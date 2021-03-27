@@ -43,59 +43,62 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include <memory>
- 
 #include "io/BaseAtomTypesSectionParser.hpp"
-#include "types/AtomType.hpp"
+
+#include <memory>
+
 #include "brains/ForceField.hpp"
+#include "types/AtomType.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 
-  BaseAtomTypesSectionParser::BaseAtomTypesSectionParser() {
-    setSectionName("BaseAtomTypes");
+BaseAtomTypesSectionParser::BaseAtomTypesSectionParser() {
+  setSectionName("BaseAtomTypes");
+}
+
+void BaseAtomTypesSectionParser::parseLine(ForceField& ff,
+                                           const std::string& line,
+                                           int lineNo) {
+  StringTokenizer tokenizer(line);
+  int nTokens = tokenizer.countTokens();
+
+  // in BaseAtomTypeSection, a line at least contains 2 tokens
+  // atomTypeName and mass
+  if (nTokens < 2) {
+    sprintf(painCave.errMsg,
+            "BaseAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+            lineNo);
+    painCave.isFatal = 1;
+    simError();
+
+  } else {
+    std::string baseAtomTypeName = tokenizer.nextToken();
+    AtomType* baseAtomType = ff.getAtomType(baseAtomTypeName);
+
+    if (baseAtomType == NULL) {
+      baseAtomType = new AtomType();
+      int ident = ff.getNAtomType();
+      baseAtomType->setIdent(ident);
+      baseAtomType->setName(baseAtomTypeName);
+      ff.addAtomType(baseAtomTypeName, baseAtomType);
+    }
+
+    //    else {
+    //         sprintf(painCave.errMsg, "BaseAtomTypesSectionParser Error:
+    //         Duplicate BaseAtomType at line %d\n",
+    //                 lineNo);
+    //         painCave.isFatal = 1;
+    //         simError();
+    //       }
+
+    RealType mass = tokenizer.nextTokenAsDouble();
+    baseAtomType->setMass(mass);
+    if (tokenizer.hasMoreTokens()) {
+      RealType nelectron = tokenizer.nextTokenAsDouble();
+      baseAtomType->addProperty(std::shared_ptr<GenericData>(
+          new DoubleGenericData("nelectron", nelectron)));
+    }
   }
+}
 
-  void BaseAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
-    StringTokenizer tokenizer(line);
-    int nTokens = tokenizer.countTokens();    
-
-    //in BaseAtomTypeSection, a line at least contains 2 tokens
-    //atomTypeName and mass
-    if (nTokens < 2)  {
-      sprintf(painCave.errMsg, "BaseAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-	      lineNo);
-      painCave.isFatal = 1;
-      simError();
-            
-    } else {
-
-      std::string baseAtomTypeName = tokenizer.nextToken();    
-      AtomType* baseAtomType = ff.getAtomType(baseAtomTypeName);
-
-      if (baseAtomType == NULL) {
-      	baseAtomType = new AtomType();
-      	int ident = ff.getNAtomType();
-      	baseAtomType->setIdent(ident); 
-      	baseAtomType->setName(baseAtomTypeName);
-      	ff.addAtomType(baseAtomTypeName, baseAtomType);
-      } 
-
-   //    else {
-//         sprintf(painCave.errMsg, "BaseAtomTypesSectionParser Error: Duplicate BaseAtomType at line %d\n",
-//                 lineNo);
-//         painCave.isFatal = 1;
-//         simError();
-//       }
-        
-      RealType mass = tokenizer.nextTokenAsDouble();              
-      baseAtomType->setMass(mass);
-      if (tokenizer.hasMoreTokens()) {
-          RealType nelectron = tokenizer.nextTokenAsDouble();
-          baseAtomType->addProperty(std::shared_ptr<GenericData>(new DoubleGenericData("nelectron", nelectron)));
-      }               
-    }    
-
-
-  }
-
-} //end namespace OpenMD
+}  // end namespace OpenMD

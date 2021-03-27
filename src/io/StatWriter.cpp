@@ -52,253 +52,235 @@
 #include <amp_math.h>
 #endif
 
-#include "io/StatWriter.hpp"
 #include "brains/Stats.hpp"
-#include "utils/simError.h"
+#include "io/StatWriter.hpp"
 #include "utils/Revision.hpp"
+#include "utils/simError.h"
 
 using namespace std;
 
 namespace OpenMD {
 
-  StatWriter::StatWriter( const std::string& filename, Stats* stats) :
-    stats_(stats){
-    
+StatWriter::StatWriter(const std::string& filename, Stats* stats)
+    : stats_(stats) {
 #ifdef IS_MPI
-    if(worldRank == 0 ){
-#endif // is_mpi
-      
-      statfile_.open(filename.c_str(), std::ios::out | std::ios::trunc );
+  if (worldRank == 0) {
+#endif  // is_mpi
 
-      if( !statfile_ ){
+    statfile_.open(filename.c_str(), std::ios::out | std::ios::trunc);
 
-	sprintf( painCave.errMsg,
-		 "Could not open \"%s\" for stat output.\n",
-		 filename.c_str());
-	painCave.isFatal = 1;
-	simError();
-      }
-
-      // Create the string for embedding the version information in the MetaData
-      version.assign("## Last run using OpenMD version: ");
-      version.append(OPENMD_VERSION_MAJOR);
-      version.append(".");
-      version.append(OPENMD_VERSION_MINOR);
-      version.append(",");
-      
-      std::string rev(revision, strnlen(revision, 40));
-      rev.append(40 - rev.length(), ' ');
-      version.append(" revision: ");
-      // If there's no GIT revision, just call this the RELEASE revision.
-      if (!rev.empty()) {
-        version.append(rev);
-      } else {
-        version.append("RELEASE");
-      }
-      
-      writeTitle();
-
-#ifdef IS_MPI
+    if (!statfile_) {
+      sprintf(painCave.errMsg, "Could not open \"%s\" for stat output.\n",
+              filename.c_str());
+      painCave.isFatal = 1;
+      simError();
     }
 
-    sprintf( checkPointMsg,
-	     "Sucessfully opened output file for stating.\n");
-    errorCheckPoint();
-#endif // is_mpi
+    // Create the string for embedding the version information in the MetaData
+    version.assign("## Last run using OpenMD version: ");
+    version.append(OPENMD_VERSION_MAJOR);
+    version.append(".");
+    version.append(OPENMD_VERSION_MINOR);
+    version.append(",");
 
-  }
-
-  StatWriter::~StatWriter( ){
-
-#ifdef IS_MPI
-    if(worldRank == 0 ){
-#endif // is_mpi
-
-      statfile_.close();
-
-#ifdef IS_MPI
+    std::string rev(revision, strnlen(revision, 40));
+    rev.append(40 - rev.length(), ' ');
+    version.append(" revision: ");
+    // If there's no GIT revision, just call this the RELEASE revision.
+    if (!rev.empty()) {
+      version.append(rev);
+    } else {
+      version.append("RELEASE");
     }
-#endif // is_mpi
+
+    writeTitle();
+
+#ifdef IS_MPI
   }
 
+  sprintf(checkPointMsg, "Sucessfully opened output file for stating.\n");
+  errorCheckPoint();
+#endif  // is_mpi
+}
 
-  void StatWriter::writeTitle() {
+StatWriter::~StatWriter() {
+#ifdef IS_MPI
+  if (worldRank == 0) {
+#endif  // is_mpi
+
+    statfile_.close();
+
+#ifdef IS_MPI
+  }
+#endif  // is_mpi
+}
+
+void StatWriter::writeTitle() {
+  Stats::StatsBitSet mask = stats_->getStatsMask();
+
+#ifdef IS_MPI
+  if (worldRank == 0) {
+#endif  // is_mpi
+
+    // write revision
+    statfile_ << version << std::endl;
+    // write title
+    statfile_ << "#";
+    for (unsigned int i = 0; i < mask.size(); ++i) {
+      if (mask[i]) {
+        statfile_ << "\t" << stats_->getTitle(i) << "(" << stats_->getUnits(i)
+                  << ")";
+      }
+    }
+    statfile_ << std::endl;
+
+#ifdef IS_MPI
+  }
+#endif  // is_mpi
+}
+
+void StatWriter::writeStat() {
+#ifdef IS_MPI
+  if (worldRank == 0) {
+#endif  // is_mpi
 
     Stats::StatsBitSet mask = stats_->getStatsMask();
+    statfile_.precision(stats_->getPrecision());
 
-#ifdef IS_MPI
-    if(worldRank == 0 ){
-#endif // is_mpi
-
-      // write revision
-      statfile_ << version << std::endl;
-      //write title
-      statfile_ << "#";
-      for (unsigned int i = 0; i <mask.size(); ++i) {
-	if (mask[i]) {
-	  statfile_ << "\t" << stats_->getTitle(i) <<
-            "(" << stats_->getUnits(i) << ")";
-	}
-      }
-      statfile_ << std::endl;
-
-#ifdef IS_MPI
-    }
-#endif // is_mpi
-  }
-
-  void StatWriter::writeStat() {
-
-#ifdef IS_MPI
-    if(worldRank == 0 ){
-#endif // is_mpi
-
-      Stats::StatsBitSet mask = stats_->getStatsMask();
-      statfile_.precision( stats_->getPrecision() );
-
-      for (unsigned int i = 0; i < mask.size(); ++i) {
-	if (mask[i]) {
-          if (stats_->getDataType(i) == "RealType")
-            writeReal(i);
-          else if (stats_->getDataType(i) == "Vector3d")
-            writeVector(i);
-          else if (stats_->getDataType(i) == "potVec")
-            writePotVec(i);
-          else if (stats_->getDataType(i) == "Mat3x3d")
-            writeMatrix(i);
-          else if (stats_->getDataType(i) == "Array2d")
-            writeArray(i);
-          else {
-            sprintf( painCave.errMsg,
-                     "StatWriter found an unknown data type for: %s ",
-                     stats_->getTitle(i).c_str());
-            painCave.isFatal = 1;
-            simError();
-          }
-        }
-      }
-
-      statfile_ << std::endl;
-      statfile_.flush();
-      statfile_.rdbuf()->pubsync();
-
-#ifdef IS_MPI
-    }
-    errorCheckPoint();
-#endif // is_mpi
-  }
-
-  void StatWriter::writeReal(int i) {
-
-    RealType s = stats_->getRealData(i);
-
-
-    if (! std::isinf(s) && ! std::isnan(s)) {
-      statfile_ << "\t" << s;
-    } else{
-      sprintf( painCave.errMsg,
-               "StatWriter detected a numerical error writing: %s ",
-               stats_->getTitle(i).c_str());
-      painCave.isFatal = 1;
-      simError();
-    }
-  }
-
-  void StatWriter::writeVector(int i) {
-
-    Vector3d s = stats_->getVectorData(i);
-    if (std::isinf(s[0]) || std::isnan(s[0]) ||
-        std::isinf(s[1]) || std::isnan(s[1]) ||
-        std::isinf(s[2]) || std::isnan(s[2]) ) {
-      sprintf( painCave.errMsg,
-               "StatWriter detected a numerical error writing: %s",
-               stats_->getTitle(i).c_str());
-      painCave.isFatal = 1;
-      simError();
-    } else {
-      statfile_ << "\t" << s[0] << "\t" << s[1] << "\t" << s[2];
-    }
-  }
-
-  void StatWriter::writePotVec(int i) {
-
-    potVec s = stats_->getPotVecData(i);
-
-    bool foundError = false;
-
-    for (unsigned int j = 0; j < N_INTERACTION_FAMILIES; j++) {
-      if (std::isinf(s[j]) || std::isnan(s[j])) foundError = true;
-    }
-    if (foundError) {
-      sprintf( painCave.errMsg,
-               "StatWriter detected a numerical error writing: %s",
-               stats_->getTitle(i).c_str());
-      painCave.isFatal = 1;
-      simError();
-    } else {
-      for (unsigned int j = 0; j < N_INTERACTION_FAMILIES; j++) {
-        statfile_ << "\t" << s[j];
-      }
-    }
-  }
-
-  void StatWriter::writeMatrix(int i) {
-
-    Mat3x3d s = stats_->getMatrixData(i);
-
-    for (unsigned int i1 = 0; i1 < 3; i1++) {
-      for (unsigned int j1 = 0; j1 < 3; j1++) {
-        if (std::isinf(s(i1,j1)) || std::isnan(s(i1,j1))) {
-          sprintf( painCave.errMsg,
-                   "StatWriter detected a numerical error writing: %s",
-                   stats_->getTitle(i).c_str());
+    for (unsigned int i = 0; i < mask.size(); ++i) {
+      if (mask[i]) {
+        if (stats_->getDataType(i) == "RealType")
+          writeReal(i);
+        else if (stats_->getDataType(i) == "Vector3d")
+          writeVector(i);
+        else if (stats_->getDataType(i) == "potVec")
+          writePotVec(i);
+        else if (stats_->getDataType(i) == "Mat3x3d")
+          writeMatrix(i);
+        else if (stats_->getDataType(i) == "Array2d")
+          writeArray(i);
+        else {
+          sprintf(painCave.errMsg,
+                  "StatWriter found an unknown data type for: %s ",
+                  stats_->getTitle(i).c_str());
           painCave.isFatal = 1;
           simError();
-        } else {
-          statfile_ << "\t" << s(i1,j1);
         }
       }
     }
+
+    statfile_ << std::endl;
+    statfile_.flush();
+    statfile_.rdbuf()->pubsync();
+
+#ifdef IS_MPI
   }
+  errorCheckPoint();
+#endif  // is_mpi
+}
 
-  void StatWriter::writeArray(int i) {
-    
-    std::vector<RealType> s = stats_->getArrayData(i);
+void StatWriter::writeReal(int i) {
+  RealType s = stats_->getRealData(i);
 
-    for (unsigned int j = 0; j < s.size(); ++j) {
-      if (std::isinf(s[j]) || std::isnan(s[j])) {
-        sprintf( painCave.errMsg,
-                 "StatWriter detected a numerical error writing: %s",
-                 stats_->getTitle(i).c_str());
+  if (!std::isinf(s) && !std::isnan(s)) {
+    statfile_ << "\t" << s;
+  } else {
+    sprintf(painCave.errMsg,
+            "StatWriter detected a numerical error writing: %s ",
+            stats_->getTitle(i).c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
+}
+
+void StatWriter::writeVector(int i) {
+  Vector3d s = stats_->getVectorData(i);
+  if (std::isinf(s[0]) || std::isnan(s[0]) || std::isinf(s[1]) ||
+      std::isnan(s[1]) || std::isinf(s[2]) || std::isnan(s[2])) {
+    sprintf(painCave.errMsg,
+            "StatWriter detected a numerical error writing: %s",
+            stats_->getTitle(i).c_str());
+    painCave.isFatal = 1;
+    simError();
+  } else {
+    statfile_ << "\t" << s[0] << "\t" << s[1] << "\t" << s[2];
+  }
+}
+
+void StatWriter::writePotVec(int i) {
+  potVec s = stats_->getPotVecData(i);
+
+  bool foundError = false;
+
+  for (unsigned int j = 0; j < N_INTERACTION_FAMILIES; j++) {
+    if (std::isinf(s[j]) || std::isnan(s[j])) foundError = true;
+  }
+  if (foundError) {
+    sprintf(painCave.errMsg,
+            "StatWriter detected a numerical error writing: %s",
+            stats_->getTitle(i).c_str());
+    painCave.isFatal = 1;
+    simError();
+  } else {
+    for (unsigned int j = 0; j < N_INTERACTION_FAMILIES; j++) {
+      statfile_ << "\t" << s[j];
+    }
+  }
+}
+
+void StatWriter::writeMatrix(int i) {
+  Mat3x3d s = stats_->getMatrixData(i);
+
+  for (unsigned int i1 = 0; i1 < 3; i1++) {
+    for (unsigned int j1 = 0; j1 < 3; j1++) {
+      if (std::isinf(s(i1, j1)) || std::isnan(s(i1, j1))) {
+        sprintf(painCave.errMsg,
+                "StatWriter detected a numerical error writing: %s",
+                stats_->getTitle(i).c_str());
         painCave.isFatal = 1;
         simError();
       } else {
-        statfile_ << "\t" << s[j];
+        statfile_ << "\t" << s(i1, j1);
       }
-    }    
-  }
-
-  void StatWriter::writeStatReport() {
-#ifdef IS_MPI
-    if(worldRank == 0 ){
-#endif      
-      reportfile_.open(reportFileName_.c_str(),
-                       std::ios::out | std::ios::trunc );
-      
-      if( !reportfile_ ){        
-        sprintf( painCave.errMsg,
-                 "Could not open \"%s\" for report output.\n",
-                 reportFileName_.c_str());
-        painCave.isFatal = 1;
-        simError();
-      }
-
-      reportfile_ << stats_->getStatsReport();
-      std::cout << stats_->getStatsReport();        
-      reportfile_.close();
-      
-#ifdef IS_MPI
     }
-#endif
   }
 }
+
+void StatWriter::writeArray(int i) {
+  std::vector<RealType> s = stats_->getArrayData(i);
+
+  for (unsigned int j = 0; j < s.size(); ++j) {
+    if (std::isinf(s[j]) || std::isnan(s[j])) {
+      sprintf(painCave.errMsg,
+              "StatWriter detected a numerical error writing: %s",
+              stats_->getTitle(i).c_str());
+      painCave.isFatal = 1;
+      simError();
+    } else {
+      statfile_ << "\t" << s[j];
+    }
+  }
+}
+
+void StatWriter::writeStatReport() {
+#ifdef IS_MPI
+  if (worldRank == 0) {
+#endif
+    reportfile_.open(reportFileName_.c_str(), std::ios::out | std::ios::trunc);
+
+    if (!reportfile_) {
+      sprintf(painCave.errMsg, "Could not open \"%s\" for report output.\n",
+              reportFileName_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    reportfile_ << stats_->getStatsReport();
+    std::cout << stats_->getStatsReport();
+    reportfile_.close();
+
+#ifdef IS_MPI
+  }
+#endif
+}
+}  // namespace OpenMD

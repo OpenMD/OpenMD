@@ -42,206 +42,206 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-#include <algorithm> 
-#include <stack>
-#include <cstdio>
 #include "io/SectionParserManager.hpp"
+
+#include <algorithm>
+#include <cstdio>
+#include <stack>
+
 #include "utils/Trim.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
 
-  SectionParserManager::~SectionParserManager() {
-    SectionParserManager::iterator i;
-    for (i = sectionParsers_.begin(); i != sectionParsers_.end(); ++i) {
-      delete (i->sectionParser);
-    }
-    sectionParsers_.clear();
+SectionParserManager::~SectionParserManager() {
+  SectionParserManager::iterator i;
+  for (i = sectionParsers_.begin(); i != sectionParsers_.end(); ++i) {
+    delete (i->sectionParser);
+  }
+  sectionParsers_.clear();
+}
+
+void SectionParserManager::parse(std::istream& input, ForceField& ff) {
+  // reset active flags
+  SectionParserManager::iterator i;
+  for (i = sectionParsers_.begin(); i != sectionParsers_.end(); ++i) {
+    i->isActive = false;
   }
 
-  void SectionParserManager::parse(std::istream& input, ForceField& ff) {
+  const int bufferSize = 65535;
+  char buffer[bufferSize];
+  int lineNo = 0;
+  std::stack<std::string> sectionNameStack;
+  // scan through the input stream and find section names
+  while (input.getline(buffer, bufferSize)) {
+    ++lineNo;
 
-    //reset active flags
-    SectionParserManager::iterator i;
-    for (i = sectionParsers_.begin(); i != sectionParsers_.end(); ++i) {
-      i->isActive = false;
-    }
+    std::string line = trimLeftCopy(buffer);
+    // a line begins with "//" is a comment line
+    if (line.empty() ||
+        (line.size() >= 2 && line[0] == '/' && line[1] == '/')) {
+      continue;
+    } else {
+      StringTokenizer tokenizer(line);
+      if (tokenizer.countTokens() < 2) {
+        continue;
+      } else {
+        std::string keyword = tokenizer.nextToken();
 
-    const int bufferSize = 65535;
-    char buffer[bufferSize];
-    int lineNo = 0;
-    std::stack<std::string> sectionNameStack;
-    //scan through the input stream and find section names        
-    while(input.getline(buffer, bufferSize)) {
-      ++lineNo;
-        
-      std::string line = trimLeftCopy(buffer);
-      //a line begins with "//" is a comment line
-      if ( line.empty() || (line.size() >= 2 && line[0] == '/' 
-                            && line[1] == '/') ) {
-	continue;
-      } else {        
-	StringTokenizer tokenizer(line);
-	if (tokenizer.countTokens() < 2) {
-	  continue;
-	} else {
-	  std::string keyword = tokenizer.nextToken();
+        if (keyword == "begin") {
+          std::string section = tokenizer.nextToken();
+          sectionNameStack.push(section);
 
-	  if (keyword == "begin") {
-	    std::string section = tokenizer.nextToken();
-	    sectionNameStack.push(section);
- 
-	    i = std::find_if(sectionParsers_.begin(), sectionParsers_.end(),
-                             SameSectionParserFunctor(section));
-	    if (i == sectionParsers_.end()){
-	      sprintf(painCave.errMsg, 
-                      "SectionParserManager Error: Can not find corresponding "
-                      "section parser for %s\n",
+          i = std::find_if(sectionParsers_.begin(), sectionParsers_.end(),
+                           SameSectionParserFunctor(section));
+          if (i == sectionParsers_.end()) {
+            sprintf(painCave.errMsg,
+                    "SectionParserManager Error: Can not find corresponding "
+                    "section parser for %s\n",
+                    section.c_str());
+            painCave.isFatal = 1;
+            simError();
+          } else {
+            if (i->isActive) {
+              sprintf(painCave.errMsg,
+                      "SectionParserManager Error: Found multiple %s "
+                      "sections\n",
                       section.c_str());
-	      painCave.isFatal = 1;
-	      simError();                        
-	    } else {
-	      if (i->isActive) {
-                sprintf(painCave.errMsg, 
-                        "SectionParserManager Error: Found multiple %s "
-                        "sections\n", section.c_str());
-                painCave.isFatal = 1;
-                simError();                        
-	      } else {                         
-                i->isActive = true;
-                i->lineNo = lineNo;
-                i->offset = input.tellg();
-	      }
-	    }
-	  } else if (keyword == "end") {
-	    std::string section = tokenizer.nextToken();
-	    if (sectionNameStack.top() == section) {
-	      sectionNameStack.pop();
-	    } else {
-	      sprintf(painCave.errMsg, "SectionParserManager Error: begin %s "
-                      "and end %s do not match at line %d\n",
-                      sectionNameStack.top().c_str(), section.c_str(), lineNo);
-	      painCave.isFatal = 1;
-	      simError();
-	    }
-	  } else {
-	    continue;
-	  }
-	}
-      }
-      
-    }
-    
-    if (!sectionNameStack.empty()) {
-      sprintf(painCave.errMsg,
-              "SectionParserManager Error: Stack is not empty\n");
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    //invoke parser
-    for (i = sectionParsers_.begin(); i != sectionParsers_.end(); ++i) {
-      if (i->isActive) {
-        // C++ standard does not guarantee seekg resets EOF, in that
-        // case, seekg will fail. It is always a good idea to call
-        // clear() before seek
-        input.clear();            
-        input.seekg(i->offset);
-        (i->sectionParser)->parse(input, ff, i->lineNo);
-        (i->sectionParser)->validateSection(ff);
+              painCave.isFatal = 1;
+              simError();
+            } else {
+              i->isActive = true;
+              i->lineNo = lineNo;
+              i->offset = input.tellg();
+            }
+          }
+        } else if (keyword == "end") {
+          std::string section = tokenizer.nextToken();
+          if (sectionNameStack.top() == section) {
+            sectionNameStack.pop();
+          } else {
+            sprintf(painCave.errMsg,
+                    "SectionParserManager Error: begin %s "
+                    "and end %s do not match at line %d\n",
+                    sectionNameStack.top().c_str(), section.c_str(), lineNo);
+            painCave.isFatal = 1;
+            simError();
+          }
+        } else {
+          continue;
+        }
       }
     }
   }
-  
-  void SectionParserManager::push_front(SectionParser* sp) {
-    SectionParserManager::iterator i;
-    i = findSectionParser(sp->getSectionName());
-    if (i != sectionParsers_.end()) {
-      std::cerr << sp->getSectionName() << " section parser already exists" 
-                << std::endl;
-      return;
-    }
-    
-    SectionParserContext context;
-    
-    if (sectionParsers_.empty()) {
-      context.priority = beginPriority_;
-    } else {
-      context.priority = sectionParsers_.front().priority - priorityDifference_;
-    }
-    
-    context.sectionParser = sp;
-    context.lineNo = 0;
-    context.offset = 0;
-    context.isActive = false;
 
-    sectionParsers_.push_front(context);
+  if (!sectionNameStack.empty()) {
+    sprintf(painCave.errMsg,
+            "SectionParserManager Error: Stack is not empty\n");
+    painCave.isFatal = 1;
+    simError();
   }
 
-  void SectionParserManager::push_back(SectionParser* sp) {
-    SectionParserManager::iterator i;
-    i = findSectionParser(sp->getSectionName());
-    if (i != sectionParsers_.end()) {
-      std::cerr << sp->getSectionName() << " section parser already exists" 
-                << std::endl;
-      return;
+  // invoke parser
+  for (i = sectionParsers_.begin(); i != sectionParsers_.end(); ++i) {
+    if (i->isActive) {
+      // C++ standard does not guarantee seekg resets EOF, in that
+      // case, seekg will fail. It is always a good idea to call
+      // clear() before seek
+      input.clear();
+      input.seekg(i->offset);
+      (i->sectionParser)->parse(input, ff, i->lineNo);
+      (i->sectionParser)->validateSection(ff);
     }
+  }
+}
 
-    SectionParserContext context;    
-    if (sectionParsers_.empty()) {
-      context.priority = beginPriority_;
-    } else {
-      context.priority = sectionParsers_.back().priority + priorityDifference_;
-    }
+void SectionParserManager::push_front(SectionParser* sp) {
+  SectionParserManager::iterator i;
+  i = findSectionParser(sp->getSectionName());
+  if (i != sectionParsers_.end()) {
+    std::cerr << sp->getSectionName() << " section parser already exists"
+              << std::endl;
+    return;
+  }
 
-    context.sectionParser = sp;
-    context.lineNo = 0;
-    context.offset = 0;
-    context.isActive = false;
+  SectionParserContext context;
 
+  if (sectionParsers_.empty()) {
+    context.priority = beginPriority_;
+  } else {
+    context.priority = sectionParsers_.front().priority - priorityDifference_;
+  }
+
+  context.sectionParser = sp;
+  context.lineNo = 0;
+  context.offset = 0;
+  context.isActive = false;
+
+  sectionParsers_.push_front(context);
+}
+
+void SectionParserManager::push_back(SectionParser* sp) {
+  SectionParserManager::iterator i;
+  i = findSectionParser(sp->getSectionName());
+  if (i != sectionParsers_.end()) {
+    std::cerr << sp->getSectionName() << " section parser already exists"
+              << std::endl;
+    return;
+  }
+
+  SectionParserContext context;
+  if (sectionParsers_.empty()) {
+    context.priority = beginPriority_;
+  } else {
+    context.priority = sectionParsers_.back().priority + priorityDifference_;
+  }
+
+  context.sectionParser = sp;
+  context.lineNo = 0;
+  context.offset = 0;
+  context.isActive = false;
+
+  sectionParsers_.push_back(context);
+}
+
+void SectionParserManager::insert(SectionParser* sp, int priority) {
+  SectionParserManager::iterator i;
+  i = findSectionParser(sp->getSectionName());
+  if (i != sectionParsers_.end()) {
+    std::cerr << sp->getSectionName() << " section parser already exists"
+              << std::endl;
+  }
+
+  SectionParserContext context;
+  context.priority = priority;
+  context.sectionParser = sp;
+  context.lineNo = 0;
+  context.offset = 0;
+  context.isActive = false;
+
+  if (sectionParsers_.empty()) {
     sectionParsers_.push_back(context);
-
-  }
-
-  void SectionParserManager::insert(SectionParser* sp, int priority) {
-    SectionParserManager::iterator i;
-    i = findSectionParser(sp->getSectionName());
-    if (i != sectionParsers_.end()) {
-      std::cerr << sp->getSectionName() << " section parser already exists" 
-                << std::endl;
-    }
-
-    SectionParserContext context;    
-    context.priority = priority;
-    context.sectionParser = sp;
-    context.lineNo = 0;
-    context.offset = 0;
-    context.isActive = false;
-
-    if (sectionParsers_.empty()) {
-      sectionParsers_.push_back(context);
-    } else {
-
-      for (i = sectionParsers_.begin(); i != sectionParsers_.end(); ++i) {
-	if (i->priority == priority) {
-	  std::cerr << "Priority " << priority << " already used" << std::endl;
-	  return;
-	} else if (i->priority > priority) {
-	  sectionParsers_.insert(i, context);
-	  break;
-	}
-      }
-    }
-  }
-
-
-  SectionParserManager::iterator SectionParserManager::findSectionParser(const std::string& sectionName) {
-    SectionParserManager::iterator i;
+  } else {
     for (i = sectionParsers_.begin(); i != sectionParsers_.end(); ++i) {
-      if (i->sectionParser->getSectionName() == sectionName) {
+      if (i->priority == priority) {
+        std::cerr << "Priority " << priority << " already used" << std::endl;
+        return;
+      } else if (i->priority > priority) {
+        sectionParsers_.insert(i, context);
         break;
       }
     }
-    return i;
   }
 }
+
+SectionParserManager::iterator SectionParserManager::findSectionParser(
+    const std::string& sectionName) {
+  SectionParserManager::iterator i;
+  for (i = sectionParsers_.begin(); i != sectionParsers_.end(); ++i) {
+    if (i->sectionParser->getSectionName() == sectionName) {
+      break;
+    }
+  }
+  return i;
+}
+}  // namespace OpenMD

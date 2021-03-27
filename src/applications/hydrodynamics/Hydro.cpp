@@ -43,34 +43,34 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 
 #include "HydroCmd.hpp"
+#include "applications/hydrodynamics/AnalyticalModel.hpp"
+#include "applications/hydrodynamics/BeadModel.hpp"
 #include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 #include "applications/hydrodynamics/HydrodynamicsModelCreator.hpp"
 #include "applications/hydrodynamics/HydrodynamicsModelFactory.hpp"
-#include "applications/hydrodynamics/AnalyticalModel.hpp"
-#include "applications/hydrodynamics/BeadModel.hpp"
 #include "applications/hydrodynamics/RoughShell.hpp"
 #include "applications/hydrodynamics/ShapeBuilder.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
+#include "utils/MemoryUtils.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
-#include "utils/MemoryUtils.hpp"
 using namespace OpenMD;
 
-struct SDShape{
+struct SDShape {
   StuntDouble* sd;
   Shape* shape;
 };
 void registerHydrodynamicsModels();
 void writeHydroProps(std::ostream& os);
 
-int main(int argc, char* argv[]){
+int main(int argc, char* argv[]) {
   registerHydrodynamicsModels();
 
   gengetopt_args_info args_info;
@@ -78,40 +78,39 @@ int main(int argc, char* argv[]){
   std::string mdFileName;
   std::string prefix;
 
-  //parse the command line option
-  if (cmdline_parser (argc, argv, &args_info) != 0) {
-    exit(1) ;
+  // parse the command line option
+  if (cmdline_parser(argc, argv, &args_info) != 0) {
+    exit(1);
   }
 
-  //get the dumpfile name and meta-data file name
-  if (args_info.input_given){
+  // get the dumpfile name and meta-data file name
+  if (args_info.input_given) {
     dumpFileName = args_info.input_arg;
   } else {
-    strcpy( painCave.errMsg,
-            "No input file name was specified.\n" );
+    strcpy(painCave.errMsg, "No input file name was specified.\n");
     painCave.isFatal = 1;
     simError();
   }
 
-  if (args_info.output_given){
+  if (args_info.output_given) {
     prefix = args_info.output_arg;
   } else {
     prefix = getPrefix(dumpFileName);
   }
   std::string outputFilename = prefix + ".hydro";
 
-  //parse md file and set up the system
+  // parse md file and set up the system
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, true);
 
   SimInfo::MoleculeIterator mi;
   Molecule* mol;
-  Molecule::IntegrableObjectIterator  ii;
+  Molecule::IntegrableObjectIterator ii;
   StuntDouble* sd;
   Mat3x3d identMat;
-  identMat(0,0) = 1.0;
-  identMat(1,1) = 1.0;
-  identMat(2,2) = 1.0;
+  identMat(0, 0) = 1.0;
+  identMat(1, 1) = 1.0;
+  identMat(2, 2) = 1.0;
 
   Globals* simParams = info->getSimParams();
   RealType temperature(0.0);
@@ -137,14 +136,11 @@ int main(int argc, char* argv[]){
 
   for (mol = info->beginMolecule(mi); mol != NULL;
        mol = info->nextMolecule(mi)) {
-
     for (sd = mol->beginIntegrableObject(ii); sd != NULL;
          sd = mol->nextIntegrableObject(ii)) {
-
-      if (uniqueStuntDoubles.find(sd->getType()) ==  uniqueStuntDoubles.end()) {
-
+      if (uniqueStuntDoubles.find(sd->getType()) == uniqueStuntDoubles.end()) {
         sd->setPos(V3Zero);
-        //sd->setA(identMat);
+        // sd->setA(identMat);
         if (sd->isRigidBody()) {
           sd->setA(identMat);
           RigidBody* rb = static_cast<RigidBody*>(sd);
@@ -154,12 +150,11 @@ int main(int argc, char* argv[]){
         SDShape tmp;
         tmp.shape = ShapeBuilder::createShape(sd);
         tmp.sd = sd;
-        uniqueStuntDoubles.insert(std::map<std::string, SDShape>::value_type(sd->getType(), tmp));
-
+        uniqueStuntDoubles.insert(
+            std::map<std::string, SDShape>::value_type(sd->getType(), tmp));
       }
     }
   }
-
 
   std::ofstream outputHydro;
   outputHydro.open(outputFilename.c_str());
@@ -170,13 +165,12 @@ int main(int argc, char* argv[]){
     Shape* shape = si->second.shape;
     StuntDouble* sd = si->second.sd;
 
-    //if (shape->hasAnalyticalSolution()) {
+    // if (shape->hasAnalyticalSolution()) {
     //  model = new AnalyticalModel(sd, info);
     //} else {
-      if (args_info.model_given) {
-
-        std::string modelName;
-        switch (args_info.model_arg) {
+    if (args_info.model_given) {
+      std::string modelName;
+      switch (args_info.model_arg) {
         case model_arg_RoughShell:
           modelName = "RoughShell";
           break;
@@ -184,19 +178,20 @@ int main(int argc, char* argv[]){
         default:
           modelName = "BeadModel";
           break;
-        }
-
-        model = HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(modelName, sd, info);
-
-        if (args_info.model_arg == model_arg_RoughShell) {
-          RealType bs = args_info.beadSize_arg;
-          dynamic_cast<RoughShell*>(model)->setSigma(bs);
-        }
       }
+
+      model =
+          HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(
+              modelName, sd, info);
+
+      if (args_info.model_arg == model_arg_RoughShell) {
+        RealType bs = args_info.beadSize_arg;
+        dynamic_cast<RoughShell*>(model)->setSigma(bs);
+      }
+    }
     //}
 
     if (model != NULL) {
-
       model->init();
 
       std::ofstream ofs;
@@ -206,7 +201,7 @@ int main(int argc, char* argv[]){
       model->writeBeads(ofs);
       ofs.close();
 
-      //if beads option is turned on, skip the calculation
+      // if beads option is turned on, skip the calculation
       if (!args_info.beads_flag) {
         model->calcHydroProps(shape, viscosity, temperature);
         model->writeHydroProps(outputHydro);
@@ -223,14 +218,15 @@ int main(int argc, char* argv[]){
 
   outputHydro.close();
 
-
-  //Utils::deletePointers(shapes);
+  // Utils::deletePointers(shapes);
   delete info;
-
 }
 
 void registerHydrodynamicsModels() {
-  HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(new HydrodynamicsModelBuilder<RoughShell>("RoughShell"));
-  HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(new HydrodynamicsModelBuilder<BeadModel>("BeadModel"));
-  HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(new HydrodynamicsModelBuilder<AnalyticalModel>("AnalyticalModel"));
+  HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(
+      new HydrodynamicsModelBuilder<RoughShell>("RoughShell"));
+  HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(
+      new HydrodynamicsModelBuilder<BeadModel>("BeadModel"));
+  HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(
+      new HydrodynamicsModelBuilder<AnalyticalModel>("AnalyticalModel"));
 }

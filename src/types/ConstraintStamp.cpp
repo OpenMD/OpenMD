@@ -42,25 +42,24 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <cstdlib>
-#include <cstring>
 
 #include "types/ConstraintStamp.hpp"
-namespace OpenMD {
-  
-  ConstraintStamp::ConstraintStamp() {
-    DefineParameter(ConstrainedDistance, "constrainedDistance");
-    DefineOptionalParameterWithDefaultValue(PrintConstraintForce, 
-                                            "printConstraintForce", false);
-  }
-  
-  ConstraintStamp::~ConstraintStamp() {    
-  }
-  
-  void ConstraintStamp::validate() {
-    DataHolder::validate();
-    CheckParameter(ConstrainedDistance, isNonNegative());    
-  }
 
+#include <cstdlib>
+#include <cstring>
+namespace OpenMD {
+
+ConstraintStamp::ConstraintStamp() {
+  DefineParameter(ConstrainedDistance, "constrainedDistance");
+  DefineOptionalParameterWithDefaultValue(PrintConstraintForce,
+                                          "printConstraintForce", false);
 }
+
+ConstraintStamp::~ConstraintStamp() {}
+
+void ConstraintStamp::validate() {
+  DataHolder::validate();
+  CheckParameter(ConstrainedDistance, isNonNegative());
+}
+
+}  // namespace OpenMD

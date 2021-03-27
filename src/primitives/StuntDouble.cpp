@@ -42,60 +42,60 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file StuntDouble.cpp
  * @author    tlin
  * @date  10/22/2004
  * @version 1.0
- */ 
-
-#include <memory>
+ */
 
 #include "primitives/StuntDouble.hpp"
 
+#include <memory>
+
 namespace OpenMD {
 
-  StuntDouble::StuntDouble(ObjectType objType, DataStoragePointer storage) : 
-    objType_(objType), storage_(storage), snapshotMan_(NULL),    
-    linear_(false), linearAxis_(-1), globalIndex_(-1), 
-    globalIntegrableObjectIndex_(-1), localIndex_(-1) {}
+StuntDouble::StuntDouble(ObjectType objType, DataStoragePointer storage)
+    : objType_(objType),
+      storage_(storage),
+      snapshotMan_(NULL),
+      linear_(false),
+      linearAxis_(-1),
+      globalIndex_(-1),
+      globalIntegrableObjectIndex_(-1),
+      localIndex_(-1) {}
 
-  StuntDouble::~StuntDouble() {}
+StuntDouble::~StuntDouble() {}
 
-  void StuntDouble::zeroForcesAndTorques() {    
-    int sl = (snapshotMan_->getCurrentSnapshot()->*storage_).getStorageLayout();
+void StuntDouble::zeroForcesAndTorques() {
+  int sl = (snapshotMan_->getCurrentSnapshot()->*storage_).getStorageLayout();
 
-    if (sl & DataStorage::dslForce) 
-      setFrc(V3Zero);
-    if (sl & DataStorage::dslTorque) 
-      setTrq(V3Zero);
-    if (sl & DataStorage::dslParticlePot) 
-      setParticlePot(0.0);
-    if (sl & DataStorage::dslFlucQForce)
-      setFlucQFrc(0.0);
-    if (sl & DataStorage::dslElectricField) 
-      setElectricField(V3Zero);
-  }
-  void StuntDouble::addProperty(std::shared_ptr<GenericData> genData) {
-    properties_.addProperty(genData);  
-  }
-
-  void StuntDouble::removeProperty(const std::string& propName) {
-    properties_.removeProperty(propName);  
-  }
-
-  std::vector<std::string> StuntDouble::getPropertyNames() {
-    return properties_.getPropertyNames();  
-  }
-      
-  std::vector<std::shared_ptr<GenericData> > StuntDouble::getProperties() { 
-    return properties_.getProperties(); 
-  }
-
-  std::shared_ptr<GenericData> StuntDouble::getPropertyByName(const std::string& propName) {
-    return properties_.getPropertyByName(propName); 
-  }
-
-
+  if (sl & DataStorage::dslForce) setFrc(V3Zero);
+  if (sl & DataStorage::dslTorque) setTrq(V3Zero);
+  if (sl & DataStorage::dslParticlePot) setParticlePot(0.0);
+  if (sl & DataStorage::dslFlucQForce) setFlucQFrc(0.0);
+  if (sl & DataStorage::dslElectricField) setElectricField(V3Zero);
 }
+void StuntDouble::addProperty(std::shared_ptr<GenericData> genData) {
+  properties_.addProperty(genData);
+}
+
+void StuntDouble::removeProperty(const std::string& propName) {
+  properties_.removeProperty(propName);
+}
+
+std::vector<std::string> StuntDouble::getPropertyNames() {
+  return properties_.getPropertyNames();
+}
+
+std::vector<std::shared_ptr<GenericData>> StuntDouble::getProperties() {
+  return properties_.getProperties();
+}
+
+std::shared_ptr<GenericData> StuntDouble::getPropertyByName(
+    const std::string& propName) {
+  return properties_.getPropertyByName(propName);
+}
+
+}  // namespace OpenMD

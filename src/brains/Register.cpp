@@ -42,81 +42,103 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "brains/Register.hpp"
 
-#include "integrators/IntegratorFactory.hpp"
-#include "integrators/IntegratorCreator.hpp"
 #include "integrators/Integrator.hpp"
-#include "integrators/NVE.hpp"
-#include "integrators/NVT.hpp"
-#include "integrators/NPTi.hpp"
-#include "integrators/NPTf.hpp"
-#include "integrators/NPTxyz.hpp"
-#include "integrators/NPTsz.hpp"
-#include "integrators/NPAT.hpp"
-#include "integrators/NPrT.hpp"
-#include "integrators/NPA.hpp"
-#include "integrators/NgammaT.hpp"
+#include "integrators/IntegratorCreator.hpp"
+#include "integrators/IntegratorFactory.hpp"
 #include "integrators/LangevinDynamics.hpp"
 #include "integrators/LangevinPiston.hpp"
+#include "integrators/NPA.hpp"
+#include "integrators/NPAT.hpp"
+#include "integrators/NPTf.hpp"
+#include "integrators/NPTi.hpp"
+#include "integrators/NPTsz.hpp"
+#include "integrators/NPTxyz.hpp"
+#include "integrators/NPrT.hpp"
+#include "integrators/NVE.hpp"
+#include "integrators/NVT.hpp"
+#include "integrators/NgammaT.hpp"
 #if defined(HAVE_QHULL)
 #include "integrators/LangevinHullDynamics.hpp"
 #endif
 
-#include "optimization/OptimizationFactory.hpp"
-#include "optimization/OptimizationCreator.hpp"
-#include "optimization/Method.hpp"
-#include "optimization/SteepestDescent.hpp"
-#include "optimization/ConjugateGradient.hpp"
-#include "optimization/BFGS.hpp"
-
-#include "lattice/LatticeFactory.hpp"
-#include "lattice/LatticeCreator.hpp"
-#include "lattice/FCCLattice.hpp"
-#include "lattice/SCLattice.hpp"
 #include "lattice/BCCLattice.hpp"
+#include "lattice/FCCLattice.hpp"
+#include "lattice/LatticeCreator.hpp"
+#include "lattice/LatticeFactory.hpp"
+#include "lattice/SCLattice.hpp"
+#include "optimization/BFGS.hpp"
+#include "optimization/ConjugateGradient.hpp"
+#include "optimization/Method.hpp"
+#include "optimization/OptimizationCreator.hpp"
+#include "optimization/OptimizationFactory.hpp"
+#include "optimization/SteepestDescent.hpp"
 
 using namespace QuantLib;
 namespace OpenMD {
 
-  void registerIntegrators() {
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NVE>("NVE"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NVT>("NVT"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPTi>("NPTI"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPTf>("NPTF"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPTxyz>("NPTXYZ"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPAT>("NPAT"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPA>("NPA"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPrT>("NPRT"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NPrT>("NPGT"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NgammaT>("NGT"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<NgammaT>("NGAMMAT"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinDynamics>("LANGEVINDYNAMICS"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinDynamics>("LD"));
+void registerIntegrators() {
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<NVE>("NVE"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<NVT>("NVT"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<NPTi>("NPTI"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<NPTf>("NPTF"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<NPTxyz>("NPTXYZ"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<NPAT>("NPAT"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<NPA>("NPA"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<NPrT>("NPRT"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<NPrT>("NPGT"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<NgammaT>("NGT"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<NgammaT>("NGAMMAT"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<LangevinDynamics>("LANGEVINDYNAMICS"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<LangevinDynamics>("LD"));
 #if defined(HAVE_QHULL)
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("LHULL"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("LANGEVINHULL"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("SMIPD"));
-    IntegratorFactory::getInstance().registerIntegrator(new IntegratorBuilder<LangevinPiston>("LANGEVINPISTON"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<LangevinHullDynamics>("LHULL"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<LangevinHullDynamics>("LANGEVINHULL"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<LangevinHullDynamics>("SMIPD"));
+  IntegratorFactory::getInstance().registerIntegrator(
+      new IntegratorBuilder<LangevinPiston>("LANGEVINPISTON"));
 #endif
-  }
-
-  void registerOptimizers() {
-    OptimizationFactory::getInstance().registerOptimization(new OptimizationBuilder<QuantLib::SteepestDescent>("SD"));
-    OptimizationFactory::getInstance().registerOptimization(new OptimizationBuilder<QuantLib::ConjugateGradient>("CG"));
-    OptimizationFactory::getInstance().registerOptimization(new OptimizationBuilder<QuantLib::BFGS>("BFGS"));
-  }
-
-  void registerLattice(){
-    LatticeFactory::getInstance().registerLattice(new LatticeBuilder<FCCLattice>("FCC"));
-    LatticeFactory::getInstance().registerLattice(new LatticeBuilder<SCLattice>("SC"));
-    LatticeFactory::getInstance().registerLattice(new LatticeBuilder<BCCLattice>("BCC"));
-  }
-
-  void registerAll() {
-    registerIntegrators();
-    registerOptimizers();
-  }
-
 }
+
+void registerOptimizers() {
+  OptimizationFactory::getInstance().registerOptimization(
+      new OptimizationBuilder<QuantLib::SteepestDescent>("SD"));
+  OptimizationFactory::getInstance().registerOptimization(
+      new OptimizationBuilder<QuantLib::ConjugateGradient>("CG"));
+  OptimizationFactory::getInstance().registerOptimization(
+      new OptimizationBuilder<QuantLib::BFGS>("BFGS"));
+}
+
+void registerLattice() {
+  LatticeFactory::getInstance().registerLattice(
+      new LatticeBuilder<FCCLattice>("FCC"));
+  LatticeFactory::getInstance().registerLattice(
+      new LatticeBuilder<SCLattice>("SC"));
+  LatticeFactory::getInstance().registerLattice(
+      new LatticeBuilder<BCCLattice>("BCC"));
+}
+
+void registerAll() {
+  registerIntegrators();
+  registerOptimizers();
+}
+
+}  // namespace OpenMD

@@ -44,111 +44,104 @@
  */
 
 #include "applications/dynamicProps/CollectiveDipoleDisplacement.hpp"
-#include "utils/Revision.hpp"
+
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
+#include "utils/Revision.hpp"
 
 using namespace std;
 namespace OpenMD {
-  CollectiveDipoleDisplacement::CollectiveDipoleDisplacement(SimInfo* info,
-                                                             const string& filename,
-                                                             const string& sele1,
-                                                             const std::string& sele2)
-    : SystemACF<Vector3d>(info, filename, sele1, sele2,
-                          DataStorage::dslPosition |
-                          DataStorage::dslFlucQPosition) {
-    
-    setCorrFuncType("Collective Dipole Displacement Function");
-    setOutputName(getPrefix(dumpFilename_) + ".ddisp");
+CollectiveDipoleDisplacement::CollectiveDipoleDisplacement(
+    SimInfo* info, const string& filename, const string& sele1,
+    const std::string& sele2)
+    : SystemACF<Vector3d>(
+          info, filename, sele1, sele2,
+          DataStorage::dslPosition | DataStorage::dslFlucQPosition) {
+  setCorrFuncType("Collective Dipole Displacement Function");
+  setOutputName(getPrefix(dumpFilename_) + ".ddisp");
 
-    std::stringstream label;
-    label << "<|Mtrans(t)-Mtrans(0)|^2>\t" 
-          << "<|Mtot(t)-Mtot(0)|^2>\t" 
-          << "<|Mrot(t)-Mrot(0)|^2>";
-    const std::string labelString = label.str();
-    setLabelString(labelString);
-    
-    CRcm_.resize(nFrames_, V3Zero);
-    CRtot_.resize(nFrames_, V3Zero);
-    CRrot_.resize(nFrames_, V3Zero);
+  std::stringstream label;
+  label << "<|Mtrans(t)-Mtrans(0)|^2>\t"
+        << "<|Mtot(t)-Mtot(0)|^2>\t"
+        << "<|Mrot(t)-Mrot(0)|^2>";
+  const std::string labelString = label.str();
+  setLabelString(labelString);
 
-    // We'll need thermo to compute the volume:
-    thermo_ =  new Thermo(info_);
-  }
-  
-  void CollectiveDipoleDisplacement::computeProperty1(int frame) {
-    SimInfo::MoleculeIterator mi;
-    Molecule* mol;
-    Molecule::AtomIterator ai;
-    Atom* atom;
-    AtomType* atype;
+  CRcm_.resize(nFrames_, V3Zero);
+  CRtot_.resize(nFrames_, V3Zero);
+  CRrot_.resize(nFrames_, V3Zero);
 
-    RealType q, qtot;
-    RealType m, mtot;
-    Vector3d r(0.0), rcm(0.0), rcq(0.0);
+  // We'll need thermo to compute the volume:
+  thermo_ = new Thermo(info_);
+}
 
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
+void CollectiveDipoleDisplacement::computeProperty1(int frame) {
+  SimInfo::MoleculeIterator mi;
+  Molecule* mol;
+  Molecule::AtomIterator ai;
+  Atom* atom;
+  AtomType* atype;
 
-      qtot = 0.0;
-      mtot = 0.0;
-      rcm *= 0.0;
-      rcq *= 0.0;
-      
-      for(atom = mol->beginAtom(ai); atom != NULL; 
-          atom = mol->nextAtom(ai)) {    
+  RealType q, qtot;
+  RealType m, mtot;
+  Vector3d r(0.0), rcm(0.0), rcq(0.0);
 
-        q = 0.0;
-        atype = atom->getAtomType();
-        FixedChargeAdapter fca = FixedChargeAdapter(atype);
-        if ( fca.isFixedCharge() )
-          q = fca.getCharge();
-        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-        if ( fqa.isFluctuatingCharge() )
-          q += atom->getFlucQPos();
+  for (mol = info_->beginMolecule(mi); mol != NULL;
+       mol = info_->nextMolecule(mi)) {
+    qtot = 0.0;
+    mtot = 0.0;
+    rcm *= 0.0;
+    rcq *= 0.0;
 
-        r = atom->getPos();
-        m = atom->getMass();
+    for (atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+      q = 0.0;
+      atype = atom->getAtomType();
+      FixedChargeAdapter fca = FixedChargeAdapter(atype);
+      if (fca.isFixedCharge()) q = fca.getCharge();
+      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+      if (fqa.isFluctuatingCharge()) q += atom->getFlucQPos();
 
-        qtot += q;
-        mtot += m;
-        
-        rcm += r * m;
-        rcq += r * q;
+      r = atom->getPos();
+      m = atom->getMass();
 
-      }
+      qtot += q;
+      mtot += m;
 
-      rcm /= mtot;
-
-      if (qtot <= std::numeric_limits<RealType>::min()) {
-        rcq = rcm;
-      } else {
-        rcq /= qtot;
-      }
-
-      CRcm_[frame]  += qtot * rcm;
-      CRtot_[frame] += qtot * rcq;
-      CRrot_[frame] += qtot * (rcq - rcm);
-      count_[frame]++;
+      rcm += r * m;
+      rcq += r * q;
     }
 
-    RealType vol = thermo_->getVolume();
+    rcm /= mtot;
 
-    CRcm_[frame]  /= (vol * Constants::chargeDensityConvert);
-    CRtot_[frame] /= (vol * Constants::chargeDensityConvert);
-    CRrot_[frame] /= (vol * Constants::chargeDensityConvert);
+    if (qtot <= std::numeric_limits<RealType>::min()) {
+      rcq = rcm;
+    } else {
+      rcq /= qtot;
+    }
+
+    CRcm_[frame] += qtot * rcm;
+    CRtot_[frame] += qtot * rcq;
+    CRrot_[frame] += qtot * (rcq - rcm);
+    count_[frame]++;
   }
 
-  Vector3d CollectiveDipoleDisplacement::calcCorrVal(int frame1, int frame2) {
-    Vector3d diff;
-    RealType dcm, dtot, drot;
-    diff = CRcm_[frame2] - CRcm_[frame1];
-    dcm = diff.lengthSquare();
-    diff = CRtot_[frame2] - CRtot_[frame1];
-    dtot = diff.lengthSquare();
-    diff = CRrot_[frame2] - CRrot_[frame1];
-    drot = diff.lengthSquare();
-    
-    return Vector3d(dcm, dtot, drot);
-  }
+  RealType vol = thermo_->getVolume();
+
+  CRcm_[frame] /= (vol * Constants::chargeDensityConvert);
+  CRtot_[frame] /= (vol * Constants::chargeDensityConvert);
+  CRrot_[frame] /= (vol * Constants::chargeDensityConvert);
 }
+
+Vector3d CollectiveDipoleDisplacement::calcCorrVal(int frame1, int frame2) {
+  Vector3d diff;
+  RealType dcm, dtot, drot;
+  diff = CRcm_[frame2] - CRcm_[frame1];
+  dcm = diff.lengthSquare();
+  diff = CRtot_[frame2] - CRtot_[frame1];
+  dtot = diff.lengthSquare();
+  diff = CRrot_[frame2] - CRrot_[frame1];
+  drot = diff.lengthSquare();
+
+  return Vector3d(dcm, dtot, drot);
+}
+}  // namespace OpenMD

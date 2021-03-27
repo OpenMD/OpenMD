@@ -44,61 +44,60 @@
  */
 
 #include "applications/dynamicProps/ForceAutoCorrFunc.hpp"
-#include "utils/Revision.hpp"
+
 #include "math/SquareMatrix3.hpp"
+#include "utils/Revision.hpp"
 
 namespace OpenMD {
-  ForceAutoCorrFunc::ForceAutoCorrFunc(SimInfo* info,
-                                       const std::string& filename,
-                                       const std::string& sele1,
-                                       const std::string& sele2)
+ForceAutoCorrFunc::ForceAutoCorrFunc(SimInfo* info, const std::string& filename,
+                                     const std::string& sele1,
+                                     const std::string& sele2)
     : ObjectACF<Mat3x3d>(info, filename, sele1, sele2,
                          DataStorage::dslForce | DataStorage::dslAmat |
-                         DataStorage::dslTorque){
+                             DataStorage::dslTorque) {
+  setCorrFuncType("Force - Force Auto Correlation Function");
+  setOutputName(getPrefix(dumpFilename_) + ".facorr");
 
-    setCorrFuncType("Force - Force Auto Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".facorr");
+  forces_.resize(nFrames_);
+  sumForces_ = V3Zero;
+  forcesCount_ = 0;
+}
 
-    forces_.resize(nFrames_);
-    sumForces_ = V3Zero;
-    forcesCount_ = 0;
+int ForceAutoCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+  if (sd->isDirectional()) {
+    Mat3x3d A = sd->getA();
+    Vector3d f = sd->getFrc();
+    propertyTemp = A * f;
+  } else {
+    Vector3d f = sd->getFrc();
+    propertyTemp = f;
   }
+  forces_[frame].push_back(propertyTemp);
+  sumForces_ += propertyTemp;
+  forcesCount_++;
+  return forces_[frame].size() - 1;
+}
 
-  int ForceAutoCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    if (sd->isDirectional()) {
-      Mat3x3d A = sd->getA();
-      Vector3d f = sd->getFrc();
-      propertyTemp = A * f;
+Mat3x3d ForceAutoCorrFunc::calcCorrVal(int frame1, int frame2, int id1,
+                                       int id2) {
+  return outProduct(forces_[frame1][id1], forces_[frame2][id2]);
+}
+
+void ForceAutoCorrFunc::postCorrelate() {
+  // Gets the average of the forces_
+  sumForces_ /= RealType(forcesCount_);
+
+  Mat3x3d correlationOfAverages_ = outProduct(sumForces_, sumForces_);
+  for (unsigned int i = 0; i < nTimeBins_; ++i) {
+    if (count_[i] > 0) {
+      histogram_[i] /= RealType(count_[i]);
+
+      // The outerProduct correlation of the averages is subtracted
+      // from the correlation value
+      histogram_[i] -= correlationOfAverages_;
     } else {
-      Vector3d f = sd->getFrc();
-      propertyTemp = f;
-    }
-    forces_[frame].push_back( propertyTemp );
-    sumForces_ += propertyTemp;
-    forcesCount_++;
-    return forces_[frame].size() - 1;
-  }
-
-  Mat3x3d ForceAutoCorrFunc::calcCorrVal(int frame1, int frame2,
-                                         int id1, int id2) {
-    return outProduct( forces_[frame1][id1] , forces_[frame2][id2] );
-  }
-
-  void ForceAutoCorrFunc::postCorrelate() {
-    // Gets the average of the forces_
-    sumForces_ /= RealType(forcesCount_);
-
-    Mat3x3d correlationOfAverages_ = outProduct(sumForces_, sumForces_);
-    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
-      if (count_[i] > 0) {
-        histogram_[i] /= RealType(count_[i]);
-
-        // The outerProduct correlation of the averages is subtracted
-        // from the correlation value
-        histogram_[i] -= correlationOfAverages_;
-      } else {
-        histogram_[i] = M3Zero;
-      }
+      histogram_[i] = M3Zero;
     }
   }
 }
+}  // namespace OpenMD

@@ -45,34 +45,30 @@
 
 #include "applications/dynamicProps/ThetaCorrFunc.hpp"
 
-
 namespace OpenMD {
-  ThetaCorrFunc::ThetaCorrFunc(SimInfo* info, const std::string& filename,
-                               const std::string& sele1,
-                               const std::string& sele2)
+ThetaCorrFunc::ThetaCorrFunc(SimInfo* info, const std::string& filename,
+                             const std::string& sele1, const std::string& sele2)
     : ObjectACF<RealType>(info, filename, sele1, sele2,
-                          DataStorage::dslPosition){
-    
-      setCorrFuncType("ThetaCorrFunc");
-      setOutputName(getPrefix(dumpFilename_) + ".tcorr");
-      setLabelString( "Cos(theta)" );
-      coords_.resize(nFrames_);
+                          DataStorage::dslPosition) {
+  setCorrFuncType("ThetaCorrFunc");
+  setOutputName(getPrefix(dumpFilename_) + ".tcorr");
+  setLabelString("Cos(theta)");
+  coords_.resize(nFrames_);
 
-      // Turn on COM calculation in reader:
-      bool ncp = true;
-      reader_->setNeedCOMprops(ncp);    
-  }
-
-  int ThetaCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    coords_[frame].push_back( sd->getPos() - sd->getCOM() );
-    return coords_[frame].size() - 1;
-  }
-
-  RealType ThetaCorrFunc::calcCorrVal(int frame1, int frame2,
-                                      int id1, int id2) {
-    Vector3d a = coords_[frame1][id1];
-    Vector3d b = coords_[frame2][id2];
-    return dot(a, b)/(a.length() * b.length());
-  }
-
+  // Turn on COM calculation in reader:
+  bool ncp = true;
+  reader_->setNeedCOMprops(ncp);
 }
+
+int ThetaCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+  coords_[frame].push_back(sd->getPos() - sd->getCOM());
+  return coords_[frame].size() - 1;
+}
+
+RealType ThetaCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
+  Vector3d a = coords_[frame1][id1];
+  Vector3d b = coords_[frame2][id2];
+  return dot(a, b) / (a.length() * b.length());
+}
+
+}  // namespace OpenMD

@@ -49,137 +49,138 @@
  * @author  Hemanta Bhattarai
  */
 
-#include <algorithm>
-#include <numeric>
-#include <fstream>
 #include "applications/staticProps/ChargeHistogram.hpp"
+
+#include <algorithm>
+#include <fstream>
+#include <numeric>
+
+#include "io/DumpReader.hpp"
+#include "primitives/Molecule.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/simError.h"
-#include "io/DumpReader.hpp"
-#include "primitives/Molecule.hpp"
 
 namespace OpenMD {
 
-  ChargeHistogram::ChargeHistogram(SimInfo* info, const std::string& filename,
-                                   const std::string& sele, int nbins)
-    : StaticAnalyser(info, filename, nbins), selectionScript_(sele),
-      evaluator_(info), seleMan_(info), nBins_(nbins) {
-
-    evaluator_.loadScriptString(sele);
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
-    
-    setOutputName(getPrefix(filename) + ".Chargehist");
+ChargeHistogram::ChargeHistogram(SimInfo* info, const std::string& filename,
+                                 const std::string& sele, int nbins)
+    : StaticAnalyser(info, filename, nbins),
+      selectionScript_(sele),
+      evaluator_(info),
+      seleMan_(info),
+      nBins_(nbins) {
+  evaluator_.loadScriptString(sele);
+  if (!evaluator_.isDynamic()) {
+    seleMan_.setSelectionSet(evaluator_.evaluate());
   }
 
-  void ChargeHistogram::process() {
-    StuntDouble* sd;
-    int ii;
-
-    if (evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
-
-    DumpReader reader(info_, dumpFilename_);
-    int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames/step_;
-    vector<RealType> charge;
-
-    nProcessed_ = nFrames/step_;
-
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
-      for (sd = seleMan_.beginSelected(ii); sd != NULL;
-           sd = seleMan_.nextSelected(ii)) {
-        RealType q = 0.0;
-        Atom* atom = static_cast<Atom*>(sd);
-
-        AtomType* atomType = atom->getAtomType();
-
-        FixedChargeAdapter fca = FixedChargeAdapter(atomType);
-        if ( fca.isFixedCharge() ) {
-          q += fca.getCharge();
-        }
-
-        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
-        if ( fqa.isFluctuatingCharge() ) {
-          q += atom->getFlucQPos();
-        }
-
-        charge.push_back(q);
-      }
-    }
-
-    if(charge.empty()){
-      sprintf(painCave.errMsg, "Selected atom not found.\n");
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    std::sort(charge.begin(),charge.end());
-
-    RealType min = charge.front();
-    RealType max = charge.back();
-
-    RealType delta_charge = (max-min)/(nBins_);
-
-    if(delta_charge == 0){
-      bincenter_.push_back(min);
-      histList_.push_back(1);
-    } else {
-      //fill the center for histogram
-      for(int j = 0; j< nBins_+ 3; ++j ) {
-        bincenter_.push_back(min + (j-1) * delta_charge);
-        histList_.push_back(0);
-      }
-      //filling up the histogram whith the densities
-      int bin_center_pos = 0;
-      vector<RealType>::iterator index;
-      RealType charge_length = static_cast<RealType>(charge.size());
-
-      bool hist_update;
-      for(index = charge.begin(); index < charge.end(); index++) {
-        hist_update = true;
-        while(hist_update) {
-          if(*index >= bincenter_[bin_center_pos] &&
-             *index < bincenter_[bin_center_pos + 1 ] ){
-            histList_[bin_center_pos] += 1.0/charge_length;
-            hist_update = false;
-          } else {
-            bin_center_pos++;
-            hist_update = true;
-          }
-        }
-
-      }
-    }
-    writeCharge();
-  }
-  
-  void ChargeHistogram::writeCharge() {
-
-    std::ofstream rdfStream(outputFilename_.c_str());
-    if (rdfStream.is_open()) {
-      rdfStream << "#Charges for selection\n";
-      rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
-      rdfStream << "#selection: (" << selectionScript_ << ")\n";
-      rdfStream << "#" << "Bin_center" << "\tcount\n";
-      for (unsigned int i = 0; i < histList_.size(); ++i) {
-        rdfStream << bincenter_[i] << "\t"
-                  <<  histList_[i]
-                  << "\n";
-      }
-    } else {
-
-      sprintf(painCave.errMsg, "ChargeHistogram: unable to open %s\n",
-	      outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();
-    }
-    rdfStream.close();
-  }
+  setOutputName(getPrefix(filename) + ".Chargehist");
 }
+
+void ChargeHistogram::process() {
+  StuntDouble* sd;
+  int ii;
+
+  if (evaluator_.isDynamic()) {
+    seleMan_.setSelectionSet(evaluator_.evaluate());
+  }
+
+  DumpReader reader(info_, dumpFilename_);
+  int nFrames = reader.getNFrames();
+  nProcessed_ = nFrames / step_;
+  vector<RealType> charge;
+
+  nProcessed_ = nFrames / step_;
+
+  for (int istep = 0; istep < nFrames; istep += step_) {
+    reader.readFrame(istep);
+    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    for (sd = seleMan_.beginSelected(ii); sd != NULL;
+         sd = seleMan_.nextSelected(ii)) {
+      RealType q = 0.0;
+      Atom* atom = static_cast<Atom*>(sd);
+
+      AtomType* atomType = atom->getAtomType();
+
+      FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+      if (fca.isFixedCharge()) {
+        q += fca.getCharge();
+      }
+
+      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+      if (fqa.isFluctuatingCharge()) {
+        q += atom->getFlucQPos();
+      }
+
+      charge.push_back(q);
+    }
+  }
+
+  if (charge.empty()) {
+    sprintf(painCave.errMsg, "Selected atom not found.\n");
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  std::sort(charge.begin(), charge.end());
+
+  RealType min = charge.front();
+  RealType max = charge.back();
+
+  RealType delta_charge = (max - min) / (nBins_);
+
+  if (delta_charge == 0) {
+    bincenter_.push_back(min);
+    histList_.push_back(1);
+  } else {
+    // fill the center for histogram
+    for (int j = 0; j < nBins_ + 3; ++j) {
+      bincenter_.push_back(min + (j - 1) * delta_charge);
+      histList_.push_back(0);
+    }
+    // filling up the histogram whith the densities
+    int bin_center_pos = 0;
+    vector<RealType>::iterator index;
+    RealType charge_length = static_cast<RealType>(charge.size());
+
+    bool hist_update;
+    for (index = charge.begin(); index < charge.end(); index++) {
+      hist_update = true;
+      while (hist_update) {
+        if (*index >= bincenter_[bin_center_pos] &&
+            *index < bincenter_[bin_center_pos + 1]) {
+          histList_[bin_center_pos] += 1.0 / charge_length;
+          hist_update = false;
+        } else {
+          bin_center_pos++;
+          hist_update = true;
+        }
+      }
+    }
+  }
+  writeCharge();
+}
+
+void ChargeHistogram::writeCharge() {
+  std::ofstream rdfStream(outputFilename_.c_str());
+  if (rdfStream.is_open()) {
+    rdfStream << "#Charges for selection\n";
+    rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
+    rdfStream << "#selection: (" << selectionScript_ << ")\n";
+    rdfStream << "#"
+              << "Bin_center"
+              << "\tcount\n";
+    for (unsigned int i = 0; i < histList_.size(); ++i) {
+      rdfStream << bincenter_[i] << "\t" << histList_[i] << "\n";
+    }
+  } else {
+    sprintf(painCave.errMsg, "ChargeHistogram: unable to open %s\n",
+            outputFilename_.c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
+  rdfStream.close();
+}
+}  // namespace OpenMD

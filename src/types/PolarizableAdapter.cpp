@@ -42,68 +42,70 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "types/PolarizableAdapter.hpp"
-#include "utils/simError.h"
+
 #include <cstdio>
 #include <memory>
 
+#include "utils/simError.h"
+
 namespace OpenMD {
 
-  bool PolarizableAdapter::isPolarizable() {
-    return at_->hasProperty(PolTypeID);
-  }
-  
-  PolarizableAtypeParameters PolarizableAdapter::getPolarizableParam() {
-    
-    if (!isPolarizable()) {
-      sprintf( painCave.errMsg,               
-               "PolarizableAdapter::getPolarizableParam was passed an atomType (%s)\n"
-               "\tthat does not appear to be a polarizable atom.\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    std::shared_ptr<GenericData> data = at_->getPropertyByName(PolTypeID);
-    if (data == nullptr) {
-      sprintf( painCave.errMsg, 
-               "PolarizableAdapter::getPolarizableParam could not find polarizable\n"
-               "\tparameters for atomType %s.\n", at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError(); 
-    }
-    
-    std::shared_ptr<PolarizableAtypeData> polData = std::dynamic_pointer_cast<PolarizableAtypeData>(data);
-    if (polData == nullptr) {
-      sprintf( painCave.errMsg,
-               "PolarizableAdapter::getPolarizableParam could not convert\n"
-               "\tGenericData to PolarizableAtypeData for atom type %s\n", 
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    return polData->getData();
-  }
-  
-  RealType PolarizableAdapter::getPolarizability() {    
-    PolarizableAtypeParameters polParam = getPolarizableParam();
-    return polParam.polarizability;
-  }
-  
-  void PolarizableAdapter::makePolarizable(RealType polarizability) {
+bool PolarizableAdapter::isPolarizable() { return at_->hasProperty(PolTypeID); }
 
-    if (isPolarizable()){
-      at_->removeProperty(PolTypeID);
-    }
-
-    PolarizableAtypeParameters polParam {};
-    polParam.polarizability = polarizability;
-    
-    at_->addProperty(std::make_shared<PolarizableAtypeData>(PolTypeID, polParam));
+PolarizableAtypeParameters PolarizableAdapter::getPolarizableParam() {
+  if (!isPolarizable()) {
+    sprintf(
+        painCave.errMsg,
+        "PolarizableAdapter::getPolarizableParam was passed an atomType (%s)\n"
+        "\tthat does not appear to be a polarizable atom.\n",
+        at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
   }
+
+  std::shared_ptr<GenericData> data = at_->getPropertyByName(PolTypeID);
+  if (data == nullptr) {
+    sprintf(
+        painCave.errMsg,
+        "PolarizableAdapter::getPolarizableParam could not find polarizable\n"
+        "\tparameters for atomType %s.\n",
+        at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  std::shared_ptr<PolarizableAtypeData> polData =
+      std::dynamic_pointer_cast<PolarizableAtypeData>(data);
+  if (polData == nullptr) {
+    sprintf(painCave.errMsg,
+            "PolarizableAdapter::getPolarizableParam could not convert\n"
+            "\tGenericData to PolarizableAtypeData for atom type %s\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  return polData->getData();
 }
+
+RealType PolarizableAdapter::getPolarizability() {
+  PolarizableAtypeParameters polParam = getPolarizableParam();
+  return polParam.polarizability;
+}
+
+void PolarizableAdapter::makePolarizable(RealType polarizability) {
+  if (isPolarizable()) {
+    at_->removeProperty(PolTypeID);
+  }
+
+  PolarizableAtypeParameters polParam{};
+  polParam.polarizability = polarizability;
+
+  at_->addProperty(std::make_shared<PolarizableAtypeData>(PolTypeID, polParam));
+}
+}  // namespace OpenMD

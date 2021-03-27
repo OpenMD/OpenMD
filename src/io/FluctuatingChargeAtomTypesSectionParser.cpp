@@ -44,83 +44,85 @@
  */
 
 #include "io/FluctuatingChargeAtomTypesSectionParser.hpp"
-#include "types/FluctuatingChargeAdapter.hpp"
-#include "types/FixedChargeAdapter.hpp"
+
+#include "brains/ForceField.hpp"
 #include "io/ForceFieldOptions.hpp"
 #include "types/AtomType.hpp"
-#include "brains/ForceField.hpp"
+#include "types/FixedChargeAdapter.hpp"
+#include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/Tuple.hpp"
 #include "utils/simError.h"
 
 using namespace std;
 namespace OpenMD {
 
-  FluctuatingChargeAtomTypesSectionParser::FluctuatingChargeAtomTypesSectionParser(ForceFieldOptions& options) : options_(options) {
-    setSectionName("FluctuatingChargeAtomTypes");
+FluctuatingChargeAtomTypesSectionParser::
+    FluctuatingChargeAtomTypesSectionParser(ForceFieldOptions& options)
+    : options_(options) {
+  setSectionName("FluctuatingChargeAtomTypes");
 
-    stringToEnumMap_["Hardness"] =  fqtHardness;
-    stringToEnumMap_["EAM"] =  fqtEAM;
-    stringToEnumMap_["EAMPoly"] =  fqtEAMPolynomial;
-    stringToEnumMap_["DREAM2"] = fqtDREAM2;
+  stringToEnumMap_["Hardness"] = fqtHardness;
+  stringToEnumMap_["EAM"] = fqtEAM;
+  stringToEnumMap_["EAMPoly"] = fqtEAMPolynomial;
+  stringToEnumMap_["DREAM2"] = fqtDREAM2;
+}
+
+void FluctuatingChargeAtomTypesSectionParser::parseLine(ForceField& ff,
+                                                        const string& line,
+                                                        int lineNo) {
+  StringTokenizer tokenizer(line);
+  int nTokens = tokenizer.countTokens();
+
+  if (nTokens < 3) {
+    sprintf(painCave.errMsg,
+            "FluctuatingChargeAtomTypesSectionParser Error: "
+            "Not enough tokens at line %d\n",
+            lineNo);
+    painCave.isFatal = 1;
+    simError();
   }
 
-  void FluctuatingChargeAtomTypesSectionParser::parseLine(ForceField& ff,
-                                                          const string& line,
-                                                          int lineNo){
-    StringTokenizer tokenizer(line);
-    int nTokens = tokenizer.countTokens();
+  // conversion to kcal / mol
+  eus_ = options_.getEnergyUnitScaling();
+  // conversion to electrons
+  cus_ = options_.getChargeUnitScaling();
+  // conversion to angstroms
+  dus_ = options_.getDistanceUnitScaling();
+  // oxidation state scaling
+  oss_ = options_.getOxidationStateScaling();
 
+  // electronegativity conversion
+  RealType chius = eus_ / cus_;
+  // curvature (hardness) conversion
+  RealType curvus = eus_ / (cus_ * cus_);
 
-    if (nTokens < 3)  {
-      sprintf(painCave.errMsg,
-              "FluctuatingChargeAtomTypesSectionParser Error: "
-              "Not enough tokens at line %d\n",
-              lineNo);
-      painCave.isFatal = 1;
-      simError();
+  string atomTypeName = tokenizer.nextToken();
+  AtomType* atomType = ff.getAtomType(atomTypeName);
+  if (atomType != NULL) {
+    FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+
+    // All fluctuating charges are charges, and if we haven't
+    // already set values for the charge, then start with zero.
+    if (!fca.isFixedCharge()) {
+      RealType charge = 0.0;
+      fca.makeFixedCharge(charge);
     }
 
-    // conversion to kcal / mol
-    eus_  = options_.getEnergyUnitScaling();
-    // conversion to electrons
-    cus_  = options_.getChargeUnitScaling();
-    // conversion to angstroms
-    dus_  = options_.getDistanceUnitScaling();
-    // oxidation state scaling
-    oss_ = options_.getOxidationStateScaling();
+  } else {
+    sprintf(painCave.errMsg,
+            "FluctuatingChargeAtomTypesSectionParser Error: Atom Type [%s] "
+            "has not been created yet\n",
+            atomTypeName.c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
 
-    // electronegativity conversion
-    RealType chius = eus_ / cus_;
-    // curvature (hardness) conversion
-    RealType curvus = eus_ / (cus_ * cus_);
+  RealType chargeMass = tokenizer.nextTokenAsDouble();
+  FluctuatingTypeEnum fqt = getFluctuatingTypeEnum(tokenizer.nextToken());
 
-    string atomTypeName = tokenizer.nextToken();
-    AtomType* atomType = ff.getAtomType(atomTypeName);
-    if (atomType != NULL) {
-      FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+  nTokens -= 3;
 
-      // All fluctuating charges are charges, and if we haven't
-      // already set values for the charge, then start with zero.
-      if (! fca.isFixedCharge()) {
-        RealType charge = 0.0;
-        fca.makeFixedCharge(charge);
-      }
-
-    } else {
-      sprintf(painCave.errMsg,
-              "FluctuatingChargeAtomTypesSectionParser Error: Atom Type [%s] "
-              "has not been created yet\n", atomTypeName.c_str());
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    RealType chargeMass = tokenizer.nextTokenAsDouble();
-    FluctuatingTypeEnum fqt = getFluctuatingTypeEnum(tokenizer.nextToken());
-
-    nTokens -= 3;
-
-    switch(fqt) {
-
+  switch (fqt) {
     case fqtHardness:
       // For Rick, Stuart, Berne style fluctuating charges, there's a
       // self charge potential defined by electronegativity and
@@ -147,12 +149,12 @@ namespace OpenMD {
         fqa.makeFluctuatingCharge(chargeMass, chi, Jii, slaterN, slaterZeta);
       }
       break;
-        
+
     case fqtEAMPolynomial:
 
       // For DR-EAM v1, oxidation state scaling is built in to
       // fluctuating charge parameters and nValence.
-      
+
       if (nTokens < 3 || nTokens % 2 != 1) {
         sprintf(painCave.errMsg,
                 "FluctuatingChargeAtomTypesSectionParser Error: "
@@ -163,19 +165,19 @@ namespace OpenMD {
       } else {
         RealType nValence = tokenizer.nextTokenAsDouble();
         nTokens -= 1;
-        
+
         DoublePolynomial vself;
-        
+
         int nPairs = nTokens / 2;
         int power;
         RealType coefficient;
-        
+
         for (int i = 0; i < nPairs; ++i) {
           power = tokenizer.nextTokenAsInt();
           coefficient = tokenizer.nextTokenAsDouble() * eus_ / pow(cus_, power);
           vself.setCoefficient(power, coefficient);
         }
-       
+
         FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
         fqa.makeFluctuatingCharge(chargeMass, nValence, vself);
       }
@@ -188,7 +190,7 @@ namespace OpenMD {
       // nMobile in the force field file should assume unit charge
       // oxidation state fits to ionization states and electron
       // affinities.
-      
+
       if (nTokens < 3 || nTokens % 2 != 0) {
         sprintf(painCave.errMsg,
                 "FluctuatingChargeAtomTypesSectionParser Error: "
@@ -202,18 +204,19 @@ namespace OpenMD {
         nTokens -= 1;
         // Mobile electron count
         RealType nMobile = tokenizer.nextTokenAsDouble() * oss_;
-        nTokens -= 1;                
-        
+        nTokens -= 1;
+
         DoublePolynomial vself;
-        
+
         int nPairs = nTokens / 2;
         int power;
         RealType coefficient;
 
-        for (int i = 0; i < nPairs; ++i) {          
+        for (int i = 0; i < nPairs; ++i) {
           power = tokenizer.nextTokenAsInt();
-          coefficient =oss_* oss_ * tokenizer.nextTokenAsDouble() * eus_ / pow(oss_ * cus_, power);
-	  
+          coefficient = oss_ * oss_ * tokenizer.nextTokenAsDouble() * eus_ /
+                        pow(oss_ * cus_, power);
+
           vself.setCoefficient(power, coefficient);
         }
 
@@ -232,15 +235,16 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
       break;
-
-    }
   }
-
-  FluctuatingChargeAtomTypesSectionParser::FluctuatingTypeEnum FluctuatingChargeAtomTypesSectionParser::getFluctuatingTypeEnum(const std::string& str) {
-    std::map<std::string, FluctuatingTypeEnum>::iterator i;
-    i = stringToEnumMap_.find(str);
-
-    return i == stringToEnumMap_.end() ? fqtUnknown : i->second;
-  }
-
 }
+
+FluctuatingChargeAtomTypesSectionParser::FluctuatingTypeEnum
+FluctuatingChargeAtomTypesSectionParser::getFluctuatingTypeEnum(
+    const std::string& str) {
+  std::map<std::string, FluctuatingTypeEnum>::iterator i;
+  i = stringToEnumMap_.find(str);
+
+  return i == stringToEnumMap_.end() ? fqtUnknown : i->second;
+}
+
+}  // namespace OpenMD

@@ -42,26 +42,24 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "primitives/UreyBradleyBend.hpp"
 
 namespace OpenMD {
-  UreyBradleyBend::UreyBradleyBend(Atom* atom1, Atom* atom2, Atom* atom3,
-                                   UreyBradleyBendType* bt) 
-    : Bend(atom1, atom2, atom3, bt), bond_(NULL){
-      bond_ = new Bond(atom1, atom3, bt->getHarmonicBondType());
-    }
+UreyBradleyBend::UreyBradleyBend(Atom* atom1, Atom* atom2, Atom* atom3,
+                                 UreyBradleyBendType* bt)
+    : Bend(atom1, atom2, atom3, bt), bond_(NULL) {
+  bond_ = new Bond(atom1, atom3, bt->getHarmonicBondType());
+}
 
-  UreyBradleyBend::~UreyBradleyBend() {
-    delete bond_;
+UreyBradleyBend::~UreyBradleyBend() { delete bond_; }
+
+void UreyBradleyBend::calcForce(RealType& angle, bool doParticlePot) {
+  Bend::calcForce(angle, doParticlePot);
+  bond_->calcForce(doParticlePot);
+  if (doParticlePot) {
+    atoms_[1]->addParticlePot(bond_->getPotential());
   }
+}
 
-  void UreyBradleyBend::calcForce(RealType& angle, bool doParticlePot) {
-    Bend::calcForce(angle, doParticlePot);
-    bond_->calcForce(doParticlePot);
-    if (doParticlePot) {
-      atoms_[1]->addParticlePot(bond_->getPotential());
-    }
-  }
-
-} //end namespace OpenMD
+}  // end namespace OpenMD

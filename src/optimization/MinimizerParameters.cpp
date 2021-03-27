@@ -42,48 +42,44 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
 
 #include "optimization/MinimizerParameters.hpp"
 
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+
 namespace OpenMD {
-  MinimizerParameters::MinimizerParameters() { 
-    DefineOptionalParameterWithDefaultValue(UseMinimizer, "useMinimizer",
-                                            false);
-    DefineOptionalParameterWithDefaultValue(Method, "method", "SD");
-    DefineOptionalParameterWithDefaultValue(MaxIterations, "maxIterations",
-                                            1000);
-    DefineOptionalParameterWithDefaultValue(MaxStationaryStateIterations,
-                                            "maxStationaryStateIterations",
-                                            100);
-    DefineOptionalParameterWithDefaultValue(RootEpsilon, "rootEpsilon", 1e-5);
-    DefineOptionalParameterWithDefaultValue(FunctionEpsilon, "functionEpsilon",
-                                            1e-5);
-    DefineOptionalParameterWithDefaultValue(GradientNormEpsilon,
-                                            "gradientNormEpsilon", 1e-5);
-    DefineOptionalParameterWithDefaultValue(InitialStepSize, "initialStepSize",
-                                            0.1);
-  }
-  
-  MinimizerParameters::~MinimizerParameters() {    
-  }
-  
-  void MinimizerParameters::validate() {
-    CheckParameter(Method, isEqualIgnoreCase("SD") || 
-                   isEqualIgnoreCase("CG") || isEqualIgnoreCase("BFGS"));
-    CheckParameter(MaxIterations, isPositive());
-    int one = 1;
-    int mi = this->getMaxIterations();
-    RealType zero = 0.0;
-    RealType oneR = 1.0;
-    CheckParameter(MaxStationaryStateIterations, 
-                   isGreaterThanOrEqualTo(one) && isLessThanOrEqualTo(mi));
-    CheckParameter(RootEpsilon, isPositive());
-    CheckParameter(GradientNormEpsilon, isPositive());
-    CheckParameter(InitialStepSize,
-                   isGreaterThan(zero) && isLessThanOrEqualTo(oneR));
-  }  
+MinimizerParameters::MinimizerParameters() {
+  DefineOptionalParameterWithDefaultValue(UseMinimizer, "useMinimizer", false);
+  DefineOptionalParameterWithDefaultValue(Method, "method", "SD");
+  DefineOptionalParameterWithDefaultValue(MaxIterations, "maxIterations", 1000);
+  DefineOptionalParameterWithDefaultValue(MaxStationaryStateIterations,
+                                          "maxStationaryStateIterations", 100);
+  DefineOptionalParameterWithDefaultValue(RootEpsilon, "rootEpsilon", 1e-5);
+  DefineOptionalParameterWithDefaultValue(FunctionEpsilon, "functionEpsilon",
+                                          1e-5);
+  DefineOptionalParameterWithDefaultValue(GradientNormEpsilon,
+                                          "gradientNormEpsilon", 1e-5);
+  DefineOptionalParameterWithDefaultValue(InitialStepSize, "initialStepSize",
+                                          0.1);
 }
+
+MinimizerParameters::~MinimizerParameters() {}
+
+void MinimizerParameters::validate() {
+  CheckParameter(Method, isEqualIgnoreCase("SD") || isEqualIgnoreCase("CG") ||
+                             isEqualIgnoreCase("BFGS"));
+  CheckParameter(MaxIterations, isPositive());
+  int one = 1;
+  int mi = this->getMaxIterations();
+  RealType zero = 0.0;
+  RealType oneR = 1.0;
+  CheckParameter(MaxStationaryStateIterations,
+                 isGreaterThanOrEqualTo(one) && isLessThanOrEqualTo(mi));
+  CheckParameter(RootEpsilon, isPositive());
+  CheckParameter(GradientNormEpsilon, isPositive());
+  CheckParameter(InitialStepSize,
+                 isGreaterThan(zero) && isLessThanOrEqualTo(oneR));
+}
+}  // namespace OpenMD

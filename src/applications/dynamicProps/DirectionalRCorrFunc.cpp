@@ -44,61 +44,60 @@
  */
 
 #include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
+
 #include "utils/Revision.hpp"
 
 namespace OpenMD {
-  DirectionalRCorrFunc::DirectionalRCorrFunc(SimInfo* info, 
-                                             const std::string& filename,
-                                             const std::string& sele1,
-                                             const std::string& sele2)
+DirectionalRCorrFunc::DirectionalRCorrFunc(SimInfo* info,
+                                           const std::string& filename,
+                                           const std::string& sele1,
+                                           const std::string& sele2)
     : ObjectACF<Vector3d>(info, filename, sele1, sele2,
-                          DataStorage::dslPosition |
-                          DataStorage::dslAmat){
-    
-    setCorrFuncType("DirectionalRCorrFunc");
-    setOutputName(getPrefix(dumpFilename_) + ".drcorr");
-    setLabelString( "r2\trparallel\trperpendicular" );
-    positions_.resize(nFrames_);
-    rotMats_.resize(nFrames_);
-  }
+                          DataStorage::dslPosition | DataStorage::dslAmat) {
+  setCorrFuncType("DirectionalRCorrFunc");
+  setOutputName(getPrefix(dumpFilename_) + ".drcorr");
+  setLabelString("r2\trparallel\trperpendicular");
+  positions_.resize(nFrames_);
+  rotMats_.resize(nFrames_);
+}
 
-  int DirectionalRCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    positions_[frame].push_back( sd->getPos() );
-    rotMats_[frame].push_back( sd->getA() );
-    return positions_[frame].size() - 1;
-  }
-  
-  Vector3d DirectionalRCorrFunc::calcCorrVal(int frame1, int frame2,
-                                             int id1, int id2) {
-    Vector3d diff = positions_[frame2][id2] - positions_[frame1][id1];
-    
-    // The lab frame vector corresponding to the body-fixed 
-    // z-axis is simply the second column of A.transpose()
-    // or, identically, the second row of A itself.
-  
-    Vector3d u1 = rotMats_[frame1][id1].getRow(2);
-    RealType u1l = u1.length();
+int DirectionalRCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+  positions_[frame].push_back(sd->getPos());
+  rotMats_[frame].push_back(sd->getA());
+  return positions_[frame].size() - 1;
+}
 
-    RealType rsq = diff.lengthSquare();
-    RealType rpar = dot( diff, u1) / u1l;
-    RealType rpar2 = rpar*rpar;
-    RealType rperp2 = rsq - rpar2;
+Vector3d DirectionalRCorrFunc::calcCorrVal(int frame1, int frame2, int id1,
+                                           int id2) {
+  Vector3d diff = positions_[frame2][id2] - positions_[frame1][id1];
 
-    return Vector3d(rsq, rpar2, rperp2);
-  }
+  // The lab frame vector corresponding to the body-fixed
+  // z-axis is simply the second column of A.transpose()
+  // or, identically, the second row of A itself.
 
-  void DirectionalRCorrFunc::validateSelection(SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;
-    for (sd = seleMan1_.beginSelected(i); sd != NULL;
-         sd = seleMan1_.nextSelected(i)) {
-      if (!sd->isDirectional()) {
-        sprintf(painCave.errMsg,
-                "DirectionalRCorrFunc::validateSelection Error: "
-                "at least one of the selected objects is not Directional\n");
-        painCave.isFatal = 1;
-        simError();        
-      }
-    }        
+  Vector3d u1 = rotMats_[frame1][id1].getRow(2);
+  RealType u1l = u1.length();
+
+  RealType rsq = diff.lengthSquare();
+  RealType rpar = dot(diff, u1) / u1l;
+  RealType rpar2 = rpar * rpar;
+  RealType rperp2 = rsq - rpar2;
+
+  return Vector3d(rsq, rpar2, rperp2);
+}
+
+void DirectionalRCorrFunc::validateSelection(SelectionManager& seleMan) {
+  StuntDouble* sd;
+  int i;
+  for (sd = seleMan1_.beginSelected(i); sd != NULL;
+       sd = seleMan1_.nextSelected(i)) {
+    if (!sd->isDirectional()) {
+      sprintf(painCave.errMsg,
+              "DirectionalRCorrFunc::validateSelection Error: "
+              "at least one of the selected objects is not Directional\n");
+      painCave.isFatal = 1;
+      simError();
+    }
   }
 }
+}  // namespace OpenMD

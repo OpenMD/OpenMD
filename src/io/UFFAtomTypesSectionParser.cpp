@@ -43,113 +43,114 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-
 #include "io/UFFAtomTypesSectionParser.hpp"
-#include "types/UFFAdapter.hpp"
+
 #include "brains/ForceField.hpp"
+#include "types/UFFAdapter.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
-  
-  UFFAtomTypesSectionParser::UFFAtomTypesSectionParser(ForceFieldOptions& options) :
-    options_(options){
-    setSectionName("UFFAtomTypes");
-  }
-  
-  void UFFAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line,
-                                            int lineNo){
-    StringTokenizer tokenizer(line);
-    int nTokens = tokenizer.countTokens();    
-    
-    // in UFFAtomTypesSectionParser, a line at least contains 12 tokens:
-    // Atom r1 theta0 x1 D1 zeta Z1 Vi Uj Xi Hard Radius
-    
-    if (nTokens < 12)  {
-      sprintf(painCave.errMsg, "UFFAtomTypesSectionParser Error: "
-              "Not enough tokens at line %d\n", lineNo);
-      painCave.isFatal = 1;
-      simError();                    
+
+UFFAtomTypesSectionParser::UFFAtomTypesSectionParser(ForceFieldOptions& options)
+    : options_(options) {
+  setSectionName("UFFAtomTypes");
+}
+
+void UFFAtomTypesSectionParser::parseLine(ForceField& ff,
+                                          const std::string& line, int lineNo) {
+  StringTokenizer tokenizer(line);
+  int nTokens = tokenizer.countTokens();
+
+  // in UFFAtomTypesSectionParser, a line at least contains 12 tokens:
+  // Atom r1 theta0 x1 D1 zeta Z1 Vi Uj Xi Hard Radius
+
+  if (nTokens < 12) {
+    sprintf(painCave.errMsg,
+            "UFFAtomTypesSectionParser Error: "
+            "Not enough tokens at line %d\n",
+            lineNo);
+    painCave.isFatal = 1;
+    simError();
+  } else {
+    std::string atomTypeName = tokenizer.nextToken();
+    AtomType* atomType = ff.getAtomType(atomTypeName);
+
+    if (atomType != NULL) {
+      UFFAdapter uffa = UFFAdapter(atomType);
+
+      RealType r1 = tokenizer.nextTokenAsDouble();
+      RealType theta0 = tokenizer.nextTokenAsDouble();
+      RealType x1 = tokenizer.nextTokenAsDouble();
+      RealType D1 = tokenizer.nextTokenAsDouble();
+      RealType zeta = tokenizer.nextTokenAsDouble();
+      RealType Z1 = tokenizer.nextTokenAsDouble();
+      RealType Vi = tokenizer.nextTokenAsDouble();
+      RealType Uj = tokenizer.nextTokenAsDouble();
+      RealType Xi = tokenizer.nextTokenAsDouble();
+      RealType Hard = tokenizer.nextTokenAsDouble();
+      RealType Radius = tokenizer.nextTokenAsDouble();
+
+      r1 *= options_.getDistanceUnitScaling();
+      theta0 *= options_.getAngleUnitScaling();
+      x1 *= options_.getDistanceUnitScaling();
+      D1 *= options_.getEnergyUnitScaling();
+      Z1 *= options_.getChargeUnitScaling();
+      Vi *= options_.getEnergyUnitScaling();
+      Uj *= options_.getEnergyUnitScaling();
+
+      uffa.makeUFF(r1, theta0, x1, D1, zeta, Z1, Vi, Uj, Xi, Hard, Radius);
+
     } else {
-      
-      std::string atomTypeName = tokenizer.nextToken();    
-      AtomType* atomType = ff.getAtomType(atomTypeName);
-      
-      if (atomType != NULL) {
-        UFFAdapter uffa = UFFAdapter(atomType);
-        
-        RealType r1 = tokenizer.nextTokenAsDouble();    
-        RealType theta0 = tokenizer.nextTokenAsDouble();
-        RealType x1 = tokenizer.nextTokenAsDouble();    
-        RealType D1 = tokenizer.nextTokenAsDouble();    
-        RealType zeta = tokenizer.nextTokenAsDouble();  
-        RealType Z1 = tokenizer.nextTokenAsDouble();    
-        RealType Vi = tokenizer.nextTokenAsDouble();    
-        RealType Uj = tokenizer.nextTokenAsDouble();    
-        RealType Xi = tokenizer.nextTokenAsDouble();    
-        RealType Hard = tokenizer.nextTokenAsDouble();  
-        RealType Radius = tokenizer.nextTokenAsDouble();
-
-        r1 *= options_.getDistanceUnitScaling();
-        theta0 *= options_.getAngleUnitScaling();
-        x1 *= options_.getDistanceUnitScaling();
-        D1 *= options_.getEnergyUnitScaling();
-        Z1 *= options_.getChargeUnitScaling();
-        Vi *= options_.getEnergyUnitScaling();
-        Uj *= options_.getEnergyUnitScaling();
-
-        uffa.makeUFF(r1,  theta0,  x1,  D1, zeta,  Z1,  Vi,  Uj, Xi,  Hard,  Radius);
-
-      } else {
-        sprintf(painCave.errMsg, "UFFAtomTypesSectionParser Error: Atom Type [%s]"
-                " has not been created yet\n", atomTypeName.c_str());
-        painCave.isFatal = 1;
-        simError();    
-      }      
-    }        
+      sprintf(painCave.errMsg,
+              "UFFAtomTypesSectionParser Error: Atom Type [%s]"
+              " has not been created yet\n",
+              atomTypeName.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
   }
+}
 
-  void UFFAtomTypesSectionParser::validateSection(ForceField& ff) {
-    // ForceField::AtomTypeContainer* atomTypes = ff.getAtomTypes();
-    // ForceField::AtomTypeContainer::MapTypeIterator i;
-    // AtomType* at;
+void UFFAtomTypesSectionParser::validateSection(ForceField& ff) {
+  // ForceField::AtomTypeContainer* atomTypes = ff.getAtomTypes();
+  // ForceField::AtomTypeContainer::MapTypeIterator i;
+  // AtomType* at;
 
-    // std::vector<AtomType*> uffTypes;
-    
-    // for (at = atomTypes->beginType(i); at != NULL; at = atomTypes->nextType(i)) {      
+  // std::vector<AtomType*> uffTypes;
 
-    //   UFFAdapter uffa = UFFAdapter(at);      
-    //   if (uffa.isUFF())
-    //     uffTypes.push_back(at);
-    // }
+  // for (at = atomTypes->beginType(i); at != NULL; at = atomTypes->nextType(i))
+  // {
 
-    // for (std::size_t i = 0; i < uffTypes.size(); ++i) {
-    //   RealType ri = uffTypes[i]->getR1();
-    //   RealType chiI = uffTypes[i]->getXi();
-    //   RealType Ra = uffTypes[i]->getX1();
-    //   RealType ka = uffTypes[i]->getD1();
-      
-    //   for (std::size_t j = 0; j < uffTypes.size(); ++j) {
-    //     RealType rj = uffTypes[j]->getR1();
-    //     RealType chiJ = uffTypes[j]->getXi();
-    //     RealType Rb = uffTypes[j]->getX1();
-    //     RealType kb = uffTypes[j]->getD1();
+  //   UFFAdapter uffa = UFFAdapter(at);
+  //   if (uffa.isUFF())
+  //     uffTypes.push_back(at);
+  // }
 
-    //     // Precompute the equilibrium bond distance
-    //     // From equation 3
-    //     rbo = -0.1332*(ri+rj)*log(bondorder);
-    //     // From equation 4
-    //     ren = ri*rj*(pow((sqrt(chiI) - sqrt(chiJ)),2.0)) / (chiI*ri + chiJ*rj);
-    //     // From equation 2
-    //     // NOTE: See http://towhee.sourceforge.net/forcefields/uff.html
-    //     // There is a typo in the published paper
-    //     rij = ri + rj + rbo - ren;
+  // for (std::size_t i = 0; i < uffTypes.size(); ++i) {
+  //   RealType ri = uffTypes[i]->getR1();
+  //   RealType chiI = uffTypes[i]->getXi();
+  //   RealType Ra = uffTypes[i]->getX1();
+  //   RealType ka = uffTypes[i]->getD1();
 
-    //     kab = sqrt(ka * kb);
+  //   for (std::size_t j = 0; j < uffTypes.size(); ++j) {
+  //     RealType rj = uffTypes[j]->getR1();
+  //     RealType chiJ = uffTypes[j]->getXi();
+  //     RealType Rb = uffTypes[j]->getX1();
+  //     RealType kb = uffTypes[j]->getD1();
 
-    //     // ka now represents the xij in equation 20 -- the expected vdw distance
-    //     kaSquared = (Ra * Rb);
-    //     ka = sqrt(kaSquared);
-      
-  }
-} //end namespace OpenMD
+  //     // Precompute the equilibrium bond distance
+  //     // From equation 3
+  //     rbo = -0.1332*(ri+rj)*log(bondorder);
+  //     // From equation 4
+  //     ren = ri*rj*(pow((sqrt(chiI) - sqrt(chiJ)),2.0)) / (chiI*ri + chiJ*rj);
+  //     // From equation 2
+  //     // NOTE: See http://towhee.sourceforge.net/forcefields/uff.html
+  //     // There is a typo in the published paper
+  //     rij = ri + rj + rbo - ren;
 
+  //     kab = sqrt(ka * kb);
+
+  //     // ka now represents the xij in equation 20 -- the expected vdw
+  //     distance kaSquared = (Ra * Rb); ka = sqrt(kaSquared);
+}
+}  // end namespace OpenMD

@@ -42,34 +42,33 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <iostream>
+
 #include <fstream>
+#include <iostream>
 #include <string>
 
 #include "Dump2XYZCmd.hpp"
+#include "brains/ForceManager.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
-#include "brains/ForceManager.hpp"
 #include "io/DumpReader.hpp"
-#include "utils/simError.h"
-#include "visitors/AtomVisitor.hpp"
-#include "visitors/ReplacementVisitor.hpp"
-#include "visitors/CompositeVisitor.hpp"
-#include "visitors/RigidBodyVisitor.hpp"
-#include "visitors/OtherVisitor.hpp"
-#include "visitors/ZconsVisitor.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "visitors/LipidTransVisitor.hpp"
+#include "utils/simError.h"
 #include "visitors/AtomNameVisitor.hpp"
+#include "visitors/AtomVisitor.hpp"
+#include "visitors/CompositeVisitor.hpp"
+#include "visitors/LipidTransVisitor.hpp"
+#include "visitors/OtherVisitor.hpp"
+#include "visitors/ReplacementVisitor.hpp"
+#include "visitors/RigidBodyVisitor.hpp"
+#include "visitors/ZconsVisitor.hpp"
 
 using namespace OpenMD;
 
 using namespace std;
-int main(int argc, char* argv[]){
-  
+int main(int argc, char* argv[]) {
   gengetopt_args_info args_info;
   string dumpFileName;
   string xyzFileName;
@@ -80,121 +79,117 @@ int main(int argc, char* argv[]){
   bool printChrg(false);
   bool printField(false);
   bool printGlobalID(false);
-  
-  //parse the command line option
-  if (cmdline_parser (argc, argv, &args_info) != 0) {
-    exit(1) ;
+
+  // parse the command line option
+  if (cmdline_parser(argc, argv, &args_info) != 0) {
+    exit(1);
   }
-  
-  //get the dumpfile name and meta-data file name
-  if (args_info.input_given){
+
+  // get the dumpfile name and meta-data file name
+  if (args_info.input_given) {
     dumpFileName = args_info.input_arg;
   } else {
-    strcpy( painCave.errMsg,
-            "No input file name was specified.\n" );
+    strcpy(painCave.errMsg, "No input file name was specified.\n");
     painCave.isFatal = 1;
     simError();
   }
-  
-  if (args_info.output_given){
+
+  if (args_info.output_given) {
     xyzFileName = args_info.output_arg;
   } else {
     xyzFileName = dumpFileName;
     xyzFileName = xyzFileName.substr(0, xyzFileName.rfind(".")) + ".xyz";
   }
-  
-  //parse md file and set up the system
+
+  // parse md file and set up the system
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
   ForceManager* forceMan = new ForceManager(info);
-  
-  //create visitor list
+
+  // create visitor list
   CompositeVisitor* compositeVisitor = new CompositeVisitor();
-  
-  //create RigidBody Visitor
-  if(args_info.rigidbody_flag){
+
+  // create RigidBody Visitor
+  if (args_info.rigidbody_flag) {
     RBCOMVisitor* rbCOMVisitor = new RBCOMVisitor(info);
     compositeVisitor->addVisitor(rbCOMVisitor, 900);
   }
-  
-  //create SSD atom visitor
+
+  // create SSD atom visitor
   SSDAtomVisitor* ssdVisitor = new SSDAtomVisitor(info);
   compositeVisitor->addVisitor(ssdVisitor, 800);
 
-  //create GBtail atom visitor
+  // create GBtail atom visitor
   GBtailVisitor* gbtVisitor = new GBtailVisitor(info);
   compositeVisitor->addVisitor(gbtVisitor, 790);
 
-  //create GBhead atom visitor
+  // create GBhead atom visitor
   GBheadVisitor* gbhVisitor = new GBheadVisitor(info);
   compositeVisitor->addVisitor(gbhVisitor, 789);
-  
-  //create default atom visitor
+
+  // create default atom visitor
   DefaultAtomVisitor* defaultAtomVisitor = new DefaultAtomVisitor(info);
   compositeVisitor->addVisitor(defaultAtomVisitor, 700);
-  
+
   // if we gave the -w option, we want to skip the waters:
   if (!args_info.water_given) {
-    //create waterType visitor
-    if(args_info.watertype_flag){
+    // create waterType visitor
+    if (args_info.watertype_flag) {
       WaterTypeVisitor* waterTypeVisitor = new WaterTypeVisitor;
       compositeVisitor->addVisitor(waterTypeVisitor, 600);
     }
-  } 
-  
+  }
+
   if (args_info.basetype_flag) {
     AtomNameVisitor* atomNameVisitor = new AtomNameVisitor(info);
     compositeVisitor->addVisitor(atomNameVisitor, 550);
     // When debugging visitors, you may find this helpful:
     //    cout << compositeVisitor->toString();
   }
-  
-  //create ZconsVisitor
-  if(args_info.zconstraint_flag){
 
+  // create ZconsVisitor
+  if (args_info.zconstraint_flag) {
     ZConsVisitor* zconsVisitor = new ZConsVisitor(info);
-    
-    if(zconsVisitor->haveZconsMol()) {
+
+    if (zconsVisitor->haveZconsMol()) {
       compositeVisitor->addVisitor(zconsVisitor, 500);
     } else {
       delete zconsVisitor;
     }
   }
-  
-  //create wrapping visitor
-  
-  //if(args_info.periodicBox_flag){
+
+  // create wrapping visitor
+
+  // if(args_info.periodicBox_flag){
   //  WrappingVisitor* wrappingVisitor = new WrappingVisitor(info);
   //  compositeVisitor->addVisitor(wrappingVisitor, 400);
   //}
 
-  //create replicate visitor
-  if(args_info.repeatX_given > 0 || 
-     args_info.repeatY_given > 0 || 
-     args_info.repeatZ_given > 0) {
-    Vector3i replicateOpt(args_info.repeatX_arg, 
-                          args_info.repeatY_arg, 
+  // create replicate visitor
+  if (args_info.repeatX_given > 0 || args_info.repeatY_given > 0 ||
+      args_info.repeatZ_given > 0) {
+    Vector3i replicateOpt(args_info.repeatX_arg, args_info.repeatY_arg,
                           args_info.repeatZ_arg);
-    ReplicateVisitor* replicateVisitor = new ReplicateVisitor(info, 
-                                                              replicateOpt);
+    ReplicateVisitor* replicateVisitor =
+        new ReplicateVisitor(info, replicateOpt);
     compositeVisitor->addVisitor(replicateVisitor, 300);
   }
 
-
-  //create rotation visitor
-  if (args_info.refsele_given&& args_info.originsele_given) {
-    compositeVisitor->addVisitor(new LipidTransVisitor(info, 
-                                                       args_info.originsele_arg, 
-                                                       args_info.refsele_arg),
-                                 250); 
+  // create rotation visitor
+  if (args_info.refsele_given && args_info.originsele_given) {
+    compositeVisitor->addVisitor(
+        new LipidTransVisitor(info, args_info.originsele_arg,
+                              args_info.refsele_arg),
+        250);
   } else if (args_info.refsele_given || args_info.originsele_given) {
-    strcpy( painCave.errMsg,
-            "The --refsele and --originsele arguments should appear together.\n" );
+    strcpy(
+        painCave.errMsg,
+        "The --refsele and --originsele arguments should appear together.\n");
     painCave.isFatal = 1;
     simError();
   }
-  
-  //create xyzVisitor
+
+  // create xyzVisitor
   XYZVisitor* xyzVisitor;
 
   if (args_info.selection_given) {
@@ -203,44 +198,44 @@ int main(int argc, char* argv[]){
     xyzVisitor = new XYZVisitor(info);
   }
 
-  if(args_info.velocities_flag){
+  if (args_info.velocities_flag) {
     printVel = true;
     xyzVisitor->doVelocities(printVel);
   }
-  if(args_info.forces_flag){
+  if (args_info.forces_flag) {
     printFrc = true;
     xyzVisitor->doForces(printFrc);
   }
-  if(args_info.vectors_flag){
+  if (args_info.vectors_flag) {
     printVec = true;
     xyzVisitor->doVectors(printVec);
   }
-  if(args_info.charges_flag){
+  if (args_info.charges_flag) {
     printChrg = true;
     xyzVisitor->doCharges(printChrg);
   }
-  if(args_info.efield_flag){
+  if (args_info.efield_flag) {
     printField = true;
     xyzVisitor->doElectricFields(printField);
   }
-  if(args_info.globalID_flag){
+  if (args_info.globalID_flag) {
     printGlobalID = true;
     xyzVisitor->doGlobalIDs(printGlobalID);
   }
 
-  compositeVisitor->addVisitor(xyzVisitor, 200); 
-  
-  //create prepareVisitor
+  compositeVisitor->addVisitor(xyzVisitor, 200);
+
+  // create prepareVisitor
   PrepareVisitor* prepareVisitor = new PrepareVisitor();
-  
-  //open dump file
+
+  // open dump file
   DumpReader* dumpReader = new DumpReader(info, dumpFileName);
   int nframes = dumpReader->getNFrames();
-  
+
   ofstream xyzStream(xyzFileName.c_str());
-  
+
   SimInfo::MoleculeIterator miter;
-  Molecule::IntegrableObjectIterator  iiter;
+  Molecule::IntegrableObjectIterator iiter;
   Molecule::RigidBodyIterator rbIter;
   Molecule* mol;
   StuntDouble* sd;
@@ -250,84 +245,71 @@ int main(int argc, char* argv[]){
   Vector3d displacement;
   Mat3x3d hmat;
   Snapshot* currentSnapshot;
-       
-  for (int i = 0; i < nframes; i += args_info.frame_arg){
+
+  for (int i = 0; i < nframes; i += args_info.frame_arg) {
     dumpReader->readFrame(i);
-    
+
     if (printFrc) forceMan->calcForces();
-    
-    //wrapping the molecule
-    if(args_info.periodicBox_flag) {
-      currentSnapshot = info->getSnapshotManager()->getCurrentSnapshot();    
-      for (mol = info->beginMolecule(miter); mol != NULL; 
+
+    // wrapping the molecule
+    if (args_info.periodicBox_flag) {
+      currentSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
+      for (mol = info->beginMolecule(miter); mol != NULL;
            mol = info->nextMolecule(miter)) {
-        
         molCom = mol->getCom();
         newMolCom = molCom;
         currentSnapshot->wrapVector(newMolCom);
         displacement = newMolCom - molCom;
 
         for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
-             sd = mol->nextIntegrableObject(iiter)) {  
-
+             sd = mol->nextIntegrableObject(iiter)) {
           sd->setPos(sd->getPos() + displacement);
-          
         }
-      }    
+      }
     }
 
-    //update atoms of rigidbody
-    for (mol = info->beginMolecule(miter); mol != NULL; 
+    // update atoms of rigidbody
+    for (mol = info->beginMolecule(miter); mol != NULL;
          mol = info->nextMolecule(miter)) {
-      
-      //change the positions of atoms which belong to the rigidbodies
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+      // change the positions of atoms which belong to the rigidbodies
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL;
            rb = mol->nextRigidBody(rbIter)) {
-
         rb->updateAtoms();
         if (printVel) rb->updateAtomVel();
-
       }
     }
-    
-    //prepare visit
-    for (mol = info->beginMolecule(miter); mol != NULL; 
-         mol = info->nextMolecule(miter)) {
 
+    // prepare visit
+    for (mol = info->beginMolecule(miter); mol != NULL;
+         mol = info->nextMolecule(miter)) {
       for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
            sd = mol->nextIntegrableObject(iiter)) {
-
         sd->accept(prepareVisitor);
-
       }
     }
-    
-    //update visitor
+
+    // update visitor
     compositeVisitor->update();
 
-
-    //visit stuntdouble
-    for (mol = info->beginMolecule(miter); mol != NULL; 
+    // visit stuntdouble
+    for (mol = info->beginMolecule(miter); mol != NULL;
          mol = info->nextMolecule(miter)) {
-
       for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
            sd = mol->nextIntegrableObject(iiter)) {
-
         sd->accept(compositeVisitor);
-
       }
     }
-    
+
     xyzVisitor->writeFrame(xyzStream);
     xyzVisitor->clear();
-    
-  }//end for (int i = 0; i < nframes; i += args_info.frame_arg)
- 
+
+  }  // end for (int i = 0; i < nframes; i += args_info.frame_arg)
+
   xyzStream.close();
 
   delete forceMan;
   delete compositeVisitor;
-  delete prepareVisitor; 
+  delete prepareVisitor;
   delete dumpReader;
 
   delete info;

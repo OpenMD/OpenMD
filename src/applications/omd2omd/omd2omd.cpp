@@ -42,97 +42,93 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <iostream>
+
 #include <fstream>
+#include <iostream>
 #include <string>
 
-#include "omd2omdCmd.hpp"
+#include "brains/ForceManager.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
-#include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
 #include "io/DumpReader.hpp"
 #include "io/DumpWriter.hpp"
-#include "utils/simError.h"
-#include "utils/Constants.hpp"
 #include "math/Quaternion.hpp"
+#include "omd2omdCmd.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
+#include "utils/Constants.hpp"
+#include "utils/simError.h"
 
 using namespace OpenMD;
 
 using namespace std;
 
-void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileName, std::vector<int> nMol);
+void createMdFile(const std::string& oldMdFileName,
+                  const std::string& newMdFileName, std::vector<int> nMol);
 
-int main(int argc, char* argv[]){
-  
+int main(int argc, char* argv[]) {
   gengetopt_args_info args_info;
   string dumpFileName;
   string outFileName;
-  
-  //parse the command line option
-  if (cmdline_parser (argc, argv, &args_info) != 0) {
-    exit(1) ;
+
+  // parse the command line option
+  if (cmdline_parser(argc, argv, &args_info) != 0) {
+    exit(1);
   }
-  
-  //get the dumpfile name and meta-data file name
-  if (args_info.input_given){
+
+  // get the dumpfile name and meta-data file name
+  if (args_info.input_given) {
     dumpFileName = args_info.input_arg;
   } else {
-    strcpy( painCave.errMsg,
-            "No input file name was specified.\n" );
-    painCave.isFatal = 1;
-    simError();
-  }
-  
-  if (args_info.output_given){
-    outFileName = args_info.output_arg;
-  } else {
-    strcpy( painCave.errMsg,
-            "No output file name was specified.\n" );
+    strcpy(painCave.errMsg, "No input file name was specified.\n");
     painCave.isFatal = 1;
     simError();
   }
 
-  //convert the input angles to radians for computation
+  if (args_info.output_given) {
+    outFileName = args_info.output_arg;
+  } else {
+    strcpy(painCave.errMsg, "No output file name was specified.\n");
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  // convert the input angles to radians for computation
   double phi = args_info.rotatePhi_arg * (Constants::PI / 180.0);
   double theta = args_info.rotateTheta_arg * (Constants::PI / 180.0);
   double psi = args_info.rotatePsi_arg * (Constants::PI / 180.0);
 
   Mat3x3d rotMatrix = Mat3x3d(0.0);
-  
+
   rotMatrix.setupRotMat(phi, theta, psi);
-  
-  Vector3i repeat = Vector3i(args_info.repeatX_arg,
-                             args_info.repeatY_arg,
+
+  Vector3i repeat = Vector3i(args_info.repeatX_arg, args_info.repeatY_arg,
                              args_info.repeatZ_arg);
 
   Mat3x3d repeatD = Mat3x3d(0.0);
-  repeatD(0,0) = repeat.x();
-  repeatD(1,1) = repeat.y();
-  repeatD(2,2) = repeat.z();
+  repeatD(0, 0) = repeat.x();
+  repeatD(1, 1) = repeat.y();
+  repeatD(2, 2) = repeat.z();
 
-  
-  Vector3d translate = Vector3d(args_info.translateX_arg,
-                                args_info.translateY_arg,
-                                args_info.translateZ_arg);
+  Vector3d translate =
+      Vector3d(args_info.translateX_arg, args_info.translateY_arg,
+               args_info.translateZ_arg);
 
-  //parse md file and set up the system
+  // parse md file and set up the system
 
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(dumpFileName, false);
   Globals* simParams = oldInfo->getSimParams();
   std::vector<Component*> components = simParams->getComponents();
   std::vector<int> nMol;
-  for (vector<Component*>::iterator i = components.begin(); 
-       i !=components.end(); ++i) {
+  for (vector<Component*>::iterator i = components.begin();
+       i != components.end(); ++i) {
     int nMolOld = (*i)->getNMol();
-    int nMolNew = nMolOld * repeat.x() * repeat.y() * repeat.z();    
+    int nMolNew = nMolOld * repeat.x() * repeat.y() * repeat.z();
     nMol.push_back(nMolNew);
   }
-  
+
   createMdFile(dumpFileName, outFileName, nMol);
 
   SimCreator newCreator;
@@ -140,7 +136,7 @@ int main(int argc, char* argv[]){
 
   DumpReader* dumpReader = new DumpReader(oldInfo, dumpFileName);
   int nframes = dumpReader->getNFrames();
-  
+
   DumpWriter* writer = new DumpWriter(newInfo, outFileName);
   if (writer == NULL) {
     sprintf(painCave.errMsg, "error in creating DumpWriter");
@@ -149,7 +145,7 @@ int main(int argc, char* argv[]){
   }
 
   SimInfo::MoleculeIterator miter;
-  Molecule::IntegrableObjectIterator  iiter;
+  Molecule::IntegrableObjectIterator iiter;
   Molecule::RigidBodyIterator rbIter;
   Molecule* mol;
   StuntDouble* sd;
@@ -168,147 +164,133 @@ int main(int argc, char* argv[]){
   Thermo thermo(oldInfo);
   AtomType* atype;
 
-  
-  for (int i = 0; i < nframes; i++){
+  for (int i = 0; i < nframes; i++) {
     cerr << "frame = " << i << "\n";
-    dumpReader->readFrame(i);        
+    dumpReader->readFrame(i);
     oldSnap = oldInfo->getSnapshotManager()->getCurrentSnapshot();
     newSnap = newInfo->getSnapshotManager()->getCurrentSnapshot();
 
-    newSnap->setID( oldSnap->getID() );
-    newSnap->setTime( oldSnap->getTime() );
-    
+    newSnap->setID(oldSnap->getID());
+    newSnap->setTime(oldSnap->getTime());
+
     oldHmat = oldSnap->getHmat();
-    rotHmat = rotMatrix*oldHmat;
-    newHmat = repeatD*rotHmat;
+    rotHmat = rotMatrix * oldHmat;
+    newHmat = repeatD * rotHmat;
     newSnap->setHmat(newHmat);
 
-    newSnap->setThermostat( oldSnap->getThermostat() );
-    newSnap->setBarostat( oldSnap->getBarostat() );
+    newSnap->setThermostat(oldSnap->getThermostat());
+    newSnap->setBarostat(oldSnap->getBarostat());
 
     COM = thermo.getCom();
 
     int newIndex = 0;
-    for (mol = oldInfo->beginMolecule(miter); mol != NULL; 
+    for (mol = oldInfo->beginMolecule(miter); mol != NULL;
          mol = oldInfo->nextMolecule(miter)) {
-
-      
       if (args_info.repairMolecules_arg == 1) {
-	molCOM = mol->getCom();
+        molCOM = mol->getCom();
       }
 
-      
       for (int ii = 0; ii < repeat.x(); ii++) {
         for (int jj = 0; jj < repeat.y(); jj++) {
           for (int kk = 0; kk < repeat.z(); kk++) {
-
             Vector3d trans = Vector3d(ii, jj, kk);
             for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
                  sd = mol->nextIntegrableObject(iiter)) {
-	      if (args_info.repairMolecules_arg == 1) {
-		relPos = sd->getPos() - molCOM;
-		oldPos = molCOM - COM + translate;
-		oldSnap->wrapVector(relPos);
-		oldSnap->wrapVector(oldPos);
-		oldPos += relPos;
-	      } else {
-		oldPos = sd->getPos() - COM + translate;
-		oldSnap->wrapVector(oldPos);			      
-	      }
+              if (args_info.repairMolecules_arg == 1) {
+                relPos = sd->getPos() - molCOM;
+                oldPos = molCOM - COM + translate;
+                oldSnap->wrapVector(relPos);
+                oldSnap->wrapVector(oldPos);
+                oldPos += relPos;
+              } else {
+                oldPos = sd->getPos() - COM + translate;
+                oldSnap->wrapVector(oldPos);
+              }
 
-	      newPos = rotMatrix*oldPos + trans * oldHmat;
-	      sdNew = newInfo->getIOIndexToIntegrableObject(newIndex);
-              sdNew->setPos( newPos );
-	      sdNew->setVel( rotMatrix*sd->getVel() );
-	      
+              newPos = rotMatrix * oldPos + trans * oldHmat;
+              sdNew = newInfo->getIOIndexToIntegrableObject(newIndex);
+              sdNew->setPos(newPos);
+              sdNew->setVel(rotMatrix * sd->getVel());
+
               if (sd->isDirectional()) {
+                Mat3x3d bodyRotMat = sd->getA();
+                bodyRotMat = bodyRotMat * rotMatrix.inverse();
+                sdNew->setA(bodyRotMat);
 
-		Mat3x3d bodyRotMat = sd->getA();
-		bodyRotMat = bodyRotMat * rotMatrix.inverse();
-		sdNew->setA( bodyRotMat );
-		
-		sdNew->setJ( rotMatrix * sd->getJ() );
+                sdNew->setJ(rotMatrix * sd->getJ());
               }
 
               if (sd->isAtom()) {
                 atype = static_cast<Atom*>(sd)->getAtomType();
                 FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-                if ( fqa.isFluctuatingCharge() ) {
+                if (fqa.isFluctuatingCharge()) {
                   RealType charge = sd->getFlucQPos();
                   sdNew->setFlucQPos(charge);
                   RealType cv = sd->getFlucQVel();
-                  sdNew->setFlucQVel(cv);                 
+                  sdNew->setFlucQVel(cv);
                 }
               }
-	      
+
               newIndex++;
             }
-	    
           }
         }
       }
-      
     }
-  
-    //update atoms of rigidbody
-    for (mol = newInfo->beginMolecule(miter); mol != NULL; 
+
+    // update atoms of rigidbody
+    for (mol = newInfo->beginMolecule(miter); mol != NULL;
          mol = newInfo->nextMolecule(miter)) {
-      
-      //change the positions of atoms which belong to the rigidbodies
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+      // change the positions of atoms which belong to the rigidbodies
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL;
            rb = mol->nextRigidBody(rbIter)) {
-	
-	
         rb->updateAtoms();
         rb->updateAtomVel();
-	
       }
     }
 
-    writer->writeDump();    
+    writer->writeDump();
   }
   // deleting the writer will put the closing at the end of the dump file.
   delete writer;
   delete oldInfo;
 }
 
-void createMdFile(const std::string&oldMdFileName, 
-                  const std::string&newMdFileName, 
-                  std::vector<int> nMol) {
+void createMdFile(const std::string& oldMdFileName,
+                  const std::string& newMdFileName, std::vector<int> nMol) {
   ifstream oldMdFile;
   ofstream newMdFile;
   const int MAXLEN = 65535;
   char buffer[MAXLEN];
-  
-  //create new .omd file based on old .omd file
+
+  // create new .omd file based on old .omd file
 
   oldMdFile.open(oldMdFileName.c_str());
   newMdFile.open(newMdFileName.c_str());
-  
+
   oldMdFile.getline(buffer, MAXLEN);
- 
+
   std::size_t i = 0;
   while (!oldMdFile.eof()) {
-    
-    //correct molecule number
+    // correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
-      if (i<nMol.size()){
+      if (i < nMol.size()) {
         sprintf(buffer, "\tnMol = %i;", nMol.at(i));
         newMdFile << buffer << std::endl;
         i++;
       }
     } else
       newMdFile << buffer << std::endl;
-    
+
     oldMdFile.getline(buffer, MAXLEN);
   }
-  
+
   oldMdFile.close();
   newMdFile.close();
 
-
   if (i != nMol.size()) {
-    sprintf(painCave.errMsg, "Couldn't replace the correct number of nMol\n"
+    sprintf(painCave.errMsg,
+            "Couldn't replace the correct number of nMol\n"
             "\tstatements in component blocks.");
     painCave.isFatal = 1;
     simError();

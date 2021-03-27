@@ -42,58 +42,52 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
 
 #include "flucq/FluctuatingChargeParameters.hpp"
 
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+
 namespace OpenMD {
-  FluctuatingChargeParameters::FluctuatingChargeParameters() { 
-    DefineOptionalParameterWithDefaultValue(Propagator, "propagator", "Damped");
-    DefineOptionalParameterWithDefaultValue(DoInitialOptimization,
-                                            "doInitialOptimization", true);
-    DefineOptionalParameterWithDefaultValue(ChargeOptimizationMethod, "method", "CG");    
-    DefineOptionalParameterWithDefaultValue(Friction, "friction", 1600.0);    
-    DefineOptionalParameterWithDefaultValue(Tolerance, "tolerance", 1.0e-5);    
-    DefineOptionalParameterWithDefaultValue(MaxIterations, "maxIterations",
-                                            100);    
-    DefineOptionalParameterWithDefaultValue(TargetTemp, "targetTemp", 1.0e-6);
-    DefineOptionalParameterWithDefaultValue(TauThermostat, "tauThermostat",
-                                            10.0);
-    DefineOptionalParameterWithDefaultValue(DragCoefficient, "dragCoefficient",
-                                            0.01);
-    DefineOptionalParameterWithDefaultValue(ConstrainRegions,
-                                            "constrainRegions", false);
-    DefineOptionalParameterWithDefaultValue(InitialStepSize, "initialStepSize",
-                                            0.1);
-  }
-  
-  void FluctuatingChargeParameters::validate() {
-    CheckParameter(Propagator,
-                   isEqualIgnoreCase("Damped") ||
-                   isEqualIgnoreCase("NVT") ||
-                   isEqualIgnoreCase("Langevin") ||
-                   isEqualIgnoreCase("Minimizer") ||
-                   isEqualIgnoreCase("NVE") ||
-                   isEqualIgnoreCase("Exact")
-                   );
-    CheckParameter(Friction, isNonNegative());    
-    CheckParameter(Tolerance, isPositive());    
-    CheckParameter(ChargeOptimizationMethod, 
-                    isEqualIgnoreCase("SD")||
-                    isEqualIgnoreCase("CG")||
-                    isEqualIgnoreCase("BFGS")
-                    );    
-    CheckParameter(MaxIterations, isPositive());    
-    CheckParameter(TargetTemp,  isNonNegative());
-    CheckParameter(TauThermostat, isPositive()); 
-    CheckParameter(DragCoefficient, isPositive()); 
-    RealType zero = 0.0;
-    RealType one = 1.0;
-    CheckParameter(InitialStepSize,
-                   isGreaterThan(zero) && isLessThanOrEqualTo(one));
-  }
-  
+FluctuatingChargeParameters::FluctuatingChargeParameters() {
+  DefineOptionalParameterWithDefaultValue(Propagator, "propagator", "Damped");
+  DefineOptionalParameterWithDefaultValue(DoInitialOptimization,
+                                          "doInitialOptimization", true);
+  DefineOptionalParameterWithDefaultValue(ChargeOptimizationMethod, "method",
+                                          "CG");
+  DefineOptionalParameterWithDefaultValue(Friction, "friction", 1600.0);
+  DefineOptionalParameterWithDefaultValue(Tolerance, "tolerance", 1.0e-5);
+  DefineOptionalParameterWithDefaultValue(MaxIterations, "maxIterations", 100);
+  DefineOptionalParameterWithDefaultValue(TargetTemp, "targetTemp", 1.0e-6);
+  DefineOptionalParameterWithDefaultValue(TauThermostat, "tauThermostat", 10.0);
+  DefineOptionalParameterWithDefaultValue(DragCoefficient, "dragCoefficient",
+                                          0.01);
+  DefineOptionalParameterWithDefaultValue(ConstrainRegions, "constrainRegions",
+                                          false);
+  DefineOptionalParameterWithDefaultValue(InitialStepSize, "initialStepSize",
+                                          0.1);
 }
+
+void FluctuatingChargeParameters::validate() {
+  CheckParameter(Propagator,
+                 isEqualIgnoreCase("Damped") || isEqualIgnoreCase("NVT") ||
+                     isEqualIgnoreCase("Langevin") ||
+                     isEqualIgnoreCase("Minimizer") ||
+                     isEqualIgnoreCase("NVE") || isEqualIgnoreCase("Exact"));
+  CheckParameter(Friction, isNonNegative());
+  CheckParameter(Tolerance, isPositive());
+  CheckParameter(ChargeOptimizationMethod, isEqualIgnoreCase("SD") ||
+                                               isEqualIgnoreCase("CG") ||
+                                               isEqualIgnoreCase("BFGS"));
+  CheckParameter(MaxIterations, isPositive());
+  CheckParameter(TargetTemp, isNonNegative());
+  CheckParameter(TauThermostat, isPositive());
+  CheckParameter(DragCoefficient, isPositive());
+  RealType zero = 0.0;
+  RealType one = 1.0;
+  CheckParameter(InitialStepSize,
+                 isGreaterThan(zero) && isLessThanOrEqualTo(one));
+}
+
+}  // namespace OpenMD

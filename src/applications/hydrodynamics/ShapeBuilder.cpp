@@ -43,95 +43,94 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 #include "applications/hydrodynamics/ShapeBuilder.hpp"
-#include "hydrodynamics/Sphere.hpp"
-#include "hydrodynamics/Ellipsoid.hpp"
+
 #include "applications/hydrodynamics/CompositeShape.hpp"
-#include "types/LennardJonesAdapter.hpp"
+#include "hydrodynamics/Ellipsoid.hpp"
+#include "hydrodynamics/Sphere.hpp"
 #include "types/GayBerneAdapter.hpp"
+#include "types/LennardJonesAdapter.hpp"
 
 namespace OpenMD {
 
-  Shape* ShapeBuilder::createShape(StuntDouble* sd) {
-    Shape* currShape = NULL;
-    if (sd->isDirectionalAtom()) {
-      currShape = internalCreateShape(static_cast<DirectionalAtom*>(sd));
-    } else if (sd->isAtom()) {
-      currShape = internalCreateShape(static_cast<Atom*>(sd));
-    } else if (sd->isRigidBody()) {
-      currShape = internalCreateShape(static_cast<RigidBody*>(sd));
-    }
-    return currShape;
+Shape* ShapeBuilder::createShape(StuntDouble* sd) {
+  Shape* currShape = NULL;
+  if (sd->isDirectionalAtom()) {
+    currShape = internalCreateShape(static_cast<DirectionalAtom*>(sd));
+  } else if (sd->isAtom()) {
+    currShape = internalCreateShape(static_cast<Atom*>(sd));
+  } else if (sd->isRigidBody()) {
+    currShape = internalCreateShape(static_cast<RigidBody*>(sd));
   }
-
-  Shape* ShapeBuilder::internalCreateShape(Atom* atom) {
-    AtomType* atomType = atom->getAtomType();
-    Shape* currShape = NULL;
-    LennardJonesAdapter lja = LennardJonesAdapter(atomType);
-    if (lja.isLennardJones()){
-      currShape = new Sphere(atom->getPos(), lja.getSigma()/2.0);
-    } else {
-      int obanum(0);
-      std::vector<AtomType*> atChain = atomType->allYourBase();
-      std::vector<AtomType*>::iterator i;
-      for (i = atChain.begin(); i != atChain.end(); ++i) {
-        obanum = etab.GetAtomicNum((*i)->getName().c_str());
-        if (obanum != 0) {
-          currShape = new Sphere(atom->getPos(), etab.GetVdwRad(obanum));
-          break;
-        }
-      }
-      if (obanum == 0) {
-        sprintf( painCave.errMsg,
-                 "Could not find atom type in default element.txt\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
-      }
-    }
-    return currShape;
-  }
-
-  Shape* ShapeBuilder::internalCreateShape(DirectionalAtom* datom) {
-    AtomType* atomType = datom->getAtomType();
-    Shape* currShape = NULL;
-    LennardJonesAdapter lja = LennardJonesAdapter(atomType);
-    GayBerneAdapter gba = GayBerneAdapter(atomType);
-    if (gba.isGayBerne()) {
-      currShape = new Ellipsoid(datom->getPos(), gba.getL()/2.0,
-                                gba.getD()/2.0, datom->getA());
-    } else if (lja.isLennardJones()) {
-      currShape = new Sphere(datom->getPos(), lja.getSigma()/2.0);
-    } else {
-      int obanum = etab.GetAtomicNum((datom->getType()).c_str());
-      if (obanum != 0) {
-        currShape = new Sphere(datom->getPos(), etab.GetVdwRad(obanum));
-      } else {
-        sprintf( painCave.errMsg,
-                 "Could not find atom type in default element.txt\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
-      }
-    }
-    return currShape;
-  }
-
-  Shape* ShapeBuilder::internalCreateShape(RigidBody* rb) {
-
-    std::vector<Atom*>::iterator ai;
-    CompositeShape* compositeShape = new CompositeShape;
-    Atom* atom;
-    for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
-      Shape* currShape = NULL;
-      if (atom->isDirectionalAtom()){
-        currShape = internalCreateShape(static_cast<DirectionalAtom*>(atom));
-      }else if (atom->isAtom()){
-        currShape =  internalCreateShape(static_cast<Atom*>(atom));
-      }
-      if (currShape != NULL)
-        compositeShape->addShape(currShape);
-    }
-
-    return compositeShape;
-  }
+  return currShape;
 }
+
+Shape* ShapeBuilder::internalCreateShape(Atom* atom) {
+  AtomType* atomType = atom->getAtomType();
+  Shape* currShape = NULL;
+  LennardJonesAdapter lja = LennardJonesAdapter(atomType);
+  if (lja.isLennardJones()) {
+    currShape = new Sphere(atom->getPos(), lja.getSigma() / 2.0);
+  } else {
+    int obanum(0);
+    std::vector<AtomType*> atChain = atomType->allYourBase();
+    std::vector<AtomType*>::iterator i;
+    for (i = atChain.begin(); i != atChain.end(); ++i) {
+      obanum = etab.GetAtomicNum((*i)->getName().c_str());
+      if (obanum != 0) {
+        currShape = new Sphere(atom->getPos(), etab.GetVdwRad(obanum));
+        break;
+      }
+    }
+    if (obanum == 0) {
+      sprintf(painCave.errMsg,
+              "Could not find atom type in default element.txt\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+  }
+  return currShape;
+}
+
+Shape* ShapeBuilder::internalCreateShape(DirectionalAtom* datom) {
+  AtomType* atomType = datom->getAtomType();
+  Shape* currShape = NULL;
+  LennardJonesAdapter lja = LennardJonesAdapter(atomType);
+  GayBerneAdapter gba = GayBerneAdapter(atomType);
+  if (gba.isGayBerne()) {
+    currShape = new Ellipsoid(datom->getPos(), gba.getL() / 2.0,
+                              gba.getD() / 2.0, datom->getA());
+  } else if (lja.isLennardJones()) {
+    currShape = new Sphere(datom->getPos(), lja.getSigma() / 2.0);
+  } else {
+    int obanum = etab.GetAtomicNum((datom->getType()).c_str());
+    if (obanum != 0) {
+      currShape = new Sphere(datom->getPos(), etab.GetVdwRad(obanum));
+    } else {
+      sprintf(painCave.errMsg,
+              "Could not find atom type in default element.txt\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+  }
+  return currShape;
+}
+
+Shape* ShapeBuilder::internalCreateShape(RigidBody* rb) {
+  std::vector<Atom*>::iterator ai;
+  CompositeShape* compositeShape = new CompositeShape;
+  Atom* atom;
+  for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
+    Shape* currShape = NULL;
+    if (atom->isDirectionalAtom()) {
+      currShape = internalCreateShape(static_cast<DirectionalAtom*>(atom));
+    } else if (atom->isAtom()) {
+      currShape = internalCreateShape(static_cast<Atom*>(atom));
+    }
+    if (currShape != NULL) compositeShape->addShape(currShape);
+  }
+
+  return compositeShape;
+}
+}  // namespace OpenMD

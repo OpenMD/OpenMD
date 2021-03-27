@@ -46,40 +46,26 @@
 
 namespace OpenMD {
 
-  NotEmptyConstraint isNotEmpty() {
-    return NotEmptyConstraint();
-  }
+NotEmptyConstraint isNotEmpty() { return NotEmptyConstraint(); }
 
-  ZeroConstraint isZero() {
-    return ZeroConstraint();
-  }
+ZeroConstraint isZero() { return ZeroConstraint(); }
 
-  ParamConstraintFacade<NonZeroConstraint> isNonZero() {
-    return ParamConstraintFacade<NonZeroConstraint>();
-  }
-
-  PositiveConstraint isPositive() {
-    return PositiveConstraint();
-  }
-
-  NonPositiveConstraint isNonPositive() {
-    return NonPositiveConstraint();
-  }
-
-  NegativeConstraint isNegative() {
-    return NegativeConstraint();
-  }
-
-  NonNegativeConstraint isNonNegative() {
-    return NonNegativeConstraint();
-  }
-
-  EqualIgnoreCaseConstraint isEqualIgnoreCase(std::string str) {
-    return EqualIgnoreCaseConstraint(str);
-  }
-
-  EvenConstraint isEven() {
-    return EvenConstraint();
-  }
-
+ParamConstraintFacade<NonZeroConstraint> isNonZero() {
+  return ParamConstraintFacade<NonZeroConstraint>();
 }
+
+PositiveConstraint isPositive() { return PositiveConstraint(); }
+
+NonPositiveConstraint isNonPositive() { return NonPositiveConstraint(); }
+
+NegativeConstraint isNegative() { return NegativeConstraint(); }
+
+NonNegativeConstraint isNonNegative() { return NonNegativeConstraint(); }
+
+EqualIgnoreCaseConstraint isEqualIgnoreCase(std::string str) {
+  return EqualIgnoreCaseConstraint(str);
+}
+
+EvenConstraint isEven() { return EvenConstraint(); }
+
+}  // namespace OpenMD

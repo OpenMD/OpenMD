@@ -43,47 +43,47 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "config.h"
-#include <cmath> 
-#include <fstream>
-#include <algorithm>
-
 #include "types/CharmmTorsionType.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <fstream>
+
+#include "config.h"
 #include "math/ChebyshevT.hpp"
 #include "math/ChebyshevU.hpp"
 
-
 namespace OpenMD {
 
-  CharmmTorsionType::CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters) {
-    std::vector<CharmmTorsionParameter>::iterator i;
-    i = std::max_element(parameters.begin(), parameters.end(), 
-			 LessThanPeriodicityFunctor());
-    if (i != parameters.end()) {
-      int maxPower = i->n;
-      ChebyshevT T(maxPower);
-      ChebyshevU U(maxPower);
-      
-      // convert parameters of charmm type torsion into 
-      // PolynomialTorsion's parameters
-      DoublePolynomial finalPolynomial;
-      for (i = parameters.begin(); i != parameters.end(); ++i) {
-	DoublePolynomial cosTerm = T.getChebyshevPolynomial(i->n);
-	cosTerm.operator*=(cos(i->delta) * i->kchi * 0.5);
+CharmmTorsionType::CharmmTorsionType(
+    std::vector<CharmmTorsionParameter>& parameters) {
+  std::vector<CharmmTorsionParameter>::iterator i;
+  i = std::max_element(parameters.begin(), parameters.end(),
+                       LessThanPeriodicityFunctor());
+  if (i != parameters.end()) {
+    int maxPower = i->n;
+    ChebyshevT T(maxPower);
+    ChebyshevU U(maxPower);
 
-	DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n);
-	sinTerm *= -sin(i->delta) * i->kchi * 0.5;
+    // convert parameters of charmm type torsion into
+    // PolynomialTorsion's parameters
+    DoublePolynomial finalPolynomial;
+    for (i = parameters.begin(); i != parameters.end(); ++i) {
+      DoublePolynomial cosTerm = T.getChebyshevPolynomial(i->n);
+      cosTerm.operator*=(cos(i->delta) * i->kchi * 0.5);
 
-	finalPolynomial += cosTerm + sinTerm;
+      DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n);
+      sinTerm *= -sin(i->delta) * i->kchi * 0.5;
 
-	finalPolynomial += (i->kchi * 0.5);
-      }
-      this->setPolynomial(finalPolynomial);  
+      finalPolynomial += cosTerm + sinTerm;
 
-      /*std::ofstream myfile;
-      myfile.open("MyParameters", std::ios::app);
-      myfile << "The Polynomial contains below terms:" << std::endl;*/    
-      
+      finalPolynomial += (i->kchi * 0.5);
     }
+    this->setPolynomial(finalPolynomial);
+
+    /*std::ofstream myfile;
+    myfile.open("MyParameters", std::ios::app);
+    myfile << "The Polynomial contains below terms:" << std::endl;*/
   }
-} //end namespace OpenMD
+}
+}  // end namespace OpenMD

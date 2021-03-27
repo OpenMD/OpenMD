@@ -5,56 +5,44 @@
  * $Id$
  */
 #include "antlr/BitSet.hpp"
+
 #include <string>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-BitSet::BitSet(unsigned int nbits)
-: storage(nbits)
-{
-	for (unsigned int i = 0; i < nbits ; i++ )
-		storage[i] = false;
+BitSet::BitSet(unsigned int nbits) : storage(nbits) {
+  for (unsigned int i = 0; i < nbits; i++) storage[i] = false;
 }
 
-BitSet::BitSet( const unsigned long* bits_, unsigned int nlongs )
-: storage(nlongs*32)
-{
-	for ( unsigned int i = 0 ; i < (nlongs * 32); i++)
-		storage[i] = (bits_[i>>5] & (1UL << (i&31))) ? true : false;
+BitSet::BitSet(const unsigned long* bits_, unsigned int nlongs)
+    : storage(nlongs * 32) {
+  for (unsigned int i = 0; i < (nlongs * 32); i++)
+    storage[i] = (bits_[i >> 5] & (1UL << (i & 31))) ? true : false;
 }
 
-BitSet::~BitSet()
-{
+BitSet::~BitSet() {}
+
+void BitSet::add(unsigned int el) {
+  if (el >= storage.size()) storage.resize(el + 1, false);
+
+  storage[el] = true;
 }
 
-void BitSet::add(unsigned int el)
-{
-	if( el >= storage.size() )
-		storage.resize( el+1, false );
+bool BitSet::member(unsigned int el) const {
+  if (el >= storage.size()) return false;
 
-	storage[el] = true;
+  return storage[el];
 }
 
-bool BitSet::member(unsigned int el) const
-{
-	if ( el >= storage.size())
-		return false;
+ANTLR_USE_NAMESPACE(std) vector<unsigned int> BitSet::toArray() const {
+  ANTLR_USE_NAMESPACE(std) vector<unsigned int> elems;
+  for (unsigned int i = 0; i < storage.size(); i++) {
+    if (storage[i]) elems.push_back(i);
+  }
 
-	return storage[el];
-}
-
-ANTLR_USE_NAMESPACE(std)vector<unsigned int> BitSet::toArray() const
-{
-	ANTLR_USE_NAMESPACE(std)vector<unsigned int> elems;
-	for (unsigned int i = 0; i < storage.size(); i++)
-	{
-		if (storage[i])
-			elems.push_back(i);
-	}
-
-	return elems;
+  return elems;
 }
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE

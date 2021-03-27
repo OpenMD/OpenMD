@@ -42,162 +42,162 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
+#include "integrators/NPAT.hpp"
+
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
 #include "integrators/IntegratorCreator.hpp"
-#include "integrators/NPAT.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
 
-  NPAT::NPAT(SimInfo* info) : NPT(info) {
-    Globals* simParams = info_->getSimParams();
+NPAT::NPAT(SimInfo* info) : NPT(info) {
+  Globals* simParams = info_->getSimParams();
 
-    // Default value of privilegedAxis is "z"
-    if (simParams->getPrivilegedAxis() == "x")
-      axis_ = 0;
-    else if (simParams->getPrivilegedAxis() == "y")
-      axis_ = 1;
-    else if (simParams->getPrivilegedAxis() == "z")
-      axis_ = 2;
-    
-  }
-
-  
-  void NPAT::evolveEtaA() {
-
-    eta(axis_,axis_) += dt2 *  instaVol * (press(axis_, axis_) - targetPressure/Constants::pressureConvert) / (NkBT*tb2);
-    oldEta_ = eta;  
-  }
-
-  void NPAT::evolveEtaB() {
-
-    prevEta_ = eta;
-    eta(axis_,axis_) = oldEta_(axis_, axis_) + dt2 *  instaVol *
-	    (press(axis_, axis_) - targetPressure/Constants::pressureConvert) / (NkBT*tb2);
-  }
-
-  void NPAT::calcVelScale(){
-
-    for (int i = 0; i < 3; i++ ) {
-      for (int j = 0; j < 3; j++ ) {
-	vScale_(i, j) = eta(i, j);
-
-	if (i == j) {
-	  vScale_(i, j) += thermostat.first;
-	}
-      }
-    }
-  }
-
-  void NPAT::getVelScaleA(Vector3d& sc, const Vector3d& vel){
-    sc = vScale_ * vel;
-  }
-
-  void NPAT::getVelScaleB(Vector3d& sc, int index ) {
-    sc = vScale_ * oldVel[index];
-  }
-
-  void NPAT::getPosScale(const Vector3d& pos, const Vector3d& COM, int index, Vector3d& sc) {
-
-    /**@todo */
-    Vector3d rj = (oldPos[index] + pos)/(RealType)2.0 -COM;
-    sc = eta * rj;
-  }
-
-  void NPAT::scaleSimBox(){
-    Mat3x3d scaleMat;
-
-    for(int i=0; i<3; i++){
-      for(int j=0; j<3; j++){
-	      scaleMat(i, j) = 0.0;
-	      if(i==j) {
-	        scaleMat(i, j) = 1.0;
-	      }
-      }
-    }
-    
-    scaleMat(axis_, axis_) = exp(dt*eta(axis_, axis_));
-    Mat3x3d hmat = snap->getHmat();
-    hmat = hmat *scaleMat;
-    snap->setHmat(hmat);
-  }
-
-  bool NPAT::etaConverged() {
-    int i;
-    RealType diffEta, sumEta;
-
-    sumEta = 0;
-    for(i = 0; i < 3; i++) {
-      sumEta += pow(prevEta_(i, i) - eta(i, i), 2);
-    }
-    
-    diffEta = sqrt( sumEta / 3.0 );
-
-    return ( diffEta <= etaTolerance );
-  }
-
-  RealType NPAT::calcConservedQuantity(){
-
-    thermostat = snap->getThermostat();
-    loadEta();
-    
-    // We need NkBT a lot, so just set it here: This is the RAW number
-    // of integrableObjects, so no subtraction or addition of constraints or
-    // orientational degrees of freedom:
-    NkBT = info_->getNGlobalIntegrableObjects()*Constants::kB *targetTemp;
-
-    // fkBT is used because the thermostat operates on more degrees of freedom
-    // than the barostat (when there are particles with orientational degrees
-    // of freedom).  
-    fkBT = info_->getNdf()*Constants::kB *targetTemp;    
-    
-    RealType conservedQuantity;
-    RealType totalEnergy;
-    RealType thermostat_kinetic;
-    RealType thermostat_potential;
-    RealType barostat_kinetic;
-    RealType barostat_potential;
-    RealType trEta;
-
-    totalEnergy = thermo.getTotalEnergy();
-
-    thermostat_kinetic = fkBT * tt2 * thermostat.first * 
-      thermostat.first /(2.0 * Constants::energyConvert);
-
-    thermostat_potential = fkBT* thermostat.second / Constants::energyConvert;
-
-    SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
-    trEta = tmp.trace();
-    
-    barostat_kinetic = NkBT * tb2 * trEta /(2.0 * Constants::energyConvert);
-
-    barostat_potential = (targetPressure * thermo.getVolume() / Constants::pressureConvert) /Constants::energyConvert;
-
-    conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
-      barostat_kinetic + barostat_potential;
-
-    return conservedQuantity;
-
-  }
-
-  void NPAT::loadEta() {
-    eta= snap->getBarostat();
-
-    //if (!eta.isDiagonal()) {
-    //    sprintf( painCave.errMsg,
-    //             "NPAT error: the diagonal elements of eta matrix are not the same or etaMat is not a diagonal matrix");
-    //    painCave.isFatal = 1;
-    //    simError();
-    //}
-  }
-
-  void NPAT::saveEta() {
-    snap->setBarostat(eta);
-  }
-
+  // Default value of privilegedAxis is "z"
+  if (simParams->getPrivilegedAxis() == "x")
+    axis_ = 0;
+  else if (simParams->getPrivilegedAxis() == "y")
+    axis_ = 1;
+  else if (simParams->getPrivilegedAxis() == "z")
+    axis_ = 2;
 }
 
+void NPAT::evolveEtaA() {
+  eta(axis_, axis_) +=
+      dt2 * instaVol *
+      (press(axis_, axis_) - targetPressure / Constants::pressureConvert) /
+      (NkBT * tb2);
+  oldEta_ = eta;
+}
+
+void NPAT::evolveEtaB() {
+  prevEta_ = eta;
+  eta(axis_, axis_) =
+      oldEta_(axis_, axis_) +
+      dt2 * instaVol *
+          (press(axis_, axis_) - targetPressure / Constants::pressureConvert) /
+          (NkBT * tb2);
+}
+
+void NPAT::calcVelScale() {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      vScale_(i, j) = eta(i, j);
+
+      if (i == j) {
+        vScale_(i, j) += thermostat.first;
+      }
+    }
+  }
+}
+
+void NPAT::getVelScaleA(Vector3d& sc, const Vector3d& vel) {
+  sc = vScale_ * vel;
+}
+
+void NPAT::getVelScaleB(Vector3d& sc, int index) {
+  sc = vScale_ * oldVel[index];
+}
+
+void NPAT::getPosScale(const Vector3d& pos, const Vector3d& COM, int index,
+                       Vector3d& sc) {
+  /**@todo */
+  Vector3d rj = (oldPos[index] + pos) / (RealType)2.0 - COM;
+  sc = eta * rj;
+}
+
+void NPAT::scaleSimBox() {
+  Mat3x3d scaleMat;
+
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      scaleMat(i, j) = 0.0;
+      if (i == j) {
+        scaleMat(i, j) = 1.0;
+      }
+    }
+  }
+
+  scaleMat(axis_, axis_) = exp(dt * eta(axis_, axis_));
+  Mat3x3d hmat = snap->getHmat();
+  hmat = hmat * scaleMat;
+  snap->setHmat(hmat);
+}
+
+bool NPAT::etaConverged() {
+  int i;
+  RealType diffEta, sumEta;
+
+  sumEta = 0;
+  for (i = 0; i < 3; i++) {
+    sumEta += pow(prevEta_(i, i) - eta(i, i), 2);
+  }
+
+  diffEta = sqrt(sumEta / 3.0);
+
+  return (diffEta <= etaTolerance);
+}
+
+RealType NPAT::calcConservedQuantity() {
+  thermostat = snap->getThermostat();
+  loadEta();
+
+  // We need NkBT a lot, so just set it here: This is the RAW number
+  // of integrableObjects, so no subtraction or addition of constraints or
+  // orientational degrees of freedom:
+  NkBT = info_->getNGlobalIntegrableObjects() * Constants::kB * targetTemp;
+
+  // fkBT is used because the thermostat operates on more degrees of freedom
+  // than the barostat (when there are particles with orientational degrees
+  // of freedom).
+  fkBT = info_->getNdf() * Constants::kB * targetTemp;
+
+  RealType conservedQuantity;
+  RealType totalEnergy;
+  RealType thermostat_kinetic;
+  RealType thermostat_potential;
+  RealType barostat_kinetic;
+  RealType barostat_potential;
+  RealType trEta;
+
+  totalEnergy = thermo.getTotalEnergy();
+
+  thermostat_kinetic = fkBT * tt2 * thermostat.first * thermostat.first /
+                       (2.0 * Constants::energyConvert);
+
+  thermostat_potential = fkBT * thermostat.second / Constants::energyConvert;
+
+  SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
+  trEta = tmp.trace();
+
+  barostat_kinetic = NkBT * tb2 * trEta / (2.0 * Constants::energyConvert);
+
+  barostat_potential =
+      (targetPressure * thermo.getVolume() / Constants::pressureConvert) /
+      Constants::energyConvert;
+
+  conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
+                      barostat_kinetic + barostat_potential;
+
+  return conservedQuantity;
+}
+
+void NPAT::loadEta() {
+  eta = snap->getBarostat();
+
+  // if (!eta.isDiagonal()) {
+  //    sprintf( painCave.errMsg,
+  //             "NPAT error: the diagonal elements of eta matrix are not the
+  //             same or etaMat is not a diagonal matrix");
+  //    painCave.isFatal = 1;
+  //    simError();
+  //}
+}
+
+void NPAT::saveEta() { snap->setBarostat(eta); }
+
+}  // namespace OpenMD

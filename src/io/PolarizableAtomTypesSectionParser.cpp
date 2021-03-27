@@ -42,49 +42,49 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "io/PolarizableAtomTypesSectionParser.hpp"
-#include "types/PolarizableAdapter.hpp"
+
 #include "brains/ForceField.hpp"
+#include "types/PolarizableAdapter.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 
-  PolarizableAtomTypesSectionParser::PolarizableAtomTypesSectionParser(ForceFieldOptions& options) : options_(options) {
-    setSectionName("PolarizableAtomTypes");
-  }
+PolarizableAtomTypesSectionParser::PolarizableAtomTypesSectionParser(
+    ForceFieldOptions& options)
+    : options_(options) {
+  setSectionName("PolarizableAtomTypes");
+}
 
-  void PolarizableAtomTypesSectionParser::parseLine(ForceField& ff,
-                                                    const std::string& line, 
-                                                    int lineNo){
-    StringTokenizer tokenizer(line);
-    int nTokens = tokenizer.countTokens();    
-    
-    if (nTokens < 2)  {
-      sprintf(painCave.errMsg, "PolarizableAtomTypesSectionParser Error: "
-              "Not enough tokens at line %d\n",
-	      lineNo);
+void PolarizableAtomTypesSectionParser::parseLine(ForceField& ff,
+                                                  const std::string& line,
+                                                  int lineNo) {
+  StringTokenizer tokenizer(line);
+  int nTokens = tokenizer.countTokens();
+
+  if (nTokens < 2) {
+    sprintf(painCave.errMsg,
+            "PolarizableAtomTypesSectionParser Error: "
+            "Not enough tokens at line %d\n",
+            lineNo);
+    painCave.isFatal = 1;
+    simError();
+  } else {
+    std::string atomTypeName = tokenizer.nextToken();
+
+    AtomType* atomType = ff.getAtomType(atomTypeName);
+    if (atomType != NULL) {
+      PolarizableAdapter fca = PolarizableAdapter(atomType);
+      RealType polarizability = tokenizer.nextTokenAsDouble();
+      fca.makePolarizable(polarizability);
+    } else {
+      sprintf(painCave.errMsg,
+              "PolarizableAtomTypesSectionParser Error: "
+              "Can not find matching AtomType at line %d\n",
+              lineNo);
       painCave.isFatal = 1;
       simError();
-    } else {
-      
-      std::string atomTypeName = tokenizer.nextToken();    
-        
-      AtomType* atomType = ff.getAtomType(atomTypeName);
-      if (atomType != NULL) {
-        PolarizableAdapter fca =  PolarizableAdapter(atomType);
-	RealType polarizability = tokenizer.nextTokenAsDouble();
-        fca.makePolarizable(polarizability);
-      } else {
-	sprintf(painCave.errMsg, "PolarizableAtomTypesSectionParser Error: "
-                "Can not find matching AtomType at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      }                  
     }
   }
 }
-
-
-
-
+}  // namespace OpenMD

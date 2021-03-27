@@ -49,197 +49,200 @@
 
 #include <algorithm>
 #include <cassert>
-#include <string>
 #include <iterator>
+#include <string>
 
-#include "utils/OpenMDBitSet.hpp"
 #include "utils/Algorithm.hpp"
+#include "utils/OpenMDBitSet.hpp"
 
 namespace OpenMD {
-  int OpenMDBitSet::countBits() {
-#ifdef __RWSTD    
-    //For the compiler(Sun, MSVC6.0) binding with RougeWave STL Library, we need to use old-style
-    // std::count which is error-prone.
-    int count = 0;
-    std::count(bitset_.begin(), bitset_.end(), true, count);
-    return count;
+int OpenMDBitSet::countBits() {
+#ifdef __RWSTD
+  // For the compiler(Sun, MSVC6.0) binding with RougeWave STL Library, we need
+  // to use old-style std::count which is error-prone.
+  int count = 0;
+  std::count(bitset_.begin(), bitset_.end(), true, count);
+  return count;
 #else
-    return std::count(bitset_.begin(), bitset_.end(), true);
+  return std::count(bitset_.begin(), bitset_.end(), true);
 #endif
-  }
+}
 
-  void OpenMDBitSet::flip(int fromIndex, int toIndex) {
-    assert(fromIndex <= toIndex);
-    assert(fromIndex >=0);
-    assert(toIndex <= size());
-    std::vector<bool>::iterator first = bitset_.begin() + fromIndex;
-    std::vector<bool>::iterator last = bitset_.begin() + toIndex;
+void OpenMDBitSet::flip(int fromIndex, int toIndex) {
+  assert(fromIndex <= toIndex);
+  assert(fromIndex >= 0);
+  assert(toIndex <= size());
+  std::vector<bool>::iterator first = bitset_.begin() + fromIndex;
+  std::vector<bool>::iterator last = bitset_.begin() + toIndex;
 
-    std::transform(first, last, first, std::logical_not<bool>());
-        
-  }
+  std::transform(first, last, first, std::logical_not<bool>());
+}
 
-  OpenMDBitSet OpenMDBitSet::get(int fromIndex, int toIndex) {
-    assert(fromIndex <= toIndex);
-    assert(fromIndex >=0);
-    assert(toIndex <= size());
-    std::vector<bool>::iterator first = bitset_.begin() + fromIndex;
-    std::vector<bool>::iterator last = bitset_.begin() + toIndex;
+OpenMDBitSet OpenMDBitSet::get(int fromIndex, int toIndex) {
+  assert(fromIndex <= toIndex);
+  assert(fromIndex >= 0);
+  assert(toIndex <= size());
+  std::vector<bool>::iterator first = bitset_.begin() + fromIndex;
+  std::vector<bool>::iterator last = bitset_.begin() + toIndex;
 
-    OpenMDBitSet result;
-    std::copy(first, last, std::back_inserter(result.bitset_));
-    return result;
-  }
+  OpenMDBitSet result;
+  std::copy(first, last, std::back_inserter(result.bitset_));
+  return result;
+}
 
-  bool OpenMDBitSet::none() {
-    std::vector<bool>::iterator i = std::find(bitset_.begin(), bitset_.end(), true);
-    return i == bitset_.end() ? true : false;
-  }
-    
-  int OpenMDBitSet::nextOffBit(int fromIndex) const {
-    if (fromIndex <= -1) {
-      //in case -1 or other negative number is passed to this function
-      return -1;
-    }
-    
-    ++fromIndex;
-    while (fromIndex < size()) {
-      if (!bitset_[fromIndex]) {
-	return fromIndex;
-      }
-      ++fromIndex;
-    }
+bool OpenMDBitSet::none() {
+  std::vector<bool>::iterator i =
+      std::find(bitset_.begin(), bitset_.end(), true);
+  return i == bitset_.end() ? true : false;
+}
 
+int OpenMDBitSet::nextOffBit(int fromIndex) const {
+  if (fromIndex <= -1) {
+    // in case -1 or other negative number is passed to this function
     return -1;
   }
 
-  int OpenMDBitSet::nextOnBit(int fromIndex) const {
-    if (fromIndex <= -1) {
-      //in case -1 or other negative number is passed to this function
-      return -1;
+  ++fromIndex;
+  while (fromIndex < size()) {
+    if (!bitset_[fromIndex]) {
+      return fromIndex;
     }
-
     ++fromIndex;
-    while (fromIndex < size()) {
-      if (bitset_[fromIndex]) {
-	return fromIndex;
-      }
-      ++fromIndex;
-    }
+  }
 
+  return -1;
+}
+
+int OpenMDBitSet::nextOnBit(int fromIndex) const {
+  if (fromIndex <= -1) {
+    // in case -1 or other negative number is passed to this function
     return -1;
   }
 
-  void OpenMDBitSet::andOperator (const OpenMDBitSet& bs) {
-    assert(size() == bs.size());
-
-    std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(), bitset_.begin(), std::logical_and<bool>());
-  }
-
-  void OpenMDBitSet::orOperator (const OpenMDBitSet& bs) {
-    assert(size() == bs.size());
-    std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(), bitset_.begin(), std::logical_or<bool>());    
-  }
-
-  void OpenMDBitSet::xorOperator (const OpenMDBitSet& bs) {
-    assert(size() == bs.size());
-    std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(), bitset_.begin(), OpenMD::logical_xor<bool>());        
-  }
-   
-  void OpenMDBitSet::setBits(int fromIndex, int toIndex, bool value) {
-    assert(fromIndex <= toIndex);
-    assert(fromIndex >=0);
-    assert(toIndex <= size());
-    std::vector<bool>::iterator first = bitset_.begin() + fromIndex;
-    std::vector<bool>::iterator last = bitset_.begin() + toIndex;
-    std::fill(first, last, value);
-  }
-
-  void OpenMDBitSet::resize(int nbits) {
-    int oldSize = size();
-    bitset_.resize(nbits);
-    if (nbits > oldSize) {
-      std::fill(bitset_.begin()+oldSize, bitset_.end(), false);
+  ++fromIndex;
+  while (fromIndex < size()) {
+    if (bitset_[fromIndex]) {
+      return fromIndex;
     }
+    ++fromIndex;
   }
 
-  OpenMDBitSet operator| (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2) {
-    assert(bs1.size() == bs2.size());
+  return -1;
+}
 
-    OpenMDBitSet result(bs1);
-    result |= bs2;
-    return result;
+void OpenMDBitSet::andOperator(const OpenMDBitSet& bs) {
+  assert(size() == bs.size());
+
+  std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(),
+                 bitset_.begin(), std::logical_and<bool>());
+}
+
+void OpenMDBitSet::orOperator(const OpenMDBitSet& bs) {
+  assert(size() == bs.size());
+  std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(),
+                 bitset_.begin(), std::logical_or<bool>());
+}
+
+void OpenMDBitSet::xorOperator(const OpenMDBitSet& bs) {
+  assert(size() == bs.size());
+  std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(),
+                 bitset_.begin(), OpenMD::logical_xor<bool>());
+}
+
+void OpenMDBitSet::setBits(int fromIndex, int toIndex, bool value) {
+  assert(fromIndex <= toIndex);
+  assert(fromIndex >= 0);
+  assert(toIndex <= size());
+  std::vector<bool>::iterator first = bitset_.begin() + fromIndex;
+  std::vector<bool>::iterator last = bitset_.begin() + toIndex;
+  std::fill(first, last, value);
+}
+
+void OpenMDBitSet::resize(int nbits) {
+  int oldSize = size();
+  bitset_.resize(nbits);
+  if (nbits > oldSize) {
+    std::fill(bitset_.begin() + oldSize, bitset_.end(), false);
   }
+}
 
-  OpenMDBitSet operator& (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2) {
-    assert(bs1.size() == bs2.size());
+OpenMDBitSet operator|(const OpenMDBitSet& bs1, const OpenMDBitSet& bs2) {
+  assert(bs1.size() == bs2.size());
 
-    OpenMDBitSet result(bs1);
-    result &= bs2;
-    return result;
-  }
+  OpenMDBitSet result(bs1);
+  result |= bs2;
+  return result;
+}
 
-  OpenMDBitSet operator^ (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2) {
-    assert(bs1.size() == bs2.size());
+OpenMDBitSet operator&(const OpenMDBitSet& bs1, const OpenMDBitSet& bs2) {
+  assert(bs1.size() == bs2.size());
 
-    OpenMDBitSet result(bs1);
-    result ^= bs2;
-    return result;
-  }
+  OpenMDBitSet result(bs1);
+  result &= bs2;
+  return result;
+}
 
-  OpenMDBitSet operator- (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2) {
-    assert(bs1.size() == bs2.size());
+OpenMDBitSet operator^(const OpenMDBitSet& bs1, const OpenMDBitSet& bs2) {
+  assert(bs1.size() == bs2.size());
 
-    OpenMDBitSet result(bs1);
-    result -= bs2;
-    return result;
-  }
+  OpenMDBitSet result(bs1);
+  result ^= bs2;
+  return result;
+}
 
-  bool operator== (const OpenMDBitSet & bs1, const OpenMDBitSet &bs2) {
-    assert(bs1.size() == bs2.size());
-    return std::equal(bs1.bitset_.begin(), bs1.bitset_.end(), bs2.bitset_.begin());
-  }  
+OpenMDBitSet operator-(const OpenMDBitSet& bs1, const OpenMDBitSet& bs2) {
+  assert(bs1.size() == bs2.size());
 
-  OpenMDBitSet OpenMDBitSet::parallelReduce() {
-    OpenMDBitSet result;
+  OpenMDBitSet result(bs1);
+  result -= bs2;
+  return result;
+}
+
+bool operator==(const OpenMDBitSet& bs1, const OpenMDBitSet& bs2) {
+  assert(bs1.size() == bs2.size());
+  return std::equal(bs1.bitset_.begin(), bs1.bitset_.end(),
+                    bs2.bitset_.begin());
+}
+
+OpenMDBitSet OpenMDBitSet::parallelReduce() {
+  OpenMDBitSet result;
 
 #ifdef IS_MPI
 
-    // This is necessary because std::vector<bool> isn't really a
-    // std::vector, so we can't pass the address of the first element
-    // to the MPI call that follows.  We first have to convert to a
-    // std::vector<int> to do the logical_or Allreduce call, then back
-    // convert it into the vector<bool>.
+  // This is necessary because std::vector<bool> isn't really a
+  // std::vector, so we can't pass the address of the first element
+  // to the MPI call that follows.  We first have to convert to a
+  // std::vector<int> to do the logical_or Allreduce call, then back
+  // convert it into the vector<bool>.
 
-    std::vector<int> bsInt(bitset_.begin(), bitset_.end());
+  std::vector<int> bsInt(bitset_.begin(), bitset_.end());
 
-    MPI_Allreduce(MPI_IN_PLACE, &bsInt[0], 
-                  bsInt.size(), MPI_INT, MPI_LOR, MPI_COMM_WORLD);
+  MPI_Allreduce(MPI_IN_PLACE, &bsInt[0], bsInt.size(), MPI_INT, MPI_LOR,
+                MPI_COMM_WORLD);
 
-    std::transform(bsInt.begin(), bsInt.end(), 
-                   std::back_inserter( result.bitset_ ), to_bool<int>());
+  std::transform(bsInt.begin(), bsInt.end(), std::back_inserter(result.bitset_),
+                 to_bool<int>());
 #else
 
-    // Not in MPI?  Just return a copy of the current bitset:
-    std::copy(bitset_.begin(), bitset_.end(), 
-              std::back_inserter( result.bitset_ ));
+  // Not in MPI?  Just return a copy of the current bitset:
+  std::copy(bitset_.begin(), bitset_.end(), std::back_inserter(result.bitset_));
 #endif
 
-    return result;
-  }
-
-  //std::istream& operator>> ( std::istream& is, const OpenMDBitSet& bs) {
-  //
-  //    return is;
-  //}
-
-  std::ostream& operator<< ( std::ostream& os, const OpenMDBitSet& bs) {
-    for (unsigned int i = 0; i < bs.bitset_.size(); ++i) {
-      std::string val = bs[i] ? "true" : "false";
-      os << "OpenMDBitSet[" << i <<"] = " << val << std::endl; 
-    }
-    
-    return os;
-  }
-
+  return result;
 }
+
+// std::istream& operator>> ( std::istream& is, const OpenMDBitSet& bs) {
+//
+//    return is;
+//}
+
+std::ostream& operator<<(std::ostream& os, const OpenMDBitSet& bs) {
+  for (unsigned int i = 0; i < bs.bitset_.size(); ++i) {
+    std::string val = bs[i] ? "true" : "false";
+    os << "OpenMDBitSet[" << i << "] = " << val << std::endl;
+  }
+
+  return os;
+}
+
+}  // namespace OpenMD

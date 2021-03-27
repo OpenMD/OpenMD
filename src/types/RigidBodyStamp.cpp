@@ -42,20 +42,18 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <iostream>
 
 #include "types/RigidBodyStamp.hpp"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
 namespace OpenMD {
-  
-  RigidBodyStamp::RigidBodyStamp(int index) : index_(index){
-    deprecatedKeywords_.insert("nMembers");  
-  }
-  
-  void RigidBodyStamp::validate() {
-    DataHolder::validate();
-  }
+
+RigidBodyStamp::RigidBodyStamp(int index) : index_(index) {
+  deprecatedKeywords_.insert("nMembers");
 }
+
+void RigidBodyStamp::validate() { DataHolder::validate(); }
+}  // namespace OpenMD

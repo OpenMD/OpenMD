@@ -42,34 +42,30 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_SHAPEATOMTYPESSECTIONPARSER_HPP
 #define IO_SHAPEATOMTYPESSECTIONPARSER_HPP
 
+#include "io/ForceFieldOptions.hpp"
 #include "io/SectionParser.hpp"
-#include "types/ShapeAtomType.hpp"
 #include "types/AtomType.hpp"
-
+#include "types/ShapeAtomType.hpp"
 namespace OpenMD {
-  
-  /**
-   * @class ShapeAtomTypesSectionParser 
-   */
-  class ShapeAtomTypesSectionParser : public SectionParser {
 
-  public:
-    ShapeAtomTypesSectionParser(ForceFieldOptions& options);
-    
-  private:
-    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
+/**
+ * @class ShapeAtomTypesSectionParser
+ */
+class ShapeAtomTypesSectionParser : public SectionParser {
+ public:
+  ShapeAtomTypesSectionParser(ForceFieldOptions& options);
 
-    void parseShapeFile(ForceField& ff, std::string& shapeFileName, AtomType* at);
-    ForceFieldOptions& options_;
-  };
-  
-  
-} //namespace OpenMD
+ private:
+  virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
 
-#endif //IO_SHAPEATOMTYPESSECTIONPARSER_HPP
+  void parseShapeFile(ForceField& ff, std::string& shapeFileName, AtomType* at);
+  ForceFieldOptions& options_;
+};
 
+}  // namespace OpenMD
 
+#endif  // IO_SHAPEATOMTYPESSECTIONPARSER_HPP

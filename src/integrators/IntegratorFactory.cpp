@@ -42,60 +42,60 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "integrators/IntegratorFactory.hpp"
+
 #include "integrators/IntegratorCreator.hpp"
 #include "utils/MemoryUtils.hpp"
 
 namespace OpenMD {
 
-  IntegratorFactory::~IntegratorFactory() {
-    Utils::deletePointers(creatorMap_);
-  }
+IntegratorFactory::~IntegratorFactory() { Utils::deletePointers(creatorMap_); }
 
-  bool IntegratorFactory::registerIntegrator(IntegratorCreator* creator) {
-    return creatorMap_.insert(
-			      CreatorMapType::value_type(creator->getIdent(), creator)).second;
-  }
-
-  bool IntegratorFactory::unregisterIntegrator(const std::string& id) {
-    return creatorMap_.erase(id) == 1;
-  }
-
-  Integrator* IntegratorFactory::createIntegrator(const std::string& id, SimInfo* info) {
-    CreatorMapType::iterator i = creatorMap_.find(id);
-    if (i != creatorMap_.end()) {
-      //invoke functor to create object
-      return (i->second)->create(info);
-    } else {
-      return NULL;
-    }
-  }
-
-  std::vector<std::string> IntegratorFactory::getIdents() {
-    IdentVectorType idents;
-    CreatorMapType::iterator i;
-
-    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-      idents.push_back(i->first);
-    }
-    
-    return idents;
-  }
-
-  std::ostream& operator <<(std::ostream& o, IntegratorFactory& factory) {
-    IntegratorFactory::IdentVectorType idents;
-    IntegratorFactory::IdentVectorIterator i;
-
-    idents = factory.getIdents();
-
-    o << "Avaliable type identifiers in this factory: " << std::endl;
-    for (i = idents.begin(); i != idents.end(); ++i) {
-      o << *i << std::endl;
-    }
-
-    return o;
-  }
-
+bool IntegratorFactory::registerIntegrator(IntegratorCreator* creator) {
+  return creatorMap_
+      .insert(CreatorMapType::value_type(creator->getIdent(), creator))
+      .second;
 }
 
+bool IntegratorFactory::unregisterIntegrator(const std::string& id) {
+  return creatorMap_.erase(id) == 1;
+}
+
+Integrator* IntegratorFactory::createIntegrator(const std::string& id,
+                                                SimInfo* info) {
+  CreatorMapType::iterator i = creatorMap_.find(id);
+  if (i != creatorMap_.end()) {
+    // invoke functor to create object
+    return (i->second)->create(info);
+  } else {
+    return NULL;
+  }
+}
+
+std::vector<std::string> IntegratorFactory::getIdents() {
+  IdentVectorType idents;
+  CreatorMapType::iterator i;
+
+  for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
+    idents.push_back(i->first);
+  }
+
+  return idents;
+}
+
+std::ostream& operator<<(std::ostream& o, IntegratorFactory& factory) {
+  IntegratorFactory::IdentVectorType idents;
+  IntegratorFactory::IdentVectorIterator i;
+
+  idents = factory.getIdents();
+
+  o << "Avaliable type identifiers in this factory: " << std::endl;
+  for (i = idents.begin(); i != idents.end(); ++i) {
+    o << *i << std::endl;
+  }
+
+  return o;
+}
+
+}  // namespace OpenMD

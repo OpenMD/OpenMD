@@ -47,90 +47,87 @@
 
 namespace OpenMD {
 
-  void ObjectRestraint::calcForce(Vector3d struc) {
+void ObjectRestraint::calcForce(Vector3d struc) {
+  pot_ = 0.0;
+  force_ = V3Zero;
 
-    pot_ = 0.0;
-    force_ = V3Zero;
-    
-    if (restType_ & rtDisplacement) {
-      Vector3d del = struc - refPos_;
-      RealType r = del.length();
-      Vector3d frc = -kDisp_ * del;
-      RealType p = 0.5 * kDisp_ * del.lengthSquare();
-      
-      pot_ = p;
-      force_ += frc * scaleFactor_;
-      if (printRest_) restInfo_[rtDisplacement] = std::make_pair(r,p);
-    }
+  if (restType_ & rtDisplacement) {
+    Vector3d del = struc - refPos_;
+    RealType r = del.length();
+    Vector3d frc = -kDisp_ * del;
+    RealType p = 0.5 * kDisp_ * del.lengthSquare();
 
-    if (restType_ & rtAbsoluteZ) {
-      RealType r = struc(2) - posZ0_;
-      Vector3d frc = Vector3d(0.0, 0.0, -kAbs_ * r);
-      RealType p = 0.5 * kAbs_ * r * r;
-      
-      pot_ += p;
-      force_ += frc * scaleFactor_;
-      if (printRest_) restInfo_[rtAbsoluteZ] = std::make_pair(r,p);
-    }
+    pot_ = p;
+    force_ += frc * scaleFactor_;
+    if (printRest_) restInfo_[rtDisplacement] = std::make_pair(r, p);
   }
-    
-  void ObjectRestraint::calcForce(Vector3d struc, RotMat3x3d A) {
 
-    calcForce(struc);
+  if (restType_ & rtAbsoluteZ) {
+    RealType r = struc(2) - posZ0_;
+    Vector3d frc = Vector3d(0.0, 0.0, -kAbs_ * r);
+    RealType p = 0.5 * kAbs_ * r * r;
 
-    // rtDisplacement is 1, rtAbsolute is 2, so anything higher than 3
-    // that requires orientations:
-    if (restType_ > 3) {
-      
-      Vector3d tBody(0.0);
-      
-      RotMat3x3d temp = A * refA_.transpose();
-      Quat4d quat = temp.toQuaternion();
-
-      RealType twistAngle;
-      Vector3d swingAxis;
-      RealType swingX, swingY;
-      
-      quat.toSwingTwist(swingX, swingY, twistAngle);
-
-      RealType p;
-      Vector3d tTwist, tSwing;
-
-      if (restType_ & rtTwist){
-        RealType dTwist = twistAngle - twist0_;      
-        /// RealType dVdtwist = kTwist_ * sin(dTwist);
-        /// p = kTwist_ * (1.0 - cos(dTwist) );
-        RealType dVdtwist = kTwist_ * dTwist;
-        p = 0.5 * kTwist_ * dTwist * dTwist;
-        pot_ += p;
-        tBody -= dVdtwist * V3Z;
-        if (printRest_) restInfo_[rtTwist] = std::make_pair(twistAngle, p);
-      }
-
-      if (restType_ & rtSwingX){
-        RealType dSwingX = swingX - swingX0_;
-        /// RealType dVdswingX = kSwingX_ * 0.5 * sin(2.0 * dSwingX);
-        /// p = 0.25 * kSwingX_ * (1.0 - cos(2.0 * dSwingX));
-        RealType dVdswingX = kSwingX_ * dSwingX;        
-        p = 0.5 * kSwingX_ * dSwingX * dSwingX;
-        pot_ += p;
-        tBody -= dVdswingX * V3X;
-        if (printRest_) restInfo_[rtSwingX] = std::make_pair(swingX, p);
-      }
-
-      if (restType_ & rtSwingY){
-        RealType dSwingY = swingY - swingY0_;
-        /// RealType dVdswingY = kSwingY_ * 0.5 * sin(2.0 * dSwingY);
-        /// p = 0.25 * kSwingY_ * (1.0 - cos(2.0 * dSwingY));
-        RealType dVdswingY = kSwingY_ * dSwingY;        
-        p = 0.5 * kSwingX_ * dSwingY * dSwingY;
-        pot_ += p;
-        tBody -= dVdswingY * V3Y;
-        if (printRest_) restInfo_[rtSwingY] = std::make_pair(swingY, p);
-      }
-
-      Vector3d tLab = A.transpose() * tBody;      
-      torque_ = tLab * scaleFactor_;      
-    }
+    pot_ += p;
+    force_ += frc * scaleFactor_;
+    if (printRest_) restInfo_[rtAbsoluteZ] = std::make_pair(r, p);
   }
 }
+
+void ObjectRestraint::calcForce(Vector3d struc, RotMat3x3d A) {
+  calcForce(struc);
+
+  // rtDisplacement is 1, rtAbsolute is 2, so anything higher than 3
+  // that requires orientations:
+  if (restType_ > 3) {
+    Vector3d tBody(0.0);
+
+    RotMat3x3d temp = A * refA_.transpose();
+    Quat4d quat = temp.toQuaternion();
+
+    RealType twistAngle;
+    Vector3d swingAxis;
+    RealType swingX, swingY;
+
+    quat.toSwingTwist(swingX, swingY, twistAngle);
+
+    RealType p;
+    Vector3d tTwist, tSwing;
+
+    if (restType_ & rtTwist) {
+      RealType dTwist = twistAngle - twist0_;
+      /// RealType dVdtwist = kTwist_ * sin(dTwist);
+      /// p = kTwist_ * (1.0 - cos(dTwist) );
+      RealType dVdtwist = kTwist_ * dTwist;
+      p = 0.5 * kTwist_ * dTwist * dTwist;
+      pot_ += p;
+      tBody -= dVdtwist * V3Z;
+      if (printRest_) restInfo_[rtTwist] = std::make_pair(twistAngle, p);
+    }
+
+    if (restType_ & rtSwingX) {
+      RealType dSwingX = swingX - swingX0_;
+      /// RealType dVdswingX = kSwingX_ * 0.5 * sin(2.0 * dSwingX);
+      /// p = 0.25 * kSwingX_ * (1.0 - cos(2.0 * dSwingX));
+      RealType dVdswingX = kSwingX_ * dSwingX;
+      p = 0.5 * kSwingX_ * dSwingX * dSwingX;
+      pot_ += p;
+      tBody -= dVdswingX * V3X;
+      if (printRest_) restInfo_[rtSwingX] = std::make_pair(swingX, p);
+    }
+
+    if (restType_ & rtSwingY) {
+      RealType dSwingY = swingY - swingY0_;
+      /// RealType dVdswingY = kSwingY_ * 0.5 * sin(2.0 * dSwingY);
+      /// p = 0.25 * kSwingY_ * (1.0 - cos(2.0 * dSwingY));
+      RealType dVdswingY = kSwingY_ * dSwingY;
+      p = 0.5 * kSwingX_ * dSwingY * dSwingY;
+      pot_ += p;
+      tBody -= dVdswingY * V3Y;
+      if (printRest_) restInfo_[rtSwingY] = std::make_pair(swingY, p);
+    }
+
+    Vector3d tLab = A.transpose() * tBody;
+    torque_ = tLab * scaleFactor_;
+  }
+}
+}  // namespace OpenMD

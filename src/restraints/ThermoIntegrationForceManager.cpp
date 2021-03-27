@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
@@ -50,121 +50,116 @@
 #include "restraints/ThermoIntegrationForceManager.hpp"
 
 namespace OpenMD {
-  
-  ThermoIntegrationForceManager::ThermoIntegrationForceManager(SimInfo* info): 
-    RestraintForceManager(info){
-    currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    simParam = info_->getSimParams();
-    
-    if (simParam->haveThermodynamicIntegrationLambda()){
-      tIntLambda_ = simParam->getThermodynamicIntegrationLambda();
-    }
-    else{
-      tIntLambda_ = 1.0;
-      sprintf(painCave.errMsg,
-              "ThermoIntegration error: the transformation parameter\n"
-              "\t(lambda) was not specified. OpenMD will use a default\n"
-              "\tvalue of %f. To set lambda, use the \n"
-              "\tthermodynamicIntegrationLambda variable.\n",
-              tIntLambda_);
-      painCave.isFatal = 0;
-      simError();
-    }
-    
-    if (simParam->haveThermodynamicIntegrationK()){
-      tIntK_ = simParam->getThermodynamicIntegrationK();
-    }
-    else{
-      tIntK_ = 1.0;
-      sprintf(painCave.errMsg,
-              "ThermoIntegration Warning: the tranformation parameter\n"
-              "\texponent (k) was not specified. OpenMD will use a default\n"
-              "\tvalue of %f. To set k, use the thermodynamicIntegrationK\n"
-              "\tvariable.\n",
-              tIntK_);
-      painCave.isFatal = 0;
-      simError();      
-    }
-    
-    // build the scaling factor used to modulate the forces and torques
-    factor_ = pow(tIntLambda_, tIntK_);
+
+ThermoIntegrationForceManager::ThermoIntegrationForceManager(SimInfo* info)
+    : RestraintForceManager(info) {
+  currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+  simParam = info_->getSimParams();
+
+  if (simParam->haveThermodynamicIntegrationLambda()) {
+    tIntLambda_ = simParam->getThermodynamicIntegrationLambda();
+  } else {
+    tIntLambda_ = 1.0;
+    sprintf(painCave.errMsg,
+            "ThermoIntegration error: the transformation parameter\n"
+            "\t(lambda) was not specified. OpenMD will use a default\n"
+            "\tvalue of %f. To set lambda, use the \n"
+            "\tthermodynamicIntegrationLambda variable.\n",
+            tIntLambda_);
+    painCave.isFatal = 0;
+    simError();
   }
-  
-  ThermoIntegrationForceManager::~ThermoIntegrationForceManager(){
+
+  if (simParam->haveThermodynamicIntegrationK()) {
+    tIntK_ = simParam->getThermodynamicIntegrationK();
+  } else {
+    tIntK_ = 1.0;
+    sprintf(painCave.errMsg,
+            "ThermoIntegration Warning: the tranformation parameter\n"
+            "\texponent (k) was not specified. OpenMD will use a default\n"
+            "\tvalue of %f. To set k, use the thermodynamicIntegrationK\n"
+            "\tvariable.\n",
+            tIntK_);
+    painCave.isFatal = 0;
+    simError();
   }
-  
-  void ThermoIntegrationForceManager::calcForces(){
-    Snapshot* curSnapshot;
-    SimInfo::MoleculeIterator mi;
-    Molecule* mol;
-    Molecule::IntegrableObjectIterator ii;
-    StuntDouble* sd;
-    Vector3d frc;
-    Vector3d trq;
-    Mat3x3d tempTau;
-    
-    // perform the standard calcForces first
-    ForceManager::calcForces();
-    
-    curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
 
-    // now scale forces and torques of all the sds
-      
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
+  // build the scaling factor used to modulate the forces and torques
+  factor_ = pow(tIntLambda_, tIntK_);
+}
 
-      for (sd = mol->beginIntegrableObject(ii); sd != NULL; 
-           sd = mol->nextIntegrableObject(ii)) {
+ThermoIntegrationForceManager::~ThermoIntegrationForceManager() {}
 
-        frc = sd->getFrc();
-        frc *= factor_;
-        sd->setFrc(frc);
-        
-        if (sd->isDirectional()){
-          trq = sd->getTrq();
-          trq *= factor_;
-          sd->setTrq(trq);
-        }
+void ThermoIntegrationForceManager::calcForces() {
+  Snapshot* curSnapshot;
+  SimInfo::MoleculeIterator mi;
+  Molecule* mol;
+  Molecule::IntegrableObjectIterator ii;
+  StuntDouble* sd;
+  Vector3d frc;
+  Vector3d trq;
+  Mat3x3d tempTau;
+
+  // perform the standard calcForces first
+  ForceManager::calcForces();
+
+  curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+
+  // now scale forces and torques of all the sds
+
+  for (mol = info_->beginMolecule(mi); mol != NULL;
+       mol = info_->nextMolecule(mi)) {
+    for (sd = mol->beginIntegrableObject(ii); sd != NULL;
+         sd = mol->nextIntegrableObject(ii)) {
+      frc = sd->getFrc();
+      frc *= factor_;
+      sd->setFrc(frc);
+
+      if (sd->isDirectional()) {
+        trq = sd->getTrq();
+        trq *= factor_;
+        sd->setTrq(trq);
       }
     }
-    
-    // set rawPotential to be the unmodulated potential
-    lrPot_ = curSnapshot->getLongRangePotential();
-    curSnapshot->setRawPotential(lrPot_);
-    
-    // modulate the potential and update the snapshot
-    lrPot_ *= factor_;
-    curSnapshot->setLongRangePotential(lrPot_);
-    
-    // scale the virial tensor
-    tempTau = curSnapshot->getVirialTensor();
-    tempTau *= factor_;
-    curSnapshot->setVirialTensor(tempTau);
+  }
 
-    // now, on to the applied restraining potentials (if needed):
-    RealType restPot_local = 0.0;
-    RealType vHarm_local = 0.0;
-    
-    if (simParam->getUseRestraints()) {
-      // do restraints from RestraintForceManager:
-      restPot_local = doRestraints(1.0 - factor_);      
-      vHarm_local = getUnscaledPotential();
-    }
-      
+  // set rawPotential to be the unmodulated potential
+  lrPot_ = curSnapshot->getLongRangePotential();
+  curSnapshot->setRawPotential(lrPot_);
+
+  // modulate the potential and update the snapshot
+  lrPot_ *= factor_;
+  curSnapshot->setLongRangePotential(lrPot_);
+
+  // scale the virial tensor
+  tempTau = curSnapshot->getVirialTensor();
+  tempTau *= factor_;
+  curSnapshot->setVirialTensor(tempTau);
+
+  // now, on to the applied restraining potentials (if needed):
+  RealType restPot_local = 0.0;
+  RealType vHarm_local = 0.0;
+
+  if (simParam->getUseRestraints()) {
+    // do restraints from RestraintForceManager:
+    restPot_local = doRestraints(1.0 - factor_);
+    vHarm_local = getUnscaledPotential();
+  }
+
 #ifdef IS_MPI
-    RealType restPot;
-    MPI_Allreduce(&restPot_local, &restPot, 1, 
-                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(&vHarm_local, &vHarm_, 1, 
-                  MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);         
-    lrPot_ += restPot;
+  RealType restPot;
+  MPI_Allreduce(&restPot_local, &restPot, 1, MPI_REALTYPE, MPI_SUM,
+                MPI_COMM_WORLD);
+  MPI_Allreduce(&vHarm_local, &vHarm_, 1, MPI_REALTYPE, MPI_SUM,
+                MPI_COMM_WORLD);
+  lrPot_ += restPot;
 #else
-    lrPot_ += restPot_local;
-    vHarm_ = vHarm_local;
+  lrPot_ += restPot_local;
+  vHarm_ = vHarm_local;
 #endif
 
-    // give the final values to stats
-    curSnapshot->setLongRangePotential(lrPot_);
-    curSnapshot->setRestraintPotential(vHarm_);
-  }  
+  // give the final values to stats
+  curSnapshot->setLongRangePotential(lrPot_);
+  curSnapshot->setRestraintPotential(vHarm_);
 }
+}  // namespace OpenMD

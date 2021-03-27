@@ -43,85 +43,82 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
 #include <cmath>
-#include <iostream>
-#include <string>
-#include <map>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
+#include <iostream>
+#include <map>
 #include <random>
+#include <string>
 
-#include "randomBuilderCmd.hpp"
-#include "lattice/LatticeFactory.hpp"
-#include "utils/MoLocator.hpp"
-#include "lattice/Lattice.hpp"
 #include "brains/Register.hpp"
-#include "brains/SimInfo.hpp"
 #include "brains/SimCreator.hpp"
+#include "brains/SimInfo.hpp"
 #include "io/DumpWriter.hpp"
-#include "math/Vector3.hpp"
+#include "lattice/Lattice.hpp"
+#include "lattice/LatticeFactory.hpp"
 #include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
+#include "randomBuilderCmd.hpp"
+#include "utils/MoLocator.hpp"
 #include "utils/StringUtils.hpp"
 
 using namespace std;
 using namespace OpenMD;
 
-void createMdFile(const std::string&oldMdFileName, 
-                  const std::string&newMdFileName,
-                  std::vector<int> nMol);
+void createMdFile(const std::string& oldMdFileName,
+                  const std::string& newMdFileName, std::vector<int> nMol);
 
-int main(int argc, char *argv []) {
-
+int main(int argc, char* argv[]) {
   registerLattice();
-    
+
   gengetopt_args_info args_info;
   std::string latticeType;
   std::string inputFileName;
   std::string outputFileName;
-  Lattice *simpleLat;
+  Lattice* simpleLat;
   RealType latticeConstant;
   std::vector<RealType> lc;
   const RealType rhoConvertConst = 1.661;
   RealType density;
   int nx, ny, nz;
   Mat3x3d hmat;
-  MoLocator *locator;
+  MoLocator* locator;
   std::vector<Vector3d> latticePos;
   std::vector<Vector3d> latticeOrt;
   int nMolPerCell;
-  DumpWriter *writer;
+  DumpWriter* writer;
 
   // parse command line arguments
-  if (cmdline_parser(argc, argv, &args_info) != 0)
-    exit(1);
+  if (cmdline_parser(argc, argv, &args_info) != 0) exit(1);
 
   density = args_info.density_arg;
 
-  //get lattice type
+  // get lattice type
   latticeType = "FCC";
-  if (args_info.lattice_given) {    
+  if (args_info.lattice_given) {
     latticeType = args_info.lattice_arg;
   }
 
   simpleLat = LatticeFactory::getInstance().createLattice(latticeType);
-    
+
   if (simpleLat == NULL) {
     sprintf(painCave.errMsg, "Lattice Factory can not create %s lattice\n",
-	    latticeType.c_str());
+            latticeType.c_str());
     painCave.isFatal = 1;
     simError();
   }
   nMolPerCell = simpleLat->getNumSitesPerCell();
 
-  //get the number of unit cells in each direction:
+  // get the number of unit cells in each direction:
 
   nx = args_info.nx_arg;
 
   if (nx <= 0) {
-    sprintf(painCave.errMsg, "The number of unit cells in the x direction "
+    sprintf(painCave.errMsg,
+            "The number of unit cells in the x direction "
             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
@@ -130,7 +127,8 @@ int main(int argc, char *argv []) {
   ny = args_info.ny_arg;
 
   if (ny <= 0) {
-    sprintf(painCave.errMsg, "The number of unit cells in the y direction "
+    sprintf(painCave.errMsg,
+            "The number of unit cells in the y direction "
             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
@@ -139,7 +137,8 @@ int main(int argc, char *argv []) {
   nz = args_info.nz_arg;
 
   if (nz <= 0) {
-    sprintf(painCave.errMsg, "The number of unit cells in the z direction "
+    sprintf(painCave.errMsg,
+            "The number of unit cells in the z direction "
             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
@@ -147,17 +146,18 @@ int main(int argc, char *argv []) {
 
   int nSites = nMolPerCell * nx * ny * nz;
 
-  //get input file name
+  // get input file name
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg, "No input .omd file name was specified "
+    sprintf(painCave.errMsg,
+            "No input .omd file name was specified "
             "on the command line");
     painCave.isFatal = 1;
     simError();
   }
 
-  //parse md file and set up the system
+  // parse md file and set up the system
 
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
@@ -170,23 +170,24 @@ int main(int argc, char *argv []) {
   std::vector<RealType> molecularMasses;
   std::vector<int> nMol;
   std::size_t nComponents = components.size();
-  
+
   if (nComponents == 1) {
-    molFractions.push_back(1.0);    
+    molFractions.push_back(1.0);
   } else {
     if (args_info.molFraction_given == nComponents) {
       for (std::size_t i = 0; i < nComponents; i++) {
         molFractions.push_back(args_info.molFraction_arg[i]);
       }
-    } else if (args_info.molFraction_given == nComponents-1) {
+    } else if (args_info.molFraction_given == nComponents - 1) {
       RealType remainingFraction = 1.0;
-      for (std::size_t i = 0; i < nComponents-1; i++) {
+      for (std::size_t i = 0; i < nComponents - 1; i++) {
         molFractions.push_back(args_info.molFraction_arg[i]);
         remainingFraction -= molFractions[i];
       }
       molFractions.push_back(remainingFraction);
-    } else {    
-      sprintf(painCave.errMsg, "randomBuilder can't figure out molFractions "
+    } else {
+      sprintf(painCave.errMsg,
+              "randomBuilder can't figure out molFractions "
               "for all of the components in the <MetaData> block.");
       painCave.isFatal = 1;
       simError();
@@ -194,18 +195,20 @@ int main(int argc, char *argv []) {
   }
 
   // do some sanity checking:
-  
+
   RealType totalFraction = 0.0;
 
   for (std::size_t i = 0; i < nComponents; i++) {
     if (molFractions.at(i) < 0.0) {
-      sprintf(painCave.errMsg, "One of the requested molFractions was"
+      sprintf(painCave.errMsg,
+              "One of the requested molFractions was"
               " less than zero!");
       painCave.isFatal = 1;
       simError();
     }
     if (molFractions.at(i) > 1.0) {
-      sprintf(painCave.errMsg, "One of the requested molFractions was"
+      sprintf(painCave.errMsg,
+              "One of the requested molFractions was"
               " greater than one!");
       painCave.isFatal = 1;
       simError();
@@ -213,13 +216,14 @@ int main(int argc, char *argv []) {
     totalFraction += molFractions.at(i);
   }
   if (abs(totalFraction - 1.0) > 1e-6) {
-    sprintf(painCave.errMsg, "The sum of molFractions was not close enough to 1.0");
+    sprintf(painCave.errMsg,
+            "The sum of molFractions was not close enough to 1.0");
     painCave.isFatal = 1;
     simError();
   }
 
   int remaining = nSites;
-  for (std::size_t i=0; i < nComponents-1; i++) {    
+  for (std::size_t i = 0; i < nComponents - 1; i++) {
     nMol.push_back(int((RealType)nSites * molFractions.at(i)));
     remaining -= nMol.at(i);
   }
@@ -229,30 +233,31 @@ int main(int argc, char *argv []) {
 
   int totalMolecules = 0;
   RealType totalMass = 0.0;
-  for (std::size_t i=0; i < nComponents; i++) {
-    molFractions[i] = (RealType)(nMol.at(i))/(RealType)nSites;
+  for (std::size_t i = 0; i < nComponents; i++) {
+    molFractions[i] = (RealType)(nMol.at(i)) / (RealType)nSites;
     totalMolecules += nMol.at(i);
-    molecularMasses.push_back(MoLocator::getMolMass(oldInfo->getMoleculeStamp(i),
-                                                    oldInfo->getForceField()));
+    molecularMasses.push_back(MoLocator::getMolMass(
+        oldInfo->getMoleculeStamp(i), oldInfo->getForceField()));
     totalMass += (RealType)(nMol.at(i)) * molecularMasses.at(i);
   }
-  RealType avgMass = totalMass / (RealType) totalMolecules;
+  RealType avgMass = totalMass / (RealType)totalMolecules;
 
   if (totalMolecules != nSites) {
-    sprintf(painCave.errMsg, "Computed total number of molecules is not equal "
+    sprintf(painCave.errMsg,
+            "Computed total number of molecules is not equal "
             "to the number of lattice sites!");
     painCave.isFatal = 1;
     simError();
   }
-     
+
   latticeConstant = pow(rhoConvertConst * nMolPerCell * avgMass / density,
-			(RealType)(1.0 / 3.0));
-  
+                        (RealType)(1.0 / 3.0));
+
   // Set the lattice constant
-  
+
   lc.push_back(latticeConstant);
   simpleLat->setLatticeConstant(lc);
-  
+
   // Calculate the lattice sites and fill the lattice vector.
 
   // Get the standard orientations of the cell sites
@@ -261,23 +266,22 @@ int main(int argc, char *argv []) {
 
   vector<Vector3d> sites;
   vector<Vector3d> orientations;
-  
-  for(int i = 0; i < nx; i++) {
-    for(int j = 0; j < ny; j++) {
-      for(int k = 0; k < nz; k++) {
 
-	// Get the position of the cell sites
+  for (int i = 0; i < nx; i++) {
+    for (int j = 0; j < ny; j++) {
+      for (int k = 0; k < nz; k++) {
+        // Get the position of the cell sites
 
-	simpleLat->getLatticePointsPos(latticePos, i, j, k);
+        simpleLat->getLatticePointsPos(latticePos, i, j, k);
 
-	for(int l = 0; l < nMolPerCell; l++) {
-	  sites.push_back(latticePos[l]);
+        for (int l = 0; l < nMolPerCell; l++) {
+          sites.push_back(latticePos[l]);
           orientations.push_back(latticeOrt[l]);
-	}
+        }
       }
     }
   }
-  
+
   outputFileName = args_info.output_arg;
 
   // create a new .omd file on the fly which corrects the number of molecules
@@ -286,7 +290,7 @@ int main(int argc, char *argv []) {
 
   delete oldInfo;
 
-  // We need to read in the new SimInfo object, then Parse the 
+  // We need to read in the new SimInfo object, then Parse the
   // md file and set up the system
 
   SimCreator newCreator;
@@ -318,23 +322,24 @@ int main(int argc, char *argv []) {
   for (std::size_t i = 0; i < sites.size(); i++) ids.push_back(i);
 
   /* Set up the random number generator engine */
-  std::random_device rd;		// Non-deterministic, uniformly-distributed integer random number generator
-  std::mt19937 gen(rd());		// 32-bit Mersenne Twister random number engine
+  std::random_device rd;   // Non-deterministic, uniformly-distributed integer
+                           // random number generator
+  std::mt19937 gen(rd());  // 32-bit Mersenne Twister random number engine
 
   std::shuffle(ids.begin(), ids.end(), gen);
 
   Molecule* mol;
   int l = 0;
-  for (std::size_t i = 0; i < nComponents; i++){
-    locator = new MoLocator(newInfo->getMoleculeStamp(i), 
-                            newInfo->getForceField());
+  for (std::size_t i = 0; i < nComponents; i++) {
+    locator =
+        new MoLocator(newInfo->getMoleculeStamp(i), newInfo->getForceField());
     for (int n = 0; n < nMol.at(i); n++) {
       mol = newInfo->getMoleculeByGlobalIndex(l);
       locator->placeMol(sites[ids[l]], orientations[ids[l]], mol);
       l++;
     }
   }
-  
+
   // Create DumpWriter and write out the coordinates
 
   writer = new DumpWriter(newInfo, outputFileName);
@@ -351,55 +356,54 @@ int main(int argc, char *argv []) {
 
   delete writer;
 
-  sprintf(painCave.errMsg, "A new OpenMD file called \"%s\" has been "
-          "generated.\n", outputFileName.c_str());
+  sprintf(painCave.errMsg,
+          "A new OpenMD file called \"%s\" has been "
+          "generated.\n",
+          outputFileName.c_str());
   painCave.isFatal = 0;
   painCave.severity = OPENMD_INFO;
   simError();
   return 0;
 }
 
-void createMdFile(const std::string&oldMdFileName, 
-                  const std::string&newMdFileName, 
-                  std::vector<int> nMol) {
+void createMdFile(const std::string& oldMdFileName,
+                  const std::string& newMdFileName, std::vector<int> nMol) {
   ifstream oldMdFile;
   ofstream newMdFile;
   const int MAXLEN = 65535;
   char buffer[MAXLEN];
-  
-  //create new .omd file based on old .omd file
+
+  // create new .omd file based on old .omd file
 
   oldMdFile.open(oldMdFileName.c_str());
   newMdFile.open(newMdFileName.c_str());
-  
+
   oldMdFile.getline(buffer, MAXLEN);
- 
+
   std::size_t i = 0;
   while (!oldMdFile.eof()) {
-    
-    //correct molecule number
+    // correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
-      if (i<nMol.size()){
-	sprintf(buffer, "\tnMol = %i;", nMol.at(i));
-	newMdFile << buffer << std::endl;
-	i++;
+      if (i < nMol.size()) {
+        sprintf(buffer, "\tnMol = %i;", nMol.at(i));
+        newMdFile << buffer << std::endl;
+        i++;
       }
     } else
       newMdFile << buffer << std::endl;
-    
+
     oldMdFile.getline(buffer, MAXLEN);
   }
-  
+
   oldMdFile.close();
   newMdFile.close();
 
   if (i != nMol.size()) {
-    sprintf(painCave.errMsg, "Couldn't replace the correct number of nMol\n"
+    sprintf(painCave.errMsg,
+            "Couldn't replace the correct number of nMol\n"
             "\tstatements in component blocks.  Make sure that all\n"
             "\tcomponents in the template file have nMol=1");
     painCave.isFatal = 1;
     simError();
   }
-
 }
-

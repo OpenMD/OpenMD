@@ -47,89 +47,93 @@
 
 using namespace OpenMD;
 
+Triangle::Triangle()
+    : normal_(V3Zero),
+      centroid_(V3Zero),
+      area_(0.0),
+      mass_(0.0),
+      facetVelocity_(V3Zero),
+      a_(V3Zero),
+      b_(V3Zero),
+      c_(V3Zero),
+      HaveArea_(false),
+      HaveNormal_(false),
+      HaveUnitNormal_(false),
+      HaveCentroid_(false) {}
 
-Triangle::Triangle() :  normal_(V3Zero), centroid_(V3Zero), area_(0.0), 
-			mass_(0.0), facetVelocity_(V3Zero), 
-			a_(V3Zero), b_(V3Zero), c_(V3Zero),
-			HaveArea_(false), HaveNormal_(false), 
-			HaveUnitNormal_(false), HaveCentroid_(false) {}
-
-void Triangle::addVertices(Vector3d P1, Vector3d P2, Vector3d P3){
+void Triangle::addVertices(Vector3d P1, Vector3d P2, Vector3d P3) {
   vertices_[0] = P1;
   vertices_[1] = P2;
   vertices_[2] = P3;
 
   // Compute some quantites like a,b,c
-  a_ = P1-P2;
-  b_ = P1-P3;
-  c_ = P2-P3;  
+  a_ = P1 - P2;
+  b_ = P1 - P3;
+  c_ = P2 - P3;
 }
 
-
-RealType Triangle::computeArea(){
+RealType Triangle::computeArea() {
   HaveArea_ = true;
   area_ = getNormal().length() * 0.5;
   return area_;
 }
 // This should return the normal for our calculations.
-Vector3d Triangle::computeNormal(){
+Vector3d Triangle::computeNormal() {
   HaveNormal_ = true;
-  normal_ = cross(a_,b_);
+  normal_ = cross(a_, b_);
   return normal_;
 }
 // This should return the normal for our calculations.
-Vector3d Triangle::computeUnitNormal(){
+Vector3d Triangle::computeUnitNormal() {
   HaveUnitNormal_ = true;
-  unitnormal_ = cross(a_,b_);
+  unitnormal_ = cross(a_, b_);
   unitnormal_.normalize();
   return unitnormal_;
 }
 
-Vector3d Triangle::computeCentroid(){
+Vector3d Triangle::computeCentroid() {
   HaveCentroid_ = true;
-  centroid_ = (vertices_[0] + vertices_[1] + vertices_[2])/RealType(3.0);
+  centroid_ = (vertices_[0] + vertices_[1] + vertices_[2]) / RealType(3.0);
   return centroid_;
 }
 
-
 Mat3x3d Triangle::computeHydrodynamicTensor(RealType viscosity) {
-  
   Vector3d u0 = -a_;
   Vector3d v0 = centroid_ - vertices_[0];
-  RealType s0 = 0.5*cross(u0,v0).length();
-  
+  RealType s0 = 0.5 * cross(u0, v0).length();
+
   Vector3d u1 = -c_;
   Vector3d v1 = centroid_ - vertices_[1];
-  RealType s1 = 0.5*cross(u1,v1).length();
-  
+  RealType s1 = 0.5 * cross(u1, v1).length();
+
   Vector3d u2 = b_;
   Vector3d v2 = centroid_ - vertices_[2];
-  RealType s2 = 0.5*cross(u2,v2).length();
-  
+  RealType s2 = 0.5 * cross(u2, v2).length();
+
   Mat3x3d H;
-  H = hydro_tensor(centroid_,centroid_,vertices_[1],vertices_[0],s0,viscosity)+
-    hydro_tensor(centroid_,centroid_,vertices_[1],vertices_[2],s1,viscosity)+
-    hydro_tensor(centroid_,centroid_,vertices_[2],vertices_[0],s2,viscosity);
- 
+  H = hydro_tensor(centroid_, centroid_, vertices_[1], vertices_[0], s0,
+                   viscosity) +
+      hydro_tensor(centroid_, centroid_, vertices_[1], vertices_[2], s1,
+                   viscosity) +
+      hydro_tensor(centroid_, centroid_, vertices_[2], vertices_[0], s2,
+                   viscosity);
+
   // Hinv *= getArea();
   return H.inverse();
 }
 
-Mat3x3d Triangle::hydro_tensor(
-                               const Vector3d& ri,
-                               const Vector3d& rj0,
-                               const Vector3d& rj1,
-                               const Vector3d& rj2,
-                               RealType s, RealType viscosity){
-  
+Mat3x3d Triangle::hydro_tensor(const Vector3d& ri, const Vector3d& rj0,
+                               const Vector3d& rj1, const Vector3d& rj2,
+                               RealType s, RealType viscosity) {
   Vector3d v2 = (rj0 + rj1 + rj2) / RealType(3.0);  // sub-centroid
-  Vector3d dr = ri - v2;                // real centroid to sub-centroid
-  RealType l2 = RealType(1.0)/dr.lengthSquare();  
- 
-  Mat3x3d G;
-  G = (SquareMatrix3<RealType>::identity() + outProduct(dr,dr)*l2)*RealType(sqrt(l2));
+  Vector3d dr = ri - v2;  // real centroid to sub-centroid
+  RealType l2 = RealType(1.0) / dr.lengthSquare();
 
-  G *= 0.125/3.14159285358979;
-  G *= s/viscosity;
+  Mat3x3d G;
+  G = (SquareMatrix3<RealType>::identity() + outProduct(dr, dr) * l2) *
+      RealType(sqrt(l2));
+
+  G *= 0.125 / 3.14159285358979;
+  G *= s / viscosity;
   return G;
 }

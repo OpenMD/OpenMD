@@ -42,22 +42,21 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <cstdlib>
-#include <cstring>
 
 #include "types/TorsionStamp.hpp"
+
+#include <cstdlib>
+#include <cstring>
 namespace OpenMD {
-  
-  TorsionStamp::TorsionStamp(): hasOverride_(false) {
-    DefineOptionalParameter(GhostVectorSource, "ghostVectorSource");
-  }
-  
-  TorsionStamp::~TorsionStamp() {    
-  }
-  
-  void TorsionStamp::validate() {
-    DataHolder::validate();
-    CheckParameter(GhostVectorSource, isNonNegative());    
-  }
+
+TorsionStamp::TorsionStamp() : hasOverride_(false) {
+  DefineOptionalParameter(GhostVectorSource, "ghostVectorSource");
 }
+
+TorsionStamp::~TorsionStamp() {}
+
+void TorsionStamp::validate() {
+  DataHolder::validate();
+  CheckParameter(GhostVectorSource, isNonNegative());
+}
+}  // namespace OpenMD

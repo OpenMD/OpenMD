@@ -44,150 +44,145 @@
  */
 
 #include "perturbations/UniformField.hpp"
+
+#include "nonbonded/NonBondedInteraction.hpp"
+#include "primitives/Molecule.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
-#include "primitives/Molecule.hpp"
-#include "nonbonded/NonBondedInteraction.hpp"
 #include "utils/Constants.hpp"
 #ifdef IS_MPI
 #include "mpi.h"
 #endif
 
 namespace OpenMD {
-  
-  UniformField::UniformField(SimInfo* info) : initialized(false), 
-					      doUniformField(false), 
-					      doParticlePot(false),
-					      info_(info) {
-    simParams = info_->getSimParams();
+
+UniformField::UniformField(SimInfo* info)
+    : initialized(false),
+      doUniformField(false),
+      doParticlePot(false),
+      info_(info) {
+  simParams = info_->getSimParams();
+}
+
+void UniformField::initialize() {
+  std::vector<RealType> ef;
+
+  if (simParams->haveElectricField()) {
+    doUniformField = true;
+    ef = simParams->getElectricField();
   }
-  
-  void UniformField::initialize() {
-
-    std::vector<RealType> ef;
-
-    if (simParams->haveElectricField()) {
-      doUniformField = true;
-      ef = simParams->getElectricField();            
-    }   
-    if (simParams->haveUniformField()) {
-      doUniformField = true;
-      ef = simParams->getUniformField();
-    }   
-    if (ef.size() != 3) {
-      sprintf(painCave.errMsg,
-              "UniformField: Incorrect number of parameters specified.\n"
-              "\tthere should be 3 parameters, but %lu were specified.\n", ef.size());
-      painCave.isFatal = 1;
-      simError();      
-    }
-    EF.x() = ef[0];
-    EF.y() = ef[1];
-    EF.z() = ef[2];
-
-    int storageLayout_ = info_->getSnapshotManager()->getStorageLayout();
-    if (storageLayout_ & DataStorage::dslParticlePot) doParticlePot = true;
-    initialized = true;
+  if (simParams->haveUniformField()) {
+    doUniformField = true;
+    ef = simParams->getUniformField();
   }
-  
-  void UniformField::applyPerturbation() {
+  if (ef.size() != 3) {
+    sprintf(painCave.errMsg,
+            "UniformField: Incorrect number of parameters specified.\n"
+            "\tthere should be 3 parameters, but %lu were specified.\n",
+            ef.size());
+    painCave.isFatal = 1;
+    simError();
+  }
+  EF.x() = ef[0];
+  EF.y() = ef[1];
+  EF.z() = ef[2];
 
-    if (!initialized) initialize();
+  int storageLayout_ = info_->getSnapshotManager()->getStorageLayout();
+  if (storageLayout_ & DataStorage::dslParticlePot) doParticlePot = true;
+  initialized = true;
+}
 
-    SimInfo::MoleculeIterator i;
-    Molecule::AtomIterator  j;
-    Molecule* mol;
-    Atom* atom;
-    AtomType* atype;
-    potVec longRangePotential(0.0);
+void UniformField::applyPerturbation() {
+  if (!initialized) initialize();
 
-    RealType C;
-    Vector3d D;
-    RealType U;
-    RealType fPot;
-    Vector3d t;
-    Vector3d f;
-    Vector3d r;
+  SimInfo::MoleculeIterator i;
+  Molecule::AtomIterator j;
+  Molecule* mol;
+  Atom* atom;
+  AtomType* atype;
+  potVec longRangePotential(0.0);
 
-    bool isCharge;
+  RealType C;
+  Vector3d D;
+  RealType U;
+  RealType fPot;
+  Vector3d t;
+  Vector3d f;
+  Vector3d r;
 
-    if (doUniformField) {
+  bool isCharge;
 
-      U = 0.0;
-      fPot = 0.0;
+  if (doUniformField) {
+    U = 0.0;
+    fPot = 0.0;
 
-      for (mol = info_->beginMolecule(i); mol != NULL; 
-           mol = info_->nextMolecule(i)) {      
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginAtom(j); atom != NULL; atom = mol->nextAtom(j)) {
+        isCharge = false;
+        C = 0.0;
 
-	for (atom = mol->beginAtom(j); atom != NULL;
-	     atom = mol->nextAtom(j)) {
+        atype = atom->getAtomType();
 
-          isCharge = false;
-	  C = 0.0;
-          
-          atype = atom->getAtomType();
+        // ad-hoc choice of the origin for potential calculation and
+        // fluctuating charge force:
 
-          // ad-hoc choice of the origin for potential calculation and
-          // fluctuating charge force:
+        r = atom->getPos();
+        info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
 
-          r = atom->getPos();
-          info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(r);
+        atom->addElectricField(EF * Constants::chargeFieldConvert);
 
-          atom->addElectricField(EF * Constants::chargeFieldConvert);
-                    
-	  FixedChargeAdapter fca = FixedChargeAdapter(atype);
-	  if ( fca.isFixedCharge() ) {
-	    isCharge = true;
-	    C = fca.getCharge();
-	  }
-	  
-          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-          if ( fqa.isFluctuatingCharge() ) {
-	    isCharge = true;
-            C += atom->getFlucQPos();
-            atom->addFlucQFrc( dot(r, EF) 
-                               * Constants::chargeFieldConvert );
+        FixedChargeAdapter fca = FixedChargeAdapter(atype);
+        if (fca.isFixedCharge()) {
+          isCharge = true;
+          C = fca.getCharge();
+        }
+
+        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+        if (fqa.isFluctuatingCharge()) {
+          isCharge = true;
+          C += atom->getFlucQPos();
+          atom->addFlucQFrc(dot(r, EF) * Constants::chargeFieldConvert);
+        }
+
+        if (isCharge) {
+          f = EF * C * Constants::chargeFieldConvert;
+          atom->addFrc(f);
+          U = -dot(r, f);
+
+          if (doParticlePot) {
+            atom->addParticlePot(U);
           }
-	  
-	  if (isCharge) {
-	    f = EF * C * Constants::chargeFieldConvert;
-	    atom->addFrc(f);
-	    U = -dot(r, f);
+          fPot += U;
+        }
 
-	    if (doParticlePot) {      
-	      atom->addParticlePot(U);
-	    }
-	    fPot += U;
-	  }
-	    
-          MultipoleAdapter ma = MultipoleAdapter(atype);
-	  if (ma.isDipole() ) {
+        MultipoleAdapter ma = MultipoleAdapter(atype);
+        if (ma.isDipole()) {
+          D = atom->getDipole() * Constants::dipoleFieldConvert;
 
-            D = atom->getDipole() * Constants::dipoleFieldConvert;
-            
-	    t = cross(D, EF);
-	    atom->addTrq(t);
+          t = cross(D, EF);
+          atom->addTrq(t);
 
-	    U = -dot(D, EF);
+          U = -dot(D, EF);
 
-	    if (doParticlePot) {      
-	      atom->addParticlePot(U);
-	    }
-	    fPot += U;
-	  }
-	}
+          if (doParticlePot) {
+            atom->addParticlePot(U);
+          }
+          fPot += U;
+        }
       }
+    }
 
 #ifdef IS_MPI
-      MPI_Allreduce(MPI_IN_PLACE, &fPot, 1, MPI_REALTYPE, 
-                    MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &fPot, 1, MPI_REALTYPE, MPI_SUM,
+                  MPI_COMM_WORLD);
 #endif
 
-      Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
-      longRangePotential = snap->getLongRangePotentials();
-      longRangePotential[ELECTROSTATIC_FAMILY] += fPot;
-      snap->setLongRangePotential(longRangePotential);
-    }
+    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    longRangePotential = snap->getLongRangePotentials();
+    longRangePotential[ELECTROSTATIC_FAMILY] += fPot;
+    snap->setLongRangePotential(longRangePotential);
   }
 }
+}  // namespace OpenMD

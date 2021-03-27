@@ -5,37 +5,30 @@
  * $Id$
  */
 #include "antlr/ASTRefCount.hpp"
+
 #include "antlr/AST.hpp"
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-ASTRef::ASTRef(AST* p)
-: ptr(p), count(1)
-{
-	if (p && !p->ref)
-		p->ref = this;
+ASTRef::ASTRef(AST* p) : ptr(p), count(1) {
+  if (p && !p->ref) p->ref = this;
 }
 
-ASTRef::~ASTRef()
-{
-	delete ptr;
-}
+ASTRef::~ASTRef() { delete ptr; }
 
-ASTRef* ASTRef::getRef(const AST* p)
-{
-	if (p) {
-		AST* pp = const_cast<AST*>(p);
-		if (pp->ref)
-			return pp->ref->increment();
-		else
-			return new ASTRef(pp);
-	} else
-		return 0;
+ASTRef* ASTRef::getRef(const AST* p) {
+  if (p) {
+    AST* pp = const_cast<AST*>(p);
+    if (pp->ref)
+      return pp->ref->increment();
+    else
+      return new ASTRef(pp);
+  } else
+    return 0;
 }
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
-

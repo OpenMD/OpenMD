@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file NVE.cpp
  * @author tlin
@@ -51,124 +51,109 @@
  */
 
 #include "integrators/NVE.hpp"
+
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
 
 namespace OpenMD {
 
+NVE::NVE(SimInfo* info) : VelocityVerletIntegrator(info) {}
 
-  NVE::NVE(SimInfo* info) : VelocityVerletIntegrator(info){
+void NVE::moveA() {
+  SimInfo::MoleculeIterator i;
+  Molecule::IntegrableObjectIterator j;
+  Molecule* mol;
+  StuntDouble* sd;
+  Vector3d vel;
+  Vector3d pos;
+  Vector3d frc;
+  Vector3d Tb;
+  Vector3d ji;
+  RealType mass;
 
-  }
+  for (mol = info_->beginMolecule(i); mol != NULL;
+       mol = info_->nextMolecule(i)) {
+    for (sd = mol->beginIntegrableObject(j); sd != NULL;
+         sd = mol->nextIntegrableObject(j)) {
+      vel = sd->getVel();
+      pos = sd->getPos();
+      frc = sd->getFrc();
+      mass = sd->getMass();
 
-  void NVE::moveA(){
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator  j;
-    Molecule* mol;
-    StuntDouble* sd;
-    Vector3d vel;
-    Vector3d pos;
-    Vector3d frc;
-    Vector3d Tb;
-    Vector3d ji;
-    RealType mass;
-    
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
+      // velocity half step
+      vel += (dt2 / mass * Constants::energyConvert) * frc;
 
-      for (sd = mol->beginIntegrableObject(j); sd != NULL;
-	   sd = mol->nextIntegrableObject(j)) {
+      // position whole step
+      pos += dt * vel;
 
-	vel = sd->getVel();
-	pos = sd->getPos();
-	frc = sd->getFrc();
-	mass = sd->getMass();
-                
-	// velocity half step
-	vel += (dt2 /mass * Constants::energyConvert) * frc;
+      sd->setVel(vel);
+      sd->setPos(pos);
 
-	// position whole step
-	pos += dt * vel;
+      if (sd->isDirectional()) {
+        // get and convert the torque to body frame
 
-	sd->setVel(vel);
-	sd->setPos(pos);
+        Tb = sd->lab2Body(sd->getTrq());
 
-	if (sd->isDirectional()){
+        // get the angular momentum, and propagate a half step
 
-	  // get and convert the torque to body frame
+        ji = sd->getJ();
 
-	  Tb = sd->lab2Body(sd->getTrq());
+        ji += (dt2 * Constants::energyConvert) * Tb;
 
-	  // get the angular momentum, and propagate a half step
+        rotAlgo_->rotate(sd, ji, dt);
 
-	  ji = sd->getJ();
-
-	  ji += (dt2  * Constants::energyConvert) * Tb;
-
-	  rotAlgo_->rotate(sd, ji, dt);
-
-	  sd->setJ(ji);
-	}
-
-            
+        sd->setJ(ji);
       }
     }
-    flucQ_->moveA();
-    rattle_->constraintA();    
-  }    
+  }
+  flucQ_->moveA();
+  rattle_->constraintA();
+}
 
-  void NVE::moveB(){
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator  j;
-    Molecule* mol;
-    StuntDouble* sd;
-    Vector3d vel;
-    Vector3d frc;
-    Vector3d Tb;
-    Vector3d ji;
-    RealType mass;
-    
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
+void NVE::moveB() {
+  SimInfo::MoleculeIterator i;
+  Molecule::IntegrableObjectIterator j;
+  Molecule* mol;
+  StuntDouble* sd;
+  Vector3d vel;
+  Vector3d frc;
+  Vector3d Tb;
+  Vector3d ji;
+  RealType mass;
 
-      for (sd = mol->beginIntegrableObject(j); sd != NULL;
-	   sd = mol->nextIntegrableObject(j)) {
+  for (mol = info_->beginMolecule(i); mol != NULL;
+       mol = info_->nextMolecule(i)) {
+    for (sd = mol->beginIntegrableObject(j); sd != NULL;
+         sd = mol->nextIntegrableObject(j)) {
+      vel = sd->getVel();
+      frc = sd->getFrc();
+      mass = sd->getMass();
 
-	vel = sd->getVel();
-	frc = sd->getFrc();
-	mass = sd->getMass();
-                
-	// velocity half step
-	vel += (dt2 /mass * Constants::energyConvert) * frc;
-                
-	sd->setVel(vel);
+      // velocity half step
+      vel += (dt2 / mass * Constants::energyConvert) * frc;
 
-	if (sd->isDirectional()){
+      sd->setVel(vel);
 
-	  // get and convert the torque to body frame
+      if (sd->isDirectional()) {
+        // get and convert the torque to body frame
 
-	  Tb = sd->lab2Body(sd->getTrq());
+        Tb = sd->lab2Body(sd->getTrq());
 
-	  // get the angular momentum, and propagate a half step
+        // get the angular momentum, and propagate a half step
 
-	  ji = sd->getJ();
+        ji = sd->getJ();
 
-	  ji += (dt2  * Constants::energyConvert) * Tb;
+        ji += (dt2 * Constants::energyConvert) * Tb;
 
-	  sd->setJ(ji);
-	}
-
-            
+        sd->setJ(ji);
       }
     }
-  
-    flucQ_->moveB();
-    rattle_->constraintB();
   }
 
+  flucQ_->moveB();
+  rattle_->constraintB();
+}
 
-  RealType NVE::calcConservedQuantity() {
-    return thermo.getTotalEnergy();
-  }
+RealType NVE::calcConservedQuantity() { return thermo.getTotalEnergy(); }
 
-} //end namespace OpenMD
+}  // end namespace OpenMD

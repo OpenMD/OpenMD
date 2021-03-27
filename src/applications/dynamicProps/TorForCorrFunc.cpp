@@ -46,90 +46,84 @@
 #include "applications/dynamicProps/TorForCorrFunc.hpp"
 
 namespace OpenMD {
-  TorForCorrFunc::TorForCorrFunc(SimInfo* info,
-                                 const std::string& filename,
-                                 const std::string& sele1,
-                                 const std::string& sele2)
+TorForCorrFunc::TorForCorrFunc(SimInfo* info, const std::string& filename,
+                               const std::string& sele1,
+                               const std::string& sele2)
     : ObjectCCF<Mat3x3d>(info, filename, sele1, sele2,
                          DataStorage::dslForce | DataStorage::dslAmat |
-                         DataStorage::dslTorque){
-      
-    setCorrFuncType("Torque - Force Cross Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".tfcorr");
+                             DataStorage::dslTorque) {
+  setCorrFuncType("Torque - Force Cross Correlation Function");
+  setOutputName(getPrefix(dumpFilename_) + ".tfcorr");
 
-    forces_.resize(nFrames_);
-    torques_.resize(nFrames_);
+  forces_.resize(nFrames_);
+  torques_.resize(nFrames_);
 
-    sumForces_ = V3Zero;
-    sumTorques_ = V3Zero;
-    forcesCount_ = 0;
-    torquesCount_ = 0;
-  }
+  sumForces_ = V3Zero;
+  sumTorques_ = V3Zero;
+  forcesCount_ = 0;
+  torquesCount_ = 0;
+}
 
-  void TorForCorrFunc::validateSelection(SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;
-    
-    for (sd = seleMan.beginSelected(i); sd != NULL;
-         sd = seleMan.nextSelected(i)) {
-      
-      if (!sd->isDirectional()) {
-        sprintf(painCave.errMsg,
-                "TorForCorrFunc::validateSelection Error: selection "
-                "%d (%s)\n"
-                "\t is not a Directional object\n", sd->getGlobalIndex(),
-                sd->getType().c_str() );
-        painCave.isFatal = 1;
-        simError();
-      }
-    }
-  }
+void TorForCorrFunc::validateSelection(SelectionManager& seleMan) {
+  StuntDouble* sd;
+  int i;
 
-
-  int TorForCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    Mat3x3d A = sd->getA();
-    Vector3d t = sd->getTrq();
-    propertyTemp = A * t;
-    torques_[frame].push_back( propertyTemp );
-    sumTorques_ += propertyTemp;
-    torquesCount_++;
-    return torques_[frame].size() - 1;
-  }
-
-  int TorForCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
-    Mat3x3d A = sd->getA();
-    Vector3d f = sd->getFrc();
-    propertyTemp = A * f;
-    forces_[frame].push_back( propertyTemp );
-    sumForces_ += propertyTemp;
-    forcesCount_++;
-    return forces_[frame].size() - 1;
-  }
-
-  Mat3x3d TorForCorrFunc::calcCorrVal(int frame1, int frame2,
-                                      int id1, int id2) {
-    return outProduct( torques_[frame1][id1] , forces_[frame2][id2] );
-  }
-
-  void TorForCorrFunc::postCorrelate() {
-    //gets the average of the forces
-    sumForces_ /= RealType(forcesCount_);
-    
-    //gets the average of the torques
-    sumTorques_ /= RealType(torquesCount_);
-    
-    Mat3x3d correlationOfAverages_ = outProduct(sumTorques_, sumForces_);
-    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
-      if (count_[i] > 0) {
-        
-        histogram_[i] /= RealType(count_[i]);
-
-        // The outerProduct correlation of the averages is subtracted
-        // from the correlation value:
-        histogram_[i] -= correlationOfAverages_;
-      } else {
-        histogram_[i] = M3Zero;
-      }
+  for (sd = seleMan.beginSelected(i); sd != NULL;
+       sd = seleMan.nextSelected(i)) {
+    if (!sd->isDirectional()) {
+      sprintf(painCave.errMsg,
+              "TorForCorrFunc::validateSelection Error: selection "
+              "%d (%s)\n"
+              "\t is not a Directional object\n",
+              sd->getGlobalIndex(), sd->getType().c_str());
+      painCave.isFatal = 1;
+      simError();
     }
   }
 }
+
+int TorForCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+  Mat3x3d A = sd->getA();
+  Vector3d t = sd->getTrq();
+  propertyTemp = A * t;
+  torques_[frame].push_back(propertyTemp);
+  sumTorques_ += propertyTemp;
+  torquesCount_++;
+  return torques_[frame].size() - 1;
+}
+
+int TorForCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
+  Mat3x3d A = sd->getA();
+  Vector3d f = sd->getFrc();
+  propertyTemp = A * f;
+  forces_[frame].push_back(propertyTemp);
+  sumForces_ += propertyTemp;
+  forcesCount_++;
+  return forces_[frame].size() - 1;
+}
+
+Mat3x3d TorForCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
+  return outProduct(torques_[frame1][id1], forces_[frame2][id2]);
+}
+
+void TorForCorrFunc::postCorrelate() {
+  // gets the average of the forces
+  sumForces_ /= RealType(forcesCount_);
+
+  // gets the average of the torques
+  sumTorques_ /= RealType(torquesCount_);
+
+  Mat3x3d correlationOfAverages_ = outProduct(sumTorques_, sumForces_);
+  for (unsigned int i = 0; i < nTimeBins_; ++i) {
+    if (count_[i] > 0) {
+      histogram_[i] /= RealType(count_[i]);
+
+      // The outerProduct correlation of the averages is subtracted
+      // from the correlation value:
+      histogram_[i] -= correlationOfAverages_;
+    } else {
+      histogram_[i] = M3Zero;
+    }
+  }
+}
+}  // namespace OpenMD

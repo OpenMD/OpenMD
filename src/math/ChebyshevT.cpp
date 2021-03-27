@@ -42,42 +42,39 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "math/ChebyshevT.hpp"
 
 namespace OpenMD {
-  ChebyshevT::ChebyshevT(int maxPower) : maxPower_(maxPower){
+ChebyshevT::ChebyshevT(int maxPower) : maxPower_(maxPower) {
+  assert(maxPower >= 0);
+  GeneratePolynomials(maxPower_);
+}
 
-    assert(maxPower >= 0);
-    GeneratePolynomials(maxPower_);
+void ChebyshevT::GeneratePolynomials(int maxPower) {
+  GenerateFirstTwoTerms();
+
+  DoublePolynomial twoX;
+  twoX.setCoefficient(1, 2.0);
+
+  // recursive generate the high order term of Chebyshev Polynomials
+  // Cn+1(x) = Cn(x) * 2x - Cn-1(x)
+  for (int i = 2; i <= maxPower; ++i) {
+    DoublePolynomial cn;
+
+    cn = polyList_[i - 1] * twoX - polyList_[i - 2];
+    polyList_.push_back(cn);
   }
+}
 
-  void ChebyshevT::GeneratePolynomials(int maxPower) {
+void ChebyshevT::GenerateFirstTwoTerms() {
+  DoublePolynomial t0;
+  t0.setCoefficient(0, 1.0);
+  polyList_.push_back(t0);
 
-    GenerateFirstTwoTerms();
+  DoublePolynomial t1;
+  t1.setCoefficient(1, 1.0);
+  polyList_.push_back(t1);
+}
 
-    DoublePolynomial twoX;
-    twoX.setCoefficient(1, 2.0);
-
-    //recursive generate the high order term of Chebyshev Polynomials
-    //Cn+1(x) = Cn(x) * 2x - Cn-1(x)
-    for (int i = 2; i <= maxPower; ++i) {
-      DoublePolynomial cn;
-        
-      cn = polyList_[i-1] * twoX - polyList_[i-2];
-      polyList_.push_back(cn);
-    }
-  }
-
-
-  void ChebyshevT::GenerateFirstTwoTerms() {
-    DoublePolynomial t0;
-    t0.setCoefficient(0, 1.0);
-    polyList_.push_back(t0);
-    
-    DoublePolynomial t1;
-    t1.setCoefficient(1, 1.0);
-    polyList_.push_back(t1);    
-  }
-
-} //end namespace OpenMD
+}  // end namespace OpenMD

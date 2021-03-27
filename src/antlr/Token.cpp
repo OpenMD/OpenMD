@@ -6,63 +6,39 @@
  */
 
 #include "antlr/Token.hpp"
+
 #include "antlr/String.hpp"
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-int Token::getColumn() const
-{
-	return 0;
+int Token::getColumn() const { return 0; }
+
+int Token::getLine() const { return 0; }
+
+ANTLR_USE_NAMESPACE(std) string Token::getText() const { return "<no text>"; }
+
+int Token::getType() const { return type; }
+
+void Token::setColumn(int) {}
+
+void Token::setLine(int) {}
+
+void Token::setText(const ANTLR_USE_NAMESPACE(std) string&) {}
+
+void Token::setType(int t) { type = t; }
+
+void Token::setFilename(const ANTLR_USE_NAMESPACE(std) string&) {}
+
+ANTLR_USE_NAMESPACE(std) string emptyString("");
+
+const ANTLR_USE_NAMESPACE(std) string& Token::getFilename() const {
+  return emptyString;
 }
 
-int Token::getLine() const
-{
-	return 0;
-}
-
-ANTLR_USE_NAMESPACE(std)string Token::getText() const
-{
-	return "<no text>";
-}
-
-int Token::getType() const
-{
-	return type;
-}
-
-void Token::setColumn(int)
-{
-}
-
-void Token::setLine(int)
-{
-}
-
-void Token::setText(const ANTLR_USE_NAMESPACE(std)string&)
-{
-}
-
-void Token::setType(int t)
-{
-	type = t;
-}
-
-void Token::setFilename(const ANTLR_USE_NAMESPACE(std)string&)
-{
-}
-
-ANTLR_USE_NAMESPACE(std)string emptyString("");
-
-const ANTLR_USE_NAMESPACE(std)string& Token::getFilename() const
-{
-	return emptyString;
-}
-
-ANTLR_USE_NAMESPACE(std)string Token::toString() const
-{
-	return "[\""+getText()+"\",<"+type+">]";
+ANTLR_USE_NAMESPACE(std) string Token::toString() const {
+  return "[\"" + getText() + "\",<" + type + ">]";
 }
 
 ANTLR_API RefToken nullToken;

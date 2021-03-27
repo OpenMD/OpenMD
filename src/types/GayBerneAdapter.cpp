@@ -42,99 +42,100 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "types/GayBerneAdapter.hpp"
-#include "utils/simError.h"
+
 #include <cstdio>
 #include <memory>
 
+#include "utils/simError.h"
+
 namespace OpenMD {
 
-  bool GayBerneAdapter::isGayBerne() {
-    return at_->hasProperty(GBtypeID);
-  }
-  
-  GBAtypeParameters GayBerneAdapter::getGayBerneParam() {
-    
-    if (!isGayBerne()) {
-      sprintf( painCave.errMsg,               
-               "GayBerneAdapter::getGayBerneParam was passed an atomType (%s)\n"
-               "\tthat does not appear to be a Gay-Berne atom.\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    std::shared_ptr<GenericData> data = at_->getPropertyByName(GBtypeID);
-    if (data == nullptr) {
-      sprintf( painCave.errMsg, 
-               "GayBerneAdapter::getGayBerneParam could not find Gay-Berne\n"
-               "\tparameters for atomType %s.\n", at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError(); 
-    }
-    
-    std::shared_ptr<GBAtypeData> gbData = std::dynamic_pointer_cast<GBAtypeData>(data);
-    if (gbData == nullptr) {
-      sprintf( painCave.errMsg,
-               "GayBerneAdapter::getGayBerneParam could not convert\n"
-               "\tGenericData to GBAtypeData for atom type %s\n", 
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    return gbData->getData();
-  }
-  
-  RealType GayBerneAdapter::getD() {    
-    GBAtypeParameters gbParam = getGayBerneParam();
-    return gbParam.GB_d;
+bool GayBerneAdapter::isGayBerne() { return at_->hasProperty(GBtypeID); }
+
+GBAtypeParameters GayBerneAdapter::getGayBerneParam() {
+  if (!isGayBerne()) {
+    sprintf(painCave.errMsg,
+            "GayBerneAdapter::getGayBerneParam was passed an atomType (%s)\n"
+            "\tthat does not appear to be a Gay-Berne atom.\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
   }
 
-  RealType GayBerneAdapter::getL() {    
-    GBAtypeParameters gbParam = getGayBerneParam();
-    return gbParam.GB_l;
+  std::shared_ptr<GenericData> data = at_->getPropertyByName(GBtypeID);
+  if (data == nullptr) {
+    sprintf(painCave.errMsg,
+            "GayBerneAdapter::getGayBerneParam could not find Gay-Berne\n"
+            "\tparameters for atomType %s.\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
   }
 
-  RealType GayBerneAdapter::getEpsX() {    
-    GBAtypeParameters gbParam = getGayBerneParam();
-    return gbParam.GB_eps_X;
+  std::shared_ptr<GBAtypeData> gbData =
+      std::dynamic_pointer_cast<GBAtypeData>(data);
+  if (gbData == nullptr) {
+    sprintf(painCave.errMsg,
+            "GayBerneAdapter::getGayBerneParam could not convert\n"
+            "\tGenericData to GBAtypeData for atom type %s\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
   }
 
-  RealType GayBerneAdapter::getEpsS() {    
-    GBAtypeParameters gbParam = getGayBerneParam();
-    return gbParam.GB_eps_S;
-  }
-
-  RealType GayBerneAdapter::getEpsE() {    
-    GBAtypeParameters gbParam = getGayBerneParam();
-    return gbParam.GB_eps_E;
-  }
-
-  RealType GayBerneAdapter::getDw() {    
-    GBAtypeParameters gbParam = getGayBerneParam();
-    return gbParam.GB_dw;
-  }
-    
-  void GayBerneAdapter::makeGayBerne(RealType d, RealType l, RealType eps_X, 
-                                     RealType eps_S, RealType eps_E, 
-                                     RealType dw){
-    if (isGayBerne()){
-      at_->removeProperty(GBtypeID);
-    }
-
-    GBAtypeParameters gbParam {};
-    gbParam.GB_d = d;
-    gbParam.GB_l = l;
-    gbParam.GB_eps_X = eps_X;
-    gbParam.GB_eps_S = eps_S;
-    gbParam.GB_eps_E = eps_E;
-    gbParam.GB_dw = dw;
-    
-    at_->addProperty(std::make_shared<GBAtypeData>(GBtypeID, gbParam));
-  }
+  return gbData->getData();
 }
+
+RealType GayBerneAdapter::getD() {
+  GBAtypeParameters gbParam = getGayBerneParam();
+  return gbParam.GB_d;
+}
+
+RealType GayBerneAdapter::getL() {
+  GBAtypeParameters gbParam = getGayBerneParam();
+  return gbParam.GB_l;
+}
+
+RealType GayBerneAdapter::getEpsX() {
+  GBAtypeParameters gbParam = getGayBerneParam();
+  return gbParam.GB_eps_X;
+}
+
+RealType GayBerneAdapter::getEpsS() {
+  GBAtypeParameters gbParam = getGayBerneParam();
+  return gbParam.GB_eps_S;
+}
+
+RealType GayBerneAdapter::getEpsE() {
+  GBAtypeParameters gbParam = getGayBerneParam();
+  return gbParam.GB_eps_E;
+}
+
+RealType GayBerneAdapter::getDw() {
+  GBAtypeParameters gbParam = getGayBerneParam();
+  return gbParam.GB_dw;
+}
+
+void GayBerneAdapter::makeGayBerne(RealType d, RealType l, RealType eps_X,
+                                   RealType eps_S, RealType eps_E,
+                                   RealType dw) {
+  if (isGayBerne()) {
+    at_->removeProperty(GBtypeID);
+  }
+
+  GBAtypeParameters gbParam{};
+  gbParam.GB_d = d;
+  gbParam.GB_l = l;
+  gbParam.GB_eps_X = eps_X;
+  gbParam.GB_eps_S = eps_S;
+  gbParam.GB_eps_E = eps_E;
+  gbParam.GB_dw = dw;
+
+  at_->addProperty(std::make_shared<GBAtypeData>(GBtypeID, gbParam));
+}
+}  // namespace OpenMD

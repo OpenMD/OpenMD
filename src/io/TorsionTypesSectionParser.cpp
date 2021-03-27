@@ -44,67 +44,62 @@
  */
 
 #include "io/TorsionTypesSectionParser.hpp"
-#include "types/TorsionTypeParser.hpp"
+
 #include "brains/ForceField.hpp"
+#include "types/TorsionTypeParser.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
 
-  TorsionTypesSectionParser::TorsionTypesSectionParser(ForceFieldOptions& options) : 
-    options_(options) {
+TorsionTypesSectionParser::TorsionTypesSectionParser(ForceFieldOptions& options)
+    : options_(options) {
+  setSectionName("TorsionTypes");
+}
 
-    setSectionName("TorsionTypes");
+void TorsionTypesSectionParser::parseLine(ForceField& ff,
+                                          const std::string& line, int lineNo) {
+  StringTokenizer tokenizer(line);
+  TorsionTypeParser ttParser;
+  TorsionType* torsionType = NULL;
+
+  std::string torsionConvention = options_.getTorsionAngleConvention();
+  toUpper(torsionConvention);
+
+  if (torsionConvention.compare("180_IS_TRANS") == 0)
+    ttParser.Trans180();
+  else
+    ttParser.Cis180();
+
+  int nTokens = tokenizer.countTokens();
+
+  if (nTokens < 5) {
+    sprintf(painCave.errMsg,
+            "TorsionTypesSectionParser Error: Not enough tokens at line %d\n",
+            lineNo);
+    painCave.isFatal = 1;
+    simError();
+    return;
   }
 
-  void TorsionTypesSectionParser::parseLine(ForceField& ff,
-					    const std::string& line, 
-					    int lineNo){
-    StringTokenizer tokenizer(line);
-    TorsionTypeParser ttParser;
-    TorsionType* torsionType = NULL;
-    
-    std::string torsionConvention = options_.getTorsionAngleConvention();
-    toUpper(torsionConvention);
+  std::string at1 = tokenizer.nextToken();
+  std::string at2 = tokenizer.nextToken();
+  std::string at3 = tokenizer.nextToken();
+  std::string at4 = tokenizer.nextToken();
+  std::string remainder = tokenizer.getRemainingString();
 
-    if (torsionConvention.compare("180_IS_TRANS") == 0)
-      ttParser.Trans180();
-    else
-      ttParser.Cis180();
-  
-    int nTokens = tokenizer.countTokens();
+  try {
+    torsionType = ttParser.parseLine(remainder);
+  } catch (OpenMDException& e) {
+    sprintf(painCave.errMsg,
+            "TorsionTypesSectionParser Error: %s "
+            "at line %d\n",
+            e.what(), lineNo);
+    painCave.isFatal = 1;
+    simError();
+  }
 
-    if (nTokens < 5) {
-      sprintf(painCave.errMsg, "TorsionTypesSectionParser Error: Not enough tokens at line %d\n",
-              lineNo);
-      painCave.isFatal = 1;
-      simError();
-      return;
-    }
-    
-    std::string at1 = tokenizer.nextToken();
-    std::string at2 = tokenizer.nextToken();
-    std::string at3 = tokenizer.nextToken();
-    std::string at4 = tokenizer.nextToken();
-    std::string remainder = tokenizer.getRemainingString();
-
-    try {
-      torsionType = ttParser.parseLine(remainder);
-    }
-    catch( OpenMDException& e ) {
-      
-      sprintf(painCave.errMsg, "TorsionTypesSectionParser Error: %s "
-              "at line %d\n",
-              e.what(), lineNo);
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    if (torsionType != NULL) {
-      ff.addTorsionType(at1, at2, at3, at4, torsionType);
-    }
-
-  }  
-} //end namespace OpenMD
-
-
-
+  if (torsionType != NULL) {
+    ff.addTorsionType(at1, at2, at3, at4, torsionType);
+  }
+}
+}  // end namespace OpenMD

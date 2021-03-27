@@ -43,31 +43,30 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
 #include <cmath>
-#include <iostream>
-#include <string>
-#include <map>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
+#include <iostream>
+#include <map>
+#include <string>
 
-#include "thermalizerCmd.hpp"
-#include "brains/Velocitizer.hpp"
-#include "brains/Register.hpp"
-#include "brains/SimInfo.hpp"
-#include "brains/SimCreator.hpp"
-#include "brains/Thermo.hpp"
 #include "brains/ForceManager.hpp"
+#include "brains/Register.hpp"
+#include "brains/SimCreator.hpp"
+#include "brains/SimInfo.hpp"
+#include "brains/Thermo.hpp"
+#include "brains/Velocitizer.hpp"
 #include "io/DumpReader.hpp"
 #include "io/DumpWriter.hpp"
-#include "utils/StringUtils.hpp"
+#include "thermalizerCmd.hpp"
 #include "utils/MemoryUtils.hpp"
+#include "utils/StringUtils.hpp"
 
 using namespace OpenMD;
 
-int main(int argc, char *argv []) {
-
+int main(int argc, char* argv[]) {
   gengetopt_args_info args_info;
   std::string inputFileName;
   std::string outputFileName;
@@ -82,10 +81,9 @@ int main(int argc, char *argv []) {
   if (args_info.input_given) {
     inputFileName = args_info.input_arg;
   } else {
-    if (args_info.inputs_num){
+    if (args_info.inputs_num) {
       inputFileName = args_info.inputs[0];
-    }
-    else{
+    } else {
       sprintf(painCave.errMsg,
               "No input file name was specified on the command line");
       painCave.severity = OPENMD_ERROR;
@@ -115,8 +113,8 @@ int main(int argc, char *argv []) {
   Thermo thermo(info);
 
   // Remove in favor of std::make_unique<> when we switch to C++14 and above
-  std::unique_ptr<Velocitizer> veloSet {Utils::make_unique<Velocitizer>(info)};
-  
+  std::unique_ptr<Velocitizer> veloSet{Utils::make_unique<Velocitizer>(info)};
+
   ForceManager* forceMan = new ForceManager(info);
 
   // Just in case we were passed a system that is on the move:
@@ -153,7 +151,8 @@ int main(int argc, char *argv []) {
     veloSet->randomize(temperature);
   }
 
-  // If resampling charge temperature, we call the randomizeChargeVelocity method
+  // If resampling charge temperature, we call the randomizeChargeVelocity
+  // method
   if (args_info.chargetemperature_given) {
     RealType charge_temperature = args_info.chargetemperature_arg;
 
@@ -179,10 +178,9 @@ int main(int argc, char *argv []) {
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
-    }
-    else {
+    } else {
       if (instKE >= epsilon) {
-	lambda =  sqrt((energy - instPE) / instKE);
+        lambda = sqrt((energy - instPE) / instKE);
         veloSet->scale(lambda);
       }
       // If the current kinetic energy is close to zero, we will
@@ -191,7 +189,7 @@ int main(int argc, char *argv []) {
       else {
         veloSet->randomize(10.0);
         instKE = thermo.getKinetic();
-	lambda = sqrt( (energy - instPE) / instKE );
+        lambda = sqrt((energy - instPE) / instKE);
         veloSet->scale(lambda);
       }
     }

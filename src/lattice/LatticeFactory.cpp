@@ -42,59 +42,59 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "lattice/LatticeFactory.hpp"
+
 #include "lattice/LatticeCreator.hpp"
 #include "utils/MemoryUtils.hpp"
 
 namespace OpenMD {
 
-  LatticeFactory::~LatticeFactory() {
-    Utils::deletePointers(creatorMap_);
-  }
+LatticeFactory::~LatticeFactory() { Utils::deletePointers(creatorMap_); }
 
-  bool LatticeFactory::registerLattice(LatticeCreator* creator) {
-    return creatorMap_.insert(
-			      CreatorMapType::value_type(creator->getIdent(), creator)).second;
-  }
-
-  bool LatticeFactory::unregisterLattice(const std::string& id) {
-    return creatorMap_.erase(id) == 1;
-  }
-
-  Lattice* LatticeFactory::createLattice(const std::string& id) {
-    CreatorMapType::iterator i = creatorMap_.find(id);
-    if (i != creatorMap_.end()) {
-      //invoke functor to create object
-      return (i->second)->create();
-    } else {
-      return NULL;
-    }
-  }
-
-  std::vector<std::string> LatticeFactory::getIdents() {
-    IdentVectorType idents;
-    CreatorMapType::iterator i;
-
-    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-      idents.push_back(i->first);
-    }
-    
-    return idents;
-  }
-
-  std::ostream& operator <<(std::ostream& o, LatticeFactory& factory) {
-    LatticeFactory::IdentVectorType idents;
-    LatticeFactory::IdentVectorIterator i;
-
-    idents = factory.getIdents();
-
-    o << "Avaliable type identifiers in this factory: " << std::endl;
-    for (i = idents.begin(); i != idents.end(); ++i) {
-      o << *i << std::endl;
-    }
-
-    return o;
-  }
-
+bool LatticeFactory::registerLattice(LatticeCreator* creator) {
+  return creatorMap_
+      .insert(CreatorMapType::value_type(creator->getIdent(), creator))
+      .second;
 }
+
+bool LatticeFactory::unregisterLattice(const std::string& id) {
+  return creatorMap_.erase(id) == 1;
+}
+
+Lattice* LatticeFactory::createLattice(const std::string& id) {
+  CreatorMapType::iterator i = creatorMap_.find(id);
+  if (i != creatorMap_.end()) {
+    // invoke functor to create object
+    return (i->second)->create();
+  } else {
+    return NULL;
+  }
+}
+
+std::vector<std::string> LatticeFactory::getIdents() {
+  IdentVectorType idents;
+  CreatorMapType::iterator i;
+
+  for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
+    idents.push_back(i->first);
+  }
+
+  return idents;
+}
+
+std::ostream& operator<<(std::ostream& o, LatticeFactory& factory) {
+  LatticeFactory::IdentVectorType idents;
+  LatticeFactory::IdentVectorIterator i;
+
+  idents = factory.getIdents();
+
+  o << "Avaliable type identifiers in this factory: " << std::endl;
+  for (i = idents.begin(); i != idents.end(); ++i) {
+    o << *i << std::endl;
+  }
+
+  return o;
+}
+
+}  // namespace OpenMD

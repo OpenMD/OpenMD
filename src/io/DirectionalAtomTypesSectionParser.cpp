@@ -42,55 +42,58 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "io/DirectionalAtomTypesSectionParser.hpp"
+
 #include "brains/ForceField.hpp"
 #include "types/DirectionalAdapter.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 
-  DirectionalAtomTypesSectionParser::DirectionalAtomTypesSectionParser(ForceFieldOptions& options)  : options_(options){
-    setSectionName("DirectionalAtomTypes");
-  }
+DirectionalAtomTypesSectionParser::DirectionalAtomTypesSectionParser(
+    ForceFieldOptions& options)
+    : options_(options) {
+  setSectionName("DirectionalAtomTypes");
+}
 
-  void DirectionalAtomTypesSectionParser::parseLine(ForceField& ff, 
-                                                    const std::string& line, 
-                                                    int lineNo){
-    StringTokenizer tokenizer(line);
-    int nTokens = tokenizer.countTokens();    
+void DirectionalAtomTypesSectionParser::parseLine(ForceField& ff,
+                                                  const std::string& line,
+                                                  int lineNo) {
+  StringTokenizer tokenizer(line);
+  int nTokens = tokenizer.countTokens();
 
-    //in DirectionalAtomTypeSection, a line contains 4 tokens
+  // in DirectionalAtomTypeSection, a line contains 4 tokens
 
-    if (nTokens < 4)  {
-      sprintf(painCave.errMsg, 
-              "DirectionalAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-              lineNo);
+  if (nTokens < 4) {
+    sprintf(painCave.errMsg,
+            "DirectionalAtomTypesSectionParser Error: Not enough tokens at "
+            "line %d\n",
+            lineNo);
+    painCave.isFatal = 1;
+    simError();
+
+  } else {
+    std::string atomTypeName = tokenizer.nextToken();
+    AtomType* atomType = ff.getAtomType(atomTypeName);
+
+    if (atomType == NULL) {
+      sprintf(painCave.errMsg,
+              "DirectionalAtomTypesSectionParser:: AtomType %s was not\n"
+              "\tdeclared in the BaseAtomTypes or AtomTypes before being\n"
+              "\tdeclared as a DirectionalAtomType!\n",
+              atomTypeName.c_str());
       painCave.isFatal = 1;
       simError();
-                   
-    } else {
+    }
 
-      std::string atomTypeName = tokenizer.nextToken();    
-      AtomType* atomType = ff.getAtomType(atomTypeName);
+    DirectionalAdapter da = DirectionalAdapter(atomType);
+    Mat3x3d I;
 
-      if (atomType == NULL) {
-        sprintf(painCave.errMsg,
-                "DirectionalAtomTypesSectionParser:: AtomType %s was not\n"
-                "\tdeclared in the BaseAtomTypes or AtomTypes before being\n"
-                "\tdeclared as a DirectionalAtomType!\n", 
-                atomTypeName.c_str());
-        painCave.isFatal = 1;
-        simError();
-      } 
-      
-      DirectionalAdapter da = DirectionalAdapter(atomType);
-      Mat3x3d I;
+    I(0, 0) = tokenizer.nextTokenAsDouble();
+    I(1, 1) = tokenizer.nextTokenAsDouble();
+    I(2, 2) = tokenizer.nextTokenAsDouble();
 
-      I(0,0) = tokenizer.nextTokenAsDouble();
-      I(1,1) = tokenizer.nextTokenAsDouble();
-      I(2,2) = tokenizer.nextTokenAsDouble();
-
-      da.makeDirectional(I);
-    }    
+    da.makeDirectional(I);
   }
-} //end namespace OpenMD
+}
+}  // end namespace OpenMD

@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "utils/PropertyMap.hpp"
 
 #include <cassert>
@@ -51,72 +51,73 @@
 
 namespace OpenMD {
 
-  void PropertyMap::addProperty(std::shared_ptr<GenericData> genData){
-    std::map<std::string, std::shared_ptr<GenericData> >::iterator iter;
+void PropertyMap::addProperty(std::shared_ptr<GenericData> genData) {
+  std::map<std::string, std::shared_ptr<GenericData>>::iterator iter;
 
-    iter = propMap_.find(genData->getID());
+  iter = propMap_.find(genData->getID());
 
-    if (iter == propMap_.end()){
-      propMap_.insert(std::make_pair(genData->getID(), genData));
-    } else {
-      iter->second = genData;
-    }
+  if (iter == propMap_.end()) {
+    propMap_.insert(std::make_pair(genData->getID(), genData));
+  } else {
+    iter->second = genData;
   }
+}
 
-  bool PropertyMap::removeProperty(const std::string& propName){
-    std::map<std::string, std::shared_ptr<GenericData> >::iterator iter;
+bool PropertyMap::removeProperty(const std::string& propName) {
+  std::map<std::string, std::shared_ptr<GenericData>>::iterator iter;
 
-    iter = propMap_.find(propName);
+  iter = propMap_.find(propName);
 
-    if (iter != propMap_.end()){
-      propMap_.erase(iter);    
-      return true;
-    } else {
-      //logger.warn("Can not find property with name: " + propName);
-      return false;
-    }
+  if (iter != propMap_.end()) {
+    propMap_.erase(iter);
+    return true;
+  } else {
+    // logger.warn("Can not find property with name: " + propName);
+    return false;
   }
+}
 
-  std::vector<std::string> PropertyMap::getPropertyNames(){
-    std::vector<std::string> propNames;
-    std::map<std::string, std::shared_ptr<GenericData> >::iterator iter;
+std::vector<std::string> PropertyMap::getPropertyNames() {
+  std::vector<std::string> propNames;
+  std::map<std::string, std::shared_ptr<GenericData>>::iterator iter;
 
-    for (iter = propMap_.begin(); iter != propMap_.end(); ++iter)
-      propNames.push_back(iter->first);
+  for (iter = propMap_.begin(); iter != propMap_.end(); ++iter)
+    propNames.push_back(iter->first);
 
-    return propNames;
-  }
+  return propNames;
+}
 
-  std::vector<std::shared_ptr<GenericData> > PropertyMap::getProperties(){
-    std::vector<std::shared_ptr<GenericData> > properties;
-    std::map<std::string, std::shared_ptr<GenericData> >::iterator iter;
+std::vector<std::shared_ptr<GenericData>> PropertyMap::getProperties() {
+  std::vector<std::shared_ptr<GenericData>> properties;
+  std::map<std::string, std::shared_ptr<GenericData>>::iterator iter;
 
-    for (iter = propMap_.begin(); iter != propMap_.end(); ++iter)
-      properties.push_back(iter->second);
+  for (iter = propMap_.begin(); iter != propMap_.end(); ++iter)
+    properties.push_back(iter->second);
 
-    return properties;
-  }
+  return properties;
+}
 
-  bool PropertyMap::hasProperty(const std::string& propName){
-    std::map<std::string, std::shared_ptr<GenericData> >::iterator iter;
+bool PropertyMap::hasProperty(const std::string& propName) {
+  std::map<std::string, std::shared_ptr<GenericData>>::iterator iter;
 
-    iter = propMap_.find(propName);
+  iter = propMap_.find(propName);
 
-    if (iter != propMap_.end())
-      return true;
-    else
-      return false;
-  }
+  if (iter != propMap_.end())
+    return true;
+  else
+    return false;
+}
 
-  std::shared_ptr<GenericData> PropertyMap::getPropertyByName(const std::string& propName){
-    std::map<std::string, std::shared_ptr<GenericData> >::iterator iter;
+std::shared_ptr<GenericData> PropertyMap::getPropertyByName(
+    const std::string& propName) {
+  std::map<std::string, std::shared_ptr<GenericData>>::iterator iter;
 
-    iter = propMap_.find(propName);
+  iter = propMap_.find(propName);
 
-    if (iter != propMap_.end())
-      return iter->second;
-    else
-      return NULL;
-  }
+  if (iter != propMap_.end())
+    return iter->second;
+  else
+    return NULL;
+}
 
-}//end namespace OpenMD
+}  // end namespace OpenMD

@@ -44,59 +44,58 @@
  */
 
 #include "hydrodynamics/Sphere.hpp"
-#include "utils/Constants.hpp"
+
 #include "math/LU.hpp"
+#include "utils/Constants.hpp"
 
 namespace OpenMD {
 
-  Sphere::Sphere(Vector3d origin, RealType radius) : origin_(origin), radius_(radius){
+Sphere::Sphere(Vector3d origin, RealType radius)
+    : origin_(origin), radius_(radius) {}
 
-  }
+bool Sphere::isInterior(Vector3d pos) {
+  Vector3d r = pos - origin_;
 
-  bool Sphere::isInterior(Vector3d pos) {
-    Vector3d r = pos - origin_;
+  bool result;
+  if (r.length() < radius_)
+    result = true;
+  else
+    result = false;
 
-    bool result;
-    if (r.length() < radius_)
-      result = true;
-    else
-      result = false;
-
-    return result;
-  }
-
-  std::pair<Vector3d, Vector3d> Sphere::getBoundingBox() {
-    std::pair<Vector3d, Vector3d>  boundary;
-    Vector3d r(radius_, radius_, radius_);
-    boundary.first = origin_ - r;
-    boundary.second = origin_ + r;
-    return boundary;
-  }
-
-  HydroProp* Sphere::getHydroProp(RealType viscosity, RealType temperature) {
-
-    RealType Xitt  = 6.0 * Constants::PI * viscosity * radius_;
-    RealType Xirr = 8.0 * Constants::PI * viscosity * radius_ * radius_ * radius_;
-
-    Mat6x6d Xi, XiCopy, D;
-
-    Xi(0, 0) = Xitt;
-    Xi(1, 1) = Xitt;
-    Xi(2, 2) = Xitt;
-    Xi(3, 3) = Xirr;
-    Xi(4, 4) = Xirr;
-    Xi(5, 5) = Xirr;
-
-    Xi *= Constants::viscoConvert;
-    XiCopy = Xi;
-
-    invertMatrix(XiCopy, D);
-    RealType kt = Constants::kb * temperature; // in kcal mol^-1
-    D *= kt;  // now in angstroms^2 fs^-1  (at least for Trans-trans)
-
-    HydroProp* hprop = new HydroProp(V3Zero, Xi, D);
-
-    return hprop;
-  }
-
+  return result;
 }
+
+std::pair<Vector3d, Vector3d> Sphere::getBoundingBox() {
+  std::pair<Vector3d, Vector3d> boundary;
+  Vector3d r(radius_, radius_, radius_);
+  boundary.first = origin_ - r;
+  boundary.second = origin_ + r;
+  return boundary;
+}
+
+HydroProp* Sphere::getHydroProp(RealType viscosity, RealType temperature) {
+  RealType Xitt = 6.0 * Constants::PI * viscosity * radius_;
+  RealType Xirr = 8.0 * Constants::PI * viscosity * radius_ * radius_ * radius_;
+
+  Mat6x6d Xi, XiCopy, D;
+
+  Xi(0, 0) = Xitt;
+  Xi(1, 1) = Xitt;
+  Xi(2, 2) = Xitt;
+  Xi(3, 3) = Xirr;
+  Xi(4, 4) = Xirr;
+  Xi(5, 5) = Xirr;
+
+  Xi *= Constants::viscoConvert;
+  XiCopy = Xi;
+
+  invertMatrix(XiCopy, D);
+  RealType kt = Constants::kb * temperature;  // in kcal mol^-1
+  D *= kt;  // now in angstroms^2 fs^-1  (at least for Trans-trans)
+
+  HydroProp* hprop = new HydroProp(V3Zero, Xi, D);
+
+  return hprop;
+}
+
+}  // namespace OpenMD

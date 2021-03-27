@@ -44,96 +44,98 @@
  */
 
 #include "hydrodynamics/Ellipsoid.hpp"
-#include "utils/Constants.hpp"
+
 #include "math/LU.hpp"
+#include "utils/Constants.hpp"
 
 namespace OpenMD {
-  
-  Ellipsoid::Ellipsoid(Vector3d origin, RealType rAxial, RealType rEquatorial,
-		       Mat3x3d rotMat) : origin_(origin), rAxial_(rAxial), 
-					 rEquatorial_(rEquatorial), 
-					 rotMat_(rotMat) {
-    if (rAxial_ > rEquatorial_) {
-      rMajor_ = rAxial_;
-      rMinor_ = rEquatorial_;
-    } else {
-      rMajor_ = rEquatorial_;
-      rMinor_ = rAxial_;
-    }          
+
+Ellipsoid::Ellipsoid(Vector3d origin, RealType rAxial, RealType rEquatorial,
+                     Mat3x3d rotMat)
+    : origin_(origin),
+      rAxial_(rAxial),
+      rEquatorial_(rEquatorial),
+      rotMat_(rotMat) {
+  if (rAxial_ > rEquatorial_) {
+    rMajor_ = rAxial_;
+    rMinor_ = rEquatorial_;
+  } else {
+    rMajor_ = rEquatorial_;
+    rMinor_ = rAxial_;
   }
-
-  bool Ellipsoid::isInterior(Vector3d pos) {
-    Vector3d r = pos - origin_;
-    Vector3d rbody = rotMat_ * r;
-
-    RealType xoverb = rbody[0]/rEquatorial_;
-    RealType yoverb = rbody[1]/rEquatorial_;
-    RealType zovera = rbody[2]/rAxial_;
-    
-    bool result;
-    if (xoverb*xoverb + yoverb*yoverb + zovera*zovera < 1)
-      result = true;
-    else
-      result = false;
-    
-    return result;    
-  }
-  
-  std::pair<Vector3d, Vector3d> Ellipsoid::getBoundingBox() {
-    
-    std::pair<Vector3d, Vector3d>  boundary;
-    //make a cubic box
-    RealType rad  = rAxial_ > rEquatorial_ ? rAxial_ : rEquatorial_; 
-    Vector3d r(rad, rad, rad);
-    boundary.first = origin_ - r;
-    boundary.second = origin_ + r;
-    return boundary;
-  }
-  
-  HydroProp* Ellipsoid::getHydroProp(RealType viscosity, 
-				     RealType temperature) {
-    
-    RealType a = rAxial_;
-    RealType b = rEquatorial_;
-    RealType a2 = a * a;
-    RealType b2 = b * b;
-    
-    RealType p = a / b;
-    RealType S;
-    if (p > 1.0) {  
-      // Ellipsoid is prolate:
-      S = 2.0/sqrt(a2 - b2) * log((a + sqrt(a2-b2))/b);
-    } else { 
-      // Ellipsoid is oblate:
-      S = 2.0/sqrt(b2 - a2) * atan(sqrt(b2-a2)/a);
-    }
-    
-    RealType pi = Constants::PI;
-    RealType XittA = 16.0 * pi * viscosity * (a2 - b2) /((2.0*a2-b2)*S -2.0*a);
-    RealType XittB = 32.0 * pi * viscosity * (a2 - b2) /((2.0*a2-3.0*b2)*S +2.0*a);
-    RealType XirrA = 32.0/3.0 * pi * viscosity *(a2 - b2) * b2 /(2.0*a -b2*S);
-    RealType XirrB = 32.0/3.0 * pi * viscosity *(a2*a2 - b2*b2)/((2.0*a2-b2)*S-2.0*a);
-    
-    
-    Mat6x6d Xi, XiCopy, D;
-    
-    Xi(0,0) = XittB;
-    Xi(1,1) = XittB;
-    Xi(2,2) = XittA;
-    Xi(3,3) = XirrB;
-    Xi(4,4) = XirrB;
-    Xi(5,5) = XirrA;
-
-    Xi *= Constants::viscoConvert;    
-    
-    XiCopy = Xi;
-    invertMatrix(XiCopy, D);
-    RealType kt = Constants::kb * temperature; // in kcal mol^-1
-    D *= kt;
-   
-    HydroProp* hprop = new HydroProp(V3Zero, Xi, D);
-
-    return hprop;
-
-  }  
 }
+
+bool Ellipsoid::isInterior(Vector3d pos) {
+  Vector3d r = pos - origin_;
+  Vector3d rbody = rotMat_ * r;
+
+  RealType xoverb = rbody[0] / rEquatorial_;
+  RealType yoverb = rbody[1] / rEquatorial_;
+  RealType zovera = rbody[2] / rAxial_;
+
+  bool result;
+  if (xoverb * xoverb + yoverb * yoverb + zovera * zovera < 1)
+    result = true;
+  else
+    result = false;
+
+  return result;
+}
+
+std::pair<Vector3d, Vector3d> Ellipsoid::getBoundingBox() {
+  std::pair<Vector3d, Vector3d> boundary;
+  // make a cubic box
+  RealType rad = rAxial_ > rEquatorial_ ? rAxial_ : rEquatorial_;
+  Vector3d r(rad, rad, rad);
+  boundary.first = origin_ - r;
+  boundary.second = origin_ + r;
+  return boundary;
+}
+
+HydroProp* Ellipsoid::getHydroProp(RealType viscosity, RealType temperature) {
+  RealType a = rAxial_;
+  RealType b = rEquatorial_;
+  RealType a2 = a * a;
+  RealType b2 = b * b;
+
+  RealType p = a / b;
+  RealType S;
+  if (p > 1.0) {
+    // Ellipsoid is prolate:
+    S = 2.0 / sqrt(a2 - b2) * log((a + sqrt(a2 - b2)) / b);
+  } else {
+    // Ellipsoid is oblate:
+    S = 2.0 / sqrt(b2 - a2) * atan(sqrt(b2 - a2) / a);
+  }
+
+  RealType pi = Constants::PI;
+  RealType XittA =
+      16.0 * pi * viscosity * (a2 - b2) / ((2.0 * a2 - b2) * S - 2.0 * a);
+  RealType XittB =
+      32.0 * pi * viscosity * (a2 - b2) / ((2.0 * a2 - 3.0 * b2) * S + 2.0 * a);
+  RealType XirrA =
+      32.0 / 3.0 * pi * viscosity * (a2 - b2) * b2 / (2.0 * a - b2 * S);
+  RealType XirrB = 32.0 / 3.0 * pi * viscosity * (a2 * a2 - b2 * b2) /
+                   ((2.0 * a2 - b2) * S - 2.0 * a);
+
+  Mat6x6d Xi, XiCopy, D;
+
+  Xi(0, 0) = XittB;
+  Xi(1, 1) = XittB;
+  Xi(2, 2) = XittA;
+  Xi(3, 3) = XirrB;
+  Xi(4, 4) = XirrB;
+  Xi(5, 5) = XirrA;
+
+  Xi *= Constants::viscoConvert;
+
+  XiCopy = Xi;
+  invertMatrix(XiCopy, D);
+  RealType kt = Constants::kb * temperature;  // in kcal mol^-1
+  D *= kt;
+
+  HydroProp* hprop = new HydroProp(V3Zero, Xi, D);
+
+  return hprop;
+}
+}  // namespace OpenMD

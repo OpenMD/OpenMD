@@ -48,267 +48,253 @@
 #include "mpi.h"
 #endif
 
-namespace OpenMD{
+namespace OpenMD {
 
-  PotentialEnergyObjectiveFunction::PotentialEnergyObjectiveFunction(SimInfo* info, ForceManager* forceMan)
-    : info_(info), forceMan_(forceMan), thermo(info), hasFlucQ_(false) {   
-    shake_ = new Shake(info_);
-    
-    if (info_->usesFluctuatingCharges()) {
-      if (info_->getNFluctuatingCharges() > 0) {
-        hasFlucQ_ = true;
-        fqConstraints_ = new FluctuatingChargeConstraints(info_);
-        bool cr = info_->getSimParams()->getFluctuatingChargeParameters()->getConstrainRegions();    
-        fqConstraints_->setConstrainRegions(cr);
-      }
-    }    
-  }
-  
-  RealType PotentialEnergyObjectiveFunction::value(const DynamicVector<RealType>& x) {
-    setCoor(x);
-    shake_->constraintR();
-    forceMan_->calcForces();
-    if (hasFlucQ_) fqConstraints_->applyConstraints();
-    shake_->constraintF();
-    return thermo.getPotential();
-  }
-  
-  void PotentialEnergyObjectiveFunction::gradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x) {
-    
-    setCoor(x);       
-    shake_->constraintR();
-    forceMan_->calcForces();
-    if (hasFlucQ_) fqConstraints_->applyConstraints();
-    shake_->constraintF();
-    getGrad(grad);
-  }
-  
-  RealType PotentialEnergyObjectiveFunction::valueAndGradient(DynamicVector<RealType>& grad,
-                                                              const DynamicVector<RealType>& x) {
-    setCoor(x);
-    shake_->constraintR();
-    forceMan_->calcForces();
-    if (hasFlucQ_) fqConstraints_->applyConstraints();
-    shake_->constraintF();
-    getGrad(grad); 
-    return thermo.getPotential();
-  }
-  
-  void PotentialEnergyObjectiveFunction::setCoor(const DynamicVector<RealType> &x) const {
-    Vector3d position;
-    Vector3d eulerAngle;
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator j;
-    Molecule::AtomIterator ai;
-    Molecule* mol;
-    StuntDouble* sd;
-    Atom* atom;
-    
-    info_->getSnapshotManager()->advance();
+PotentialEnergyObjectiveFunction::PotentialEnergyObjectiveFunction(
+    SimInfo* info, ForceManager* forceMan)
+    : info_(info), forceMan_(forceMan), thermo(info), hasFlucQ_(false) {
+  shake_ = new Shake(info_);
 
-    int index;
-#ifdef IS_MPI
-    index = displacements_[myrank_];
-#else
-    index = 0;
-#endif               
-
-    info_->getSnapshotManager()->advance();
-    
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-
-      for (sd = mol->beginIntegrableObject(j);  sd != NULL;
-           sd = mol->nextIntegrableObject(j)) {
-        
-        position[0] = x[index++];
-        position[1] = x[index++];
-        position[2] = x[index++];
-        
-        sd->setPos(position);
-        
-        if (sd->isDirectional()) {
-          eulerAngle[0] = x[index++];
-          eulerAngle[1] = x[index++];
-          eulerAngle[2] = x[index++];
-          
-          sd->setEuler(eulerAngle);
-
-          if (sd->isRigidBody()) {
-            RigidBody* rb = static_cast<RigidBody*>(sd);
-            rb->updateAtoms();
-          }
-        }
-      }
+  if (info_->usesFluctuatingCharges()) {
+    if (info_->getNFluctuatingCharges() > 0) {
+      hasFlucQ_ = true;
+      fqConstraints_ = new FluctuatingChargeConstraints(info_);
+      bool cr = info_->getSimParams()
+                    ->getFluctuatingChargeParameters()
+                    ->getConstrainRegions();
+      fqConstraints_->setConstrainRegions(cr);
     }
-
-    if (hasFlucQ_) {
-      for (mol = info_->beginMolecule(i); mol != NULL; 
-           mol = info_->nextMolecule(i)) {
-        
-        for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
-             atom = mol->nextFluctuatingCharge(ai)) {
-          
-          atom->setFlucQPos(x[index++]);
-        }
-      }
-    }
-  }
-  
-  void PotentialEnergyObjectiveFunction::getGrad(DynamicVector<RealType> &grad) {
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator j;
-    Molecule::AtomIterator ai;
-    Molecule* mol;
-    StuntDouble* sd;
-    Atom* atom;
-    std::vector<RealType> myGrad;
-    
-    int index;
-#ifdef IS_MPI
-    index = displacements_[myrank_];
-    grad.setZero();
-#else
-    index = 0;
-#endif               
-    
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-
-      for (sd = mol->beginIntegrableObject(j); sd != NULL;
-           sd = mol->nextIntegrableObject(j)) {        
-
-        myGrad = sd->getGrad();
-
-        for (size_t k = 0; k < myGrad.size(); ++k) {   
-          grad[index++] = myGrad[k];
-        }
-      }
-    }
-
-    if (hasFlucQ_) {
-      for (mol = info_->beginMolecule(i); mol != NULL; 
-           mol = info_->nextMolecule(i)) {
-        
-        for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
-             atom = mol->nextFluctuatingCharge(ai)) {
-          
-          grad[index++] = -atom->getFlucQFrc();
-        }
-      }
-    }
-#ifdef IS_MPI
-    MPI_Allreduce(MPI_IN_PLACE, &grad[0], ndf_, MPI_REALTYPE, MPI_SUM,
-                  MPI_COMM_WORLD);
-#endif
-    
-  }
-
-  DynamicVector<RealType> PotentialEnergyObjectiveFunction::setInitialCoords() {
-#ifdef IS_MPI        
-    MPI_Comm_size( MPI_COMM_WORLD, &nproc_);
-    MPI_Comm_rank( MPI_COMM_WORLD, &myrank_);
-    std::vector<int> onProc(nproc_, 0);
-
-    displacements_.clear();    
-    displacements_.resize(nproc_, 0);
-#endif
-
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator  j;
-    Molecule::AtomIterator ai;
-    Molecule* mol;
-    StuntDouble* sd;
-    Atom* atom;
-
-    Vector3d pos;
-    Vector3d eulerAngle;
-
-    ndf_ = 0;
-    
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-      
-      for (sd = mol->beginIntegrableObject(j);  sd != NULL;
-           sd = mol->nextIntegrableObject(j)) {
-        
-        ndf_ += 3;
-        
-        if (sd->isDirectional())  {
-          ndf_ += 3;
-        }
-      }
-    }
-
-    if (hasFlucQ_) {      
-      for (mol = info_->beginMolecule(i); mol != NULL; 
-           mol = info_->nextMolecule(i)) {
-        
-        for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
-             atom = mol->nextFluctuatingCharge(ai)) {
-          
-          ndf_++;
-        }
-      }
-    }
-
-#ifdef IS_MPI
-    MPI_Allgather(&ndf_, 1, MPI_INT, &onProc[0], 1, MPI_INT, MPI_COMM_WORLD);
-
-    ndf_ = 0;        
-    for (int iproc = 0; iproc < nproc_; iproc++){
-      ndf_ += onProc[iproc];
-    }
-    
-    displacements_[0] = 0;    
-    for (int iproc = 1; iproc < nproc_; iproc++){
-      displacements_[iproc] = displacements_[iproc-1] + onProc[iproc-1];
-    }
-#endif
-    
-    DynamicVector<RealType> xinit(ndf_, 0.0);
-
-    int index;
-#ifdef IS_MPI
-    index = displacements_[myrank_];
-#else
-    index = 0;
-#endif               
-    
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-      
-      for (sd = mol->beginIntegrableObject(j);  sd != NULL;
-           sd = mol->nextIntegrableObject(j)) {        
-        
-        pos = sd->getPos();
-        xinit[index++] = pos[0];
-        xinit[index++] = pos[1];
-        xinit[index++] = pos[2];
-        
-        if (sd->isDirectional()) {
-          eulerAngle = sd->getEuler();
-          xinit[index++] = eulerAngle[0];
-          xinit[index++] = eulerAngle[1];
-          xinit[index++] = eulerAngle[2];          
-        }
-        
-      }
-    }
-    
-    if (hasFlucQ_) {      
-      
-      for (mol = info_->beginMolecule(i); mol != NULL; 
-           mol = info_->nextMolecule(i)) {
-        
-        for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
-             atom = mol->nextFluctuatingCharge(ai)) {
-          
-          xinit[index++] = atom->getFlucQPos();
-        }
-      }
-    }
-    
-    return xinit;
   }
 }
+
+RealType PotentialEnergyObjectiveFunction::value(
+    const DynamicVector<RealType>& x) {
+  setCoor(x);
+  shake_->constraintR();
+  forceMan_->calcForces();
+  if (hasFlucQ_) fqConstraints_->applyConstraints();
+  shake_->constraintF();
+  return thermo.getPotential();
+}
+
+void PotentialEnergyObjectiveFunction::gradient(
+    DynamicVector<RealType>& grad, const DynamicVector<RealType>& x) {
+  setCoor(x);
+  shake_->constraintR();
+  forceMan_->calcForces();
+  if (hasFlucQ_) fqConstraints_->applyConstraints();
+  shake_->constraintF();
+  getGrad(grad);
+}
+
+RealType PotentialEnergyObjectiveFunction::valueAndGradient(
+    DynamicVector<RealType>& grad, const DynamicVector<RealType>& x) {
+  setCoor(x);
+  shake_->constraintR();
+  forceMan_->calcForces();
+  if (hasFlucQ_) fqConstraints_->applyConstraints();
+  shake_->constraintF();
+  getGrad(grad);
+  return thermo.getPotential();
+}
+
+void PotentialEnergyObjectiveFunction::setCoor(
+    const DynamicVector<RealType>& x) const {
+  Vector3d position;
+  Vector3d eulerAngle;
+  SimInfo::MoleculeIterator i;
+  Molecule::IntegrableObjectIterator j;
+  Molecule::AtomIterator ai;
+  Molecule* mol;
+  StuntDouble* sd;
+  Atom* atom;
+
+  info_->getSnapshotManager()->advance();
+
+  int index;
+#ifdef IS_MPI
+  index = displacements_[myrank_];
+#else
+  index = 0;
+#endif
+
+  info_->getSnapshotManager()->advance();
+
+  for (mol = info_->beginMolecule(i); mol != NULL;
+       mol = info_->nextMolecule(i)) {
+    for (sd = mol->beginIntegrableObject(j); sd != NULL;
+         sd = mol->nextIntegrableObject(j)) {
+      position[0] = x[index++];
+      position[1] = x[index++];
+      position[2] = x[index++];
+
+      sd->setPos(position);
+
+      if (sd->isDirectional()) {
+        eulerAngle[0] = x[index++];
+        eulerAngle[1] = x[index++];
+        eulerAngle[2] = x[index++];
+
+        sd->setEuler(eulerAngle);
+
+        if (sd->isRigidBody()) {
+          RigidBody* rb = static_cast<RigidBody*>(sd);
+          rb->updateAtoms();
+        }
+      }
+    }
+  }
+
+  if (hasFlucQ_) {
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
+           atom = mol->nextFluctuatingCharge(ai)) {
+        atom->setFlucQPos(x[index++]);
+      }
+    }
+  }
+}
+
+void PotentialEnergyObjectiveFunction::getGrad(DynamicVector<RealType>& grad) {
+  SimInfo::MoleculeIterator i;
+  Molecule::IntegrableObjectIterator j;
+  Molecule::AtomIterator ai;
+  Molecule* mol;
+  StuntDouble* sd;
+  Atom* atom;
+  std::vector<RealType> myGrad;
+
+  int index;
+#ifdef IS_MPI
+  index = displacements_[myrank_];
+  grad.setZero();
+#else
+  index = 0;
+#endif
+
+  for (mol = info_->beginMolecule(i); mol != NULL;
+       mol = info_->nextMolecule(i)) {
+    for (sd = mol->beginIntegrableObject(j); sd != NULL;
+         sd = mol->nextIntegrableObject(j)) {
+      myGrad = sd->getGrad();
+
+      for (size_t k = 0; k < myGrad.size(); ++k) {
+        grad[index++] = myGrad[k];
+      }
+    }
+  }
+
+  if (hasFlucQ_) {
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
+           atom = mol->nextFluctuatingCharge(ai)) {
+        grad[index++] = -atom->getFlucQFrc();
+      }
+    }
+  }
+#ifdef IS_MPI
+  MPI_Allreduce(MPI_IN_PLACE, &grad[0], ndf_, MPI_REALTYPE, MPI_SUM,
+                MPI_COMM_WORLD);
+#endif
+}
+
+DynamicVector<RealType> PotentialEnergyObjectiveFunction::setInitialCoords() {
+#ifdef IS_MPI
+  MPI_Comm_size(MPI_COMM_WORLD, &nproc_);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank_);
+  std::vector<int> onProc(nproc_, 0);
+
+  displacements_.clear();
+  displacements_.resize(nproc_, 0);
+#endif
+
+  SimInfo::MoleculeIterator i;
+  Molecule::IntegrableObjectIterator j;
+  Molecule::AtomIterator ai;
+  Molecule* mol;
+  StuntDouble* sd;
+  Atom* atom;
+
+  Vector3d pos;
+  Vector3d eulerAngle;
+
+  ndf_ = 0;
+
+  for (mol = info_->beginMolecule(i); mol != NULL;
+       mol = info_->nextMolecule(i)) {
+    for (sd = mol->beginIntegrableObject(j); sd != NULL;
+         sd = mol->nextIntegrableObject(j)) {
+      ndf_ += 3;
+
+      if (sd->isDirectional()) {
+        ndf_ += 3;
+      }
+    }
+  }
+
+  if (hasFlucQ_) {
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
+           atom = mol->nextFluctuatingCharge(ai)) {
+        ndf_++;
+      }
+    }
+  }
+
+#ifdef IS_MPI
+  MPI_Allgather(&ndf_, 1, MPI_INT, &onProc[0], 1, MPI_INT, MPI_COMM_WORLD);
+
+  ndf_ = 0;
+  for (int iproc = 0; iproc < nproc_; iproc++) {
+    ndf_ += onProc[iproc];
+  }
+
+  displacements_[0] = 0;
+  for (int iproc = 1; iproc < nproc_; iproc++) {
+    displacements_[iproc] = displacements_[iproc - 1] + onProc[iproc - 1];
+  }
+#endif
+
+  DynamicVector<RealType> xinit(ndf_, 0.0);
+
+  int index;
+#ifdef IS_MPI
+  index = displacements_[myrank_];
+#else
+  index = 0;
+#endif
+
+  for (mol = info_->beginMolecule(i); mol != NULL;
+       mol = info_->nextMolecule(i)) {
+    for (sd = mol->beginIntegrableObject(j); sd != NULL;
+         sd = mol->nextIntegrableObject(j)) {
+      pos = sd->getPos();
+      xinit[index++] = pos[0];
+      xinit[index++] = pos[1];
+      xinit[index++] = pos[2];
+
+      if (sd->isDirectional()) {
+        eulerAngle = sd->getEuler();
+        xinit[index++] = eulerAngle[0];
+        xinit[index++] = eulerAngle[1];
+        xinit[index++] = eulerAngle[2];
+      }
+    }
+  }
+
+  if (hasFlucQ_) {
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginFluctuatingCharge(ai); atom != NULL;
+           atom = mol->nextFluctuatingCharge(ai)) {
+        xinit[index++] = atom->getFlucQPos();
+      }
+    }
+  }
+
+  return xinit;
+}
+}  // namespace OpenMD

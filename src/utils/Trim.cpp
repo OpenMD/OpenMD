@@ -42,33 +42,27 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "utils/Trim.hpp"
 
 namespace OpenMD {
 
-  void trimLeft(std::string& str) {
-    trimLeftIf(str, isSpace());
-  }
+void trimLeft(std::string& str) { trimLeftIf(str, isSpace()); }
 
-  void trimRight(std::string& str) {
-    trimRightIf(str, isSpace());
-  }
+void trimRight(std::string& str) { trimRightIf(str, isSpace()); }
 
-  void trim(std::string& str) {
-    trimIf(str, isSpace());
-  }
+void trim(std::string& str) { trimIf(str, isSpace()); }
 
-  std::string trimLeftCopy(const std::string& input) {
-    return trimLeftCopyIf(input, isSpace());
-  }
-
-  std::string trimRightCopy(const std::string& input) {
-    return trimRightCopyIf(input, isSpace());
-  }
-
-  std::string trimCopy(const std::string& input) {
-    return trimCopyIf(input, isSpace());
-  }
-
+std::string trimLeftCopy(const std::string& input) {
+  return trimLeftCopyIf(input, isSpace());
 }
+
+std::string trimRightCopy(const std::string& input) {
+  return trimRightCopyIf(input, isSpace());
+}
+
+std::string trimCopy(const std::string& input) {
+  return trimCopyIf(input, isSpace());
+}
+
+}  // namespace OpenMD

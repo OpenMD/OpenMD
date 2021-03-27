@@ -42,32 +42,30 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <cstdio>
-#include <cmath>
-#include <limits>
+
 #include "math/RealSphericalHarmonic.hpp"
+
+#include <cmath>
+#include <cstdio>
+#include <limits>
 
 using namespace OpenMD;
 
-RealSphericalHarmonic::RealSphericalHarmonic() {
-}
+RealSphericalHarmonic::RealSphericalHarmonic() {}
 
 RealType RealSphericalHarmonic::getValueAt(RealType costheta, RealType phi) {
-  
   RealType p, phase;
-  
+
   // associated Legendre polynomial
-  p = LegendreP(L,M,costheta);
- 
+  p = LegendreP(L, M, costheta);
+
   if (functionType == RSH_SIN) {
     phase = sin((RealType)M * phi);
   } else {
     phase = cos((RealType)M * phi);
   }
-  
-  return coefficient*p*phase;
-  
+
+  return coefficient * p * phase;
 }
 
 //---------------------------------------------------------------------------//
@@ -85,18 +83,17 @@ RealType RealSphericalHarmonic::getValueAt(RealType costheta, RealType phi) {
 //   value of the polynomial in x
 //
 //---------------------------------------------------------------------------//
-RealType RealSphericalHarmonic::LegendreP (int l, int m, RealType x) {
+RealType RealSphericalHarmonic::LegendreP(int l, int m, RealType x) {
   // check parameters
   if (m < 0 || m > l || fabs(x) > 1.0) {
     printf("LegendreP got a bad argument: l = %d\tm = %d\tx = %lf\n", l, m, x);
-//    return NAN;
-	return std::numeric_limits <RealType>:: quiet_NaN();
+    //    return NAN;
+    return std::numeric_limits<RealType>::quiet_NaN();
   }
-  
+
   RealType pmm = 1.0;
   if (m > 0) {
-    RealType h = sqrt((1.0-x)*(1.0+x)),
-      f = 1.0;
+    RealType h = sqrt((1.0 - x) * (1.0 + x)), f = 1.0;
     for (int i = 1; i <= m; i++) {
       pmm *= -f * h;
       f += 2.0;
@@ -106,11 +103,11 @@ RealType RealSphericalHarmonic::LegendreP (int l, int m, RealType x) {
     return pmm;
   else {
     RealType pmmp1 = x * (2 * m + 1) * pmm;
-    if (l == (m+1))
+    if (l == (m + 1))
       return pmmp1;
     else {
       RealType pll = 0.0;
-      for (int ll = m+2; ll <= l; ll++) {
+      for (int ll = m + 2; ll <= l; ll++) {
         pll = (x * (2 * ll - 1) * pmmp1 - (ll + m - 1) * pmm) / (ll - m);
         pmm = pmmp1;
         pmmp1 = pll;
@@ -119,4 +116,3 @@ RealType RealSphericalHarmonic::LegendreP (int l, int m, RealType x) {
     }
   }
 }
-

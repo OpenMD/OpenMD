@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file LangevinDynamics.cpp
  * @author tlin
@@ -51,124 +51,113 @@
  */
 
 #include "integrators/LangevinHullDynamics.hpp"
+
+#include "integrators/LangevinHullForceManager.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
-#include "integrators/LangevinHullForceManager.hpp"
 namespace OpenMD {
 
-   LangevinHullDynamics::LangevinHullDynamics(SimInfo* info) : VelocityVerletIntegrator(info){
-    setForceManager(new LangevinHullForceManager(info));
-  }
-  
-  void LangevinHullDynamics::moveA(){
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator  j;
-    Molecule* mol;
-    StuntDouble* sd;
-    Vector3d vel;
-    Vector3d pos;
-    Vector3d frc;
-    Vector3d Tb;
-    Vector3d ji;
-    RealType mass;
-    
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
+LangevinHullDynamics::LangevinHullDynamics(SimInfo* info)
+    : VelocityVerletIntegrator(info) {
+  setForceManager(new LangevinHullForceManager(info));
+}
 
-      for (sd = mol->beginIntegrableObject(j); sd != NULL;
-	   sd = mol->nextIntegrableObject(j)) {
+void LangevinHullDynamics::moveA() {
+  SimInfo::MoleculeIterator i;
+  Molecule::IntegrableObjectIterator j;
+  Molecule* mol;
+  StuntDouble* sd;
+  Vector3d vel;
+  Vector3d pos;
+  Vector3d frc;
+  Vector3d Tb;
+  Vector3d ji;
+  RealType mass;
 
-	vel = sd->getVel();
-	pos = sd->getPos();
-	frc = sd->getFrc();
-	mass = sd->getMass();
-                
-	// velocity half step
-	vel += (dt2 /mass * Constants::energyConvert) * frc;
+  for (mol = info_->beginMolecule(i); mol != NULL;
+       mol = info_->nextMolecule(i)) {
+    for (sd = mol->beginIntegrableObject(j); sd != NULL;
+         sd = mol->nextIntegrableObject(j)) {
+      vel = sd->getVel();
+      pos = sd->getPos();
+      frc = sd->getFrc();
+      mass = sd->getMass();
 
-	// position whole step
-	pos += dt * vel;
+      // velocity half step
+      vel += (dt2 / mass * Constants::energyConvert) * frc;
 
-	sd->setVel(vel);
-	sd->setPos(pos);
+      // position whole step
+      pos += dt * vel;
 
-	if (sd->isDirectional()){
+      sd->setVel(vel);
+      sd->setPos(pos);
 
-	  // get and convert the torque to body frame
+      if (sd->isDirectional()) {
+        // get and convert the torque to body frame
 
-	  Tb = sd->lab2Body(sd->getTrq());
+        Tb = sd->lab2Body(sd->getTrq());
 
-	  // get the angular momentum, and propagate a half step
+        // get the angular momentum, and propagate a half step
 
-	  ji = sd->getJ();
+        ji = sd->getJ();
 
-	  ji += (dt2  * Constants::energyConvert) * Tb;
+        ji += (dt2 * Constants::energyConvert) * Tb;
 
-	  rotAlgo_->rotate(sd, ji, dt);
+        rotAlgo_->rotate(sd, ji, dt);
 
-	  sd->setJ(ji);
-	}
-
-            
+        sd->setJ(ji);
       }
-    } //end for(mol = info_->beginMolecule(i))
-    
-    flucQ_->moveA();
-    rattle_->constraintA();
-  }    
+    }
+  }  // end for(mol = info_->beginMolecule(i))
 
-  void LangevinHullDynamics::moveB(){
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator  j;
-    Molecule* mol;
-    StuntDouble* sd;
-    Vector3d vel;
-    Vector3d frc;
-    Vector3d Tb;
-    Vector3d ji;
-    RealType mass;
-    
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
+  flucQ_->moveA();
+  rattle_->constraintA();
+}
 
-      for (sd = mol->beginIntegrableObject(j); sd != NULL;
-	   sd = mol->nextIntegrableObject(j)) {
+void LangevinHullDynamics::moveB() {
+  SimInfo::MoleculeIterator i;
+  Molecule::IntegrableObjectIterator j;
+  Molecule* mol;
+  StuntDouble* sd;
+  Vector3d vel;
+  Vector3d frc;
+  Vector3d Tb;
+  Vector3d ji;
+  RealType mass;
 
-	vel = sd->getVel();
-	frc = sd->getFrc();
-	mass = sd->getMass();
-                
-	// velocity half step
-	vel += (dt2 /mass * Constants::energyConvert) * frc;
-                
-	sd->setVel(vel);
+  for (mol = info_->beginMolecule(i); mol != NULL;
+       mol = info_->nextMolecule(i)) {
+    for (sd = mol->beginIntegrableObject(j); sd != NULL;
+         sd = mol->nextIntegrableObject(j)) {
+      vel = sd->getVel();
+      frc = sd->getFrc();
+      mass = sd->getMass();
 
-	if (sd->isDirectional()){
+      // velocity half step
+      vel += (dt2 / mass * Constants::energyConvert) * frc;
 
-	  // get and convert the torque to body frame
+      sd->setVel(vel);
 
-	  Tb = sd->lab2Body(sd->getTrq());
+      if (sd->isDirectional()) {
+        // get and convert the torque to body frame
 
-	  // get the angular momentum, and propagate a half step
+        Tb = sd->lab2Body(sd->getTrq());
 
-	  ji = sd->getJ();
+        // get the angular momentum, and propagate a half step
 
-	  ji += (dt2  * Constants::energyConvert) * Tb;
+        ji = sd->getJ();
 
-	  sd->setJ(ji);
-	}
+        ji += (dt2 * Constants::energyConvert) * Tb;
 
-            
+        sd->setJ(ji);
       }
-    } //end for(mol = info_->beginMolecule(i))
-  
-    flucQ_->moveB();
-    rattle_->constraintB();
-  }
+    }
+  }  // end for(mol = info_->beginMolecule(i))
 
-  RealType LangevinHullDynamics::calcConservedQuantity() {
-    return 0.0;
-  }
+  flucQ_->moveB();
+  rattle_->constraintB();
+}
 
-} //end namespace OpenMD
+RealType LangevinHullDynamics::calcConservedQuantity() { return 0.0; }
 
+}  // end namespace OpenMD

@@ -6,6 +6,7 @@
  */
 
 #include "antlr/CharBuffer.hpp"
+
 #include <iostream>
 
 //#include <ios>
@@ -27,24 +28,22 @@ namespace antlr {
 
 /** Create a character buffer. Enable fail and bad exceptions, if supported
  * by platform. */
-CharBuffer::CharBuffer(ANTLR_USE_NAMESPACE(std)istream& input_)
-: input(input_)
-{
-//	input.exceptions(ANTLR_USE_NAMESPACE(std)ios_base::badbit|
-//						  ANTLR_USE_NAMESPACE(std)ios_base::failbit);
+CharBuffer::CharBuffer(ANTLR_USE_NAMESPACE(std) istream& input_)
+    : input(input_) {
+  //	input.exceptions(ANTLR_USE_NAMESPACE(std)ios_base::badbit|
+  //						  ANTLR_USE_NAMESPACE(std)ios_base::failbit);
 }
 
 /** Get the next character from the stream. May throw CharStreamIOException
  * when something bad happens (not EOF) (if supported by platform).
  */
-int CharBuffer::getChar()
-{
-//	try {
-		return input.get();
-//	}
-//	catch (ANTLR_USE_NAMESPACE(std)ios_base::failure& e) {
-//		throw CharStreamIOException(e);
-//	}
+int CharBuffer::getChar() {
+  //	try {
+  return input.get();
+  //	}
+  //	catch (ANTLR_USE_NAMESPACE(std)ios_base::failure& e) {
+  //		throw CharStreamIOException(e);
+  //	}
 }
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE

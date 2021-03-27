@@ -44,37 +44,40 @@
  */
 
 #include "io/OptionSectionParser.hpp"
-#include "types/AtomType.hpp"
+
 #include "brains/ForceField.hpp"
-#include "utils/simError.h"
+#include "types/AtomType.hpp"
 #include "utils/StringUtils.hpp"
+#include "utils/simError.h"
 namespace OpenMD {
 
-  OptionSectionParser::OptionSectionParser(ForceFieldOptions& options) : options_(options) {
-    setSectionName("Options");        
+OptionSectionParser::OptionSectionParser(ForceFieldOptions& options)
+    : options_(options) {
+  setSectionName("Options");
+}
+
+void OptionSectionParser::parseLine(ForceField& ff, const std::string& line,
+                                    int lineNo) {
+  StringTokenizer tokenizer(line);
+
+  if (tokenizer.countTokens() >= 2) {
+    std::string optionName = tokenizer.nextToken();
+    std::string optionValue = tokenizer.nextToken();
+
+    options_.setData(optionName, optionValue);
+
+  } else {
+    sprintf(painCave.errMsg,
+            "OptionSectionParser Error: "
+            "Not enough tokens at line %d\n",
+            lineNo);
+    painCave.isFatal = 1;
+    simError();
   }
-  
-  void OptionSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
-    
-    StringTokenizer tokenizer(line);
+}
 
-    if (tokenizer.countTokens() >= 2) {
-      std::string optionName = tokenizer.nextToken();
-      std::string optionValue = tokenizer.nextToken();
+void OptionSectionParser::validateSection(ForceField& ff) {
+  options_.validateOptions();
+}
 
-      options_.setData(optionName, optionValue);
-      
-    } else {
-      sprintf(painCave.errMsg, "OptionSectionParser Error: "
-              "Not enough tokens at line %d\n", lineNo);
-      painCave.isFatal = 1;
-      simError();    
-    }
-    
-  }
-
-  void OptionSectionParser::validateSection(ForceField& ff) {
-    options_.validateOptions();
-  }
-
-} //end namespace OpenMD  
+}  // end namespace OpenMD

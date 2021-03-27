@@ -43,87 +43,86 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "primitives/Molecule.hpp"
 #include "selection/IndexFinder.hpp"
+
+#include "primitives/Molecule.hpp"
 
 namespace OpenMD {
 
-  IndexFinder::IndexFinder(SimInfo* info) : info_(info){
-    nObjects_.push_back(info_->getNGlobalAtoms()+info_->getNGlobalRigidBodies());
-    nObjects_.push_back(info_->getNGlobalBonds());
-    nObjects_.push_back(info_->getNGlobalBends());
-    nObjects_.push_back(info_->getNGlobalTorsions());
-    nObjects_.push_back(info_->getNGlobalInversions());
-    nObjects_.push_back(info_->getNGlobalMolecules());
+IndexFinder::IndexFinder(SimInfo* info) : info_(info) {
+  nObjects_.push_back(info_->getNGlobalAtoms() +
+                      info_->getNGlobalRigidBodies());
+  nObjects_.push_back(info_->getNGlobalBonds());
+  nObjects_.push_back(info_->getNGlobalBends());
+  nObjects_.push_back(info_->getNGlobalTorsions());
+  nObjects_.push_back(info_->getNGlobalInversions());
+  nObjects_.push_back(info_->getNGlobalMolecules());
 
-    selectionSets_.resize(info_->getNGlobalMolecules());
-    init();
-  }
+  selectionSets_.resize(info_->getNGlobalMolecules());
+  init();
+}
 
-  void IndexFinder::init() {
+void IndexFinder::init() {
+  SimInfo::MoleculeIterator mi;
+  Molecule::AtomIterator ai;
+  Molecule::RigidBodyIterator rbIter;
+  Molecule::BondIterator bondIter;
+  Molecule::BendIterator bendIter;
+  Molecule::TorsionIterator torsionIter;
+  Molecule::InversionIterator inversionIter;
 
-    SimInfo::MoleculeIterator mi;
-    Molecule::AtomIterator ai;
-    Molecule::RigidBodyIterator rbIter;
-    Molecule::BondIterator bondIter;
-    Molecule::BendIterator bendIter;
-    Molecule::TorsionIterator torsionIter;
-    Molecule::InversionIterator inversionIter;
+  Molecule* mol;
+  Atom* atom;
+  RigidBody* rb;
+  Bond* bond;
+  Bend* bend;
+  Torsion* torsion;
+  Inversion* inversion;
 
-    Molecule* mol;
-    Atom* atom;
-    RigidBody* rb;
-    Bond* bond;
-    Bend* bend;
-    Torsion* torsion;
-    Inversion* inversion;    
-    
-
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
-      
-      SelectionSet ss(nObjects_);
-
-      ss.bitsets_[MOLECULE].setBitOn(mol->getGlobalIndex());
-
-      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-	ss.bitsets_[STUNTDOUBLE].setBitOn(atom->getGlobalIndex());
-      }
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
-           rb = mol->nextRigidBody(rbIter)) {
-        ss.bitsets_[STUNTDOUBLE].setBitOn(rb->getGlobalIndex());
-      }
-      for (bond = mol->beginBond(bondIter); bond != NULL; 
-           bond = mol->nextBond(bondIter)) {
-        ss.bitsets_[BOND].setBitOn(bond->getGlobalIndex());
-      }   
-      for (bend = mol->beginBend(bendIter); bend != NULL; 
-           bend = mol->nextBend(bendIter)) {
-        ss.bitsets_[BEND].setBitOn(bend->getGlobalIndex());
-      }   
-      for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; 
-           torsion = mol->nextTorsion(torsionIter)) {
-        ss.bitsets_[TORSION].setBitOn(torsion->getGlobalIndex());
-      }   
-      for (inversion = mol->beginInversion(inversionIter); inversion != NULL; 
-           inversion = mol->nextInversion(inversionIter)) {
-        ss.bitsets_[INVERSION].setBitOn(inversion->getGlobalIndex());
-      }   
-
-      selectionSets_[mol->getGlobalIndex()] = ss;
-    }
-  }
-
-  SelectionSet IndexFinder::find(int molIndex){
-    return selectionSets_[molIndex];
-  }
-
-  SelectionSet IndexFinder::find(int begMolIndex, int endMolIndex){
+  for (mol = info_->beginMolecule(mi); mol != NULL;
+       mol = info_->nextMolecule(mi)) {
     SelectionSet ss(nObjects_);
-        
-    for (int i = begMolIndex; i < endMolIndex; ++i) {
-      ss |= selectionSets_[i];
-    }    
-    return ss;
+
+    ss.bitsets_[MOLECULE].setBitOn(mol->getGlobalIndex());
+
+    for (atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+      ss.bitsets_[STUNTDOUBLE].setBitOn(atom->getGlobalIndex());
+    }
+    for (rb = mol->beginRigidBody(rbIter); rb != NULL;
+         rb = mol->nextRigidBody(rbIter)) {
+      ss.bitsets_[STUNTDOUBLE].setBitOn(rb->getGlobalIndex());
+    }
+    for (bond = mol->beginBond(bondIter); bond != NULL;
+         bond = mol->nextBond(bondIter)) {
+      ss.bitsets_[BOND].setBitOn(bond->getGlobalIndex());
+    }
+    for (bend = mol->beginBend(bendIter); bend != NULL;
+         bend = mol->nextBend(bendIter)) {
+      ss.bitsets_[BEND].setBitOn(bend->getGlobalIndex());
+    }
+    for (torsion = mol->beginTorsion(torsionIter); torsion != NULL;
+         torsion = mol->nextTorsion(torsionIter)) {
+      ss.bitsets_[TORSION].setBitOn(torsion->getGlobalIndex());
+    }
+    for (inversion = mol->beginInversion(inversionIter); inversion != NULL;
+         inversion = mol->nextInversion(inversionIter)) {
+      ss.bitsets_[INVERSION].setBitOn(inversion->getGlobalIndex());
+    }
+
+    selectionSets_[mol->getGlobalIndex()] = ss;
   }
 }
+
+SelectionSet IndexFinder::find(int molIndex) {
+  return selectionSets_[molIndex];
+}
+
+SelectionSet IndexFinder::find(int begMolIndex, int endMolIndex) {
+  SelectionSet ss(nObjects_);
+
+  for (int i = begMolIndex; i < endMolIndex; ++i) {
+    ss |= selectionSets_[i];
+  }
+  return ss;
+}
+}  // namespace OpenMD

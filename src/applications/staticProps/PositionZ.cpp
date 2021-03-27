@@ -48,39 +48,43 @@
  * Created by Hemanta Bhattarai on 02/20/20.
  */
 
+#include "applications/staticProps/PositionZ.hpp"
+
 #include <algorithm>
 #include <fstream>
-#include "applications/staticProps/PositionZ.hpp"
+
+#include "brains/Thermo.hpp"
+#include "io/DumpReader.hpp"
+#include "primitives/Molecule.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/simError.h"
-#include "io/DumpReader.hpp"
-#include "primitives/Molecule.hpp"
-#include "brains/Thermo.hpp"
 
 namespace OpenMD {
 
-  PositionZ::PositionZ(SimInfo* info, const std::string& filename,
-                                 const std::string& sele, int nzbins, int axis)
-    : StaticAnalyser(info, filename, nzbins), selectionScript_(sele),
-      evaluator_(info), seleMan_(info), thermo_(info), axis_(axis) {
+PositionZ::PositionZ(SimInfo* info, const std::string& filename,
+                     const std::string& sele, int nzbins, int axis)
+    : StaticAnalyser(info, filename, nzbins),
+      selectionScript_(sele),
+      evaluator_(info),
+      seleMan_(info),
+      thermo_(info),
+      axis_(axis) {
+  evaluator_.loadScriptString(sele);
+  if (!evaluator_.isDynamic()) {
+    seleMan_.setSelectionSet(evaluator_.evaluate());
+  }
 
-    evaluator_.loadScriptString(sele);
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
+  // fixed number of bins
 
-    // fixed number of bins
+  sliceSDCount_.resize(nBins_);
+  flucSliceSDCount_.resize(nBins_);
+  std::fill(sliceSDCount_.begin(), sliceSDCount_.end(), 0);
+  std::fill(flucSliceSDCount_.begin(), flucSliceSDCount_.end(), 0);
 
-    sliceSDCount_.resize(nBins_);
-    flucSliceSDCount_.resize(nBins_);
-    std::fill(sliceSDCount_.begin(), sliceSDCount_.end(), 0);
-    std::fill(flucSliceSDCount_.begin(), flucSliceSDCount_.end(), 0);
+  positionZ_.resize(nBins_);
 
-
-    positionZ_.resize(nBins_);
-
-    switch(axis_) {
+  switch (axis_) {
     case 0:
       axisLabel_ = "x";
       break;
@@ -91,125 +95,113 @@ namespace OpenMD {
     default:
       axisLabel_ = "z";
       break;
-    }
-
-    setOutputName(getPrefix(filename) + ".CountZ");
   }
 
-  void PositionZ::process() {
-    StuntDouble* sd;
-    int ii;
+  setOutputName(getPrefix(filename) + ".CountZ");
+}
 
-    bool usePeriodicBoundaryConditions_ =
+void PositionZ::process() {
+  StuntDouble* sd;
+  int ii;
+
+  bool usePeriodicBoundaryConditions_ =
       info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-    DumpReader reader(info_, dumpFilename_);
-    int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames/step_;
+  DumpReader reader(info_, dumpFilename_);
+  int nFrames = reader.getNFrames();
+  nProcessed_ = nFrames / step_;
 
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+  for (int istep = 0; istep < nFrames; istep += step_) {
+    reader.readFrame(istep);
+    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    zBox_.push_back(hmat(axis_, axis_));
 
+    RealType halfBoxZ_ = hmat(axis_, axis_) / 2.0;
 
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-      zBox_.push_back(hmat(axis_,axis_));
-
-      RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;
-
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-
-      //wrap the stuntdoubles into a cell
-      for (sd = seleMan_.beginSelected(ii); sd != NULL; sd = seleMan_.nextSelected(ii)) {
-        Vector3d pos = sd->getPos();
-        if (usePeriodicBoundaryConditions_)
-          currentSnapshot_->wrapVector(pos);
-        sd->setPos(pos);
-      }
-
-      //determine which atom belongs to which slice
-      for (sd = seleMan_.beginSelected(ii); sd != NULL; sd = seleMan_.nextSelected(ii)) {
-        Vector3d pos = sd->getPos();
-        // shift molecules by half a box to have bins start at 0
-        int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
-        sliceSDCount_[binNo]++;
-
-      }
-
-      //loop over the slices to calculate the charge
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      std::map<int,RealType> countInBin;
-      
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-      RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;
-
-      //determine which atom belongs to which slice
-      for (sd = seleMan_.beginSelected(ii); sd != NULL; sd = seleMan_.nextSelected(ii)) {
-        Vector3d pos = sd->getPos();
-        // shift molecules by half a box to have bins start at 0
-        int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
-        countInBin[binNo]++;
-
-      }
-
-      //loop over the slices to calculate the charge
-
-
-    for(unsigned int index = 0; index < flucSliceSDCount_.size(); ++index)
-    {
-        RealType flucCount = (countInBin[index] - (sliceSDCount_[index]/nProcessed_));
-        flucSliceSDCount_[index] += flucCount * flucCount;
-
+    // wrap the stuntdoubles into a cell
+    for (sd = seleMan_.beginSelected(ii); sd != NULL;
+         sd = seleMan_.nextSelected(ii)) {
+      Vector3d pos = sd->getPos();
+      if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(pos);
+      sd->setPos(pos);
     }
 
+    // determine which atom belongs to which slice
+    for (sd = seleMan_.beginSelected(ii); sd != NULL;
+         sd = seleMan_.nextSelected(ii)) {
+      Vector3d pos = sd->getPos();
+      // shift molecules by half a box to have bins start at 0
+      int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_, axis_));
+      sliceSDCount_[binNo]++;
+    }
 
-
+    // loop over the slices to calculate the charge
   }
 
+  for (int istep = 0; istep < nFrames; istep += step_) {
+    std::map<int, RealType> countInBin;
 
-    writePositionZ();
+    reader.readFrame(istep);
+    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    RealType halfBoxZ_ = hmat(axis_, axis_) / 2.0;
 
-  }
-
-  void PositionZ::writePositionZ() {
-
-    // compute average box length:
-    std::vector<RealType>::iterator j;
-    RealType zSum = 0.0;
-    for (j = zBox_.begin(); j != zBox_.end(); ++j) {
-      zSum += *j;
-    }
-    RealType zAve = zSum / zBox_.size();
-
-    std::ofstream rdfStream(outputFilename_.c_str());
-    if (rdfStream.is_open()) {
-      rdfStream << "#position count "<<"\n";
-      rdfStream << "#selection: (" << selectionScript_ << ")\n";
-      rdfStream << "#" << axisLabel_ << "\tAverage Number\tFluctations_in_count\n";
-      for (unsigned int i = 0; i < positionZ_.size(); ++i) {
-        RealType z = zAve * (i+0.5)/positionZ_.size();
-        rdfStream << z << "\t"
-                  << sliceSDCount_[i]/nProcessed_<<"\t"
-                  << sqrt(flucSliceSDCount_[i])/nProcessed_
-                  << "\n";
-      }
-
-    } else {
-
-      sprintf(painCave.errMsg, "ChargeZ: unable to open %s\n",
-	      outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();
+    // determine which atom belongs to which slice
+    for (sd = seleMan_.beginSelected(ii); sd != NULL;
+         sd = seleMan_.nextSelected(ii)) {
+      Vector3d pos = sd->getPos();
+      // shift molecules by half a box to have bins start at 0
+      int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_, axis_));
+      countInBin[binNo]++;
     }
 
-    rdfStream.close();
+    // loop over the slices to calculate the charge
 
+    for (unsigned int index = 0; index < flucSliceSDCount_.size(); ++index) {
+      RealType flucCount =
+          (countInBin[index] - (sliceSDCount_[index] / nProcessed_));
+      flucSliceSDCount_[index] += flucCount * flucCount;
+    }
   }
+
+  writePositionZ();
 }
+
+void PositionZ::writePositionZ() {
+  // compute average box length:
+  std::vector<RealType>::iterator j;
+  RealType zSum = 0.0;
+  for (j = zBox_.begin(); j != zBox_.end(); ++j) {
+    zSum += *j;
+  }
+  RealType zAve = zSum / zBox_.size();
+
+  std::ofstream rdfStream(outputFilename_.c_str());
+  if (rdfStream.is_open()) {
+    rdfStream << "#position count "
+              << "\n";
+    rdfStream << "#selection: (" << selectionScript_ << ")\n";
+    rdfStream << "#" << axisLabel_
+              << "\tAverage Number\tFluctations_in_count\n";
+    for (unsigned int i = 0; i < positionZ_.size(); ++i) {
+      RealType z = zAve * (i + 0.5) / positionZ_.size();
+      rdfStream << z << "\t" << sliceSDCount_[i] / nProcessed_ << "\t"
+                << sqrt(flucSliceSDCount_[i]) / nProcessed_ << "\n";
+    }
+
+  } else {
+    sprintf(painCave.errMsg, "ChargeZ: unable to open %s\n",
+            outputFilename_.c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  rdfStream.close();
+}
+}  // namespace OpenMD

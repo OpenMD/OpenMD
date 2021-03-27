@@ -43,51 +43,51 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "shapedLatticeEllipsoid.hpp"
+
+#include <cmath>
 
 #include "lattice/shapedLattice.hpp"
-#include "shapedLatticeEllipsoid.hpp"
-#include <cmath>
 
 using namespace std;
 namespace OpenMD {
-  
-  shapedLatticeEllipsoid::shapedLatticeEllipsoid(RealType latticeConstant,
-                                                 std::string latticeType, 
-                                                 RealType rAxial, 
-                                                 RealType rEquatorial) : 
-    shapedLattice(latticeConstant, latticeType){
-    
-    rAxial_= rAxial;
-    rEquatorial_= rEquatorial;
 
-    Vector3d dimension;
-    dimension[0]=2.0*rEquatorial_;
-    dimension[1]=2.0*rEquatorial_;
-    dimension[2]=2.0*rAxial_;
-    setGridDimension(dimension);
-    Vector3d origin;
-    origin[0] = latticeConstant / 2.0;
-    origin[1] = latticeConstant / 2.0;
-    origin[2] = latticeConstant / 2.0;
-    setOrigin(origin);
-  }
+shapedLatticeEllipsoid::shapedLatticeEllipsoid(RealType latticeConstant,
+                                               std::string latticeType,
+                                               RealType rAxial,
+                                               RealType rEquatorial)
+    : shapedLattice(latticeConstant, latticeType) {
+  rAxial_ = rAxial;
+  rEquatorial_ = rEquatorial;
 
-  /**
-   * Determines whether a point lies within an ellipsoid centered at
-   * origin (0,0,0)
-   *
-   */ 
-  bool shapedLatticeEllipsoid::isInterior(Vector3d pos) {
-    RealType xoverb = pos[0]/rEquatorial_;
-    RealType yoverb = pos[1]/rEquatorial_;
-    RealType zovera = pos[2]/rAxial_;
-    
-    bool result;
-    if (xoverb*xoverb + yoverb*yoverb + zovera*zovera < 1)
-      result = true;
-    else
-      result = false;
-    
-    return result;    
-  }    
+  Vector3d dimension;
+  dimension[0] = 2.0 * rEquatorial_;
+  dimension[1] = 2.0 * rEquatorial_;
+  dimension[2] = 2.0 * rAxial_;
+  setGridDimension(dimension);
+  Vector3d origin;
+  origin[0] = latticeConstant / 2.0;
+  origin[1] = latticeConstant / 2.0;
+  origin[2] = latticeConstant / 2.0;
+  setOrigin(origin);
 }
+
+/**
+ * Determines whether a point lies within an ellipsoid centered at
+ * origin (0,0,0)
+ *
+ */
+bool shapedLatticeEllipsoid::isInterior(Vector3d pos) {
+  RealType xoverb = pos[0] / rEquatorial_;
+  RealType yoverb = pos[1] / rEquatorial_;
+  RealType zovera = pos[2] / rAxial_;
+
+  bool result;
+  if (xoverb * xoverb + yoverb * yoverb + zovera * zovera < 1)
+    result = true;
+  else
+    result = false;
+
+  return result;
+}
+}  // namespace OpenMD

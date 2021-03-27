@@ -43,46 +43,46 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include <memory>
- 
 #include "primitives/ShortRangeInteraction.hpp"
+
+#include <memory>
 
 namespace OpenMD {
 
-  ShortRangeInteraction::ShortRangeInteraction() : globalIndex_(-1), 
-                                                   localIndex_(-1) {
-  }
+ShortRangeInteraction::ShortRangeInteraction()
+    : globalIndex_(-1), localIndex_(-1) {}
 
-  ShortRangeInteraction::~ShortRangeInteraction() {
-  }
+ShortRangeInteraction::~ShortRangeInteraction() {}
 
-  RealType ShortRangeInteraction::getValue() {
-    int id = snapshotMan_->getCurrentSnapshot()->getID();
-    return getValue(id);
-  }
-
-  RealType ShortRangeInteraction::getPrevValue() {
-    int id = snapshotMan_->getPrevSnapshot()->getID();
-    return getValue(id);
-  }
-
-  void ShortRangeInteraction::addProperty(std::shared_ptr<GenericData> genData) {
-    properties_.addProperty(genData);  
-  }
-  
-  void ShortRangeInteraction::removeProperty(const std::string& propName) {
-    properties_.removeProperty(propName);  
-  }
-  
-  std::vector<std::string> ShortRangeInteraction::getPropertyNames() {
-    return properties_.getPropertyNames();  
-  }
-  
-  std::vector<std::shared_ptr<GenericData> > ShortRangeInteraction::getProperties() { 
-    return properties_.getProperties(); 
-  }
-  
-  std::shared_ptr<GenericData> ShortRangeInteraction::getPropertyByName(const std::string& propName) {
-    return properties_.getPropertyByName(propName); 
-  }   
+RealType ShortRangeInteraction::getValue() {
+  int id = snapshotMan_->getCurrentSnapshot()->getID();
+  return getValue(id);
 }
+
+RealType ShortRangeInteraction::getPrevValue() {
+  int id = snapshotMan_->getPrevSnapshot()->getID();
+  return getValue(id);
+}
+
+void ShortRangeInteraction::addProperty(std::shared_ptr<GenericData> genData) {
+  properties_.addProperty(genData);
+}
+
+void ShortRangeInteraction::removeProperty(const std::string& propName) {
+  properties_.removeProperty(propName);
+}
+
+std::vector<std::string> ShortRangeInteraction::getPropertyNames() {
+  return properties_.getPropertyNames();
+}
+
+std::vector<std::shared_ptr<GenericData>>
+ShortRangeInteraction::getProperties() {
+  return properties_.getProperties();
+}
+
+std::shared_ptr<GenericData> ShortRangeInteraction::getPropertyByName(
+    const std::string& propName) {
+  return properties_.getPropertyByName(propName);
+}
+}  // namespace OpenMD

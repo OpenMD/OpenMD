@@ -46,33 +46,30 @@
 #include "applications/dynamicProps/SelectionCorrFunc.hpp"
 
 namespace OpenMD {
-  SelectionCorrFunc::SelectionCorrFunc(SimInfo* info, 
-                                       const std::string& filename, 
-                                       const std::string& sele1, 
-                                       const std::string& sele2)
-    : ObjectCCF<int>(info, filename, sele1, sele2, DataStorage::dslPosition){
-    
-    setCorrFuncType("SelectionCorrFunc");
-    setOutputName(getPrefix(dumpFilename_) + ".selecorr");
-    
-    selected1_.resize(nFrames_);
-    selected2_.resize(nFrames_);
-  }
-  
-  int SelectionCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    selected1_[frame].push_back( sd->getGlobalIndex() );
-    return selected1_[frame].size() - 1;
-  }
-  
-  int SelectionCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
-    selected2_[frame].push_back( sd->getGlobalIndex() );
-    return selected2_[frame].size() - 1;
-  }
+SelectionCorrFunc::SelectionCorrFunc(SimInfo* info, const std::string& filename,
+                                     const std::string& sele1,
+                                     const std::string& sele2)
+    : ObjectCCF<int>(info, filename, sele1, sele2, DataStorage::dslPosition) {
+  setCorrFuncType("SelectionCorrFunc");
+  setOutputName(getPrefix(dumpFilename_) + ".selecorr");
 
-  int SelectionCorrFunc::calcCorrVal(int frame1, int frame2,
-                                     int id1, int id2) {
-    if (selected1_[frame1][id1] == selected2_[frame2][id2]) return 1;
-    return 0;
-  }
-
+  selected1_.resize(nFrames_);
+  selected2_.resize(nFrames_);
 }
+
+int SelectionCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+  selected1_[frame].push_back(sd->getGlobalIndex());
+  return selected1_[frame].size() - 1;
+}
+
+int SelectionCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
+  selected2_[frame].push_back(sd->getGlobalIndex());
+  return selected2_[frame].size() - 1;
+}
+
+int SelectionCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
+  if (selected1_[frame1][id1] == selected2_[frame2][id2]) return 1;
+  return 0;
+}
+
+}  // namespace OpenMD

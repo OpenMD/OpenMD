@@ -44,58 +44,56 @@
  */
 
 #include "io/InversionTypesSectionParser.hpp"
-#include "types/InversionTypeParser.hpp"
+
 #include "brains/ForceField.hpp"
+#include "types/InversionTypeParser.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
-  
-  InversionTypesSectionParser::InversionTypesSectionParser(ForceFieldOptions& options) : options_(options){
-    
-    setSectionName("InversionTypes");
+
+InversionTypesSectionParser::InversionTypesSectionParser(
+    ForceFieldOptions& options)
+    : options_(options) {
+  setSectionName("InversionTypes");
+}
+
+void InversionTypesSectionParser::parseLine(ForceField& ff,
+                                            const std::string& line,
+                                            int lineNo) {
+  StringTokenizer tokenizer(line);
+  InversionTypeParser itParser;
+  InversionType* inversionType = NULL;
+
+  int nTokens = tokenizer.countTokens();
+
+  if (nTokens < 5) {
+    sprintf(painCave.errMsg,
+            "InversionTypesSectionParser Error: Not enough tokens at line %d\n",
+            lineNo);
+    painCave.isFatal = 1;
+    simError();
+    return;
   }
-  
-  void InversionTypesSectionParser::parseLine(ForceField& ff,
-					      const std::string& line, 
-					      int lineNo){
-    StringTokenizer tokenizer(line);
-    InversionTypeParser itParser;
-    InversionType* inversionType = NULL;
-    
-    int nTokens = tokenizer.countTokens();
-    
-    if (nTokens < 5) {
-      sprintf(painCave.errMsg, "InversionTypesSectionParser Error: Not enough tokens at line %d\n",
-              lineNo);
-      painCave.isFatal = 1;
-      simError();
-      return;
-    }
-    
-    std::string at1 = tokenizer.nextToken();
-    std::string at2 = tokenizer.nextToken();
-    std::string at3 = tokenizer.nextToken();
-    std::string at4 = tokenizer.nextToken();
-    std::string remainder = tokenizer.getRemainingString();
 
-    try {
-      inversionType = itParser.parseLine(remainder);
-    }
-    catch( OpenMDException& e ) {
-      
-      sprintf(painCave.errMsg, "InversionTypesSectionParser Error: %s "
-              "at line %d\n",
-              e.what(), lineNo);
-      painCave.isFatal = 1;
-      simError();
-    }
-        
-    if (inversionType != NULL) {
-      ff.addInversionType(at1, at2, at3, at4, inversionType);
-    }
+  std::string at1 = tokenizer.nextToken();
+  std::string at2 = tokenizer.nextToken();
+  std::string at3 = tokenizer.nextToken();
+  std::string at4 = tokenizer.nextToken();
+  std::string remainder = tokenizer.getRemainingString();
 
+  try {
+    inversionType = itParser.parseLine(remainder);
+  } catch (OpenMDException& e) {
+    sprintf(painCave.errMsg,
+            "InversionTypesSectionParser Error: %s "
+            "at line %d\n",
+            e.what(), lineNo);
+    painCave.isFatal = 1;
+    simError();
   }
-} //end namespace OpenMD
 
-
-
+  if (inversionType != NULL) {
+    ff.addInversionType(at1, at2, at3, at4, inversionType);
+  }
+}
+}  // end namespace OpenMD

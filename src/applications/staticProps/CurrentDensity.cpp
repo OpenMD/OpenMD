@@ -48,12 +48,13 @@
  * Created by Cody R. Drisko on 06/14/19.
  */
 
+#include "applications/staticProps/CurrentDensity.hpp"
+
 #include <algorithm>
 #include <fstream>
 #include <string>
 #include <vector>
 
-#include "applications/staticProps/CurrentDensity.hpp"
 #include "brains/Thermo.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
@@ -64,21 +65,24 @@
 
 namespace OpenMD {
 
-  CurrentDensity::CurrentDensity(SimInfo* info, const std::string& filename,
-                                 const std::string& sele, int nbins, int axis)
-    : StaticAnalyser(info, filename, nbins), selectionScript_(sele),
-      evaluator_(info), seleMan_(info), thermo_(info), axis_(axis) {
+CurrentDensity::CurrentDensity(SimInfo* info, const std::string& filename,
+                               const std::string& sele, int nbins, int axis)
+    : StaticAnalyser(info, filename, nbins),
+      selectionScript_(sele),
+      evaluator_(info),
+      seleMan_(info),
+      thermo_(info),
+      axis_(axis) {
+  evaluator_.loadScriptString(sele);
+  if (!evaluator_.isDynamic()) {
+    seleMan_.setSelectionSet(evaluator_.evaluate());
+  }
 
-    evaluator_.loadScriptString(sele);
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
+  // fixed number of bins
+  sliceSDLists_.resize(nBins_);
+  currentDensity_.resize(nBins_);
 
-    // fixed number of bins
-    sliceSDLists_.resize(nBins_);
-    currentDensity_.resize(nBins_);
-
-    switch(axis_) {
+  switch (axis_) {
     case 0:
       axisLabel_ = "x";
       break;
@@ -89,123 +93,115 @@ namespace OpenMD {
     default:
       axisLabel_ = "z";
       break;
-    }
-
-    setOutputName(getPrefix(filename) + ".Jc");
   }
 
-  void CurrentDensity::process() {
-    StuntDouble* sd;
-    int ii;
+  setOutputName(getPrefix(filename) + ".Jc");
+}
 
-    bool usePeriodicBoundaryConditions_ =
+void CurrentDensity::process() {
+  StuntDouble* sd;
+  int ii;
+
+  bool usePeriodicBoundaryConditions_ =
       info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-    DumpReader reader(info_, dumpFilename_);
-    int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames / step_;
-    overallCurrentDensity_ = 0;
+  DumpReader reader(info_, dumpFilename_);
+  int nFrames = reader.getNFrames();
+  nProcessed_ = nFrames / step_;
+  overallCurrentDensity_ = 0;
 
-    for (int istep = 0; istep < nFrames; istep += step_) {
+  for (int istep = 0; istep < nFrames; istep += step_) {
+    reader.readFrame(istep);
+    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    Vector3d COMvel = thermo_.getComVel();
 
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      Vector3d COMvel = thermo_.getComVel();
+    for (unsigned int i = 0; i < nBins_; i++) {
+      sliceSDLists_[i].clear();
+    }
 
-      for (unsigned int i = 0; i < nBins_; i++) {
-        sliceSDLists_[i].clear();
+    RealType sliceVolume = currentSnapshot_->getVolume() / nBins_;
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    zBox_.push_back(hmat(axis_, axis_));
+
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+
+    // determine which atom belongs to which slice
+    for (sd = seleMan_.beginSelected(ii); sd != NULL;
+         sd = seleMan_.nextSelected(ii)) {
+      int binNo;
+      Vector3d pos = sd->getPos();
+
+      if (usePeriodicBoundaryConditions_) {
+        currentSnapshot_->wrapVector(pos);
+        binNo = int(nBins_ * (pos[axis_] / hmat(axis_, axis_) + 0.5)) % nBins_;
+        sliceSDLists_[binNo].push_back(sd);
       }
+    }
 
-      RealType sliceVolume = currentSnapshot_->getVolume() /nBins_;
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-      zBox_.push_back(hmat(axis_,axis_));
+    // loop over the slices to calculate the densities
+    for (unsigned int i = 0; i < nBins_; i++) {
+      RealType binJc = 0;
 
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
+      for (unsigned int j = 0; j < sliceSDLists_[i].size(); ++j) {
+        RealType q = 0.0;
+        Atom* atom = static_cast<Atom*>(sliceSDLists_[i][j]);
 
-      // determine which atom belongs to which slice
-      for (sd = seleMan_.beginSelected(ii); sd != NULL; sd = seleMan_.nextSelected(ii)) {
+        AtomType* atomType = atom->getAtomType();
 
-        int binNo;
-        Vector3d pos = sd->getPos();
+        if (sliceSDLists_[i][j]->isAtom()) {
+          FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+          if (fca.isFixedCharge()) q = fca.getCharge();
 
-        if (usePeriodicBoundaryConditions_) {
-          currentSnapshot_->wrapVector(pos);
-          binNo = int(nBins_ * (pos[axis_] / hmat(axis_,axis_) + 0.5)) % nBins_;
-	  sliceSDLists_[binNo].push_back(sd);
+          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+          if (fqa.isFluctuatingCharge()) q += atom->getFlucQPos();
+
+          Vector3d vel = sliceSDLists_[i][j]->getVel();
+          binJc += q * (vel[axis_] - COMvel[axis_]);
         }
       }
 
-      // loop over the slices to calculate the densities
-      for (unsigned int i = 0; i < nBins_; i++) {
-
-        RealType binJc = 0;
-
-        for (unsigned int j = 0; j < sliceSDLists_[i].size(); ++j) {
-
-          RealType q = 0.0;
-          Atom* atom = static_cast<Atom*>(sliceSDLists_[i][j]);
-
-          AtomType* atomType = atom->getAtomType();
-
-          if (sliceSDLists_[i][j]->isAtom()) {
-            FixedChargeAdapter fca = FixedChargeAdapter(atomType);
-            if ( fca.isFixedCharge() )
-              q = fca.getCharge();
-
-            FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
-            if ( fqa.isFluctuatingCharge() )
-              q += atom->getFlucQPos();
-
-            Vector3d vel = sliceSDLists_[i][j]->getVel();
-            binJc += q * (vel[axis_] - COMvel[axis_]);
-          }
-        }
-
-        // Units of (e / Ang^2 / fs)
-        currentDensity_[i] += binJc / sliceVolume;
-        overallCurrentDensity_ += currentDensity_[i];
-      }
+      // Units of (e / Ang^2 / fs)
+      currentDensity_[i] += binJc / sliceVolume;
+      overallCurrentDensity_ += currentDensity_[i];
     }
-
-    writeCurrentDensity();
   }
 
-  void CurrentDensity::writeCurrentDensity() {
-
-    // compute average box length:
-    std::vector<RealType>::iterator j;
-    RealType zSum = 0.0;
-    for (j = zBox_.begin(); j != zBox_.end(); ++j) {
-      zSum += *j;
-    }
-    RealType zAve = zSum / zBox_.size();
-
-    std::ofstream rdfStream(outputFilename_.c_str());
-    if (rdfStream.is_open()) {
-      rdfStream << "#Current Density = "
-                << overallCurrentDensity_ / (nBins_ * nProcessed_)
-                << " e / Ang^2 / fs.\n";
-      rdfStream << "#J_c(" << axisLabel_ << ")\n";
-      rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
-      rdfStream << "#selection: (" << selectionScript_ << ")\n";
-      rdfStream << "#" << axisLabel_ << "\tcurrent density\n";
-
-      for (unsigned int i = 0; i < currentDensity_.size(); ++i) {
-        RealType z = zAve * (i + 0.5) / currentDensity_.size();
-        rdfStream << z << "\t"
-                  << currentDensity_[i] / nProcessed_
-                  << "\n";
-      }
-
-    } else {
-      sprintf(painCave.errMsg, "CurrentDensity: unable to open %s\n",
-	      outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    rdfStream.close();
-  }
+  writeCurrentDensity();
 }
+
+void CurrentDensity::writeCurrentDensity() {
+  // compute average box length:
+  std::vector<RealType>::iterator j;
+  RealType zSum = 0.0;
+  for (j = zBox_.begin(); j != zBox_.end(); ++j) {
+    zSum += *j;
+  }
+  RealType zAve = zSum / zBox_.size();
+
+  std::ofstream rdfStream(outputFilename_.c_str());
+  if (rdfStream.is_open()) {
+    rdfStream << "#Current Density = "
+              << overallCurrentDensity_ / (nBins_ * nProcessed_)
+              << " e / Ang^2 / fs.\n";
+    rdfStream << "#J_c(" << axisLabel_ << ")\n";
+    rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
+    rdfStream << "#selection: (" << selectionScript_ << ")\n";
+    rdfStream << "#" << axisLabel_ << "\tcurrent density\n";
+
+    for (unsigned int i = 0; i < currentDensity_.size(); ++i) {
+      RealType z = zAve * (i + 0.5) / currentDensity_.size();
+      rdfStream << z << "\t" << currentDensity_[i] / nProcessed_ << "\n";
+    }
+
+  } else {
+    sprintf(painCave.errMsg, "CurrentDensity: unable to open %s\n",
+            outputFilename_.c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  rdfStream.close();
+}
+}  // namespace OpenMD

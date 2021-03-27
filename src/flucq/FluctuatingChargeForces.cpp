@@ -48,66 +48,65 @@
 #endif
 
 #include "flucq/FluctuatingChargeForces.hpp"
-#include "types/FluctuatingChargeAdapter.hpp"
 #include "math/RealSymmetricTridiagonal.hpp"
+#include "types/FluctuatingChargeAdapter.hpp"
 
 namespace OpenMD {
 
-  FluctuatingChargeForces::FluctuatingChargeForces(SimInfo* info) :
-    info_(info), initialized_(false) {
-  }
+FluctuatingChargeForces::FluctuatingChargeForces(SimInfo* info)
+    : info_(info), initialized_(false) {}
 
-  void FluctuatingChargeForces::initialize(){
-    FQtypes.clear();
-    FQtids.clear();
-    FQtids.resize( forceField_->getNAtomType(), -1);
+void FluctuatingChargeForces::initialize() {
+  FQtypes.clear();
+  FQtids.clear();
+  FQtids.resize(forceField_->getNAtomType(), -1);
 
-    set<AtomType*>::iterator at;
-    for (at = simTypes_.begin(); at != simTypes_.end(); ++at)
-      if ((*at)->isFluctuatingCharge()) addType(*at);
+  set<AtomType*>::iterator at;
+  for (at = simTypes_.begin(); at != simTypes_.end(); ++at)
+    if ((*at)->isFluctuatingCharge()) addType(*at);
 
-    initialized_ = true;
-  }
-
-  void FluctuatingChargeForces::getSelfInteraction(int atid, RealType charge,
-                                                   RealType &potential,
-                                                   RealType &force) {
-    if (!initialized_) initialize();
-
-    data = FQMap[FQtids[atid]];
-
-    DoublePolynomial vself = data.vself_;
-    potential += vself.evaluate(charge);
-    force -= vself.evaluateDerivative(charge);
-    
-    return;
-  }
-
-  void FluctuatingChargeForces::addType(AtomType* atomType) {
-    FluctuatingChargeAtomData data;
-    FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
-    if (fqa.isFluctuatingCharge()) {
-      data.electronegativity = fqa.getElectronegativity();
-      data.hardness = fqa.getHardness();
-      data.slaterN = fqa.getSlaterN();
-      data.slaterZeta = fqa.getSlaterZeta();
-      data.vself_ = fqa.getSelfPolynomial();
-    }
-    int atid = atomType->getIdent();
-    int fqtid = FQtypes.size();
-    
-    pair<set<int>::iterator,bool> ret;
-    ret = FQtypes.insert( atid );
-    if (ret.second == false) {
-      sprintf( painCave.errMsg,
-               "FluctuatingChargeForces already had a previous fluctuating "
-               "charge entry with ident %d\n",
-               atid );
-      painCave.severity = OPENMD_INFO;
-      painCave.isFatal = 0;
-      simError();
-    }
-    FQtids[atid] = fqtid;
-    FQMap.push_back(data);
-  }
+  initialized_ = true;
 }
+
+void FluctuatingChargeForces::getSelfInteraction(int atid, RealType charge,
+                                                 RealType& potential,
+                                                 RealType& force) {
+  if (!initialized_) initialize();
+
+  data = FQMap[FQtids[atid]];
+
+  DoublePolynomial vself = data.vself_;
+  potential += vself.evaluate(charge);
+  force -= vself.evaluateDerivative(charge);
+
+  return;
+}
+
+void FluctuatingChargeForces::addType(AtomType* atomType) {
+  FluctuatingChargeAtomData data;
+  FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+  if (fqa.isFluctuatingCharge()) {
+    data.electronegativity = fqa.getElectronegativity();
+    data.hardness = fqa.getHardness();
+    data.slaterN = fqa.getSlaterN();
+    data.slaterZeta = fqa.getSlaterZeta();
+    data.vself_ = fqa.getSelfPolynomial();
+  }
+  int atid = atomType->getIdent();
+  int fqtid = FQtypes.size();
+
+  pair<set<int>::iterator, bool> ret;
+  ret = FQtypes.insert(atid);
+  if (ret.second == false) {
+    sprintf(painCave.errMsg,
+            "FluctuatingChargeForces already had a previous fluctuating "
+            "charge entry with ident %d\n",
+            atid);
+    painCave.severity = OPENMD_INFO;
+    painCave.isFatal = 0;
+    simError();
+  }
+  FQtids[atid] = fqtid;
+  FQMap.push_back(data);
+}
+}  // namespace OpenMD

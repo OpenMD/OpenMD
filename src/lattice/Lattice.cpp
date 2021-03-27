@@ -42,21 +42,22 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "lattice/Lattice.hpp"
 
-namespace OpenMD{
-  void Lattice::getLatticePointsPos(std::vector<Vector3d>& latticePos, int nx, int ny, int nz){
+namespace OpenMD {
+void Lattice::getLatticePointsPos(std::vector<Vector3d>& latticePos, int nx,
+                                  int ny, int nz) {
+  latticePos.resize(nCellSites);
 
-    latticePos.resize(nCellSites);
-                                                           
-    for( int i=0;i < nCellSites;i++){
-
-      latticePos[i][0] = origin[0] + cellSitesPos[i][0] + cellLen[0] * (RealType(nx) - 0.5);
-      latticePos[i][1] = origin[1] + cellSitesPos[i][1] + cellLen[1] * (RealType(ny) - 0.5);
-      latticePos[i][2] = origin[2] + cellSitesPos[i][2] + cellLen[2] * (RealType(nz) - 0.5);    
-    }
-
+  for (int i = 0; i < nCellSites; i++) {
+    latticePos[i][0] =
+        origin[0] + cellSitesPos[i][0] + cellLen[0] * (RealType(nx) - 0.5);
+    latticePos[i][1] =
+        origin[1] + cellSitesPos[i][1] + cellLen[1] * (RealType(ny) - 0.5);
+    latticePos[i][2] =
+        origin[2] + cellSitesPos[i][2] + cellLen[2] * (RealType(nz) - 0.5);
   }
-
 }
+
+}  // namespace OpenMD

@@ -42,181 +42,169 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
+#include "utils/MoLocator.hpp"
+
+#include <cmath>
+#include <cstdlib>
 #include <iostream>
 
-#include <cstdlib>
-#include <cmath>
-
-#include "utils/simError.h"
-#include "utils/MoLocator.hpp"
 #include "types/AtomType.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
-  MoLocator::MoLocator( MoleculeStamp* theStamp, ForceField* theFF){
-    
-    myStamp = theStamp;
-    myFF = theFF;
-    nIntegrableObjects = myStamp->getNIntegrable();
-    calcRef();
-  }
-  
-  void MoLocator::placeMol( const Vector3d& offset, const Vector3d& ort, 
-                            Molecule* mol) {
+MoLocator::MoLocator(MoleculeStamp* theStamp, ForceField* theFF) {
+  myStamp = theStamp;
+  myFF = theFF;
+  nIntegrableObjects = myStamp->getNIntegrable();
+  calcRef();
+}
 
-    Vector3d newCoor;
-    Vector3d curRefCoor;  
-    RotMat3x3d rotMat = latVec2RotMat(ort);
-    
-    if(mol->getNIntegrableObjects() != nIntegrableObjects){
-      sprintf( painCave.errMsg,
-               "MoLocator::placeMol error.\n"
-               "\tThe number of integrable objects of MoleculeStamp is not\n"
-               "\tthe same as that of Molecule\n");
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    Molecule::IntegrableObjectIterator ii;
-    StuntDouble* sd;
-    int i;
-    for (sd = mol->beginIntegrableObject(ii), i = 0; sd != NULL; 
-         sd = mol->nextIntegrableObject(ii), ++i) { 
-      
-      newCoor = rotMat * refCoords[i];
-      newCoor += offset;
-     
-      sd->setPos(newCoor);
-      sd->setVel(V3Zero);
-      
-      if(sd->isDirectional()){
-        sd->setA(rotMat * sd->getA());
-        sd->setJ(V3Zero);  
-      }        
-    }
-  }
-  
-  void MoLocator::calcRef( void ){
-    AtomStamp* currAtomStamp;
-    RigidBodyStamp* rbStamp;
-    std::vector<RealType> mass;
-    Vector3d coor;
-    Vector3d refMolCom;  
-    RealType totMassInRb;
-    RealType currAtomMass;
-    RealType molMass;
-    
-    std::size_t nAtoms= myStamp->getNAtoms();
-    std::size_t nRigidBodies = myStamp->getNRigidBodies();
-    
-    for(std::size_t i = 0; i < nAtoms; i++){
-      
-      currAtomStamp = myStamp->getAtomStamp(i);
-      
-      if( !currAtomStamp->havePosition() ){
-        sprintf( painCave.errMsg,
-                 "MoLocator::calcRef error.\n"
-                 "\tComponent %s, atom %s does not have a position specified.\n"
-                 "\tThis means MoLocator cannot initalize it's position.\n",
-                 myStamp->getName().c_str(),
-                 currAtomStamp->getType().c_str());
-        
-        painCave.isFatal = 1;
-        simError();
-      }
-      
-      //if atom belongs to rigidbody, just skip it
-      if(myStamp->isAtomInRigidBody(i))
-        continue;
-      //get mass and the reference coordinate 
-      else{
-        currAtomMass = getAtomMass(currAtomStamp->getType(), myFF);   
-        mass.push_back(currAtomMass);
-        coor.x() = currAtomStamp->getPosX();
-        coor.y() = currAtomStamp->getPosY();
-        coor.z() = currAtomStamp->getPosZ();
-        refCoords.push_back(coor);
-        
-      }
-    }
-    
-    for(std::size_t i = 0; i < nRigidBodies; i++){
-      
-      rbStamp = myStamp->getRigidBodyStamp(i);
-      std::size_t nAtomsInRb = rbStamp->getNMembers();
-      
-      coor.x() = 0.0;
-      coor.y() = 0.0;
-      coor.z() = 0.0;
-      totMassInRb = 0.0;
-      
-      for(std::size_t j = 0; j < nAtomsInRb; j++){
-        
-        currAtomStamp = myStamp->getAtomStamp(rbStamp->getMemberAt(j));
-        currAtomMass = getAtomMass(currAtomStamp->getType(), myFF);
-        totMassInRb +=  currAtomMass;
-        
-        coor.x() += currAtomStamp->getPosX() * currAtomMass;
-        coor.y() += currAtomStamp->getPosY() * currAtomMass;
-        coor.z() += currAtomStamp->getPosZ() * currAtomMass;
-      }
-      
-      mass.push_back(totMassInRb);
-      coor /= totMassInRb;
-      refCoords.push_back(coor);
-    }
-    
-    
-    //calculate the reference center of mass
-    molMass = 0;
-    refMolCom.x() = 0;
-    refMolCom.y() = 0;
-    refMolCom.z() = 0;
-    
-    for(std::size_t i = 0; i < nIntegrableObjects; i++){
-      refMolCom += refCoords[i] * mass[i];
-      molMass += mass[i];
-    }
-    
-    refMolCom /= molMass;
-    
-    //move the reference center of mass to (0,0,0) and adjust the
-    //reference coordinate of the integrabel objects
-    for(std::size_t i = 0; i < nIntegrableObjects; i++)
-      refCoords[i] -= refMolCom;
-  }
-  
-  RealType MoLocator::getAtomMass(const std::string& at, ForceField* myFF) {
-    RealType mass;
-    AtomType* atomType= myFF->getAtomType(at);
-    if (atomType != NULL) {
-      mass = atomType->getMass();
-    } else {
-      mass = 0.0;
-      std::cerr << "Can not find AtomType: " << at << std::endl;
-    }
-    return mass;
-  }
-  
-  RealType MoLocator::getMolMass(MoleculeStamp *molStamp, ForceField *myFF) {
-    unsigned int nAtoms;
-    RealType totMass = 0;
-    nAtoms = molStamp->getNAtoms();
-    
-    for(std::size_t i = 0; i < nAtoms; i++) {
-      AtomStamp *currAtomStamp = molStamp->getAtomStamp(i);
-      totMass += getAtomMass(currAtomStamp->getType(), myFF);         
-    }
-    return totMass;
+void MoLocator::placeMol(const Vector3d& offset, const Vector3d& ort,
+                         Molecule* mol) {
+  Vector3d newCoor;
+  Vector3d curRefCoor;
+  RotMat3x3d rotMat = latVec2RotMat(ort);
+
+  if (mol->getNIntegrableObjects() != nIntegrableObjects) {
+    sprintf(painCave.errMsg,
+            "MoLocator::placeMol error.\n"
+            "\tThe number of integrable objects of MoleculeStamp is not\n"
+            "\tthe same as that of Molecule\n");
+    painCave.isFatal = 1;
+    simError();
   }
 
-  RotMat3x3d MoLocator::latVec2RotMat(const Vector3d& lv){
-    
-    RealType theta =acos(lv[2]);
-    RealType phi = atan2(lv[1], lv[0]);
-    RealType psi = 0;
-    
-    return RotMat3x3d(phi, theta, psi);    
+  Molecule::IntegrableObjectIterator ii;
+  StuntDouble* sd;
+  int i;
+  for (sd = mol->beginIntegrableObject(ii), i = 0; sd != NULL;
+       sd = mol->nextIntegrableObject(ii), ++i) {
+    newCoor = rotMat * refCoords[i];
+    newCoor += offset;
+
+    sd->setPos(newCoor);
+    sd->setVel(V3Zero);
+
+    if (sd->isDirectional()) {
+      sd->setA(rotMat * sd->getA());
+      sd->setJ(V3Zero);
+    }
   }
 }
 
+void MoLocator::calcRef(void) {
+  AtomStamp* currAtomStamp;
+  RigidBodyStamp* rbStamp;
+  std::vector<RealType> mass;
+  Vector3d coor;
+  Vector3d refMolCom;
+  RealType totMassInRb;
+  RealType currAtomMass;
+  RealType molMass;
+
+  std::size_t nAtoms = myStamp->getNAtoms();
+  std::size_t nRigidBodies = myStamp->getNRigidBodies();
+
+  for (std::size_t i = 0; i < nAtoms; i++) {
+    currAtomStamp = myStamp->getAtomStamp(i);
+
+    if (!currAtomStamp->havePosition()) {
+      sprintf(painCave.errMsg,
+              "MoLocator::calcRef error.\n"
+              "\tComponent %s, atom %s does not have a position specified.\n"
+              "\tThis means MoLocator cannot initalize it's position.\n",
+              myStamp->getName().c_str(), currAtomStamp->getType().c_str());
+
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    // if atom belongs to rigidbody, just skip it
+    if (myStamp->isAtomInRigidBody(i)) continue;
+    // get mass and the reference coordinate
+    else {
+      currAtomMass = getAtomMass(currAtomStamp->getType(), myFF);
+      mass.push_back(currAtomMass);
+      coor.x() = currAtomStamp->getPosX();
+      coor.y() = currAtomStamp->getPosY();
+      coor.z() = currAtomStamp->getPosZ();
+      refCoords.push_back(coor);
+    }
+  }
+
+  for (std::size_t i = 0; i < nRigidBodies; i++) {
+    rbStamp = myStamp->getRigidBodyStamp(i);
+    std::size_t nAtomsInRb = rbStamp->getNMembers();
+
+    coor.x() = 0.0;
+    coor.y() = 0.0;
+    coor.z() = 0.0;
+    totMassInRb = 0.0;
+
+    for (std::size_t j = 0; j < nAtomsInRb; j++) {
+      currAtomStamp = myStamp->getAtomStamp(rbStamp->getMemberAt(j));
+      currAtomMass = getAtomMass(currAtomStamp->getType(), myFF);
+      totMassInRb += currAtomMass;
+
+      coor.x() += currAtomStamp->getPosX() * currAtomMass;
+      coor.y() += currAtomStamp->getPosY() * currAtomMass;
+      coor.z() += currAtomStamp->getPosZ() * currAtomMass;
+    }
+
+    mass.push_back(totMassInRb);
+    coor /= totMassInRb;
+    refCoords.push_back(coor);
+  }
+
+  // calculate the reference center of mass
+  molMass = 0;
+  refMolCom.x() = 0;
+  refMolCom.y() = 0;
+  refMolCom.z() = 0;
+
+  for (std::size_t i = 0; i < nIntegrableObjects; i++) {
+    refMolCom += refCoords[i] * mass[i];
+    molMass += mass[i];
+  }
+
+  refMolCom /= molMass;
+
+  // move the reference center of mass to (0,0,0) and adjust the
+  // reference coordinate of the integrabel objects
+  for (std::size_t i = 0; i < nIntegrableObjects; i++)
+    refCoords[i] -= refMolCom;
+}
+
+RealType MoLocator::getAtomMass(const std::string& at, ForceField* myFF) {
+  RealType mass;
+  AtomType* atomType = myFF->getAtomType(at);
+  if (atomType != NULL) {
+    mass = atomType->getMass();
+  } else {
+    mass = 0.0;
+    std::cerr << "Can not find AtomType: " << at << std::endl;
+  }
+  return mass;
+}
+
+RealType MoLocator::getMolMass(MoleculeStamp* molStamp, ForceField* myFF) {
+  unsigned int nAtoms;
+  RealType totMass = 0;
+  nAtoms = molStamp->getNAtoms();
+
+  for (std::size_t i = 0; i < nAtoms; i++) {
+    AtomStamp* currAtomStamp = molStamp->getAtomStamp(i);
+    totMass += getAtomMass(currAtomStamp->getType(), myFF);
+  }
+  return totMass;
+}
+
+RotMat3x3d MoLocator::latVec2RotMat(const Vector3d& lv) {
+  RealType theta = acos(lv[2]);
+  RealType phi = atan2(lv[1], lv[0]);
+  RealType psi = 0;
+
+  return RotMat3x3d(phi, theta, psi);
+}
+}  // namespace OpenMD

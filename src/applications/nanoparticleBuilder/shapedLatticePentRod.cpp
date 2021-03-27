@@ -43,81 +43,78 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "lattice/shapedLattice.hpp"
 #include "shapedLatticePentRod.hpp"
-#include "shapedLatticeRod.hpp"
+
 #include <cmath>
+
+#include "lattice/shapedLattice.hpp"
+#include "shapedLatticeRod.hpp"
 
 using namespace std;
 namespace OpenMD {
-  
-  shapedLatticePentRod::shapedLatticePentRod(RealType latticeConstant,
-				     std::string latticeType, 
-				     RealType radius, RealType length) : shapedLattice(latticeConstant, latticeType){
-    
-    rodRadius_= radius;
-    rodLength_= length;
-    Vector3d dimension;
-    dimension[0] = 2.0*length;
-    dimension[1] = 2.0*length;
-    dimension[2] = 2.0*length;
-    setGridDimension(dimension);
-    Vector3d origin;
-    origin[0] = 0;
-    origin[1] = 0;
-    origin[2] = 2.04;
-    setOrigin(origin);
-  }
 
-
-  /**
-   * Creates a wedge for pentagonal nanorods
-   *
-   */ 
-
-  bool shapedLatticePentRod::isInterior(Vector3d point){
-
-    RealType x, y, z, new_x, new_y, left_newx, right_newx;
-    // int z_int;
-
-    bool isIT=false;
-
-    x = point[0];
-    y = point[1];
-    z = point[2];
-
-    // z_int = int(z/2.04);
-
-    //Rotate by 45 degrees around z-axis so length of rod lies along y axis
-    new_x = (sqrt(2.0)/2)*(x - y);
-    new_y = (sqrt(2.0)/2)*(x + y);
- 
-    left_newx = (z - 1.44)*(0.577350269/0.816496581);
-    right_newx = (z + 1.44)*(-0.577350269/0.816496581);
-
-    //Make center spine of nanorod down new_y axis
-    //This is now done directly in nanorod_pentBuilder.cpp
-    /*if ( (new_x == 0) && (z == 0) ) {
-
-      if ( abs(new_y) <= 0.5*rodLength_ + 0.5773502692*rodRadius_ ) {
-
-	isIT = true;
-
-      }  
-      }*/
-
-    //Make one wedge
-    if ( (z < 0) && (z >= -0.816496581*rodRadius_ - 1.44) ) {
-      
-      if ( abs(new_y) <= 1.44*(z/2.04) + 0.5*rodLength_ + 0.5773502692*rodRadius_ ) { 
-	
-	if ( (new_x >= left_newx) && (new_x <= right_newx) ) {
-	  
-	  isIT=true;
-	  
-	}	  
-      }
-    }	   
-    return isIT;
-  }
+shapedLatticePentRod::shapedLatticePentRod(RealType latticeConstant,
+                                           std::string latticeType,
+                                           RealType radius, RealType length)
+    : shapedLattice(latticeConstant, latticeType) {
+  rodRadius_ = radius;
+  rodLength_ = length;
+  Vector3d dimension;
+  dimension[0] = 2.0 * length;
+  dimension[1] = 2.0 * length;
+  dimension[2] = 2.0 * length;
+  setGridDimension(dimension);
+  Vector3d origin;
+  origin[0] = 0;
+  origin[1] = 0;
+  origin[2] = 2.04;
+  setOrigin(origin);
 }
+
+/**
+ * Creates a wedge for pentagonal nanorods
+ *
+ */
+
+bool shapedLatticePentRod::isInterior(Vector3d point) {
+  RealType x, y, z, new_x, new_y, left_newx, right_newx;
+  // int z_int;
+
+  bool isIT = false;
+
+  x = point[0];
+  y = point[1];
+  z = point[2];
+
+  // z_int = int(z/2.04);
+
+  // Rotate by 45 degrees around z-axis so length of rod lies along y axis
+  new_x = (sqrt(2.0) / 2) * (x - y);
+  new_y = (sqrt(2.0) / 2) * (x + y);
+
+  left_newx = (z - 1.44) * (0.577350269 / 0.816496581);
+  right_newx = (z + 1.44) * (-0.577350269 / 0.816496581);
+
+  // Make center spine of nanorod down new_y axis
+  // This is now done directly in nanorod_pentBuilder.cpp
+  /*if ( (new_x == 0) && (z == 0) ) {
+
+    if ( abs(new_y) <= 0.5*rodLength_ + 0.5773502692*rodRadius_ ) {
+
+      isIT = true;
+
+    }
+    }*/
+
+  // Make one wedge
+  if ((z < 0) && (z >= -0.816496581 * rodRadius_ - 1.44)) {
+    if (abs(new_y) <=
+        1.44 * (z / 2.04) + 0.5 * rodLength_ + 0.5773502692 * rodRadius_) {
+      if ((new_x >= left_newx) && (new_x <= right_newx)) {
+        isIT = true;
+      }
+    }
+  }
+  return isIT;
+}
+}  // namespace OpenMD

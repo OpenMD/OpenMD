@@ -44,118 +44,112 @@
  */
 
 #include "perturbations/MagneticField.hpp"
+
+#include "nonbonded/NonBondedInteraction.hpp"
+#include "primitives/Molecule.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
-#include "primitives/Molecule.hpp"
-#include "nonbonded/NonBondedInteraction.hpp"
 #include "utils/Constants.hpp"
 
 namespace OpenMD {
 
-  MagneticField::MagneticField(SimInfo* info) : initialized(false),
-                                                doMagneticField(false),
-                                                info_(info) {
-    simParams = info_->getSimParams();
+MagneticField::MagneticField(SimInfo* info)
+    : initialized(false), doMagneticField(false), info_(info) {
+  simParams = info_->getSimParams();
+}
+
+void MagneticField::initialize() {
+  std::vector<RealType> mf;
+
+  if (simParams->haveMagneticField()) {
+    doMagneticField = true;
+    mf = simParams->getMagneticField();
   }
-
-  void MagneticField::initialize() {
-
-    std::vector<RealType> mf;
-
-    if (simParams->haveMagneticField()) {
-      doMagneticField = true;
-      mf = simParams->getMagneticField();
-    }
-    if (mf.size() != 3) {
-      sprintf(painCave.errMsg,
-              "MagneticField: Incorrect number of parameters specified.\n"
-              "\tthere should be 3 parameters, but %lu were specified.\n", 
-	      mf.size());
-      painCave.isFatal = 1;
-      simError();
-    }
-    MF.x() = mf[0];
-    MF.y() = mf[1];
-    MF.z() = mf[2];
-
-    initialized = true;
+  if (mf.size() != 3) {
+    sprintf(painCave.errMsg,
+            "MagneticField: Incorrect number of parameters specified.\n"
+            "\tthere should be 3 parameters, but %lu were specified.\n",
+            mf.size());
+    painCave.isFatal = 1;
+    simError();
   }
+  MF.x() = mf[0];
+  MF.y() = mf[1];
+  MF.z() = mf[2];
 
-  void MagneticField::applyPerturbation() {
+  initialized = true;
+}
 
-    if (!initialized) initialize();
+void MagneticField::applyPerturbation() {
+  if (!initialized) initialize();
 
-    SimInfo::MoleculeIterator i;
-    Molecule::AtomIterator  j;
-    Molecule* mol;
-    Atom* atom;
-    AtomType* atype;
+  SimInfo::MoleculeIterator i;
+  Molecule::AtomIterator j;
+  Molecule* mol;
+  Atom* atom;
+  AtomType* atype;
 
-    int l,m,n;
-    RealType C;
-    Vector3d v;
-    Vector3d f;
-    Vector3d r;
-    Vector3d t;
-    Vector3d D;
-    Vector3d AngMomentum;
-    Vector3d omega;
-    Mat3x3d I;
-    bool isCharge;
+  int l, m, n;
+  RealType C;
+  Vector3d v;
+  Vector3d f;
+  Vector3d r;
+  Vector3d t;
+  Vector3d D;
+  Vector3d AngMomentum;
+  Vector3d omega;
+  Mat3x3d I;
+  bool isCharge;
 
-    if (doMagneticField) {
+  if (doMagneticField) {
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginAtom(j); atom != NULL; atom = mol->nextAtom(j)) {
+        isCharge = false;
+        C = 0.0;
 
-      for (mol = info_->beginMolecule(i); mol != NULL;
-           mol = info_->nextMolecule(i)) {
+        atype = atom->getAtomType();
+        r = atom->getPos();
+        v = atom->getVel();
 
-	for (atom = mol->beginAtom(j); atom != NULL;
-	     atom = mol->nextAtom(j)) {
+        FixedChargeAdapter fca = FixedChargeAdapter(atype);
+        if (fca.isFixedCharge()) {
+          isCharge = true;
+          C = fca.getCharge();
+        }
 
-          isCharge = false;
-          C = 0.0;
+        C *= Constants::chargeFieldConvert;
 
-          atype = atom->getAtomType();
-          r = atom->getPos();
-          v = atom->getVel();
+        if (isCharge) {
+          f = cross(v, MF) * C * Constants::magneticFieldConvert;
+          atom->addFrc(f);
+        }
 
-	  FixedChargeAdapter fca = FixedChargeAdapter(atype);
-	  if ( fca.isFixedCharge() ) {
-	    isCharge = true;
-	    C = fca.getCharge();
-	  }
+        MultipoleAdapter ma = MultipoleAdapter(atype);
+        if (ma.isDipole()) {
+          D = atom->getDipole() * Constants::dipoleFieldConvert;
 
-          C *= Constants::chargeFieldConvert;
+          t = cross(D, cross(v, MF));
+          atom->addTrq(t);
 
-	  if (isCharge) {
-	    f = cross(v, MF) * C * Constants::magneticFieldConvert;
-	    atom->addFrc(f);
-	  }
-
-          MultipoleAdapter ma = MultipoleAdapter(atype);
-          if (ma.isDipole() ) {
-            D = atom->getDipole() * Constants::dipoleFieldConvert;
-
-            t = cross(D, cross(v, MF));
-            atom->addTrq(t);
-
-            AngMomentum = atom->getJ();
-            I = atom->getI();
-            if(atom->isLinear()) {
-              l = atom->linearAxis();
-              m = (l + 1) % 3;
-              n = (l + 2) % 3;
-              omega[l] = 0;
-              omega[m] = AngMomentum[m] / I(m,m);
-              omega[n] = AngMomentum[n] / I(n,n);
-            } else {
-              omega = I.inverse() * AngMomentum;
-            }
-
-            f=cross(cross(omega, D), MF);
-            atom->addFrc(f);
+          AngMomentum = atom->getJ();
+          I = atom->getI();
+          if (atom->isLinear()) {
+            l = atom->linearAxis();
+            m = (l + 1) % 3;
+            n = (l + 2) % 3;
+            omega[l] = 0;
+            omega[m] = AngMomentum[m] / I(m, m);
+            omega[n] = AngMomentum[n] / I(n, n);
+          } else {
+            omega = I.inverse() * AngMomentum;
           }
+
+          f = cross(cross(omega, D), MF);
+          atom->addFrc(f);
         }
       }
     }
   }
 }
+}  // namespace OpenMD

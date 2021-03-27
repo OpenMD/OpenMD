@@ -42,30 +42,33 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
 
 #include "utils/Utility.hpp"
 
 namespace OpenMD {
 
-  bool replaceWithWildCard(std::vector<std::vector<std::string>::iterator>& cont,
-			   std::vector<std::string>& sequence, std::vector<std::string>& result, const std::string& wildCard) {
-    if (cont.size() > sequence.size()) {
-      std::cerr << "the size of iterator container is greater than the size of sequence";
+bool replaceWithWildCard(std::vector<std::vector<std::string>::iterator>& cont,
+                         std::vector<std::string>& sequence,
+                         std::vector<std::string>& result,
+                         const std::string& wildCard) {
+  if (cont.size() > sequence.size()) {
+    std::cerr << "the size of iterator container is greater than the size of "
+                 "sequence";
+  }
+
+  bool hasMoreCombination =
+      next_combination(cont, sequence.begin(), sequence.end());
+  if (hasMoreCombination) {
+    result.clear();
+    result.insert(result.begin(), sequence.size(), wildCard);
+    std::vector<std::vector<std::string>::iterator>::iterator i;
+    for (i = cont.begin(); i != cont.end(); ++i) {
+      result[*i - sequence.begin()] = **i;
     }
+  }
 
-    bool hasMoreCombination = next_combination(cont, sequence.begin(), sequence.end());
-    if (hasMoreCombination) {
-      result.clear();
-      result.insert(result.begin(), sequence.size(), wildCard);
-      std::vector<std::vector<std::string>::iterator>::iterator i;
-      for ( i = cont.begin(); i != cont.end(); ++i){
-	result[*i - sequence.begin()] = **i;
-      }
-    }
+  return hasMoreCombination;
 
-    return hasMoreCombination;
-    
-  }//end replaceWildCard
+}  // end replaceWildCard
 
-}
+}  // namespace OpenMD

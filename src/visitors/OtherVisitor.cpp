@@ -43,519 +43,509 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "visitors/OtherVisitor.hpp"
+
 #include <memory>
 
-#include "selection/SelectionManager.hpp" 
-#include "visitors/OtherVisitor.hpp"
-#include "primitives/DirectionalAtom.hpp"
-#include "primitives/RigidBody.hpp"
-#include "primitives/Molecule.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
+#include "primitives/DirectionalAtom.hpp"
+#include "primitives/Molecule.hpp"
+#include "primitives/RigidBody.hpp"
+#include "selection/SelectionManager.hpp"
 
 namespace OpenMD {
 
-  void WrappingVisitor::visit(Atom *atom) {
-    internalVisit(atom);
+void WrappingVisitor::visit(Atom *atom) { internalVisit(atom); }
+
+void WrappingVisitor::visit(DirectionalAtom *datom) { internalVisit(datom); }
+
+void WrappingVisitor::visit(RigidBody *rb) { internalVisit(rb); }
+
+void WrappingVisitor::internalVisit(StuntDouble *sd) {
+  std::shared_ptr<GenericData> data;
+  std::shared_ptr<AtomData> atomData;
+  std::shared_ptr<AtomInfo> atomInfo;
+  std::vector<std::shared_ptr<AtomInfo>>::iterator i;
+
+  data = sd->getPropertyByName("ATOMDATA");
+
+  if (data != nullptr) {
+    atomData = std::dynamic_pointer_cast<AtomData>(data);
+
+    if (atomData == nullptr) return;
+  } else
+    return;
+
+  Snapshot *currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
+
+  for (atomInfo = atomData->beginAtomInfo(i); atomInfo;
+       atomInfo = atomData->nextAtomInfo(i)) {
+    Vector3d newPos = atomInfo->pos - origin_;
+    currSnapshot->wrapVector(newPos);
+    atomInfo->pos = newPos;
   }
+}
 
-  void WrappingVisitor::visit(DirectionalAtom *datom) {
-    internalVisit(datom);
+void WrappingVisitor::update() {
+  if (useCom_) {
+    Thermo thermo(info);
+    origin_ = thermo.getCom();
   }
+}
 
-  void WrappingVisitor::visit(RigidBody *rb) {
-    internalVisit(rb);
-  }
+const std::string WrappingVisitor::toString() {
+  char buffer[65535];
+  std::string result;
 
-  void WrappingVisitor::internalVisit(StuntDouble *sd) {
-    std::shared_ptr<GenericData>      data;
-    std::shared_ptr<AtomData>         atomData;
-    std::shared_ptr<AtomInfo>         atomInfo;
-    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
+  sprintf(
+      buffer,
+      "------------------------------------------------------------------\n");
+  result += buffer;
 
-    data = sd->getPropertyByName("ATOMDATA");
+  sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+  result += buffer;
 
-    if (data != nullptr) {
-      atomData = std::dynamic_pointer_cast<AtomData>(data);
+  sprintf(buffer, "Visitor Description: wrapping atoms back to periodic box\n");
+  result += buffer;
 
-      if (atomData == nullptr)
-	return;
-    } else
-      return;
+  sprintf(
+      buffer,
+      "------------------------------------------------------------------\n");
+  result += buffer;
 
-    Snapshot* currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
-    
-    for( atomInfo = atomData->beginAtomInfo(i); atomInfo; 
-         atomInfo = atomData->nextAtomInfo(i) ) {
+  return result;
+}
 
-      Vector3d newPos = atomInfo->pos - origin_;
-      currSnapshot->wrapVector(newPos);
-      atomInfo->pos = newPos;
+//----------------------------------------------------------------------------//
 
-    }
-  }
+ReplicateVisitor::ReplicateVisitor(SimInfo *info, Vector3i opt)
+    : BaseVisitor(), replicateOpt(opt) {
+  this->info = info;
+  visitorName = "ReplicateVisitor";
 
-  void WrappingVisitor::update() {
-    if (useCom_){
-      Thermo thermo(info);
-      origin_ = thermo.getCom();
-    }
-  }
-  
-  const std::string WrappingVisitor::toString() {
-    char        buffer[65535];
-    std::string result;
-
-    sprintf(buffer,
-            "------------------------------------------------------------------\n");
-    result += buffer;
-
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
-    result += buffer;
-
-    sprintf(buffer,
-            "Visitor Description: wrapping atoms back to periodic box\n");
-    result += buffer;
-
-    sprintf(buffer,
-            "------------------------------------------------------------------\n");
-    result += buffer;
-
-    return result;
-  }
-
-  //----------------------------------------------------------------------------//
-
-  ReplicateVisitor::ReplicateVisitor(SimInfo *info, Vector3i opt) :
-    BaseVisitor(), replicateOpt(opt) {
-      this->info = info;
-      visitorName = "ReplicateVisitor";
-
-      //generate the replicate directions
-      for( int i = 0; i <= replicateOpt[0]; i++ ) {
-        for( int j = 0; j <= replicateOpt[1]; j++ ) {
-	  for( int k = 0; k <= replicateOpt[2]; k++ ) {
-	    //skip original frame
-	    if (i == 0 && j == 0 && k == 0) {
-	      continue; 
-	    } else {
-	      dir.push_back(Vector3d((RealType)i, (RealType)j, (RealType)k));
-	    }
-	  }
+  // generate the replicate directions
+  for (int i = 0; i <= replicateOpt[0]; i++) {
+    for (int j = 0; j <= replicateOpt[1]; j++) {
+      for (int k = 0; k <= replicateOpt[2]; k++) {
+        // skip original frame
+        if (i == 0 && j == 0 && k == 0) {
+          continue;
+        } else {
+          dir.push_back(Vector3d((RealType)i, (RealType)j, (RealType)k));
         }
       }
-    
     }
-
-  void ReplicateVisitor::visit(Atom *atom) {
-    internalVisit(atom);
   }
+}
 
-  void ReplicateVisitor::visit(DirectionalAtom *datom) {
-    internalVisit(datom);
-  }
+void ReplicateVisitor::visit(Atom *atom) { internalVisit(atom); }
 
-  void ReplicateVisitor::visit(RigidBody *rb) {
-    internalVisit(rb);
-  }
+void ReplicateVisitor::visit(DirectionalAtom *datom) { internalVisit(datom); }
 
-  void ReplicateVisitor::internalVisit(StuntDouble *sd) {
-    std::shared_ptr<GenericData> data;
-    std::shared_ptr<AtomData>    atomData;
+void ReplicateVisitor::visit(RigidBody *rb) { internalVisit(rb); }
 
-    //if there is not atom data, just skip it
-    data = sd->getPropertyByName("ATOMDATA");
+void ReplicateVisitor::internalVisit(StuntDouble *sd) {
+  std::shared_ptr<GenericData> data;
+  std::shared_ptr<AtomData> atomData;
 
-    if (data != nullptr) {
-      atomData = std::dynamic_pointer_cast<AtomData>(data);
+  // if there is not atom data, just skip it
+  data = sd->getPropertyByName("ATOMDATA");
 
-      if (atomData == nullptr) {
-	return;
-      }
-    } else {
+  if (data != nullptr) {
+    atomData = std::dynamic_pointer_cast<AtomData>(data);
+
+    if (atomData == nullptr) {
       return;
     }
-
-    Snapshot* currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
-    Mat3x3d box = currSnapshot->getHmat();
-
-    std::vector<std::shared_ptr<AtomInfo>> atomInfoList = atomData->getData();
-
-    replicate(atomInfoList, atomData, box);
+  } else {
+    return;
   }
 
-  void ReplicateVisitor::replicate(std::vector<std::shared_ptr<AtomInfo>>&infoList,
-                                   std::shared_ptr<AtomData> data,
-				   const Mat3x3d& box) {
-    std::shared_ptr<AtomInfo> newAtomInfo;
-    std::vector<Vector3d>::iterator dirIter;
-    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
+  Snapshot *currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
+  Mat3x3d box = currSnapshot->getHmat();
 
-    for( dirIter = dir.begin(); dirIter != dir.end(); ++dirIter ) {
-      for( i = infoList.begin(); i != infoList.end(); ++i ) {
-	newAtomInfo = std::make_shared<AtomInfo>();
-	*newAtomInfo = *(*i);
-        newAtomInfo->pos += box * (*dirIter);
-	data->addAtomInfo(newAtomInfo);
-      }
+  std::vector<std::shared_ptr<AtomInfo>> atomInfoList = atomData->getData();
+
+  replicate(atomInfoList, atomData, box);
+}
+
+void ReplicateVisitor::replicate(
+    std::vector<std::shared_ptr<AtomInfo>> &infoList,
+    std::shared_ptr<AtomData> data, const Mat3x3d &box) {
+  std::shared_ptr<AtomInfo> newAtomInfo;
+  std::vector<Vector3d>::iterator dirIter;
+  std::vector<std::shared_ptr<AtomInfo>>::iterator i;
+
+  for (dirIter = dir.begin(); dirIter != dir.end(); ++dirIter) {
+    for (i = infoList.begin(); i != infoList.end(); ++i) {
+      newAtomInfo = std::make_shared<AtomInfo>();
+      *newAtomInfo = *(*i);
+      newAtomInfo->pos += box * (*dirIter);
+      data->addAtomInfo(newAtomInfo);
     }
   }
+}
 
-  const std::string ReplicateVisitor::toString() {
-    char                            buffer[65535];
-    std::string                     result;
+const std::string ReplicateVisitor::toString() {
+  char buffer[65535];
+  std::string result;
 
+  sprintf(buffer,
+          "--------------------------------------------------------------\n");
+  result += buffer;
 
-    sprintf(buffer,
-            "--------------------------------------------------------------\n");
-    result += buffer;
+  sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+  result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
-    result += buffer;
+  sprintf(buffer,
+          "Visitor Description: replicate the atoms in different direction\n");
+  result += buffer;
 
-    sprintf(buffer,
-            "Visitor Description: replicate the atoms in different direction\n");
-    result += buffer;
+  // print the replicate direction
+  sprintf(buffer, "repeatX = %d:\n", replicateOpt[0]);
+  result += buffer;
 
-    //print the replicate direction
-    sprintf(buffer, "repeatX = %d:\n", replicateOpt[0]);
-    result += buffer;
+  sprintf(buffer, "repeatY = %d:\n", replicateOpt[1]);
+  result += buffer;
 
-    sprintf(buffer, "repeatY = %d:\n", replicateOpt[1]);
-    result += buffer;
+  sprintf(buffer, "repeatZ = %d:\n", replicateOpt[2]);
+  result += buffer;
 
-    sprintf(buffer, "repeatZ = %d:\n", replicateOpt[2]);
-    result += buffer;
+  sprintf(buffer,
+          "--------------------------------------------------------------\n");
+  result += buffer;
 
-    sprintf(buffer,
-            "--------------------------------------------------------------\n");
-    result += buffer;
+  return result;
+}
 
-    return result;
+//------------------------------------------------------------------------//
+
+XYZVisitor::XYZVisitor(SimInfo *info)
+    : BaseVisitor(),
+      seleMan(info),
+      evaluator(info),
+      doPositions_(true),
+      doVelocities_(false),
+      doForces_(false),
+      doVectors_(false),
+      doCharges_(false),
+      doElectricFields_(false),
+      doGlobalIDs_(false) {
+  this->info = info;
+  visitorName = "XYZVisitor";
+
+  evaluator.loadScriptString("select all");
+
+  if (!evaluator.isDynamic()) {
+    seleMan.setSelectionSet(evaluator.evaluate());
   }
+}
 
-  //------------------------------------------------------------------------//
+XYZVisitor::XYZVisitor(SimInfo *info, const std::string &script)
+    : BaseVisitor(),
+      seleMan(info),
+      evaluator(info),
+      doPositions_(true),
+      doVelocities_(false),
+      doForces_(false),
+      doVectors_(false),
+      doCharges_(false),
+      doElectricFields_(false),
+      doGlobalIDs_(false) {
+  this->info = info;
+  visitorName = "XYZVisitor";
 
-  XYZVisitor::XYZVisitor(SimInfo *info) : BaseVisitor(), seleMan(info), 
-                                          evaluator(info), doPositions_(true),
-                                          doVelocities_(false), 
-                                          doForces_(false), doVectors_(false),
-                                          doCharges_(false), 
-                                          doElectricFields_(false), doGlobalIDs_(false) {
-    this->info = info;
-    visitorName = "XYZVisitor";
-    
-    evaluator.loadScriptString("select all");
-    
-    if (!evaluator.isDynamic()) {
-      seleMan.setSelectionSet(evaluator.evaluate());
-    }
-  }
-  
-  XYZVisitor::XYZVisitor(SimInfo *info, const std::string& script) :
-    BaseVisitor(), seleMan(info), evaluator(info), doPositions_(true),
-    doVelocities_(false), doForces_(false), doVectors_(false),
-    doCharges_(false), doElectricFields_(false), doGlobalIDs_(false) {
-    
-    this->info = info;
-    visitorName = "XYZVisitor";
+  evaluator.loadScriptString(script);
 
-    evaluator.loadScriptString(script);
+  if (!evaluator.isDynamic()) {
+    seleMan.setSelectionSet(evaluator.evaluate());
+  }
+}
 
-    if (!evaluator.isDynamic()) {
-      seleMan.setSelectionSet(evaluator.evaluate());
-    }
-  }
-    
-  void XYZVisitor::visit(Atom *atom) {
-    if (isSelected(atom))
-      internalVisit(atom);
-  }
+void XYZVisitor::visit(Atom *atom) {
+  if (isSelected(atom)) internalVisit(atom);
+}
 
-  void XYZVisitor::visit(DirectionalAtom *datom) {
-    if (isSelected(datom))
-      internalVisit(datom);
-  }
-  
-  void XYZVisitor::visit(RigidBody *rb) {
-    if (isSelected(rb))
-      internalVisit(rb);
-  }
-  
-  void XYZVisitor::update() {
-    //if dynamic, we need to re-evaluate the selection
-    if (evaluator.isDynamic()) {
-      seleMan.setSelectionSet(evaluator.evaluate());
-    }
-  }
-  
-  void XYZVisitor::internalVisit(StuntDouble *sd) {
-    std::shared_ptr<GenericData>      data;
-    std::shared_ptr<AtomData>         atomData;
-    std::shared_ptr<AtomInfo>         atomInfo;
-    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
-    char                              buffer[1024];
-    
-    //if there is not atom data, just skip it
-    data = sd->getPropertyByName("ATOMDATA");
-    
-    if (data != nullptr) {
-      atomData = std::dynamic_pointer_cast<AtomData>(data);
-      
-      if (atomData == nullptr)
-	return;
-    } else
-      return;
+void XYZVisitor::visit(DirectionalAtom *datom) {
+  if (isSelected(datom)) internalVisit(datom);
+}
 
-    for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
-         atomInfo = atomData->nextAtomInfo(i) ) {
-     
-      std::string line;
-      sprintf(buffer, "%s", atomInfo->atomTypeName.c_str());
+void XYZVisitor::visit(RigidBody *rb) {
+  if (isSelected(rb)) internalVisit(rb);
+}
+
+void XYZVisitor::update() {
+  // if dynamic, we need to re-evaluate the selection
+  if (evaluator.isDynamic()) {
+    seleMan.setSelectionSet(evaluator.evaluate());
+  }
+}
+
+void XYZVisitor::internalVisit(StuntDouble *sd) {
+  std::shared_ptr<GenericData> data;
+  std::shared_ptr<AtomData> atomData;
+  std::shared_ptr<AtomInfo> atomInfo;
+  std::vector<std::shared_ptr<AtomInfo>>::iterator i;
+  char buffer[1024];
+
+  // if there is not atom data, just skip it
+  data = sd->getPropertyByName("ATOMDATA");
+
+  if (data != nullptr) {
+    atomData = std::dynamic_pointer_cast<AtomData>(data);
+
+    if (atomData == nullptr) return;
+  } else
+    return;
+
+  for (atomInfo = atomData->beginAtomInfo(i); atomInfo;
+       atomInfo = atomData->nextAtomInfo(i)) {
+    std::string line;
+    sprintf(buffer, "%s", atomInfo->atomTypeName.c_str());
+    line += buffer;
+
+    if (doPositions_) {
+      sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->pos[0], atomInfo->pos[1],
+              atomInfo->pos[2]);
       line += buffer;
-      
-      if (doPositions_){
-        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->pos[0], 
-                atomInfo->pos[1], atomInfo->pos[2]);
-        line += buffer;
-      }      
-      if (doCharges_ && atomInfo->hasCharge) {
-        sprintf(buffer, "%15.8f", atomInfo->charge);
-        line += buffer;
-      }
-      if (doVectors_ && atomInfo->hasVector) {
-        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->vec[0], 
-                atomInfo->vec[1], atomInfo->vec[2]);
-        line += buffer;
-      }
-      if (doVelocities_ && atomInfo->hasVelocity) {
-        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->vel[0], 
-                atomInfo->vel[1], atomInfo->vel[2]);
-        line += buffer;
-      }
-      if (doForces_ && atomInfo->hasForce) {
-        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->frc[0], 
-                atomInfo->frc[1], atomInfo->frc[2]);
-        line += buffer;
-      }      
-      if (doElectricFields_ && atomInfo->hasElectricField) {
-        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->eField[0], 
-                atomInfo->eField[1], atomInfo->eField[2]);
-        line += buffer;
-      }
-      if (doGlobalIDs_) {
-        sprintf(buffer, "%10d", atomInfo->globalID);
-        line += buffer;
-      }
-
-      frame.push_back(line);
-    }    
-  }
-
-  bool XYZVisitor::isSelected(StuntDouble *sd) {
-    return seleMan.isSelected(sd);
-  }
-
-  void XYZVisitor::writeFrame(std::ostream &outStream) {
-    std::vector<std::string>::iterator i;
-    char buffer[1024];
-    
-    if (frame.empty())
-      std::cerr << "Current Frame does not contain any atoms" << std::endl;
-    
-    //total number of atoms  
-    outStream << frame.size() << std::endl;
-    
-    //write comment line
-    Snapshot* currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
-    Mat3x3d box = currSnapshot->getHmat();
-    
-    sprintf(buffer,
-            "%15.8f;%15.8f%15.8f%15.8f;%15.8f%15.8f%15.8f;%15.8f%15.8f%15.8f",
-            currSnapshot->getTime(),
-            box(0, 0), box(0, 1), box(0, 2),
-            box(1, 0), box(1, 1), box(1, 2),
-            box(2, 0), box(2, 1), box(2, 2));
-    
-    outStream << buffer << std::endl;
-    
-    for( i = frame.begin(); i != frame.end(); ++i )
-      outStream << *i << std::endl;
-  }
-  
-  std::string XYZVisitor::trimmedName(const std::string&atomTypeName) {    
-    return atomTypeName.substr(0, atomTypeName.find('-'));
-  }
-  
-  const std::string XYZVisitor::toString() {
-    char        buffer[65535];
-    std::string result;
-    
-    sprintf(buffer,
-            "------------------------------------------------------------------\n");
-    result += buffer;
-    
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
-    result += buffer;
-    
-    sprintf(buffer,
-            "Visitor Description: assemble the atom data and output xyz file\n");
-    result += buffer;
-
-    sprintf(buffer,
-            "------------------------------------------------------------------\n");
-    result += buffer;
-    
-    return result;
-  }
-  
-  //----------------------------------------------------------------------------//
-  
-  void PrepareVisitor::internalVisit(Atom *atom) {
-    std::shared_ptr<GenericData> data;
-    
-    //if visited property is  existed, remove it
-    data = atom->getPropertyByName("VISITED");
-    
-    if (data != nullptr) {
-      atom->removeProperty("VISITED");
     }
-    
-    //remove atomdata
-    data = atom->getPropertyByName("ATOMDATA");
-
-    if (data != nullptr) {
-      std::shared_ptr<AtomData> atomData = std::dynamic_pointer_cast<AtomData>(data);
-
-      if (atomData != NULL)
-	atom->removeProperty("ATOMDATA");
+    if (doCharges_ && atomInfo->hasCharge) {
+      sprintf(buffer, "%15.8f", atomInfo->charge);
+      line += buffer;
     }
-  }
-
-  void PrepareVisitor::internalVisit(RigidBody *rb) {
-    std::shared_ptr<GenericData> data;
-    std::shared_ptr<AtomData>    atomData;
-    std::vector<Atom *> myAtoms;
-    std::vector<Atom *>::iterator atomIter;
-
-    //if visited property is  existed, remove it
-    data = rb->getPropertyByName("VISITED");
-
-    if (data != nullptr) {
-      rb->removeProperty("VISITED");
+    if (doVectors_ && atomInfo->hasVector) {
+      sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->vec[0], atomInfo->vec[1],
+              atomInfo->vec[2]);
+      line += buffer;
+    }
+    if (doVelocities_ && atomInfo->hasVelocity) {
+      sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->vel[0], atomInfo->vel[1],
+              atomInfo->vel[2]);
+      line += buffer;
+    }
+    if (doForces_ && atomInfo->hasForce) {
+      sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->frc[0], atomInfo->frc[1],
+              atomInfo->frc[2]);
+      line += buffer;
+    }
+    if (doElectricFields_ && atomInfo->hasElectricField) {
+      sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->eField[0],
+              atomInfo->eField[1], atomInfo->eField[2]);
+      line += buffer;
+    }
+    if (doGlobalIDs_) {
+      sprintf(buffer, "%10d", atomInfo->globalID);
+      line += buffer;
     }
 
-    //remove atomdata
-    data = rb->getPropertyByName("ATOMDATA");
+    frame.push_back(line);
+  }
+}
 
-    if (data != nullptr) {
-      atomData = std::dynamic_pointer_cast<AtomData>(data);
+bool XYZVisitor::isSelected(StuntDouble *sd) { return seleMan.isSelected(sd); }
 
-      if (atomData != NULL)
-	rb->removeProperty("ATOMDATA");
-    }
+void XYZVisitor::writeFrame(std::ostream &outStream) {
+  std::vector<std::string>::iterator i;
+  char buffer[1024];
 
+  if (frame.empty())
+    std::cerr << "Current Frame does not contain any atoms" << std::endl;
+
+  // total number of atoms
+  outStream << frame.size() << std::endl;
+
+  // write comment line
+  Snapshot *currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
+  Mat3x3d box = currSnapshot->getHmat();
+
+  sprintf(buffer,
+          "%15.8f;%15.8f%15.8f%15.8f;%15.8f%15.8f%15.8f;%15.8f%15.8f%15.8f",
+          currSnapshot->getTime(), box(0, 0), box(0, 1), box(0, 2), box(1, 0),
+          box(1, 1), box(1, 2), box(2, 0), box(2, 1), box(2, 2));
+
+  outStream << buffer << std::endl;
+
+  for (i = frame.begin(); i != frame.end(); ++i) outStream << *i << std::endl;
+}
+
+std::string XYZVisitor::trimmedName(const std::string &atomTypeName) {
+  return atomTypeName.substr(0, atomTypeName.find('-'));
+}
+
+const std::string XYZVisitor::toString() {
+  char buffer[65535];
+  std::string result;
+
+  sprintf(
+      buffer,
+      "------------------------------------------------------------------\n");
+  result += buffer;
+
+  sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+  result += buffer;
+
+  sprintf(buffer,
+          "Visitor Description: assemble the atom data and output xyz file\n");
+  result += buffer;
+
+  sprintf(
+      buffer,
+      "------------------------------------------------------------------\n");
+  result += buffer;
+
+  return result;
+}
+
+//----------------------------------------------------------------------------//
+
+void PrepareVisitor::internalVisit(Atom *atom) {
+  std::shared_ptr<GenericData> data;
+
+  // if visited property is  existed, remove it
+  data = atom->getPropertyByName("VISITED");
+
+  if (data != nullptr) {
+    atom->removeProperty("VISITED");
+  }
+
+  // remove atomdata
+  data = atom->getPropertyByName("ATOMDATA");
+
+  if (data != nullptr) {
+    std::shared_ptr<AtomData> atomData =
+        std::dynamic_pointer_cast<AtomData>(data);
+
+    if (atomData != NULL) atom->removeProperty("ATOMDATA");
+  }
+}
+
+void PrepareVisitor::internalVisit(RigidBody *rb) {
+  std::shared_ptr<GenericData> data;
+  std::shared_ptr<AtomData> atomData;
+  std::vector<Atom *> myAtoms;
+  std::vector<Atom *>::iterator atomIter;
+
+  // if visited property is  existed, remove it
+  data = rb->getPropertyByName("VISITED");
+
+  if (data != nullptr) {
+    rb->removeProperty("VISITED");
+  }
+
+  // remove atomdata
+  data = rb->getPropertyByName("ATOMDATA");
+
+  if (data != nullptr) {
+    atomData = std::dynamic_pointer_cast<AtomData>(data);
+
+    if (atomData != NULL) rb->removeProperty("ATOMDATA");
+  }
+
+  myAtoms = rb->getAtoms();
+
+  for (atomIter = myAtoms.begin(); atomIter != myAtoms.end(); ++atomIter)
+    internalVisit(*atomIter);
+}
+
+const std::string PrepareVisitor::toString() {
+  char buffer[65535];
+  std::string result;
+
+  sprintf(
+      buffer,
+      "------------------------------------------------------------------\n");
+  result += buffer;
+
+  sprintf(buffer, "Visitor name: %s", visitorName.c_str());
+  result += buffer;
+
+  sprintf(buffer,
+          "Visitor Description: prepare for operation of other vistors\n");
+  result += buffer;
+
+  sprintf(
+      buffer,
+      "------------------------------------------------------------------\n");
+  result += buffer;
+
+  return result;
+}
+
+//----------------------------------------------------------------------------//
+
+WaterTypeVisitor::WaterTypeVisitor() {
+  visitorName = "WaterTypeVisitor";
+  waterTypeList.insert("TIP3P_RB_0");
+  waterTypeList.insert("TIP4P_RB_0");
+  waterTypeList.insert("TIP4P-Ice_RB_0");
+  waterTypeList.insert("TIP4P-Ew_RB_0");
+  waterTypeList.insert("TIP4P-2005_RB_0");
+  waterTypeList.insert("TIP5P_RB_0");
+  waterTypeList.insert("TIP5P-E_RB_0");
+  waterTypeList.insert("SPCE_RB_0");
+  waterTypeList.insert("SPC_RB_0");
+  waterTypeList.insert("SPC-HW_RB_0");
+  waterTypeList.insert("NE6_RB_0");
+}
+
+void WaterTypeVisitor::visit(RigidBody *rb) {
+  std::string rbName;
+  std::vector<Atom *> myAtoms;
+  std::vector<Atom *>::iterator atomIter;
+  std::vector<std::shared_ptr<AtomInfo>>::iterator i;
+  std::shared_ptr<AtomData> atomData;
+
+  rbName = rb->getType();
+
+  if (waterTypeList.find(rbName) != waterTypeList.end()) {
     myAtoms = rb->getAtoms();
 
-    for( atomIter = myAtoms.begin(); atomIter != myAtoms.end(); ++atomIter )
-      internalVisit(*atomIter);
-  }
+    for (atomIter = myAtoms.begin(); atomIter != myAtoms.end(); ++atomIter) {
+      std::shared_ptr<GenericData> data =
+          (*atomIter)->getPropertyByName("ATOMDATA");
 
-  const std::string PrepareVisitor::toString() {
-    char buffer[65535];
-    std::string result;
- 
-    sprintf(buffer,
-	    "------------------------------------------------------------------\n");
-    result += buffer;
- 
-    sprintf(buffer, "Visitor name: %s", visitorName.c_str());
-    result += buffer;
- 
-    sprintf(buffer,
-	    "Visitor Description: prepare for operation of other vistors\n");
-    result += buffer;
- 
-    sprintf(buffer,
-	    "------------------------------------------------------------------\n");
-    result += buffer;
- 
-    return result;
-  }
+      if (data != nullptr) {
+        atomData = std::dynamic_pointer_cast<AtomData>(data);
 
-  //----------------------------------------------------------------------------//
+        if (atomData == nullptr) continue;
+      } else
+        continue;
 
-  WaterTypeVisitor::WaterTypeVisitor() {
-    visitorName = "WaterTypeVisitor";
-    waterTypeList.insert("TIP3P_RB_0");
-    waterTypeList.insert("TIP4P_RB_0");
-    waterTypeList.insert("TIP4P-Ice_RB_0");
-    waterTypeList.insert("TIP4P-Ew_RB_0");
-    waterTypeList.insert("TIP4P-2005_RB_0");
-    waterTypeList.insert("TIP5P_RB_0");
-    waterTypeList.insert("TIP5P-E_RB_0");
-    waterTypeList.insert("SPCE_RB_0");
-    waterTypeList.insert("SPC_RB_0");
-    waterTypeList.insert("SPC-HW_RB_0");
-    waterTypeList.insert("NE6_RB_0");
-  }
-
-  void WaterTypeVisitor::visit(RigidBody *rb) {
-    std::string rbName;
-    std::vector<Atom*> myAtoms;
-    std::vector<Atom*>::iterator atomIter;
-    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
-    std::shared_ptr<AtomData> atomData;
-
-    rbName = rb->getType();
-    
-    if (waterTypeList.find(rbName) != waterTypeList.end()) {
-      myAtoms = rb->getAtoms();
-      
-      for( atomIter = myAtoms.begin(); atomIter != myAtoms.end();
-	   ++atomIter ) {
-	std::shared_ptr<GenericData> data = (*atomIter)->getPropertyByName("ATOMDATA");
-        
-	if (data != nullptr) {
-	  atomData = std::dynamic_pointer_cast<AtomData>(data);
-          
-	  if (atomData == nullptr)
-	    continue;
-	} else
-	  continue;
-        
-	for( std::shared_ptr<AtomInfo> atomInfo = atomData->beginAtomInfo(i); atomInfo;
-	     atomInfo = atomData->nextAtomInfo(i) ) {
-	  atomInfo->atomTypeName = trimmedName(atomInfo->atomTypeName);
-	} 
+      for (std::shared_ptr<AtomInfo> atomInfo = atomData->beginAtomInfo(i);
+           atomInfo; atomInfo = atomData->nextAtomInfo(i)) {
+        atomInfo->atomTypeName = trimmedName(atomInfo->atomTypeName);
       }
-    } 
+    }
   }
+}
 
-  std::string WaterTypeVisitor::trimmedName(const std::string&atomTypeName) {
-    return atomTypeName.substr(0, atomTypeName.find('_'));
-  }
+std::string WaterTypeVisitor::trimmedName(const std::string &atomTypeName) {
+  return atomTypeName.substr(0, atomTypeName.find('_'));
+}
 
-  const std::string WaterTypeVisitor::toString() {
-    char buffer[65535];
-    std::string result;
+const std::string WaterTypeVisitor::toString() {
+  char buffer[65535];
+  std::string result;
 
-    sprintf(buffer,
-            "------------------------------------------------------------------\n");
-    result += buffer;
+  sprintf(
+      buffer,
+      "------------------------------------------------------------------\n");
+  result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
-    result += buffer;
+  sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+  result += buffer;
 
-    sprintf(buffer,
-            "Visitor Description: Replace the atom type in water model\n");
-    result += buffer;
+  sprintf(buffer,
+          "Visitor Description: Replace the atom type in water model\n");
+  result += buffer;
 
-    sprintf(buffer,
-            "------------------------------------------------------------------\n");
-    result += buffer;
+  sprintf(
+      buffer,
+      "------------------------------------------------------------------\n");
+  result += buffer;
 
-    return result;
-  }
+  return result;
+}
 
-} //namespace OpenMD
+}  // namespace OpenMD

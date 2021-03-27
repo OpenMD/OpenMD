@@ -42,32 +42,29 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "lattice/SCLattice.hpp"
 
 namespace OpenMD {
 
-  SCLattice::SCLattice() : CubicLattice(){
-    nCellSites = 1;
-    cellSitesPos.resize(nCellSites);
-    cellSitesOrt.resize(nCellSites);
-    update();
-
-  }
-
-  void SCLattice::update(){
-
-    RealType oneOverRoot3;
-    oneOverRoot3 = 1.0 / sqrt(3.0);
-
-    // Molecule 1
-    cellSitesPos[0][0] = 0.0; 
-    cellSitesPos[0][1] = 0.0;
-    cellSitesPos[0][2] = 0.0;
-  
-    cellSitesOrt[0][0] = oneOverRoot3;
-    cellSitesOrt[0][1] = oneOverRoot3;
-    cellSitesOrt[0][2] = oneOverRoot3;
-  }
+SCLattice::SCLattice() : CubicLattice() {
+  nCellSites = 1;
+  cellSitesPos.resize(nCellSites);
+  cellSitesOrt.resize(nCellSites);
+  update();
 }
 
+void SCLattice::update() {
+  RealType oneOverRoot3;
+  oneOverRoot3 = 1.0 / sqrt(3.0);
+
+  // Molecule 1
+  cellSitesPos[0][0] = 0.0;
+  cellSitesPos[0][1] = 0.0;
+  cellSitesPos[0][2] = 0.0;
+
+  cellSitesOrt[0][0] = oneOverRoot3;
+  cellSitesOrt[0][1] = oneOverRoot3;
+  cellSitesOrt[0][2] = oneOverRoot3;
+}
+}  // namespace OpenMD

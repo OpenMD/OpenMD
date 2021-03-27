@@ -19,15 +19,15 @@
 */
 
 #include "optimization/SteepestDescent.hpp"
-#include "optimization/Problem.hpp"
+
 #include "optimization/LineSearch.hpp"
+#include "optimization/Problem.hpp"
 
 namespace QuantLib {
-    
-    DynamicVector<RealType> SteepestDescent::getUpdatedDirection(const Problem&,
-                                                                 RealType,
-                                                                 const DynamicVector<RealType>&) {
-        return -lineSearch_->lastGradient();
-    }
-    
+
+DynamicVector<RealType> SteepestDescent::getUpdatedDirection(
+    const Problem&, RealType, const DynamicVector<RealType>&) {
+  return -lineSearch_->lastGradient();
 }
+
+}  // namespace QuantLib

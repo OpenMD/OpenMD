@@ -5,6 +5,7 @@
  * $Id$
  */
 #include "antlr/TokenStreamSelector.hpp"
+
 #include "antlr/TokenStreamRetryException.hpp"
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
@@ -19,89 +20,71 @@ namespace antlr {
  *  multiple input streams; this works great for includes.
  */
 
-TokenStreamSelector::TokenStreamSelector()
-: input(0)
-{
+TokenStreamSelector::TokenStreamSelector() : input(0) {}
+
+TokenStreamSelector::~TokenStreamSelector() {}
+
+void TokenStreamSelector::addInputStream(TokenStream* stream,
+                                         const ANTLR_USE_NAMESPACE(std)
+                                             string& key) {
+  inputStreamNames[key] = stream;
 }
 
-TokenStreamSelector::~TokenStreamSelector()
-{
+TokenStream* TokenStreamSelector::getCurrentStream() const { return input; }
+
+TokenStream* TokenStreamSelector::getStream(const ANTLR_USE_NAMESPACE(std)
+                                                string& sname) const {
+  inputStreamNames_coll::const_iterator i = inputStreamNames.find(sname);
+  if (i == inputStreamNames.end()) {
+    throw ANTLR_USE_NAMESPACE(std) string("TokenStream ") + sname +
+        " not found";
+  }
+  return (*i).second;
 }
 
-void TokenStreamSelector::addInputStream(TokenStream* stream, const ANTLR_USE_NAMESPACE(std)string& key)
-{
-	inputStreamNames[key] = stream;
+RefToken TokenStreamSelector::nextToken() {
+  // keep looking for a token until you don't
+  // get a retry exception
+  for (;;) {
+    try {
+      return input->nextToken();
+    } catch (TokenStreamRetryException&) {
+      // just retry "forever"
+    }
+  }
 }
 
-TokenStream* TokenStreamSelector::getCurrentStream() const
-{
-	return input;
+TokenStream* TokenStreamSelector::pop() {
+  TokenStream* stream = streamStack.top();
+  streamStack.pop();
+  select(stream);
+  return stream;
 }
 
-TokenStream* TokenStreamSelector::getStream(const ANTLR_USE_NAMESPACE(std)string& sname) const
-{
-	inputStreamNames_coll::const_iterator i = inputStreamNames.find(sname);
-	if (i == inputStreamNames.end()) {
-		throw ANTLR_USE_NAMESPACE(std)string("TokenStream ")+sname+" not found";
-	}
-	return (*i).second;
+void TokenStreamSelector::push(TokenStream* stream) {
+  streamStack.push(input);
+  select(stream);
 }
 
-RefToken TokenStreamSelector::nextToken()
-{
-	// keep looking for a token until you don't
-	// get a retry exception
-	for (;;) {
-		try {
-			return input->nextToken();
-		}
-		catch (TokenStreamRetryException&) {
-			// just retry "forever"
-		}
-	}
+void TokenStreamSelector::push(const ANTLR_USE_NAMESPACE(std) string& sname) {
+  streamStack.push(input);
+  select(sname);
 }
 
-TokenStream* TokenStreamSelector::pop()
-{
-	TokenStream* stream = streamStack.top();
-	streamStack.pop();
-	select(stream);
-	return stream;
-}
-
-void TokenStreamSelector::push(TokenStream* stream)
-{
-	streamStack.push(input);
-	select(stream);
-}
-
-void TokenStreamSelector::push(const ANTLR_USE_NAMESPACE(std)string& sname)
-{
-	streamStack.push(input);
-	select(sname);
-}
-
-void TokenStreamSelector::retry()
-{
-	throw TokenStreamRetryException();
-}
+void TokenStreamSelector::retry() { throw TokenStreamRetryException(); }
 
 /** Set the stream without pushing old stream */
-void TokenStreamSelector::select(TokenStream* stream)
-{
-	input = stream;
-}
+void TokenStreamSelector::select(TokenStream* stream) { input = stream; }
 
-void TokenStreamSelector::select(const ANTLR_USE_NAMESPACE(std)string& sname)
-{
-	inputStreamNames_coll::const_iterator i = inputStreamNames.find(sname);
-	if (i == inputStreamNames.end()) {
-		throw ANTLR_USE_NAMESPACE(std)string("TokenStream ")+sname+" not found";
-	}
-	input = (*i).second;
+void TokenStreamSelector::select(const ANTLR_USE_NAMESPACE(std) string& sname) {
+  inputStreamNames_coll::const_iterator i = inputStreamNames.find(sname);
+  if (i == inputStreamNames.end()) {
+    throw ANTLR_USE_NAMESPACE(std) string("TokenStream ") + sname +
+        " not found";
+  }
+  input = (*i).second;
 }
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
-

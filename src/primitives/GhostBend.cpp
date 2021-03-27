@@ -42,74 +42,74 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include "config.h"
-#include <cmath>
+
 #include "primitives/GhostBend.hpp"
+
+#include <cmath>
+
+#include "config.h"
 #include "primitives/DirectionalAtom.hpp"
 #include "utils/Constants.hpp"
 
 namespace OpenMD {
 
-  /**@todo still a lot left to improve*/
-  void GhostBend::calcForce(RealType& angle, bool doParticlePot) {
-    DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atoms_[1]);
-    
-    Vector3d pos1 = atoms_[0]->getPos();
-    Vector3d pos2 = ghostAtom->getPos();
+/**@todo still a lot left to improve*/
+void GhostBend::calcForce(RealType& angle, bool doParticlePot) {
+  DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atoms_[1]);
 
-    Vector3d r21 = pos1 - pos2;
-    snapshotMan_->getCurrentSnapshot()->wrapVector(r21);
-    RealType d21 = r21.length();
-    
-    RealType d21inv = 1.0 / d21;
-   
-    // we need the transpose of A to get the lab fixed vector:
-    Vector3d r23 = ghostAtom->getA().transpose().getColumn(2);
-    RealType d23 = r23.length();
-    
-    RealType d23inv = 1.0 / d23;
-    
-    RealType cosTheta = dot(r21, r23) / (d21 * d23);
+  Vector3d pos1 = atoms_[0]->getPos();
+  Vector3d pos2 = ghostAtom->getPos();
 
-    //check roundoff     
-    if (cosTheta > 1.0) {
-      cosTheta = 1.0;
-    } else if (cosTheta < -1.0) {
-      cosTheta = -1.0;
-    }
-    
-    RealType theta = acos(cosTheta);
+  Vector3d r21 = pos1 - pos2;
+  snapshotMan_->getCurrentSnapshot()->wrapVector(r21);
+  RealType d21 = r21.length();
 
-    RealType dVdTheta;
-    
-    bendType_->calcForce(theta, potential_, dVdTheta);
-    
-    RealType sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-    
-    if (fabs(sinTheta) < 1.0E-6) {
-      sinTheta = 1.0E-6;
-    }
-    
-    RealType commonFactor1 = dVdTheta / sinTheta * d21inv;
-    RealType commonFactor2 = dVdTheta / sinTheta * d23inv;
-    
-    Vector3d force1 = commonFactor1 * (r23 * d23inv - r21*d21inv*cosTheta);
-    Vector3d force3 = commonFactor2 * (r21 * d21inv - r23*d23inv*cosTheta);
+  RealType d21inv = 1.0 / d21;
 
-    // Total force in current bend is zero
+  // we need the transpose of A to get the lab fixed vector:
+  Vector3d r23 = ghostAtom->getA().transpose().getColumn(2);
+  RealType d23 = r23.length();
 
-    atoms_[0]->addFrc(force1);
-    ghostAtom->addFrc(-force1);
+  RealType d23inv = 1.0 / d23;
 
-    ghostAtom->addTrq( cross(r23, force3) );    
-    if(doParticlePot) {
-      atoms_[0]->addParticlePot(potential_);
-      ghostAtom->addParticlePot(potential_);
-    }
+  RealType cosTheta = dot(r21, r23) / (d21 * d23);
 
-    angle = theta /Constants::PI * 180.0;
-   
-  }  
-} //end namespace OpenMD
+  // check roundoff
+  if (cosTheta > 1.0) {
+    cosTheta = 1.0;
+  } else if (cosTheta < -1.0) {
+    cosTheta = -1.0;
+  }
 
+  RealType theta = acos(cosTheta);
+
+  RealType dVdTheta;
+
+  bendType_->calcForce(theta, potential_, dVdTheta);
+
+  RealType sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+  if (fabs(sinTheta) < 1.0E-6) {
+    sinTheta = 1.0E-6;
+  }
+
+  RealType commonFactor1 = dVdTheta / sinTheta * d21inv;
+  RealType commonFactor2 = dVdTheta / sinTheta * d23inv;
+
+  Vector3d force1 = commonFactor1 * (r23 * d23inv - r21 * d21inv * cosTheta);
+  Vector3d force3 = commonFactor2 * (r21 * d21inv - r23 * d23inv * cosTheta);
+
+  // Total force in current bend is zero
+
+  atoms_[0]->addFrc(force1);
+  ghostAtom->addFrc(-force1);
+
+  ghostAtom->addTrq(cross(r23, force3));
+  if (doParticlePot) {
+    atoms_[0]->addParticlePot(potential_);
+    ghostAtom->addParticlePot(potential_);
+  }
+
+  angle = theta / Constants::PI * 180.0;
+}
+}  // end namespace OpenMD

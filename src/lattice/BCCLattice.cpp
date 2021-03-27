@@ -42,45 +42,42 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "lattice/BCCLattice.hpp"
 
 namespace OpenMD {
 
-  BCCLattice::BCCLattice() : CubicLattice(){
-    nCellSites = 2;
-    cellSitesPos.resize(nCellSites);
-    cellSitesOrt.resize(nCellSites);
-    update();
-  }
-
-  void BCCLattice::update(){
-
-    RealType cellLenOver2;
-    RealType oneOverRoot3;
-
-    cellLenOver2  = 0.5 * latticeParam;
-    oneOverRoot3 = 1.0 / sqrt(3.0);
-
-    // Molecule 1
-    cellSitesPos[0][0] = 0.0; 
-    cellSitesPos[0][1] = 0.0;
-    cellSitesPos[0][2] = 0.0;
-  
-    cellSitesOrt[0][0] = oneOverRoot3;
-    cellSitesOrt[0][1] = oneOverRoot3;
-    cellSitesOrt[0][2] = oneOverRoot3;
-
-    // Molecule 2  
-    cellSitesPos[1][0]   = cellLenOver2;
-    cellSitesPos[1][1]   = cellLenOver2;
-    cellSitesPos[1][2]   = cellLenOver2;
-
-    cellSitesOrt[1][0] = -oneOverRoot3;
-    cellSitesOrt[1][1] = -oneOverRoot3;
-    cellSitesOrt[1][2] = -oneOverRoot3;
-   
-  }
-
+BCCLattice::BCCLattice() : CubicLattice() {
+  nCellSites = 2;
+  cellSitesPos.resize(nCellSites);
+  cellSitesOrt.resize(nCellSites);
+  update();
 }
 
+void BCCLattice::update() {
+  RealType cellLenOver2;
+  RealType oneOverRoot3;
+
+  cellLenOver2 = 0.5 * latticeParam;
+  oneOverRoot3 = 1.0 / sqrt(3.0);
+
+  // Molecule 1
+  cellSitesPos[0][0] = 0.0;
+  cellSitesPos[0][1] = 0.0;
+  cellSitesPos[0][2] = 0.0;
+
+  cellSitesOrt[0][0] = oneOverRoot3;
+  cellSitesOrt[0][1] = oneOverRoot3;
+  cellSitesOrt[0][2] = oneOverRoot3;
+
+  // Molecule 2
+  cellSitesPos[1][0] = cellLenOver2;
+  cellSitesPos[1][1] = cellLenOver2;
+  cellSitesPos[1][2] = cellLenOver2;
+
+  cellSitesOrt[1][0] = -oneOverRoot3;
+  cellSitesOrt[1][1] = -oneOverRoot3;
+  cellSitesOrt[1][2] = -oneOverRoot3;
+}
+
+}  // namespace OpenMD

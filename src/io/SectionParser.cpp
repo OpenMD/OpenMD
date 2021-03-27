@@ -42,91 +42,90 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "io/SectionParser.hpp"
+
 #include "utils/Trim.hpp"
 namespace OpenMD {
 
-  void SectionParser::parse(std::istream& input, ForceField& ff, int lineNo) {
-    const int bufferSize = 65535;
-    char buffer[bufferSize];
-    std::string line, filteredLine;
-    while(input.getline(buffer, bufferSize)) {
-      ++lineNo;
-      line = trimLeftCopy(buffer);
-      //a line begins with "//" is comment
-      // let's also call lines starting with # and ! as comments
-      if (isEndSection(line)) {
-        break;
-      } else if ( line.empty() || 
-                  (line.size() >= 2 && line[0] == '/' && line[1] == '/') ||
-                  (line.size() >= 1 && line[0] == '#') || 
-                  (line.size() >= 1 && line[0] == '!') ) {
-        continue;
-      } else {
-        filteredLine = stripComments(line);
-        parseLine(ff, filteredLine, lineNo);
-      }
+void SectionParser::parse(std::istream& input, ForceField& ff, int lineNo) {
+  const int bufferSize = 65535;
+  char buffer[bufferSize];
+  std::string line, filteredLine;
+  while (input.getline(buffer, bufferSize)) {
+    ++lineNo;
+    line = trimLeftCopy(buffer);
+    // a line begins with "//" is comment
+    // let's also call lines starting with # and ! as comments
+    if (isEndSection(line)) {
+      break;
+    } else if (line.empty() ||
+               (line.size() >= 2 && line[0] == '/' && line[1] == '/') ||
+               (line.size() >= 1 && line[0] == '#') ||
+               (line.size() >= 1 && line[0] == '!')) {
+      continue;
+    } else {
+      filteredLine = stripComments(line);
+      parseLine(ff, filteredLine, lineNo);
     }
   }
+}
 
-  std::string SectionParser::stripComments(const std::string& line) {
+std::string SectionParser::stripComments(const std::string& line) {
+  unsigned int n = line.length();
+  std::string res;
 
-    unsigned int n = line.length(); 
-    std::string res; 
-  
-    // Flags to indicate that single line and multpile line comments 
-    // have started or not. 
-    bool s_cmt = false; 
-    bool m_cmt = false; 
-    
-    // Traverse the line 
-    for (unsigned int i = 0; i < n; i++)  {      
-      // If single line comment flag is on, then check for end of it 
-      if (s_cmt == true && line[i] == '\n') 
-        s_cmt = false; 
-      
-      // If multiple line comment is on, then check for end of it 
-      else if  (m_cmt == true && line[i] == '*' && line[i+1] == '/') 
-        m_cmt = false,  i++; 
-      
-      // If this character is in a comment, ignore it 
-      else if (s_cmt || m_cmt) 
-        continue; 
-      
-      // Check for beginning of comments and set the approproate flags 
-      else if (line[i] == '/' && line[i+1] == '/') 
-        s_cmt = true, i++; 
-      else if (line[i] == '/' && line[i+1] == '*') 
-        m_cmt = true,  i++; 
-      
-      // If current character is a non-comment character, append it to res 
-      else  res += line[i]; 
-    } 
-    return res;
+  // Flags to indicate that single line and multpile line comments
+  // have started or not.
+  bool s_cmt = false;
+  bool m_cmt = false;
+
+  // Traverse the line
+  for (unsigned int i = 0; i < n; i++) {
+    // If single line comment flag is on, then check for end of it
+    if (s_cmt == true && line[i] == '\n') s_cmt = false;
+
+    // If multiple line comment is on, then check for end of it
+    else if (m_cmt == true && line[i] == '*' && line[i + 1] == '/')
+      m_cmt = false, i++;
+
+    // If this character is in a comment, ignore it
+    else if (s_cmt || m_cmt)
+      continue;
+
+    // Check for beginning of comments and set the approproate flags
+    else if (line[i] == '/' && line[i + 1] == '/')
+      s_cmt = true, i++;
+    else if (line[i] == '/' && line[i + 1] == '*')
+      m_cmt = true, i++;
+
+    // If current character is a non-comment character, append it to res
+    else
+      res += line[i];
   }
-  
-  bool SectionParser::isEndSection(const std::string& line) {
-    StringTokenizer tokenizer(line);
-    
-    if (tokenizer.countTokens() >= 2) {
-      std::string keyword = tokenizer.nextToken();
-      
-      if (keyword != "end"){
-        return false;
-      } 
-      
-      std::string section = tokenizer.nextToken();
-      if (section == sectionName_) {
-        return true;
-      }else {
-        return false;
-      }
-      
-    }else {
+  return res;
+}
+
+bool SectionParser::isEndSection(const std::string& line) {
+  StringTokenizer tokenizer(line);
+
+  if (tokenizer.countTokens() >= 2) {
+    std::string keyword = tokenizer.nextToken();
+
+    if (keyword != "end") {
       return false;
     }
-    
-  }
 
-}//namespace OpenMD
+    std::string section = tokenizer.nextToken();
+    if (section == sectionName_) {
+      return true;
+    } else {
+      return false;
+    }
+
+  } else {
+    return false;
+  }
+}
+
+}  // namespace OpenMD

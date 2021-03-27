@@ -43,35 +43,36 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "lattice/shapedLattice.hpp"
 #include "shapedLatticeSpherical.hpp"
+
+#include "lattice/shapedLattice.hpp"
 
 using namespace std;
 namespace OpenMD {
-  
-  shapedLatticeSpherical::shapedLatticeSpherical(RealType latticeConstant,
-                                                 std::string latticeType, 
-                                                 RealType radius) : shapedLattice(latticeConstant, latticeType){
-    
-    sphereRadius_= radius;
-    Vector3d dimension;
-    dimension[0]=2.0*radius;
-    dimension[1]=2.0*radius;
-    dimension[2]=2.0*radius;
-    setGridDimension(dimension);
-    Vector3d origin;
-    origin[0] = latticeConstant / 2.0;
-    origin[1] = latticeConstant / 2.0;
-    origin[2] = latticeConstant / 2.0;
-    setOrigin(origin);
-  }
-  /**
-   * Determines whether a point lies with a sphere at origin 0
-   *
-   */  
-  bool shapedLatticeSpherical::isInterior(Vector3d point){
-    bool isIT=false;
-    if (point.length() <= sphereRadius_) isIT=true;
-    return isIT;
-  }
+
+shapedLatticeSpherical::shapedLatticeSpherical(RealType latticeConstant,
+                                               std::string latticeType,
+                                               RealType radius)
+    : shapedLattice(latticeConstant, latticeType) {
+  sphereRadius_ = radius;
+  Vector3d dimension;
+  dimension[0] = 2.0 * radius;
+  dimension[1] = 2.0 * radius;
+  dimension[2] = 2.0 * radius;
+  setGridDimension(dimension);
+  Vector3d origin;
+  origin[0] = latticeConstant / 2.0;
+  origin[1] = latticeConstant / 2.0;
+  origin[2] = latticeConstant / 2.0;
+  setOrigin(origin);
 }
+/**
+ * Determines whether a point lies with a sphere at origin 0
+ *
+ */
+bool shapedLatticeSpherical::isInterior(Vector3d point) {
+  bool isIT = false;
+  if (point.length() <= sphereRadius_) isIT = true;
+  return isIT;
+}
+}  // namespace OpenMD

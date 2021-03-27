@@ -43,28 +43,29 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "applications/staticProps/GofZ.hpp"
+
 #include <algorithm>
 #include <fstream>
-#include "applications/staticProps/GofZ.hpp"
+
 #include "utils/simError.h"
 
 namespace OpenMD {
 
-  GofZ::GofZ(SimInfo* info, const std::string& filename,
-             const std::string& sele1, const std::string& sele2, RealType len,
-             RealType maxz, int nrbins, int axis)
+GofZ::GofZ(SimInfo* info, const std::string& filename, const std::string& sele1,
+           const std::string& sele2, RealType len, RealType maxz, int nrbins,
+           int axis)
     : RadialDistrFunc(info, filename, sele1, sele2, nrbins), axis_(axis) {
+  deltaZ_ = maxz / nBins_;
+  rC_ = len;
 
-    deltaZ_ = maxz / nBins_;
-    rC_ = len;
+  histogram_.resize(nBins_);
+  avgGofz_.resize(nBins_);
 
-    histogram_.resize(nBins_);
-    avgGofz_.resize(nBins_);
+  setOutputName(getPrefix(filename) + ".gofz");
 
-    setOutputName(getPrefix(filename) + ".gofz");
-
-    // Set the axis label for the privileged axis
-    switch(axis_) {
+  // Set the axis label for the privileged axis
+  switch (axis_) {
     case 0:
       axisLabel_ = "x";
       break;
@@ -75,78 +76,72 @@ namespace OpenMD {
     default:
       axisLabel_ = "z";
       break;
-    }
-
-  }
-
-  void GofZ::preProcess() {
-    std::fill(avgGofz_.begin(), avgGofz_.end(), 0.0);
-  }
-
-  void GofZ::initializeHistogram() {
-    std::fill(histogram_.begin(), histogram_.end(), 0);
-  }
-
-  void GofZ::processHistogram() {
-
-    int nPairs = getNPairs();
-    RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
-    RealType pairDensity = nPairs /volume * 2.0;
-    RealType pairConstant = ( 2.0 * Constants::PI * pairDensity );
-
-    for(unsigned int i = 0 ; i < histogram_.size(); ++i){
-
-      RealType zLower = i * deltaZ_;
-      RealType zUpper = zLower + deltaZ_;
-      RealType cylSlice = (zUpper - zLower)*rC_*rC_;
-      RealType nIdeal = cylSlice * pairConstant;
-
-      avgGofz_[i] += histogram_[i] / nIdeal;
-    }
-
-  }
-
-  void GofZ::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
-    if (sd1 == sd2) {
-      return;
-    }
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-    Vector3d pos1 = sd1->getPos();
-    Vector3d pos2 = sd2->getPos();
-    Vector3d r12 = pos2 - pos1;
-    if (usePeriodicBoundaryConditions_)
-      currentSnapshot_->wrapVector(r12);
-
-    RealType distance = r12.length();
-    RealType z2 = r12[axis_]*r12[axis_];
-    RealType xydist = sqrt(distance*distance - z2);
-
-    if (xydist < rC_) {
-      RealType thisZ = abs(r12[axis_]);
-      int whichBin = int(thisZ / deltaZ_);
-      if (whichBin < int(nBins_))
-        histogram_[whichBin] += 2;
-    }
-  }
-
-  void GofZ::writeRdf() {
-    std::ofstream rdfStream(outputFilename_.c_str());
-    if (rdfStream.is_open()) {
-      rdfStream << "#" << axisLabel_ << "-separation distribution function\n";
-      rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
-      rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-      rdfStream << "#r\tcorrValue\n";
-      for (unsigned int i = 0; i < avgGofz_.size(); ++i) {
-        RealType z = deltaZ_ * (i + 0.5);
-        rdfStream << z << "\t" << avgGofz_[i]/nProcessed_ << "\n";
-      }
-    } else {
-      sprintf(painCave.errMsg, "GofZ: unable to open %s\n",
-              outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();
-    }
-    rdfStream.close();
   }
 }
+
+void GofZ::preProcess() { std::fill(avgGofz_.begin(), avgGofz_.end(), 0.0); }
+
+void GofZ::initializeHistogram() {
+  std::fill(histogram_.begin(), histogram_.end(), 0);
+}
+
+void GofZ::processHistogram() {
+  int nPairs = getNPairs();
+  RealType volume =
+      info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
+  RealType pairDensity = nPairs / volume * 2.0;
+  RealType pairConstant = (2.0 * Constants::PI * pairDensity);
+
+  for (unsigned int i = 0; i < histogram_.size(); ++i) {
+    RealType zLower = i * deltaZ_;
+    RealType zUpper = zLower + deltaZ_;
+    RealType cylSlice = (zUpper - zLower) * rC_ * rC_;
+    RealType nIdeal = cylSlice * pairConstant;
+
+    avgGofz_[i] += histogram_[i] / nIdeal;
+  }
+}
+
+void GofZ::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+  if (sd1 == sd2) {
+    return;
+  }
+  bool usePeriodicBoundaryConditions_ =
+      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
+  Vector3d pos1 = sd1->getPos();
+  Vector3d pos2 = sd2->getPos();
+  Vector3d r12 = pos2 - pos1;
+  if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(r12);
+
+  RealType distance = r12.length();
+  RealType z2 = r12[axis_] * r12[axis_];
+  RealType xydist = sqrt(distance * distance - z2);
+
+  if (xydist < rC_) {
+    RealType thisZ = abs(r12[axis_]);
+    int whichBin = int(thisZ / deltaZ_);
+    if (whichBin < int(nBins_)) histogram_[whichBin] += 2;
+  }
+}
+
+void GofZ::writeRdf() {
+  std::ofstream rdfStream(outputFilename_.c_str());
+  if (rdfStream.is_open()) {
+    rdfStream << "#" << axisLabel_ << "-separation distribution function\n";
+    rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
+    rdfStream << "selection2: (" << selectionScript2_ << ")\n";
+    rdfStream << "#r\tcorrValue\n";
+    for (unsigned int i = 0; i < avgGofz_.size(); ++i) {
+      RealType z = deltaZ_ * (i + 0.5);
+      rdfStream << z << "\t" << avgGofz_[i] / nProcessed_ << "\n";
+    }
+  } else {
+    sprintf(painCave.errMsg, "GofZ: unable to open %s\n",
+            outputFilename_.c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
+  rdfStream.close();
+}
+}  // namespace OpenMD

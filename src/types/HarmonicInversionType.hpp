@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_HARMONICINVERSIONTYPE_HPP
 #define TYPES_HARMONICINVERSIONTYPE_HPP
 
@@ -50,56 +50,49 @@
 #define copysign _copysign
 #endif
 
+#include "utils/Constants.hpp"
+
 namespace OpenMD {
 
-  /**
-   * @class HarmonicInversionType
-   * This inversion potential has the form:
-   * 
-   *  \f[ 
-         V_{inv} = \frac{d_0}{2} \left(\phi - \phi_0\right)^2
-       \f]
-   *
-   */
-  class HarmonicInversionType : public InversionType {
-    
-  public:
-        
-    HarmonicInversionType(RealType d0, RealType phi0) :  
-      InversionType(), d0_(d0), phi0_(phi0) {}
+/**
+ * @class HarmonicInversionType
+ * This inversion potential has the form:
+ *
+ *  \f[
+       V_{inv} = \frac{d_0}{2} \left(\phi - \phi_0\right)^2
+     \f]
+ *
+ */
+class HarmonicInversionType : public InversionType {
+ public:
+  HarmonicInversionType(RealType d0, RealType phi0)
+      : InversionType(), d0_(d0), phi0_(phi0) {}
 
+  virtual void calcForce(RealType phi, RealType& V, RealType& dVdPhi) {
+    RealType dp = phi - phi0_;
+    /* dp cannot be outside (-pi,pi) */
+    if (dp >= Constants::PI)
+      dp -= 2 * Constants::PI;
+    else if (dp < -Constants::PI)
+      dp += 2 * Constants::PI;
 
-    virtual void calcForce(RealType phi, RealType& V, RealType& dVdPhi) {
-
-      RealType dp = phi - phi0_;
-      /* dp cannot be outside (-pi,pi) */
-      if (dp >=Constants::PI)       
-        dp -= 2*Constants::PI;      
-      else if (dp < -Constants::PI)
-        dp += 2*Constants::PI;
-
-      V = 0.5 * d0_ * dp * dp;
-      dVdPhi = -d0_ * dp;      
-    }
-    
-    virtual InversionKey getKey() { return itAngle; }
-    friend std::ostream& operator <<(std::ostream& os, HarmonicInversionType& ttt);
-    
-  private:
-    
-    RealType d0_;
-    RealType phi0_;
-    
-  };
-  
-  std::ostream& operator <<(std::ostream& os, HarmonicInversionType& hit) {
-    
-    os << "This HarmonicInversionType has below form:" << std::endl;
-    os << hit.d0_ << "*(phi - " << hit.phi0_ << ")/2" << std::endl; 
-    return os;
+    V = 0.5 * d0_ * dp * dp;
+    dVdPhi = -d0_ * dp;
   }
-  
-} //end namespace OpenMD
-#endif //TYPES_HARMONICINVERSIONTYPE_HPP
 
+  virtual InversionKey getKey() { return itAngle; }
+  friend std::ostream& operator<<(std::ostream& os, HarmonicInversionType& ttt);
 
+ private:
+  RealType d0_;
+  RealType phi0_;
+};
+
+std::ostream& operator<<(std::ostream& os, HarmonicInversionType& hit) {
+  os << "This HarmonicInversionType has below form:" << std::endl;
+  os << hit.d0_ << "*(phi - " << hit.phi0_ << ")/2" << std::endl;
+  return os;
+}
+
+}  // end namespace OpenMD
+#endif  // TYPES_HARMONICINVERSIONTYPE_HPP

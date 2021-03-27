@@ -49,28 +49,26 @@
 
 /* Standard includes independent of library */
 
-#include <iostream>
-#include <fstream>
-#include <list>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
 #include <iterator>
-#include "math/ConvexHull.hpp"
-#include "utils/simError.h"
+#include <list>
 
+#include "math/ConvexHull.hpp"
 #include "math/qhull.hpp"
+#include "utils/simError.h"
 
 #ifdef HAVE_QHULL
 using namespace OpenMD;
 using namespace std;
 
-ConvexHull::ConvexHull() : Hull(), options_("qhull FA Qt Pp"), dim_(3) {
-}
+ConvexHull::ConvexHull() : Hull(), options_("qhull FA Qt Pp"), dim_(3) {}
 
-void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
-
+void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
 #ifdef HAVE_QHULL_REENTRANT
   qhT qh_qh;
-  qhT *qh= &qh_qh;
+  qhT *qh = &qh_qh;
   QHULL_LIB_CHECK
 #endif
 
@@ -83,13 +81,13 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   setT *vertices;
   int curlong, totlong;
 
-  vector<double> ptArray(numpoints*dim_);
+  vector<double> ptArray(numpoints * dim_);
 
   // Copy the positon vector into a points vector for qhull.
-  vector<StuntDouble*>::iterator SD;
+  vector<StuntDouble *>::iterator SD;
   int i = 0;
 
-  for (SD =bodydoubles.begin(); SD != bodydoubles.end(); ++SD){
+  for (SD = bodydoubles.begin(); SD != bodydoubles.end(); ++SD) {
     Vector3d pos = (*SD)->getPos();
     ptArray[dim_ * i] = pos.x();
     ptArray[dim_ * i + 1] = pos.y();
@@ -104,15 +102,15 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
      processor versions) */
 #ifdef HAVE_QHULL_REENTRANT
   qh_init_A(qh, NULL, NULL, stderr, 0, NULL);
-  int exitcode= setjmp(qh->errexit);
+  int exitcode = setjmp(qh->errexit);
   if (!exitcode) {
     qh->NOerrexit = False;
     qh_initflags(qh, const_cast<char *>(options_.c_str()));
     qh_init_B(qh, &ptArray[0], numpoints, dim_, ismalloc);
     qh_qhull(qh);
     qh_check_output(qh);
-    exitcode= qh_ERRnone;
-    qh->NOerrexit= True;
+    exitcode = qh_ERRnone;
+    qh->NOerrexit = True;
   } else {
     sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute convex hull");
     painCave.isFatal = 1;
@@ -120,14 +118,14 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   }
 #else
   qh_init_A(NULL, NULL, stderr, 0, NULL);
-  int exitcode= setjmp(qh errexit);
+  int exitcode = setjmp(qh errexit);
   if (!exitcode) {
     qh_initflags(const_cast<char *>(options_.c_str()));
     qh_init_B(&ptArray[0], numpoints, dim_, ismalloc);
     qh_qhull();
     qh_check_output();
-    exitcode= qh_ERRnone;
-    qh NOerrexit= True;
+    exitcode = qh_ERRnone;
+    qh NOerrexit = True;
   } else {
     sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute convex hull");
     painCave.isFatal = 1;
@@ -135,15 +133,14 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   }
 #endif
 
-
 #ifdef IS_MPI
-  //If we are doing the mpi version, set up some vectors for data communication
+  // If we are doing the mpi version, set up some vectors for data communication
 
   int nproc;
   int myrank;
 
-  MPI_Comm_size( MPI_COMM_WORLD, &nproc);
-  MPI_Comm_rank( MPI_COMM_WORLD, &myrank);
+  MPI_Comm_size(MPI_COMM_WORLD, &nproc);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
   int localHullSites = 0;
 
@@ -157,7 +154,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   vector<int> indexMap;
   vector<double> masses;
 
-  FORALLvertices{
+  FORALLvertices {
     localHullSites++;
 
 #ifdef HAVE_QHULL_REENTRANT
@@ -165,14 +162,14 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
 #else
     int idx = qh_pointid(vertex->point);
 #endif
-    
+
     indexMap.push_back(idx);
 
-    coords.push_back(ptArray[dim_  * idx]);
-    coords.push_back(ptArray[dim_  * idx + 1]);
-    coords.push_back(ptArray[dim_  * idx + 2]);
+    coords.push_back(ptArray[dim_ * idx]);
+    coords.push_back(ptArray[dim_ * idx + 1]);
+    coords.push_back(ptArray[dim_ * idx + 2]);
 
-    StuntDouble* sd = bodydoubles[idx];
+    StuntDouble *sd = bodydoubles[idx];
 
     Vector3d vel = sd->getVel();
     vels.push_back(vel.x());
@@ -182,11 +179,11 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
     masses.push_back(sd->getMass());
   }
 
-  MPI_Allgather(&localHullSites, 1, MPI_INT, &hullSitesOnProc[0],
-                1, MPI_INT, MPI_COMM_WORLD);
+  MPI_Allgather(&localHullSites, 1, MPI_INT, &hullSitesOnProc[0], 1, MPI_INT,
+                MPI_COMM_WORLD);
 
   int globalHullSites = 0;
-  for (int iproc = 0; iproc < nproc; iproc++){
+  for (int iproc = 0; iproc < nproc; iproc++) {
     globalHullSites += hullSitesOnProc[iproc];
     coordsOnProc[iproc] = dim_ * hullSitesOnProc[iproc];
   }
@@ -194,9 +191,11 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   displacements[0] = 0;
   vectorDisplacements[0] = 0;
 
-  for (int iproc = 1; iproc < nproc; iproc++){
-    displacements[iproc] = displacements[iproc-1] + hullSitesOnProc[iproc-1];
-    vectorDisplacements[iproc] = vectorDisplacements[iproc-1] + coordsOnProc[iproc-1];
+  for (int iproc = 1; iproc < nproc; iproc++) {
+    displacements[iproc] =
+        displacements[iproc - 1] + hullSitesOnProc[iproc - 1];
+    vectorDisplacements[iproc] =
+        vectorDisplacements[iproc - 1] + coordsOnProc[iproc - 1];
   }
 
   vector<double> globalCoords(dim_ * globalHullSites);
@@ -206,16 +205,15 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   int count = coordsOnProc[myrank];
 
   MPI_Allgatherv(&coords[0], count, MPI_DOUBLE, &globalCoords[0],
-                 &coordsOnProc[0], &vectorDisplacements[0],
-                 MPI_DOUBLE, MPI_COMM_WORLD);
+                 &coordsOnProc[0], &vectorDisplacements[0], MPI_DOUBLE,
+                 MPI_COMM_WORLD);
 
-  MPI_Allgatherv(&vels[0], count, MPI_DOUBLE, &globalVels[0],
-                 &coordsOnProc[0], &vectorDisplacements[0],
-                 MPI_DOUBLE, MPI_COMM_WORLD);
+  MPI_Allgatherv(&vels[0], count, MPI_DOUBLE, &globalVels[0], &coordsOnProc[0],
+                 &vectorDisplacements[0], MPI_DOUBLE, MPI_COMM_WORLD);
 
-  MPI_Allgatherv(&masses[0], localHullSites, MPI_DOUBLE,
-                 &globalMasses[0], &hullSitesOnProc[0],
-                 &displacements[0], MPI_DOUBLE, MPI_COMM_WORLD);
+  MPI_Allgatherv(&masses[0], localHullSites, MPI_DOUBLE, &globalMasses[0],
+                 &hullSitesOnProc[0], &displacements[0], MPI_DOUBLE,
+                 MPI_COMM_WORLD);
 
   // Free previous hull
 #ifdef HAVE_QHULL_REENTRANT
@@ -226,7 +224,8 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   qh_memfreeshort(&curlong, &totlong);
 #endif
   if (curlong || totlong) {
-    sprintf(painCave.errMsg, "ConvexHull: qhull internal warning:\n"
+    sprintf(painCave.errMsg,
+            "ConvexHull: qhull internal warning:\n"
             "\tdid not free %d bytes of long memory (%d pieces)",
             totlong, curlong);
     painCave.isFatal = 1;
@@ -235,38 +234,38 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
 
 #ifdef HAVE_QHULL_REENTRANT
   qh_init_A(qh, NULL, NULL, stderr, 0, NULL);
-  exitcode= setjmp(qh->errexit);
+  exitcode = setjmp(qh->errexit);
   if (!exitcode) {
     qh->NOerrexit = False;
     qh_initflags(qh, const_cast<char *>(options_.c_str()));
     qh_init_B(qh, &globalCoords[0], globalHullSites, dim_, ismalloc);
     qh_qhull(qh);
     qh_check_output(qh);
-    exitcode= qh_ERRnone;
-    qh->NOerrexit= True;
+    exitcode = qh_ERRnone;
+    qh->NOerrexit = True;
   } else {
     sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute convex hull");
     painCave.isFatal = 1;
     simError();
   }
-#else  
+#else
   qh_init_A(NULL, NULL, stderr, 0, NULL);
-  exitcode= setjmp(qh errexit);
+  exitcode = setjmp(qh errexit);
   if (!exitcode) {
     qh NOerrexit = False;
     qh_initflags(const_cast<char *>(options_.c_str()));
     qh_init_B(&globalCoords[0], globalHullSites, dim_, ismalloc);
     qh_qhull();
     qh_check_output();
-    exitcode= qh_ERRnone;
-    qh NOerrexit= True;  /* no more setjmp */
+    exitcode = qh_ERRnone;
+    qh NOerrexit = True; /* no more setjmp */
   } else {
     sprintf(painCave.errMsg,
             "ConvexHull: Qhull failed to compute global convex hull");
     painCave.isFatal = 1;
     simError();
 
-  } //qh_new_qhull
+  }  // qh_new_qhull
 #endif
 
 #endif
@@ -275,14 +274,14 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   // RealType calcvol = 0.0;
 
 #ifdef HAVE_QHULL_REENTRANT
-  qh_triangulate (qh);
+  qh_triangulate(qh);
 #else
-  qh_triangulate ();
+  qh_triangulate();
 #endif
 
   FORALLfacets {
     Triangle face;
-    //Qhull sets the unit normal in facet->normal
+    // Qhull sets the unit normal in facet->normal
     Vector3d V3dNormal(facet->normal[0], facet->normal[1], facet->normal[2]);
     face.setUnitNormal(V3dNormal);
 
@@ -290,7 +289,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
     RealType faceArea = qh_facetarea(qh, facet);
     face.setArea(faceArea);
     vertices = qh_facet3vertex(qh, facet);
-    coordT *center = qh_getcenter(qh,vertices);
+    coordT *center = qh_getcenter(qh, vertices);
 #else
     RealType faceArea = qh_facetarea(facet);
     face.setArea(faceArea);
@@ -306,7 +305,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
 
     int ver = 0;
 
-    FOREACHvertex_(vertices){
+    FOREACHvertex_(vertices) {
 #ifdef HAVE_QHULL_REENTRANT
       int id = qh_pointid(qh, vertex->point);
 #else
@@ -319,8 +318,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
       RealType mass;
 
 #ifdef IS_MPI
-      vel = Vector3d(globalVels[dim_ * id],
-                     globalVels[dim_ * id + 1],
+      vel = Vector3d(globalVels[dim_ * id], globalVels[dim_ * id + 1],
                      globalVels[dim_ * id + 2]);
       mass = globalMasses[id];
 
@@ -329,10 +327,9 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
 
       int localID = id - displacements[myrank];
 
-
-      if (localID >= 0 && localID < hullSitesOnProc[myrank]){
+      if (localID >= 0 && localID < hullSitesOnProc[myrank]) {
         face.addVertexSD(bodydoubles[indexMap[localID]]);
-      }else{
+      } else {
         face.addVertexSD(NULL);
       }
 #else
@@ -343,7 +340,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
       faceVel = faceVel + vel;
       faceMass = faceMass + mass;
       ver++;
-    } //Foreachvertex
+    }  // Foreachvertex
 
     face.addVertices(p[0], p[1], p[2]);
     face.setFacetMass(faceMass);
@@ -352,10 +349,12 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
     RealType comparea = face.computeArea();
     realT calcarea = qh_facetarea (facet);
     Vector3d V3dCompNorm = -face.computeUnitNormal();
-    RealType thisOffset = ((0.0-p[0][0])*V3dCompNorm[0] + (0.0-p[0][1])*V3dCompNorm[1] + (0.0-p[0][2])*V3dCompNorm[2]);
-    RealType dist = facet->offset + intPoint[0]*V3dNormal[0] + intPoint[1]*V3dNormal[1] + intPoint[2]*V3dNormal[2];
-    cout << "facet offset and computed offset: " << facet->offset << "  " << thisOffset <<  endl;
-    calcvol +=  -dist*comparea/qh hull_dim;
+    RealType thisOffset = ((0.0-p[0][0])*V3dCompNorm[0] +
+    (0.0-p[0][1])*V3dCompNorm[1] + (0.0-p[0][2])*V3dCompNorm[2]); RealType dist
+    = facet->offset + intPoint[0]*V3dNormal[0] + intPoint[1]*V3dNormal[1] +
+    intPoint[2]*V3dNormal[2]; cout
+    << "facet offset and computed offset: " << facet->offset << "  " <<
+    thisOffset << endl; calcvol +=  -dist*comparea/qh hull_dim;
     */
     Triangles_.push_back(face);
 #ifdef HAVE_QHULL_REENTRANT
@@ -363,7 +362,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
 #else
     qh_settempfree(&vertices);
 #endif
-  } //FORALLfacets
+  }  // FORALLfacets
 
 #ifdef HAVE_QHULL_REENTRANT
   qh_getarea(qh, qh->facet_list);
@@ -381,7 +380,8 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   qh_memfreeshort(&curlong, &totlong);
 #endif
   if (curlong || totlong) {
-    sprintf(painCave.errMsg, "ConvexHull: qhull internal warning:\n"
+    sprintf(painCave.errMsg,
+            "ConvexHull: qhull internal warning:\n"
             "\tdid not free %d bytes of long memory (%d pieces)",
             totlong, curlong);
     painCave.isFatal = 1;
@@ -405,13 +405,15 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
 // #endif
 //     for (int i = 0; i < qh_PRINTEND; i++)
 // #ifdef HAVE_QHULL_REENTRANT
-//       qh_printfacets(qh, newGeomFile, qh->PRINTout[i], qh->facet_list, NULL, !qh_ALL);
+//       qh_printfacets(qh, newGeomFile, qh->PRINTout[i], qh->facet_list, NULL,
+//       !qh_ALL);
 // #else
-//       qh_printfacets(newGeomFile, qh PRINTout[i], qh facet_list, NULL, !qh_ALL);
+//       qh_printfacets(newGeomFile, qh PRINTout[i], qh facet_list, NULL,
+//       !qh_ALL);
 // #endif
 //     fclose(newGeomFile);
 // #ifdef IS_MPI
 //   }
 // #endif
 // }
-#endif //QHULL
+#endif  // QHULL

@@ -42,37 +42,37 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
 
 #include "types/Component.hpp"
 
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+
 namespace OpenMD {
-  Component::Component() : moleculeStamp_(NULL) {
-    DefineParameter(Type, "type");
-    DefineParameter(NMol, "nMol");
-    DefineParameter(Region, "region");
-  }
-  
-  Component::~Component() {    
-  }
-  
-  void Component::validate() {
-    CheckParameter(Type, isNotEmpty());
-    CheckParameter(NMol, isPositive());
-    CheckParameter(Region, isNonNegative());
-  }
-  
-  bool Component::findMoleculeStamp(const std::map<std::string, MoleculeStamp*>& molStamps) {
-    bool ret = false;
-    std::map<std::string, MoleculeStamp*>::const_iterator i;
-    i = molStamps.find(getType());
-    if (i != molStamps.end()) {
-      moleculeStamp_ = i->second;
-      ret = true;
-    }    
-    return ret;
-  }
+Component::Component() : moleculeStamp_(NULL) {
+  DefineParameter(Type, "type");
+  DefineParameter(NMol, "nMol");
+  DefineParameter(Region, "region");
 }
+
+Component::~Component() {}
+
+void Component::validate() {
+  CheckParameter(Type, isNotEmpty());
+  CheckParameter(NMol, isPositive());
+  CheckParameter(Region, isNonNegative());
+}
+
+bool Component::findMoleculeStamp(
+    const std::map<std::string, MoleculeStamp*>& molStamps) {
+  bool ret = false;
+  std::map<std::string, MoleculeStamp*>::const_iterator i;
+  i = molStamps.find(getType());
+  if (i != molStamps.end()) {
+    moleculeStamp_ = i->second;
+    ret = true;
+  }
+  return ret;
+}
+}  // namespace OpenMD

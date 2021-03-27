@@ -18,36 +18,36 @@
 */
 
 #include "optimization/LineSearch.hpp"
-#include "optimization/Problem.hpp"
-#include "optimization/Constraint.hpp"
-#include "utils/simError.h"
+
 #include <cstdio>
 
-namespace QuantLib {
-    
-    RealType LineSearch::update(DynamicVector<RealType>& params,
-                                const DynamicVector<RealType>& direction,
-                                RealType beta,
-                                const Constraint& constraint) {
-        
-        RealType diff=beta;
-        DynamicVector<RealType> newParams = params + diff*direction;
-        bool valid = constraint.test(newParams);
-        int icount = 0;
-        while (!valid) {
-            if (icount > 200) {
-                sprintf(painCave.errMsg, "can't update linesearch\n");
-                painCave.isFatal = 1;
-                painCave.severity = OPENMD_ERROR;
-                simError();
-            }
-            diff *= 0.5;
-            icount ++;
-            newParams = params + diff*direction;
-            valid = constraint.test(newParams);
-        }
-        params += diff*direction;
-        return diff;
-    }
+#include "optimization/Constraint.hpp"
+#include "optimization/Problem.hpp"
+#include "utils/simError.h"
 
+namespace QuantLib {
+
+RealType LineSearch::update(DynamicVector<RealType>& params,
+                            const DynamicVector<RealType>& direction,
+                            RealType beta, const Constraint& constraint) {
+  RealType diff = beta;
+  DynamicVector<RealType> newParams = params + diff * direction;
+  bool valid = constraint.test(newParams);
+  int icount = 0;
+  while (!valid) {
+    if (icount > 200) {
+      sprintf(painCave.errMsg, "can't update linesearch\n");
+      painCave.isFatal = 1;
+      painCave.severity = OPENMD_ERROR;
+      simError();
+    }
+    diff *= 0.5;
+    icount++;
+    newParams = params + diff * direction;
+    valid = constraint.test(newParams);
+  }
+  params += diff * direction;
+  return diff;
 }
+
+}  // namespace QuantLib

@@ -44,73 +44,81 @@
  */
 
 #include "applications/dynamicProps/AngularVelocityAutoOutProductCorrFunc.hpp"
-#include "utils/Revision.hpp"
+
 #include "math/SquareMatrix3.hpp"
+#include "utils/Revision.hpp"
 
 namespace OpenMD {
-  AngularVelocityAutoOutProductCorrFunc::AngularVelocityAutoOutProductCorrFunc(SimInfo* info,
-                                       const std::string& filename,
-                                       const std::string& sele1,
-                                       const std::string& sele2)
+AngularVelocityAutoOutProductCorrFunc::AngularVelocityAutoOutProductCorrFunc(
+    SimInfo* info, const std::string& filename, const std::string& sele1,
+    const std::string& sele2)
     : ObjectACF<Mat3x3d>(info, filename, sele1, sele2,
-                         DataStorage::dslAngularMomentum){
+                         DataStorage::dslAngularMomentum) {
+  setCorrFuncType(
+      "Angular Velocity - Angular Velocity Auto Outer Product Correlation "
+      "Function");
+  setOutputName(getPrefix(dumpFilename_) + ".waOutProdcorr");
 
-    setCorrFuncType("Angular Velocity - Angular Velocity Auto Outer Product Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".waOutProdcorr");
-
-    angularVelocity_.resize(nFrames_);
-    sumAngularVelocity_ = V3Zero;
-    angularVelocityCount_ = 0;
-    propertyTemp = V3Zero;
-  }
-
-  int AngularVelocityAutoOutProductCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    if (sd->isDirectional()) {
-      Mat3x3d momentInertia = sd->getI();
-      Vector3d angMom = sd->getJ();
-      Vector3d omega = momentInertia.inverse() * angMom;
-      propertyTemp = omega;
-    } else {
-      sprintf(painCave.errMsg, "The selection contains non-directional entities. Your selection should include\
- Directional atoms and/or Rigid Bodies.\n");
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    angularVelocity_[frame].push_back( propertyTemp );
-    sumAngularVelocity_ += propertyTemp;
-    angularVelocityCount_++;
-    return angularVelocity_[frame].size() - 1;
-  }
-
-  Mat3x3d AngularVelocityAutoOutProductCorrFunc::calcCorrVal(int frame1, int frame2,
-                                         int id1, int id2) {
-    Mat3x3d tmpMat_1;
-    tmpMat_1 = outProduct(angularVelocity_[frame1][id1], angularVelocity_[frame2][id2]);
-    Mat3x3d tmpMat_2;
-    tmpMat_2 = outProduct(angularVelocity_[frame2][id2], angularVelocity_[frame1][id1]);
-    Mat3x3d tmpMat_3;
-    tmpMat_3 = 0.5*(tmpMat_1 + tmpMat_2);
-    return tmpMat_3;
-  }
-
-  void AngularVelocityAutoOutProductCorrFunc::postCorrelate() {
-    // Gets the average of the angular velocities
-    sumAngularVelocity_ /= RealType(angularVelocityCount_);
-
-    Mat3x3d correlationOfAverages_ = outProduct(sumAngularVelocity_, sumAngularVelocity_);
-
-    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
-      if (count_[i] > 0) {
-        histogram_[i] /= RealType(count_[i]);
-
-        // The outerProduct correlation of the averages is subtracted
-        // from the correlation value:
-        histogram_[i] -= correlationOfAverages_;
-      } else {
-        histogram_[i] = M3Zero;
-      }
-    }
-  }
-
+  angularVelocity_.resize(nFrames_);
+  sumAngularVelocity_ = V3Zero;
+  angularVelocityCount_ = 0;
+  propertyTemp = V3Zero;
 }
+
+int AngularVelocityAutoOutProductCorrFunc::computeProperty1(int frame,
+                                                            StuntDouble* sd) {
+  if (sd->isDirectional()) {
+    Mat3x3d momentInertia = sd->getI();
+    Vector3d angMom = sd->getJ();
+    Vector3d omega = momentInertia.inverse() * angMom;
+    propertyTemp = omega;
+  } else {
+    sprintf(
+        painCave.errMsg,
+        "The selection contains non-directional entities. Your selection should include\
+ Directional atoms and/or Rigid Bodies.\n");
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  angularVelocity_[frame].push_back(propertyTemp);
+  sumAngularVelocity_ += propertyTemp;
+  angularVelocityCount_++;
+  return angularVelocity_[frame].size() - 1;
+}
+
+Mat3x3d AngularVelocityAutoOutProductCorrFunc::calcCorrVal(int frame1,
+                                                           int frame2, int id1,
+                                                           int id2) {
+  Mat3x3d tmpMat_1;
+  tmpMat_1 =
+      outProduct(angularVelocity_[frame1][id1], angularVelocity_[frame2][id2]);
+  Mat3x3d tmpMat_2;
+  tmpMat_2 =
+      outProduct(angularVelocity_[frame2][id2], angularVelocity_[frame1][id1]);
+  Mat3x3d tmpMat_3;
+  tmpMat_3 = 0.5 * (tmpMat_1 + tmpMat_2);
+  return tmpMat_3;
+}
+
+void AngularVelocityAutoOutProductCorrFunc::postCorrelate() {
+  // Gets the average of the angular velocities
+  sumAngularVelocity_ /= RealType(angularVelocityCount_);
+
+  Mat3x3d correlationOfAverages_ =
+      outProduct(sumAngularVelocity_, sumAngularVelocity_);
+
+  for (unsigned int i = 0; i < nTimeBins_; ++i) {
+    if (count_[i] > 0) {
+      histogram_[i] /= RealType(count_[i]);
+
+      // The outerProduct correlation of the averages is subtracted
+      // from the correlation value:
+      histogram_[i] -= correlationOfAverages_;
+    } else {
+      histogram_[i] = M3Zero;
+    }
+  }
+}
+
+}  // namespace OpenMD

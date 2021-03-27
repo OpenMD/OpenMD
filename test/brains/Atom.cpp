@@ -46,27 +46,21 @@
 #include "primitives/Atom.hpp"
 namespace OpenMD {
 
-Atom::Atom(AtomType* at) : StuntDouble(otAtom, &Snapshot::atomData) ,atomType_(at) {
+Atom::Atom(AtomType* at) : StuntDouble(otAtom, &Snapshot::atomData), atomType_(at) {}
 
-}
-
-Mat3x3d Atom::getI() {
-    return Mat3x3d::identity();
-}    
+Mat3x3d Atom::getI() { return Mat3x3d::identity(); }
 
 std::vector<double> Atom::getGrad() {
-    vector<double> grad(3);
-    Vector3d force= getFrc();
+  vector<double> grad(3);
+  Vector3d force = getFrc();
 
-    grad[0] = -force[0];
-    grad[1] = -force[1];
-    grad[2] = -force[2];
-    
-    return grad;
-}    
+  grad[0] = -force[0];
+  grad[1] = -force[1];
+  grad[2] = -force[2];
 
-void Atom::accept(BaseVisitor* v) {
-    v->visit(this);
-}    
-
+  return grad;
 }
+
+void Atom::accept(BaseVisitor* v) { v->visit(this); }
+
+}  // namespace OpenMD

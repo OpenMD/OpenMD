@@ -42,207 +42,202 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
+#include "visitors/ZconsVisitor.hpp"
+
 #include <cmath>
 #include <memory>
 
-#include "visitors/ZconsVisitor.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/StringUtils.hpp"
 #include "types/ZconsStamp.hpp"
+#include "utils/StringUtils.hpp"
 namespace OpenMD {
 
-  ZConsVisitor::ZConsVisitor(SimInfo* info) : BaseVisitor(), 
-					      zconsReader_(NULL), info_(info){
-    
-    visitorName = "ZConsVisitor";
-    currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    Globals* simParam = info_->getSimParams();
+ZConsVisitor::ZConsVisitor(SimInfo* info)
+    : BaseVisitor(), zconsReader_(NULL), info_(info) {
+  visitorName = "ZConsVisitor";
+  currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+  Globals* simParam = info_->getSimParams();
 
-    if (simParam->haveZconsTime()){
-      zconsTime_ = simParam->getZconsTime();
-    }
-    else{
-      sprintf(painCave.errMsg,
-	      "ZConstraint error: If you use a ZConstraint,\n"
-	      "\tyou must set zconsTime.\n");
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    if (simParam->haveZconsTol()){
-      zconsTol_ = simParam->getZconsTol();
-    }
-    else{
-      zconsTol_ = 0.01;
-      sprintf(painCave.errMsg,
-	      "ZConstraint Warning: Tolerance for z-constraint method is not specified.\n"
-	      "\tOpenMD will use a default value of %f.\n"
-	      "\tTo set the tolerance, use the zconsTol variable.\n",
-	      zconsTol_);
-      painCave.isFatal = 0;
-      simError();      
-    }    
-         
-    int nZconstraints = simParam->getNZconsStamps();
-    std::vector<ZConsStamp*> stamp = simParam->getZconsStamps();
-    for (int i = 0; i < nZconstraints; i++){
-      int zmolIndex = stamp[i]->getMolIndex();
-      zmolStates_.insert(std::make_pair(zmolIndex, zsMoving));
-    }
-
-
-    //fill zatomToZmol_ array
-    /** @todo only works for single version now*/
-    std::map<int, ZConsState>::iterator j;
-    for (j = zmolStates_.begin(); j != zmolStates_.end(); ++j) {
-      Molecule* mol = info_->getMoleculeByGlobalIndex(j->first);
-      assert(mol != NULL);
-      Molecule::AtomIterator ai;
-      Atom* at;
-      for (at = mol->beginAtom(ai); at != NULL; at = mol->nextAtom(ai)) {
-	zatomToZmol_.insert(std::make_pair(at->getGlobalIndex(), mol->getGlobalIndex()));
-      }
-    }
-
-    zconsFilename_ = getPrefix(info_->getFinalConfigFileName()) + ".fz"; 
-    
-    zconsReader_ = new ZConsReader(info);
-
-    if (zconsReader_->hasNextFrame())
-      zconsReader_->readNextFrame();
-  
+  if (simParam->haveZconsTime()) {
+    zconsTime_ = simParam->getZconsTime();
+  } else {
+    sprintf(painCave.errMsg,
+            "ZConstraint error: If you use a ZConstraint,\n"
+            "\tyou must set zconsTime.\n");
+    painCave.isFatal = 1;
+    simError();
   }
 
-  ZConsVisitor::~ZConsVisitor(){
-    delete zconsReader_;    
+  if (simParam->haveZconsTol()) {
+    zconsTol_ = simParam->getZconsTol();
+  } else {
+    zconsTol_ = 0.01;
+    sprintf(painCave.errMsg,
+            "ZConstraint Warning: Tolerance for z-constraint method is not "
+            "specified.\n"
+            "\tOpenMD will use a default value of %f.\n"
+            "\tTo set the tolerance, use the zconsTol variable.\n",
+            zconsTol_);
+    painCave.isFatal = 0;
+    simError();
   }
 
-  void ZConsVisitor::visit(Atom* atom){
-    std::string prefix;
-    if(isZconstraint(atom->getGlobalIndex(), prefix))
-      internalVisit(atom, prefix);
+  int nZconstraints = simParam->getNZconsStamps();
+  std::vector<ZConsStamp*> stamp = simParam->getZconsStamps();
+  for (int i = 0; i < nZconstraints; i++) {
+    int zmolIndex = stamp[i]->getMolIndex();
+    zmolStates_.insert(std::make_pair(zmolIndex, zsMoving));
   }
 
-  void ZConsVisitor::visit(DirectionalAtom* datom){
-    std::string prefix;
-
-    if(isZconstraint(datom->getGlobalIndex(), prefix))
-      internalVisit(datom, prefix);
-  }
-
-  void ZConsVisitor::visit(RigidBody* rb){
-    std::string prefix;
-    std::vector<Atom*> atoms;
-
-    atoms = rb->getAtoms();
-
-    if(isZconstraint(atoms[0]->getGlobalIndex(), prefix))
-      internalVisit(rb, prefix);
-  }
-
-  void ZConsVisitor::update(){
-    Vector3d com;
-    std::map<int, ZConsState>::iterator i;
-    for ( i = zmolStates_.begin(); i != zmolStates_.end(); ++i) {
-      i->second = zsMoving;
+  // fill zatomToZmol_ array
+  /** @todo only works for single version now*/
+  std::map<int, ZConsState>::iterator j;
+  for (j = zmolStates_.begin(); j != zmolStates_.end(); ++j) {
+    Molecule* mol = info_->getMoleculeByGlobalIndex(j->first);
+    assert(mol != NULL);
+    Molecule::AtomIterator ai;
+    Atom* at;
+    for (at = mol->beginAtom(ai); at != NULL; at = mol->nextAtom(ai)) {
+      zatomToZmol_.insert(
+          std::make_pair(at->getGlobalIndex(), mol->getGlobalIndex()));
     }
-     
-    readZconsFile(currSnapshot_->getTime());
-
-    const std::vector<ZconsData>& fixedZmolData = zconsReader_->getFixedZMolData();
-    std::vector<ZconsData>::const_iterator j;
-    for (j = fixedZmolData.begin(); j != fixedZmolData.end(); ++j) {
-      std::map<int, ZConsState>::iterator k = zmolStates_.find(j->zmolIndex);
-      assert(k != zmolStates_.end());
-      k->second = zsFixed;
-    }
-    
   }
 
-  void ZConsVisitor::readZconsFile(RealType time) {
-    RealType tempTime;
-    while(zconsReader_->hasNextFrame()){
-      tempTime = zconsReader_->getCurTime();
-      if(tempTime >= time) {
-	return;
-      }
-        
-      zconsReader_->readNextFrame();
-    } 
+  zconsFilename_ = getPrefix(info_->getFinalConfigFileName()) + ".fz";
+
+  zconsReader_ = new ZConsReader(info);
+
+  if (zconsReader_->hasNextFrame()) zconsReader_->readNextFrame();
+}
+
+ZConsVisitor::~ZConsVisitor() { delete zconsReader_; }
+
+void ZConsVisitor::visit(Atom* atom) {
+  std::string prefix;
+  if (isZconstraint(atom->getGlobalIndex(), prefix))
+    internalVisit(atom, prefix);
+}
+
+void ZConsVisitor::visit(DirectionalAtom* datom) {
+  std::string prefix;
+
+  if (isZconstraint(datom->getGlobalIndex(), prefix))
+    internalVisit(datom, prefix);
+}
+
+void ZConsVisitor::visit(RigidBody* rb) {
+  std::string prefix;
+  std::vector<Atom*> atoms;
+
+  atoms = rb->getAtoms();
+
+  if (isZconstraint(atoms[0]->getGlobalIndex(), prefix))
+    internalVisit(rb, prefix);
+}
+
+void ZConsVisitor::update() {
+  Vector3d com;
+  std::map<int, ZConsState>::iterator i;
+  for (i = zmolStates_.begin(); i != zmolStates_.end(); ++i) {
+    i->second = zsMoving;
   }
 
-  void ZConsVisitor::internalVisit(StuntDouble* sd, const std::string& prefix){
-    std::shared_ptr<GenericData> data;
-    std::shared_ptr<AtomData> atomData;
-    std::shared_ptr<AtomInfo> atomInfo;
-    std::vector<std::shared_ptr<AtomInfo>>::iterator iter;
+  readZconsFile(currSnapshot_->getTime());
 
-    //if there is not atom data, just skip it
-    data = sd->getPropertyByName("ATOMDATA");
-    if(data != nullptr){
-      atomData = std::dynamic_pointer_cast<AtomData>(data);  
-      if(atomData == nullptr)
-	return;
-    }
-    else
+  const std::vector<ZconsData>& fixedZmolData =
+      zconsReader_->getFixedZMolData();
+  std::vector<ZconsData>::const_iterator j;
+  for (j = fixedZmolData.begin(); j != fixedZmolData.end(); ++j) {
+    std::map<int, ZConsState>::iterator k = zmolStates_.find(j->zmolIndex);
+    assert(k != zmolStates_.end());
+    k->second = zsFixed;
+  }
+}
+
+void ZConsVisitor::readZconsFile(RealType time) {
+  RealType tempTime;
+  while (zconsReader_->hasNextFrame()) {
+    tempTime = zconsReader_->getCurTime();
+    if (tempTime >= time) {
       return;
-
-    for(atomInfo  = atomData->beginAtomInfo(iter);
-	atomInfo; atomInfo = atomData->nextAtomInfo(iter))
-      (atomInfo->atomTypeName).insert(0, prefix);
-  }
-
-
-  bool ZConsVisitor::isZconstraint(int atomIndex, std::string& prefix){
-    std::string prefixString[] = {"ZF", "ZM"};
-    std::map<int, int>::iterator i = zatomToZmol_.find(atomIndex);
-    if (i ==  zatomToZmol_.end() ){
-      prefix = "";
-      return false;
-    } else {
-
-      std::map<int, ZConsState>::iterator j = zmolStates_.find(i->second);
-      assert(j !=zmolStates_.end());
-      prefix = prefixString[j->second];
-      return true;
     }
+
+    zconsReader_->readNextFrame();
+  }
+}
+
+void ZConsVisitor::internalVisit(StuntDouble* sd, const std::string& prefix) {
+  std::shared_ptr<GenericData> data;
+  std::shared_ptr<AtomData> atomData;
+  std::shared_ptr<AtomInfo> atomInfo;
+  std::vector<std::shared_ptr<AtomInfo>>::iterator iter;
+
+  // if there is not atom data, just skip it
+  data = sd->getPropertyByName("ATOMDATA");
+  if (data != nullptr) {
+    atomData = std::dynamic_pointer_cast<AtomData>(data);
+    if (atomData == nullptr) return;
+  } else
+    return;
+
+  for (atomInfo = atomData->beginAtomInfo(iter); atomInfo;
+       atomInfo = atomData->nextAtomInfo(iter))
+    (atomInfo->atomTypeName).insert(0, prefix);
+}
+
+bool ZConsVisitor::isZconstraint(int atomIndex, std::string& prefix) {
+  std::string prefixString[] = {"ZF", "ZM"};
+  std::map<int, int>::iterator i = zatomToZmol_.find(atomIndex);
+  if (i == zatomToZmol_.end()) {
+    prefix = "";
+    return false;
+  } else {
+    std::map<int, ZConsState>::iterator j = zmolStates_.find(i->second);
+    assert(j != zmolStates_.end());
+    prefix = prefixString[j->second];
+    return true;
+  }
+}
+
+const std::string ZConsVisitor::toString() {
+  char buffer[65535];
+  std::string result;
+
+  sprintf(
+      buffer,
+      "------------------------------------------------------------------\n");
+  result += buffer;
+
+  sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+  result += buffer;
+
+  sprintf(buffer, "number of zconstraint molecule: %d\n",
+          (int)zmolStates_.size());
+  result += buffer;
+
+  sprintf(buffer, "zconstraint tolerance = %lf\n", zconsTol_);
+  result += buffer;
+
+  sprintf(buffer, "zconstraint sample time = %lf\n", zconsTime_);
+  result += buffer;
+
+  sprintf(buffer, "zconstraint output filename = %s\n", zconsFilename_.c_str());
+  result += buffer;
+
+  std::map<int, ZConsState>::iterator i;
+  int j = 0;
+  for (i = zmolStates_.begin(); i != zmolStates_.end(); ++i) {
+    sprintf(buffer, "zconstraint molecule[%d] = %d\n", j++, i->first);
+    result += buffer;
   }
 
-  const std::string ZConsVisitor::toString(){
-    char buffer[65535];
-    std::string result;
+  sprintf(
+      buffer,
+      "------------------------------------------------------------------\n");
+  result += buffer;
 
-    sprintf(buffer ,"------------------------------------------------------------------\n");
-    result += buffer;
+  return result;
+}
 
-    sprintf(buffer ,"Visitor name: %s\n", visitorName.c_str());
-    result += buffer;
-
-    sprintf(buffer , "number of zconstraint molecule: %d\n", (int) zmolStates_.size());
-    result += buffer;
-
-    sprintf(buffer , "zconstraint tolerance = %lf\n", zconsTol_);
-    result += buffer;
-
-    sprintf(buffer , "zconstraint sample time = %lf\n", zconsTime_);
-    result += buffer;
-
-    sprintf(buffer , "zconstraint output filename = %s\n", zconsFilename_.c_str());
-    result += buffer;
-
-    std::map<int, ZConsState>::iterator i;
-    int j = 0;
-    for ( i = zmolStates_.begin(); i != zmolStates_.end(); ++i) {
-      sprintf(buffer ,"zconstraint molecule[%d] = %d\n", j++, i->first);
-      result += buffer;
-    }
-  
-    sprintf(buffer ,"------------------------------------------------------------------\n");
-    result += buffer;
-
-    return result;
-  }
-
-
-}//namespace OpenMD
+}  // namespace OpenMD

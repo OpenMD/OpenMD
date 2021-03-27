@@ -42,140 +42,131 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "FluctuatingChargeNVE.hpp"
+
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
 
-  FluctuatingChargeNVE::FluctuatingChargeNVE(SimInfo* info) : 
-    FluctuatingChargePropagator(info), 
-    snap(info->getSnapshotManager()->getCurrentSnapshot()), thermo(info) {  
-  }
+FluctuatingChargeNVE::FluctuatingChargeNVE(SimInfo* info)
+    : FluctuatingChargePropagator(info),
+      snap(info->getSnapshotManager()->getCurrentSnapshot()),
+      thermo(info) {}
 
-  void FluctuatingChargeNVE::initialize() {
-    FluctuatingChargePropagator::initialize();  
-    if (hasFlucQ_) {
-      if (info_->getSimParams()->haveDt()) {
-        dt_ = info_->getSimParams()->getDt();
-        dt2_ = dt_ * 0.5;
-      } else {
-        sprintf(painCave.errMsg,
-                "FluctuatingChargeNVE Error: dt is not set\n");
-        painCave.isFatal = 1;
-        simError();
-      }
-      
-      if (!info_->getSimParams()->getUseIntialExtendedSystemState()) {
-        snap->setElectronicThermostat(make_pair(0.0, 0.0));
-      }
+void FluctuatingChargeNVE::initialize() {
+  FluctuatingChargePropagator::initialize();
+  if (hasFlucQ_) {
+    if (info_->getSimParams()->haveDt()) {
+      dt_ = info_->getSimParams()->getDt();
+      dt2_ = dt_ * 0.5;
+    } else {
+      sprintf(painCave.errMsg, "FluctuatingChargeNVE Error: dt is not set\n");
+      painCave.isFatal = 1;
+      simError();
     }
-  }
 
-
-  void FluctuatingChargeNVE::moveA() {
-
-    if (!hasFlucQ_) return;
-
-    SimInfo::MoleculeIterator i;
-    Molecule::FluctuatingChargeIterator  j;
-    Molecule* mol;
-    Atom* atom;
-    RealType cvel, cpos, cfrc, cmass;
-
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-           atom = mol->nextFluctuatingCharge(j)) {
-        
-        cvel = atom->getFlucQVel();
-        cpos = atom->getFlucQPos();
-        cfrc = atom->getFlucQFrc();
-        cmass = atom->getChargeMass();       
-
-	// velocity half step
-        cvel += dt2_ * cfrc / cmass;                    
-        // position whole step
-        cpos += dt_ * cvel;
-	
-        atom->setFlucQVel(cvel);
-        atom->setFlucQPos(cpos);
-      }
-    }
-  }
-
-  void FluctuatingChargeNVE::moveB() {
-    if (!hasFlucQ_) return;
-    SimInfo::MoleculeIterator i;
-    Molecule::FluctuatingChargeIterator  j;
-    Molecule* mol;
-    Atom* atom;
-    RealType cfrc, cvel, cmass;
-
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-      for (atom = mol->beginFluctuatingCharge(j);  atom != NULL;
-           atom = mol->nextFluctuatingCharge(j)) {
-
-        cvel = atom->getFlucQVel();
-        cfrc = atom->getFlucQFrc();
-        cmass = atom->getChargeMass();
-        
-        // velocity half step
-        cvel += dt2_ * cfrc / cmass;
-        atom->setFlucQVel(cvel);      
-
-      }
-    }
-  }
-  void FluctuatingChargeNVE::VelocityStep(RealType dt) {
-
-    if (!hasFlucQ_) return;
-
-    SimInfo::MoleculeIterator i;
-    Molecule::FluctuatingChargeIterator  j;
-    Molecule* mol;
-    Atom* atom;
-    RealType cvel, cfrc, cmass;
-
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-           atom = mol->nextFluctuatingCharge(j)) {
-        
-        cvel = atom->getFlucQVel();
-        cfrc = atom->getFlucQFrc();
-        cmass = atom->getChargeMass();       
-
-	// velocity half step
-        cvel += dt * cfrc / cmass;        
-        atom->setFlucQVel(cvel);
-      }
-    }
-  }
-  
-  void FluctuatingChargeNVE::PositionStep(RealType dt) {
-    
-    if (!hasFlucQ_) return;
-    
-    SimInfo::MoleculeIterator i;
-    Molecule::FluctuatingChargeIterator  j;
-    Molecule* mol;
-    Atom* atom;
-    RealType cvel, cpos;
-    
-    for (mol = info_->beginMolecule(i); mol != NULL; 
-         mol = info_->nextMolecule(i)) {
-      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-           atom = mol->nextFluctuatingCharge(j)) {
-        
-        cvel = atom->getFlucQVel();
-        cpos = atom->getFlucQPos();
-
-        cpos += dt * cvel;	
-        atom->setFlucQPos(cpos);
-      }
+    if (!info_->getSimParams()->getUseIntialExtendedSystemState()) {
+      snap->setElectronicThermostat(make_pair(0.0, 0.0));
     }
   }
 }
+
+void FluctuatingChargeNVE::moveA() {
+  if (!hasFlucQ_) return;
+
+  SimInfo::MoleculeIterator i;
+  Molecule::FluctuatingChargeIterator j;
+  Molecule* mol;
+  Atom* atom;
+  RealType cvel, cpos, cfrc, cmass;
+
+  for (mol = info_->beginMolecule(i); mol != NULL;
+       mol = info_->nextMolecule(i)) {
+    for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+         atom = mol->nextFluctuatingCharge(j)) {
+      cvel = atom->getFlucQVel();
+      cpos = atom->getFlucQPos();
+      cfrc = atom->getFlucQFrc();
+      cmass = atom->getChargeMass();
+
+      // velocity half step
+      cvel += dt2_ * cfrc / cmass;
+      // position whole step
+      cpos += dt_ * cvel;
+
+      atom->setFlucQVel(cvel);
+      atom->setFlucQPos(cpos);
+    }
+  }
+}
+
+void FluctuatingChargeNVE::moveB() {
+  if (!hasFlucQ_) return;
+  SimInfo::MoleculeIterator i;
+  Molecule::FluctuatingChargeIterator j;
+  Molecule* mol;
+  Atom* atom;
+  RealType cfrc, cvel, cmass;
+
+  for (mol = info_->beginMolecule(i); mol != NULL;
+       mol = info_->nextMolecule(i)) {
+    for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+         atom = mol->nextFluctuatingCharge(j)) {
+      cvel = atom->getFlucQVel();
+      cfrc = atom->getFlucQFrc();
+      cmass = atom->getChargeMass();
+
+      // velocity half step
+      cvel += dt2_ * cfrc / cmass;
+      atom->setFlucQVel(cvel);
+    }
+  }
+}
+void FluctuatingChargeNVE::VelocityStep(RealType dt) {
+  if (!hasFlucQ_) return;
+
+  SimInfo::MoleculeIterator i;
+  Molecule::FluctuatingChargeIterator j;
+  Molecule* mol;
+  Atom* atom;
+  RealType cvel, cfrc, cmass;
+
+  for (mol = info_->beginMolecule(i); mol != NULL;
+       mol = info_->nextMolecule(i)) {
+    for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+         atom = mol->nextFluctuatingCharge(j)) {
+      cvel = atom->getFlucQVel();
+      cfrc = atom->getFlucQFrc();
+      cmass = atom->getChargeMass();
+
+      // velocity half step
+      cvel += dt * cfrc / cmass;
+      atom->setFlucQVel(cvel);
+    }
+  }
+}
+
+void FluctuatingChargeNVE::PositionStep(RealType dt) {
+  if (!hasFlucQ_) return;
+
+  SimInfo::MoleculeIterator i;
+  Molecule::FluctuatingChargeIterator j;
+  Molecule* mol;
+  Atom* atom;
+  RealType cvel, cpos;
+
+  for (mol = info_->beginMolecule(i); mol != NULL;
+       mol = info_->nextMolecule(i)) {
+    for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+         atom = mol->nextFluctuatingCharge(j)) {
+      cvel = atom->getFlucQVel();
+      cpos = atom->getFlucQPos();
+
+      cpos += dt * cvel;
+      atom->setFlucQPos(cpos);
+    }
+  }
+}
+}  // namespace OpenMD

@@ -46,13 +46,12 @@
 #include "integrators/VelocityVerletIntegrator.hpp"
 
 namespace OpenMD {
-  VelocityVerletIntegrator::VelocityVerletIntegrator(SimInfo *info)
-    : Integrator(info) { 
-  }
+VelocityVerletIntegrator::VelocityVerletIntegrator(SimInfo *info)
+    : Integrator(info) {}
 
-  void VelocityVerletIntegrator::step() {
-    moveA();
-    calcForce();
-    moveB();
-  }
-} //End OpenMD
+void VelocityVerletIntegrator::step() {
+  moveA();
+  calcForce();
+  moveB();
+}
+}  // namespace OpenMD

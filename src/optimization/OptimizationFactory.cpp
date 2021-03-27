@@ -42,60 +42,62 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "optimization/OptimizationFactory.hpp"
+
 #include "optimization/OptimizationCreator.hpp"
 #include "utils/MemoryUtils.hpp"
 
 namespace OpenMD {
-  
-  OptimizationFactory::~OptimizationFactory() {
-    Utils::deletePointers(creatorMap_);
-  }
 
-  bool OptimizationFactory::registerOptimization(OptimizationCreator* creator) {
-    return creatorMap_.insert(
-			      CreatorMapType::value_type(creator->getIdent(), creator)).second;
-  }
-
-  bool OptimizationFactory::unregisterOptimization(const std::string& id) {
-    return creatorMap_.erase(id) == 1;
-  }
-
-  QuantLib::OptimizationMethod* OptimizationFactory::createOptimization(const std::string& id, SimInfo* info) {
-    CreatorMapType::iterator i = creatorMap_.find(id);
-    if (i != creatorMap_.end()) {
-      //invoke functor to create object
-      return (i->second)->create();
-    } else {
-      return NULL;
-    }
-  }
-
-  std::vector<std::string> OptimizationFactory::getIdents() {
-    IdentVectorType idents;
-    CreatorMapType::iterator i;
-
-    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-      idents.push_back(i->first);
-    }
-    
-    return idents;
-  }
-
-  std::ostream& operator <<(std::ostream& o, OptimizationFactory& factory) {
-    OptimizationFactory::IdentVectorType idents;
-    OptimizationFactory::IdentVectorIterator i;
-
-    idents = factory.getIdents();
-
-    o << "Avaliable type identifiers in this factory: " << std::endl;
-    for (i = idents.begin(); i != idents.end(); ++i) {
-      o << *i << std::endl;
-    }
-
-    return o;
-  }
-
+OptimizationFactory::~OptimizationFactory() {
+  Utils::deletePointers(creatorMap_);
 }
 
+bool OptimizationFactory::registerOptimization(OptimizationCreator* creator) {
+  return creatorMap_
+      .insert(CreatorMapType::value_type(creator->getIdent(), creator))
+      .second;
+}
+
+bool OptimizationFactory::unregisterOptimization(const std::string& id) {
+  return creatorMap_.erase(id) == 1;
+}
+
+QuantLib::OptimizationMethod* OptimizationFactory::createOptimization(
+    const std::string& id, SimInfo* info) {
+  CreatorMapType::iterator i = creatorMap_.find(id);
+  if (i != creatorMap_.end()) {
+    // invoke functor to create object
+    return (i->second)->create();
+  } else {
+    return NULL;
+  }
+}
+
+std::vector<std::string> OptimizationFactory::getIdents() {
+  IdentVectorType idents;
+  CreatorMapType::iterator i;
+
+  for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
+    idents.push_back(i->first);
+  }
+
+  return idents;
+}
+
+std::ostream& operator<<(std::ostream& o, OptimizationFactory& factory) {
+  OptimizationFactory::IdentVectorType idents;
+  OptimizationFactory::IdentVectorIterator i;
+
+  idents = factory.getIdents();
+
+  o << "Avaliable type identifiers in this factory: " << std::endl;
+  for (i = idents.begin(); i != idents.end(); ++i) {
+    o << *i << std::endl;
+  }
+
+  return o;
+}
+
+}  // namespace OpenMD

@@ -42,63 +42,68 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "io/AtomTypesSectionParser.hpp"
-#include "types/AtomType.hpp"
+
 #include "brains/ForceField.hpp"
+#include "types/AtomType.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 
-  AtomTypesSectionParser::AtomTypesSectionParser() {
-    setSectionName("AtomTypes");
-  }
+AtomTypesSectionParser::AtomTypesSectionParser() {
+  setSectionName("AtomTypes");
+}
 
-  void AtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
-    StringTokenizer tokenizer(line);
-    int nTokens = tokenizer.countTokens();    
+void AtomTypesSectionParser::parseLine(ForceField& ff, const std::string& line,
+                                       int lineNo) {
+  StringTokenizer tokenizer(line);
+  int nTokens = tokenizer.countTokens();
 
-    //in AtomTypeSection, a line at least contains 2 tokens
-    //atomTypeName and mass
-    if (nTokens < 2)  {
-      sprintf(painCave.errMsg, "AtomTypesSectionParser Error: Not enough tokens at line %d\n",
-	      lineNo);
+  // in AtomTypeSection, a line at least contains 2 tokens
+  // atomTypeName and mass
+  if (nTokens < 2) {
+    sprintf(painCave.errMsg,
+            "AtomTypesSectionParser Error: Not enough tokens at line %d\n",
+            lineNo);
+    painCave.isFatal = 1;
+    simError();
+
+  } else {
+    std::string atomTypeName = tokenizer.nextToken();
+    std::string baseAtomTypeName = tokenizer.nextToken();
+
+    AtomType* baseAtomType =
+        dynamic_cast<AtomType*>(ff.getAtomType(baseAtomTypeName));
+
+    if (baseAtomType == NULL) {
+      sprintf(painCave.errMsg,
+              "AtomTypesSectionParser Error: Could not find matching base atom "
+              "type to "
+              "%s at line %d\n",
+              baseAtomTypeName.c_str(), lineNo);
       painCave.isFatal = 1;
       simError();
-            
+    }
+
+    AtomType* atomType = ff.getAtomType(atomTypeName);
+
+    if (atomType == NULL) {
+      atomType = new AtomType();
+      atomType->useBase(baseAtomType);
+      int ident = ff.getNAtomType();
+      atomType->setIdent(ident);
+      atomType->setName(atomTypeName);
+      ff.addAtomType(atomTypeName, atomType);
     } else {
+      std::cerr << "duplicate atom type: " << atomTypeName << " on line "
+                << lineNo << "\n";
+    }
 
-      std::string atomTypeName = tokenizer.nextToken();   
-      std::string baseAtomTypeName = tokenizer.nextToken();
-
-      AtomType* baseAtomType = dynamic_cast<AtomType*>(ff.getAtomType(baseAtomTypeName));
-
-      if (baseAtomType == NULL) {
-	sprintf(painCave.errMsg, "AtomTypesSectionParser Error: Could not find matching base atom type to %s at line %d\n",
-		baseAtomTypeName.c_str(), lineNo);
-	painCave.isFatal = 1;
-	simError();
-      }
-	
-      AtomType* atomType = ff.getAtomType(atomTypeName);
-
-      if (atomType == NULL) {
-      	atomType = new AtomType();
-	atomType->useBase(baseAtomType);
-      	int ident = ff.getNAtomType();
-      	atomType->setIdent(ident); 
-      	atomType->setName(atomTypeName);
-      	ff.addAtomType(atomTypeName, atomType);
-      } else {
-        std::cerr << "duplicate atom type: " << atomTypeName << " on line " << lineNo << "\n";
-      }
-        
-      if (tokenizer.hasMoreTokens()) {
-	RealType mass = tokenizer.nextTokenAsDouble();              
-	atomType->setMass(mass);
-      }               
-    }    
-
-
+    if (tokenizer.hasMoreTokens()) {
+      RealType mass = tokenizer.nextTokenAsDouble();
+      atomType->setMass(mass);
+    }
   }
+}
 
-} //end namespace OpenMD
+}  // end namespace OpenMD

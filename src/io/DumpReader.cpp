@@ -42,772 +42,734 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-  
-#define _LARGEFILE_SOURCE64 
-#define _FILE_OFFSET_BITS 64 
- 
-#ifdef IS_MPI 
-#include <mpi.h> 
+
+#define _LARGEFILE_SOURCE64
+#define _FILE_OFFSET_BITS 64
+
+#ifdef IS_MPI
+#include <mpi.h>
 #endif
- 
-#include <sys/types.h> 
-#include <sys/stat.h> 
- 
-#include <iostream> 
-#include <cmath> 
- 
-#include <cstdio> 
-#include <cstdlib> 
-#include <cstring> 
- 
-#include "io/DumpReader.hpp" 
-#include "primitives/Molecule.hpp" 
-#include "utils/simError.h" 
-#include "utils/MemoryUtils.hpp" 
-#include "utils/StringTokenizer.hpp" 
+
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+
 #include "brains/Thermo.hpp"
- 
- 
-namespace OpenMD { 
-   
-  DumpReader::DumpReader(SimInfo* info, const std::string& filename) 
-    : info_(info), filename_(filename), isScanned_(false), nframes_(0),
-      needCOMprops_(false) { 
-    
-#ifdef IS_MPI     
-    if (worldRank == 0) { 
-#endif 
-      
-      inFile_ = new std::ifstream(filename_.c_str(),   
-                                  ifstream::in | ifstream::binary); 
-      
-      if (inFile_->fail()) { 
-	sprintf(painCave.errMsg, 
-		"DumpReader: Cannot open file: %s\n", 
-		filename_.c_str()); 
-	painCave.isFatal = 1; 
-	simError(); 
-      } 
-      
-#ifdef IS_MPI       
-    }     
-    strcpy(checkPointMsg, "Dump file opened for reading successfully."); 
-    errorCheckPoint();     
-#endif 
-    
-    return; 
-  } 
-  
-  DumpReader::~DumpReader() { 
-    
-#ifdef IS_MPI     
-    if (worldRank == 0) { 
+#include "io/DumpReader.hpp"
+#include "primitives/Molecule.hpp"
+#include "utils/MemoryUtils.hpp"
+#include "utils/StringTokenizer.hpp"
+#include "utils/simError.h"
+
+namespace OpenMD {
+
+DumpReader::DumpReader(SimInfo* info, const std::string& filename)
+    : info_(info),
+      filename_(filename),
+      isScanned_(false),
+      nframes_(0),
+      needCOMprops_(false) {
+#ifdef IS_MPI
+  if (worldRank == 0) {
 #endif
 
-      delete inFile_; 
-      
-#ifdef IS_MPI       
-    }     
-    strcpy(checkPointMsg, "Dump file closed successfully."); 
-    errorCheckPoint();     
-#endif 
-    
-    return; 
-  } 
-  
-  int DumpReader::getNFrames(void) { 
-     
-    if (!isScanned_) 
-      scanFile(); 
-     
-    return nframes_; 
-  } 
-   
-  void DumpReader::scanFile(void) { 
+    inFile_ =
+        new std::ifstream(filename_.c_str(), ifstream::in | ifstream::binary);
 
-    std::streampos prevPos;
-    std::streampos  currPos; 
-    
-#ifdef IS_MPI     
-    if (worldRank == 0) { 
-#endif // is_mpi 
-      
+    if (inFile_->fail()) {
+      sprintf(painCave.errMsg, "DumpReader: Cannot open file: %s\n",
+              filename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+
+#ifdef IS_MPI
+  }
+  strcpy(checkPointMsg, "Dump file opened for reading successfully.");
+  errorCheckPoint();
+#endif
+
+  return;
+}
+
+DumpReader::~DumpReader() {
+#ifdef IS_MPI
+  if (worldRank == 0) {
+#endif
+
+    delete inFile_;
+
+#ifdef IS_MPI
+  }
+  strcpy(checkPointMsg, "Dump file closed successfully.");
+  errorCheckPoint();
+#endif
+
+  return;
+}
+
+int DumpReader::getNFrames(void) {
+  if (!isScanned_) scanFile();
+
+  return nframes_;
+}
+
+void DumpReader::scanFile(void) {
+  std::streampos prevPos;
+  std::streampos currPos;
+
+#ifdef IS_MPI
+  if (worldRank == 0) {
+#endif  // is_mpi
+
+    currPos = inFile_->tellg();
+    prevPos = currPos;
+    bool foundOpenSnapshotTag = false;
+    bool foundClosedSnapshotTag = false;
+
+    int lineNo = 0;
+    while (inFile_->getline(buffer, bufferSize)) {
+      ++lineNo;
+
+      std::string line = buffer;
       currPos = inFile_->tellg();
-      prevPos = currPos;
-      bool foundOpenSnapshotTag = false;
-      bool foundClosedSnapshotTag = false;
-
-      int lineNo = 0; 
-      while(inFile_->getline(buffer, bufferSize)) {
-        ++lineNo;
-        
-        std::string line = buffer;
-        currPos = inFile_->tellg(); 
-        if (line.find("<Snapshot>")!= std::string::npos) {
-          if (foundOpenSnapshotTag) {
-            sprintf(painCave.errMsg, 
-                    "DumpReader:<Snapshot> is multiply nested at line %d "
-                    "in %s \n", lineNo, filename_.c_str()); 
-            painCave.isFatal = 1; 
-            simError();           
-          }
-          foundOpenSnapshotTag = true;
-          foundClosedSnapshotTag = false;
-          framePos_.push_back(prevPos);
-          
-        } else if (line.find("</Snapshot>") != std::string::npos){
-          if (!foundOpenSnapshotTag) {
-            sprintf(painCave.errMsg, 
-                    "DumpReader:</Snapshot> appears before <Snapshot> at "
-                    "line %d in %s \n", lineNo, filename_.c_str()); 
-            painCave.isFatal = 1; 
-            simError(); 
-          }
-          
-          if (foundClosedSnapshotTag) {
-            sprintf(painCave.errMsg, 
-                    "DumpReader:</Snapshot> appears multiply nested at "
-                    "line %d in %s \n", lineNo, filename_.c_str()); 
-            painCave.isFatal = 1; 
-            simError(); 
-          }
-          foundClosedSnapshotTag = true;
-          foundOpenSnapshotTag = false;
+      if (line.find("<Snapshot>") != std::string::npos) {
+        if (foundOpenSnapshotTag) {
+          sprintf(painCave.errMsg,
+                  "DumpReader:<Snapshot> is multiply nested at line %d "
+                  "in %s \n",
+                  lineNo, filename_.c_str());
+          painCave.isFatal = 1;
+          simError();
         }
-        prevPos = currPos;
-      }
-      
-      // only found <Snapshot> for the last frame means the file is
-      // corrupted, we should discard it and give a warning message
-      if (foundOpenSnapshotTag) {
-        sprintf(painCave.errMsg, 
-                "DumpReader: last frame in %s is invalid\n", filename_.c_str());
-        painCave.isFatal = 0; 
-        simError();       
-        framePos_.pop_back();
-      }
-      
-      nframes_ = framePos_.size(); 
-      
-      if (nframes_ == 0) {
-        sprintf(painCave.errMsg, 
-                "DumpReader: %s does not contain a valid frame\n",
-                filename_.c_str()); 
-        painCave.isFatal = 1; 
-        simError();      
-      }
-      
-#ifdef IS_MPI 
-    }      
-    MPI_Bcast(&nframes_, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-#endif // is_mpi 
-    
-    isScanned_ = true; 
-  } 
-   
-  void DumpReader::readFrame(int whichFrame) { 
-    if (!isScanned_) 
-      scanFile(); 
-         
-    int storageLayout = info_->getSnapshotManager()->getStorageLayout(); 
-     
-    if (storageLayout & DataStorage::dslPosition) { 
-      needPos_ = true; 
-    } else { 
-      needPos_ = false; 
-    } 
-     
-    if (storageLayout & DataStorage::dslVelocity) { 
-      needVel_ = true; 
-    } else { 
-      needVel_ = false; 
-    } 
-     
-    if (storageLayout & DataStorage::dslAmat || 
-        storageLayout & DataStorage::dslDipole || 
-        storageLayout & DataStorage::dslQuadrupole) { 
-      needQuaternion_ = true; 
-    } else { 
-      needQuaternion_ = false; 
-    } 
-     
-    if (storageLayout & DataStorage::dslAngularMomentum) { 
-      needAngMom_ = true; 
-    } else { 
-      needAngMom_ = false;     
-    } 
-     
-    readSet(whichFrame); 
+        foundOpenSnapshotTag = true;
+        foundClosedSnapshotTag = false;
+        framePos_.push_back(prevPos);
 
-    if (needCOMprops_) {
-      Thermo thermo(info_);
-      Vector3d com;
+      } else if (line.find("</Snapshot>") != std::string::npos) {
+        if (!foundOpenSnapshotTag) {
+          sprintf(painCave.errMsg,
+                  "DumpReader:</Snapshot> appears before <Snapshot> at "
+                  "line %d in %s \n",
+                  lineNo, filename_.c_str());
+          painCave.isFatal = 1;
+          simError();
+        }
 
-      if (needPos_ && needVel_) {
-        Vector3d comvel;
-        Vector3d comw;
-        thermo.getComAll(com, comvel);
-        comw = thermo.getAngularMomentum();
-      } else {
-        com = thermo.getCom();
-      }                    
+        if (foundClosedSnapshotTag) {
+          sprintf(painCave.errMsg,
+                  "DumpReader:</Snapshot> appears multiply nested at "
+                  "line %d in %s \n",
+                  lineNo, filename_.c_str());
+          painCave.isFatal = 1;
+          simError();
+        }
+        foundClosedSnapshotTag = true;
+        foundOpenSnapshotTag = false;
+      }
+      prevPos = currPos;
     }
-  } 
-   
-  void DumpReader::readSet(int whichFrame) {     
-    std::string line;
 
-#ifndef IS_MPI 
-    inFile_->clear();  
-    inFile_->seekg(framePos_[whichFrame]); 
+    // only found <Snapshot> for the last frame means the file is
+    // corrupted, we should discard it and give a warning message
+    if (foundOpenSnapshotTag) {
+      sprintf(painCave.errMsg, "DumpReader: last frame in %s is invalid\n",
+              filename_.c_str());
+      painCave.isFatal = 0;
+      simError();
+      framePos_.pop_back();
+    }
 
-    std::istream& inputStream = *inFile_;     
-#else
-    
-    int primaryNode = 0;
-    std::stringstream sstream;
-    if (worldRank == primaryNode) {
-      std::string sendBuffer;
+    nframes_ = framePos_.size();
 
-      inFile_->clear();  
-      inFile_->seekg(framePos_[whichFrame]); 
-      
-      while (inFile_->getline(buffer, bufferSize)) {
+    if (nframes_ == 0) {
+      sprintf(painCave.errMsg,
+              "DumpReader: %s does not contain a valid frame\n",
+              filename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
 
-        line = buffer;
-        sendBuffer += line;
-        sendBuffer += '\n';
-        if (line.find("</Snapshot>") != std::string::npos) {
-          break;
-        }        
-      }
+#ifdef IS_MPI
+  }
+  MPI_Bcast(&nframes_, 1, MPI_INT, 0, MPI_COMM_WORLD);
+#endif  // is_mpi
 
-      int sendBufferSize = sendBuffer.size();
-      MPI_Bcast(&sendBufferSize, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);     
-      MPI_Bcast((void *)sendBuffer.c_str(), sendBufferSize, 
-                MPI_CHAR, primaryNode, MPI_COMM_WORLD);     
-      
-      sstream.str(sendBuffer);
+  isScanned_ = true;
+}
+
+void DumpReader::readFrame(int whichFrame) {
+  if (!isScanned_) scanFile();
+
+  int storageLayout = info_->getSnapshotManager()->getStorageLayout();
+
+  if (storageLayout & DataStorage::dslPosition) {
+    needPos_ = true;
+  } else {
+    needPos_ = false;
+  }
+
+  if (storageLayout & DataStorage::dslVelocity) {
+    needVel_ = true;
+  } else {
+    needVel_ = false;
+  }
+
+  if (storageLayout & DataStorage::dslAmat ||
+      storageLayout & DataStorage::dslDipole ||
+      storageLayout & DataStorage::dslQuadrupole) {
+    needQuaternion_ = true;
+  } else {
+    needQuaternion_ = false;
+  }
+
+  if (storageLayout & DataStorage::dslAngularMomentum) {
+    needAngMom_ = true;
+  } else {
+    needAngMom_ = false;
+  }
+
+  readSet(whichFrame);
+
+  if (needCOMprops_) {
+    Thermo thermo(info_);
+    Vector3d com;
+
+    if (needPos_ && needVel_) {
+      Vector3d comvel;
+      Vector3d comw;
+      thermo.getComAll(com, comvel);
+      comw = thermo.getAngularMomentum();
     } else {
-      int sendBufferSize;
-      MPI_Bcast(&sendBufferSize, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
-      char * recvBuffer = new char[sendBufferSize+1];
-      assert(recvBuffer);
-      recvBuffer[sendBufferSize] = '\0';
-      MPI_Bcast(recvBuffer, sendBufferSize, MPI_CHAR, primaryNode,
-                MPI_COMM_WORLD);
-      sstream.str(recvBuffer);
-      delete [] recvBuffer;
-    }      
+      com = thermo.getCom();
+    }
+  }
+}
 
-    std::istream& inputStream = sstream;  
+void DumpReader::readSet(int whichFrame) {
+  std::string line;
+
+#ifndef IS_MPI
+  inFile_->clear();
+  inFile_->seekg(framePos_[whichFrame]);
+
+  std::istream& inputStream = *inFile_;
+#else
+
+  int primaryNode = 0;
+  std::stringstream sstream;
+  if (worldRank == primaryNode) {
+    std::string sendBuffer;
+
+    inFile_->clear();
+    inFile_->seekg(framePos_[whichFrame]);
+
+    while (inFile_->getline(buffer, bufferSize)) {
+      line = buffer;
+      sendBuffer += line;
+      sendBuffer += '\n';
+      if (line.find("</Snapshot>") != std::string::npos) {
+        break;
+      }
+    }
+
+    int sendBufferSize = sendBuffer.size();
+    MPI_Bcast(&sendBufferSize, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
+    MPI_Bcast((void*)sendBuffer.c_str(), sendBufferSize, MPI_CHAR, primaryNode,
+              MPI_COMM_WORLD);
+
+    sstream.str(sendBuffer);
+  } else {
+    int sendBufferSize;
+    MPI_Bcast(&sendBufferSize, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
+    char* recvBuffer = new char[sendBufferSize + 1];
+    assert(recvBuffer);
+    recvBuffer[sendBufferSize] = '\0';
+    MPI_Bcast(recvBuffer, sendBufferSize, MPI_CHAR, primaryNode,
+              MPI_COMM_WORLD);
+    sstream.str(recvBuffer);
+    delete[] recvBuffer;
+  }
+
+  std::istream& inputStream = sstream;
 #endif
 
-    inputStream.getline(buffer, bufferSize);
+  inputStream.getline(buffer, bufferSize);
 
-    line = buffer;
-    if (line.find("<Snapshot>") == std::string::npos) {
-      sprintf(painCave.errMsg, 
-              "DumpReader Error: can not find <Snapshot>\n"); 
-      painCave.isFatal = 1; 
-      simError(); 
-    } 
-    
-    //read frameData
-    readFrameProperties(inputStream);
+  line = buffer;
+  if (line.find("<Snapshot>") == std::string::npos) {
+    sprintf(painCave.errMsg, "DumpReader Error: can not find <Snapshot>\n");
+    painCave.isFatal = 1;
+    simError();
+  }
 
-    //read StuntDoubles
-    int nSD = readStuntDoubles(inputStream);     
+  // read frameData
+  readFrameProperties(inputStream);
 
-    inputStream.getline(buffer, bufferSize);
-    line = buffer;
+  // read StuntDoubles
+  int nSD = readStuntDoubles(inputStream);
 
-    if (line.find("<SiteData>") != std::string::npos) {
-      //read SiteData
-      readSiteData(inputStream);         
-    } else {
-      if (line.find("</Snapshot>") == std::string::npos) {
-        sprintf(painCave.errMsg, 
-                "DumpReader Error: can not find </Snapshot>\n"); 
-        painCave.isFatal = 1; 
-        simError(); 
-      }        
+  inputStream.getline(buffer, bufferSize);
+  line = buffer;
+
+  if (line.find("<SiteData>") != std::string::npos) {
+    // read SiteData
+    readSiteData(inputStream);
+  } else {
+    if (line.find("</Snapshot>") == std::string::npos) {
+      sprintf(painCave.errMsg, "DumpReader Error: can not find </Snapshot>\n");
+      painCave.isFatal = 1;
+      simError();
     }
+  }
 
-    if (nSD != info_->getNGlobalIntegrableObjects()) {
-      sprintf(painCave.errMsg, 
-              "DumpReader Error: Number of parsed StuntDouble lines (%d)\n"
-              "\tis not the same as the expected number of Objects (%d)\n",
-              nSD,info_->getNGlobalIntegrableObjects() ); 
-      painCave.isFatal = 1; 
-      simError(); 
+  if (nSD != info_->getNGlobalIntegrableObjects()) {
+    sprintf(painCave.errMsg,
+            "DumpReader Error: Number of parsed StuntDouble lines (%d)\n"
+            "\tis not the same as the expected number of Objects (%d)\n",
+            nSD, info_->getNGlobalIntegrableObjects());
+    painCave.isFatal = 1;
+    simError();
+  }
+}
+
+void DumpReader::parseDumpLine(const std::string& line) {
+  StringTokenizer tokenizer(line);
+  int nTokens;
+
+  nTokens = tokenizer.countTokens();
+
+  if (nTokens < 2) {
+    sprintf(painCave.errMsg, "DumpReader Error: Not enough Tokens.\n%s\n",
+            line.c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  int index = tokenizer.nextTokenAsInt();
+
+  StuntDouble* sd = info_->getIOIndexToIntegrableObject(index);
+
+  if (sd == NULL) {
+    return;
+  }
+  std::string type = tokenizer.nextToken();
+  int size = type.size();
+
+  size_t found;
+
+  if (needPos_) {
+    found = type.find("p");
+    if (found == std::string::npos) {
+      sprintf(painCave.errMsg,
+              "DumpReader Error: StuntDouble %d has no Position\n"
+              "\tField (\"p\") specified.\n%s\n",
+              index, line.c_str());
+      painCave.isFatal = 1;
+      simError();
     }
-  } 
-   
-  void DumpReader::parseDumpLine(const std::string& line) { 
-       
-    StringTokenizer tokenizer(line); 
-    int nTokens; 
-     
-    nTokens = tokenizer.countTokens(); 
-     
-    if (nTokens < 2) {  
-      sprintf(painCave.errMsg, 
-              "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str()); 
-      painCave.isFatal = 1; 
-      simError(); 
-    } 
+  }
 
-    int index = tokenizer.nextTokenAsInt();
- 
-    StuntDouble* sd = info_->getIOIndexToIntegrableObject(index);
-
-    if (sd == NULL) {
-      return;
-    }
-    std::string type = tokenizer.nextToken(); 
-    int size = type.size();
-
-    size_t found;
-    
-    if (needPos_) {
-      found = type.find("p");      
+  if (sd->isDirectional()) {
+    if (needQuaternion_) {
+      found = type.find("q");
       if (found == std::string::npos) {
-        sprintf(painCave.errMsg, 
-                "DumpReader Error: StuntDouble %d has no Position\n"
-                "\tField (\"p\") specified.\n%s\n", index, 
-                line.c_str());  
-        painCave.isFatal = 1; 
-        simError(); 
+        sprintf(painCave.errMsg,
+                "DumpReader Error: Directional StuntDouble %d has no\n"
+                "\tQuaternion Field (\"q\") specified.\n%s\n",
+                index, line.c_str());
+        painCave.isFatal = 1;
+        simError();
       }
     }
-    
-    if (sd->isDirectional()) {
-      if (needQuaternion_) {
-        found = type.find("q");      
-        if (found == std::string::npos) {
-          sprintf(painCave.errMsg, 
-                  "DumpReader Error: Directional StuntDouble %d has no\n"
-                  "\tQuaternion Field (\"q\") specified.\n%s\n", index, 
-                  line.c_str());  
-          painCave.isFatal = 1; 
-          simError(); 
-        }
-      }      
-    }
+  }
 
-    for(int i = 0; i < size; ++i) {
-      switch(type[i]) {
-        
+  for (int i = 0; i < size; ++i) {
+    switch (type[i]) {
       case 'p': {
         Vector3d pos;
-        pos[0] = tokenizer.nextTokenAsDouble(); 
-        pos[1] = tokenizer.nextTokenAsDouble(); 
-        pos[2] = tokenizer.nextTokenAsDouble(); 
-        if (needPos_) { 
-          sd->setPos(pos); 
-        }             
+        pos[0] = tokenizer.nextTokenAsDouble();
+        pos[1] = tokenizer.nextTokenAsDouble();
+        pos[2] = tokenizer.nextTokenAsDouble();
+        if (needPos_) {
+          sd->setPos(pos);
+        }
         break;
       }
-      case 'v' : {
+      case 'v': {
         Vector3d vel;
-        vel[0] = tokenizer.nextTokenAsDouble(); 
-        vel[1] = tokenizer.nextTokenAsDouble(); 
-        vel[2] = tokenizer.nextTokenAsDouble(); 
-        if (needVel_) { 
-          sd->setVel(vel); 
-        } 
+        vel[0] = tokenizer.nextTokenAsDouble();
+        vel[1] = tokenizer.nextTokenAsDouble();
+        vel[2] = tokenizer.nextTokenAsDouble();
+        if (needVel_) {
+          sd->setVel(vel);
+        }
         break;
       }
 
-      case 'q' : {
+      case 'q': {
         Quat4d q;
-        if (sd->isDirectional()) { 
-              
-          q[0] = tokenizer.nextTokenAsDouble(); 
-          q[1] = tokenizer.nextTokenAsDouble(); 
-          q[2] = tokenizer.nextTokenAsDouble(); 
-          q[3] = tokenizer.nextTokenAsDouble(); 
-              
-          RealType qlen = q.length(); 
-          if (qlen < OpenMD::epsilon) { //check quaternion is not
-            //equal to 0
-                
-            sprintf(painCave.errMsg, 
+        if (sd->isDirectional()) {
+          q[0] = tokenizer.nextTokenAsDouble();
+          q[1] = tokenizer.nextTokenAsDouble();
+          q[2] = tokenizer.nextTokenAsDouble();
+          q[3] = tokenizer.nextTokenAsDouble();
+
+          RealType qlen = q.length();
+          if (qlen < OpenMD::epsilon) {  // check quaternion is not
+            // equal to 0
+
+            sprintf(painCave.errMsg,
                     "DumpReader Error: initial quaternion error "
-                    "(q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n"); 
-            painCave.isFatal = 1; 
-            simError(); 
-                
-          }  
-              
-          q.normalize(); 
-          if (needQuaternion_) {            
-            sd->setQ(q); 
-          }               
-        }            
+                    "(q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n");
+            painCave.isFatal = 1;
+            simError();
+          }
+
+          q.normalize();
+          if (needQuaternion_) {
+            sd->setQ(q);
+          }
+        }
         break;
-      }  
-      case 'j' : {
+      }
+      case 'j': {
         Vector3d ji;
         if (sd->isDirectional()) {
-          ji[0] = tokenizer.nextTokenAsDouble(); 
-          ji[1] = tokenizer.nextTokenAsDouble(); 
-          ji[2] = tokenizer.nextTokenAsDouble(); 
-          if (needAngMom_) { 
-            sd->setJ(ji); 
-          } 
+          ji[0] = tokenizer.nextTokenAsDouble();
+          ji[1] = tokenizer.nextTokenAsDouble();
+          ji[2] = tokenizer.nextTokenAsDouble();
+          if (needAngMom_) {
+            sd->setJ(ji);
+          }
         }
         break;
-      }  
+      }
       case 'f': {
-
         Vector3d force;
-        force[0] = tokenizer.nextTokenAsDouble(); 
-        force[1] = tokenizer.nextTokenAsDouble(); 
-        force[2] = tokenizer.nextTokenAsDouble();           
-        sd->setFrc(force); 
+        force[0] = tokenizer.nextTokenAsDouble();
+        force[1] = tokenizer.nextTokenAsDouble();
+        force[2] = tokenizer.nextTokenAsDouble();
+        sd->setFrc(force);
         break;
       }
-      case 't' : {
-
+      case 't': {
         Vector3d torque;
-        torque[0] = tokenizer.nextTokenAsDouble(); 
-        torque[1] = tokenizer.nextTokenAsDouble(); 
-        torque[2] = tokenizer.nextTokenAsDouble();           
-        sd->setTrq(torque);          
+        torque[0] = tokenizer.nextTokenAsDouble();
+        torque[1] = tokenizer.nextTokenAsDouble();
+        torque[2] = tokenizer.nextTokenAsDouble();
+        sd->setTrq(torque);
         break;
       }
-      case 'u' : {
-
+      case 'u': {
         RealType particlePot;
-        particlePot = tokenizer.nextTokenAsDouble(); 
-        sd->setParticlePot(particlePot);          
-        break;
-      }
-      case 'c' : {
-        RealType flucQPos;
-        flucQPos = tokenizer.nextTokenAsDouble();
-	if (sd->isAtom())
-          if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
-            sd->setFlucQPos(flucQPos);
-        break;
-      }
-      case 'w' : {
-
-        RealType flucQVel;
-        flucQVel = tokenizer.nextTokenAsDouble();
-        if (sd->isAtom())          
-          if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
-            sd->setFlucQVel(flucQVel);          
-        break;
-      }
-      case 'g' : {
-
-        RealType flucQFrc;
-        flucQFrc = tokenizer.nextTokenAsDouble();
-        if (sd->isAtom())
-          if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
-            sd->setFlucQFrc(flucQFrc);
-        break;
-      }
-      case 'e' : {
-
-        Vector3d eField;
-        eField[0] = tokenizer.nextTokenAsDouble(); 
-        eField[1] = tokenizer.nextTokenAsDouble(); 
-        eField[2] = tokenizer.nextTokenAsDouble();           
-        sd->setElectricField(eField);          
-        break;
-      }
-      case 's' : {
-
-        RealType sPot;
-        sPot = tokenizer.nextTokenAsDouble(); 
-        sd->setSitePotential(sPot);          
-        break;
-      }
-      case 'd' : {
-        
-        RealType density;
-        density = tokenizer.nextTokenAsDouble(); 
-        sd->setDensity(density);          
-        break;
-      }
-
-      default: {
-        sprintf(painCave.errMsg, 
-                "DumpReader Error: %s is an unrecognized type\n",
-                type.c_str()); 
-        painCave.isFatal = 1; 
-        simError(); 
-        break;   
-      }
-
-      }      
-    }
-    if (sd->isRigidBody()) {
-      RigidBody* rb = static_cast<RigidBody*>(sd);
-      if (needPos_) {
-        // This should let us use various atom-based selections even
-        // if we have only rigid bodies:
-        rb->updateAtoms();
-      }
-      if (needVel_) {
-        rb->updateAtomVel();
-      }
-    }    
-  } 
-   
-
-  void DumpReader::parseSiteLine(const std::string& line) { 
-
-    StringTokenizer tokenizer(line); 
-    int nTokens; 
-         
-    nTokens = tokenizer.countTokens(); 
-     
-    if (nTokens < 2) {  
-      sprintf(painCave.errMsg, 
-              "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str()); 
-      painCave.isFatal = 1; 
-      simError(); 
-    } 
-
-    /**
-     * The first token is the global integrable object index.
-     */
-
-    int index = tokenizer.nextTokenAsInt();
-    StuntDouble* sd = info_->getIOIndexToIntegrableObject(index);
-    if (sd == NULL) {
-      return;
-    }
-
-    /**
-     * Test to see if the next token is an integer or not.  If not,
-     * we've got data on the integrable object itself.  If there is an
-     * integer, we're parsing data for a site on a rigid body.
-     */
-    std::string indexTest = tokenizer.peekNextToken();
-    std::istringstream i(indexTest);
-    int siteIndex;
-    if (i >> siteIndex) {
-      // chew up this token and parse as an int:
-      siteIndex = tokenizer.nextTokenAsInt();
-      if (sd->isRigidBody()) {
-        
-        RigidBody* rb = static_cast<RigidBody*>(sd);
-
-        // Sometimes site lines are inherited from other models, so
-        // just ignore a site line that exceeds the number of atoms in
-        // our RB:        
-        if (siteIndex >= rb->getNumAtoms()) {
-          return;
-        }
-
-        sd = rb->getAtoms()[siteIndex];
-      }
-    }
-
-    /**
-     * The next token contains information on what follows.
-     */
-    std::string type = tokenizer.nextToken(); 
-    int size = type.size();
-    
-    for(int i = 0; i < size; ++i) {
-      switch(type[i]) {
-        
-      case 'u' : {
-        
-        RealType particlePot;
-        particlePot = tokenizer.nextTokenAsDouble(); 
+        particlePot = tokenizer.nextTokenAsDouble();
         sd->setParticlePot(particlePot);
         break;
       }
-      case 'c' : {
-        
+      case 'c': {
         RealType flucQPos;
         flucQPos = tokenizer.nextTokenAsDouble();
         if (sd->isAtom())
-          if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
+          if (dynamic_cast<Atom*>(sd)->isFluctuatingCharge())
             sd->setFlucQPos(flucQPos);
         break;
       }
-      case 'w' : {
-        
+      case 'w': {
         RealType flucQVel;
-	flucQVel = tokenizer.nextTokenAsDouble();
+        flucQVel = tokenizer.nextTokenAsDouble();
         if (sd->isAtom())
-          if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
+          if (dynamic_cast<Atom*>(sd)->isFluctuatingCharge())
             sd->setFlucQVel(flucQVel);
         break;
       }
-      case 'g' : {
-	
+      case 'g': {
         RealType flucQFrc;
-	flucQFrc = tokenizer.nextTokenAsDouble();
+        flucQFrc = tokenizer.nextTokenAsDouble();
         if (sd->isAtom())
-          if (dynamic_cast<Atom *>(sd)->isFluctuatingCharge())
+          if (dynamic_cast<Atom*>(sd)->isFluctuatingCharge())
             sd->setFlucQFrc(flucQFrc);
         break;
       }
-      case 'e' : {
-        
+      case 'e': {
         Vector3d eField;
-        eField[0] = tokenizer.nextTokenAsDouble(); 
-        eField[1] = tokenizer.nextTokenAsDouble(); 
-        eField[2] = tokenizer.nextTokenAsDouble();  
-        sd->setElectricField(eField);          
+        eField[0] = tokenizer.nextTokenAsDouble();
+        eField[1] = tokenizer.nextTokenAsDouble();
+        eField[2] = tokenizer.nextTokenAsDouble();
+        sd->setElectricField(eField);
         break;
       }
-      case 's' : {
-        
+      case 's': {
         RealType sPot;
-        sPot = tokenizer.nextTokenAsDouble(); 
-        sd->setSitePotential(sPot);          
+        sPot = tokenizer.nextTokenAsDouble();
+        sd->setSitePotential(sPot);
         break;
       }
-      case 'd' : {
-        
-        RealType dens;
-        dens = tokenizer.nextTokenAsDouble(); 
-        sd->setDensity(dens);          
+      case 'd': {
+        RealType density;
+        density = tokenizer.nextTokenAsDouble();
+        sd->setDensity(density);
         break;
-      }        
+      }
+
       default: {
-        sprintf(painCave.errMsg, 
+        sprintf(painCave.errMsg,
                 "DumpReader Error: %s is an unrecognized type\n", type.c_str());
-        painCave.isFatal = 1; 
-        simError(); 
-        break;   
-      }
-      }
-    }
-  } 
-  
-  
-  int DumpReader::readStuntDoubles(std::istream& inputStream) {
-    
-    inputStream.getline(buffer, bufferSize);
-    std::string line(buffer);
-    
-    if (line.find("<StuntDoubles>") == std::string::npos) {
-      sprintf(painCave.errMsg, 
-              "DumpReader Error: Missing <StuntDoubles>\n"); 
-      painCave.isFatal = 1; 
-      simError(); 
-    }
-
-    int nSD = 0;
-
-    while(inputStream.getline(buffer, bufferSize)) {
-      line = buffer;
-      
-      if(line.find("</StuntDoubles>") != std::string::npos) {
+        painCave.isFatal = 1;
+        simError();
         break;
       }
-
-      parseDumpLine(line);
-      nSD++;
     }
+  }
+  if (sd->isRigidBody()) {
+    RigidBody* rb = static_cast<RigidBody*>(sd);
+    if (needPos_) {
+      // This should let us use various atom-based selections even
+      // if we have only rigid bodies:
+      rb->updateAtoms();
+    }
+    if (needVel_) {
+      rb->updateAtomVel();
+    }
+  }
+}
 
-    return nSD;
+void DumpReader::parseSiteLine(const std::string& line) {
+  StringTokenizer tokenizer(line);
+  int nTokens;
+
+  nTokens = tokenizer.countTokens();
+
+  if (nTokens < 2) {
+    sprintf(painCave.errMsg, "DumpReader Error: Not enough Tokens.\n%s\n",
+            line.c_str());
+    painCave.isFatal = 1;
+    simError();
   }
 
-  void  DumpReader::readSiteData(std::istream& inputStream) {
+  /**
+   * The first token is the global integrable object index.
+   */
 
-    std::string line(buffer);
-
-    // We already found the starting <SiteData> tag or we wouldn't be
-    // here, so just start parsing until we get to the ending
-    // </SiteData> tag:
-    
-    while(inputStream.getline(buffer, bufferSize)) {
-      line = buffer;
-      
-      if(line.find("</SiteData>") != std::string::npos) {
-        break;
-      }
-
-      parseSiteLine(line);
-    }
-  
+  int index = tokenizer.nextTokenAsInt();
+  StuntDouble* sd = info_->getIOIndexToIntegrableObject(index);
+  if (sd == NULL) {
+    return;
   }
 
-  void DumpReader::readFrameProperties(std::istream& inputStream) {
+  /**
+   * Test to see if the next token is an integer or not.  If not,
+   * we've got data on the integrable object itself.  If there is an
+   * integer, we're parsing data for a site on a rigid body.
+   */
+  std::string indexTest = tokenizer.peekNextToken();
+  std::istringstream i(indexTest);
+  int siteIndex;
+  if (i >> siteIndex) {
+    // chew up this token and parse as an int:
+    siteIndex = tokenizer.nextTokenAsInt();
+    if (sd->isRigidBody()) {
+      RigidBody* rb = static_cast<RigidBody*>(sd);
 
-    Snapshot* s = info_->getSnapshotManager()->getCurrentSnapshot();
-    // We're about to overwrite all frame properties, so clear out any
-    // derived properties from previous use:
-    s->clearDerivedProperties();
-    
-    inputStream.getline(buffer, bufferSize);
-    std::string line(buffer);
+      // Sometimes site lines are inherited from other models, so
+      // just ignore a site line that exceeds the number of atoms in
+      // our RB:
+      if (siteIndex >= rb->getNumAtoms()) {
+        return;
+      }
 
-    if (line.find("<FrameData>") == std::string::npos) {
-      sprintf(painCave.errMsg, 
-              "DumpReader Error: Missing <FrameData>\n"); 
-      painCave.isFatal = 1; 
-      simError(); 
+      sd = rb->getAtoms()[siteIndex];
     }
+  }
 
-    while(inputStream.getline(buffer, bufferSize)) {
-      line = buffer;
-      
-      if(line.find("</FrameData>") != std::string::npos) {
+  /**
+   * The next token contains information on what follows.
+   */
+  std::string type = tokenizer.nextToken();
+  int size = type.size();
+
+  for (int i = 0; i < size; ++i) {
+    switch (type[i]) {
+      case 'u': {
+        RealType particlePot;
+        particlePot = tokenizer.nextTokenAsDouble();
+        sd->setParticlePot(particlePot);
         break;
       }
-      
-      StringTokenizer tokenizer(line, " ;\t\n\r{}:,");
-      if (!tokenizer.hasMoreTokens()) {
-        sprintf(painCave.errMsg, 
-                "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str()); 
-        painCave.isFatal = 1; 
-        simError();      
+      case 'c': {
+        RealType flucQPos;
+        flucQPos = tokenizer.nextTokenAsDouble();
+        if (sd->isAtom())
+          if (dynamic_cast<Atom*>(sd)->isFluctuatingCharge())
+            sd->setFlucQPos(flucQPos);
+        break;
       }
-
-      std::string propertyName = tokenizer.nextToken();
-      if (propertyName == "Time") {
-        RealType currTime = tokenizer.nextTokenAsDouble(); 
-        s->setTime(currTime); 
-      } else if (propertyName == "Hmat"){
-        Mat3x3d hmat;
-        hmat(0, 0) = tokenizer.nextTokenAsDouble(); 
-        hmat(0, 1) = tokenizer.nextTokenAsDouble(); 
-        hmat(0, 2) = tokenizer.nextTokenAsDouble(); 
-        hmat(1, 0) = tokenizer.nextTokenAsDouble(); 
-        hmat(1, 1) = tokenizer.nextTokenAsDouble(); 
-        hmat(1, 2) = tokenizer.nextTokenAsDouble(); 
-        hmat(2, 0) = tokenizer.nextTokenAsDouble(); 
-        hmat(2, 1) = tokenizer.nextTokenAsDouble(); 
-        hmat(2, 2) = tokenizer.nextTokenAsDouble(); 
-        s->setHmat(hmat);      
-      } else if (propertyName == "Thermostat") {
-        pair<RealType, RealType> thermostat;
-        thermostat.first = tokenizer.nextTokenAsDouble();
-        thermostat.second = tokenizer.nextTokenAsDouble();
-        s->setThermostat(thermostat); 
-      } else if (propertyName == "Barostat") {
-        Mat3x3d eta;
-        eta(0, 0) = tokenizer.nextTokenAsDouble(); 
-        eta(0, 1) = tokenizer.nextTokenAsDouble(); 
-        eta(0, 2) = tokenizer.nextTokenAsDouble(); 
-        eta(1, 0) = tokenizer.nextTokenAsDouble(); 
-        eta(1, 1) = tokenizer.nextTokenAsDouble(); 
-        eta(1, 2) = tokenizer.nextTokenAsDouble(); 
-        eta(2, 0) = tokenizer.nextTokenAsDouble(); 
-        eta(2, 1) = tokenizer.nextTokenAsDouble(); 
-        eta(2, 2) = tokenizer.nextTokenAsDouble(); 
-        s->setBarostat(eta); 
-      } else {
-        sprintf(painCave.errMsg, 
-                "DumpReader Error: %s is an invalid property in <FrameData>\n",
-                propertyName.c_str()); 
-        painCave.isFatal = 0; 
-        simError();         
-      } 
+      case 'w': {
+        RealType flucQVel;
+        flucQVel = tokenizer.nextTokenAsDouble();
+        if (sd->isAtom())
+          if (dynamic_cast<Atom*>(sd)->isFluctuatingCharge())
+            sd->setFlucQVel(flucQVel);
+        break;
+      }
+      case 'g': {
+        RealType flucQFrc;
+        flucQFrc = tokenizer.nextTokenAsDouble();
+        if (sd->isAtom())
+          if (dynamic_cast<Atom*>(sd)->isFluctuatingCharge())
+            sd->setFlucQFrc(flucQFrc);
+        break;
+      }
+      case 'e': {
+        Vector3d eField;
+        eField[0] = tokenizer.nextTokenAsDouble();
+        eField[1] = tokenizer.nextTokenAsDouble();
+        eField[2] = tokenizer.nextTokenAsDouble();
+        sd->setElectricField(eField);
+        break;
+      }
+      case 's': {
+        RealType sPot;
+        sPot = tokenizer.nextTokenAsDouble();
+        sd->setSitePotential(sPot);
+        break;
+      }
+      case 'd': {
+        RealType dens;
+        dens = tokenizer.nextTokenAsDouble();
+        sd->setDensity(dens);
+        break;
+      }
+      default: {
+        sprintf(painCave.errMsg,
+                "DumpReader Error: %s is an unrecognized type\n", type.c_str());
+        painCave.isFatal = 1;
+        simError();
+        break;
+      }
     }
-  }   
-}//end namespace OpenMD 
+  }
+}
+
+int DumpReader::readStuntDoubles(std::istream& inputStream) {
+  inputStream.getline(buffer, bufferSize);
+  std::string line(buffer);
+
+  if (line.find("<StuntDoubles>") == std::string::npos) {
+    sprintf(painCave.errMsg, "DumpReader Error: Missing <StuntDoubles>\n");
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  int nSD = 0;
+
+  while (inputStream.getline(buffer, bufferSize)) {
+    line = buffer;
+
+    if (line.find("</StuntDoubles>") != std::string::npos) {
+      break;
+    }
+
+    parseDumpLine(line);
+    nSD++;
+  }
+
+  return nSD;
+}
+
+void DumpReader::readSiteData(std::istream& inputStream) {
+  std::string line(buffer);
+
+  // We already found the starting <SiteData> tag or we wouldn't be
+  // here, so just start parsing until we get to the ending
+  // </SiteData> tag:
+
+  while (inputStream.getline(buffer, bufferSize)) {
+    line = buffer;
+
+    if (line.find("</SiteData>") != std::string::npos) {
+      break;
+    }
+
+    parseSiteLine(line);
+  }
+}
+
+void DumpReader::readFrameProperties(std::istream& inputStream) {
+  Snapshot* s = info_->getSnapshotManager()->getCurrentSnapshot();
+  // We're about to overwrite all frame properties, so clear out any
+  // derived properties from previous use:
+  s->clearDerivedProperties();
+
+  inputStream.getline(buffer, bufferSize);
+  std::string line(buffer);
+
+  if (line.find("<FrameData>") == std::string::npos) {
+    sprintf(painCave.errMsg, "DumpReader Error: Missing <FrameData>\n");
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  while (inputStream.getline(buffer, bufferSize)) {
+    line = buffer;
+
+    if (line.find("</FrameData>") != std::string::npos) {
+      break;
+    }
+
+    StringTokenizer tokenizer(line, " ;\t\n\r{}:,");
+    if (!tokenizer.hasMoreTokens()) {
+      sprintf(painCave.errMsg, "DumpReader Error: Not enough Tokens.\n%s\n",
+              line.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    std::string propertyName = tokenizer.nextToken();
+    if (propertyName == "Time") {
+      RealType currTime = tokenizer.nextTokenAsDouble();
+      s->setTime(currTime);
+    } else if (propertyName == "Hmat") {
+      Mat3x3d hmat;
+      hmat(0, 0) = tokenizer.nextTokenAsDouble();
+      hmat(0, 1) = tokenizer.nextTokenAsDouble();
+      hmat(0, 2) = tokenizer.nextTokenAsDouble();
+      hmat(1, 0) = tokenizer.nextTokenAsDouble();
+      hmat(1, 1) = tokenizer.nextTokenAsDouble();
+      hmat(1, 2) = tokenizer.nextTokenAsDouble();
+      hmat(2, 0) = tokenizer.nextTokenAsDouble();
+      hmat(2, 1) = tokenizer.nextTokenAsDouble();
+      hmat(2, 2) = tokenizer.nextTokenAsDouble();
+      s->setHmat(hmat);
+    } else if (propertyName == "Thermostat") {
+      pair<RealType, RealType> thermostat;
+      thermostat.first = tokenizer.nextTokenAsDouble();
+      thermostat.second = tokenizer.nextTokenAsDouble();
+      s->setThermostat(thermostat);
+    } else if (propertyName == "Barostat") {
+      Mat3x3d eta;
+      eta(0, 0) = tokenizer.nextTokenAsDouble();
+      eta(0, 1) = tokenizer.nextTokenAsDouble();
+      eta(0, 2) = tokenizer.nextTokenAsDouble();
+      eta(1, 0) = tokenizer.nextTokenAsDouble();
+      eta(1, 1) = tokenizer.nextTokenAsDouble();
+      eta(1, 2) = tokenizer.nextTokenAsDouble();
+      eta(2, 0) = tokenizer.nextTokenAsDouble();
+      eta(2, 1) = tokenizer.nextTokenAsDouble();
+      eta(2, 2) = tokenizer.nextTokenAsDouble();
+      s->setBarostat(eta);
+    } else {
+      sprintf(painCave.errMsg,
+              "DumpReader Error: %s is an invalid property in <FrameData>\n",
+              propertyName.c_str());
+      painCave.isFatal = 0;
+      simError();
+    }
+  }
+}
+}  // end namespace OpenMD

@@ -42,72 +42,74 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "types/DirectionalAdapter.hpp"
-#include "utils/simError.h"
+
 #include <cstdio>
 #include <memory>
 
+#include "utils/simError.h"
+
 namespace OpenMD {
-  
-  bool DirectionalAdapter::isDirectional() {
-    return at_->hasProperty(DirectionalTypeID);
-  }
-  
-  DirectionalAtypeParameters DirectionalAdapter::getDirectionalParam() {
-    
-    if (!isDirectional()) {
-      sprintf( painCave.errMsg,               
-               "DirectionalAdapter::getDirectionalParam was passed an atomType (%s)\n"
-               "\tthat does not appear to be a Directional atom.\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    std::shared_ptr<GenericData> data = at_->getPropertyByName(DirectionalTypeID);
-    if (data == nullptr) {
-      sprintf( painCave.errMsg, 
-               "DirectionalAdapter::getDirectionalParam could not find Directional\n"
-               "\tparameters for atomType %s.\n", at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError(); 
-    }
-    
-    std::shared_ptr<DirectionalAtypeData> directionalData = std::dynamic_pointer_cast<DirectionalAtypeData>(data);
-    if (directionalData == nullptr) {
-      sprintf( painCave.errMsg,
-               "DirectionalAdapter::getDirectionalParam could not convert\n"
-               "\tGenericData to DirectionalAtypeData for atom type %s\n", 
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    return directionalData->getData();
-  }
-  
 
-  Mat3x3d DirectionalAdapter::getI() {    
-    DirectionalAtypeParameters directionalParam = getDirectionalParam();
-    return directionalParam.I;
-  }
-
-
-    
-  void DirectionalAdapter::makeDirectional(Mat3x3d I) {
-
-    if (isDirectional()){
-      at_->removeProperty(DirectionalTypeID);
-    }
-
-    DirectionalAtypeParameters directionalParam{};
-
-    directionalParam.I = I;
-    
-    at_->addProperty(std::make_shared<DirectionalAtypeData>(DirectionalTypeID, directionalParam));
-  }
+bool DirectionalAdapter::isDirectional() {
+  return at_->hasProperty(DirectionalTypeID);
 }
+
+DirectionalAtypeParameters DirectionalAdapter::getDirectionalParam() {
+  if (!isDirectional()) {
+    sprintf(
+        painCave.errMsg,
+        "DirectionalAdapter::getDirectionalParam was passed an atomType (%s)\n"
+        "\tthat does not appear to be a Directional atom.\n",
+        at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  std::shared_ptr<GenericData> data = at_->getPropertyByName(DirectionalTypeID);
+  if (data == nullptr) {
+    sprintf(
+        painCave.errMsg,
+        "DirectionalAdapter::getDirectionalParam could not find Directional\n"
+        "\tparameters for atomType %s.\n",
+        at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  std::shared_ptr<DirectionalAtypeData> directionalData =
+      std::dynamic_pointer_cast<DirectionalAtypeData>(data);
+  if (directionalData == nullptr) {
+    sprintf(painCave.errMsg,
+            "DirectionalAdapter::getDirectionalParam could not convert\n"
+            "\tGenericData to DirectionalAtypeData for atom type %s\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  return directionalData->getData();
+}
+
+Mat3x3d DirectionalAdapter::getI() {
+  DirectionalAtypeParameters directionalParam = getDirectionalParam();
+  return directionalParam.I;
+}
+
+void DirectionalAdapter::makeDirectional(Mat3x3d I) {
+  if (isDirectional()) {
+    at_->removeProperty(DirectionalTypeID);
+  }
+
+  DirectionalAtypeParameters directionalParam{};
+
+  directionalParam.I = I;
+
+  at_->addProperty(std::make_shared<DirectionalAtypeData>(DirectionalTypeID,
+                                                          directionalParam));
+}
+}  // namespace OpenMD

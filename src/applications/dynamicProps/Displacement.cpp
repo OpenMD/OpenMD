@@ -44,37 +44,36 @@
  */
 
 #include "applications/dynamicProps/Displacement.hpp"
-#include "utils/Revision.hpp"
+
 #include <sstream>
 
+#include "utils/Revision.hpp"
+
 namespace OpenMD {
-  Displacement::Displacement(SimInfo* info, const std::string& filename, 
-                             const std::string& sele1, const std::string& sele2)
-    : ObjectACF<Vector3d>(info, filename, sele1, sele2, 
-                          DataStorage::dslPosition | DataStorage::dslAmat){
-    
-    setCorrFuncType("Displacement");
-    setOutputName(getPrefix(dumpFilename_) + ".disp");
+Displacement::Displacement(SimInfo* info, const std::string& filename,
+                           const std::string& sele1, const std::string& sele2)
+    : ObjectACF<Vector3d>(info, filename, sele1, sele2,
+                          DataStorage::dslPosition | DataStorage::dslAmat) {
+  setCorrFuncType("Displacement");
+  setOutputName(getPrefix(dumpFilename_) + ".disp");
 
-    positions_.resize(nFrames_);
-  }
+  positions_.resize(nFrames_);
+}
 
-  DisplacementZ::DisplacementZ(SimInfo* info, const std::string& filename, 
-                               const std::string& sele1,
-                               const std::string& sele2,
-                               int nZbins, int axis)
-    : ObjectACF<Vector3d>(info, filename, sele1, sele2, 
-                          DataStorage::dslPosition | DataStorage::dslAmat){
-    
-    setCorrFuncType("Displacement binned by Z");
-    setOutputName(getPrefix(dumpFilename_) + ".dispZ");
+DisplacementZ::DisplacementZ(SimInfo* info, const std::string& filename,
+                             const std::string& sele1, const std::string& sele2,
+                             int nZbins, int axis)
+    : ObjectACF<Vector3d>(info, filename, sele1, sele2,
+                          DataStorage::dslPosition | DataStorage::dslAmat) {
+  setCorrFuncType("Displacement binned by Z");
+  setOutputName(getPrefix(dumpFilename_) + ".dispZ");
 
-    positions_.resize(nFrames_);
-    zBins_.resize(nFrames_);
-    nZBins_ = nZbins;
-    axis_ = axis;
+  positions_.resize(nFrames_);
+  zBins_.resize(nFrames_);
+  nZBins_ = nZbins;
+  axis_ = axis;
 
-    switch(axis_) {
+  switch (axis_) {
     case 0:
       axisLabel_ = "x";
       break;
@@ -85,191 +84,183 @@ namespace OpenMD {
     default:
       axisLabel_ = "z";
       break;
-    }
-
-    std::stringstream params;
-    params << " nzbins = " << nZBins_;
-    const std::string paramString = params.str();
-    setParameterString( paramString );
-
-    histograms_.resize(nTimeBins_);
-    counts_.resize(nTimeBins_);
-    for (unsigned int i = 0; i < nTimeBins_; i++) {
-      histograms_[i].resize(nZBins_);
-      counts_[i].resize(nZBins_);
-      std::fill(histograms_[i].begin(), histograms_[i].end(), Vector3d(0.0));
-      std::fill(counts_[i].begin(), counts_[i].end(), 0);
-    }
-  }
-  
-  
-  int Displacement::computeProperty1(int frame, StuntDouble* sd) {
-    positions_[frame].push_back( sd->getPos() );
-    return positions_[frame].size() - 1;
-  }
-  
-  Vector3d Displacement::calcCorrVal(int frame1, int frame2, int id1, int id2) {
-    return positions_[frame2][id2] - positions_[frame1][id1];
   }
 
-  void DisplacementZ::computeFrame(int istep) {
-    hmat_ = currentSnapshot_->getHmat();
-    halfBoxZ_ = hmat_(axis_,axis_) / 2.0;      
+  std::stringstream params;
+  params << " nzbins = " << nZBins_;
+  const std::string paramString = params.str();
+  setParameterString(paramString);
 
-    StuntDouble* sd;
-
-    int isd1, isd2;
-    unsigned int index;
-
-    if (evaluator1_.isDynamic()) {
-      seleMan1_.setSelectionSet(evaluator1_.evaluate());
-    }
-    
-    if (uniqueSelections_ && evaluator2_.isDynamic()) {
-      seleMan2_.setSelectionSet(evaluator2_.evaluate());
-    }      
-    
-    for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
-         sd = seleMan1_.nextSelected(isd1)) {
-
-      index = computeProperty1(istep, sd);        
-      if (index == sele1ToIndex_[istep].size()) {
-        sele1ToIndex_[istep].push_back(sd->getGlobalIndex());
-      } else {
-        sele1ToIndex_[istep].resize(index+1);
-        sele1ToIndex_[istep][index] = sd->getGlobalIndex();
-      }
-    }
-   
-    if (uniqueSelections_) { 
-      for (sd = seleMan2_.beginSelected(isd2); sd != NULL;
-           sd = seleMan2_.nextSelected(isd2)) {        
-
-        index = computeProperty1(istep, sd);
-
-        if (index == sele2ToIndex_[istep].size()) {
-          sele2ToIndex_[istep].push_back(sd->getGlobalIndex());
-        } else {
-          sele2ToIndex_[istep].resize(index+1);
-          sele2ToIndex_[istep][index] = sd->getGlobalIndex();
-        }
-      }
-    }
-  }
-
-  int DisplacementZ::computeProperty1(int frame, StuntDouble* sd) {
-    Vector3d pos = sd->getPos();
-    // we need the raw (not wrapped) positions for RMSD:
-    positions_[frame].push_back( sd->getPos() );
-    
-    if (info_->getSimParams()->getUsePeriodicBoundaryConditions()) {
-      currentSnapshot_->wrapVector(pos);
-    }    
-    int zBin = int(nZBins_ * (halfBoxZ_ + pos[axis_]) / hmat_(axis_,axis_));
-    zBins_[frame].push_back(zBin);
-    
-    return positions_[frame].size() - 1;
-  }
-  
-  void DisplacementZ::correlateFrames(int frame1, int frame2, int timeBin) {
-    std::vector<int> s1;
-    std::vector<int> s2;
-    
-    std::vector<int>::iterator i1;
-    std::vector<int>::iterator i2;
-
-    s1 = sele1ToIndex_[frame1];
-
-    if (uniqueSelections_) 
-       s2 = sele2ToIndex_[frame2];
-    else
-       s2 = sele1ToIndex_[frame2];
-
-    for (i1 = s1.begin(), i2 = s2.begin();
-         i1 != s1.end() && i2 != s2.end(); ++i1, ++i2){
-      
-      // If the selections are dynamic, they might not have the
-      // same objects in both frames, so we need to roll either of
-      // the selections until we have the same object to
-      // correlate.
-
-      while ( i1 != s1.end() && *i1 < *i2 ) {
-        ++i1;
-      }
-      
-      while ( i2 != s2.end() && *i2 < *i1 ) {
-        ++i2;
-      }
-          
-      if ( i1 == s1.end() || i2 == s2.end() ) break;
-
-      calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin(),
-                  timeBin);
-    }
-  }
-
-  Vector3d DisplacementZ::calcCorrVal(int frame1, int frame2, int id1, int id2, int timeBin)
-  {
-    int zBin1 = zBins_[frame1][id1];
-    int zBin2 = zBins_[frame2][id2];    
-    
-    if (zBin1 == zBin2) {
-      Vector3d diff = positions_[frame2][id2] - positions_[frame1][id1];
-      histograms_[timeBin][zBin1] += diff;
-      counts_[timeBin][zBin1]++;
-    }
-    return Vector3d(0.0);
-  }
-  
-  void DisplacementZ::postCorrelate() {
-    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
-      for (unsigned int j = 0; j < nZBins_; ++j) {        
-        if (counts_[i][j] > 0) {
-          histograms_[i][j] /= counts_[i][j];
-        } else {
-          histograms_[i][j] = Vector3d(0.0);
-        }
-      }
-    }
-  }
-  void DisplacementZ::writeCorrelate() {
-    std::ofstream ofs(getOutputFileName().c_str());
-
-    if (ofs.is_open()) {
-      Revision r;
-      
-      ofs << "# " << getCorrFuncType() << "\n";
-      ofs << "# OpenMD " << r.getFullRevision() << "\n";
-      ofs << "# " << r.getBuildDate() << "\n";
-      ofs << "# selection script1: \"" << selectionScript1_ ;
-      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-      ofs << "# privilegedAxis computed as " << axisLabel_ << " axis \n";
-      if (!paramString_.empty())
-        ofs << "# parameters: " << paramString_ << "\n";
-
-      ofs << "#time\tcorrVal\n";
-
-      for (unsigned int i = 0; i < nTimeBins_; ++i) {
-
-        ofs << times_[i] - times_[0] << "\t";
-        
-        for (unsigned int j = 0; j < nZBins_; ++j) {
-          for (int k = 0; k < 3; k++) {
-            ofs << histograms_[i][j](k) << '\t';
-          }
-        }          
-        
-        ofs << "\n";
-      }
-      
-    } else {
-      sprintf(painCave.errMsg,
-              "DisplacementZ::writeCorrelate Error: fail to open %s\n",
-              getOutputFileName().c_str());
-      painCave.isFatal = 1;
-      simError();        
-    }
-    ofs.close();    
+  histograms_.resize(nTimeBins_);
+  counts_.resize(nTimeBins_);
+  for (unsigned int i = 0; i < nTimeBins_; i++) {
+    histograms_[i].resize(nZBins_);
+    counts_[i].resize(nZBins_);
+    std::fill(histograms_[i].begin(), histograms_[i].end(), Vector3d(0.0));
+    std::fill(counts_[i].begin(), counts_[i].end(), 0);
   }
 }
 
+int Displacement::computeProperty1(int frame, StuntDouble* sd) {
+  positions_[frame].push_back(sd->getPos());
+  return positions_[frame].size() - 1;
+}
+
+Vector3d Displacement::calcCorrVal(int frame1, int frame2, int id1, int id2) {
+  return positions_[frame2][id2] - positions_[frame1][id1];
+}
+
+void DisplacementZ::computeFrame(int istep) {
+  hmat_ = currentSnapshot_->getHmat();
+  halfBoxZ_ = hmat_(axis_, axis_) / 2.0;
+
+  StuntDouble* sd;
+
+  int isd1, isd2;
+  unsigned int index;
+
+  if (evaluator1_.isDynamic()) {
+    seleMan1_.setSelectionSet(evaluator1_.evaluate());
+  }
+
+  if (uniqueSelections_ && evaluator2_.isDynamic()) {
+    seleMan2_.setSelectionSet(evaluator2_.evaluate());
+  }
+
+  for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
+       sd = seleMan1_.nextSelected(isd1)) {
+    index = computeProperty1(istep, sd);
+    if (index == sele1ToIndex_[istep].size()) {
+      sele1ToIndex_[istep].push_back(sd->getGlobalIndex());
+    } else {
+      sele1ToIndex_[istep].resize(index + 1);
+      sele1ToIndex_[istep][index] = sd->getGlobalIndex();
+    }
+  }
+
+  if (uniqueSelections_) {
+    for (sd = seleMan2_.beginSelected(isd2); sd != NULL;
+         sd = seleMan2_.nextSelected(isd2)) {
+      index = computeProperty1(istep, sd);
+
+      if (index == sele2ToIndex_[istep].size()) {
+        sele2ToIndex_[istep].push_back(sd->getGlobalIndex());
+      } else {
+        sele2ToIndex_[istep].resize(index + 1);
+        sele2ToIndex_[istep][index] = sd->getGlobalIndex();
+      }
+    }
+  }
+}
+
+int DisplacementZ::computeProperty1(int frame, StuntDouble* sd) {
+  Vector3d pos = sd->getPos();
+  // we need the raw (not wrapped) positions for RMSD:
+  positions_[frame].push_back(sd->getPos());
+
+  if (info_->getSimParams()->getUsePeriodicBoundaryConditions()) {
+    currentSnapshot_->wrapVector(pos);
+  }
+  int zBin = int(nZBins_ * (halfBoxZ_ + pos[axis_]) / hmat_(axis_, axis_));
+  zBins_[frame].push_back(zBin);
+
+  return positions_[frame].size() - 1;
+}
+
+void DisplacementZ::correlateFrames(int frame1, int frame2, int timeBin) {
+  std::vector<int> s1;
+  std::vector<int> s2;
+
+  std::vector<int>::iterator i1;
+  std::vector<int>::iterator i2;
+
+  s1 = sele1ToIndex_[frame1];
+
+  if (uniqueSelections_)
+    s2 = sele2ToIndex_[frame2];
+  else
+    s2 = sele1ToIndex_[frame2];
+
+  for (i1 = s1.begin(), i2 = s2.begin(); i1 != s1.end() && i2 != s2.end();
+       ++i1, ++i2) {
+    // If the selections are dynamic, they might not have the
+    // same objects in both frames, so we need to roll either of
+    // the selections until we have the same object to
+    // correlate.
+
+    while (i1 != s1.end() && *i1 < *i2) {
+      ++i1;
+    }
+
+    while (i2 != s2.end() && *i2 < *i1) {
+      ++i2;
+    }
+
+    if (i1 == s1.end() || i2 == s2.end()) break;
+
+    calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin(), timeBin);
+  }
+}
+
+Vector3d DisplacementZ::calcCorrVal(int frame1, int frame2, int id1, int id2,
+                                    int timeBin) {
+  int zBin1 = zBins_[frame1][id1];
+  int zBin2 = zBins_[frame2][id2];
+
+  if (zBin1 == zBin2) {
+    Vector3d diff = positions_[frame2][id2] - positions_[frame1][id1];
+    histograms_[timeBin][zBin1] += diff;
+    counts_[timeBin][zBin1]++;
+  }
+  return Vector3d(0.0);
+}
+
+void DisplacementZ::postCorrelate() {
+  for (unsigned int i = 0; i < nTimeBins_; ++i) {
+    for (unsigned int j = 0; j < nZBins_; ++j) {
+      if (counts_[i][j] > 0) {
+        histograms_[i][j] /= counts_[i][j];
+      } else {
+        histograms_[i][j] = Vector3d(0.0);
+      }
+    }
+  }
+}
+void DisplacementZ::writeCorrelate() {
+  std::ofstream ofs(getOutputFileName().c_str());
+
+  if (ofs.is_open()) {
+    Revision r;
+
+    ofs << "# " << getCorrFuncType() << "\n";
+    ofs << "# OpenMD " << r.getFullRevision() << "\n";
+    ofs << "# " << r.getBuildDate() << "\n";
+    ofs << "# selection script1: \"" << selectionScript1_;
+    ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+    ofs << "# privilegedAxis computed as " << axisLabel_ << " axis \n";
+    if (!paramString_.empty()) ofs << "# parameters: " << paramString_ << "\n";
+
+    ofs << "#time\tcorrVal\n";
+
+    for (unsigned int i = 0; i < nTimeBins_; ++i) {
+      ofs << times_[i] - times_[0] << "\t";
+
+      for (unsigned int j = 0; j < nZBins_; ++j) {
+        for (int k = 0; k < 3; k++) {
+          ofs << histograms_[i][j](k) << '\t';
+        }
+      }
+
+      ofs << "\n";
+    }
+
+  } else {
+    sprintf(painCave.errMsg,
+            "DisplacementZ::writeCorrelate Error: fail to open %s\n",
+            getOutputFileName().c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
+  ofs.close();
+}
+}  // namespace OpenMD

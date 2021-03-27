@@ -43,207 +43,198 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "nonbonded/Mie.hpp"
+
+#include <cmath>
 #include <cstdio>
 #include <cstring>
-#include <cmath>
 
-#include "nonbonded/Mie.hpp"
-#include "utils/simError.h"
 #include "types/MieInteractionType.hpp"
+#include "utils/simError.h"
 
 using namespace std;
 
 namespace OpenMD {
 
-  Mie::Mie() : initialized_(false), forceField_(NULL), 
-	       name_("Mie") {}
-  
-  void Mie::initialize() {    
+Mie::Mie() : initialized_(false), forceField_(NULL), name_("Mie") {}
 
-    MieTypes.clear();
-    MieTids.clear();
-    MixingMap.clear();
-    MieTids.resize( forceField_->getNAtomType(), -1);
+void Mie::initialize() {
+  MieTypes.clear();
+  MieTids.clear();
+  MixingMap.clear();
+  MieTids.resize(forceField_->getNAtomType(), -1);
 
-    ForceField::NonBondedInteractionTypeContainer* nbiTypes = forceField_->getNonBondedInteractionTypes();
-    ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
-    ForceField::NonBondedInteractionTypeContainer::KeyType keys;
-    NonBondedInteractionType* nbt;
-    int mietid1, mietid2;
+  ForceField::NonBondedInteractionTypeContainer* nbiTypes =
+      forceField_->getNonBondedInteractionTypes();
+  ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
+  ForceField::NonBondedInteractionTypeContainer::KeyType keys;
+  NonBondedInteractionType* nbt;
+  int mietid1, mietid2;
 
-    for (nbt = nbiTypes->beginType(j); nbt != NULL; 
-         nbt = nbiTypes->nextType(j)) {
-      
-      if (nbt->isMie()) {
-        keys = nbiTypes->getKeys(j);
-        AtomType* at1 = forceField_->getAtomType(keys[0]);
-        if (at1 == NULL) {
-          sprintf( painCave.errMsg,
-                   "Mie::initialize could not find AtomType %s\n"
-                   "\tto for for %s - %s interaction.\n",
-                   keys[0].c_str(), keys[0].c_str(), keys[1].c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }
-
-        AtomType* at2 = forceField_->getAtomType(keys[1]);
-        if (at2 == NULL) {
-          sprintf( painCave.errMsg,
-                   "Mie::initialize could not find AtomType %s\n"
-                   "\tfor %s - %s nonbonded interaction.\n",
-                   keys[1].c_str(), keys[0].c_str(), keys[1].c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }
-
-        int atid1 = at1->getIdent();
-        if (MieTids[atid1] == -1) {
-          mietid1 = MieTypes.size();
-          MieTypes.insert(atid1);
-          MieTids[atid1] = mietid1;         
-        }
-        int atid2 = at2->getIdent();
-        if (MieTids[atid2] == -1) {
-          mietid2 = MieTypes.size();
-          MieTypes.insert(atid2);
-          MieTids[atid2] = mietid2;         
-        }
-          
-        MieInteractionType* mit = dynamic_cast<MieInteractionType*>(nbt);
-        if (mit == NULL) {
-          sprintf( painCave.errMsg,
-                   "Mie::initialize could not convert NonBondedInteractionType\n"
-                   "\tto MieInteractionType for %s - %s interaction.\n", 
-                   at1->getName().c_str(),
-                   at2->getName().c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }
-        
-        RealType sigma = mit->getSigma();
-        RealType epsilon = mit->getEpsilon();
-        int nRep = mit->getNrep();
-        int mAtt = mit->getMatt();
-
-        addExplicitInteraction(at1, at2, sigma, epsilon, nRep, mAtt);
+  for (nbt = nbiTypes->beginType(j); nbt != NULL; nbt = nbiTypes->nextType(j)) {
+    if (nbt->isMie()) {
+      keys = nbiTypes->getKeys(j);
+      AtomType* at1 = forceField_->getAtomType(keys[0]);
+      if (at1 == NULL) {
+        sprintf(painCave.errMsg,
+                "Mie::initialize could not find AtomType %s\n"
+                "\tto for for %s - %s interaction.\n",
+                keys[0].c_str(), keys[0].c_str(), keys[1].c_str());
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
       }
+
+      AtomType* at2 = forceField_->getAtomType(keys[1]);
+      if (at2 == NULL) {
+        sprintf(painCave.errMsg,
+                "Mie::initialize could not find AtomType %s\n"
+                "\tfor %s - %s nonbonded interaction.\n",
+                keys[1].c_str(), keys[0].c_str(), keys[1].c_str());
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
+      }
+
+      int atid1 = at1->getIdent();
+      if (MieTids[atid1] == -1) {
+        mietid1 = MieTypes.size();
+        MieTypes.insert(atid1);
+        MieTids[atid1] = mietid1;
+      }
+      int atid2 = at2->getIdent();
+      if (MieTids[atid2] == -1) {
+        mietid2 = MieTypes.size();
+        MieTypes.insert(atid2);
+        MieTids[atid2] = mietid2;
+      }
+
+      MieInteractionType* mit = dynamic_cast<MieInteractionType*>(nbt);
+      if (mit == NULL) {
+        sprintf(painCave.errMsg,
+                "Mie::initialize could not convert NonBondedInteractionType\n"
+                "\tto MieInteractionType for %s - %s interaction.\n",
+                at1->getName().c_str(), at2->getName().c_str());
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
+      }
+
+      RealType sigma = mit->getSigma();
+      RealType epsilon = mit->getEpsilon();
+      int nRep = mit->getNrep();
+      int mAtt = mit->getMatt();
+
+      addExplicitInteraction(at1, at2, sigma, epsilon, nRep, mAtt);
     }
-    initialized_ = true;
   }
-      
-  void Mie::addExplicitInteraction(AtomType* atype1, 
-                                   AtomType* atype2, 
-                                   RealType sigma, 
-                                   RealType epsilon, 
-                                   int nRep, int mAtt) {
-
-    MieInteractionData mixer;
-    mixer.sigma = sigma;
-    mixer.epsilon = epsilon;
-    mixer.sigmai = 1.0 / mixer.sigma;
-    mixer.nRep = nRep;
-    mixer.mAtt = mAtt;
-
-    RealType n = RealType(nRep);
-    RealType m = RealType(mAtt);
-    
-    mixer.nmScale = n * pow(n/m, m/(n-m)) / (n-m); 
-
-    int mietid1 = MieTids[atype1->getIdent()];
-    int mietid2 = MieTids[atype2->getIdent()];
-    int nMie = MieTypes.size();
-
-    MixingMap.resize(nMie);
-    MixingMap[mietid1].resize(nMie);
-    
-    MixingMap[mietid1][mietid2] = mixer;
-    if (mietid2 != mietid1) {
-      MixingMap[mietid2].resize(nMie);
-      MixingMap[mietid2][mietid1] = mixer;
-    }    
-  }
-  
-  void Mie::calcForce(InteractionData &idat) {
-
-    if (!initialized_) initialize();
-    
-    MieInteractionData &mixer = MixingMap[MieTids[idat.atid1]][MieTids[idat.atid2]];
-    RealType sigmai = mixer.sigmai;
-    RealType epsilon = mixer.epsilon;
-    int nRep = mixer.nRep;
-    int mAtt = mixer.mAtt;
-    RealType nmScale = mixer.nmScale;
-    
-    RealType ros;
-    RealType rcos;
-    RealType myPot = 0.0;
-    RealType myPotC = 0.0;
-    RealType myDeriv = 0.0;
-    RealType myDerivC = 0.0;
-    
-    ros = idat.rij * sigmai;     
-    
-    getMieFunc(ros, nRep, mAtt, myPot, myDeriv);
-    
-    if (idat.shiftedPot) {
-      rcos = idat.rcut * sigmai;
-      getMieFunc(rcos, nRep, mAtt, myPotC, myDerivC);
-      myDerivC = 0.0;
-    } else if (idat.shiftedForce) {
-      rcos = idat.rcut * sigmai;
-      getMieFunc(rcos, nRep, mAtt, myPotC, myDerivC);
-      myPotC = myPotC + myDerivC * (idat.rij - idat.rcut) * sigmai;
-    } else {
-      myPotC = 0.0;
-      myDerivC = 0.0;        
-    }
-    
-    RealType pot_temp = idat.vdwMult * nmScale * epsilon * (myPot - myPotC);
-    idat.vpair += pot_temp;
-    
-    RealType dudr = idat.sw * idat.vdwMult * nmScale * epsilon * (myDeriv - 
-								  myDerivC)*sigmai;
-    
-    idat.pot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
-    if (idat.isSelected)
-      idat.selePot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
-
-    idat.f1 += idat.d * dudr / idat.rij;
-    
-    return;
-  }
-
-  void Mie::getMieFunc(const RealType &r, int &n, int &m,
-                       RealType &pot, RealType &deriv) {
-
-    RealType ri = 1.0 / r;
-    RealType rin = pow(ri, n);
-    RealType rim = pow(ri, m);
-    RealType rin1 = rin * ri;
-    RealType rim1 = rim * ri;
-
-    pot = rin - rim;    
-    deriv = -n * rin1 + m * rim1;    
-    return;
-  }
-  
-
-  RealType Mie::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {   
-    if (!initialized_) initialize();   
-    
-    int atid1 = atypes.first->getIdent();
-    int atid2 = atypes.second->getIdent();
-    int mietid1 = MieTids[atid1];
-    int mietid2 = MieTids[atid2];
-    
-    if (mietid1 == -1 || mietid2 == -1) return 0.0;
-    else {      
-      MieInteractionData mixer = MixingMap[mietid1][mietid2];
-      return 2.5 * mixer.sigma;
-    }
-  }  
+  initialized_ = true;
 }
 
+void Mie::addExplicitInteraction(AtomType* atype1, AtomType* atype2,
+                                 RealType sigma, RealType epsilon, int nRep,
+                                 int mAtt) {
+  MieInteractionData mixer;
+  mixer.sigma = sigma;
+  mixer.epsilon = epsilon;
+  mixer.sigmai = 1.0 / mixer.sigma;
+  mixer.nRep = nRep;
+  mixer.mAtt = mAtt;
+
+  RealType n = RealType(nRep);
+  RealType m = RealType(mAtt);
+
+  mixer.nmScale = n * pow(n / m, m / (n - m)) / (n - m);
+
+  int mietid1 = MieTids[atype1->getIdent()];
+  int mietid2 = MieTids[atype2->getIdent()];
+  int nMie = MieTypes.size();
+
+  MixingMap.resize(nMie);
+  MixingMap[mietid1].resize(nMie);
+
+  MixingMap[mietid1][mietid2] = mixer;
+  if (mietid2 != mietid1) {
+    MixingMap[mietid2].resize(nMie);
+    MixingMap[mietid2][mietid1] = mixer;
+  }
+}
+
+void Mie::calcForce(InteractionData& idat) {
+  if (!initialized_) initialize();
+
+  MieInteractionData& mixer =
+      MixingMap[MieTids[idat.atid1]][MieTids[idat.atid2]];
+  RealType sigmai = mixer.sigmai;
+  RealType epsilon = mixer.epsilon;
+  int nRep = mixer.nRep;
+  int mAtt = mixer.mAtt;
+  RealType nmScale = mixer.nmScale;
+
+  RealType ros;
+  RealType rcos;
+  RealType myPot = 0.0;
+  RealType myPotC = 0.0;
+  RealType myDeriv = 0.0;
+  RealType myDerivC = 0.0;
+
+  ros = idat.rij * sigmai;
+
+  getMieFunc(ros, nRep, mAtt, myPot, myDeriv);
+
+  if (idat.shiftedPot) {
+    rcos = idat.rcut * sigmai;
+    getMieFunc(rcos, nRep, mAtt, myPotC, myDerivC);
+    myDerivC = 0.0;
+  } else if (idat.shiftedForce) {
+    rcos = idat.rcut * sigmai;
+    getMieFunc(rcos, nRep, mAtt, myPotC, myDerivC);
+    myPotC = myPotC + myDerivC * (idat.rij - idat.rcut) * sigmai;
+  } else {
+    myPotC = 0.0;
+    myDerivC = 0.0;
+  }
+
+  RealType pot_temp = idat.vdwMult * nmScale * epsilon * (myPot - myPotC);
+  idat.vpair += pot_temp;
+
+  RealType dudr = idat.sw * idat.vdwMult * nmScale * epsilon *
+                  (myDeriv - myDerivC) * sigmai;
+
+  idat.pot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
+  if (idat.isSelected) idat.selePot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
+
+  idat.f1 += idat.d * dudr / idat.rij;
+
+  return;
+}
+
+void Mie::getMieFunc(const RealType& r, int& n, int& m, RealType& pot,
+                     RealType& deriv) {
+  RealType ri = 1.0 / r;
+  RealType rin = pow(ri, n);
+  RealType rim = pow(ri, m);
+  RealType rin1 = rin * ri;
+  RealType rim1 = rim * ri;
+
+  pot = rin - rim;
+  deriv = -n * rin1 + m * rim1;
+  return;
+}
+
+RealType Mie::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
+  if (!initialized_) initialize();
+
+  int atid1 = atypes.first->getIdent();
+  int atid2 = atypes.second->getIdent();
+  int mietid1 = MieTids[atid1];
+  int mietid2 = MieTids[atid2];
+
+  if (mietid1 == -1 || mietid2 == -1)
+    return 0.0;
+  else {
+    MieInteractionData mixer = MixingMap[mietid1][mietid2];
+    return 2.5 * mixer.sigma;
+  }
+}
+}  // namespace OpenMD

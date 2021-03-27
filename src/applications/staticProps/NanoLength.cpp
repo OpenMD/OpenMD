@@ -44,38 +44,39 @@
  */
 
 #include "applications/staticProps/NanoLength.hpp"
-#include "utils/simError.h"
+
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+#include "utils/simError.h"
 
 using namespace OpenMD;
 
-bool pairComparator( const evIndex& l, const evIndex& r) { 
-  return l.first < r.first; 
+bool pairComparator(const evIndex& l, const evIndex& r) {
+  return l.first < r.first;
 }
 
-NanoLength::NanoLength(SimInfo* info,
-                       const std::string& filename,
+NanoLength::NanoLength(SimInfo* info, const std::string& filename,
                        const std::string& sele)
-  : StaticAnalyser(info, filename, 1), selectionScript_(sele), seleMan_(info),
-    evaluator_(info) {
-  
+    : StaticAnalyser(info, filename, 1),
+      selectionScript_(sele),
+      seleMan_(info),
+      evaluator_(info) {
   setOutputName(getPrefix(filename) + ".length");
-  
+
   osq.open(getOutputFileName().c_str());
-  
+
   evaluator_.loadScriptString(sele);
   if (!evaluator_.isDynamic()) {
     seleMan_.setSelectionSet(evaluator_.evaluate());
   }
   frameCounter_ = 0;
-    }
+}
 
 void NanoLength::process() {
   StuntDouble* sd;
   Vector3d vec;
   int i;
-  
+
   DumpReader reader(info_, dumpFilename_);
   int nFrames = reader.getNFrames();
   frameCounter_ = 0;
@@ -87,49 +88,48 @@ void NanoLength::process() {
     frameCounter_++;
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
     RealType time = currentSnapshot_->getTime();
-    
+
     // Clear pos vector between each frame.
     theAtoms_.clear();
-    
+
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-    
+
     // outer loop is over the selected StuntDoubles:
-    
+
     for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {      
-      theAtoms_.push_back(sd);      
+         sd = seleMan_.nextSelected(i)) {
+      theAtoms_.push_back(sd);
     }
-    
+
     RealType rodLength = getLength(theAtoms_);
-    
+
     osq.precision(7);
-    if (osq.is_open()){
-      osq << time << "\t" << rodLength << std::endl;      
+    if (osq.is_open()) {
+      osq << time << "\t" << rodLength << std::endl;
     }
   }
   osq.close();
 }
-    
+
 RealType NanoLength::getLength(std::vector<StuntDouble*> atoms) {
   Vector3d COM(0.0);
   RealType mass = 0.0;
   RealType mtmp;
-  for (std::vector<StuntDouble*>::iterator i = atoms.begin(); 
-       i != atoms.end(); ++i) {
+  for (std::vector<StuntDouble*>::iterator i = atoms.begin(); i != atoms.end();
+       ++i) {
     mtmp = (*i)->getMass();
     mass += mtmp;
     COM += (*i)->getPos() * mtmp;
   }
   COM /= mass;
-  
+
   // Moment of Inertia calculation
-  Mat3x3d Itmp(0.0);    
-  for (std::vector<StuntDouble*>::iterator i = atoms.begin(); 
-       i != atoms.end(); ++i) {
-    
-    Mat3x3d IAtom(0.0);  
+  Mat3x3d Itmp(0.0);
+  for (std::vector<StuntDouble*>::iterator i = atoms.begin(); i != atoms.end();
+       ++i) {
+    Mat3x3d IAtom(0.0);
     mtmp = (*i)->getMass();
     Vector3d delta = (*i)->getPos() - COM;
     IAtom -= outProduct(delta, delta) * mtmp;
@@ -139,49 +139,47 @@ RealType NanoLength::getLength(std::vector<StuntDouble*> atoms) {
     IAtom(2, 2) += mtmp * r2;
     Itmp += IAtom;
   }
-  
-  //diagonalize 
+
+  // diagonalize
   Vector3d evals;
   Mat3x3d evects;
   Mat3x3d::diagonalize(Itmp, evals, evects);
-  
+
   // we need to re-order the axes so that the smallest moment of
   // inertia (which corresponds to the long axis of the rod) is
   // along the z-axis. We'll just reverse the order of the three
   // axes.  Python has an argsort function, but we had to invent our
   // own:
-  
+
   std::vector<evIndex> evals_prime;
-  for (int i = 0; i < 3; i++) 
+  for (int i = 0; i < 3; i++)
     evals_prime.push_back(std::make_pair(evals[i], i));
   std::sort(evals_prime.begin(), evals_prime.end(), pairComparator);
-  
+
   RotMat3x3d A;
   Mat3x3d I;
-  
+
   for (int i = 0; i < 3; i++) {
-    int index = evals_prime[2-i].second;
+    int index = evals_prime[2 - i].second;
     A.setColumn(i, evects.getColumn(index));
-    I(i,i) = evals[index];
+    I(i, i) = evals[index];
   }
-  
+
   // now project the delta from the center of mass onto the long
   // axis of the object
-  
+
   Vector3d longAxis = A.getColumn(2);
   RealType axisLength = longAxis.length();
   RealType projmin = 0.0;
   RealType projmax = 0.0;
-  
-  for (std::vector<StuntDouble*>::iterator i = atoms.begin(); 
-       i != atoms.end(); ++i) {
+
+  for (std::vector<StuntDouble*>::iterator i = atoms.begin(); i != atoms.end();
+       ++i) {
     Vector3d delta = (*i)->getPos() - COM;
     RealType projection = dot(delta, longAxis) / axisLength;
     if (projection > projmax) projmax = projection;
-    if (projection < projmin) projmin = projection;      
+    if (projection < projmin) projmin = projection;
   }
-  
+
   return projmax - projmin;
 }
-
-

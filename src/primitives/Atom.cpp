@@ -44,39 +44,35 @@
  */
 
 #include "primitives/Atom.hpp"
+
 #include "types/FluctuatingChargeAdapter.hpp"
 
 namespace OpenMD {
-  
-  Atom::Atom(AtomType* at) : StuntDouble(otAtom, &Snapshot::atomData),
-                             atomType_(at) {
-    mass_ = at->getMass();
-    if (at->isFluctuatingCharge()) {
-      FluctuatingChargeAdapter fca = FluctuatingChargeAdapter(at);
-      chargeMass_ = fca.getChargeMass();
-    } else {
-      chargeMass_ = std::numeric_limits<RealType>::infinity();
-    }
+
+Atom::Atom(AtomType* at)
+    : StuntDouble(otAtom, &Snapshot::atomData), atomType_(at) {
+  mass_ = at->getMass();
+  if (at->isFluctuatingCharge()) {
+    FluctuatingChargeAdapter fca = FluctuatingChargeAdapter(at);
+    chargeMass_ = fca.getChargeMass();
+  } else {
+    chargeMass_ = std::numeric_limits<RealType>::infinity();
   }
-
-  Mat3x3d Atom::getI() {
-    return Mat3x3d::identity();
-  }    
-  
-  std::vector<RealType> Atom::getGrad() {
-
-    std::vector<RealType> grad(3, 0.0);
-
-    Vector3d force= getFrc();
-    
-    grad[0] = -force[0];
-    grad[1] = -force[1];
-    grad[2] = -force[2];
-
-    return grad;         
-  }    
-  
-  void Atom::accept(BaseVisitor* v) {
-    v->visit(this);
-  }      
 }
+
+Mat3x3d Atom::getI() { return Mat3x3d::identity(); }
+
+std::vector<RealType> Atom::getGrad() {
+  std::vector<RealType> grad(3, 0.0);
+
+  Vector3d force = getFrc();
+
+  grad[0] = -force[0];
+  grad[1] = -force[1];
+  grad[2] = -force[2];
+
+  return grad;
+}
+
+void Atom::accept(BaseVisitor* v) { v->visit(this); }
+}  // namespace OpenMD

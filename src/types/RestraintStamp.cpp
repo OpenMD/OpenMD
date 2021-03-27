@@ -43,41 +43,42 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "types/RestraintStamp.hpp"
+
 #include <cstdio>
 #include <cstring>
 
-#include "types/RestraintStamp.hpp"
-
 namespace OpenMD {
-  RestraintStamp::RestraintStamp() {
-    DefineParameter(Type, "restraintType");
+RestraintStamp::RestraintStamp() {
+  DefineParameter(Type, "restraintType");
 
-    DefineOptionalParameter(MolIndex, "molIndex");
-    DefineOptionalParameter(ObjectSelection, "objectSelection");
-    DefineOptionalParameter(DisplacementSpringConstant, "displacementSpringConstant");
-    DefineOptionalParameter(AbsoluteSpringConstant, "absoluteSpringConstant");
-    DefineOptionalParameter(TwistSpringConstant, "twistSpringConstant");
-    DefineOptionalParameter(SwingXSpringConstant, "swingXSpringConstant");
-    DefineOptionalParameter(SwingYSpringConstant, "swingYSpringConstant");
+  DefineOptionalParameter(MolIndex, "molIndex");
+  DefineOptionalParameter(ObjectSelection, "objectSelection");
+  DefineOptionalParameter(DisplacementSpringConstant,
+                          "displacementSpringConstant");
+  DefineOptionalParameter(AbsoluteSpringConstant, "absoluteSpringConstant");
+  DefineOptionalParameter(TwistSpringConstant, "twistSpringConstant");
+  DefineOptionalParameter(SwingXSpringConstant, "swingXSpringConstant");
+  DefineOptionalParameter(SwingYSpringConstant, "swingYSpringConstant");
 
-    DefineOptionalParameter(AbsolutePositionZ, "absolutePositionZ");
-    DefineOptionalParameter(RestrainedTwistAngle, "restrainedTwistAngle");
-    DefineOptionalParameter(RestrainedSwingXAngle, "restrainedSwingXAngle");
-    DefineOptionalParameter(RestrainedSwingYAngle, "restrainedSwingYAngle");
-    DefineOptionalParameterWithDefaultValue(Print, "print", true);
-  }
-  
-  RestraintStamp::~RestraintStamp() {    
-  }
-  
-  void RestraintStamp::validate() {
-    DataHolder::validate();
-    CheckParameter(Type, isEqualIgnoreCase("Object") || isEqualIgnoreCase("Molecular"));
-    CheckParameter(DisplacementSpringConstant, isNonNegative());
-    CheckParameter(AbsoluteSpringConstant, isNonNegative());    
-    CheckParameter(TwistSpringConstant, isNonNegative());
-    CheckParameter(SwingXSpringConstant, isNonNegative());
-    CheckParameter(SwingYSpringConstant, isNonNegative());    
-    // CheckParameter(MolIndex, isNonNegative());
-  }
+  DefineOptionalParameter(AbsolutePositionZ, "absolutePositionZ");
+  DefineOptionalParameter(RestrainedTwistAngle, "restrainedTwistAngle");
+  DefineOptionalParameter(RestrainedSwingXAngle, "restrainedSwingXAngle");
+  DefineOptionalParameter(RestrainedSwingYAngle, "restrainedSwingYAngle");
+  DefineOptionalParameterWithDefaultValue(Print, "print", true);
 }
+
+RestraintStamp::~RestraintStamp() {}
+
+void RestraintStamp::validate() {
+  DataHolder::validate();
+  CheckParameter(Type,
+                 isEqualIgnoreCase("Object") || isEqualIgnoreCase("Molecular"));
+  CheckParameter(DisplacementSpringConstant, isNonNegative());
+  CheckParameter(AbsoluteSpringConstant, isNonNegative());
+  CheckParameter(TwistSpringConstant, isNonNegative());
+  CheckParameter(SwingXSpringConstant, isNonNegative());
+  CheckParameter(SwingYSpringConstant, isNonNegative());
+  // CheckParameter(MolIndex, isNonNegative());
+}
+}  // namespace OpenMD

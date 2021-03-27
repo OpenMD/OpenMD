@@ -46,36 +46,31 @@
 #include "applications/dynamicProps/BondCorrFunc.hpp"
 
 namespace OpenMD {
-  BondCorrFunc::BondCorrFunc(SimInfo* info, const std::string& filename, 
-                             const std::string& sele1, const std::string& sele2)
+BondCorrFunc::BondCorrFunc(SimInfo* info, const std::string& filename,
+                           const std::string& sele1, const std::string& sele2)
     : AutoCorrFunc<RealType>(info, filename, sele1, sele2,
-                             DataStorage::dslPosition){
-    
-    setCorrFuncType("Bond Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".bondcorr");
+                             DataStorage::dslPosition) {
+  setCorrFuncType("Bond Correlation Function");
+  setOutputName(getPrefix(dumpFilename_) + ".bondcorr");
 
-    this->autoCorrFunc_ = true;
-    this->doSystemProperties_ = false;
-    this->doMolecularProperties_ = false;
-    this->doObjectProperties_ = false;
-    this->doBondProperties_ = true;
+  this->autoCorrFunc_ = true;
+  this->doSystemProperties_ = false;
+  this->doMolecularProperties_ = false;
+  this->doObjectProperties_ = false;
+  this->doBondProperties_ = true;
 
-    delta_.resize(nFrames_);
-
-  }
-  
-  int BondCorrFunc::computeProperty1(int frame, Bond* bond) {
-    
-    RealType re = bond->getBondType()->getEquilibriumBondLength();
-    RealType r = bond->getValue();
-    
-    delta_[frame].push_back( r - re );
-    return delta_[frame].size() - 1;
-  }
-
-  RealType BondCorrFunc::calcCorrVal(int frame1, int frame2,
-                                      int id1, int id2) {
-    return delta_[frame1][id1] * delta_[frame2][id2];
-  }
+  delta_.resize(nFrames_);
 }
 
+int BondCorrFunc::computeProperty1(int frame, Bond* bond) {
+  RealType re = bond->getBondType()->getEquilibriumBondLength();
+  RealType r = bond->getValue();
+
+  delta_[frame].push_back(r - re);
+  return delta_[frame].size() - 1;
+}
+
+RealType BondCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
+  return delta_[frame1][id1] * delta_[frame2][id2];
+}
+}  // namespace OpenMD

@@ -44,54 +44,54 @@
  */
 
 #include "io/BendTypesSectionParser.hpp"
-#include "types/BendTypeParser.hpp"
+
 #include "brains/ForceField.hpp"
+#include "types/BendTypeParser.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
 
-  BendTypesSectionParser::BendTypesSectionParser(ForceFieldOptions& options) : options_(options){
-    setSectionName("BendTypes");
+BendTypesSectionParser::BendTypesSectionParser(ForceFieldOptions& options)
+    : options_(options) {
+  setSectionName("BendTypes");
+}
+
+void BendTypesSectionParser::parseLine(ForceField& ff, const std::string& line,
+                                       int lineNo) {
+  StringTokenizer tokenizer(line);
+  BendTypeParser btParser;
+  BendType* bendType = NULL;
+
+  int nTokens = tokenizer.countTokens();
+
+  if (nTokens < 5) {
+    sprintf(painCave.errMsg,
+            "BendTypesSectionParser Error: Not enough tokens at line %d\n",
+            lineNo);
+    painCave.isFatal = 1;
+    simError();
+    return;
   }
 
-  void BendTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
-    StringTokenizer tokenizer(line);
-    BendTypeParser btParser;
-    BendType* bendType = NULL;
+  std::string at1 = tokenizer.nextToken();
+  std::string at2 = tokenizer.nextToken();
+  std::string at3 = tokenizer.nextToken();
+  std::string remainder = tokenizer.getRemainingString();
+  RealType kScale = options_.getBendForceConstantScaling();
 
-    int nTokens = tokenizer.countTokens();
-
-    if (nTokens < 5) {
-      sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
-	      lineNo);
-      painCave.isFatal = 1;
-      simError();
-      return;
-    }
-    
-    std::string at1 = tokenizer.nextToken();
-    std::string at2 = tokenizer.nextToken();
-    std::string at3 = tokenizer.nextToken();
-    std::string remainder = tokenizer.getRemainingString();
-    RealType kScale = options_.getBendForceConstantScaling();
-
-    try {
-      bendType = btParser.parseLine(remainder, kScale);
-    }
-    catch( OpenMDException& e ) {
-      
-      sprintf(painCave.errMsg, "BendTypesSectionParser Error: %s "
-              "at line %d\n",
-              e.what(), lineNo);
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    if (bendType != NULL) {
-      ff.addBendType(at1, at2, at3, bendType);
-    }
-    
+  try {
+    bendType = btParser.parseLine(remainder, kScale);
+  } catch (OpenMDException& e) {
+    sprintf(painCave.errMsg,
+            "BendTypesSectionParser Error: %s "
+            "at line %d\n",
+            e.what(), lineNo);
+    painCave.isFatal = 1;
+    simError();
   }
-} //end namespace OpenMD
 
-
+  if (bendType != NULL) {
+    ff.addBendType(at1, at2, at3, bendType);
+  }
+}
+}  // end namespace OpenMD

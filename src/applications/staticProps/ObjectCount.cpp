@@ -43,89 +43,88 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "applications/staticProps/ObjectCount.hpp"
+
 #include <algorithm>
 #include <functional>
-#include "applications/staticProps/ObjectCount.hpp"
-#include "utils/simError.h"
+
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
 
-  ObjectCount::ObjectCount(SimInfo* info, const std::string& filename, 
-                           const std::string& sele)
-    : StaticAnalyser(info, filename, 1), selectionScript_(sele), 
-      seleMan_(info), evaluator_(info) {
-    
-    setOutputName(getPrefix(filename) + ".counts");
-    
-    evaluator_.loadScriptString(sele);
-    
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }            
+ObjectCount::ObjectCount(SimInfo* info, const std::string& filename,
+                         const std::string& sele)
+    : StaticAnalyser(info, filename, 1),
+      selectionScript_(sele),
+      seleMan_(info),
+      evaluator_(info) {
+  setOutputName(getPrefix(filename) + ".counts");
+
+  evaluator_.loadScriptString(sele);
+
+  if (!evaluator_.isDynamic()) {
+    seleMan_.setSelectionSet(evaluator_.evaluate());
   }
-
-  void ObjectCount::process() {
-  
-    counts_.clear();
-    counts_.resize(10, 0);
-    DumpReader reader(info_, dumpFilename_);    
-    int nFrames = reader.getNFrames();
-    unsigned long int nsum = 0;
-    unsigned long int n2sum = 0;
-
-    for (int i = 0; i < nFrames; i += step_) {
-      reader.readFrame(i);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    
-      if (evaluator_.isDynamic()) {
-	seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-        
-      unsigned int count = seleMan_.getSelectionCount();
-
-      if (counts_.size() < count+1)  {
-	counts_.resize(count+1, 0);
-      }
-
-      counts_[count]++;
-
-      nsum += count;
-      n2sum += count * count;
-    }
-   
-    int nProcessed = nFrames /step_;
-
-    nAvg = nsum / nProcessed;
-    n2Avg = n2sum / nProcessed;
-    sDev = sqrt(n2Avg - nAvg*nAvg);
-    writeCounts();   
-  }
-  
-  void ObjectCount::writeCounts() {
-    std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
-    if (ofs.is_open()) {
-      ofs << "#counts\n";
-      ofs << "#selection: (" << selectionScript_ << ")\n";
-      ofs << "# <N> = "<< nAvg << "\n";
-      ofs << "# <N^2> = " << n2Avg << "\n";
-      ofs << "# sqrt(<N^2> - <N>^2)  = " << sDev << "\n";
-      ofs << "# N\tcounts[N]\n";
-      for (unsigned int i = 0; i < counts_.size(); ++i) {
-        ofs << i << "\t" << counts_[i] << "\n";
-      }
-      
-    } else {
-      
-      sprintf(painCave.errMsg, "ObjectCount: unable to open %s\n", 
-	      outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();  
-    }
-    ofs.close();
-  }
-  
 }
 
+void ObjectCount::process() {
+  counts_.clear();
+  counts_.resize(10, 0);
+  DumpReader reader(info_, dumpFilename_);
+  int nFrames = reader.getNFrames();
+  unsigned long int nsum = 0;
+  unsigned long int n2sum = 0;
 
+  for (int i = 0; i < nFrames; i += step_) {
+    reader.readFrame(i);
+    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+
+    unsigned int count = seleMan_.getSelectionCount();
+
+    if (counts_.size() < count + 1) {
+      counts_.resize(count + 1, 0);
+    }
+
+    counts_[count]++;
+
+    nsum += count;
+    n2sum += count * count;
+  }
+
+  int nProcessed = nFrames / step_;
+
+  nAvg = nsum / nProcessed;
+  n2Avg = n2sum / nProcessed;
+  sDev = sqrt(n2Avg - nAvg * nAvg);
+  writeCounts();
+}
+
+void ObjectCount::writeCounts() {
+  std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
+  if (ofs.is_open()) {
+    ofs << "#counts\n";
+    ofs << "#selection: (" << selectionScript_ << ")\n";
+    ofs << "# <N> = " << nAvg << "\n";
+    ofs << "# <N^2> = " << n2Avg << "\n";
+    ofs << "# sqrt(<N^2> - <N>^2)  = " << sDev << "\n";
+    ofs << "# N\tcounts[N]\n";
+    for (unsigned int i = 0; i < counts_.size(); ++i) {
+      ofs << i << "\t" << counts_[i] << "\n";
+    }
+
+  } else {
+    sprintf(painCave.errMsg, "ObjectCount: unable to open %s\n",
+            outputFilename_.c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
+  ofs.close();
+}
+
+}  // namespace OpenMD

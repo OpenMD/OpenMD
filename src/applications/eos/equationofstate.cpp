@@ -42,74 +42,68 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <iostream>
-#include <fstream>
+
 #include <cmath>
+#include <fstream>
+#include <iostream>
 #include <string>
 
-#include "equationofstateCmd.hpp"
+#include "brains/ForceManager.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
-#include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
+#include "equationofstateCmd.hpp"
+#include "flucq/FluctuatingChargeDamped.hpp"
 #include "io/DumpReader.hpp"
 #include "io/DumpWriter.hpp"
-#include "utils/simError.h"
-#include "utils/Constants.hpp"
-#include "flucq/FluctuatingChargeDamped.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
+#include "utils/Constants.hpp"
 #include "utils/MemoryUtils.hpp"
 #include "utils/ProgressBar.hpp"
-
-
+#include "utils/simError.h"
 
 using namespace OpenMD;
 using namespace std;
 
-int main(int argc, char* argv[]){
-  
+int main(int argc, char* argv[]) {
   gengetopt_args_info args_info;
   string omdFileName;
   string outFileName;
-  
-  //parse the command line option
-  if (cmdline_parser (argc, argv, &args_info) != 0) {
-    exit(1) ;
+
+  // parse the command line option
+  if (cmdline_parser(argc, argv, &args_info) != 0) {
+    exit(1);
   }
-  
-  //get the omd file name and meta-data file name
-  if (args_info.input_given){
+
+  // get the omd file name and meta-data file name
+  if (args_info.input_given) {
     omdFileName = args_info.input_arg;
   } else {
-    strcpy( painCave.errMsg,
-            "No input file name was specified.\n" );
+    strcpy(painCave.errMsg, "No input file name was specified.\n");
     painCave.isFatal = 1;
     simError();
   }
-  
-  if (args_info.output_given){
+
+  if (args_info.output_given) {
     outFileName = args_info.output_arg;
   } else {
-    strcpy( painCave.errMsg,
-            "No output file name was specified.\n" );
+    strcpy(painCave.errMsg, "No output file name was specified.\n");
     painCave.isFatal = 1;
     simError();
   }
 
-  //convert the input angles to radians for computation
-  double initial_affine = args_info.initial_arg ;
-  double final_affine = args_info.final_arg ;
-  int number = args_info.number_arg ;
+  // convert the input angles to radians for computation
+  double initial_affine = args_info.initial_arg;
+  double final_affine = args_info.final_arg;
+  int number = args_info.number_arg;
 
-  RealType affine_step = (final_affine - initial_affine)/(number + 1);
-  
+  RealType affine_step = (final_affine - initial_affine) / (number + 1);
 
   registerAll();
-  
+
   SimInfo::MoleculeIterator miter;
-  Molecule::IntegrableObjectIterator  iiter;
+  Molecule::IntegrableObjectIterator iiter;
   Molecule::RigidBodyIterator rbIter;
   Molecule* mol;
   StuntDouble* sd;
@@ -123,86 +117,74 @@ int main(int argc, char* argv[]){
   Vector3d newPos;
   AtomType* atype;
 
-  //parse omd file and set up the system
+  // parse omd file and set up the system
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(omdFileName);
   oldSnap = oldInfo->getSnapshotManager()->getCurrentSnapshot();
   oldHmat = oldSnap->getHmat();
 
-  //ProgressBarPtr progressBar {nullptr};
-  //progressBar = Utils::make_unique<ProgressBar>();
-
+  // ProgressBarPtr progressBar {nullptr};
+  // progressBar = Utils::make_unique<ProgressBar>();
 
   ofstream eos;
   eos.open(outFileName.c_str());
 
   RealType current_affine = initial_affine;
   int countStep = 0;
-  std::cout<<"Calculation for EOS started."<<std::endl;
-  while (current_affine <= final_affine){
-    
-    //progressBar->setStatus(countStep,number);
-    //progressBar->update();
+  std::cout << "Calculation for EOS started." << std::endl;
+  while (current_affine <= final_affine) {
+    // progressBar->setStatus(countStep,number);
+    // progressBar->update();
     ++countStep;
     RealType scaling = std::cbrt(current_affine);
     Mat3x3d scaleMatrix = Mat3x3d(0.0);
-    scaleMatrix(0,0) = scaling ;
-    scaleMatrix(1,1) = scaling ;
-    scaleMatrix(2,2) = scaling ;
+    scaleMatrix(0, 0) = scaling;
+    scaleMatrix(1, 1) = scaling;
+    scaleMatrix(2, 2) = scaling;
 
-    
     SimInfo* newInfo = oldCreator.createSim(omdFileName);
     newSnap = newInfo->getSnapshotManager()->getCurrentSnapshot();
 
-
-
-    
     newHmat = scaleMatrix * oldHmat;
     newSnap->setHmat(newHmat);
 
     int newIndex = 0;
-    for (mol = oldInfo->beginMolecule(miter); mol != NULL; 
+    for (mol = oldInfo->beginMolecule(miter); mol != NULL;
          mol = oldInfo->nextMolecule(miter)) {
-
-        for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
-                 sd = mol->nextIntegrableObject(iiter)) {
-	      oldPos = sd->getPos() ;
-	      oldSnap->wrapVector(oldPos);
-	      newPos = scaleMatrix*oldPos ;
-	      sdNew = newInfo->getIOIndexToIntegrableObject(newIndex);
-          sdNew->setPos( newPos );
-          sdNew->setVel(sd->getVel());
-          if (sd->isAtom()) {
-            atype = static_cast<Atom*>(sd)->getAtomType();
-            FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-            if ( fqa.isFluctuatingCharge() ) {
-              RealType charge = sd->getFlucQPos();
-              sdNew->setFlucQPos(charge);
-              RealType cv = sd->getFlucQVel();
-              sdNew->setFlucQVel(cv);         
-            }
+      for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
+           sd = mol->nextIntegrableObject(iiter)) {
+        oldPos = sd->getPos();
+        oldSnap->wrapVector(oldPos);
+        newPos = scaleMatrix * oldPos;
+        sdNew = newInfo->getIOIndexToIntegrableObject(newIndex);
+        sdNew->setPos(newPos);
+        sdNew->setVel(sd->getVel());
+        if (sd->isAtom()) {
+          atype = static_cast<Atom*>(sd)->getAtomType();
+          FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+          if (fqa.isFluctuatingCharge()) {
+            RealType charge = sd->getFlucQPos();
+            sdNew->setFlucQPos(charge);
+            RealType cv = sd->getFlucQVel();
+            sdNew->setFlucQVel(cv);
           }
         }
-	      
-       newIndex++;
-       }
-	    
-          
-    for (mol = newInfo->beginMolecule(miter); mol != NULL; 
+      }
+
+      newIndex++;
+    }
+
+    for (mol = newInfo->beginMolecule(miter); mol != NULL;
          mol = newInfo->nextMolecule(miter)) {
-      
-      //change the positions of atoms which belong to the rigidbodies
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+      // change the positions of atoms which belong to the rigidbodies
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL;
            rb = mol->nextRigidBody(rbIter)) {
-	
-	
         rb->updateAtoms();
         rb->updateAtomVel();
-	
       }
     }
 
-    ForceManager* fman = new ForceManager(newInfo);   
+    ForceManager* fman = new ForceManager(newInfo);
     fman->initialize();
 
     FluctuatingChargePropagator* flucQ = new FluctuatingChargeDamped(newInfo);
@@ -213,19 +195,11 @@ int main(int argc, char* argv[]){
     Thermo thermo(newInfo);
     RealType totalEnergy(0);
     totalEnergy = thermo.getTotalEnergy();
-    eos<<current_affine<<"\t"<<totalEnergy<<"\n";
+    eos << current_affine << "\t" << totalEnergy << "\n";
 
-    std::cout<<countStep<<" data generated."<<std::endl;
-
-
-
-
-
+    std::cout << countStep << " data generated." << std::endl;
 
     current_affine += affine_step;
+  }
+  eos.close();
 }
-    eos.close();
-}
-
-
-

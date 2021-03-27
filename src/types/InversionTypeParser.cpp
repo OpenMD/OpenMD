@@ -43,12 +43,13 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "utils/Constants.hpp"
 #include "types/InversionTypeParser.hpp"
-#include "types/ImproperCosineInversionType.hpp"
-#include "types/HarmonicInversionType.hpp"
+
 #include "types/AmberImproperTorsionType.hpp"
+#include "types/HarmonicInversionType.hpp"
+#include "types/ImproperCosineInversionType.hpp"
 #include "types/PolynomialInversionType.hpp"
+#include "utils/Constants.hpp"
 // #include "types/CentralAtomHeightInversionType.hpp"
 // #include "types/DreidingInversionType.hpp"
 #include "utils/OpenMDException.hpp"
@@ -56,94 +57,92 @@
 #include "utils/StringUtils.hpp"
 
 namespace OpenMD {
-  
-  InversionTypeParser::InversionTypeParser() {    
-    stringToEnumMap_["AmberImproper"] = itAmberImproper;
-    stringToEnumMap_["ImproperCosine"] = itImproperCosine;
-    stringToEnumMap_["Harmonic"] = itHarmonic;
-    stringToEnumMap_["CentralAtomHeight"] = itCentralAtomHeight;
-    stringToEnumMap_["Dreiding"] = itDreiding;
+
+InversionTypeParser::InversionTypeParser() {
+  stringToEnumMap_["AmberImproper"] = itAmberImproper;
+  stringToEnumMap_["ImproperCosine"] = itImproperCosine;
+  stringToEnumMap_["Harmonic"] = itHarmonic;
+  stringToEnumMap_["CentralAtomHeight"] = itCentralAtomHeight;
+  stringToEnumMap_["Dreiding"] = itDreiding;
+}
+
+InversionType* InversionTypeParser::parseTypeAndPars(
+    const std::string& type, std::vector<RealType> pars) {
+  std::string line(type);
+
+  std::vector<RealType>::iterator it;
+  for (it = pars.begin(); it != pars.end(); ++it) {
+    line.append("\t");
+    line.append(OpenMD::to_string(*it));
   }
 
-  InversionType* InversionTypeParser::parseTypeAndPars(const std::string& type,
-                                                       std::vector<RealType> pars) {
-    
-    std::string line(type);
-    
-    std::vector<RealType>::iterator it;
-    for (it = pars.begin(); it != pars.end(); ++it) {
-      line.append("\t");
-      line.append( OpenMD::to_string(*it) );      
-    }
-    
-    return parseLine( line );    
+  return parseLine(line);
+}
+
+InversionType* InversionTypeParser::parseLine(const std::string& line) {
+  StringTokenizer tokenizer(line);
+  InversionType* inversionType = NULL;
+
+  int nTokens = tokenizer.countTokens();
+
+  if (nTokens < 1) {
+    throw OpenMDException("InversionTypeParser: Not enough tokens");
   }
-  
-  InversionType* InversionTypeParser::parseLine(const std::string& line){
-    
-    StringTokenizer tokenizer(line);
-    InversionType* inversionType = NULL;
-    
-    int nTokens = tokenizer.countTokens();
-    
-    if (nTokens < 1) {
-      throw OpenMDException("InversionTypeParser: Not enough tokens");
-    }
-    
-    InversionTypeEnum it = getInversionTypeEnum(tokenizer.nextToken());
 
-    nTokens -= 1;
+  InversionTypeEnum it = getInversionTypeEnum(tokenizer.nextToken());
 
-    switch(it) {
-      
-    case itImproperCosine :
+  nTokens -= 1;
+
+  switch (it) {
+    case itImproperCosine:
 
       if (nTokens < 3 || nTokens % 3 != 0) {
         throw OpenMDException("InversionTypeParser: Not enough tokens");
       } else {
         int nSets = nTokens / 3;
-  
-        std::vector<ImproperCosineInversionParameter> parameters;             
+
+        std::vector<ImproperCosineInversionParameter> parameters;
         for (int i = 0; i < nSets; ++i) {
           ImproperCosineInversionParameter currParam;
           currParam.kchi = tokenizer.nextTokenAsDouble();
           currParam.n = tokenizer.nextTokenAsInt();
-	  currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 * Constants::PI; //convert to rad
+          currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 *
+                            Constants::PI;  // convert to rad
           parameters.push_back(currParam);
         }
         inversionType = new ImproperCosineInversionType(parameters);
       }
-      
+
       break;
-      
+
     case itAmberImproper:
-      
+
       if (nTokens < 1) {
         throw OpenMDException("InversionTypeParser: Not enough tokens");
       } else {
-	RealType v2 = tokenizer.nextTokenAsDouble();
+        RealType v2 = tokenizer.nextTokenAsDouble();
         inversionType = new AmberImproperTorsionType(v2);
       }
-      
+
       break;
-      
-    case itHarmonic :
+
+    case itHarmonic:
       if (nTokens < 2) {
         throw OpenMDException("InversionTypeParser: Not enough tokens");
       } else {
         // Most inversion don't have specific angle information since
         // they are cosine polynomials.  This one is different,
         // however.  To match our other force field files
-        // (particularly for bends): 
+        // (particularly for bends):
         //
         // d0 should be read in kcal / mol / degrees^2
         // phi0 should be read in degrees
 
         RealType degreesPerRadian = 180.0 / Constants::PI;
-        
+
         // convert to kcal / mol / radians^2
-        RealType d0 = tokenizer.nextTokenAsDouble() * pow(degreesPerRadian,2);
-        
+        RealType d0 = tokenizer.nextTokenAsDouble() * pow(degreesPerRadian, 2);
+
         // convert to radians
         RealType phi0 = tokenizer.nextTokenAsDouble() / degreesPerRadian;
         inversionType = new HarmonicInversionType(d0, phi0);
@@ -155,38 +154,36 @@ namespace OpenMD {
       if (nTokens < 1) {
         throw OpenMDException("InversionTypeParser: Not enough tokens");
       } else {
-     
+
         RealType k = tokenizer.nextTokenAsDouble();
-     
+
         inversionType = new CentralAtomHeightInversionType(k);
       }
-      break;                 
+      break;
     case itDreiding :
       if (nTokens < 3) {
         throw OpenMDException("InversionTypeParser: Not enough tokens");
       } else {
-     
+
         RealType k = tokenizer.nextTokenAsDouble();
-     
+
         inversionType = new CentralAtomHeightInversionType(k);
       }
-      break;                 
+      break;
       */
-    case itUnknown :
+    case itUnknown:
     default:
-      throw OpenMDException("InversionTypeParser: Unknown Inversion Type");    
-    }
-    return inversionType;
+      throw OpenMDException("InversionTypeParser: Unknown Inversion Type");
   }
-  
-  InversionTypeParser::InversionTypeEnum InversionTypeParser::getInversionTypeEnum(const std::string& str) {
-    std::map<std::string, InversionTypeEnum>::iterator i;
-    i = stringToEnumMap_.find(str);
-    
-    return i == stringToEnumMap_.end() ? itUnknown : i->second;
-  }
-  
+  return inversionType;
 }
 
+InversionTypeParser::InversionTypeEnum
+InversionTypeParser::getInversionTypeEnum(const std::string& str) {
+  std::map<std::string, InversionTypeEnum>::iterator i;
+  i = stringToEnumMap_.find(str);
 
+  return i == stringToEnumMap_.end() ? itUnknown : i->second;
+}
 
+}  // namespace OpenMD

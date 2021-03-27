@@ -43,13 +43,14 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef  IS_MPI
+#ifdef IS_MPI
 #include <mpi.h>
 #endif
- 
-#include <cstdlib>
+
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
+
 #include "config.h"
 
 int nChecks;
@@ -61,21 +62,20 @@ errorStruct painCave;
 char checkPointMsg[MAX_SIM_ERROR_MSG_LENGTH];
 int worldRank;
 
-void initSimError( void ){
+void initSimError(void) {
   painCave.errMsg[0] = '\0';
   painCave.isFatal = 0;
   painCave.severity = OPENMD_ERROR;
   painCave.isEventLoop = 0;
   nChecks = 0;
 #ifdef IS_MPI
-  MPI_Comm_rank( MPI_COMM_WORLD, &worldRank);
+  MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
 #else
   worldRank = 0;
 #endif
 }
 
-int simError( void ) {
-  
+int simError(void) {
   char errorMsg[MAX_SIM_ERROR_MSG_LENGTH];
 
 #ifdef IS_MPI
@@ -83,94 +83,90 @@ int simError( void ) {
   int isError;
   char nodeMsg[MAX_SIM_ERROR_MSG_LENGTH];
 #endif
-  
+
   strcpy(errorMsg, "OpenMD ");
-  switch( painCave.severity ) {
-  case OPENMD_WARNING:
-    strcat(errorMsg, "warning");
-    break;
-  case OPENMD_INFO:
-    strcat(errorMsg, "info");
-    break;
-  default:
-    if( painCave.isFatal ) {
-      strcat(errorMsg, "FATAL ");
-    }
-    strcat(errorMsg, "ERROR");
-  }
-  
-#ifdef IS_MPI
-  if (worldRank == 0) {
-    if ( painCave.isEventLoop ) {
-      sprintf( nodeMsg, " (reported by MPI node %d)", worldRank);
-      strncat(errorMsg, nodeMsg, MAX_SIM_ERROR_MSG_LENGTH - strlen(errorMsg) - 1);
-      errorMsg[MAX_SIM_ERROR_MSG_LENGTH-1] = '\0';
-    }
-#endif
-    
-    strcat(errorMsg, ":\n\t");    
-    strncat(errorMsg, painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH - strlen(errorMsg) - 1);
-    errorMsg[MAX_SIM_ERROR_MSG_LENGTH-1] = '\0';
-    strcat(errorMsg, "\n");
-    
-    switch( painCave.severity ) {
+  switch (painCave.severity) {
     case OPENMD_WARNING:
+      strcat(errorMsg, "warning");
+      break;
     case OPENMD_INFO:
-      fprintf(stdout, "%s", errorMsg);
+      strcat(errorMsg, "info");
       break;
     default:
-      fprintf(stderr, "%s", errorMsg);
-    }
-    
-#ifdef IS_MPI
-    if (painCave.isEventLoop) 
-      return 1;
+      if (painCave.isFatal) {
+        strcat(errorMsg, "FATAL ");
+      }
+      strcat(errorMsg, "ERROR");
   }
-#endif   
+
+#ifdef IS_MPI
+  if (worldRank == 0) {
+    if (painCave.isEventLoop) {
+      sprintf(nodeMsg, " (reported by MPI node %d)", worldRank);
+      strncat(errorMsg, nodeMsg,
+              MAX_SIM_ERROR_MSG_LENGTH - strlen(errorMsg) - 1);
+      errorMsg[MAX_SIM_ERROR_MSG_LENGTH - 1] = '\0';
+    }
+#endif
+
+    strcat(errorMsg, ":\n\t");
+    strncat(errorMsg, painCave.errMsg,
+            MAX_SIM_ERROR_MSG_LENGTH - strlen(errorMsg) - 1);
+    errorMsg[MAX_SIM_ERROR_MSG_LENGTH - 1] = '\0';
+    strcat(errorMsg, "\n");
+
+    switch (painCave.severity) {
+      case OPENMD_WARNING:
+      case OPENMD_INFO:
+        fprintf(stdout, "%s", errorMsg);
+        break;
+      default:
+        fprintf(stderr, "%s", errorMsg);
+    }
+
+#ifdef IS_MPI
+    if (painCave.isEventLoop) return 1;
+  }
+#endif
 
   if (painCave.isFatal) {
-#ifdef IS_MPI    
+#ifdef IS_MPI
     MPI_Allreduce(&myError, &isError, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);
     MPI_Finalize();
 #endif
     exit(0);
-  }  
-  return 1;  
+  }
+  return 1;
 }
 
-
-void errorCheckPoint( void ){
-  
+void errorCheckPoint(void) {
   int myError = 0;
   int isError = 0;
-  
+
 #ifdef IS_MPI
   MPI_Allreduce(&myError, &isError, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);
 #else
   isError = myError;
 #endif
-  
-  if( isError ){    
+
+  if (isError) {
 #ifdef IS_MPI
     MPI_Finalize();
-#endif    
+#endif
     exit(0);
   }
-  
-#ifdef CHECKPOINT_VERBOSE  
+
+#ifdef CHECKPOINT_VERBOSE
   nChecks++;
 
 #ifdef IS_MPI
-  if( worldRank == 0 ){
+  if (worldRank == 0) {
 #endif
 
-    fprintf(stderr,
-	    "Checkpoint #%d reached: %s\n",
-	    nChecks,
-	    checkPointMsg );
+    fprintf(stderr, "Checkpoint #%d reached: %s\n", nChecks, checkPointMsg);
 #ifdef IS_MPI
   }
 #endif
 
-#endif 
+#endif
 }

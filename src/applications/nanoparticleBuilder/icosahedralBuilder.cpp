@@ -43,71 +43,68 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "brains/SimCreator.hpp"
+#include "brains/SimInfo.hpp"
+#include "clusters/Cuboctahedron.hpp"
+#include "clusters/Decahedron.hpp"
+#include "clusters/Icosahedron.hpp"
 #include "config.h"
 #include "icosahedralBuilderCmd.hpp"
+#include "io/DumpWriter.hpp"
 #include "utils/MoLocator.hpp"
 #include "utils/Tuple.hpp"
-#include "brains/SimInfo.hpp"
-#include "brains/SimCreator.hpp"
-#include "io/DumpWriter.hpp"
-#include "clusters/Icosahedron.hpp"
-#include "clusters/Decahedron.hpp"
-#include "clusters/Cuboctahedron.hpp"
 
 using namespace OpenMD;
 using namespace std;
 
-void createMdFile(const std::string&oldMdFileName, 
-                  const std::string&newMdFileName,
-                  int nMol) {
+void createMdFile(const std::string& oldMdFileName,
+                  const std::string& newMdFileName, int nMol) {
   ifstream oldMdFile;
   ofstream newMdFile;
   const int MAXLEN = 65535;
   char buffer[MAXLEN];
-  
-  //create new .omd file based on old .omd file
+
+  // create new .omd file based on old .omd file
   oldMdFile.open(oldMdFileName.c_str());
   newMdFile.open(newMdFileName.c_str());
   oldMdFile.getline(buffer, MAXLEN);
 
   while (!oldMdFile.eof()) {
-
-    //correct molecule number
+    // correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
       sprintf(buffer, "\tnMol = %i;", nMol);
       newMdFile << buffer << std::endl;
     } else {
       newMdFile << buffer << std::endl;
     }
-    
+
     oldMdFile.getline(buffer, MAXLEN);
   }
-  
+
   oldMdFile.close();
   newMdFile.close();
 }
 
-int main(int argc, char *argv []) {
-  
+int main(int argc, char* argv[]) {
   gengetopt_args_info args_info;
   std::string inputFileName;
   std::string outputFileName;
-  
+
   MoLocator* locator;
   RealType latticeConstant(0.0);
   int nShells(-1);
 
-  DumpWriter *writer;
-  
+  DumpWriter* writer;
+
   // Parse Command Line Arguments
-  if (cmdline_parser(argc, argv, &args_info) != 0)
-    exit(1);
-         
+  if (cmdline_parser(argc, argv, &args_info) != 0) exit(1);
+
   /* get input file name */
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg, "No input .omd file name was specified "
+    sprintf(painCave.errMsg,
+            "No input .omd file name was specified "
             "on the command line");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
@@ -115,27 +112,30 @@ int main(int argc, char *argv []) {
   }
 
   if (args_info.shells_given ||
-      (args_info.cuboctahedron_given || args_info.truncatedCube_given) ) {   
-    nShells = args_info.shells_arg;    
-    if( nShells < 0 ) {
-      sprintf(painCave.errMsg, "icosahedralBuilder:  The number of shells\n"
+      (args_info.cuboctahedron_given || args_info.truncatedCube_given)) {
+    nShells = args_info.shells_arg;
+    if (nShells < 0) {
+      sprintf(painCave.errMsg,
+              "icosahedralBuilder:  The number of shells\n"
               "\tmust be greater than or equal to zero.");
       painCave.isFatal = 1;
       cmdline_parser_print_help();
       simError();
     }
   } else {
-    sprintf(painCave.errMsg, "icosahedralBuilder:  The number of shells\n"
+    sprintf(painCave.errMsg,
+            "icosahedralBuilder:  The number of shells\n"
             "\tis required to build a Mackay Icosahedron.");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
     simError();
   }
 
-  if (args_info.latticeConstant_given) {    
+  if (args_info.latticeConstant_given) {
     latticeConstant = args_info.latticeConstant_arg;
-  } else  {   
-    sprintf(painCave.errMsg, "icosahedralBuilder:  No lattice constant\n"
+  } else {
+    sprintf(painCave.errMsg,
+            "icosahedralBuilder:  No lattice constant\n"
             "\tgiven.");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
@@ -147,44 +147,42 @@ int main(int argc, char *argv []) {
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
 
   vector<Vector3d> Points;
-  if (args_info.ico_given){
+  if (args_info.ico_given) {
     Icosahedron* ico = new Icosahedron();
     Points = ico->getPoints(nShells);
   } else if (args_info.deca_given) {
     RegularDecahedron* deca = new RegularDecahedron(nShells);
     Points = deca->getPoints();
   } else if (args_info.ino_given) {
-    int columnAtoms = args_info.columnAtoms_arg;    
+    int columnAtoms = args_info.columnAtoms_arg;
     InoDecahedron* ino = new InoDecahedron(columnAtoms, nShells);
     Points = ino->getPoints();
   } else if (args_info.marks_given) {
-    int columnAtoms = args_info.columnAtoms_arg;    
+    int columnAtoms = args_info.columnAtoms_arg;
     int twinAtoms = args_info.twinAtoms_arg;
     Decahedron* marks = new Decahedron(columnAtoms, nShells, twinAtoms);
     Points = marks->getPoints();
   } else if (args_info.stone_given) {
-    int columnAtoms = args_info.columnAtoms_arg;    
+    int columnAtoms = args_info.columnAtoms_arg;
     int twinAtoms = args_info.twinAtoms_arg;
     int truncatedPlanes = args_info.truncatedPlanes_arg;
-    CurlingStoneDecahedron* csd = new CurlingStoneDecahedron(columnAtoms,
-                                                             nShells,
-                                                             twinAtoms,
-                                                             truncatedPlanes);
+    CurlingStoneDecahedron* csd = new CurlingStoneDecahedron(
+        columnAtoms, nShells, twinAtoms, truncatedPlanes);
     Points = csd->getPoints();
   } else if (args_info.cuboctahedron_given || args_info.truncatedCube_given) {
     std::string lattice;
     int unitCells = 0;
-    if (args_info.lattice_given) {    
+    if (args_info.lattice_given) {
       lattice = args_info.lattice_arg;
-    } else  {   
+    } else {
       sprintf(painCave.errMsg, "icosahedralBuilder: No lattice type given.");
       painCave.isFatal = 1;
       cmdline_parser_print_help();
       simError();
     }
-    if (args_info.unitCells_given) {    
+    if (args_info.unitCells_given) {
       unitCells = args_info.unitCells_arg;
-    } else  {   
+    } else {
       sprintf(painCave.errMsg, "icosahedralBuilder: Must specify unit cells.");
       painCave.isFatal = 1;
       cmdline_parser_print_help();
@@ -192,27 +190,27 @@ int main(int argc, char *argv []) {
     }
     if (args_info.truncatedCube_given) {
       int truncatedPlanes = args_info.truncatedPlanes_arg;
-      TruncatedCube* tc = new TruncatedCube(lattice, unitCells,
-                                            truncatedPlanes);
+      TruncatedCube* tc =
+          new TruncatedCube(lattice, unitCells, truncatedPlanes);
       Points = tc->getPoints();
     } else {
       RegularCuboctahedron* rc = new RegularCuboctahedron(lattice, unitCells);
       Points = rc->getPoints();
     }
   }
-  
+
   outputFileName = args_info.output_arg;
-   
+
   // create a new .omd file on fly which corrects the number of
   // molecules
 
   createMdFile(inputFileName, outputFileName, Points.size());
-  
+
   delete oldInfo;
-  
+
   SimCreator newCreator;
   SimInfo* NewInfo = newCreator.createSim(outputFileName, false);
-    
+
   // Place molecules
   Molecule* mol;
   SimInfo::MoleculeIterator mi;
@@ -220,9 +218,9 @@ int main(int argc, char *argv []) {
 
   int l = 0;
 
-  locator = new MoLocator(NewInfo->getMoleculeStamp(0), 
-                          NewInfo->getForceField());
-    
+  locator =
+      new MoLocator(NewInfo->getMoleculeStamp(0), NewInfo->getForceField());
+
   Vector3d boxMax;
   Vector3d boxMin;
 
@@ -239,7 +237,7 @@ int main(int argc, char *argv []) {
       location = Points[n] * latticeConstant / sqrt(2.0);
     }
     Vector3d orientation = Vector3d(0, 0, 1.0);
-    
+
     if (n == 0) {
       boxMax = location;
       boxMin = location;
@@ -249,28 +247,28 @@ int main(int argc, char *argv []) {
         boxMin[i] = min(boxMin[i], location[i]);
       }
     }
-    
+
     locator->placeMol(location, orientation, mol);
     l++;
   }
 
   Mat3x3d boundingBox;
-  boundingBox(0,0) = 10.0*(boxMax[0] - boxMin[0]);
-  boundingBox(1,1) = 10.0*(boxMax[1] - boxMin[1]);
-  boundingBox(2,2) = 10.0*(boxMax[2] - boxMin[2]);
- 
-  //set Hmat
-  NewInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat( boundingBox );
-  
-  //create dumpwriter and write out the coordinates
+  boundingBox(0, 0) = 10.0 * (boxMax[0] - boxMin[0]);
+  boundingBox(1, 1) = 10.0 * (boxMax[1] - boxMin[1]);
+  boundingBox(2, 2) = 10.0 * (boxMax[2] - boxMin[2]);
+
+  // set Hmat
+  NewInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat(boundingBox);
+
+  // create dumpwriter and write out the coordinates
   writer = new DumpWriter(NewInfo, outputFileName);
-  
+
   if (writer == NULL) {
     sprintf(painCave.errMsg, "Error in creating dumpwriter object ");
     painCave.isFatal = 1;
     simError();
   }
-  
+
   writer->writeDump();
 
   // deleting the writer will put the closing at the end of the dump file
@@ -278,8 +276,10 @@ int main(int argc, char *argv []) {
   delete writer;
 
   // clean up by calling simError.....
-  sprintf(painCave.errMsg, "A new OpenMD file called \"%s\" has been "
-          "generated.\n", outputFileName.c_str());
+  sprintf(painCave.errMsg,
+          "A new OpenMD file called \"%s\" has been "
+          "generated.\n",
+          outputFileName.c_str());
   painCave.isFatal = 0;
   painCave.severity = OPENMD_INFO;
   simError();

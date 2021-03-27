@@ -45,30 +45,34 @@
 
 /* Calculates Rho(Z) for density profile of liquid slab. */
 
+#include "applications/staticProps/RhoZ.hpp"
+
 #include <algorithm>
 #include <fstream>
-#include "applications/staticProps/RhoZ.hpp"
-#include "utils/simError.h"
+
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
+#include "utils/simError.h"
 namespace OpenMD {
 
-  RhoZ::RhoZ(SimInfo* info, const std::string& filename,
-	     const std::string& sele, int nzbins, int axis)
-    : StaticAnalyser(info, filename, nzbins), selectionScript_(sele),
-      evaluator_(info), seleMan_(info), axis_(axis) {
+RhoZ::RhoZ(SimInfo* info, const std::string& filename, const std::string& sele,
+           int nzbins, int axis)
+    : StaticAnalyser(info, filename, nzbins),
+      selectionScript_(sele),
+      evaluator_(info),
+      seleMan_(info),
+      axis_(axis) {
+  evaluator_.loadScriptString(sele);
+  if (!evaluator_.isDynamic()) {
+    seleMan_.setSelectionSet(evaluator_.evaluate());
+  }
 
-    evaluator_.loadScriptString(sele);
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
+  // fixed number of bins
 
-    // fixed number of bins
+  sliceSDLists_.resize(nBins_);
+  density_.resize(nBins_);
 
-    sliceSDLists_.resize(nBins_);
-    density_.resize(nBins_);
-
-    switch(axis_) {
+  switch (axis_) {
     case 0:
       axisLabel_ = "x";
       break;
@@ -79,118 +83,113 @@ namespace OpenMD {
     default:
       axisLabel_ = "z";
       break;
-    }
-
-
-    setOutputName(getPrefix(filename) + ".RhoZ");
   }
 
-  void RhoZ::process() {
-    StuntDouble* sd;
-    int ii;
+  setOutputName(getPrefix(filename) + ".RhoZ");
+}
 
-    bool usePeriodicBoundaryConditions_ =
+void RhoZ::process() {
+  StuntDouble* sd;
+  int ii;
+
+  bool usePeriodicBoundaryConditions_ =
       info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-    DumpReader reader(info_, dumpFilename_);
-    int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames/step_;
+  DumpReader reader(info_, dumpFilename_);
+  int nFrames = reader.getNFrames();
+  nProcessed_ = nFrames / step_;
 
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+  for (int istep = 0; istep < nFrames; istep += step_) {
+    reader.readFrame(istep);
+    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-      for (unsigned int i = 0; i < nBins_; i++) {
-        sliceSDLists_[i].clear();
-      }
-
-      RealType sliceVolume = currentSnapshot_->getVolume() /nBins_;
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-      zBox_.push_back(hmat(axis_,axis_));
-
-      //RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;
-
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-
-      //wrap the stuntdoubles into a cell
-      for (sd = seleMan_.beginSelected(ii); sd != NULL;
-	   sd = seleMan_.nextSelected(ii)) {
-        Vector3d pos = sd->getPos();
-        if (usePeriodicBoundaryConditions_)
-          currentSnapshot_->wrapVector(pos);
-        sd->setPos(pos);
-      }
-
-      //determine which atom belongs to which slice
-      for (sd = seleMan_.beginSelected(ii); sd != NULL;
-	   sd = seleMan_.nextSelected(ii)) {
-        Vector3d pos = sd->getPos();
-        // shift molecules by half a box to have bins start at 0
-        //int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_)); = int(nBins_ * ( 0.5 + pos[axis_] / hmat(axis_,axis_) )
-        // Shift molecules by half a box to have bins start at 0
-        // The modulo operator is used to wrap the case when we are
-        // beyond the end of the bins back to the beginning. (from RNEMD.cpp)
-        int binNo = int(nBins_ * ( pos[axis_] / hmat(axis_,axis_) + 0.5 )) % nBins_;
-        sliceSDLists_[binNo].push_back(sd);
-      }
-
-      //loop over the slices to calculate the densities
-      for (unsigned int i = 0; i < nBins_; i++) {
-        RealType totalMass = 0;
-        for (unsigned int k = 0; k < sliceSDLists_[i].size(); ++k) {
-          totalMass += sliceSDLists_[i][k]->getMass();
-        }
-        density_[i] += totalMass/sliceVolume;
-      }
+    for (unsigned int i = 0; i < nBins_; i++) {
+      sliceSDLists_[i].clear();
     }
 
-    writeDensity();
+    RealType sliceVolume = currentSnapshot_->getVolume() / nBins_;
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    zBox_.push_back(hmat(axis_, axis_));
 
+    // RealType halfBoxZ_ = hmat(axis_,axis_) / 2.0;
+
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+
+    // wrap the stuntdoubles into a cell
+    for (sd = seleMan_.beginSelected(ii); sd != NULL;
+         sd = seleMan_.nextSelected(ii)) {
+      Vector3d pos = sd->getPos();
+      if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(pos);
+      sd->setPos(pos);
+    }
+
+    // determine which atom belongs to which slice
+    for (sd = seleMan_.beginSelected(ii); sd != NULL;
+         sd = seleMan_.nextSelected(ii)) {
+      Vector3d pos = sd->getPos();
+      // shift molecules by half a box to have bins start at 0
+      // int binNo = int(nBins_ * (halfBoxZ_ + pos[axis_]) / hmat(axis_,axis_));
+      // = int(nBins_ * ( 0.5 + pos[axis_] / hmat(axis_,axis_) ) Shift molecules
+      // by half a box to have bins start at 0 The modulo operator is used to
+      // wrap the case when we are beyond the end of the bins back to the
+      // beginning. (from RNEMD.cpp)
+      int binNo =
+          int(nBins_ * (pos[axis_] / hmat(axis_, axis_) + 0.5)) % nBins_;
+      sliceSDLists_[binNo].push_back(sd);
+    }
+
+    // loop over the slices to calculate the densities
+    for (unsigned int i = 0; i < nBins_; i++) {
+      RealType totalMass = 0;
+      for (unsigned int k = 0; k < sliceSDLists_[i].size(); ++k) {
+        totalMass += sliceSDLists_[i][k]->getMass();
+      }
+      density_[i] += totalMass / sliceVolume;
+    }
   }
 
+  writeDensity();
+}
 
+void RhoZ::writeDensity() {
+  // compute average box length:
+  std::vector<RealType>::iterator j;
+  RealType zSum = 0.0;
+  for (j = zBox_.begin(); j != zBox_.end(); ++j) {
+    zSum += *j;
+  }
+  RealType zAve = zSum / zBox_.size();
 
-  void RhoZ::writeDensity() {
+  std::ofstream rdfStream(outputFilename_.c_str());
+  if (rdfStream.is_open()) {
+    rdfStream << "#Rho(" << axisLabel_ << ")\n";
+    rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
+    rdfStream << "#selection: (" << selectionScript_ << ")\n";
+    rdfStream << "#" << axisLabel_ << "\tdensity (g cm^-3)\t";
 
-    // compute average box length:
-    std::vector<RealType>::iterator j;
-    RealType zSum = 0.0;
-    for (j = zBox_.begin(); j != zBox_.end(); ++j) {
-      zSum += *j;
-    }
-    RealType zAve = zSum / zBox_.size();
+    rdfStream << std::endl;
 
-    std::ofstream rdfStream(outputFilename_.c_str());
-    if (rdfStream.is_open()) {
-      rdfStream << "#Rho(" << axisLabel_ << ")\n";
-      rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
-      rdfStream << "#selection: (" << selectionScript_ << ")\n";
-      rdfStream << "#" << axisLabel_ << "\tdensity (g cm^-3)\t";
+    rdfStream.precision(8);  // same precision as the RNEMD files
+
+    for (unsigned int i = 0; i < density_.size(); ++i) {
+      RealType z = zAve * (i + 0.5) / density_.size();
+      rdfStream << z << "\t"
+                << Constants::densityConvert * density_[i] / nProcessed_
+                << "\t";
 
       rdfStream << std::endl;
-
-      rdfStream.precision(8);   //same precision as the RNEMD files
-
-      for (unsigned int i = 0; i < density_.size(); ++i) {
-        RealType z = zAve * (i+0.5)/density_.size();
-        rdfStream << z << "\t"
-                  << Constants::densityConvert * density_[i] / nProcessed_
-                  << "\t";
-
-        rdfStream << std::endl;
-      }
-
-    } else {
-
-      sprintf(painCave.errMsg, "RhoZ: unable to open %s\n",
-	      outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();
     }
 
-    rdfStream.close();
+  } else {
+    sprintf(painCave.errMsg, "RhoZ: unable to open %s\n",
+            outputFilename_.c_str());
+    painCave.isFatal = 1;
+    simError();
   }
 
+  rdfStream.close();
 }
+
+}  // namespace OpenMD

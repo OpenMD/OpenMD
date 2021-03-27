@@ -44,129 +44,128 @@
  */
 
 #include "types/UFFAdapter.hpp"
-#include "utils/simError.h"
+
 #include <cstdio>
 #include <memory>
 
+#include "utils/simError.h"
+
 namespace OpenMD {
 
-  bool UFFAdapter::isUFF() {
-    return at_->hasProperty(UFFtypeID);
-  }
-  
-  UFFAtypeParameters UFFAdapter::getUFFParam() {
-    
-    if (!isUFF()) {
-      sprintf( painCave.errMsg,               
-               "UFFAdapter::getUFFParam was passed an atomType (%s)\n"
-               "\tthat does not appear to be a UFF atom.\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    std::shared_ptr<GenericData> data = at_->getPropertyByName(UFFtypeID);
-    if (data == nullptr) {
-      sprintf( painCave.errMsg, 
-               "UFFAdapter::getUFFParam could not find UFF\n"
-               "\tparameters for atomType %s.\n", at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError(); 
-    }
-    
-    std::shared_ptr<UFFAtypeData> uffData = std::dynamic_pointer_cast<UFFAtypeData>(data);
-    if (uffData == NULL) {
-      sprintf( painCave.errMsg,
-               "UFFAdapter::getUFFParam could not convert\n"
-               "\tGenericData to UFFAtypeData for atom type %s\n", 
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    return uffData->getData();
+bool UFFAdapter::isUFF() { return at_->hasProperty(UFFtypeID); }
+
+UFFAtypeParameters UFFAdapter::getUFFParam() {
+  if (!isUFF()) {
+    sprintf(painCave.errMsg,
+            "UFFAdapter::getUFFParam was passed an atomType (%s)\n"
+            "\tthat does not appear to be a UFF atom.\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
   }
 
-  RealType UFFAdapter::getR1() {    
-    UFFAtypeParameters uffParam = getUFFParam();
-    return uffParam.r1;
+  std::shared_ptr<GenericData> data = at_->getPropertyByName(UFFtypeID);
+  if (data == nullptr) {
+    sprintf(painCave.errMsg,
+            "UFFAdapter::getUFFParam could not find UFF\n"
+            "\tparameters for atomType %s.\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
   }
 
-  RealType UFFAdapter::getTheta0() {    
-    UFFAtypeParameters uffParam = getUFFParam();
-    return uffParam.theta0;
+  std::shared_ptr<UFFAtypeData> uffData =
+      std::dynamic_pointer_cast<UFFAtypeData>(data);
+  if (uffData == NULL) {
+    sprintf(painCave.errMsg,
+            "UFFAdapter::getUFFParam could not convert\n"
+            "\tGenericData to UFFAtypeData for atom type %s\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
   }
 
-  RealType UFFAdapter::getX1() {    
-    UFFAtypeParameters uffParam = getUFFParam();
-    return uffParam.x1;
-  }
-  
-  RealType UFFAdapter::getD1() {    
-    UFFAtypeParameters uffParam = getUFFParam();
-    return uffParam.D1;
-  }
-
-  RealType UFFAdapter::getZeta() {    
-    UFFAtypeParameters uffParam = getUFFParam();
-    return uffParam.zeta;
-  }
-
-  RealType UFFAdapter::getZ1() {    
-    UFFAtypeParameters uffParam = getUFFParam();
-    return uffParam.Z1;
-  }
-
-  RealType UFFAdapter::getVi() {    
-    UFFAtypeParameters uffParam = getUFFParam();
-    return uffParam.Vi;
-  }
-
-  RealType UFFAdapter::getUj() {    
-    UFFAtypeParameters uffParam = getUFFParam();
-    return uffParam.Uj;
-  }
-  
-  RealType UFFAdapter::getXi() {    
-    UFFAtypeParameters uffParam = getUFFParam();
-    return uffParam.Xi;
-  }
-
-  RealType UFFAdapter::getHard() {    
-    UFFAtypeParameters uffParam = getUFFParam();
-    return uffParam.Hard;
-  }
-
-  RealType UFFAdapter::getRadius() {    
-    UFFAtypeParameters uffParam = getUFFParam();
-    return uffParam.Radius;
-  }
-      
-  void UFFAdapter::makeUFF(RealType r1, RealType theta0, RealType x1, RealType D1,
-                           RealType zeta, RealType Z1, RealType Vi, RealType Uj,
-                           RealType Xi, RealType Hard, RealType Radius) { 
-    
-    if (isUFF()){
-      at_->removeProperty(UFFtypeID);
-    }
-    
-    UFFAtypeParameters uffParam {};
-
-    uffParam.r1 =     r1;    
-    uffParam.theta0 = theta0;
-    uffParam.x1 =     x1;    
-    uffParam.D1 =     D1;    
-    uffParam.zeta =   zeta;  
-    uffParam.Z1 =     Z1;    
-    uffParam.Vi =     Vi;    
-    uffParam.Uj =     Uj;    
-    uffParam.Xi =     Xi;    
-    uffParam.Hard =   Hard;  
-    uffParam.Radius = Radius;
-    at_->addProperty(std::make_shared<UFFAtypeData>(UFFtypeID, uffParam));
-  }
+  return uffData->getData();
 }
 
+RealType UFFAdapter::getR1() {
+  UFFAtypeParameters uffParam = getUFFParam();
+  return uffParam.r1;
+}
+
+RealType UFFAdapter::getTheta0() {
+  UFFAtypeParameters uffParam = getUFFParam();
+  return uffParam.theta0;
+}
+
+RealType UFFAdapter::getX1() {
+  UFFAtypeParameters uffParam = getUFFParam();
+  return uffParam.x1;
+}
+
+RealType UFFAdapter::getD1() {
+  UFFAtypeParameters uffParam = getUFFParam();
+  return uffParam.D1;
+}
+
+RealType UFFAdapter::getZeta() {
+  UFFAtypeParameters uffParam = getUFFParam();
+  return uffParam.zeta;
+}
+
+RealType UFFAdapter::getZ1() {
+  UFFAtypeParameters uffParam = getUFFParam();
+  return uffParam.Z1;
+}
+
+RealType UFFAdapter::getVi() {
+  UFFAtypeParameters uffParam = getUFFParam();
+  return uffParam.Vi;
+}
+
+RealType UFFAdapter::getUj() {
+  UFFAtypeParameters uffParam = getUFFParam();
+  return uffParam.Uj;
+}
+
+RealType UFFAdapter::getXi() {
+  UFFAtypeParameters uffParam = getUFFParam();
+  return uffParam.Xi;
+}
+
+RealType UFFAdapter::getHard() {
+  UFFAtypeParameters uffParam = getUFFParam();
+  return uffParam.Hard;
+}
+
+RealType UFFAdapter::getRadius() {
+  UFFAtypeParameters uffParam = getUFFParam();
+  return uffParam.Radius;
+}
+
+void UFFAdapter::makeUFF(RealType r1, RealType theta0, RealType x1, RealType D1,
+                         RealType zeta, RealType Z1, RealType Vi, RealType Uj,
+                         RealType Xi, RealType Hard, RealType Radius) {
+  if (isUFF()) {
+    at_->removeProperty(UFFtypeID);
+  }
+
+  UFFAtypeParameters uffParam{};
+
+  uffParam.r1 = r1;
+  uffParam.theta0 = theta0;
+  uffParam.x1 = x1;
+  uffParam.D1 = D1;
+  uffParam.zeta = zeta;
+  uffParam.Z1 = Z1;
+  uffParam.Vi = Vi;
+  uffParam.Uj = Uj;
+  uffParam.Xi = Xi;
+  uffParam.Hard = Hard;
+  uffParam.Radius = Radius;
+  at_->addProperty(std::make_shared<UFFAtypeData>(UFFtypeID, uffParam));
+}
+}  // namespace OpenMD

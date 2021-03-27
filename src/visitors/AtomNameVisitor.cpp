@@ -42,85 +42,81 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-#include <sstream> 
+#include "visitors/AtomNameVisitor.hpp"
+
 #include <fstream>
 #include <memory>
+#include <sstream>
 
-#include "visitors/AtomNameVisitor.hpp"
-#include "utils/Trim.hpp"
-#include "utils/StringTokenizer.hpp"
 #include "brains/SimInfo.hpp"
-
+#include "utils/StringTokenizer.hpp"
+#include "utils/Trim.hpp"
 
 namespace OpenMD {
-  AtomNameVisitor::AtomNameVisitor(SimInfo* info) : BaseVisitor(), 
-                                                    info_(info) {
-    visitorName = "AtomNameVisitor";
-    ff_ = info_->getForceField();
-  }
-  
-  
-  void AtomNameVisitor::visitAtom(Atom* atom) {
-    std::shared_ptr<AtomData> atomData;
-    std::shared_ptr<GenericData> data = atom->getPropertyByName("ATOMDATA");
-    
-    if(data != nullptr){
-      atomData = std::dynamic_pointer_cast<AtomData>(data);  
-      if(atomData == nullptr){
-	std::cerr << "can not get Atom Data from " << atom->getType() 
-                  << std::endl;
-	atomData = std::make_shared<AtomData>(); 
-      }
-    } else {
-      atomData = std::make_shared<AtomData>(); 
-    }
-    
-    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
-    for (std::shared_ptr<AtomInfo> atomInfo = atomData->beginAtomInfo(i); 
-         atomInfo != nullptr; 
-         atomInfo = atomData->nextAtomInfo(i)) {
-      
-      // query the force field for the AtomType associated with this
-      // atomTypeName:
-      AtomType* at = ff_->getAtomType(atomInfo->atomTypeName);
-      // get the chain of base types for this atom type:
-      std::vector<AtomType*> ayb = at->allYourBase();
-      // use the last type in the chain of base types for the name:
-      std::string bn = ayb[ayb.size()-1]->getName();
-      
-      atomInfo->atomTypeName = bn;      
-    }
-  }
-  
-  void AtomNameVisitor::visit(RigidBody* rb) {
-    std::vector<Atom*>::iterator i;
-    
-    for (Atom* atom = rb->beginAtom(i); atom != NULL; atom = rb->nextAtom(i)) {
-      visit(atom);
-    }
-  }
-  
-  
-  const std::string AtomNameVisitor::toString() {
-    char   buffer[65535];
-    std::string result;
-    
-    sprintf(buffer,
-            "------------------------------------------------------------------\n");
-    result += buffer;
-    
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
-    result += buffer;
-    
-    sprintf(buffer,
-            "Visitor Description: print base atom types\n");
-    result += buffer;
-    
-    sprintf(buffer,
-            "------------------------------------------------------------------\n");
-    result += buffer;
-    
-    return result;
-  }
-  
+AtomNameVisitor::AtomNameVisitor(SimInfo* info) : BaseVisitor(), info_(info) {
+  visitorName = "AtomNameVisitor";
+  ff_ = info_->getForceField();
 }
+
+void AtomNameVisitor::visitAtom(Atom* atom) {
+  std::shared_ptr<AtomData> atomData;
+  std::shared_ptr<GenericData> data = atom->getPropertyByName("ATOMDATA");
+
+  if (data != nullptr) {
+    atomData = std::dynamic_pointer_cast<AtomData>(data);
+    if (atomData == nullptr) {
+      std::cerr << "can not get Atom Data from " << atom->getType()
+                << std::endl;
+      atomData = std::make_shared<AtomData>();
+    }
+  } else {
+    atomData = std::make_shared<AtomData>();
+  }
+
+  std::vector<std::shared_ptr<AtomInfo>>::iterator i;
+  for (std::shared_ptr<AtomInfo> atomInfo = atomData->beginAtomInfo(i);
+       atomInfo != nullptr; atomInfo = atomData->nextAtomInfo(i)) {
+    // query the force field for the AtomType associated with this
+    // atomTypeName:
+    AtomType* at = ff_->getAtomType(atomInfo->atomTypeName);
+    // get the chain of base types for this atom type:
+    std::vector<AtomType*> ayb = at->allYourBase();
+    // use the last type in the chain of base types for the name:
+    std::string bn = ayb[ayb.size() - 1]->getName();
+
+    atomInfo->atomTypeName = bn;
+  }
+}
+
+void AtomNameVisitor::visit(RigidBody* rb) {
+  std::vector<Atom*>::iterator i;
+
+  for (Atom* atom = rb->beginAtom(i); atom != NULL; atom = rb->nextAtom(i)) {
+    visit(atom);
+  }
+}
+
+const std::string AtomNameVisitor::toString() {
+  char buffer[65535];
+  std::string result;
+
+  sprintf(
+      buffer,
+      "------------------------------------------------------------------\n");
+  result += buffer;
+
+  sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+  result += buffer;
+
+  sprintf(buffer, "Visitor Description: print base atom types\n");
+  result += buffer;
+
+  sprintf(
+      buffer,
+      "------------------------------------------------------------------\n");
+  result += buffer;
+
+  return result;
+}
+
+}  // namespace OpenMD

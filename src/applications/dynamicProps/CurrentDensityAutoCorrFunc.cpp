@@ -44,156 +44,152 @@
  */
 
 #include "applications/dynamicProps/CurrentDensityAutoCorrFunc.hpp"
-#include "utils/Revision.hpp"
+
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
+#include "utils/Revision.hpp"
 
 using namespace std;
 namespace OpenMD {
-  CurrentDensityAutoCorrFunc::CurrentDensityAutoCorrFunc(SimInfo* info,
-                                                         const string& filename,
-                                                         const string& sele1,
-                                                         const string& sele2)
-    : SystemACF<RealType>(info, filename, sele1, sele2,
-                          DataStorage::dslVelocity |
-                          DataStorage::dslFlucQPosition) {
-    
-    setCorrFuncType("Current Density Auto Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".currentDensityCorr");
+CurrentDensityAutoCorrFunc::CurrentDensityAutoCorrFunc(SimInfo* info,
+                                                       const string& filename,
+                                                       const string& sele1,
+                                                       const string& sele2)
+    : SystemACF<RealType>(
+          info, filename, sele1, sele2,
+          DataStorage::dslVelocity | DataStorage::dslFlucQPosition) {
+  setCorrFuncType("Current Density Auto Correlation Function");
+  setOutputName(getPrefix(dumpFilename_) + ".currentDensityCorr");
 
-    std::set<AtomType*> osTypes = seleMan1_.getSelectedAtomTypes();
-    std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
+  std::set<AtomType*> osTypes = seleMan1_.getSelectedAtomTypes();
+  std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
 
-    Jc_.resize(nFrames_, V3Zero);
-    JcCount_.resize(nFrames_, 0);
+  Jc_.resize(nFrames_, V3Zero);
+  JcCount_.resize(nFrames_, 0);
 
-    typeJc_.resize(nFrames_);
-    typeCounts_.resize(nFrames_);
-    myHistogram_.resize(nTimeBins_);
-    
-    for (int i = 0; i < nFrames_; ++i) {
-      typeJc_[i].resize(outputTypes_.size(), V3Zero);
-      typeCounts_[i].resize(outputTypes_.size(), 0);
-    }
-    for (unsigned int i = 0; i < nTimeBins_; ++i) {
-      myHistogram_[i].resize(outputTypes_.size() + 1, 0.0);
-    }
-    // We'll need thermo to compute the volume:
-    thermo_ =  new Thermo(info_);
+  typeJc_.resize(nFrames_);
+  typeCounts_.resize(nFrames_);
+  myHistogram_.resize(nTimeBins_);
+
+  for (int i = 0; i < nFrames_; ++i) {
+    typeJc_[i].resize(outputTypes_.size(), V3Zero);
+    typeCounts_[i].resize(outputTypes_.size(), 0);
   }
-  
-  void CurrentDensityAutoCorrFunc::computeProperty1(int frame) {
-    StuntDouble* sd1;
-    AtomType* atype;
-    std::vector<AtomType*>::iterator at;
-    int i;
-   
-    for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL;
-         sd1 = seleMan1_.nextSelected(i)) {
-      Vector3d v = sd1->getVel();
-      RealType q = 0.0;
-      int typeIndex(-1);
-      
-      if (sd1->isAtom()) {
-        atype = static_cast<Atom*>(sd1)->getAtomType();
-        FixedChargeAdapter fca = FixedChargeAdapter(atype);
-        if ( fca.isFixedCharge() )
-          q = fca.getCharge();
-        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-        if ( fqa.isFluctuatingCharge() )
-          q += sd1->getFlucQPos();
-        
-        typeIndex = -1;
-        at = std::find(outputTypes_.begin(), outputTypes_.end(), atype);
-        if (at != outputTypes_.end()) {
-          typeIndex = std::distance(outputTypes_.begin(), at);
-        }
-        if (typeIndex != -1) {
-          typeCounts_[frame][typeIndex]++;
-          typeJc_[frame][typeIndex] += q * v;
-        }
-      }
-      JcCount_[frame]++;
-      Jc_[frame] += q*v;
-    }
-
-    RealType vol = thermo_->getVolume();
-
-    Jc_[frame] /= (vol * Constants::currentDensityConvert);
-    for (unsigned int j = 0 ; j < outputTypes_.size(); j++) {
-      typeJc_[frame][j] /= (vol * Constants::currentDensityConvert);
-    }
+  for (unsigned int i = 0; i < nTimeBins_; ++i) {
+    myHistogram_[i].resize(outputTypes_.size() + 1, 0.0);
   }
-
-  void CurrentDensityAutoCorrFunc::correlateFrames(int frame1, int frame2,
-                                                   int timeBin) {
-
-    RealType corrVal(0.0);
-    corrVal = dot(Jc_[frame1], Jc_[frame2]);
-    myHistogram_[timeBin][0] += corrVal;
-
-    for (unsigned int j = 0 ; j < outputTypes_.size(); j++) {
-      corrVal = dot(typeJc_[frame1][j], typeJc_[frame2][j]);
-      myHistogram_[timeBin][j+1] += corrVal;
-    }
-    
-    count_[timeBin]++;
-  }
-
-  void CurrentDensityAutoCorrFunc::postCorrelate() {
-    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
-      for (unsigned int j = 0 ; j < outputTypes_.size() + 1; j++) {
-        if (count_[i] > 0) {
-          myHistogram_[i][j] /= count_[i];
-        } else {
-          myHistogram_[i][j] = 0.0;
-        }
-      }
-    }
-  }
-
-  void CurrentDensityAutoCorrFunc::writeCorrelate() {
-    ofstream ofs(outputFilename_.c_str());
-    
-    if (ofs.is_open()) {
-
-      Revision r;
-
-      ofs << "# " << getCorrFuncType() << "\n";
-      ofs << "# OpenMD " << r.getFullRevision() << "\n";
-      ofs << "# " << r.getBuildDate() << "\n";
-      ofs << "# selection script1: \"" << selectionScript1_ ;
-      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-      if (!paramString_.empty())
-        ofs << "# parameters: " << paramString_ << "\n";
-      ofs << "# units = Amps^2 m^-4\n";
-      if (!labelString_.empty())        
-        ofs << "#time\t" << labelString_ << "\n";
-      else
-        ofs << "#time\tcorrVal\t(";
-      
-      for (unsigned int j = 0; j <  outputTypes_.size(); j++) {
-        ofs << outputTypes_[j]->getName() << "\t";
-      }
-      
-      ofs << ")\n";
-
-      for (unsigned int i = 0; i < nTimeBins_; ++i) {
-        ofs << times_[i]-times_[0] << "\t";
-        for (unsigned int j = 0; j < outputTypes_.size() + 1; j++) {
-          ofs << myHistogram_[i][j] << '\t';        
-        }
-        ofs << '\n';
-      }
-      
-    } else {
-      sprintf(painCave.errMsg,
-              "CurrentDensityAutoCorrFunc::writeCorrelate Error: failed to open %s\n",
-              outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    ofs.close();
-  } 
+  // We'll need thermo to compute the volume:
+  thermo_ = new Thermo(info_);
 }
+
+void CurrentDensityAutoCorrFunc::computeProperty1(int frame) {
+  StuntDouble* sd1;
+  AtomType* atype;
+  std::vector<AtomType*>::iterator at;
+  int i;
+
+  for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL;
+       sd1 = seleMan1_.nextSelected(i)) {
+    Vector3d v = sd1->getVel();
+    RealType q = 0.0;
+    int typeIndex(-1);
+
+    if (sd1->isAtom()) {
+      atype = static_cast<Atom*>(sd1)->getAtomType();
+      FixedChargeAdapter fca = FixedChargeAdapter(atype);
+      if (fca.isFixedCharge()) q = fca.getCharge();
+      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+      if (fqa.isFluctuatingCharge()) q += sd1->getFlucQPos();
+
+      typeIndex = -1;
+      at = std::find(outputTypes_.begin(), outputTypes_.end(), atype);
+      if (at != outputTypes_.end()) {
+        typeIndex = std::distance(outputTypes_.begin(), at);
+      }
+      if (typeIndex != -1) {
+        typeCounts_[frame][typeIndex]++;
+        typeJc_[frame][typeIndex] += q * v;
+      }
+    }
+    JcCount_[frame]++;
+    Jc_[frame] += q * v;
+  }
+
+  RealType vol = thermo_->getVolume();
+
+  Jc_[frame] /= (vol * Constants::currentDensityConvert);
+  for (unsigned int j = 0; j < outputTypes_.size(); j++) {
+    typeJc_[frame][j] /= (vol * Constants::currentDensityConvert);
+  }
+}
+
+void CurrentDensityAutoCorrFunc::correlateFrames(int frame1, int frame2,
+                                                 int timeBin) {
+  RealType corrVal(0.0);
+  corrVal = dot(Jc_[frame1], Jc_[frame2]);
+  myHistogram_[timeBin][0] += corrVal;
+
+  for (unsigned int j = 0; j < outputTypes_.size(); j++) {
+    corrVal = dot(typeJc_[frame1][j], typeJc_[frame2][j]);
+    myHistogram_[timeBin][j + 1] += corrVal;
+  }
+
+  count_[timeBin]++;
+}
+
+void CurrentDensityAutoCorrFunc::postCorrelate() {
+  for (unsigned int i = 0; i < nTimeBins_; ++i) {
+    for (unsigned int j = 0; j < outputTypes_.size() + 1; j++) {
+      if (count_[i] > 0) {
+        myHistogram_[i][j] /= count_[i];
+      } else {
+        myHistogram_[i][j] = 0.0;
+      }
+    }
+  }
+}
+
+void CurrentDensityAutoCorrFunc::writeCorrelate() {
+  ofstream ofs(outputFilename_.c_str());
+
+  if (ofs.is_open()) {
+    Revision r;
+
+    ofs << "# " << getCorrFuncType() << "\n";
+    ofs << "# OpenMD " << r.getFullRevision() << "\n";
+    ofs << "# " << r.getBuildDate() << "\n";
+    ofs << "# selection script1: \"" << selectionScript1_;
+    ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+    if (!paramString_.empty()) ofs << "# parameters: " << paramString_ << "\n";
+    ofs << "# units = Amps^2 m^-4\n";
+    if (!labelString_.empty())
+      ofs << "#time\t" << labelString_ << "\n";
+    else
+      ofs << "#time\tcorrVal\t(";
+
+    for (unsigned int j = 0; j < outputTypes_.size(); j++) {
+      ofs << outputTypes_[j]->getName() << "\t";
+    }
+
+    ofs << ")\n";
+
+    for (unsigned int i = 0; i < nTimeBins_; ++i) {
+      ofs << times_[i] - times_[0] << "\t";
+      for (unsigned int j = 0; j < outputTypes_.size() + 1; j++) {
+        ofs << myHistogram_[i][j] << '\t';
+      }
+      ofs << '\n';
+    }
+
+  } else {
+    sprintf(
+        painCave.errMsg,
+        "CurrentDensityAutoCorrFunc::writeCorrelate Error: failed to open %s\n",
+        outputFilename_.c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  ofs.close();
+}
+}  // namespace OpenMD

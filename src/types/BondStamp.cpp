@@ -42,23 +42,22 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <cstdlib>
-#include <cstring>
 
 #include "types/BondStamp.hpp"
-namespace OpenMD {
-  
-  BondStamp::BondStamp(): hasOverride_(false) {
-    DefineOptionalParameterWithDefaultValue(BondOrder, "bondOrder", 1);
-  }
-  
-  BondStamp::~BondStamp() {    
-  }
-  
-  void BondStamp::validate() {
-    DataHolder::validate();
-    CheckParameter(BondOrder, isPositive());
-  }
 
+#include <cstdlib>
+#include <cstring>
+namespace OpenMD {
+
+BondStamp::BondStamp() : hasOverride_(false) {
+  DefineOptionalParameterWithDefaultValue(BondOrder, "bondOrder", 1);
 }
+
+BondStamp::~BondStamp() {}
+
+void BondStamp::validate() {
+  DataHolder::validate();
+  CheckParameter(BondOrder, isPositive());
+}
+
+}  // namespace OpenMD

@@ -43,102 +43,97 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "applications/staticProps/TwoDGofR.hpp"
+
 #include <algorithm>
 #include <fstream>
-#include "applications/staticProps/TwoDGofR.hpp"
+
 #include "utils/simError.h"
 
 namespace OpenMD {
 
-  TwoDGofR::TwoDGofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, RealType dz, int nrbins)
+TwoDGofR::TwoDGofR(SimInfo* info, const std::string& filename,
+                   const std::string& sele1, const std::string& sele2,
+                   RealType len, RealType dz, int nrbins)
     : RadialDistrFunc(info, filename, sele1, sele2, nrbins), len_(len) {
+  deltaR_ = len_ / nBins_;
 
-      deltaR_ = len_ /nBins_;
+  deltaZ_ = dz;
 
-      deltaZ_ = dz;
-    
-      histogram_.resize(nBins_);
-      avgTwoDGofR_.resize(nBins_);
+  histogram_.resize(nBins_);
+  avgTwoDGofR_.resize(nBins_);
 
-      setOutputName(getPrefix(filename) + ".TwoDGofR");
-    }
-
-
-  void TwoDGofR::preProcess() {
-    std::fill(avgTwoDGofR_.begin(), avgTwoDGofR_.end(), 0.0);    
-  }
-
-  void TwoDGofR::initializeHistogram() {
-    std::fill(histogram_.begin(), histogram_.end(), 0);
-  }
-
-
-  void TwoDGofR::processHistogram() {
-
-    int nPairs = getNPairs();
-
-    Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-
-    RealType volume = hmat(0,0) * hmat(1,1) * deltaZ_;
-
-    RealType pairDensity = nPairs /volume * 2.0;
-    RealType pairConstant = (Constants::PI * pairDensity);
-
-    for(unsigned int i = 0 ; i < histogram_.size(); ++i){
-
-      RealType rLower = i * deltaR_;
-      RealType rUpper = rLower + deltaR_;
-      RealType volSlice = deltaZ_ * (( rUpper*rUpper ) - ( rLower*rLower ));
-      RealType nIdeal = volSlice * pairConstant;
-      
-      avgTwoDGofR_[i] += histogram_[i] / nIdeal;    
-    }
-
-  }
-
-  void TwoDGofR::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
-
-    if (sd1 == sd2) {
-      return;
-    }
-    bool usePeriodicBoundaryConditions_ = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-    Vector3d pos1 = sd1->getPos();
-    Vector3d pos2 = sd2->getPos();
-    Vector3d r12 = pos2 - pos1;
-    if (usePeriodicBoundaryConditions_)
-      currentSnapshot_->wrapVector(r12);
-
-    RealType distance = sqrt(r12.x()*r12.x() + r12.y()*r12.y());
-
-    if (distance < len_) {
-      int whichBin = int(distance / deltaR_);
-      histogram_[whichBin] += 2;
-    }
-  }
-
-
-  void TwoDGofR::writeRdf() {
-    std::ofstream rdfStream(outputFilename_.c_str());
-    if (rdfStream.is_open()) {
-      rdfStream << "#2D radial distribution function\n";
-      rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
-      rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-      rdfStream << "#r\tcorrValue\n";
-      for (unsigned int i = 0; i < avgTwoDGofR_.size(); ++i) {
-	RealType r = deltaR_ * (i + 0.5);
-	rdfStream << r << "\t" << avgTwoDGofR_[i]/nProcessed_ << "\n";
-      }
-        
-    } else {
-
-      sprintf(painCave.errMsg, "TwoDGofR: unable to open %s\n", outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();  
-    }
-
-    rdfStream.close();
-  }
-
+  setOutputName(getPrefix(filename) + ".TwoDGofR");
 }
 
+void TwoDGofR::preProcess() {
+  std::fill(avgTwoDGofR_.begin(), avgTwoDGofR_.end(), 0.0);
+}
+
+void TwoDGofR::initializeHistogram() {
+  std::fill(histogram_.begin(), histogram_.end(), 0);
+}
+
+void TwoDGofR::processHistogram() {
+  int nPairs = getNPairs();
+
+  Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+
+  RealType volume = hmat(0, 0) * hmat(1, 1) * deltaZ_;
+
+  RealType pairDensity = nPairs / volume * 2.0;
+  RealType pairConstant = (Constants::PI * pairDensity);
+
+  for (unsigned int i = 0; i < histogram_.size(); ++i) {
+    RealType rLower = i * deltaR_;
+    RealType rUpper = rLower + deltaR_;
+    RealType volSlice = deltaZ_ * ((rUpper * rUpper) - (rLower * rLower));
+    RealType nIdeal = volSlice * pairConstant;
+
+    avgTwoDGofR_[i] += histogram_[i] / nIdeal;
+  }
+}
+
+void TwoDGofR::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+  if (sd1 == sd2) {
+    return;
+  }
+  bool usePeriodicBoundaryConditions_ =
+      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
+  Vector3d pos1 = sd1->getPos();
+  Vector3d pos2 = sd2->getPos();
+  Vector3d r12 = pos2 - pos1;
+  if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(r12);
+
+  RealType distance = sqrt(r12.x() * r12.x() + r12.y() * r12.y());
+
+  if (distance < len_) {
+    int whichBin = int(distance / deltaR_);
+    histogram_[whichBin] += 2;
+  }
+}
+
+void TwoDGofR::writeRdf() {
+  std::ofstream rdfStream(outputFilename_.c_str());
+  if (rdfStream.is_open()) {
+    rdfStream << "#2D radial distribution function\n";
+    rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
+    rdfStream << "selection2: (" << selectionScript2_ << ")\n";
+    rdfStream << "#r\tcorrValue\n";
+    for (unsigned int i = 0; i < avgTwoDGofR_.size(); ++i) {
+      RealType r = deltaR_ * (i + 0.5);
+      rdfStream << r << "\t" << avgTwoDGofR_[i] / nProcessed_ << "\n";
+    }
+
+  } else {
+    sprintf(painCave.errMsg, "TwoDGofR: unable to open %s\n",
+            outputFilename_.c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  rdfStream.close();
+}
+
+}  // namespace OpenMD

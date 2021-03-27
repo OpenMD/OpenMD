@@ -44,11 +44,9 @@
  */
 #include "types/FragmentStamp.hpp"
 namespace OpenMD {
-  FragmentStamp::FragmentStamp(int index) : index_(index){
-    DefineParameter(Name, "name");
-  }
-  
-  void FragmentStamp::validate() {
-    CheckParameter(Name, isNotEmpty());
-  }
+FragmentStamp::FragmentStamp(int index) : index_(index) {
+  DefineParameter(Name, "name");
 }
+
+void FragmentStamp::validate() { CheckParameter(Name, isNotEmpty()); }
+}  // namespace OpenMD

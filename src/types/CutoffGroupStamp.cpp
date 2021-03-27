@@ -42,19 +42,15 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <iostream>
 
 #include "types/CutoffGroupStamp.hpp"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
 namespace OpenMD {
-  CutoffGroupStamp::CutoffGroupStamp() {
-    deprecatedKeywords_.insert("nMembers");  
-  }
-  
-  void CutoffGroupStamp::validate() {
-    DataHolder::validate();
-  }
-}
+CutoffGroupStamp::CutoffGroupStamp() { deprecatedKeywords_.insert("nMembers"); }
+
+void CutoffGroupStamp::validate() { DataHolder::validate(); }
+}  // namespace OpenMD

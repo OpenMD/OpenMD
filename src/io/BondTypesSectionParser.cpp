@@ -42,55 +42,53 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "io/BondTypesSectionParser.hpp"
-#include "types/BondTypeParser.hpp"
+
 #include "brains/ForceField.hpp"
+#include "types/BondTypeParser.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
 
-  BondTypesSectionParser::BondTypesSectionParser(ForceFieldOptions& options) : options_(options){
-    setSectionName("BondTypes");
-  }
-
-  void BondTypesSectionParser::parseLine(ForceField& ff,
-                                         const std::string& line,
-                                         int lineNo) {
-    StringTokenizer tokenizer(line);
-    BondTypeParser btParser;        
-    BondType* bondType = NULL;
-    int nTokens = tokenizer.countTokens();
-    
-    if (nTokens < 4) {
-      sprintf(painCave.errMsg,
-              "BondTypesSectionParser Error: Not enough tokens at line %d\n",
-	      lineNo);
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    std::string at1 = tokenizer.nextToken();
-    std::string at2 = tokenizer.nextToken(); 
-    std::string remainder = tokenizer.getRemainingString();
-    RealType kScale = options_.getBondForceConstantScaling();
-   
-    try {
-      bondType = btParser.parseLine(remainder, kScale);
-    }
-    catch( OpenMDException& e ) {
-      
-      sprintf(painCave.errMsg, "BondTypesSectionParser Error: %s "
-              "at line %d\n",
-              e.what(), lineNo);
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    if (bondType != NULL) {
-      ff.addBondType(at1, at2, bondType);
-    }
-
-  }
+BondTypesSectionParser::BondTypesSectionParser(ForceFieldOptions& options)
+    : options_(options) {
+  setSectionName("BondTypes");
 }
 
+void BondTypesSectionParser::parseLine(ForceField& ff, const std::string& line,
+                                       int lineNo) {
+  StringTokenizer tokenizer(line);
+  BondTypeParser btParser;
+  BondType* bondType = NULL;
+  int nTokens = tokenizer.countTokens();
+
+  if (nTokens < 4) {
+    sprintf(painCave.errMsg,
+            "BondTypesSectionParser Error: Not enough tokens at line %d\n",
+            lineNo);
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  std::string at1 = tokenizer.nextToken();
+  std::string at2 = tokenizer.nextToken();
+  std::string remainder = tokenizer.getRemainingString();
+  RealType kScale = options_.getBondForceConstantScaling();
+
+  try {
+    bondType = btParser.parseLine(remainder, kScale);
+  } catch (OpenMDException& e) {
+    sprintf(painCave.errMsg,
+            "BondTypesSectionParser Error: %s "
+            "at line %d\n",
+            e.what(), lineNo);
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  if (bondType != NULL) {
+    ff.addBondType(at1, at2, bondType);
+  }
+}
+}  // namespace OpenMD

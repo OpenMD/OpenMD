@@ -44,146 +44,138 @@
  */
 
 #include "applications/dynamicProps/ChargeOrientationCorrFunc.hpp"
+
+#include "math/SquareMatrix3.hpp"
+#include "primitives/Molecule.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
-#include "primitives/Molecule.hpp"
-#include "math/SquareMatrix3.hpp"
-
-
 
 namespace OpenMD {
-  ChargeOrientationCorrFunc::ChargeOrientationCorrFunc(SimInfo* info,
-                                 const std::string& filename,
-                                 const std::string& sele1,
-                                 const std::string& sele2,
-                                 const RealType dipoleX,
-                                 const RealType dipoleY,
-                                 const RealType dipoleZ,
-                                 const RealType cutOff,
-                                 const int axis)
-    : ObjectCCF<RealType>(info, filename, sele1, sele2,
-                          DataStorage::dslFlucQPosition |
-                          DataStorage::dslVelocity), axis_(axis) {
-    
-    setCorrFuncType("Charge - Orientation Order Parameter Cross Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".QScorr");
+ChargeOrientationCorrFunc::ChargeOrientationCorrFunc(
+    SimInfo* info, const std::string& filename, const std::string& sele1,
+    const std::string& sele2, const RealType dipoleX, const RealType dipoleY,
+    const RealType dipoleZ, const RealType cutOff, const int axis)
+    : ObjectCCF<RealType>(
+          info, filename, sele1, sele2,
+          DataStorage::dslFlucQPosition | DataStorage::dslVelocity),
+      axis_(axis) {
+  setCorrFuncType(
+      "Charge - Orientation Order Parameter Cross Correlation Function");
+  setOutputName(getPrefix(dumpFilename_) + ".QScorr");
 
-    charges_.resize(nFrames_);
-    CosTheta_.resize(nFrames_);
+  charges_.resize(nFrames_);
+  CosTheta_.resize(nFrames_);
 
-    sumCharge_ = 0;
-    sumCosTheta_ = 0;
-    chargeCount_ = 0;
-    CosThetaCount_ = 0;
+  sumCharge_ = 0;
+  sumCosTheta_ = 0;
+  chargeCount_ = 0;
+  CosThetaCount_ = 0;
 
-    dipoleVector_ = Vector3d(dipoleX, dipoleY, dipoleZ);
-    dipoleVector_.normalize();
+  dipoleVector_ = Vector3d(dipoleX, dipoleY, dipoleZ);
+  dipoleVector_.normalize();
 
-    switch(axis_) {
+  switch (axis_) {
     case 0:
       axisLabel_ = "x";
-      refAxis_ = Vector3d(1,0,0);
+      refAxis_ = Vector3d(1, 0, 0);
       break;
     case 1:
       axisLabel_ = "y";
-      refAxis_ = Vector3d(0,1,0);
+      refAxis_ = Vector3d(0, 1, 0);
       break;
     case 2:
     default:
       axisLabel_ = "z";
-      refAxis_ = Vector3d(0,0,1);
+      refAxis_ = Vector3d(0, 0, 1);
       break;
-    }
   }
+}
 
-  void ChargeOrientationCorrFunc::validateSelection(SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;
+void ChargeOrientationCorrFunc::validateSelection(SelectionManager& seleMan) {
+  StuntDouble* sd;
+  int i;
 
-    for (sd = seleMan.beginSelected(i); sd != NULL;
-         sd = seleMan.nextSelected(i)) {
-
-      Atom* atom = static_cast<Atom*>(sd);
-      AtomType* atomType = atom->getAtomType();
-      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
-
-      if (!sd->isDirectional() && !fqa.isFluctuatingCharge()) {
-        sprintf(painCave.errMsg,
-                "ChargeOrientationCorrFunc::validateSelection Error: selection "
-                "%d (%s)\n"
-                "\t is not a Directional object\n", sd->getGlobalIndex(),
-                sd->getType().c_str() );
-        painCave.isFatal = 1;
-        simError();
-      }
-    }
-  }
-
-
-  int ChargeOrientationCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    RealType q = 0.0;
+  for (sd = seleMan.beginSelected(i); sd != NULL;
+       sd = seleMan.nextSelected(i)) {
     Atom* atom = static_cast<Atom*>(sd);
-
     AtomType* atomType = atom->getAtomType();
-
-    FixedChargeAdapter fca = FixedChargeAdapter(atomType);
-    if ( fca.isFixedCharge() ) {
-      q += fca.getCharge();
-    }
-
     FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
-    if ( fqa.isFluctuatingCharge() ) {
-      q += atom->getFlucQPos();
-    }
 
-    propertyTemp = q;
-    charges_[frame].push_back( propertyTemp );
-    sumCharge_ += propertyTemp;
-    chargeCount_++;
-    return charges_[frame].size() - 1;
-  }
-
-  int ChargeOrientationCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
-    SquareMatrix3<RealType> rotMat;
-    Vector3d rotatedDipoleVector;
-    RealType ctheta(0.0);
-
-    rotMat = sd->getA();
-    rotatedDipoleVector = rotMat * dipoleVector_;
-    rotatedDipoleVector.normalize();
-    ctheta = dot(rotatedDipoleVector, refAxis_);
-
-    propertyTemp = ctheta;
-    CosTheta_[frame].push_back( propertyTemp );
-    sumCosTheta_ += propertyTemp;
-    CosThetaCount_++;
-    return CosTheta_[frame].size() - 1;
-  }
-
-  RealType ChargeOrientationCorrFunc::calcCorrVal(int frame1, int frame2,
-                                      int id1, int id2) {
-    return charges_[frame1][id1] * CosTheta_[frame2][id2] ;
-  }
-
-  void ChargeOrientationCorrFunc::postCorrelate() {
-    //gets the average of the charges
-    sumCharge_ /= RealType(chargeCount_);
-
-    //gets the average of the CosTheta
-    sumCosTheta_ /= RealType(CosThetaCount_);
-
-    RealType correlationOfAverages_ = sumCharge_ * sumCosTheta_;
-    for (unsigned int i =0 ; i < nTimeBins_; ++i) {
-      if (count_[i] > 0) {
-
-        histogram_[i] /= RealType(count_[i]);
-
-        // The  correlation of the averages is subtracted
-        // from the correlation value:
-        histogram_[i] -= correlationOfAverages_;
-      } else {
-        histogram_[i] = 0;
-      }
+    if (!sd->isDirectional() && !fqa.isFluctuatingCharge()) {
+      sprintf(painCave.errMsg,
+              "ChargeOrientationCorrFunc::validateSelection Error: selection "
+              "%d (%s)\n"
+              "\t is not a Directional object\n",
+              sd->getGlobalIndex(), sd->getType().c_str());
+      painCave.isFatal = 1;
+      simError();
     }
   }
 }
+
+int ChargeOrientationCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+  RealType q = 0.0;
+  Atom* atom = static_cast<Atom*>(sd);
+
+  AtomType* atomType = atom->getAtomType();
+
+  FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+  if (fca.isFixedCharge()) {
+    q += fca.getCharge();
+  }
+
+  FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+  if (fqa.isFluctuatingCharge()) {
+    q += atom->getFlucQPos();
+  }
+
+  propertyTemp = q;
+  charges_[frame].push_back(propertyTemp);
+  sumCharge_ += propertyTemp;
+  chargeCount_++;
+  return charges_[frame].size() - 1;
+}
+
+int ChargeOrientationCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
+  SquareMatrix3<RealType> rotMat;
+  Vector3d rotatedDipoleVector;
+  RealType ctheta(0.0);
+
+  rotMat = sd->getA();
+  rotatedDipoleVector = rotMat * dipoleVector_;
+  rotatedDipoleVector.normalize();
+  ctheta = dot(rotatedDipoleVector, refAxis_);
+
+  propertyTemp = ctheta;
+  CosTheta_[frame].push_back(propertyTemp);
+  sumCosTheta_ += propertyTemp;
+  CosThetaCount_++;
+  return CosTheta_[frame].size() - 1;
+}
+
+RealType ChargeOrientationCorrFunc::calcCorrVal(int frame1, int frame2, int id1,
+                                                int id2) {
+  return charges_[frame1][id1] * CosTheta_[frame2][id2];
+}
+
+void ChargeOrientationCorrFunc::postCorrelate() {
+  // gets the average of the charges
+  sumCharge_ /= RealType(chargeCount_);
+
+  // gets the average of the CosTheta
+  sumCosTheta_ /= RealType(CosThetaCount_);
+
+  RealType correlationOfAverages_ = sumCharge_ * sumCosTheta_;
+  for (unsigned int i = 0; i < nTimeBins_; ++i) {
+    if (count_[i] > 0) {
+      histogram_[i] /= RealType(count_[i]);
+
+      // The  correlation of the averages is subtracted
+      // from the correlation value:
+      histogram_[i] -= correlationOfAverages_;
+    } else {
+      histogram_[i] = 0;
+    }
+  }
+}
+}  // namespace OpenMD

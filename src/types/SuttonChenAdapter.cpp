@@ -42,94 +42,94 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "types/SuttonChenAdapter.hpp"
-#include "utils/simError.h"
+
 #include <cstdio>
 #include <memory>
 
+#include "utils/simError.h"
+
 namespace OpenMD {
 
-  bool SuttonChenAdapter::isSuttonChen() {
-    return at_->hasProperty(SCtypeID);
-  }
-  
-  SCAtypeParameters SuttonChenAdapter::getSuttonChenParam() {
-    
-    if (!isSuttonChen()) {
-      sprintf( painCave.errMsg,               
-               "SuttonChenAdapter::getSuttonChenParam was passed an atomType (%s)\n"
-               "\tthat does not appear to be a Sutton-Chen atom.\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    std::shared_ptr<GenericData> data = at_->getPropertyByName(SCtypeID);
-    if (data == nullptr) {
-      sprintf( painCave.errMsg, 
-               "SuttonChenAdapter::getSuttonChenParam could not find Sutton-Chen\n"
-               "\tparameters for atomType %s.\n", at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError(); 
-    }
-    
-    std::shared_ptr<SCAtypeData> scData = std::dynamic_pointer_cast<SCAtypeData>(data);
-    if (scData == nullptr) {
-      sprintf( painCave.errMsg,
-               "SuttonChenAdapter::getSuttonChenParam could not convert\n"
-               "\tGenericData to SCAtypeData for atom type %s\n", 
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    return scData->getData();
-  }
-  
-  RealType SuttonChenAdapter::getC() {    
-    SCAtypeParameters scParam = getSuttonChenParam();
-    return scParam.c;
+bool SuttonChenAdapter::isSuttonChen() { return at_->hasProperty(SCtypeID); }
+
+SCAtypeParameters SuttonChenAdapter::getSuttonChenParam() {
+  if (!isSuttonChen()) {
+    sprintf(
+        painCave.errMsg,
+        "SuttonChenAdapter::getSuttonChenParam was passed an atomType (%s)\n"
+        "\tthat does not appear to be a Sutton-Chen atom.\n",
+        at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
   }
 
-  RealType SuttonChenAdapter::getM() {    
-    SCAtypeParameters scParam = getSuttonChenParam();
-    return scParam.m;
+  std::shared_ptr<GenericData> data = at_->getPropertyByName(SCtypeID);
+  if (data == nullptr) {
+    sprintf(painCave.errMsg,
+            "SuttonChenAdapter::getSuttonChenParam could not find Sutton-Chen\n"
+            "\tparameters for atomType %s.\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
   }
 
-  RealType SuttonChenAdapter::getN() {    
-    SCAtypeParameters scParam = getSuttonChenParam();
-    return scParam.n;
+  std::shared_ptr<SCAtypeData> scData =
+      std::dynamic_pointer_cast<SCAtypeData>(data);
+  if (scData == nullptr) {
+    sprintf(painCave.errMsg,
+            "SuttonChenAdapter::getSuttonChenParam could not convert\n"
+            "\tGenericData to SCAtypeData for atom type %s\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
   }
 
-  RealType SuttonChenAdapter::getAlpha() {    
-    SCAtypeParameters scParam = getSuttonChenParam();
-    return scParam.alpha;
-  }
-
-  RealType SuttonChenAdapter::getEpsilon() {    
-    SCAtypeParameters scParam = getSuttonChenParam();
-    return scParam.epsilon;
-  }
-
-    
-  void SuttonChenAdapter::makeSuttonChen(RealType c, RealType m, RealType n, 
-                                         RealType alpha, RealType epsilon){ 
-
-    if (isSuttonChen()){
-      at_->removeProperty(SCtypeID);
-    }
-
-    SCAtypeParameters scParam {};
-    scParam.c = c;
-    scParam.m = m;
-    scParam.n = n;
-    scParam.alpha = alpha;
-    scParam.epsilon = epsilon;
-    
-    at_->addProperty(std::make_shared<SCAtypeData>(SCtypeID, scParam));
-  }
+  return scData->getData();
 }
+
+RealType SuttonChenAdapter::getC() {
+  SCAtypeParameters scParam = getSuttonChenParam();
+  return scParam.c;
+}
+
+RealType SuttonChenAdapter::getM() {
+  SCAtypeParameters scParam = getSuttonChenParam();
+  return scParam.m;
+}
+
+RealType SuttonChenAdapter::getN() {
+  SCAtypeParameters scParam = getSuttonChenParam();
+  return scParam.n;
+}
+
+RealType SuttonChenAdapter::getAlpha() {
+  SCAtypeParameters scParam = getSuttonChenParam();
+  return scParam.alpha;
+}
+
+RealType SuttonChenAdapter::getEpsilon() {
+  SCAtypeParameters scParam = getSuttonChenParam();
+  return scParam.epsilon;
+}
+
+void SuttonChenAdapter::makeSuttonChen(RealType c, RealType m, RealType n,
+                                       RealType alpha, RealType epsilon) {
+  if (isSuttonChen()) {
+    at_->removeProperty(SCtypeID);
+  }
+
+  SCAtypeParameters scParam{};
+  scParam.c = c;
+  scParam.m = m;
+  scParam.n = n;
+  scParam.alpha = alpha;
+  scParam.epsilon = epsilon;
+
+  at_->addProperty(std::make_shared<SCAtypeData>(SCtypeID, scParam));
+}
+}  // namespace OpenMD

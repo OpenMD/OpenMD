@@ -42,223 +42,217 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
+#include "utils/StringTokenizer.hpp"
+
 #include <iostream>
 #include <iterator>
 #include <sstream>
-#include "utils/StringTokenizer.hpp"
 
 namespace OpenMD {
 
+StringTokenizer::StringTokenizer(const std::string& str,
+                                 const std::string& delim)
+    : tokenString_(str),
+      delim_(delim),
+      returnTokens_(false),
+      currentPos_(tokenString_.begin()),
+      end_(tokenString_.end()) {}
 
-  StringTokenizer::StringTokenizer(const std::string & str, const std::string & delim) 
-    : tokenString_(str), delim_(delim), returnTokens_(false),
-      currentPos_(tokenString_.begin()), end_(tokenString_.end()){
+StringTokenizer::StringTokenizer(std::string::const_iterator& first,
+                                 std::string::const_iterator& last,
+                                 const std::string& delim)
+    : tokenString_(first, last),
+      delim_(delim),
+      returnTokens_(false),
+      currentPos_(tokenString_.begin()),
+      end_(tokenString_.end()) {}
 
-  }
+StringTokenizer::StringTokenizer(const std::string& str,
+                                 const std::string& delim, bool returnTokens)
+    : tokenString_(str),
+      delim_(delim),
+      returnTokens_(returnTokens),
+      currentPos_(tokenString_.begin()),
+      end_(tokenString_.end()) {}
 
-  StringTokenizer::StringTokenizer(std::string::const_iterator& first, std::string::const_iterator& last,
-				   const std::string & delim)  
-    : tokenString_(first, last) , delim_(delim), returnTokens_(false),
-      currentPos_(tokenString_.begin()), end_(tokenString_.end()) {
+bool StringTokenizer::isDelimiter(const char c) {
+  return delim_.find(c) == std::string::npos ? false : true;
+}
 
-  }
+int StringTokenizer::countTokens() {
+  std::string::const_iterator tmpIter = currentPos_;
+  int numToken = 0;
 
-  StringTokenizer::StringTokenizer(const std::string&str, const std::string&delim,
-				   bool returnTokens)
-    : tokenString_(str), delim_(delim), returnTokens_(returnTokens),
-      currentPos_(tokenString_.begin()), end_(tokenString_.end()) {
+  while (true) {
+    // skip delimiter first
+    while (tmpIter != end_ && isDelimiter(*tmpIter)) {
+      ++tmpIter;
 
-  }
-
-  bool StringTokenizer::isDelimiter(const char c) {
-    return delim_.find(c) == std::string::npos ? false : true;
-  }
-
-  int StringTokenizer::countTokens() {
-    
-    std::string::const_iterator tmpIter = currentPos_;    
-    int numToken = 0;
-
-    while (true) {
-
-      //skip delimiter first
-      while( tmpIter != end_ && isDelimiter(*tmpIter)) {
-	++tmpIter;
-
-	if (returnTokens_) {
-	  //if delimiter is consider as token
-	  ++numToken;
-	}
+      if (returnTokens_) {
+        // if delimiter is consider as token
+        ++numToken;
       }
-        
-      if (tmpIter == end_) {
-	break;
-      }
-        
-      //encount a token here
-      while ( tmpIter != end_ && !isDelimiter(*tmpIter) ) {
-	++tmpIter;
-      }
-
-      ++numToken;
-
     }
 
-    return numToken;
+    if (tmpIter == end_) {
+      break;
+    }
+
+    // encount a token here
+    while (tmpIter != end_ && !isDelimiter(*tmpIter)) {
+      ++tmpIter;
+    }
+
+    ++numToken;
   }
 
-  bool StringTokenizer::hasMoreTokens() {
-    
-    if (currentPos_ == end_) {
-      return false;
-    } else if (returnTokens_) {
-      return true;
-    } else {
-      std::string::const_iterator i = currentPos_;
+  return numToken;
+}
 
-      //walk through the remaining string to check whether it contains
-      //non-delimeter or not
-      while(i != end_ && isDelimiter(*i)) {
-	++i;
+bool StringTokenizer::hasMoreTokens() {
+  if (currentPos_ == end_) {
+    return false;
+  } else if (returnTokens_) {
+    return true;
+  } else {
+    std::string::const_iterator i = currentPos_;
+
+    // walk through the remaining string to check whether it contains
+    // non-delimeter or not
+    while (i != end_ && isDelimiter(*i)) {
+      ++i;
+    }
+
+    return i != end_ ? true : false;
+  }
+}
+
+std::string StringTokenizer::nextToken() {
+  std::string result;
+
+  if (currentPos_ != end_) {
+    std::insert_iterator<std::string> insertIter(result, result.begin());
+
+    while (currentPos_ != end_ && isDelimiter(*currentPos_)) {
+      if (returnTokens_) {
+        *insertIter++ = *currentPos_++;
+        return result;
       }
 
-      return i != end_ ? true : false;
+      ++currentPos_;
+    }
+
+    while (currentPos_ != end_ && !isDelimiter(*currentPos_)) {
+      *insertIter++ = *currentPos_++;
     }
   }
 
-  std::string StringTokenizer::nextToken() {
-    std::string result;
-    
-    if(currentPos_ != end_) {
-      std::insert_iterator<std::string> insertIter(result, result.begin());
+  return result;
+}
 
-      while( currentPos_ != end_ && isDelimiter(*currentPos_)) {
-
-	if (returnTokens_) {
-	  *insertIter++ = *currentPos_++;
-	  return result;
-	}
-            
-	++currentPos_;
+void StringTokenizer::skipToken() {
+  if (currentPos_ != end_) {
+    while (currentPos_ != end_ && isDelimiter(*currentPos_)) {
+      if (returnTokens_) {
+        *currentPos_++;
+        return;
       }
 
-      while (currentPos_ != end_ && !isDelimiter(*currentPos_)) {
-	*insertIter++ = *currentPos_++;
-      }
-        
+      ++currentPos_;
     }
-    
+
+    while (currentPos_ != end_ && !isDelimiter(*currentPos_)) {
+      *currentPos_++;
+    }
+  }
+}
+
+bool StringTokenizer::nextTokenAsBool() {
+  std::string token = nextToken();
+  std::istringstream iss(token);
+  bool result;
+
+  if (iss >> result) {
     return result;
+  } else {
+    std::cerr << "unable to convert " << token << " to a bool" << std::endl;
+    return false;
   }
+}
 
-  void StringTokenizer::skipToken() {
+// Since libstdc++(GCC 3.2) has an i/ostream::operator>>/<<(streambuf*) bug (Bug
+// 9318) Instead of using iostream facility, we use C library
+int StringTokenizer::nextTokenAsInt() {
+  std::string token = nextToken();
 
-    if(currentPos_ != end_) {
-      while( currentPos_ != end_ && isDelimiter(*currentPos_)) {
+  return atoi(token.c_str());
+}
 
-	if (returnTokens_) {
-	  *currentPos_++;
-          return;
-	}
-            
-	++currentPos_;
+float StringTokenizer::nextTokenAsFloat() {
+  std::string token = nextToken();
+  convertFortranNumber(token);
+  return (float)(atof(token.c_str()));
+}
+
+RealType StringTokenizer::nextTokenAsDouble() {
+  std::string token = nextToken();
+  convertFortranNumber(token);
+  return atof(token.c_str());
+}
+
+std::string StringTokenizer::peekNextToken() {
+  std::string result;
+  std::string::const_iterator tmpIter = currentPos_;
+
+  if (tmpIter != end_) {
+    std::insert_iterator<std::string> insertIter(result, result.begin());
+
+    while (tmpIter != end_ && isDelimiter(*tmpIter)) {
+      if (returnTokens_) {
+        *insertIter++ = *tmpIter++;
+        return result;
       }
 
-      while (currentPos_ != end_ && !isDelimiter(*currentPos_)) {
-	*currentPos_++;
-      }
+      ++tmpIter;
+    }
+
+    while (tmpIter != end_ && !isDelimiter(*tmpIter)) {
+      *insertIter++ = *tmpIter++;
     }
   }
 
-  bool StringTokenizer::nextTokenAsBool() {
-    std::string token = nextToken();
-    std::istringstream iss(token);
-    bool result;
-    
-    if (iss >> result) {
-      return result;
-    } else {
-      std::cerr << "unable to convert " << token << " to a bool" << std::endl;
-      return false;
+  return result;
+}
+
+std::vector<std::string> StringTokenizer::getAllTokens() {
+  std::vector<std::string> tokens;
+  while (hasMoreTokens()) {
+    tokens.push_back(nextToken());
+  }
+  return tokens;
+}
+void StringTokenizer::convertFortranNumber(std::string& fortranNumber) {
+  std::string::iterator i;
+  for (i = fortranNumber.begin(); i != fortranNumber.end(); ++i) {
+    if (*i == 'd' || *i == 'D') {
+      *i = 'E';
     }
   }
- 
-  //Since libstdc++(GCC 3.2) has an i/ostream::operator>>/<<(streambuf*) bug (Bug 9318)
-  //Instead of using iostream facility, we use C library
-  int StringTokenizer::nextTokenAsInt() {
-    std::string token = nextToken();
-   
-    return atoi(token.c_str());
-  }
+}
 
-  float StringTokenizer::nextTokenAsFloat() {
-    std::string token = nextToken();
-    convertFortranNumber(token);
-    return (float) (atof(token.c_str()));
-  }
+std::string StringTokenizer::getRemainingString() {
+  std::string result;
+  std::string::const_iterator tmpIter = currentPos_;
+  if (tmpIter != end_) {
+    std::insert_iterator<std::string> insertIter(result, result.begin());
 
-  RealType StringTokenizer::nextTokenAsDouble() {
-    std::string token = nextToken();
-    convertFortranNumber(token);
-    return atof(token.c_str());
-  }
-
-  std::string  StringTokenizer::peekNextToken() {
-    std::string result;
-    std::string::const_iterator tmpIter = currentPos_;
-    
-    if(tmpIter != end_) {
-      std::insert_iterator<std::string> insertIter(result, result.begin());
-
-      while(tmpIter != end_ && isDelimiter(*tmpIter)) {
-
-	if (returnTokens_) {
-	  *insertIter++ = *tmpIter++;
-	  return result;
-	}
-            
-	++tmpIter;
-      }
-
-      while (tmpIter != end_ && !isDelimiter(*tmpIter)) {
-	*insertIter++ = *tmpIter++;
-      }
-    }
-    
-    return result;    
-  }
-
-  std::vector<std::string>  StringTokenizer::getAllTokens() {
-    std::vector<std::string> tokens;
-    while (hasMoreTokens()) {
-      tokens.push_back(nextToken());
-    }
-    return tokens;
-  }
-  void StringTokenizer::convertFortranNumber(std::string& fortranNumber) {
-    std::string::iterator i;
-    for(i = fortranNumber.begin(); i != fortranNumber.end(); ++i) {
-      if (*i == 'd' || *i == 'D') {
-	*i = 'E';
-      }
+    while (tmpIter != end_) {
+      *insertIter++ = *tmpIter++;
     }
   }
 
-  std::string  StringTokenizer::getRemainingString() {
-    std::string result;
-    std::string::const_iterator tmpIter = currentPos_;
-    if(tmpIter != end_) {
-      std::insert_iterator<std::string> insertIter(result, result.begin());
-      
-      while (tmpIter != end_) {
-	*insertIter++ = *tmpIter++;
-      }
-    }
-    
-    return result;
-  }
+  return result;
+}
 
-  
-}//end namespace OpenMD
-
+}  // end namespace OpenMD

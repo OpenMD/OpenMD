@@ -43,20 +43,20 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
 #include <cmath>
-#include <iostream>
-#include <string>
-#include <map>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
+#include <iostream>
+#include <map>
+#include <string>
 
 #include "applications/recenter/recenterCmd.hpp"
-#include "brains/Thermo.hpp"
 #include "brains/Register.hpp"
-#include "brains/SimInfo.hpp"
 #include "brains/SimCreator.hpp"
+#include "brains/SimInfo.hpp"
+#include "brains/Thermo.hpp"
 #include "io/DumpReader.hpp"
 #include "io/DumpWriter.hpp"
 #include "utils/StringUtils.hpp"
@@ -64,8 +64,7 @@
 using namespace std;
 using namespace OpenMD;
 
-int main(int argc, char *argv []) {
-
+int main(int argc, char* argv[]) {
   registerLattice();
 
   gengetopt_args_info args_info;
@@ -74,21 +73,21 @@ int main(int argc, char *argv []) {
   std::string outputFileName;
 
   // parse command line arguments
-  if (cmdline_parser(argc, argv, &args_info) != 0)
-    exit(1);
+  if (cmdline_parser(argc, argv, &args_info) != 0) exit(1);
 
-  //get input file name
+  // get input file name
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg, "No input file name was specified "
+    sprintf(painCave.errMsg,
+            "No input file name was specified "
             "on the command line");
     painCave.severity = OPENMD_ERROR;
     painCave.isFatal = 1;
     simError();
   }
 
-  //parse md file and set up the system
+  // parse md file and set up the system
 
   SimCreator creator;
   SimInfo* info = creator.createSim(inputFileName, false);
@@ -101,13 +100,13 @@ int main(int argc, char *argv []) {
   if (!outputFileName.compare(inputFileName)) {
     sprintf(painCave.errMsg,
             "Input and Output File names should be different!");
-    painCave.severity = OPENMD_ERROR;        
+    painCave.severity = OPENMD_ERROR;
     painCave.isFatal = 1;
     simError();
   }
 
   DumpWriter* writer = new DumpWriter(info, outputFileName);
-    
+
   if (writer == NULL) {
     sprintf(painCave.errMsg, "error in creating DumpWriter");
     painCave.severity = OPENMD_ERROR;
@@ -120,22 +119,19 @@ int main(int argc, char *argv []) {
   Vector3d pos;
   SimInfo::MoleculeIterator i;
   Molecule::IntegrableObjectIterator j;
-  Molecule * mol;
-  StuntDouble * sd;
+  Molecule* mol;
+  StuntDouble* sd;
   Thermo thermo(info);
 
   for (int istep = 0; istep < nFrames; istep++) {
     reader.readFrame(istep);
     COM = thermo.getCom();
-    for( mol = info->beginMolecule(i); mol != NULL;
-         mol = info->nextMolecule(i) ) {
-
-      for( sd = mol->beginIntegrableObject(j); sd != NULL;
-           sd = mol->nextIntegrableObject(j) ) {
-
-	pos = sd->getPos();
-	sd->setPos(pos - COM);
-	
+    for (mol = info->beginMolecule(i); mol != NULL;
+         mol = info->nextMolecule(i)) {
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {
+        pos = sd->getPos();
+        sd->setPos(pos - COM);
       }
     }
     writer->writeDump();
@@ -151,6 +147,6 @@ int main(int argc, char *argv []) {
   painCave.severity = OPENMD_INFO;
   painCave.isFatal = 0;
   simError();
-  
+
   return 0;
 }

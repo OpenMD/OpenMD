@@ -43,194 +43,190 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 #include "applications/hydrodynamics/HydrodynamicsModel.hpp"
+
+#include "applications/hydrodynamics/CompositeShape.hpp"
+#include "hydrodynamics/Ellipsoid.hpp"
 #include "hydrodynamics/Shape.hpp"
 #include "hydrodynamics/Sphere.hpp"
-#include "hydrodynamics/Ellipsoid.hpp"
-#include "applications/hydrodynamics/CompositeShape.hpp"
 
 namespace OpenMD {
 
-  bool HydrodynamicsModel::calcHydroProps(Shape* shape, RealType viscosity, RealType temperature) {
-    return false;
-  }
-
-  void HydrodynamicsModel::writeHydroProps(std::ostream& os) {
-
-    Vector3d center;
-    Mat6x6d Xi, D;
-
-    os << sd_->getType() << "\t";
-
-    //center of resistance
-
-    center = cr_->getCOR();
-
-    os << center[0] <<  "\t" << center[1] <<  "\t" << center[2] <<  "\t";
-
-    //resistance tensor at center of resistance
-    //translation
-
-    Xi = cr_->getXi();
-
-    os << Xi(0, 0) <<  "\t" << Xi(0, 1) <<  "\t" << Xi(0, 2) <<  "\t"
-       << Xi(1, 0) <<  "\t" << Xi(1, 1) <<  "\t" << Xi(1, 2) <<  "\t"
-       << Xi(2, 0) <<  "\t" << Xi(2, 1) <<  "\t" << Xi(2, 2) <<  "\t";
-
-    //rotation-translation
-    os << Xi(0, 3) <<  "\t" << Xi(0, 4) <<  "\t" << Xi(0, 5) <<  "\t"
-       << Xi(1, 3) <<  "\t" << Xi(1, 4) <<  "\t" << Xi(1, 5) <<  "\t"
-       << Xi(2, 3) <<  "\t" << Xi(2, 4) <<  "\t" << Xi(2, 5) <<  "\t";
-
-    //translation-rotation
-    os << Xi(3, 0) <<  "\t" << Xi(3, 1) <<  "\t" << Xi(3, 2) <<  "\t"
-       << Xi(4, 0) <<  "\t" << Xi(4, 1) <<  "\t" << Xi(4, 2) <<  "\t"
-       << Xi(5, 0) <<  "\t" << Xi(5, 1) <<  "\t" << Xi(5, 2) <<  "\t";
-
-    //rotation
-    os << Xi(3, 3) <<  "\t" << Xi(3, 4) <<  "\t" << Xi(3, 5) <<  "\t"
-       << Xi(4, 3) <<  "\t" << Xi(4, 4) <<  "\t" << Xi(4, 5) <<  "\t"
-       << Xi(5, 3) <<  "\t" << Xi(5, 4) <<  "\t" << Xi(5, 5) <<  "\t";
-
-
-    //diffusion tensor at center of resistance
-    //translation
-
-    D = cr_->getD();
-
-    os << D(0, 0) <<  "\t" << D(0, 1) <<  "\t" << D(0, 2) <<  "\t"
-       << D(1, 0) <<  "\t" << D(1, 1) <<  "\t" << D(1, 2) <<  "\t"
-       << D(2, 0) <<  "\t" << D(2, 1) <<  "\t" << D(2, 2) <<  "\t";
-
-    //rotation-translation
-    os << D(0, 3) <<  "\t" << D(0, 4) <<  "\t" << D(0, 5) <<  "\t"
-       << D(1, 3) <<  "\t" << D(1, 4) <<  "\t" << D(1, 5) <<  "\t"
-       << D(2, 3) <<  "\t" << D(2, 4) <<  "\t" << D(2, 5) <<  "\t";
-
-    //translation-rotation
-    os << D(3, 0) <<  "\t" << D(3, 1) <<  "\t" << D(3, 2) <<  "\t"
-       << D(4, 0) <<  "\t" << D(4, 1) <<  "\t" << D(4, 2) <<  "\t"
-       << D(5, 0) <<  "\t" << D(5, 1) <<  "\t" << D(5, 2) <<  "\t";
-
-    //rotation
-    os << D(3, 3) <<  "\t" << D(3, 4) <<  "\t" << D(3, 5) <<  "\t"
-       << D(4, 3) <<  "\t" << D(4, 4) <<  "\t" << D(4, 5) <<  "\t"
-       << D(5, 3) <<  "\t" << D(5, 4) <<  "\t" << D(5, 5) <<  "\t";
-
-    //---------------------------------------------------------------------
-
-    //center of diffusion
-
-    center = cd_->getCOR();
-
-    os << center[0] <<  "\t" << center[1] <<  "\t" << center[2] <<  "\t";
-
-    //resistance tensor at center of diffusion
-    //translation
-
-    Xi = cd_->getXi();
-
-    os << Xi(0, 0) <<  "\t" << Xi(0, 1) <<  "\t" << Xi(0, 2) <<  "\t"
-       << Xi(1, 0) <<  "\t" << Xi(1, 1) <<  "\t" << Xi(1, 2) <<  "\t"
-       << Xi(2, 0) <<  "\t" << Xi(2, 1) <<  "\t" << Xi(2, 2) <<  "\t";
-
-    //rotation-translation
-    os << Xi(0, 3) <<  "\t" << Xi(0, 4) <<  "\t" << Xi(0, 5) <<  "\t"
-       << Xi(1, 3) <<  "\t" << Xi(1, 4) <<  "\t" << Xi(1, 5) <<  "\t"
-       << Xi(2, 3) <<  "\t" << Xi(2, 4) <<  "\t" << Xi(2, 5) <<  "\t";
-
-    //translation-rotation
-    os << Xi(3, 0) <<  "\t" << Xi(3, 1) <<  "\t" << Xi(3, 2) <<  "\t"
-       << Xi(4, 0) <<  "\t" << Xi(4, 1) <<  "\t" << Xi(4, 2) <<  "\t"
-       << Xi(5, 0) <<  "\t" << Xi(5, 1) <<  "\t" << Xi(5, 2) <<  "\t";
-
-    //rotation
-    os << Xi(3, 3) <<  "\t" << Xi(3, 4) <<  "\t" << Xi(3, 5) <<  "\t"
-       << Xi(4, 3) <<  "\t" << Xi(4, 4) <<  "\t" << Xi(4, 5) <<  "\t"
-       << Xi(5, 3) <<  "\t" << Xi(5, 4) <<  "\t" << Xi(5, 5) <<  "\t";
-
-
-    //diffusion tensor at center of diffusion
-    //translation
-
-    D = cd_->getD();
-
-    os << D(0, 0) <<  "\t" << D(0, 1) <<  "\t" << D(0, 2) <<  "\t"
-       << D(1, 0) <<  "\t" << D(1, 1) <<  "\t" << D(1, 2) <<  "\t"
-       << D(2, 0) <<  "\t" << D(2, 1) <<  "\t" << D(2, 2) <<  "\t";
-
-    //rotation-translation
-    os << D(0, 3) <<  "\t" << D(0, 4) <<  "\t" << D(0, 5) <<  "\t"
-       << D(1, 3) <<  "\t" << D(1, 4) <<  "\t" << D(1, 5) <<  "\t"
-       << D(2, 3) <<  "\t" << D(2, 4) <<  "\t" << D(2, 5) <<  "\t";
-
-    //translation-rotation
-    os << D(3, 0) <<  "\t" << D(3, 1) <<  "\t" << D(3, 2) <<  "\t"
-       << D(4, 0) <<  "\t" << D(4, 1) <<  "\t" << D(4, 2) <<  "\t"
-       << D(5, 0) <<  "\t" << D(5, 1) <<  "\t" << D(5, 2) <<  "\t";
-
-    //rotation
-    os << D(3, 3) <<  "\t" << D(3, 4) <<  "\t" << D(3, 5) <<  "\t"
-       << D(4, 3) <<  "\t" << D(4, 4) <<  "\t" << D(4, 5) <<  "\t"
-       << D(5, 3) <<  "\t" << D(5, 4) <<  "\t" << D(5, 5) <<  "\t";
-
-    //---------------------------------------------------------------------
-
-    //center of mass
-
-    center = com_->getCOR();
-
-    os << center[0] <<  "\t" << center[1] <<  "\t" << center[2] <<  "\t";
-
-    //resistance tensor at center of mass
-    //translation-translation
-
-    Xi = com_->getXi();
-
-    os << Xi(0, 0) <<  "\t" << Xi(0, 1) <<  "\t" << Xi(0, 2) <<  "\t"
-       << Xi(1, 0) <<  "\t" << Xi(1, 1) <<  "\t" << Xi(1, 2) <<  "\t"
-       << Xi(2, 0) <<  "\t" << Xi(2, 1) <<  "\t" << Xi(2, 2) <<  "\t";
-
-    //rotation-translation
-    os << Xi(0, 3) <<  "\t" << Xi(0, 4) <<  "\t" << Xi(0, 5) <<  "\t"
-       << Xi(1, 3) <<  "\t" << Xi(1, 4) <<  "\t" << Xi(1, 5) <<  "\t"
-       << Xi(2, 3) <<  "\t" << Xi(2, 4) <<  "\t" << Xi(2, 5) <<  "\t";
-
-    //translation-rotation
-    os << Xi(3, 0) <<  "\t" << Xi(3, 1) <<  "\t" << Xi(3, 2) <<  "\t"
-       << Xi(4, 0) <<  "\t" << Xi(4, 1) <<  "\t" << Xi(4, 2) <<  "\t"
-       << Xi(5, 0) <<  "\t" << Xi(5, 1) <<  "\t" << Xi(5, 2) <<  "\t";
-
-    //rotation-rotation
-    os << Xi(3, 3) <<  "\t" << Xi(3, 4) <<  "\t" << Xi(3, 5) <<  "\t"
-       << Xi(4, 3) <<  "\t" << Xi(4, 4) <<  "\t" << Xi(4, 5) <<  "\t"
-       << Xi(5, 3) <<  "\t" << Xi(5, 4) <<  "\t" << Xi(5, 5) <<  "\t";
-
-
-    //diffusion tensor at center of mass
-    //translation-translation
-
-    D = com_->getD();
-
-    os << D(0, 0) <<  "\t" << D(0, 1) <<  "\t" << D(0, 2) <<  "\t"
-       << D(1, 0) <<  "\t" << D(1, 1) <<  "\t" << D(1, 2) <<  "\t"
-       << D(2, 0) <<  "\t" << D(2, 1) <<  "\t" << D(2, 2) <<  "\t";
-
-    //rotation-translation
-    os << D(0, 3) <<  "\t" << D(0, 4) <<  "\t" << D(0, 5) <<  "\t"
-       << D(1, 3) <<  "\t" << D(1, 4) <<  "\t" << D(1, 5) <<  "\t"
-       << D(2, 3) <<  "\t" << D(2, 4) <<  "\t" << D(2, 5) <<  "\t";
-
-    //translation-rotation
-    os << D(3, 0) <<  "\t" << D(3, 1) <<  "\t" << D(3, 2) <<  "\t"
-       << D(4, 0) <<  "\t" << D(4, 1) <<  "\t" << D(4, 2) <<  "\t"
-       << D(5, 0) <<  "\t" << D(5, 1) <<  "\t" << D(5, 2) <<  "\t";
-
-    //rotation-rotation
-    os << D(3, 3) <<  "\t" << D(3, 4) <<  "\t" << D(3, 5) <<  "\t"
-       << D(4, 3) <<  "\t" << D(4, 4) <<  "\t" << D(4, 5) <<  "\t"
-       << D(5, 3) <<  "\t" << D(5, 4) <<  "\t" << D(5, 5) <<  "\n";
-
-
-  }
-
+bool HydrodynamicsModel::calcHydroProps(Shape* shape, RealType viscosity,
+                                        RealType temperature) {
+  return false;
 }
+
+void HydrodynamicsModel::writeHydroProps(std::ostream& os) {
+  Vector3d center;
+  Mat6x6d Xi, D;
+
+  os << sd_->getType() << "\t";
+
+  // center of resistance
+
+  center = cr_->getCOR();
+
+  os << center[0] << "\t" << center[1] << "\t" << center[2] << "\t";
+
+  // resistance tensor at center of resistance
+  // translation
+
+  Xi = cr_->getXi();
+
+  os << Xi(0, 0) << "\t" << Xi(0, 1) << "\t" << Xi(0, 2) << "\t" << Xi(1, 0)
+     << "\t" << Xi(1, 1) << "\t" << Xi(1, 2) << "\t" << Xi(2, 0) << "\t"
+     << Xi(2, 1) << "\t" << Xi(2, 2) << "\t";
+
+  // rotation-translation
+  os << Xi(0, 3) << "\t" << Xi(0, 4) << "\t" << Xi(0, 5) << "\t" << Xi(1, 3)
+     << "\t" << Xi(1, 4) << "\t" << Xi(1, 5) << "\t" << Xi(2, 3) << "\t"
+     << Xi(2, 4) << "\t" << Xi(2, 5) << "\t";
+
+  // translation-rotation
+  os << Xi(3, 0) << "\t" << Xi(3, 1) << "\t" << Xi(3, 2) << "\t" << Xi(4, 0)
+     << "\t" << Xi(4, 1) << "\t" << Xi(4, 2) << "\t" << Xi(5, 0) << "\t"
+     << Xi(5, 1) << "\t" << Xi(5, 2) << "\t";
+
+  // rotation
+  os << Xi(3, 3) << "\t" << Xi(3, 4) << "\t" << Xi(3, 5) << "\t" << Xi(4, 3)
+     << "\t" << Xi(4, 4) << "\t" << Xi(4, 5) << "\t" << Xi(5, 3) << "\t"
+     << Xi(5, 4) << "\t" << Xi(5, 5) << "\t";
+
+  // diffusion tensor at center of resistance
+  // translation
+
+  D = cr_->getD();
+
+  os << D(0, 0) << "\t" << D(0, 1) << "\t" << D(0, 2) << "\t" << D(1, 0) << "\t"
+     << D(1, 1) << "\t" << D(1, 2) << "\t" << D(2, 0) << "\t" << D(2, 1) << "\t"
+     << D(2, 2) << "\t";
+
+  // rotation-translation
+  os << D(0, 3) << "\t" << D(0, 4) << "\t" << D(0, 5) << "\t" << D(1, 3) << "\t"
+     << D(1, 4) << "\t" << D(1, 5) << "\t" << D(2, 3) << "\t" << D(2, 4) << "\t"
+     << D(2, 5) << "\t";
+
+  // translation-rotation
+  os << D(3, 0) << "\t" << D(3, 1) << "\t" << D(3, 2) << "\t" << D(4, 0) << "\t"
+     << D(4, 1) << "\t" << D(4, 2) << "\t" << D(5, 0) << "\t" << D(5, 1) << "\t"
+     << D(5, 2) << "\t";
+
+  // rotation
+  os << D(3, 3) << "\t" << D(3, 4) << "\t" << D(3, 5) << "\t" << D(4, 3) << "\t"
+     << D(4, 4) << "\t" << D(4, 5) << "\t" << D(5, 3) << "\t" << D(5, 4) << "\t"
+     << D(5, 5) << "\t";
+
+  //---------------------------------------------------------------------
+
+  // center of diffusion
+
+  center = cd_->getCOR();
+
+  os << center[0] << "\t" << center[1] << "\t" << center[2] << "\t";
+
+  // resistance tensor at center of diffusion
+  // translation
+
+  Xi = cd_->getXi();
+
+  os << Xi(0, 0) << "\t" << Xi(0, 1) << "\t" << Xi(0, 2) << "\t" << Xi(1, 0)
+     << "\t" << Xi(1, 1) << "\t" << Xi(1, 2) << "\t" << Xi(2, 0) << "\t"
+     << Xi(2, 1) << "\t" << Xi(2, 2) << "\t";
+
+  // rotation-translation
+  os << Xi(0, 3) << "\t" << Xi(0, 4) << "\t" << Xi(0, 5) << "\t" << Xi(1, 3)
+     << "\t" << Xi(1, 4) << "\t" << Xi(1, 5) << "\t" << Xi(2, 3) << "\t"
+     << Xi(2, 4) << "\t" << Xi(2, 5) << "\t";
+
+  // translation-rotation
+  os << Xi(3, 0) << "\t" << Xi(3, 1) << "\t" << Xi(3, 2) << "\t" << Xi(4, 0)
+     << "\t" << Xi(4, 1) << "\t" << Xi(4, 2) << "\t" << Xi(5, 0) << "\t"
+     << Xi(5, 1) << "\t" << Xi(5, 2) << "\t";
+
+  // rotation
+  os << Xi(3, 3) << "\t" << Xi(3, 4) << "\t" << Xi(3, 5) << "\t" << Xi(4, 3)
+     << "\t" << Xi(4, 4) << "\t" << Xi(4, 5) << "\t" << Xi(5, 3) << "\t"
+     << Xi(5, 4) << "\t" << Xi(5, 5) << "\t";
+
+  // diffusion tensor at center of diffusion
+  // translation
+
+  D = cd_->getD();
+
+  os << D(0, 0) << "\t" << D(0, 1) << "\t" << D(0, 2) << "\t" << D(1, 0) << "\t"
+     << D(1, 1) << "\t" << D(1, 2) << "\t" << D(2, 0) << "\t" << D(2, 1) << "\t"
+     << D(2, 2) << "\t";
+
+  // rotation-translation
+  os << D(0, 3) << "\t" << D(0, 4) << "\t" << D(0, 5) << "\t" << D(1, 3) << "\t"
+     << D(1, 4) << "\t" << D(1, 5) << "\t" << D(2, 3) << "\t" << D(2, 4) << "\t"
+     << D(2, 5) << "\t";
+
+  // translation-rotation
+  os << D(3, 0) << "\t" << D(3, 1) << "\t" << D(3, 2) << "\t" << D(4, 0) << "\t"
+     << D(4, 1) << "\t" << D(4, 2) << "\t" << D(5, 0) << "\t" << D(5, 1) << "\t"
+     << D(5, 2) << "\t";
+
+  // rotation
+  os << D(3, 3) << "\t" << D(3, 4) << "\t" << D(3, 5) << "\t" << D(4, 3) << "\t"
+     << D(4, 4) << "\t" << D(4, 5) << "\t" << D(5, 3) << "\t" << D(5, 4) << "\t"
+     << D(5, 5) << "\t";
+
+  //---------------------------------------------------------------------
+
+  // center of mass
+
+  center = com_->getCOR();
+
+  os << center[0] << "\t" << center[1] << "\t" << center[2] << "\t";
+
+  // resistance tensor at center of mass
+  // translation-translation
+
+  Xi = com_->getXi();
+
+  os << Xi(0, 0) << "\t" << Xi(0, 1) << "\t" << Xi(0, 2) << "\t" << Xi(1, 0)
+     << "\t" << Xi(1, 1) << "\t" << Xi(1, 2) << "\t" << Xi(2, 0) << "\t"
+     << Xi(2, 1) << "\t" << Xi(2, 2) << "\t";
+
+  // rotation-translation
+  os << Xi(0, 3) << "\t" << Xi(0, 4) << "\t" << Xi(0, 5) << "\t" << Xi(1, 3)
+     << "\t" << Xi(1, 4) << "\t" << Xi(1, 5) << "\t" << Xi(2, 3) << "\t"
+     << Xi(2, 4) << "\t" << Xi(2, 5) << "\t";
+
+  // translation-rotation
+  os << Xi(3, 0) << "\t" << Xi(3, 1) << "\t" << Xi(3, 2) << "\t" << Xi(4, 0)
+     << "\t" << Xi(4, 1) << "\t" << Xi(4, 2) << "\t" << Xi(5, 0) << "\t"
+     << Xi(5, 1) << "\t" << Xi(5, 2) << "\t";
+
+  // rotation-rotation
+  os << Xi(3, 3) << "\t" << Xi(3, 4) << "\t" << Xi(3, 5) << "\t" << Xi(4, 3)
+     << "\t" << Xi(4, 4) << "\t" << Xi(4, 5) << "\t" << Xi(5, 3) << "\t"
+     << Xi(5, 4) << "\t" << Xi(5, 5) << "\t";
+
+  // diffusion tensor at center of mass
+  // translation-translation
+
+  D = com_->getD();
+
+  os << D(0, 0) << "\t" << D(0, 1) << "\t" << D(0, 2) << "\t" << D(1, 0) << "\t"
+     << D(1, 1) << "\t" << D(1, 2) << "\t" << D(2, 0) << "\t" << D(2, 1) << "\t"
+     << D(2, 2) << "\t";
+
+  // rotation-translation
+  os << D(0, 3) << "\t" << D(0, 4) << "\t" << D(0, 5) << "\t" << D(1, 3) << "\t"
+     << D(1, 4) << "\t" << D(1, 5) << "\t" << D(2, 3) << "\t" << D(2, 4) << "\t"
+     << D(2, 5) << "\t";
+
+  // translation-rotation
+  os << D(3, 0) << "\t" << D(3, 1) << "\t" << D(3, 2) << "\t" << D(4, 0) << "\t"
+     << D(4, 1) << "\t" << D(4, 2) << "\t" << D(5, 0) << "\t" << D(5, 1) << "\t"
+     << D(5, 2) << "\t";
+
+  // rotation-rotation
+  os << D(3, 3) << "\t" << D(3, 4) << "\t" << D(3, 5) << "\t" << D(4, 3) << "\t"
+     << D(4, 4) << "\t" << D(4, 5) << "\t" << D(5, 3) << "\t" << D(5, 4) << "\t"
+     << D(5, 5) << "\n";
+}
+
+}  // namespace OpenMD

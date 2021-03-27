@@ -42,24 +42,22 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "primitives/SDKBend.hpp"
 
 namespace OpenMD {
-  SDKBend::SDKBend(Atom* atom1, Atom* atom2, Atom* atom3, SDKBendType* bt) 
-    : Bend(atom1, atom2, atom3, bt), bond_(NULL){
-    bond_ = new Bond(atom1, atom3, bt->getShiftedMieBondType());
-  }
-  
-  SDKBend::~SDKBend() {
-    delete bond_;
-  }
-  
-  void SDKBend::calcForce(RealType& angle, bool doParticlePot) {
-    Bend::calcForce(angle, doParticlePot);
-    bond_->calcForce(doParticlePot);
-    if (doParticlePot) {
-      atoms_[1]->addParticlePot(bond_->getPotential());
-    }
-  }  
+SDKBend::SDKBend(Atom* atom1, Atom* atom2, Atom* atom3, SDKBendType* bt)
+    : Bend(atom1, atom2, atom3, bt), bond_(NULL) {
+  bond_ = new Bond(atom1, atom3, bt->getShiftedMieBondType());
 }
+
+SDKBend::~SDKBend() { delete bond_; }
+
+void SDKBend::calcForce(RealType& angle, bool doParticlePot) {
+  Bend::calcForce(angle, doParticlePot);
+  bond_->calcForce(doParticlePot);
+  if (doParticlePot) {
+    atoms_[1]->addParticlePot(bond_->getPotential());
+  }
+}
+}  // namespace OpenMD

@@ -44,80 +44,91 @@
  */
 
 #include "io/NonBondedInteractionsSectionParser.hpp"
+
+#include "brains/ForceField.hpp"
 #include "types/AtomType.hpp"
-#include "types/MorseInteractionType.hpp"
-#include "types/MAWInteractionType.hpp"
-#include "types/LennardJonesInteractionType.hpp"
-#include "types/RepulsivePowerInteractionType.hpp"
-#include "types/MieInteractionType.hpp"
 #include "types/BuckinghamInteractionType.hpp"
 #include "types/EAMInteractionType.hpp"
 #include "types/InversePowerSeriesInteractionType.hpp"
-#include "brains/ForceField.hpp"
+#include "types/LennardJonesInteractionType.hpp"
+#include "types/MAWInteractionType.hpp"
+#include "types/MieInteractionType.hpp"
+#include "types/MorseInteractionType.hpp"
+#include "types/RepulsivePowerInteractionType.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 
-  NonBondedInteractionsSectionParser::NonBondedInteractionsSectionParser(ForceFieldOptions& options) : options_(options){
-    setSectionName("NonBondedInteractions");
+NonBondedInteractionsSectionParser::NonBondedInteractionsSectionParser(
+    ForceFieldOptions& options)
+    : options_(options) {
+  setSectionName("NonBondedInteractions");
 
-    stringToEnumMap_["MAW"] =  MAW;
-    stringToEnumMap_["ShiftedMorse"] =  ShiftedMorse;
-    stringToEnumMap_["LennardJones"] = LennardJones;
-    stringToEnumMap_["RepulsiveMorse"] = RepulsiveMorse;
-    stringToEnumMap_["RepulsivePower"] = RepulsivePower;
-    stringToEnumMap_["Mie"] = Mie;
-    stringToEnumMap_["Buckingham"] = Buckingham;
-    stringToEnumMap_["EAMTable"] = EAMTable;
-    stringToEnumMap_["EAMZhou"] = EAMZhou;
-    stringToEnumMap_["EAMOxides"] = EAMOxides;
-    stringToEnumMap_["InversePowerSeries"] = InversePowerSeries;
+  stringToEnumMap_["MAW"] = MAW;
+  stringToEnumMap_["ShiftedMorse"] = ShiftedMorse;
+  stringToEnumMap_["LennardJones"] = LennardJones;
+  stringToEnumMap_["RepulsiveMorse"] = RepulsiveMorse;
+  stringToEnumMap_["RepulsivePower"] = RepulsivePower;
+  stringToEnumMap_["Mie"] = Mie;
+  stringToEnumMap_["Buckingham"] = Buckingham;
+  stringToEnumMap_["EAMTable"] = EAMTable;
+  stringToEnumMap_["EAMZhou"] = EAMZhou;
+  stringToEnumMap_["EAMOxides"] = EAMOxides;
+  stringToEnumMap_["InversePowerSeries"] = InversePowerSeries;
+}
 
+void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
+                                                   const std::string& line,
+                                                   int lineNo) {
+  StringTokenizer tokenizer(line);
+  int nTokens = tokenizer.countTokens();
+  if (nTokens < 3) {
+    sprintf(painCave.errMsg,
+            "NonBondedInteractionsSectionParser Error: Not enough tokens at "
+            "line %d\n",
+            lineNo);
+    painCave.isFatal = 1;
+    simError();
   }
 
-  void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
-    StringTokenizer tokenizer(line);
-    int nTokens = tokenizer.countTokens();
-    if (nTokens < 3) {
-      sprintf(painCave.errMsg,
-              "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
-	      lineNo);
-      painCave.isFatal = 1;
-      simError();
-    }
+  meus_ = options_.getMetallicEnergyUnitScaling();
+  eus_ = options_.getEnergyUnitScaling();
+  dus_ = options_.getDistanceUnitScaling();
 
-    meus_ = options_.getMetallicEnergyUnitScaling();
-    eus_  = options_.getEnergyUnitScaling();
-    dus_  = options_.getDistanceUnitScaling();
+  std::string at1 = tokenizer.nextToken();
+  std::string at2 = tokenizer.nextToken();
+  std::string itype = tokenizer.nextToken();
 
-    std::string at1 = tokenizer.nextToken();
-    std::string at2 = tokenizer.nextToken();
-    std::string itype = tokenizer.nextToken();
+  NonBondedInteractionTypeEnum nbit = getNonBondedInteractionTypeEnum(itype);
+  nTokens -= 3;
+  NonBondedInteractionType* interactionType = NULL;
 
-    NonBondedInteractionTypeEnum nbit = getNonBondedInteractionTypeEnum(itype);
-    nTokens -= 3;
-    NonBondedInteractionType* interactionType = NULL;
-
-    //switch is a nightmare to maintain
-    switch(nbit) {
-    case MAW :
+  // switch is a nightmare to maintain
+  switch (nbit) {
+    case MAW:
       if (nTokens != 5) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 8 tokens expected.  \n",
+        sprintf(painCave.errMsg,
+                "NonBondedInteractionsSectionParser Error: Token number "
+                "mismatch at line "
+                "%d. 8 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
-      } else { 
+      } else {
         RealType r_e = dus_ * tokenizer.nextTokenAsDouble();
         RealType D_e = eus_ * tokenizer.nextTokenAsDouble();
-        RealType beta = tokenizer.nextTokenAsDouble() / dus_ ;
+        RealType beta = tokenizer.nextTokenAsDouble() / dus_;
         RealType ca1 = tokenizer.nextTokenAsDouble();
         RealType cb1 = tokenizer.nextTokenAsDouble();
         interactionType = new MAWInteractionType(D_e, beta, r_e, ca1, cb1);
       }
       break;
 
-    case ShiftedMorse :
+    case ShiftedMorse:
       if (nTokens != 3) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 6 tokens expected.  \n",
+        sprintf(painCave.errMsg,
+                "NonBondedInteractionsSectionParser Error: Token number "
+                "mismatch at line "
+                "%d. 6 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -129,9 +140,12 @@ namespace OpenMD {
       }
       break;
 
-    case RepulsiveMorse :
+    case RepulsiveMorse:
       if (nTokens != 3) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 6 tokens expected.  \n",
+        sprintf(painCave.errMsg,
+                "NonBondedInteractionsSectionParser Error: Token number "
+                "mismatch at line "
+                "%d. 6 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -143,9 +157,12 @@ namespace OpenMD {
       }
       break;
 
-    case LennardJones :
+    case LennardJones:
       if (nTokens != 2) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 5 tokens expected.  \n",
+        sprintf(painCave.errMsg,
+                "NonBondedInteractionsSectionParser Error: Token number "
+                "mismatch at line "
+                "%d. 5 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -156,9 +173,12 @@ namespace OpenMD {
       }
       break;
 
-    case RepulsivePower :
+    case RepulsivePower:
       if (nTokens < 3) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 6 tokens expected.  \n",
+        sprintf(painCave.errMsg,
+                "NonBondedInteractionsSectionParser Error: Token number "
+                "mismatch at line "
+                "%d. 6 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -166,14 +186,17 @@ namespace OpenMD {
         RealType sigma = dus_ * tokenizer.nextTokenAsDouble();
         RealType epsilon = eus_ * tokenizer.nextTokenAsDouble();
         int nRep = tokenizer.nextTokenAsInt();
-        interactionType = new RepulsivePowerInteractionType(sigma, epsilon,
-                                                            nRep);
+        interactionType =
+            new RepulsivePowerInteractionType(sigma, epsilon, nRep);
       }
       break;
 
-    case Mie :
+    case Mie:
       if (nTokens != 4) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 7 tokens expected.  \n",
+        sprintf(painCave.errMsg,
+                "NonBondedInteractionsSectionParser Error: Token number "
+                "mismatch at line "
+                "%d. 7 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -186,9 +209,11 @@ namespace OpenMD {
       }
       break;
 
-    case Buckingham :
+    case Buckingham:
       if (nTokens < 4) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+        sprintf(painCave.errMsg,
+                "NonBondedInteractionsSectionParser Error: Not enough tokens "
+                "at line %d\n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -198,36 +223,42 @@ namespace OpenMD {
 
         RealType A = eus_ * tokenizer.nextTokenAsDouble();
         RealType B = tokenizer.nextTokenAsDouble() / dus_;
-        RealType C = tokenizer.nextTokenAsDouble(); // should also have a scaling
+        RealType C =
+            tokenizer.nextTokenAsDouble();  // should also have a scaling
         RealType sigma = 0.0;
         RealType epsilon = 0.0;
 
         if (btype.compare("MODIFIED")) {
           sigma = dus_ * tokenizer.nextTokenAsDouble();
           epsilon = eus_ * tokenizer.nextTokenAsDouble();
-          interactionType = new BuckinghamInteractionType(A, B, C, sigma, epsilon, btModified);
+          interactionType = new BuckinghamInteractionType(A, B, C, sigma,
+                                                          epsilon, btModified);
 
-        } else if(btype.compare("TRADITIONAL")) {
-          interactionType = new BuckinghamInteractionType(A, B, C, btTraditional);
+        } else if (btype.compare("TRADITIONAL")) {
+          interactionType =
+              new BuckinghamInteractionType(A, B, C, btTraditional);
         } else {
-
-          sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Unknown Buckingham Type at line %d\n",
+          sprintf(painCave.errMsg,
+                  "NonBondedInteractionsSectionParser Error: Unknown "
+                  "Buckingham Type at "
+                  "line %d\n",
                   lineNo);
           painCave.isFatal = 1;
           simError();
         }
-
       }
       break;
 
-    case EAMZhou :
+    case EAMZhou:
       if (nTokens != 7) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 10 tokens expected.  \n",
+        sprintf(painCave.errMsg,
+                "NonBondedInteractionsSectionParser Error: Token number "
+                "mismatch at line "
+                "%d. 10 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
       } else {
-
         RealType re = dus_ * tokenizer.nextTokenAsDouble();
         RealType alpha = tokenizer.nextTokenAsDouble();
         RealType beta = tokenizer.nextTokenAsDouble();
@@ -238,19 +269,21 @@ namespace OpenMD {
         RealType kappa = tokenizer.nextTokenAsDouble();
         RealType lambda = tokenizer.nextTokenAsDouble();
 
-        interactionType = new EAMInteractionType(re, alpha, beta, A, B,
-                                                 kappa, lambda);
+        interactionType =
+            new EAMInteractionType(re, alpha, beta, A, B, kappa, lambda);
       }
       break;
 
-    case EAMOxides :
+    case EAMOxides:
       if (nTokens != 5) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Token number mismatch at line %d. 8 tokens expected.  \n",
+        sprintf(painCave.errMsg,
+                "NonBondedInteractionsSectionParser Error: Token number "
+                "mismatch at line "
+                "%d. 8 tokens expected.  \n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
       } else {
-
         RealType re = dus_ * tokenizer.nextTokenAsDouble();
         RealType alpha = tokenizer.nextTokenAsDouble();
         // Because EAM is a metallic potential, we'll use the metallic
@@ -262,52 +295,55 @@ namespace OpenMD {
         interactionType = new EAMInteractionType(re, alpha, A, Ci, Cj);
       }
       break;
-      
-    case InversePowerSeries :
+
+    case InversePowerSeries:
       if (nTokens < 2 || nTokens % 2 != 0) {
-        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
+        sprintf(painCave.errMsg,
+                "NonBondedInteractionsSectionParser Error: Not enough tokens "
+                "at line %d\n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
       } else {
-
-        std::vector<std::pair<int,RealType> > series;
+        std::vector<std::pair<int, RealType>> series;
         int nPairs = nTokens / 2;
         int power;
         RealType coefficient;
-        
+
         for (int i = 0; i < nPairs; ++i) {
           power = tokenizer.nextTokenAsInt();
           coefficient = tokenizer.nextTokenAsDouble() * eus_ * pow(dus_, power);
-          series.push_back(std::make_pair( power, coefficient));          
+          series.push_back(std::make_pair(power, coefficient));
         }
         interactionType = new InversePowerSeriesInteractionType(series);
-        
       }
       break;
 
-    case Unknown :
+    case Unknown:
     default:
-      sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Unknown Interaction Type at line %d\n",
-	      lineNo);
+      sprintf(painCave.errMsg,
+              "NonBondedInteractionsSectionParser Error: Unknown Interaction "
+              "Type at "
+              "line %d\n",
+              lineNo);
       painCave.isFatal = 1;
       simError();
 
       break;
-
-    }
-
-    if (interactionType != NULL) {
-      ff.addNonBondedInteractionType(at1, at2, interactionType);
-    }
-
   }
 
-  NonBondedInteractionsSectionParser::NonBondedInteractionTypeEnum NonBondedInteractionsSectionParser::getNonBondedInteractionTypeEnum(const std::string& str) {
-    std::map<std::string, NonBondedInteractionTypeEnum>::iterator i;
-    i = stringToEnumMap_.find(str);
-
-    return i == stringToEnumMap_.end() ? Unknown : i->second;
+  if (interactionType != NULL) {
+    ff.addNonBondedInteractionType(at1, at2, interactionType);
   }
+}
 
-} //end namespace OpenMD
+NonBondedInteractionsSectionParser::NonBondedInteractionTypeEnum
+NonBondedInteractionsSectionParser::getNonBondedInteractionTypeEnum(
+    const std::string& str) {
+  std::map<std::string, NonBondedInteractionTypeEnum>::iterator i;
+  i = stringToEnumMap_.find(str);
+
+  return i == stringToEnumMap_.end() ? Unknown : i->second;
+}
+
+}  // end namespace OpenMD

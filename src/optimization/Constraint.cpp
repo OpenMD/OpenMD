@@ -18,36 +18,36 @@
 */
 
 #include "optimization/Constraint.hpp"
-#include "utils/simError.h"
+
 #include <cstdio>
+
+#include "utils/simError.h"
 
 namespace QuantLib {
 
-    Constraint::Constraint(Constraint::Impl* impl)
-    : impl_(impl) {}
+Constraint::Constraint(Constraint::Impl* impl) : impl_(impl) {}
 
-    RealType Constraint::update(DynamicVector<RealType>& params,
-                                const DynamicVector<RealType>& direction,
-                                RealType beta) {
-
-        RealType diff=beta;
-        DynamicVector<RealType> newParams = params + diff*direction;
-        bool valid = test(newParams);
-        int icount = 0;
-        while (!valid) {
-            if (icount > 200) {
-                sprintf(painCave.errMsg,  "can't update parameter vector\n");
-                painCave.isFatal = 1;
-                painCave.severity = OPENMD_ERROR;
-                simError();
-            }
-            diff *= 0.5;
-            icount ++;
-            newParams = params + diff*direction;
-            valid = test(newParams);
-        }
-        params += diff*direction;
-        return diff;
+RealType Constraint::update(DynamicVector<RealType>& params,
+                            const DynamicVector<RealType>& direction,
+                            RealType beta) {
+  RealType diff = beta;
+  DynamicVector<RealType> newParams = params + diff * direction;
+  bool valid = test(newParams);
+  int icount = 0;
+  while (!valid) {
+    if (icount > 200) {
+      sprintf(painCave.errMsg, "can't update parameter vector\n");
+      painCave.isFatal = 1;
+      painCave.severity = OPENMD_ERROR;
+      simError();
     }
-
+    diff *= 0.5;
+    icount++;
+    newParams = params + diff * direction;
+    valid = test(newParams);
+  }
+  params += diff * direction;
+  return diff;
 }
+
+}  // namespace QuantLib

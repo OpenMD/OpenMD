@@ -43,158 +43,155 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "applications/staticProps/PotDiff.hpp"
+
 #include <algorithm>
 #include <functional>
-#include "applications/staticProps/PotDiff.hpp"
+
 #include "brains/ForceManager.hpp"
 #include "brains/SimSnapshotManager.hpp"
-#include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
 
-  PotDiff::PotDiff(SimInfo* info, const std::string& filename, 
-                   const std::string& sele)
-    : StaticAnalyser(info, filename, 1), selectionScript_(sele), 
-      seleMan_(info), evaluator_(info) {
-    
-    StuntDouble* sd;
-    int i;
-    
-    setOutputName(getPrefix(filename) + ".potDiff");
+PotDiff::PotDiff(SimInfo* info, const std::string& filename,
+                 const std::string& sele)
+    : StaticAnalyser(info, filename, 1),
+      selectionScript_(sele),
+      seleMan_(info),
+      evaluator_(info) {
+  StuntDouble* sd;
+  int i;
 
-    // The PotDiff is computed by negating the charge on the atom type
-    // using fluctuating charge values.  If we don't have any
-    // fluctuating charges in the simulation, we need to expand
-    // storage to hold them.
-    int storageLayout = info_->getStorageLayout();
-    storageLayout |= DataStorage::dslFlucQPosition;
-    storageLayout |= DataStorage::dslFlucQVelocity;
-    storageLayout |= DataStorage::dslFlucQForce;
-    info_->setStorageLayout(storageLayout);
-    info_->setSnapshotManager(new SimSnapshotManager(info_, storageLayout));
+  setOutputName(getPrefix(filename) + ".potDiff");
 
-    // now we have to figure out which AtomTypes to convert to fluctuating
-    // charges
-    evaluator_.loadScriptString(sele);    
-    seleMan_.setSelectionSet(evaluator_.evaluate());
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {      
-      AtomType* at = static_cast<Atom*>(sd)->getAtomType();
-      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(at);
-      if (fqa.isFluctuatingCharge()) {
-        selectionWasFlucQ_.push_back(true);
-      } else {
-        selectionWasFlucQ_.push_back(false);                
-        // make a fictitious fluctuating charge with an unphysical
-        // charge mass and slaterN, but we need to zero out the
-        // electronegativity and hardness to remove the self
-        // contribution:
-        fqa.makeFluctuatingCharge(1.0e9, 0.0, 0.0, 1);
+  // The PotDiff is computed by negating the charge on the atom type
+  // using fluctuating charge values.  If we don't have any
+  // fluctuating charges in the simulation, we need to expand
+  // storage to hold them.
+  int storageLayout = info_->getStorageLayout();
+  storageLayout |= DataStorage::dslFlucQPosition;
+  storageLayout |= DataStorage::dslFlucQVelocity;
+  storageLayout |= DataStorage::dslFlucQForce;
+  info_->setStorageLayout(storageLayout);
+  info_->setSnapshotManager(new SimSnapshotManager(info_, storageLayout));
+
+  // now we have to figure out which AtomTypes to convert to fluctuating
+  // charges
+  evaluator_.loadScriptString(sele);
+  seleMan_.setSelectionSet(evaluator_.evaluate());
+  for (sd = seleMan_.beginSelected(i); sd != NULL;
+       sd = seleMan_.nextSelected(i)) {
+    AtomType* at = static_cast<Atom*>(sd)->getAtomType();
+    FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(at);
+    if (fqa.isFluctuatingCharge()) {
+      selectionWasFlucQ_.push_back(true);
+    } else {
+      selectionWasFlucQ_.push_back(false);
+      // make a fictitious fluctuating charge with an unphysical
+      // charge mass and slaterN, but we need to zero out the
+      // electronegativity and hardness to remove the self
+      // contribution:
+      fqa.makeFluctuatingCharge(1.0e9, 0.0, 0.0, 1);
+      sd->setFlucQPos(0.0);
+    }
+  }
+  info_->getSnapshotManager()->advance();
+}
+
+void PotDiff::process() {
+  StuntDouble* sd;
+  int j;
+
+  diff_.clear();
+  DumpReader reader(info_, dumpFilename_);
+  int nFrames = reader.getNFrames();
+
+  // We'll need the force manager to compute the potential
+
+  ForceManager* forceMan = new ForceManager(info_);
+
+  // We'll need thermo to report the potential
+
+  Thermo* thermo = new Thermo(info_);
+
+  for (int i = 0; i < nFrames; i += step_) {
+    reader.readFrame(i);
+    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    for (sd = seleMan_.beginSelected(j); sd != NULL;
+         sd = seleMan_.nextSelected(j)) {
+      if (!selectionWasFlucQ_[j]) {
         sd->setFlucQPos(0.0);
       }
     }
+
+    forceMan->calcForces();
+    RealType pot1 = thermo->getPotential();
+
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+
+    for (sd = seleMan_.beginSelected(j); sd != NULL;
+         sd = seleMan_.nextSelected(j)) {
+      AtomType* at = static_cast<Atom*>(sd)->getAtomType();
+
+      FixedChargeAdapter fca = FixedChargeAdapter(at);
+      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(at);
+
+      RealType charge = 0.0;
+
+      if (fca.isFixedCharge()) charge += fca.getCharge();
+      if (fqa.isFluctuatingCharge()) charge += sd->getFlucQPos();
+
+      sd->setFlucQPos(-charge);
+    }
+
+    currentSnapshot_->clearDerivedProperties();
+    forceMan->calcForces();
+    RealType pot2 = thermo->getPotential();
+    RealType diff = pot2 - pot1;
+
+    data_.add(diff);
+    diff_.push_back(diff);
+    times_.push_back(currentSnapshot_->getTime());
+
     info_->getSnapshotManager()->advance();
   }
-  
-  void PotDiff::process() {
-    StuntDouble* sd;
-    int j;
-  
-    diff_.clear();
-    DumpReader reader(info_, dumpFilename_);
-    int nFrames = reader.getNFrames();
 
-    // We'll need the force manager to compute the potential
-    
-    ForceManager* forceMan = new ForceManager(info_);
-
-    // We'll need thermo to report the potential
-    
-    Thermo* thermo =  new Thermo(info_);
-
-    for (int i = 0; i < nFrames; i += step_) {
-      reader.readFrame(i);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    
-      for (sd = seleMan_.beginSelected(j); sd != NULL;
-           sd = seleMan_.nextSelected(j)) {
-        if (!selectionWasFlucQ_[j])  {
-          sd->setFlucQPos(0.0);
-        }
-      }
-            
-      forceMan->calcForces();
-      RealType pot1 = thermo->getPotential();    
-
-      if (evaluator_.isDynamic()) {
-        seleMan_.setSelectionSet(evaluator_.evaluate());
-      }
-
-      for (sd = seleMan_.beginSelected(j); sd != NULL;
-           sd = seleMan_.nextSelected(j)) {
-
-        AtomType* at = static_cast<Atom*>(sd)->getAtomType();
-
-        FixedChargeAdapter fca = FixedChargeAdapter(at);
-        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(at);
-
-        RealType charge = 0.0;
-        
-        if (fca.isFixedCharge()) charge += fca.getCharge();
-        if (fqa.isFluctuatingCharge()) charge += sd->getFlucQPos();
-
-        sd->setFlucQPos(-charge);
-      }
-
-      currentSnapshot_->clearDerivedProperties();
-      forceMan->calcForces();
-      RealType pot2 = thermo->getPotential();
-      RealType diff = pot2-pot1;
-      
-      data_.add(diff);
-      diff_.push_back(diff);
-      times_.push_back(currentSnapshot_->getTime());
-
-      info_->getSnapshotManager()->advance();
-    }
-   
-    writeDiff();   
-  }
-  
-  void PotDiff::writeDiff() {
-
-    RealType mu, sigma, m95;
-    std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
-    if (ofs.is_open()) {
-
-      data_.getAverage(mu);
-      data_.getStdDev(sigma);
-      data_.get95percentConfidenceInterval(m95);
-      
-      ofs << "#potDiff\n";
-      ofs << "#selection: (" << selectionScript_ << ")\n";
-      ofs << "# <diff> = "<< mu << "\n";
-      ofs << "# StdDev = " << sigma << "\n";
-      ofs << "# 95% confidence interval = " << m95 << "\n";
-      ofs << "# t\tdiff[t]\n";
-      for (unsigned int i = 0; i < diff_.size(); ++i) {
-        ofs << times_[i] << "\t" << diff_[i] << "\n";
-      }
-      
-    } else {
-      
-      sprintf(painCave.errMsg, "PotDiff: unable to open %s\n", 
-	      outputFilename_.c_str());
-      painCave.isFatal = 1;
-      simError();  
-    }
-    ofs.close();
-  }
-  
+  writeDiff();
 }
 
+void PotDiff::writeDiff() {
+  RealType mu, sigma, m95;
+  std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
+  if (ofs.is_open()) {
+    data_.getAverage(mu);
+    data_.getStdDev(sigma);
+    data_.get95percentConfidenceInterval(m95);
 
+    ofs << "#potDiff\n";
+    ofs << "#selection: (" << selectionScript_ << ")\n";
+    ofs << "# <diff> = " << mu << "\n";
+    ofs << "# StdDev = " << sigma << "\n";
+    ofs << "# 95% confidence interval = " << m95 << "\n";
+    ofs << "# t\tdiff[t]\n";
+    for (unsigned int i = 0; i < diff_.size(); ++i) {
+      ofs << times_[i] << "\t" << diff_[i] << "\n";
+    }
+
+  } else {
+    sprintf(painCave.errMsg, "PotDiff: unable to open %s\n",
+            outputFilename_.c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
+  ofs.close();
+}
+
+}  // namespace OpenMD

@@ -44,56 +44,52 @@
  */
 
 #include "applications/dynamicProps/DipoleCorrFunc.hpp"
-#include "primitives/Atom.hpp"
-#include "types/MultipoleAdapter.hpp"
-#include "utils/simError.h"
-#include "utils/Revision.hpp"
+
 #include <sstream>
 
+#include "primitives/Atom.hpp"
+#include "types/MultipoleAdapter.hpp"
+#include "utils/Revision.hpp"
+#include "utils/simError.h"
+
 namespace OpenMD {
-  DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename,
-                                 const std::string& sele1,
-                                 const std::string& sele2)
+DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename,
+                               const std::string& sele1,
+                               const std::string& sele2)
     : ObjectACF<RealType>(info, filename, sele1, sele2,
-                          DataStorage::dslAmat |
-                          DataStorage::dslDipole) {
-    
-    setCorrFuncType("Dipole Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".dcorr");
-    setLabelString( "<D(0).D(t)>" );
-    dipoles_.resize(nFrames_);
-  }
-
-  int DipoleCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    dipoles_[frame].push_back( sd->getDipole() );
-    return dipoles_[frame].size() - 1;
-  }
-  
-  RealType DipoleCorrFunc::calcCorrVal(int frame1, int frame2,
-                                       int id1, int id2) {
-    Vector3d v1 = dipoles_[frame1][id1];
-    Vector3d v2 = dipoles_[frame2][id2];
-    return dot(v1, v2)/(v1.length()*v2.length());
-  }
-  
-  void DipoleCorrFunc::validateSelection(SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; 
-         sd = seleMan1_.nextSelected(i)) {
-
-      AtomType* at = static_cast<Atom*>(sd)->getAtomType();
-      MultipoleAdapter ma = MultipoleAdapter(at);
-
-      if (!ma.isDipole()) {
-	sprintf(painCave.errMsg,
-                "DipoleCorrFunc::validateSelection Error: selected atoms do\n"
-                "\tnot have a dipole\n");
-	painCave.isFatal = 1;
-	simError();        
-      }
-    }    
-  }
+                          DataStorage::dslAmat | DataStorage::dslDipole) {
+  setCorrFuncType("Dipole Correlation Function");
+  setOutputName(getPrefix(dumpFilename_) + ".dcorr");
+  setLabelString("<D(0).D(t)>");
+  dipoles_.resize(nFrames_);
 }
 
+int DipoleCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+  dipoles_[frame].push_back(sd->getDipole());
+  return dipoles_[frame].size() - 1;
+}
 
+RealType DipoleCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
+  Vector3d v1 = dipoles_[frame1][id1];
+  Vector3d v2 = dipoles_[frame2][id2];
+  return dot(v1, v2) / (v1.length() * v2.length());
+}
+
+void DipoleCorrFunc::validateSelection(SelectionManager& seleMan) {
+  StuntDouble* sd;
+  int i;
+  for (sd = seleMan1_.beginSelected(i); sd != NULL;
+       sd = seleMan1_.nextSelected(i)) {
+    AtomType* at = static_cast<Atom*>(sd)->getAtomType();
+    MultipoleAdapter ma = MultipoleAdapter(at);
+
+    if (!ma.isDipole()) {
+      sprintf(painCave.errMsg,
+              "DipoleCorrFunc::validateSelection Error: selected atoms do\n"
+              "\tnot have a dipole\n");
+      painCave.isFatal = 1;
+      simError();
+    }
+  }
+}
+}  // namespace OpenMD

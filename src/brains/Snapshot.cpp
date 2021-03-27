@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-  
+
 /**
  * @file Snapshot.cpp
  * @author tlin
@@ -51,746 +51,654 @@
  */
 
 #include "brains/Snapshot.hpp"
-#include "utils/simError.h"
-#include "utils/Utility.hpp"
+
 #include <cstdio>
+
+#include "utils/Utility.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
 
-  Snapshot::Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups,
-                     bool usePBC) : 
-    atomData(nAtoms), rigidbodyData(nRigidbodies),
-    cgData(nCutoffGroups, DataStorage::dslPosition), 
-    orthoTolerance_(1e-6) {
-    
-    frameData.id = -1;                   
-    frameData.currentTime = 0;     
-    frameData.hmat = Mat3x3d(0.0);             
-    frameData.invHmat = Mat3x3d(0.0);          
-    frameData.orthoRhombic = false;
-    frameData.usePBC = usePBC;
-    frameData.bondPotential = 0.0;      
-    frameData.bendPotential = 0.0;      
-    frameData.torsionPotential = 0.0;   
-    frameData.inversionPotential = 0.0; 
-    frameData.lrPotentials = potVec(0.0);
-    frameData.surfacePotential = 0.0;
-    frameData.reciprocalPotential = 0.0;
-    frameData.selfPotentials = potVec(0.0);
-    frameData.excludedPotentials = potVec(0.0); 
-    frameData.restraintPotential = 0.0; 
-    frameData.rawPotential = 0.0;   
-    frameData.xyArea = 0.0;
-    frameData.xzArea = 0.0;
-    frameData.yzArea = 0.0;
-    frameData.volume = 0.0;          
-    frameData.thermostat = make_pair(0.0, 0.0);
-    frameData.electronicThermostat = make_pair(0.0, 0.0);
-    frameData.barostat = Mat3x3d(0.0);              
-    frameData.virialTensor = Mat3x3d(0.0);              
-    frameData.conductiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
-    clearDerivedProperties();
-  }
-  
-  Snapshot::Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, 
-                     int storageLayout, bool usePBC) : 
-    atomData(nAtoms, storageLayout), 
-    rigidbodyData(nRigidbodies, storageLayout),
-    cgData(nCutoffGroups, DataStorage::dslPosition),
-    orthoTolerance_(1e-6) {
-    
-    frameData.id = -1;                   
-    frameData.currentTime = 0;     
-    frameData.hmat = Mat3x3d(0.0);             
-    frameData.invHmat = Mat3x3d(0.0);      
-    frameData.bBox = Mat3x3d(0.0);             
-    frameData.invBbox = Mat3x3d(0.0);
-    frameData.orthoRhombic = false;
-    frameData.usePBC = usePBC;
-    frameData.bondPotential = 0.0;      
-    frameData.bendPotential = 0.0;      
-    frameData.torsionPotential = 0.0;   
-    frameData.inversionPotential = 0.0; 
-    frameData.lrPotentials = potVec(0.0);
-    frameData.surfacePotential = 0.0;    
-    frameData.reciprocalPotential = 0.0;
-    frameData.selfPotentials = potVec(0.0);
-    frameData.excludedPotentials = potVec(0.0); 
-    frameData.restraintPotential = 0.0; 
-    frameData.rawPotential = 0.0;       
-    frameData.xyArea = 0.0;
-    frameData.xzArea = 0.0;
-    frameData.yzArea = 0.0;
-    frameData.volume = 0.0;          
-    frameData.thermostat = make_pair(0.0, 0.0);
-    frameData.electronicThermostat = make_pair(0.0, 0.0);
-    frameData.barostat = Mat3x3d(0.0);              
-    frameData.virialTensor = Mat3x3d(0.0);              
-    frameData.conductiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
+Snapshot::Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, bool usePBC)
+    : atomData(nAtoms),
+      rigidbodyData(nRigidbodies),
+      cgData(nCutoffGroups, DataStorage::dslPosition),
+      orthoTolerance_(1e-6) {
+  frameData.id = -1;
+  frameData.currentTime = 0;
+  frameData.hmat = Mat3x3d(0.0);
+  frameData.invHmat = Mat3x3d(0.0);
+  frameData.orthoRhombic = false;
+  frameData.usePBC = usePBC;
+  frameData.bondPotential = 0.0;
+  frameData.bendPotential = 0.0;
+  frameData.torsionPotential = 0.0;
+  frameData.inversionPotential = 0.0;
+  frameData.lrPotentials = potVec(0.0);
+  frameData.surfacePotential = 0.0;
+  frameData.reciprocalPotential = 0.0;
+  frameData.selfPotentials = potVec(0.0);
+  frameData.excludedPotentials = potVec(0.0);
+  frameData.restraintPotential = 0.0;
+  frameData.rawPotential = 0.0;
+  frameData.xyArea = 0.0;
+  frameData.xzArea = 0.0;
+  frameData.yzArea = 0.0;
+  frameData.volume = 0.0;
+  frameData.thermostat = make_pair(0.0, 0.0);
+  frameData.electronicThermostat = make_pair(0.0, 0.0);
+  frameData.barostat = Mat3x3d(0.0);
+  frameData.virialTensor = Mat3x3d(0.0);
+  frameData.conductiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
+  clearDerivedProperties();
+}
 
-    clearDerivedProperties();
-  }
+Snapshot::Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups,
+                   int storageLayout, bool usePBC)
+    : atomData(nAtoms, storageLayout),
+      rigidbodyData(nRigidbodies, storageLayout),
+      cgData(nCutoffGroups, DataStorage::dslPosition),
+      orthoTolerance_(1e-6) {
+  frameData.id = -1;
+  frameData.currentTime = 0;
+  frameData.hmat = Mat3x3d(0.0);
+  frameData.invHmat = Mat3x3d(0.0);
+  frameData.bBox = Mat3x3d(0.0);
+  frameData.invBbox = Mat3x3d(0.0);
+  frameData.orthoRhombic = false;
+  frameData.usePBC = usePBC;
+  frameData.bondPotential = 0.0;
+  frameData.bendPotential = 0.0;
+  frameData.torsionPotential = 0.0;
+  frameData.inversionPotential = 0.0;
+  frameData.lrPotentials = potVec(0.0);
+  frameData.surfacePotential = 0.0;
+  frameData.reciprocalPotential = 0.0;
+  frameData.selfPotentials = potVec(0.0);
+  frameData.excludedPotentials = potVec(0.0);
+  frameData.restraintPotential = 0.0;
+  frameData.rawPotential = 0.0;
+  frameData.xyArea = 0.0;
+  frameData.xzArea = 0.0;
+  frameData.yzArea = 0.0;
+  frameData.volume = 0.0;
+  frameData.thermostat = make_pair(0.0, 0.0);
+  frameData.electronicThermostat = make_pair(0.0, 0.0);
+  frameData.barostat = Mat3x3d(0.0);
+  frameData.virialTensor = Mat3x3d(0.0);
+  frameData.conductiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
 
-  void Snapshot::clearDerivedProperties() {
-    frameData.totalEnergy = 0.0;     
-    frameData.translationalKinetic = 0.0;   
-    frameData.rotationalKinetic = 0.0;   
-    frameData.electronicKinetic = 0.0;   
-    frameData.kineticEnergy = 0.0;   
-    frameData.potentialEnergy = 0.0; 
-    frameData.shortRangePotential = 0.0;
-    frameData.longRangePotential = 0.0;
-    frameData.excludedPotential = 0.0;
-    frameData.selfPotential = 0.0; 
-    frameData.pressure = 0.0;        
-    frameData.temperature = 0.0;
-    frameData.pressureTensor = Mat3x3d(0.0);   
-    frameData.systemDipole = Vector3d(0.0);
-    frameData.systemQuadrupole = Mat3x3d(0.0);
-    frameData.convectiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
-    frameData.electronicTemperature = 0.0;
-    frameData.netCharge = 0.0;
-    frameData.chargeMomentum = 0.0;
-    frameData.COM = V3Zero;             
-    frameData.COMvel = V3Zero;          
-    frameData.COMw = V3Zero; 
+  clearDerivedProperties();
+}
 
-    hasTotalEnergy = false;         
-    hasTranslationalKineticEnergy = false;       
-    hasRotationalKineticEnergy = false;       
-    hasElectronicKineticEnergy = false;       
-    hasKineticEnergy = false;       
-    hasShortRangePotential = false;
-    hasLongRangePotential = false;
-    hasExcludedPotential = false;
-    hasSelfPotential = false;
-    hasPotentialEnergy = false;   
-    hasXYarea = false;
-    hasXZarea = false;
-    hasYZarea = false;
-    hasVolume = false;         
-    hasPressure = false;       
-    hasTemperature = false;    
-    hasElectronicTemperature = false;
-    hasNetCharge = false;
-    hasChargeMomentum = false;
-    hasCOM = false;
-    hasCOMvel = false;
-    hasCOMw = false;
-    hasPressureTensor = false;    
-    hasSystemDipole = false;      
-    hasSystemQuadrupole = false;
-    hasConvectiveHeatFlux = false;  
-    hasInertiaTensor = false;
-    hasGyrationalVolume = false;   
-    hasHullVolume = false;
-    hasConservedQuantity = false; 
-    hasBoundingBox = false;
-  }
+void Snapshot::clearDerivedProperties() {
+  frameData.totalEnergy = 0.0;
+  frameData.translationalKinetic = 0.0;
+  frameData.rotationalKinetic = 0.0;
+  frameData.electronicKinetic = 0.0;
+  frameData.kineticEnergy = 0.0;
+  frameData.potentialEnergy = 0.0;
+  frameData.shortRangePotential = 0.0;
+  frameData.longRangePotential = 0.0;
+  frameData.excludedPotential = 0.0;
+  frameData.selfPotential = 0.0;
+  frameData.pressure = 0.0;
+  frameData.temperature = 0.0;
+  frameData.pressureTensor = Mat3x3d(0.0);
+  frameData.systemDipole = Vector3d(0.0);
+  frameData.systemQuadrupole = Mat3x3d(0.0);
+  frameData.convectiveHeatFlux = Vector3d(0.0, 0.0, 0.0);
+  frameData.electronicTemperature = 0.0;
+  frameData.netCharge = 0.0;
+  frameData.chargeMomentum = 0.0;
+  frameData.COM = V3Zero;
+  frameData.COMvel = V3Zero;
+  frameData.COMw = V3Zero;
 
-  /** Returns the id of this Snapshot */
-  int Snapshot::getID() {
-    return frameData.id;
-  }
-  
-  /** Sets the id of this Snapshot */
-  void Snapshot::setID(int id) {
-    frameData.id = id;
-  }
-  
-  int Snapshot::getSize() {
-    return atomData.getSize() + rigidbodyData.getSize();
-  }
-  
-  /** Returns the number of atoms */
-  int Snapshot::getNumberOfAtoms() {
-    return atomData.getSize();
-  }
-  
-  /** Returns the number of rigid bodies */
-  int Snapshot::getNumberOfRigidBodies() {
-    return rigidbodyData.getSize();
-  }
-  
-  /** Returns the number of rigid bodies */
-  int Snapshot::getNumberOfCutoffGroups() {
-    return cgData.getSize();
-  }
+  hasTotalEnergy = false;
+  hasTranslationalKineticEnergy = false;
+  hasRotationalKineticEnergy = false;
+  hasElectronicKineticEnergy = false;
+  hasKineticEnergy = false;
+  hasShortRangePotential = false;
+  hasLongRangePotential = false;
+  hasExcludedPotential = false;
+  hasSelfPotential = false;
+  hasPotentialEnergy = false;
+  hasXYarea = false;
+  hasXZarea = false;
+  hasYZarea = false;
+  hasVolume = false;
+  hasPressure = false;
+  hasTemperature = false;
+  hasElectronicTemperature = false;
+  hasNetCharge = false;
+  hasChargeMomentum = false;
+  hasCOM = false;
+  hasCOMvel = false;
+  hasCOMw = false;
+  hasPressureTensor = false;
+  hasSystemDipole = false;
+  hasSystemQuadrupole = false;
+  hasConvectiveHeatFlux = false;
+  hasInertiaTensor = false;
+  hasGyrationalVolume = false;
+  hasHullVolume = false;
+  hasConservedQuantity = false;
+  hasBoundingBox = false;
+}
 
-  /** Returns the number of bytes in a FrameData structure */
-  int Snapshot::getFrameDataSize() {
-    return sizeof(FrameData);
-  }
-  
-  /** Returns the H-Matrix */
-  Mat3x3d Snapshot::getHmat() {
-    return frameData.hmat;
-  }
+/** Returns the id of this Snapshot */
+int Snapshot::getID() { return frameData.id; }
 
-  /** Sets the H-Matrix */  
-  void Snapshot::setHmat(const Mat3x3d& m) {
-    hasVolume = false;
-    frameData.hmat = m;
-    frameData.invHmat = frameData.hmat.inverse();
-    
-    //determine whether the box is orthoTolerance or not
-    bool oldOrthoRhombic = frameData.orthoRhombic;
-    
-    RealType smallDiag = fabs(frameData.hmat(0, 0));
-    if(smallDiag > fabs(frameData.hmat(1, 1)))
-      smallDiag = fabs(frameData.hmat(1, 1));
-    if(smallDiag > fabs(frameData.hmat(2, 2)))
-      smallDiag = fabs(frameData.hmat(2, 2));    
-    RealType tol = smallDiag * orthoTolerance_;
+/** Sets the id of this Snapshot */
+void Snapshot::setID(int id) { frameData.id = id; }
 
-    frameData.orthoRhombic = true;
+int Snapshot::getSize() { return atomData.getSize() + rigidbodyData.getSize(); }
 
-    for (int i = 0; i < 3; i++ ) {
-      for (int j = 0 ; j < 3; j++) {
-	if (i != j) {
-	  if (frameData.orthoRhombic) {
-	    if ( fabs(frameData.hmat(i, j)) >= tol)
-	      frameData.orthoRhombic = false;
-	  }        
-	}
-      }
-    }
-    
-    if( oldOrthoRhombic != frameData.orthoRhombic){
-      
-      // It is finally time to suppress these warnings once and for
-      // all.  They were annoying and not very informative.
+/** Returns the number of atoms */
+int Snapshot::getNumberOfAtoms() { return atomData.getSize(); }
 
-      // if( frameData.orthoRhombic ) {
-      //   sprintf( painCave.errMsg,
-      //   	 "OpenMD is switching from the default Non-Orthorhombic\n"
-      //   	 "\tto the faster Orthorhombic periodic boundary computations.\n"
-      //   	 "\tThis is usually a good thing, but if you want the\n"
-      //   	 "\tNon-Orthorhombic computations, make the orthoBoxTolerance\n"
-      //   	 "\tvariable ( currently set to %G ) smaller.\n",
-      //   	 orthoTolerance_);
-      //   painCave.severity = OPENMD_INFO;
-      //   simError();
-      // }
-      // else {
-      //   sprintf( painCave.errMsg,
-      //   	 "OpenMD is switching from the faster Orthorhombic to the more\n"
-      //   	 "\tflexible Non-Orthorhombic periodic boundary computations.\n"
-      //   	 "\tThis is usually because the box has deformed under\n"
-      //   	 "\tNPTf integration. If you want to live on the edge with\n"
-      //   	 "\tthe Orthorhombic computations, make the orthoBoxTolerance\n"
-      //   	 "\tvariable ( currently set to %G ) larger.\n",
-      //   	 orthoTolerance_);
-      //   painCave.severity = OPENMD_WARNING;
-      //   simError();
-      // }
-    }    
-  }
-  
-  /** Returns the inverse H-Matrix */
-  Mat3x3d Snapshot::getInvHmat() {
-    return frameData.invHmat;
-  }
+/** Returns the number of rigid bodies */
+int Snapshot::getNumberOfRigidBodies() { return rigidbodyData.getSize(); }
 
-  /** Returns the Bounding Box */
-  Mat3x3d Snapshot::getBoundingBox() {
-    return frameData.bBox;
-  }
+/** Returns the number of rigid bodies */
+int Snapshot::getNumberOfCutoffGroups() { return cgData.getSize(); }
 
-  /** Sets the Bounding Box */  
-  void Snapshot::setBoundingBox(const Mat3x3d& m) {
-    frameData.bBox = m;
-    frameData.invBbox = frameData.bBox.inverse();
-    hasBoundingBox = true;
-  }
+/** Returns the number of bytes in a FrameData structure */
+int Snapshot::getFrameDataSize() { return sizeof(FrameData); }
 
-  /** Returns the inverse Bounding Box */
-  Mat3x3d Snapshot::getInvBoundingBox() {
-    return frameData.invBbox;
-  }
+/** Returns the H-Matrix */
+Mat3x3d Snapshot::getHmat() { return frameData.hmat; }
 
-  RealType Snapshot::getXYarea() {
-    if (!hasXYarea) {
-      Vector3d x = frameData.hmat.getColumn(0);
-      Vector3d y = frameData.hmat.getColumn(1);
-      frameData.xyArea = cross(x,y).length();
-      hasXYarea = true;
-    }
-    return frameData.xyArea;
-  }
+/** Sets the H-Matrix */
+void Snapshot::setHmat(const Mat3x3d& m) {
+  hasVolume = false;
+  frameData.hmat = m;
+  frameData.invHmat = frameData.hmat.inverse();
 
-  RealType Snapshot::getXZarea() {
-    if (!hasXZarea) {
-      Vector3d x = frameData.hmat.getColumn(0);
-      Vector3d z = frameData.hmat.getColumn(2);
-      frameData.xzArea = cross(x,z).length();
-      hasXZarea = true;
-    }
-    return frameData.xzArea;
-  }
+  // determine whether the box is orthoTolerance or not
+  bool oldOrthoRhombic = frameData.orthoRhombic;
 
-  RealType Snapshot::getYZarea() {
-    if (!hasYZarea) {
-      Vector3d y = frameData.hmat.getColumn(1);
-      Vector3d z = frameData.hmat.getColumn(2);
-      frameData.yzArea = cross(y,z).length();
-      hasYZarea = true;
-    }
-    return frameData.yzArea;
-  }
+  RealType smallDiag = fabs(frameData.hmat(0, 0));
+  if (smallDiag > fabs(frameData.hmat(1, 1)))
+    smallDiag = fabs(frameData.hmat(1, 1));
+  if (smallDiag > fabs(frameData.hmat(2, 2)))
+    smallDiag = fabs(frameData.hmat(2, 2));
+  RealType tol = smallDiag * orthoTolerance_;
 
-  RealType Snapshot::getVolume() {
-    if (!hasVolume) {
-      frameData.volume = frameData.hmat.determinant();
-      hasVolume = true;
-    }
-    return frameData.volume;
-  }
+  frameData.orthoRhombic = true;
 
-  void Snapshot::setVolume(RealType vol) {
-    hasVolume = true;
-    frameData.volume = vol;
-  }
-
-
-  /** Wrap a vector according to periodic boundary conditions */
-  void Snapshot::wrapVector(Vector3d& pos) {
-
-    if ( !frameData.usePBC ) return;
-    
-    if( !frameData.orthoRhombic ) {
-      Vector3d scaled = frameData.invHmat * pos;
-      for (int i = 0; i < 3; i++) {
-        scaled[i] -= roundMe( scaled[i] );        
-      }
-      // calc the wrapped real coordinates from the wrapped scaled coordinates
-      pos = frameData.hmat * scaled;
-    } else {
-      RealType scaled;
-      for (int i=0; i<3; i++) {      
-        scaled = pos[i] * frameData.invHmat(i,i);
-        scaled -= roundMe( scaled );
-        pos[i] = scaled * frameData.hmat(i,i);
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if (i != j) {
+        if (frameData.orthoRhombic) {
+          if (fabs(frameData.hmat(i, j)) >= tol) frameData.orthoRhombic = false;
+        }
       }
     }
   }
 
-  /** Scaling a vector to multiples of the periodic box */
-  inline Vector3d Snapshot::scaleVector(Vector3d& pos) {   
-    
-    Vector3d scaled;
+  if (oldOrthoRhombic != frameData.orthoRhombic) {
+    // It is finally time to suppress these warnings once and for
+    // all.  They were annoying and not very informative.
 
-    if( !frameData.orthoRhombic )
-      scaled = frameData.invHmat * pos;
-    else {
-      // calc the scaled coordinates.
-      for (int i=0; i<3; i++) 
-        scaled[i] = pos[i] * frameData.invHmat(i, i);
-    }
-
-    return scaled;
-  }
-
-  void Snapshot::setCOM(const Vector3d& com) {
-    frameData.COM = com;
-    hasCOM = true;
-  }
-  
-  void Snapshot::setCOMvel(const Vector3d& comVel) {
-    frameData.COMvel = comVel;
-    hasCOMvel = true;
-  }
-  
-  void Snapshot::setCOMw(const Vector3d& comw) {
-    frameData.COMw = comw;
-    hasCOMw = true;
-  }
-  
-  Vector3d Snapshot::getCOM() {
-    return frameData.COM;
-  }
-  
-  Vector3d Snapshot::getCOMvel() {
-    return frameData.COMvel;
-  }
-  
-  Vector3d Snapshot::getCOMw() {
-    return frameData.COMw;
-  }
-  
-  RealType Snapshot::getTime() {
-    return frameData.currentTime;
-  }
-  
-  void Snapshot::increaseTime(RealType dt) {
-    setTime(getTime() + dt);
-  }
-  
-  void Snapshot::setTime(RealType time) {
-    frameData.currentTime = time;
-  }
- 
-  void Snapshot::setBondPotential(RealType bp) {
-    frameData.bondPotential = bp;
-  }
-  
-  void Snapshot::setBendPotential(RealType bp) {
-    frameData.bendPotential = bp;
-  }
-  
-  void Snapshot::setTorsionPotential(RealType tp) {
-    frameData.torsionPotential = tp;
-  }
-  
-  void Snapshot::setInversionPotential(RealType ip) {
-    frameData.inversionPotential = ip;
-  }
-
-  RealType Snapshot::getBondPotential() {
-    return frameData.bondPotential;
-  }
-  
-  RealType Snapshot::getBendPotential() {
-    return frameData.bendPotential;
-  }
-  
-  RealType Snapshot::getTorsionPotential() {
-    return frameData.torsionPotential;
-  }
-  
-  RealType Snapshot::getInversionPotential() {
-    return frameData.inversionPotential;
-  }
-
-  RealType Snapshot::getShortRangePotential() {
-    if (!hasShortRangePotential) {
-      frameData.shortRangePotential = frameData.bondPotential;
-      frameData.shortRangePotential += frameData.bendPotential;
-      frameData.shortRangePotential += frameData.torsionPotential;
-      frameData.shortRangePotential += frameData.inversionPotential;
-      hasShortRangePotential = true;
-    }
-    return frameData.shortRangePotential;
-  }
-
-  void Snapshot::setSurfacePotential(RealType sp){
-    frameData.surfacePotential = sp;
-  }
-
-  RealType Snapshot::getSurfacePotential() {
-    return frameData.surfacePotential;
-  }
-
-  void Snapshot::setReciprocalPotential(RealType rp){
-    frameData.reciprocalPotential = rp;
-  }
-
-  RealType Snapshot::getReciprocalPotential() {
-    return frameData.reciprocalPotential;
-  }
-
-  void Snapshot::setSelfPotential(potVec sp){
-    frameData.selfPotentials = sp;
-  }
-  
-  potVec Snapshot::getSelfPotentials() {
-    return frameData.selfPotentials;
-  }
-
-  RealType Snapshot::getSelfPotential() {
-    if (!hasSelfPotential) {
-      for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
-        frameData.selfPotential += frameData.selfPotentials[i];
-      }
-      hasSelfPotential = true;
-    }   
-    return frameData.selfPotential;
-  }
-  
-  void Snapshot::setLongRangePotential(potVec lrPot) {
-    frameData.lrPotentials = lrPot;
-  }
-    
-  RealType Snapshot::getLongRangePotential() {
-    if (!hasLongRangePotential) {
-      for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
-        frameData.longRangePotential += frameData.lrPotentials[i];
-      }
-      frameData.longRangePotential += frameData.reciprocalPotential;
-      frameData.longRangePotential += frameData.surfacePotential;
-      hasLongRangePotential = true;
-    }   
-    return frameData.longRangePotential;
-  }
-
-  potVec Snapshot::getLongRangePotentials() {
-    return frameData.lrPotentials;
-  }
-
-  RealType Snapshot::getPotentialEnergy() {
-    if (!hasPotentialEnergy) {
-      frameData.potentialEnergy = this->getLongRangePotential();
-      frameData.potentialEnergy += this->getShortRangePotential();
-      frameData.potentialEnergy += this->getSelfPotential();
-      frameData.potentialEnergy += this->getRestraintPotential();
-      frameData.potentialEnergy += this->getExcludedPotential();
-      hasPotentialEnergy = true;
-    }
-    return frameData.potentialEnergy;
-  }
-    
-  void Snapshot::setExcludedPotentials(potVec exPot) {
-    frameData.excludedPotentials = exPot;
-  }
-
-  potVec Snapshot::getExcludedPotentials() {
-    return frameData.excludedPotentials;
-  }
-
-  RealType Snapshot::getExcludedPotential() {
-    if (!hasExcludedPotential) {
-      for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
-        frameData.excludedPotential += frameData.excludedPotentials[i];
-      }
-      hasExcludedPotential = true;
-    }   
-    return frameData.excludedPotential;
-  }
-  
-  void Snapshot::setRestraintPotential(RealType rp) {
-    frameData.restraintPotential = rp;
-  }
-  
-  RealType Snapshot::getRestraintPotential() {
-    return frameData.restraintPotential;
-  }
-  
-  void Snapshot::setRawPotential(RealType rp) {
-    frameData.rawPotential = rp;
-  }
-  
-  RealType Snapshot::getRawPotential() {
-    return frameData.rawPotential;
-  }
-
-  void Snapshot::setSelectionPotentials(potVec selPot) {
-    frameData.selectionPotentials = selPot;
-  }
-
-  potVec Snapshot::getSelectionPotentials() {
-    return frameData.selectionPotentials;
-  }
-
-  RealType Snapshot::getTranslationalKineticEnergy() {
-    return frameData.translationalKinetic;
-  }
-
-  RealType Snapshot::getRotationalKineticEnergy() {
-    return frameData.rotationalKinetic;
-  }
-
-  RealType Snapshot::getElectronicKineticEnergy() {
-    return frameData.electronicKinetic;
-  }
-
-  RealType Snapshot::getKineticEnergy() {
-    return frameData.kineticEnergy;
-  }
-
-  void Snapshot::setTranslationalKineticEnergy(RealType tke) {
-    hasTranslationalKineticEnergy = true;
-    frameData.translationalKinetic = tke;
-  }
-
-  void Snapshot::setRotationalKineticEnergy(RealType rke) {
-    hasRotationalKineticEnergy = true;
-    frameData.rotationalKinetic = rke;
-  }
-
-  void Snapshot::setElectronicKineticEnergy(RealType eke) {
-    hasElectronicKineticEnergy = true;
-    frameData.electronicKinetic = eke;
-  }
-
-  void Snapshot::setKineticEnergy(RealType ke) {
-    hasKineticEnergy = true;
-    frameData.kineticEnergy = ke;
-  }
-
-  RealType Snapshot::getTotalEnergy() {
-    return frameData.totalEnergy;
-  }
-
-  void Snapshot::setTotalEnergy(RealType te) {
-    hasTotalEnergy = true;
-    frameData.totalEnergy = te;
-  }
-
-  RealType Snapshot::getConservedQuantity() {
-    return frameData.conservedQuantity;
-  }
-
-  void Snapshot::setConservedQuantity(RealType cq) {
-    hasConservedQuantity = true;
-    frameData.conservedQuantity = cq;
-  }
-
-  RealType Snapshot::getTemperature() {
-    return frameData.temperature;
-  }
-
-  void Snapshot::setTemperature(RealType temp) {
-    hasTemperature = true;
-    frameData.temperature = temp;
-  }
-
-  RealType Snapshot::getElectronicTemperature() {
-    return frameData.electronicTemperature;
-  }
-
-  void Snapshot::setElectronicTemperature(RealType eTemp) {
-    hasElectronicTemperature = true;
-    frameData.electronicTemperature = eTemp;
-  }
-  
-  RealType Snapshot::getNetCharge() {
-    return frameData.netCharge;
-  }
-  
-  void Snapshot::setNetCharge(RealType nChg) {
-    hasNetCharge = true;
-    frameData.netCharge = nChg;
-  }
-
-  RealType Snapshot::getChargeMomentum() {
-    return frameData.chargeMomentum;
-  }
-
-  void Snapshot::setChargeMomentum(RealType cMom) {
-    hasChargeMomentum = true;
-    frameData.chargeMomentum = cMom;
-  }
-
-  RealType Snapshot::getPressure() {
-    return frameData.pressure;
-  }
-
-  void Snapshot::setPressure(RealType pressure) {
-    hasPressure = true;
-    frameData.pressure = pressure;
-  }
-
-  Mat3x3d Snapshot::getPressureTensor() {
-    return frameData.pressureTensor;
-  }
-
-
-  void Snapshot::setPressureTensor(const Mat3x3d& pressureTensor) {
-    hasPressureTensor = true;
-    frameData.pressureTensor = pressureTensor;
-  }
-
-  void Snapshot::setVirialTensor(const Mat3x3d& virialTensor) {
-    frameData.virialTensor = virialTensor;
-  }
-
-  Mat3x3d  Snapshot::getVirialTensor() {
-    return frameData.virialTensor;
-  }
-
-  void Snapshot::setConductiveHeatFlux(const Vector3d& chf) {
-    frameData.conductiveHeatFlux = chf;
-  }
-
-  Vector3d Snapshot::getConductiveHeatFlux() {
-    return frameData.conductiveHeatFlux;
-  }
-  
-  Vector3d Snapshot::getConvectiveHeatFlux() {
-    return frameData.convectiveHeatFlux;
-  }
-
-  void Snapshot::setConvectiveHeatFlux(const Vector3d& chf) {    
-    hasConvectiveHeatFlux = true;
-    frameData.convectiveHeatFlux = chf;
-  }
-
-  Vector3d Snapshot::getHeatFlux() {
-    // BE CAREFUL WITH UNITS
-    return getConductiveHeatFlux() + getConvectiveHeatFlux();
-  }
-
-  Vector3d Snapshot::getSystemDipole() {
-    return frameData.systemDipole;
-  }
-
-  void Snapshot::setSystemDipole(const Vector3d& bd) {    
-    hasSystemDipole = true;
-    frameData.systemDipole = bd;
-  }
-
-  Mat3x3d Snapshot::getSystemQuadrupole() {
-    return frameData.systemQuadrupole;
-  }
-
-  void Snapshot::setSystemQuadrupole(const Mat3x3d& bq) {    
-    hasSystemQuadrupole = true;
-    frameData.systemQuadrupole = bq;
-  }
-
-  void Snapshot::setThermostat(const pair<RealType, RealType>& thermostat) {
-    frameData.thermostat = thermostat;
-  }
-
-  pair<RealType, RealType> Snapshot::getThermostat() {
-    return frameData.thermostat;
-  }
-
-  void Snapshot::setElectronicThermostat(const pair<RealType,
-                                         RealType>& eTherm) {
-    frameData.electronicThermostat = eTherm;
-  }
-
-  pair<RealType, RealType> Snapshot::getElectronicThermostat() {
-    return frameData.electronicThermostat;
-  }
- 
-  void Snapshot::setBarostat(const Mat3x3d& barostat) {
-    frameData.barostat = barostat;
-  }
-
-  Mat3x3d Snapshot::getBarostat() {
-    return frameData.barostat;
-  }
-
-  void Snapshot::setInertiaTensor(const Mat3x3d& inertiaTensor) {
-    frameData.inertiaTensor = inertiaTensor;
-    hasInertiaTensor = true;
-  }
-
-  Mat3x3d Snapshot::getInertiaTensor() {
-    return frameData.inertiaTensor;
-  }
-
-  void Snapshot::setGyrationalVolume(const RealType gyrationalVolume) {
-    frameData.gyrationalVolume = gyrationalVolume;
-    hasGyrationalVolume = true;
-  }
-
-  RealType Snapshot::getGyrationalVolume() {
-    return frameData.gyrationalVolume;
-  }
-
-  void Snapshot::setHullVolume(const RealType hullVolume) {
-    frameData.hullVolume = hullVolume;
-    hasHullVolume = true;
-  }
-
-  RealType Snapshot::getHullVolume() {
-    return frameData.hullVolume;
-  }
-
-  void Snapshot::setOrthoTolerance(RealType ot) {
-    orthoTolerance_ = ot;
+    // if( frameData.orthoRhombic ) {
+    //   sprintf( painCave.errMsg,
+    //   	 "OpenMD is switching from the default Non-Orthorhombic\n"
+    //   	 "\tto the faster Orthorhombic periodic boundary
+    //   computations.\n"
+    //   	 "\tThis is usually a good thing, but if you want the\n"
+    //   	 "\tNon-Orthorhombic computations, make the orthoBoxTolerance\n"
+    //   	 "\tvariable ( currently set to %G ) smaller.\n",
+    //   	 orthoTolerance_);
+    //   painCave.severity = OPENMD_INFO;
+    //   simError();
+    // }
+    // else {
+    //   sprintf( painCave.errMsg,
+    //   	 "OpenMD is switching from the faster Orthorhombic to the
+    //   more\n"
+    //   	 "\tflexible Non-Orthorhombic periodic boundary computations.\n"
+    //   	 "\tThis is usually because the box has deformed under\n"
+    //   	 "\tNPTf integration. If you want to live on the edge with\n"
+    //   	 "\tthe Orthorhombic computations, make the orthoBoxTolerance\n"
+    //   	 "\tvariable ( currently set to %G ) larger.\n",
+    //   	 orthoTolerance_);
+    //   painCave.severity = OPENMD_WARNING;
+    //   simError();
+    // }
   }
 }
+
+/** Returns the inverse H-Matrix */
+Mat3x3d Snapshot::getInvHmat() { return frameData.invHmat; }
+
+/** Returns the Bounding Box */
+Mat3x3d Snapshot::getBoundingBox() { return frameData.bBox; }
+
+/** Sets the Bounding Box */
+void Snapshot::setBoundingBox(const Mat3x3d& m) {
+  frameData.bBox = m;
+  frameData.invBbox = frameData.bBox.inverse();
+  hasBoundingBox = true;
+}
+
+/** Returns the inverse Bounding Box */
+Mat3x3d Snapshot::getInvBoundingBox() { return frameData.invBbox; }
+
+RealType Snapshot::getXYarea() {
+  if (!hasXYarea) {
+    Vector3d x = frameData.hmat.getColumn(0);
+    Vector3d y = frameData.hmat.getColumn(1);
+    frameData.xyArea = cross(x, y).length();
+    hasXYarea = true;
+  }
+  return frameData.xyArea;
+}
+
+RealType Snapshot::getXZarea() {
+  if (!hasXZarea) {
+    Vector3d x = frameData.hmat.getColumn(0);
+    Vector3d z = frameData.hmat.getColumn(2);
+    frameData.xzArea = cross(x, z).length();
+    hasXZarea = true;
+  }
+  return frameData.xzArea;
+}
+
+RealType Snapshot::getYZarea() {
+  if (!hasYZarea) {
+    Vector3d y = frameData.hmat.getColumn(1);
+    Vector3d z = frameData.hmat.getColumn(2);
+    frameData.yzArea = cross(y, z).length();
+    hasYZarea = true;
+  }
+  return frameData.yzArea;
+}
+
+RealType Snapshot::getVolume() {
+  if (!hasVolume) {
+    frameData.volume = frameData.hmat.determinant();
+    hasVolume = true;
+  }
+  return frameData.volume;
+}
+
+void Snapshot::setVolume(RealType vol) {
+  hasVolume = true;
+  frameData.volume = vol;
+}
+
+/** Wrap a vector according to periodic boundary conditions */
+void Snapshot::wrapVector(Vector3d& pos) {
+  if (!frameData.usePBC) return;
+
+  if (!frameData.orthoRhombic) {
+    Vector3d scaled = frameData.invHmat * pos;
+    for (int i = 0; i < 3; i++) {
+      scaled[i] -= roundMe(scaled[i]);
+    }
+    // calc the wrapped real coordinates from the wrapped scaled coordinates
+    pos = frameData.hmat * scaled;
+  } else {
+    RealType scaled;
+    for (int i = 0; i < 3; i++) {
+      scaled = pos[i] * frameData.invHmat(i, i);
+      scaled -= roundMe(scaled);
+      pos[i] = scaled * frameData.hmat(i, i);
+    }
+  }
+}
+
+/** Scaling a vector to multiples of the periodic box */
+inline Vector3d Snapshot::scaleVector(Vector3d& pos) {
+  Vector3d scaled;
+
+  if (!frameData.orthoRhombic)
+    scaled = frameData.invHmat * pos;
+  else {
+    // calc the scaled coordinates.
+    for (int i = 0; i < 3; i++) scaled[i] = pos[i] * frameData.invHmat(i, i);
+  }
+
+  return scaled;
+}
+
+void Snapshot::setCOM(const Vector3d& com) {
+  frameData.COM = com;
+  hasCOM = true;
+}
+
+void Snapshot::setCOMvel(const Vector3d& comVel) {
+  frameData.COMvel = comVel;
+  hasCOMvel = true;
+}
+
+void Snapshot::setCOMw(const Vector3d& comw) {
+  frameData.COMw = comw;
+  hasCOMw = true;
+}
+
+Vector3d Snapshot::getCOM() { return frameData.COM; }
+
+Vector3d Snapshot::getCOMvel() { return frameData.COMvel; }
+
+Vector3d Snapshot::getCOMw() { return frameData.COMw; }
+
+RealType Snapshot::getTime() { return frameData.currentTime; }
+
+void Snapshot::increaseTime(RealType dt) { setTime(getTime() + dt); }
+
+void Snapshot::setTime(RealType time) { frameData.currentTime = time; }
+
+void Snapshot::setBondPotential(RealType bp) { frameData.bondPotential = bp; }
+
+void Snapshot::setBendPotential(RealType bp) { frameData.bendPotential = bp; }
+
+void Snapshot::setTorsionPotential(RealType tp) {
+  frameData.torsionPotential = tp;
+}
+
+void Snapshot::setInversionPotential(RealType ip) {
+  frameData.inversionPotential = ip;
+}
+
+RealType Snapshot::getBondPotential() { return frameData.bondPotential; }
+
+RealType Snapshot::getBendPotential() { return frameData.bendPotential; }
+
+RealType Snapshot::getTorsionPotential() { return frameData.torsionPotential; }
+
+RealType Snapshot::getInversionPotential() {
+  return frameData.inversionPotential;
+}
+
+RealType Snapshot::getShortRangePotential() {
+  if (!hasShortRangePotential) {
+    frameData.shortRangePotential = frameData.bondPotential;
+    frameData.shortRangePotential += frameData.bendPotential;
+    frameData.shortRangePotential += frameData.torsionPotential;
+    frameData.shortRangePotential += frameData.inversionPotential;
+    hasShortRangePotential = true;
+  }
+  return frameData.shortRangePotential;
+}
+
+void Snapshot::setSurfacePotential(RealType sp) {
+  frameData.surfacePotential = sp;
+}
+
+RealType Snapshot::getSurfacePotential() { return frameData.surfacePotential; }
+
+void Snapshot::setReciprocalPotential(RealType rp) {
+  frameData.reciprocalPotential = rp;
+}
+
+RealType Snapshot::getReciprocalPotential() {
+  return frameData.reciprocalPotential;
+}
+
+void Snapshot::setSelfPotential(potVec sp) { frameData.selfPotentials = sp; }
+
+potVec Snapshot::getSelfPotentials() { return frameData.selfPotentials; }
+
+RealType Snapshot::getSelfPotential() {
+  if (!hasSelfPotential) {
+    for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
+      frameData.selfPotential += frameData.selfPotentials[i];
+    }
+    hasSelfPotential = true;
+  }
+  return frameData.selfPotential;
+}
+
+void Snapshot::setLongRangePotential(potVec lrPot) {
+  frameData.lrPotentials = lrPot;
+}
+
+RealType Snapshot::getLongRangePotential() {
+  if (!hasLongRangePotential) {
+    for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
+      frameData.longRangePotential += frameData.lrPotentials[i];
+    }
+    frameData.longRangePotential += frameData.reciprocalPotential;
+    frameData.longRangePotential += frameData.surfacePotential;
+    hasLongRangePotential = true;
+  }
+  return frameData.longRangePotential;
+}
+
+potVec Snapshot::getLongRangePotentials() { return frameData.lrPotentials; }
+
+RealType Snapshot::getPotentialEnergy() {
+  if (!hasPotentialEnergy) {
+    frameData.potentialEnergy = this->getLongRangePotential();
+    frameData.potentialEnergy += this->getShortRangePotential();
+    frameData.potentialEnergy += this->getSelfPotential();
+    frameData.potentialEnergy += this->getRestraintPotential();
+    frameData.potentialEnergy += this->getExcludedPotential();
+    hasPotentialEnergy = true;
+  }
+  return frameData.potentialEnergy;
+}
+
+void Snapshot::setExcludedPotentials(potVec exPot) {
+  frameData.excludedPotentials = exPot;
+}
+
+potVec Snapshot::getExcludedPotentials() {
+  return frameData.excludedPotentials;
+}
+
+RealType Snapshot::getExcludedPotential() {
+  if (!hasExcludedPotential) {
+    for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
+      frameData.excludedPotential += frameData.excludedPotentials[i];
+    }
+    hasExcludedPotential = true;
+  }
+  return frameData.excludedPotential;
+}
+
+void Snapshot::setRestraintPotential(RealType rp) {
+  frameData.restraintPotential = rp;
+}
+
+RealType Snapshot::getRestraintPotential() {
+  return frameData.restraintPotential;
+}
+
+void Snapshot::setRawPotential(RealType rp) { frameData.rawPotential = rp; }
+
+RealType Snapshot::getRawPotential() { return frameData.rawPotential; }
+
+void Snapshot::setSelectionPotentials(potVec selPot) {
+  frameData.selectionPotentials = selPot;
+}
+
+potVec Snapshot::getSelectionPotentials() {
+  return frameData.selectionPotentials;
+}
+
+RealType Snapshot::getTranslationalKineticEnergy() {
+  return frameData.translationalKinetic;
+}
+
+RealType Snapshot::getRotationalKineticEnergy() {
+  return frameData.rotationalKinetic;
+}
+
+RealType Snapshot::getElectronicKineticEnergy() {
+  return frameData.electronicKinetic;
+}
+
+RealType Snapshot::getKineticEnergy() { return frameData.kineticEnergy; }
+
+void Snapshot::setTranslationalKineticEnergy(RealType tke) {
+  hasTranslationalKineticEnergy = true;
+  frameData.translationalKinetic = tke;
+}
+
+void Snapshot::setRotationalKineticEnergy(RealType rke) {
+  hasRotationalKineticEnergy = true;
+  frameData.rotationalKinetic = rke;
+}
+
+void Snapshot::setElectronicKineticEnergy(RealType eke) {
+  hasElectronicKineticEnergy = true;
+  frameData.electronicKinetic = eke;
+}
+
+void Snapshot::setKineticEnergy(RealType ke) {
+  hasKineticEnergy = true;
+  frameData.kineticEnergy = ke;
+}
+
+RealType Snapshot::getTotalEnergy() { return frameData.totalEnergy; }
+
+void Snapshot::setTotalEnergy(RealType te) {
+  hasTotalEnergy = true;
+  frameData.totalEnergy = te;
+}
+
+RealType Snapshot::getConservedQuantity() {
+  return frameData.conservedQuantity;
+}
+
+void Snapshot::setConservedQuantity(RealType cq) {
+  hasConservedQuantity = true;
+  frameData.conservedQuantity = cq;
+}
+
+RealType Snapshot::getTemperature() { return frameData.temperature; }
+
+void Snapshot::setTemperature(RealType temp) {
+  hasTemperature = true;
+  frameData.temperature = temp;
+}
+
+RealType Snapshot::getElectronicTemperature() {
+  return frameData.electronicTemperature;
+}
+
+void Snapshot::setElectronicTemperature(RealType eTemp) {
+  hasElectronicTemperature = true;
+  frameData.electronicTemperature = eTemp;
+}
+
+RealType Snapshot::getNetCharge() { return frameData.netCharge; }
+
+void Snapshot::setNetCharge(RealType nChg) {
+  hasNetCharge = true;
+  frameData.netCharge = nChg;
+}
+
+RealType Snapshot::getChargeMomentum() { return frameData.chargeMomentum; }
+
+void Snapshot::setChargeMomentum(RealType cMom) {
+  hasChargeMomentum = true;
+  frameData.chargeMomentum = cMom;
+}
+
+RealType Snapshot::getPressure() { return frameData.pressure; }
+
+void Snapshot::setPressure(RealType pressure) {
+  hasPressure = true;
+  frameData.pressure = pressure;
+}
+
+Mat3x3d Snapshot::getPressureTensor() { return frameData.pressureTensor; }
+
+void Snapshot::setPressureTensor(const Mat3x3d& pressureTensor) {
+  hasPressureTensor = true;
+  frameData.pressureTensor = pressureTensor;
+}
+
+void Snapshot::setVirialTensor(const Mat3x3d& virialTensor) {
+  frameData.virialTensor = virialTensor;
+}
+
+Mat3x3d Snapshot::getVirialTensor() { return frameData.virialTensor; }
+
+void Snapshot::setConductiveHeatFlux(const Vector3d& chf) {
+  frameData.conductiveHeatFlux = chf;
+}
+
+Vector3d Snapshot::getConductiveHeatFlux() {
+  return frameData.conductiveHeatFlux;
+}
+
+Vector3d Snapshot::getConvectiveHeatFlux() {
+  return frameData.convectiveHeatFlux;
+}
+
+void Snapshot::setConvectiveHeatFlux(const Vector3d& chf) {
+  hasConvectiveHeatFlux = true;
+  frameData.convectiveHeatFlux = chf;
+}
+
+Vector3d Snapshot::getHeatFlux() {
+  // BE CAREFUL WITH UNITS
+  return getConductiveHeatFlux() + getConvectiveHeatFlux();
+}
+
+Vector3d Snapshot::getSystemDipole() { return frameData.systemDipole; }
+
+void Snapshot::setSystemDipole(const Vector3d& bd) {
+  hasSystemDipole = true;
+  frameData.systemDipole = bd;
+}
+
+Mat3x3d Snapshot::getSystemQuadrupole() { return frameData.systemQuadrupole; }
+
+void Snapshot::setSystemQuadrupole(const Mat3x3d& bq) {
+  hasSystemQuadrupole = true;
+  frameData.systemQuadrupole = bq;
+}
+
+void Snapshot::setThermostat(const pair<RealType, RealType>& thermostat) {
+  frameData.thermostat = thermostat;
+}
+
+pair<RealType, RealType> Snapshot::getThermostat() {
+  return frameData.thermostat;
+}
+
+void Snapshot::setElectronicThermostat(const pair<RealType, RealType>& eTherm) {
+  frameData.electronicThermostat = eTherm;
+}
+
+pair<RealType, RealType> Snapshot::getElectronicThermostat() {
+  return frameData.electronicThermostat;
+}
+
+void Snapshot::setBarostat(const Mat3x3d& barostat) {
+  frameData.barostat = barostat;
+}
+
+Mat3x3d Snapshot::getBarostat() { return frameData.barostat; }
+
+void Snapshot::setInertiaTensor(const Mat3x3d& inertiaTensor) {
+  frameData.inertiaTensor = inertiaTensor;
+  hasInertiaTensor = true;
+}
+
+Mat3x3d Snapshot::getInertiaTensor() { return frameData.inertiaTensor; }
+
+void Snapshot::setGyrationalVolume(const RealType gyrationalVolume) {
+  frameData.gyrationalVolume = gyrationalVolume;
+  hasGyrationalVolume = true;
+}
+
+RealType Snapshot::getGyrationalVolume() { return frameData.gyrationalVolume; }
+
+void Snapshot::setHullVolume(const RealType hullVolume) {
+  frameData.hullVolume = hullVolume;
+  hasHullVolume = true;
+}
+
+RealType Snapshot::getHullVolume() { return frameData.hullVolume; }
+
+void Snapshot::setOrthoTolerance(RealType ot) { orthoTolerance_ = ot; }
+}  // namespace OpenMD

@@ -44,48 +44,50 @@
  */
 
 #include "io/ChargeAtomTypesSectionParser.hpp"
-#include "types/FixedChargeAdapter.hpp"
+
 #include "brains/ForceField.hpp"
+#include "types/FixedChargeAdapter.hpp"
 #include "utils/simError.h"
 namespace OpenMD {
 
-  ChargeAtomTypesSectionParser::ChargeAtomTypesSectionParser(ForceFieldOptions& options) : options_(options) {
-    setSectionName("ChargeAtomTypes");
-  }
+ChargeAtomTypesSectionParser::ChargeAtomTypesSectionParser(
+    ForceFieldOptions& options)
+    : options_(options) {
+  setSectionName("ChargeAtomTypes");
+}
 
-  void ChargeAtomTypesSectionParser::parseLine(ForceField& ff,
-					       const std::string& line,
-					       int lineNo){
-    StringTokenizer tokenizer(line);
-    int nTokens = tokenizer.countTokens();    
-    
-    if (nTokens < 2)  {
+void ChargeAtomTypesSectionParser::parseLine(ForceField& ff,
+                                             const std::string& line,
+                                             int lineNo) {
+  StringTokenizer tokenizer(line);
+  int nTokens = tokenizer.countTokens();
+
+  if (nTokens < 2) {
+    sprintf(
+        painCave.errMsg,
+        "ChargeAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+        lineNo);
+    painCave.isFatal = 1;
+    simError();
+  } else {
+    RealType cus_ = options_.getChargeUnitScaling();
+
+    std::string atomTypeName = tokenizer.nextToken();
+
+    AtomType* atomType = ff.getAtomType(atomTypeName);
+    if (atomType != NULL) {
+      FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+      RealType charge = cus_ * tokenizer.nextTokenAsDouble();
+      fca.makeFixedCharge(charge);
+    } else {
       sprintf(painCave.errMsg,
-	      "ChargeAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-	      lineNo);
+              "ChargeAtomTypesSectionParser Error: Can not find matching "
+              "AtomType at "
+              "line %d\n",
+              lineNo);
       painCave.isFatal = 1;
       simError();
-    } else {
-      
-      RealType cus_  = options_.getChargeUnitScaling();
-      
-      std::string atomTypeName = tokenizer.nextToken();    
-        
-      AtomType* atomType = ff.getAtomType(atomTypeName);
-      if (atomType != NULL) {
-        FixedChargeAdapter fca =  FixedChargeAdapter(atomType);
-	RealType charge = cus_ * tokenizer.nextTokenAsDouble();
-        fca.makeFixedCharge(charge);
-      } else {
-	sprintf(painCave.errMsg, "ChargeAtomTypesSectionParser Error: Can not find matching AtomType at line %d\n",
-		lineNo);
-	painCave.isFatal = 1;
-	simError();
-      }                  
     }
   }
-} //end namespace OpenMD
-
-
-
-
+}
+}  // end namespace OpenMD

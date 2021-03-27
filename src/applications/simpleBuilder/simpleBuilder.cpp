@@ -43,36 +43,34 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
 #include <cmath>
-#include <iostream>
-#include <string>
-#include <map>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
+#include <iostream>
+#include <map>
+#include <string>
 
-#include "simpleBuilderCmd.hpp"
-#include "lattice/LatticeFactory.hpp"
-#include "utils/MoLocator.hpp"
-#include "lattice/Lattice.hpp"
 #include "brains/Register.hpp"
-#include "brains/SimInfo.hpp"
 #include "brains/SimCreator.hpp"
+#include "brains/SimInfo.hpp"
 #include "io/DumpWriter.hpp"
-#include "math/Vector3.hpp"
+#include "lattice/Lattice.hpp"
+#include "lattice/LatticeFactory.hpp"
 #include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
+#include "simpleBuilderCmd.hpp"
+#include "utils/MoLocator.hpp"
 #include "utils/StringUtils.hpp"
 
 using namespace std;
 using namespace OpenMD;
 
-void createMdFile(const std::string&oldMdFileName,
-                  const std::string&newMdFileName,
-                  int nMol);
+void createMdFile(const std::string &oldMdFileName,
+                  const std::string &newMdFileName, int nMol);
 
-int main(int argc, char *argv []) {
-
+int main(int argc, char *argv[]) {
   registerLattice();
 
   gengetopt_args_info args_info;
@@ -93,12 +91,11 @@ int main(int argc, char *argv []) {
   DumpWriter *writer;
 
   // parse command line arguments
-  if (cmdline_parser(argc, argv, &args_info) != 0)
-    exit(1);
+  if (cmdline_parser(argc, argv, &args_info) != 0) exit(1);
 
   density = args_info.density_arg;
 
-  //get lattice type
+  // get lattice type
   latticeType = "FCC";
   if (args_info.lattice_given) {
     latticeType = args_info.lattice_arg;
@@ -108,18 +105,19 @@ int main(int argc, char *argv []) {
 
   if (simpleLat == NULL) {
     sprintf(painCave.errMsg, "Lattice Factory can not create %s lattice\n",
-	    latticeType.c_str());
+            latticeType.c_str());
     painCave.isFatal = 1;
     simError();
   }
   nMolPerCell = simpleLat->getNumSitesPerCell();
 
-  //get the number of unit cells in each direction:
+  // get the number of unit cells in each direction:
 
   nx = args_info.nx_arg;
 
   if (nx <= 0) {
-    sprintf(painCave.errMsg, "The number of unit cells in the x direction "
+    sprintf(painCave.errMsg,
+            "The number of unit cells in the x direction "
             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
@@ -128,7 +126,8 @@ int main(int argc, char *argv []) {
   ny = args_info.ny_arg;
 
   if (ny <= 0) {
-    sprintf(painCave.errMsg, "The number of unit cells in the y direction "
+    sprintf(painCave.errMsg,
+            "The number of unit cells in the y direction "
             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
@@ -137,7 +136,8 @@ int main(int argc, char *argv []) {
   nz = args_info.nz_arg;
 
   if (nz <= 0) {
-    sprintf(painCave.errMsg, "The number of unit cells in the z direction "
+    sprintf(painCave.errMsg,
+            "The number of unit cells in the z direction "
             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
@@ -145,20 +145,21 @@ int main(int argc, char *argv []) {
 
   int nSites = nMolPerCell * nx * ny * nz;
 
-  //get input file name
+  // get input file name
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg, "No input .omd file name was specified "
+    sprintf(painCave.errMsg,
+            "No input .omd file name was specified "
             "on the command line");
     painCave.isFatal = 1;
     simError();
   }
 
-  //parse md file and set up the system
+  // parse md file and set up the system
 
   SimCreator oldCreator;
-  SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
+  SimInfo *oldInfo = oldCreator.createSim(inputFileName, false);
 
   // Calculate lattice constant (in Angstroms)
 
@@ -166,7 +167,7 @@ int main(int argc, char *argv []) {
                                            oldInfo->getForceField());
 
   latticeConstant = pow(rhoConvertConst * nMolPerCell * avgMass / density,
-			(RealType)(1.0 / 3.0));
+                        (RealType)(1.0 / 3.0));
 
   // Set the lattice constant
 
@@ -182,18 +183,17 @@ int main(int argc, char *argv []) {
   vector<Vector3d> sites;
   vector<Vector3d> orientations;
 
-  for(int i = 0; i < nx; i++) {
-    for(int j = 0; j < ny; j++) {
-      for(int k = 0; k < nz; k++) {
+  for (int i = 0; i < nx; i++) {
+    for (int j = 0; j < ny; j++) {
+      for (int k = 0; k < nz; k++) {
+        // Get the position of the cell sites
 
-	// Get the position of the cell sites
+        simpleLat->getLatticePointsPos(latticePos, i, j, k);
 
-	simpleLat->getLatticePointsPos(latticePos, i, j, k);
-
-	for(int l = 0; l < nMolPerCell; l++) {
-	  sites.push_back(latticePos[l]);
+        for (int l = 0; l < nMolPerCell; l++) {
+          sites.push_back(latticePos[l]);
           orientations.push_back(latticeOrt[l]);
-	}
+        }
       }
     }
   }
@@ -210,7 +210,7 @@ int main(int argc, char *argv []) {
   // md file and set up the system
 
   SimCreator newCreator;
-  SimInfo* newInfo = newCreator.createSim(outputFileName, false);
+  SimInfo *newInfo = newCreator.createSim(outputFileName, false);
 
   // fill Hmat
 
@@ -232,9 +232,9 @@ int main(int argc, char *argv []) {
 
   // place the molecules
 
-  Molecule* mol;
-  locator = new MoLocator(newInfo->getMoleculeStamp(0),
-                          newInfo->getForceField());
+  Molecule *mol;
+  locator =
+      new MoLocator(newInfo->getMoleculeStamp(0), newInfo->getForceField());
   for (int n = 0; n < nSites; n++) {
     mol = newInfo->getMoleculeByGlobalIndex(n);
     locator->placeMol(sites[n], orientations[n], mol);
@@ -265,23 +265,21 @@ int main(int argc, char *argv []) {
   return 0;
 }
 
-void createMdFile(const std::string&oldMdFileName,
-                  const std::string&newMdFileName,
-                  int nMol) {
+void createMdFile(const std::string &oldMdFileName,
+                  const std::string &newMdFileName, int nMol) {
   ifstream oldMdFile;
   ofstream newMdFile;
   const int MAXLEN = 65535;
   char buffer[MAXLEN];
 
-  //create new .omd file based on old .omd file
+  // create new .omd file based on old .omd file
   oldMdFile.open(oldMdFileName.c_str());
   newMdFile.open(newMdFileName.c_str());
 
   oldMdFile.getline(buffer, MAXLEN);
 
   while (!oldMdFile.eof()) {
-
-    //correct molecule number
+    // correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
       sprintf(buffer, "\t\tnMol = %d;", nMol);
       newMdFile << buffer << std::endl;

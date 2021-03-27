@@ -43,24 +43,23 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "types/ZconsStamp.hpp"
+
 #include <cstdio>
 #include <cstring>
 
-#include "types/ZconsStamp.hpp"
-
 namespace OpenMD {
-  ZConsStamp::ZConsStamp() {
-    DefineParameter(MolIndex, "molIndex");
-    DefineOptionalParameter(Zpos, "zPos");
-    DefineOptionalParameter(Kratio, "kRatio");
-    DefineOptionalParameter(CantVel, "cantVel");
-  }
-  
-  ZConsStamp::~ZConsStamp() {    
-  }
-  
-  void ZConsStamp::validate() {
-    DataHolder::validate();
-    CheckParameter(MolIndex, isNonNegative());
-  }
+ZConsStamp::ZConsStamp() {
+  DefineParameter(MolIndex, "molIndex");
+  DefineOptionalParameter(Zpos, "zPos");
+  DefineOptionalParameter(Kratio, "kRatio");
+  DefineOptionalParameter(CantVel, "cantVel");
 }
+
+ZConsStamp::~ZConsStamp() {}
+
+void ZConsStamp::validate() {
+  DataHolder::validate();
+  CheckParameter(MolIndex, isNonNegative());
+}
+}  // namespace OpenMD

@@ -42,96 +42,97 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #include "types/MultipoleAdapter.hpp"
-#include "utils/simError.h"
+
 #include <cstdio>
 #include <memory>
 
+#include "utils/simError.h"
+
 namespace OpenMD {
-  
-  bool MultipoleAdapter::isMultipole() {
-    return at_->hasProperty(MultipoleTypeID);
-  }
-  
-  MultipoleAtypeParameters MultipoleAdapter::getMultipoleParam() {
-    
-    if (!isMultipole()) {
-      sprintf( painCave.errMsg,               
-               "MultipoleAdapter::getMultipoleParam was passed an atomType (%s)\n"
-               "\tthat does not appear to be a Multipole atom.\n",
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    std::shared_ptr<GenericData> data = at_->getPropertyByName(MultipoleTypeID);
-    if (data == nullptr) {
-      sprintf( painCave.errMsg, 
-               "MultipoleAdapter::getMultipoleParam could not find Multipole\n"
-               "\tparameters for atomType %s.\n", at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError(); 
-    }
-    
-    std::shared_ptr<MultipoleAtypeData> multipoleData = std::dynamic_pointer_cast<MultipoleAtypeData>(data);
-    if (multipoleData == nullptr) {
-      sprintf( painCave.errMsg,
-               "MultipoleAdapter::getMultipoleParam could not convert\n"
-               "\tGenericData to MultipoleAtypeData for atom type %s\n", 
-               at_->getName().c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    return multipoleData->getData();
-  }
 
-  bool MultipoleAdapter::isDipole() {
-    if (isMultipole()) {
-      MultipoleAtypeParameters multipoleParam = getMultipoleParam();
-      return multipoleParam.isDipole;
-    } else 
-      return false;
-  }
-  bool MultipoleAdapter::isQuadrupole() {
-    if (isMultipole()) {
-      MultipoleAtypeParameters multipoleParam = getMultipoleParam();
-      return multipoleParam.isQuadrupole;
-    } else 
-      return false;
-  }
-
-  Vector3d MultipoleAdapter::getDipole() {    
-    MultipoleAtypeParameters multipoleParam = getMultipoleParam();
-    return multipoleParam.dipole;
-  }
-
-  Mat3x3d MultipoleAdapter::getQuadrupole() {    
-    MultipoleAtypeParameters multipoleParam = getMultipoleParam();
-    return multipoleParam.quadrupole;
-  }
-    
-  void MultipoleAdapter::makeMultipole(Vector3d dipole, 
-                                       Mat3x3d quadrupole, 
-                                       bool isDipole,
-                                       bool isQuadrupole){ 
-
-    if (isMultipole()){
-      at_->removeProperty(MultipoleTypeID);
-    }
-
-    MultipoleAtypeParameters multipoleParam {};
-
-    multipoleParam.dipole = dipole;
-    multipoleParam.quadrupole = quadrupole;
-
-    multipoleParam.isDipole = isDipole;
-    multipoleParam.isQuadrupole = isQuadrupole;   
-
-    at_->addProperty(std::make_shared<MultipoleAtypeData>(MultipoleTypeID, multipoleParam));
-  }
+bool MultipoleAdapter::isMultipole() {
+  return at_->hasProperty(MultipoleTypeID);
 }
+
+MultipoleAtypeParameters MultipoleAdapter::getMultipoleParam() {
+  if (!isMultipole()) {
+    sprintf(painCave.errMsg,
+            "MultipoleAdapter::getMultipoleParam was passed an atomType (%s)\n"
+            "\tthat does not appear to be a Multipole atom.\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  std::shared_ptr<GenericData> data = at_->getPropertyByName(MultipoleTypeID);
+  if (data == nullptr) {
+    sprintf(painCave.errMsg,
+            "MultipoleAdapter::getMultipoleParam could not find Multipole\n"
+            "\tparameters for atomType %s.\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  std::shared_ptr<MultipoleAtypeData> multipoleData =
+      std::dynamic_pointer_cast<MultipoleAtypeData>(data);
+  if (multipoleData == nullptr) {
+    sprintf(painCave.errMsg,
+            "MultipoleAdapter::getMultipoleParam could not convert\n"
+            "\tGenericData to MultipoleAtypeData for atom type %s\n",
+            at_->getName().c_str());
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  return multipoleData->getData();
+}
+
+bool MultipoleAdapter::isDipole() {
+  if (isMultipole()) {
+    MultipoleAtypeParameters multipoleParam = getMultipoleParam();
+    return multipoleParam.isDipole;
+  } else
+    return false;
+}
+bool MultipoleAdapter::isQuadrupole() {
+  if (isMultipole()) {
+    MultipoleAtypeParameters multipoleParam = getMultipoleParam();
+    return multipoleParam.isQuadrupole;
+  } else
+    return false;
+}
+
+Vector3d MultipoleAdapter::getDipole() {
+  MultipoleAtypeParameters multipoleParam = getMultipoleParam();
+  return multipoleParam.dipole;
+}
+
+Mat3x3d MultipoleAdapter::getQuadrupole() {
+  MultipoleAtypeParameters multipoleParam = getMultipoleParam();
+  return multipoleParam.quadrupole;
+}
+
+void MultipoleAdapter::makeMultipole(Vector3d dipole, Mat3x3d quadrupole,
+                                     bool isDipole, bool isQuadrupole) {
+  if (isMultipole()) {
+    at_->removeProperty(MultipoleTypeID);
+  }
+
+  MultipoleAtypeParameters multipoleParam{};
+
+  multipoleParam.dipole = dipole;
+  multipoleParam.quadrupole = quadrupole;
+
+  multipoleParam.isDipole = isDipole;
+  multipoleParam.isQuadrupole = isQuadrupole;
+
+  at_->addProperty(
+      std::make_shared<MultipoleAtypeData>(MultipoleTypeID, multipoleParam));
+}
+}  // namespace OpenMD

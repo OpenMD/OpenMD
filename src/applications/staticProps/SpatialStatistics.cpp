@@ -43,10 +43,11 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "applications/staticProps/SpatialStatistics.hpp"
+
 #include <string>
 #include <vector>
 
-#include "applications/staticProps/SpatialStatistics.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
@@ -59,84 +60,79 @@
 
 namespace OpenMD {
 
-  SpatialStatistics::SpatialStatistics(SimInfo* info, const std::string& filename,
-                                       const std::string& sele, int nbins)
-    : StaticAnalyser(info, filename, nbins), selectionScript_(sele),
-      evaluator_(info), seleMan_(info) {
-
-    evaluator_.loadScriptString(sele);
-    if (!evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
-
-    setOutputName(getPrefix(filename) + ".spst");
+SpatialStatistics::SpatialStatistics(SimInfo* info, const std::string& filename,
+                                     const std::string& sele, int nbins)
+    : StaticAnalyser(info, filename, nbins),
+      selectionScript_(sele),
+      evaluator_(info),
+      seleMan_(info) {
+  evaluator_.loadScriptString(sele);
+  if (!evaluator_.isDynamic()) {
+    seleMan_.setSelectionSet(evaluator_.evaluate());
   }
 
-  SpatialStatistics::~SpatialStatistics() {
+  setOutputName(getPrefix(filename) + ".spst");
+}
 
-    // Here we need to delete the accumulators...
-    for (auto& data : data_) {
-      if ( !data->accumulatorArray2d.empty() )
-        Utils::deletePointers(data->accumulatorArray2d);
-      else
-        Utils::deletePointers(data->accumulator);
-    }
-
-    // ...and the output data
-    std::vector<OutputData*>::iterator i;
-    OutputData* outputData;
-
-    for(outputData = beginOutputData(i); outputData;
-        outputData = nextOutputData(i)) {
-      delete outputData;
-    }
+SpatialStatistics::~SpatialStatistics() {
+  // Here we need to delete the accumulators...
+  for (auto& data : data_) {
+    if (!data->accumulatorArray2d.empty())
+      Utils::deletePointers(data->accumulatorArray2d);
+    else
+      Utils::deletePointers(data->accumulator);
   }
 
-  void SpatialStatistics::process() {
+  // ...and the output data
+  std::vector<OutputData*>::iterator i;
+  OutputData* outputData;
 
-    DumpReader reader(info_, dumpFilename_);
-    int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames/step_;
+  for (outputData = beginOutputData(i); outputData;
+       outputData = nextOutputData(i)) {
+    delete outputData;
+  }
+}
 
-    for (int istep = 0; istep < nFrames; istep += step_) {
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      processFrame(istep);
-    }
+void SpatialStatistics::process() {
+  DumpReader reader(info_, dumpFilename_);
+  int nFrames = reader.getNFrames();
+  nProcessed_ = nFrames / step_;
 
-    writeOutput();
+  for (int istep = 0; istep < nFrames; istep += step_) {
+    reader.readFrame(istep);
+    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    processFrame(istep);
   }
 
-  void SpatialStatistics::processFrame(int istep) {
+  writeOutput();
+}
 
-    StuntDouble* sd;
-    int i;
+void SpatialStatistics::processFrame(int istep) {
+  StuntDouble* sd;
+  int i;
 
-    if (evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
-
-    // loop over the selected atoms:
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {
-
-      // figure out where that object is:
-      Vector3d pos = sd->getPos();
-
-      int bin = getBin(pos);
-
-      // forward the work of statistics on to the subclass:
-      processStuntDouble( sd, bin );
-    }
+  if (evaluator_.isDynamic()) {
+    seleMan_.setSelectionSet(evaluator_.evaluate());
   }
 
+  // loop over the selected atoms:
+  for (sd = seleMan_.beginSelected(i); sd != NULL;
+       sd = seleMan_.nextSelected(i)) {
+    // figure out where that object is:
+    Vector3d pos = sd->getPos();
 
-  SlabStatistics::SlabStatistics(SimInfo* info, const std::string& filename,
-                                 const std::string& sele, int nbins, int axis)
+    int bin = getBin(pos);
+
+    // forward the work of statistics on to the subclass:
+    processStuntDouble(sd, bin);
+  }
+}
+
+SlabStatistics::SlabStatistics(SimInfo* info, const std::string& filename,
+                               const std::string& sele, int nbins, int axis)
     : SpatialStatistics(info, filename, sele, nbins), axis_(axis) {
-
-    // Set the axis label for the privileged axis
-    switch(axis_) {
+  // Set the axis label for the privileged axis
+  switch (axis_) {
     case 0:
       axisLabel_ = "x";
       break;
@@ -147,91 +143,87 @@ namespace OpenMD {
     default:
       axisLabel_ = "z";
       break;
-    }
-
-    z_ = new OutputData;
-    z_->units =  "Angstroms";
-    z_->title =  axisLabel_;
-    z_->dataType = odtReal;
-    z_->dataHandling = odhAverage;
-    z_->accumulator.reserve(nbins);
-    for (int i = 0; i < nbins; i++)
-      z_->accumulator.push_back( new Accumulator() );
-    data_.push_back(z_);
   }
 
-  void SlabStatistics::processFrame(int istep) {
+  z_ = new OutputData;
+  z_->units = "Angstroms";
+  z_->title = axisLabel_;
+  z_->dataType = odtReal;
+  z_->dataHandling = odhAverage;
+  z_->accumulator.reserve(nbins);
+  for (int i = 0; i < nbins; i++) z_->accumulator.push_back(new Accumulator());
+  data_.push_back(z_);
+}
 
-    RealType z;
-    hmat_ = currentSnapshot_->getHmat();
+void SlabStatistics::processFrame(int istep) {
+  RealType z;
+  hmat_ = currentSnapshot_->getHmat();
 
-    for (unsigned int i = 0; i < nBins_; i++) {
-      z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_,axis_);
-      dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
-    }
-
-    volume_ = currentSnapshot_->getVolume();
-
-    SpatialStatistics::processFrame(istep);
+  for (unsigned int i = 0; i < nBins_; i++) {
+    z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_, axis_);
+    dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
   }
 
-  int SlabStatistics::getBin(Vector3d pos) {
+  volume_ = currentSnapshot_->getVolume();
 
-    currentSnapshot_->wrapVector(pos);
-    // which bin is this stuntdouble in?
-    // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
-    // Shift molecules by half a box to have bins start at 0
-    // The modulo operator is used to wrap the case when we are
-    // beyond the end of the bins back to the beginning.
-    return int(nBins_ * (pos[axis_] / hmat_(axis_,axis_) + 0.5)) % nBins_;
+  SpatialStatistics::processFrame(istep);
+}
+
+int SlabStatistics::getBin(Vector3d pos) {
+  currentSnapshot_->wrapVector(pos);
+  // which bin is this stuntdouble in?
+  // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
+  // Shift molecules by half a box to have bins start at 0
+  // The modulo operator is used to wrap the case when we are
+  // beyond the end of the bins back to the beginning.
+  return int(nBins_ * (pos[axis_] / hmat_(axis_, axis_) + 0.5)) % nBins_;
+}
+
+ShellStatistics::ShellStatistics(SimInfo* info, const std::string& filename,
+                                 const std::string& sele, int nbins)
+    : SpatialStatistics(info, filename, sele, nbins),
+      coordinateOrigin_(V3Zero) {
+  binWidth_ = 1.0;
+
+  Globals* simParams = info->getSimParams();
+  RNEMD::RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
+  bool hasCoordinateOrigin = rnemdParams->haveCoordinateOrigin();
+
+  if (hasCoordinateOrigin) {
+    std::vector<RealType> co = rnemdParams->getCoordinateOrigin();
+    if (co.size() != 3) {
+      sprintf(painCave.errMsg,
+              "RNEMD: Incorrect number of parameters specified for "
+              "coordinateOrigin.\n"
+              "\tthere should be 3 parameters, but %lu were specified.\n",
+              co.size());
+      painCave.isFatal = 1;
+      simError();
+    }
+    coordinateOrigin_.x() = co[0];
+    coordinateOrigin_.y() = co[1];
+    coordinateOrigin_.z() = co[2];
+  } else {
+    coordinateOrigin_ = V3Zero;
   }
 
+  r_ = new OutputData;
+  r_->units = "Angstroms";
+  r_->title = "R";
+  r_->dataType = odtReal;
+  r_->dataHandling = odhAverage;
+  r_->accumulator.reserve(nbins);
+  for (int i = 0; i < nbins; i++) r_->accumulator.push_back(new Accumulator());
+  data_.push_back(r_);
 
-  ShellStatistics::ShellStatistics(SimInfo* info, const std::string& filename,
-                                   const std::string& sele, int nbins)
-    : SpatialStatistics(info, filename, sele, nbins), coordinateOrigin_(V3Zero) {
-
-    binWidth_ = 1.0;
-
-    Globals* simParams = info->getSimParams();
-    RNEMD::RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
-    bool hasCoordinateOrigin = rnemdParams->haveCoordinateOrigin();
-
-    if (hasCoordinateOrigin) {
-      std::vector<RealType> co = rnemdParams->getCoordinateOrigin();
-      if (co.size() != 3) {
-        sprintf(painCave.errMsg,
-                "RNEMD: Incorrect number of parameters specified for coordinateOrigin.\n"
-                "\tthere should be 3 parameters, but %lu were specified.\n",
-                co.size());
-        painCave.isFatal = 1;
-        simError();
-      }
-      coordinateOrigin_.x() = co[0];
-      coordinateOrigin_.y() = co[1];
-      coordinateOrigin_.z() = co[2];
-    } else {
-      coordinateOrigin_ = V3Zero;
-    }
-
-    r_ = new OutputData;
-    r_->units =  "Angstroms";
-    r_->title =  "R";
-    r_->dataType = odtReal;
-    r_->dataHandling = odhAverage;
-    r_->accumulator.reserve(nbins);
-    for (int i = 0; i < nbins; i++)
-      r_->accumulator.push_back( new Accumulator() );
-    data_.push_back(r_);
-
-    for (int i = 0; i < nbins; i++) {
-      RealType r = (((RealType)i + 0.5) * binWidth_);
-      dynamic_cast<Accumulator*>(r_->accumulator[i])->add(r);
-    }
-  }
-
-  int ShellStatistics::getBin(Vector3d pos) {
-    Vector3d rPos = pos - coordinateOrigin_;
-    return int(rPos.length() / binWidth_);
+  for (int i = 0; i < nbins; i++) {
+    RealType r = (((RealType)i + 0.5) * binWidth_);
+    dynamic_cast<Accumulator*>(r_->accumulator[i])->add(r);
   }
 }
+
+int ShellStatistics::getBin(Vector3d pos) {
+  Vector3d rPos = pos - coordinateOrigin_;
+  return int(rPos.length() / binWidth_);
+}
+}  // namespace OpenMD

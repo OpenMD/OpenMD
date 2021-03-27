@@ -43,56 +43,55 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
 #include <cmath>
-#include <iostream>
-#include <string>
-#include <map>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
+#include <iostream>
+#include <map>
+#include <string>
 
-#include "elasticConstantsCmd.hpp"
-#include "brains/Register.hpp"
-#include "brains/SimInfo.hpp"
-#include "brains/SimCreator.hpp"
-#include "brains/Thermo.hpp"
 #include "brains/ForceManager.hpp"
+#include "brains/Register.hpp"
+#include "brains/SimCreator.hpp"
+#include "brains/SimInfo.hpp"
+#include "brains/Thermo.hpp"
 #include "brains/Velocitizer.hpp"
 #include "constraints/Shake.hpp"
+#include "elasticConstantsCmd.hpp"
 #include "flucq/FluctuatingChargeConstraints.hpp"
 #include "flucq/FluctuatingChargeDamped.hpp"
 #include "io/DumpReader.hpp"
-#include "utils/StringUtils.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "utils/MemoryUtils.hpp"
-#include "math/QR.hpp"
 #include "math/LU.hpp"
-
-#include "optimization/OptimizationFactory.hpp"
-#include "optimization/Method.hpp"
-#include "optimization/Constraint.hpp"
-#include "optimization/Problem.hpp"
+#include "math/QR.hpp"
+#include "math/SquareMatrix3.hpp"
 #include "optimization/BoxObjectiveFunction.hpp"
+#include "optimization/Constraint.hpp"
+#include "optimization/Method.hpp"
+#include "optimization/OptimizationFactory.hpp"
+#include "optimization/Problem.hpp"
+#include "utils/MemoryUtils.hpp"
+#include "utils/StringUtils.hpp"
 
 using namespace OpenMD;
 using namespace JAMA;
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <numeric>
 #include <vector>
-#include <iomanip>
 
-template<typename Real>
-class Vector6 : public Vector<Real, 6>{
-public:
+template <typename Real>
+class Vector6 : public Vector<Real, 6> {
+ public:
   typedef Real ElemType;
   typedef Real* ElemPoinerType;
-  Vector6() : Vector<Real, 6>(){}
-  
+  Vector6() : Vector<Real, 6>() {}
+
   /** Constructs and initializes a Vector6d from individual coordinates */
-  inline Vector6( RealType v0, RealType v1, RealType v2, RealType v3,
-                  RealType v4, RealType v5) {
+  inline Vector6(RealType v0, RealType v1, RealType v2, RealType v3,
+                 RealType v4, RealType v5) {
     this->data_[0] = v0;
     this->data_[1] = v1;
     this->data_[2] = v2;
@@ -102,44 +101,42 @@ public:
   }
   /** Constructs and initializes from an array*/
   inline Vector6(Real* array) : Vector<Real, 6>(array) {}
-  
+
   inline Vector6(const Vector<Real, 6>& v) : Vector<Real, 6>(v) {}
-  
-  inline Vector6<Real>& operator = (const Vector<Real, 6>& v) {
-    if (this == &v) { return *this; }
+
+  inline Vector6<Real>& operator=(const Vector<Real, 6>& v) {
+    if (this == &v) {
+      return *this;
+    }
     Vector<Real, 6>::operator=(v);
     return *this;
   }
-
 };
-  
-  
+
 typedef Vector6<RealType> Vector6d;
 
 RealType slope(const std::vector<RealType>& x, const std::vector<RealType>& y) {
-
   // for (size_t i = 0; i < x.size(); i++) {
   //   std::cerr << x[i] << "\t" << y[i] << "\n";
   // }
   // std::cerr << "&\n";
-  
-  const size_t n    = x.size();  
-  const RealType s_x  = std::accumulate(x.begin(), x.end(), 0.0);
-  const RealType s_y  = std::accumulate(y.begin(), y.end(), 0.0);
+
+  const size_t n = x.size();
+  const RealType s_x = std::accumulate(x.begin(), x.end(), 0.0);
+  const RealType s_y = std::accumulate(y.begin(), y.end(), 0.0);
   const RealType s_xx = std::inner_product(x.begin(), x.end(), x.begin(), 0.0);
   const RealType s_xy = std::inner_product(x.begin(), x.end(), y.begin(), 0.0);
-  const RealType a    = (n * s_xy - s_x * s_y) / (n * s_xx - s_x * s_x);
+  const RealType a = (n * s_xy - s_x * s_y) / (n * s_xx - s_x * s_x);
   return a;
 }
 
 void quadraticFit(const std::vector<RealType>& x,
-                  const std::vector<RealType>& y,
-                  RealType& a, RealType& b, RealType& c) {
-  
+                  const std::vector<RealType>& y, RealType& a, RealType& b,
+                  RealType& c) {
   RealType s00 = RealType(x.size());
   RealType s10(0.0), s20(0.0), s30(0.0), s40(0.0);
   RealType s01(0.0), s11(0.0), s21(0.0);
-  
+
   for (size_t i = 0; i < x.size(); i++) {
     // std::cerr << x[i] << "\t" << y[i] << "\n";
     s10 += x[i];
@@ -147,155 +144,151 @@ void quadraticFit(const std::vector<RealType>& x,
     s30 += pow(x[i], 3);
     s40 += pow(x[i], 4);
     s01 += y[i];
-    s11 += x[i]*y[i];
-    s21 += pow(x[i],2) * y[i];
+    s11 += x[i] * y[i];
+    s21 += pow(x[i], 2) * y[i];
   }
   // std::cerr << "&\n";
 
-  RealType D = (s40 * (s20 * s00 - s10 * s10) - 
-                s30 * (s30 * s00 - s10 * s20) + 
+  RealType D = (s40 * (s20 * s00 - s10 * s10) - s30 * (s30 * s00 - s10 * s20) +
                 s20 * (s30 * s10 - s20 * s20));
-  
-  a = (s21*(s20 * s00 - s10 * s10) - 
-       s11*(s30 * s00 - s10 * s20) + 
-       s01*(s30 * s10 - s20 * s20)) / D;
-  
-  b = (s40*(s11 * s00 - s01 * s10) - 
-       s30*(s21 * s00 - s01 * s20) + 
-       s20*(s21 * s10 - s11 * s20)) / D;
-  
-  c = (s40*(s20 * s01 - s10 * s11) - 
-       s30*(s30 * s01 - s10 * s21) + 
-       s20*(s30 * s11 - s20 * s21)) / D;
+
+  a = (s21 * (s20 * s00 - s10 * s10) - s11 * (s30 * s00 - s10 * s20) +
+       s01 * (s30 * s10 - s20 * s20)) /
+      D;
+
+  b = (s40 * (s11 * s00 - s01 * s10) - s30 * (s21 * s00 - s01 * s20) +
+       s20 * (s21 * s10 - s11 * s20)) /
+      D;
+
+  c = (s40 * (s20 * s01 - s10 * s11) - s30 * (s30 * s01 - s10 * s21) +
+       s20 * (s30 * s11 - s20 * s21)) /
+      D;
 
   return;
 }
 
 void writeMatrix(DynamicRectMatrix<RealType> M, std::string title,
                  std::string units) {
-
   std::cout << left << title << " (" << units << "):" << std::endl;
   std::cout << std::endl;
-    
+
   std::cout << " ";
-  std::cout << right << setw(12) << M(0,0) << " ";
-  std::cout << right << setw(12) << M(0,1) << " ";
-  std::cout << right << setw(12) << M(0,2) << " ";
-  std::cout << right << setw(12) << M(0,3) << " ";
-  std::cout << right << setw(12) << M(0,4) << " ";                
-  std::cout << right << setw(12) << M(0,5);
+  std::cout << right << setw(12) << M(0, 0) << " ";
+  std::cout << right << setw(12) << M(0, 1) << " ";
+  std::cout << right << setw(12) << M(0, 2) << " ";
+  std::cout << right << setw(12) << M(0, 3) << " ";
+  std::cout << right << setw(12) << M(0, 4) << " ";
+  std::cout << right << setw(12) << M(0, 5);
   std::cout << std::endl;
 
   std::cout << " ";
-  std::cout << right << setw(12) << M(1,0) << " ";
-  std::cout << right << setw(12) << M(1,1) << " ";
-  std::cout << right << setw(12) << M(1,2) << " ";
-  std::cout << right << setw(12) << M(1,3) << " ";
-  std::cout << right << setw(12) << M(1,4) << " ";                
-  std::cout << right << setw(12) << M(1,5);
+  std::cout << right << setw(12) << M(1, 0) << " ";
+  std::cout << right << setw(12) << M(1, 1) << " ";
+  std::cout << right << setw(12) << M(1, 2) << " ";
+  std::cout << right << setw(12) << M(1, 3) << " ";
+  std::cout << right << setw(12) << M(1, 4) << " ";
+  std::cout << right << setw(12) << M(1, 5);
   std::cout << std::endl;
 
   std::cout << " ";
-  std::cout << right << setw(12) << M(2,0) << " ";
-  std::cout << right << setw(12) << M(2,1) << " ";
-  std::cout << right << setw(12) << M(2,2) << " ";
-  std::cout << right << setw(12) << M(2,3) << " ";
-  std::cout << right << setw(12) << M(2,4) << " ";
-  std::cout << right << setw(12) << M(2,5);
+  std::cout << right << setw(12) << M(2, 0) << " ";
+  std::cout << right << setw(12) << M(2, 1) << " ";
+  std::cout << right << setw(12) << M(2, 2) << " ";
+  std::cout << right << setw(12) << M(2, 3) << " ";
+  std::cout << right << setw(12) << M(2, 4) << " ";
+  std::cout << right << setw(12) << M(2, 5);
   std::cout << std::endl;
 
   std::cout << " ";
-  std::cout << right << setw(12) << M(3,0) << " ";
-  std::cout << right << setw(12) << M(3,1) << " ";
-  std::cout << right << setw(12) << M(3,2) << " ";
-  std::cout << right << setw(12) << M(3,3) << " ";
-  std::cout << right << setw(12) << M(3,4) << " ";                
-  std::cout << right << setw(12) << M(3,5);
+  std::cout << right << setw(12) << M(3, 0) << " ";
+  std::cout << right << setw(12) << M(3, 1) << " ";
+  std::cout << right << setw(12) << M(3, 2) << " ";
+  std::cout << right << setw(12) << M(3, 3) << " ";
+  std::cout << right << setw(12) << M(3, 4) << " ";
+  std::cout << right << setw(12) << M(3, 5);
   std::cout << std::endl;
 
   std::cout << " ";
-  std::cout << right << setw(12) << M(4,0) << " ";
-  std::cout << right << setw(12) << M(4,1) << " ";
-  std::cout << right << setw(12) << M(4,2) << " ";
-  std::cout << right << setw(12) << M(4,3) << " ";
-  std::cout << right << setw(12) << M(4,4) << " ";                
-  std::cout << right << setw(12) << M(4,5);
+  std::cout << right << setw(12) << M(4, 0) << " ";
+  std::cout << right << setw(12) << M(4, 1) << " ";
+  std::cout << right << setw(12) << M(4, 2) << " ";
+  std::cout << right << setw(12) << M(4, 3) << " ";
+  std::cout << right << setw(12) << M(4, 4) << " ";
+  std::cout << right << setw(12) << M(4, 5);
   std::cout << std::endl;
-    
+
   std::cout << " ";
-  std::cout << right << setw(12) << M(5,0) << " ";
-  std::cout << right << setw(12) << M(5,1) << " ";
-  std::cout << right << setw(12) << M(5,2) << " ";
-  std::cout << right << setw(12) << M(5,3) << " ";
-  std::cout << right << setw(12) << M(5,4) << " ";
-  std::cout << right << setw(12) << M(5,5);
+  std::cout << right << setw(12) << M(5, 0) << " ";
+  std::cout << right << setw(12) << M(5, 1) << " ";
+  std::cout << right << setw(12) << M(5, 2) << " ";
+  std::cout << right << setw(12) << M(5, 3) << " ";
+  std::cout << right << setw(12) << M(5, 4) << " ";
+  std::cout << right << setw(12) << M(5, 5);
   std::cout << std::endl;
-  std::cout << std::endl;    
+  std::cout << std::endl;
 }
 
-void writeBoxGeometries(Mat3x3d org, Mat3x3d opt, std::string title1, std::string title2, std::string units) {
-  
+void writeBoxGeometries(Mat3x3d org, Mat3x3d opt, std::string title1,
+                        std::string title2, std::string units) {
   std::cout << left << title1 << " (" << units << "):" << std::endl;
-  std::cout << std::endl;  
-  std::cout << " ";
-  std::cout << right << setw(12) << org(0,0) << " ";
-  std::cout << right << setw(12) << org(0,1) << " ";
-  std::cout << right << setw(12) << org(0,2) << " ";
   std::cout << std::endl;
   std::cout << " ";
-  std::cout << right << setw(12) << org(1,0) << " ";
-  std::cout << right << setw(12) << org(1,1) << " ";
-  std::cout << right << setw(12) << org(1,2) << " ";
+  std::cout << right << setw(12) << org(0, 0) << " ";
+  std::cout << right << setw(12) << org(0, 1) << " ";
+  std::cout << right << setw(12) << org(0, 2) << " ";
   std::cout << std::endl;
   std::cout << " ";
-  std::cout << right << setw(12) << org(2,0) << " ";
-  std::cout << right << setw(12) << org(2,1) << " ";
-  std::cout << right << setw(12) << org(2,2) << " ";
+  std::cout << right << setw(12) << org(1, 0) << " ";
+  std::cout << right << setw(12) << org(1, 1) << " ";
+  std::cout << right << setw(12) << org(1, 2) << " ";
   std::cout << std::endl;
-  std::cout << std::endl; 
+  std::cout << " ";
+  std::cout << right << setw(12) << org(2, 0) << " ";
+  std::cout << right << setw(12) << org(2, 1) << " ";
+  std::cout << right << setw(12) << org(2, 2) << " ";
+  std::cout << std::endl;
+  std::cout << std::endl;
   std::cout << left << title2 << " (" << units << "):" << std::endl;
   std::cout << std::endl;
   std::cout << " ";
-  std::cout << right << setw(12) << opt(0,0) << " ";
-  std::cout << right << setw(12) << opt(0,1) << " ";
-  std::cout << right << setw(12) << opt(0,2) << " ";
+  std::cout << right << setw(12) << opt(0, 0) << " ";
+  std::cout << right << setw(12) << opt(0, 1) << " ";
+  std::cout << right << setw(12) << opt(0, 2) << " ";
   std::cout << std::endl;
   std::cout << " ";
-  std::cout << right << setw(12) << opt(1,0) << " ";
-  std::cout << right << setw(12) << opt(1,1) << " ";
-  std::cout << right << setw(12) << opt(1,2) << " ";
+  std::cout << right << setw(12) << opt(1, 0) << " ";
+  std::cout << right << setw(12) << opt(1, 1) << " ";
+  std::cout << right << setw(12) << opt(1, 2) << " ";
   std::cout << std::endl;
   std::cout << " ";
-  std::cout << right << setw(12) << opt(2,0) << " ";
-  std::cout << right << setw(12) << opt(2,1) << " ";
-  std::cout << right << setw(12) << opt(2,2) << " ";
+  std::cout << right << setw(12) << opt(2, 0) << " ";
+  std::cout << right << setw(12) << opt(2, 1) << " ";
+  std::cout << right << setw(12) << opt(2, 2) << " ";
   std::cout << std::endl;
-  std::cout << std::endl; 
+  std::cout << std::endl;
 }
 
 void writeMaterialProperties(DynamicRectMatrix<RealType> C,
                              DynamicRectMatrix<RealType> S) {
-  
-  RealType C11 = C(0,0);
-  RealType C22 = C(1,1);
-  RealType C33 = C(2,2);
-  RealType C12 = C(0,1);
-  RealType C23 = C(1,2);
-  RealType C31 = C(2,0);
-  RealType C44 = C(3,3);
-  RealType C55 = C(4,4);
-  RealType C66 = C(5,5);
-  
-  RealType S11 = S(0,0);
-  RealType S22 = S(1,1);
-  RealType S33 = S(2,2);
-  RealType S12 = S(0,1);
-  RealType S23 = S(1,2);
-  RealType S31 = S(2,0);
-  RealType S44 = S(3,3);
-  RealType S55 = S(4,4);
-  RealType S66 = S(5,5);
+  RealType C11 = C(0, 0);
+  RealType C22 = C(1, 1);
+  RealType C33 = C(2, 2);
+  RealType C12 = C(0, 1);
+  RealType C23 = C(1, 2);
+  RealType C31 = C(2, 0);
+  RealType C44 = C(3, 3);
+  RealType C55 = C(4, 4);
+  RealType C66 = C(5, 5);
 
+  RealType S11 = S(0, 0);
+  RealType S22 = S(1, 1);
+  RealType S33 = S(2, 2);
+  RealType S12 = S(0, 1);
+  RealType S23 = S(1, 2);
+  RealType S31 = S(2, 0);
+  RealType S44 = S(3, 3);
+  RealType S55 = S(4, 4);
+  RealType S66 = S(5, 5);
 
   // Material Properties defined in:
   //
@@ -317,83 +310,75 @@ void writeMaterialProperties(DynamicRectMatrix<RealType> C,
   //
   // J. Phys.: Condens. Matter 28 275201 (2016)
   // doi:10.1088/0953-8984/28/27/275201
-  
+
   // Bulk modulus (Voigt average):
-  RealType Kv = ((C11+C22+C33) + 2.0*(C12+C23+C31)) / 9.0;
+  RealType Kv = ((C11 + C22 + C33) + 2.0 * (C12 + C23 + C31)) / 9.0;
   // Bulk modulus (Reuss average):
-  RealType Kr = 1.0 / ((S11+S22+S33) + 2.0*(S12+S23+S31));
+  RealType Kr = 1.0 / ((S11 + S22 + S33) + 2.0 * (S12 + S23 + S31));
   // Shear modulus (Voigt average):
-  RealType Gv = ((C11+C22+C33) - (C12+C23+C31) + 3.0*(C44+C55+C66)) / 15.0;
+  RealType Gv =
+      ((C11 + C22 + C33) - (C12 + C23 + C31) + 3.0 * (C44 + C55 + C66)) / 15.0;
   // Shear modulus (Reuss average):
-  RealType Gr = 15.0 / (4.0*(S11+S22+S33) - 4.0*(S12+S23+S31) + 3.0*(S44+S55+S66));
+  RealType Gr = 15.0 / (4.0 * (S11 + S22 + S33) - 4.0 * (S12 + S23 + S31) +
+                        3.0 * (S44 + S55 + S66));
   // Bulk modulus (Hill average):
   RealType Kh = (Kv + Kr) / 2.0;
   // Shear modulus (Hill average):
   RealType Gh = (Gv + Gr) / 2.0;
   // Universal elastic anisotropy
-  RealType Au = 5.0 * (Gv/Gr) + (Kv/Kr) - 6.0;
+  RealType Au = 5.0 * (Gv / Gr) + (Kv / Kr) - 6.0;
   // Isotropic Poisson ratio
-  RealType muv = (1.0 - 3.0*Gv/(3.0*Kv + Gv)) / 2.0;
-  RealType mur = (1.0 - 3.0*Gr/(3.0*Kr + Gr)) / 2.0;
-  RealType muh = (1.0 - 3.0*Gh/(3.0*Kh + Gh)) / 2.0;
+  RealType muv = (1.0 - 3.0 * Gv / (3.0 * Kv + Gv)) / 2.0;
+  RealType mur = (1.0 - 3.0 * Gr / (3.0 * Kr + Gr)) / 2.0;
+  RealType muh = (1.0 - 3.0 * Gh / (3.0 * Kh + Gh)) / 2.0;
   // Isotropic Young's modulus
-  RealType Ev = 1.0/(1.0/(3.0*Gv) + 1.0/(9.0*Kv));
-  RealType Er = 1.0/(1.0/(3.0*Gr) + 1.0/(9.0*Kr));
-  RealType Eh = 1.0/(1.0/(3.0*Gh) + 1.0/(9.0*Kh));
+  RealType Ev = 1.0 / (1.0 / (3.0 * Gv) + 1.0 / (9.0 * Kv));
+  RealType Er = 1.0 / (1.0 / (3.0 * Gr) + 1.0 / (9.0 * Kr));
+  RealType Eh = 1.0 / (1.0 / (3.0 * Gh) + 1.0 / (9.0 * Kh));
 
-  std::cout << "                              "
-            << setw(12) << "Voigt" << " "
-            << setw(12) << "Reuss" << " "
-            << setw(12) << "Hill\n";
-  std::cout << "Bulk modulus:                 "
-            << setw(12) << Kv << " "
-            << setw(12) << Kr << " "
-            << setw(12) << Kh << " (GPa)\n";
+  std::cout << "                              " << setw(12) << "Voigt"
+            << " " << setw(12) << "Reuss"
+            << " " << setw(12) << "Hill\n";
+  std::cout << "Bulk modulus:                 " << setw(12) << Kv << " "
+            << setw(12) << Kr << " " << setw(12) << Kh << " (GPa)\n";
 
-  std::cout << "Shear modulus:                "
-            << setw(12) << Gv << " "
-            << setw(12) << Gr << " "
-            << setw(12) << Gh << " (GPa)\n";
+  std::cout << "Shear modulus:                " << setw(12) << Gv << " "
+            << setw(12) << Gr << " " << setw(12) << Gh << " (GPa)\n";
 
-  std::cout << "Young\'s modulus (isotropic):  "
-            << setw(12) << Ev << " "
-            << setw(12) << Er << " "
-            << setw(12) << Eh << " (GPa)\n";
+  std::cout << "Young\'s modulus (isotropic):  " << setw(12) << Ev << " "
+            << setw(12) << Er << " " << setw(12) << Eh << " (GPa)\n";
 
-  std::cout << "Poisson\'s Ratio:              "
-            << setw(12) << muv << " "
-            << setw(12) << mur << " "
-            << setw(12) << muh << "\n";
-  
+  std::cout << "Poisson\'s Ratio:              " << setw(12) << muv << " "
+            << setw(12) << mur << " " << setw(12) << muh << "\n";
+
   std::cout << "Universal elastic Anisotropy: " << setw(12) << Au << "\n";
-    
+
   // Assume a cubic crystal, and use symmetries:
 
-  //C11 = (C(0,0) + C(1,1) + C(2,2)) / 3.0;
-  //C12 = (C(0,1) + C(0,2) + C(1,2)) / 3.0;
-  //C44 = (C(3,3) + C(4,4) + C(5,5)) / 3.0;
-  //S11 = (S(0,0) + S(1,1) + S(2,2)) / 3.0;
-  //S12 = (S(0,1) + S(0,2) + S(1,2)) / 3.0;
-  //S44 = (S(3,3) + S(4,4) + S(5,5)) / 3.0;
-      
+  // C11 = (C(0,0) + C(1,1) + C(2,2)) / 3.0;
+  // C12 = (C(0,1) + C(0,2) + C(1,2)) / 3.0;
+  // C44 = (C(3,3) + C(4,4) + C(5,5)) / 3.0;
+  // S11 = (S(0,0) + S(1,1) + S(2,2)) / 3.0;
+  // S12 = (S(0,1) + S(0,2) + S(1,2)) / 3.0;
+  // S44 = (S(3,3) + S(4,4) + S(5,5)) / 3.0;
+
   // Anisotropy factor
-  //RealType A1 = 2.0*C44 / (C11 - C12);
-  //RealType A2 = 2.0*(S11 - S12) / S44;
-  
+  // RealType A1 = 2.0*C44 / (C11 - C12);
+  // RealType A2 = 2.0*(S11 - S12) / S44;
+
   // std::cout << "Anisotropy factor = " << A1 << " " << A2 << "\n";
-    
+
   // Effective Elastic constants for propagation in Cubic Crystals
-  //RealType kL_100 = C11;
-  //RealType kT_100 = C44;
-  //RealType kL_110 = 0.5 * (C11 + C12 + 2.0*C44);
-  //RealType kT1_110 = C44;
-  //RealType kT2_110 = 0.5*(C11 - C12);
-  //RealType kL_111 = (C11 + 2*C12 + 4*C44) / 3.0;
-  //RealType kT_111 = (C11 - C12 + C44) / 3.0;
-   
+  // RealType kL_100 = C11;
+  // RealType kT_100 = C44;
+  // RealType kL_110 = 0.5 * (C11 + C12 + 2.0*C44);
+  // RealType kT1_110 = C44;
+  // RealType kT2_110 = 0.5*(C11 - C12);
+  // RealType kL_111 = (C11 + 2*C12 + 4*C44) / 3.0;
+  // RealType kT_111 = (C11 - C12 + C44) / 3.0;
 }
 
-int main(int argc, char *argv []) {
+int main(int argc, char* argv[]) {
   std::string method;
   std::string inputFileName;
   std::string outputFileName;
@@ -410,10 +395,9 @@ int main(int argc, char *argv []) {
   if (args_info.input_given) {
     inputFileName = args_info.input_arg;
   } else {
-    if (args_info.inputs_num){
+    if (args_info.inputs_num) {
       inputFileName = args_info.inputs[0];
-    }
-    else{
+    } else {
       sprintf(painCave.errMsg,
               "No input file name was specified on the command line");
       painCave.severity = OPENMD_ERROR;
@@ -423,10 +407,10 @@ int main(int argc, char *argv []) {
   }
 
   method = "energy";
-  if (args_info.method_given) {    
+  if (args_info.method_given) {
     method = args_info.method_arg;
     toLower(method);
-  }  
+  }
 
   int nMax = args_info.npoints_arg;
 
@@ -463,28 +447,28 @@ int main(int argc, char *argv []) {
   std::vector<Vector6d> eStrains;
   // Only the strains for the "N" Laue group are used (1-21, skipping 0)
   // eStrains.push_back(Vector6d( 1., 1., 1., 0., 0., 0.));
-  eStrains.push_back(Vector6d( 1., 0., 0., 0., 0., 0.));
-  eStrains.push_back(Vector6d( 0., 1., 0., 0., 0., 0.));
-  eStrains.push_back(Vector6d( 0., 0., 1., 0., 0., 0.));
-  eStrains.push_back(Vector6d( 0., 0., 0., 2., 0., 0.));
-  eStrains.push_back(Vector6d( 0., 0., 0., 0., 2., 0.));
-  eStrains.push_back(Vector6d( 0., 0., 0., 0., 0., 2.));
-  eStrains.push_back(Vector6d( 1., 1., 0., 0., 0., 0.));
-  eStrains.push_back(Vector6d( 1., 0., 1., 0., 0., 0.));
-  eStrains.push_back(Vector6d( 1., 0., 0., 2., 0., 0.));
-  eStrains.push_back(Vector6d( 1., 0., 0., 0., 2., 0.));
-  eStrains.push_back(Vector6d( 1., 0., 0., 0., 0., 2.));
-  eStrains.push_back(Vector6d( 0., 1., 1., 0., 0., 0.));
-  eStrains.push_back(Vector6d( 0., 1., 0., 2., 0., 0.));
-  eStrains.push_back(Vector6d( 0., 1., 0., 0., 2., 0.));
-  eStrains.push_back(Vector6d( 0., 1., 0., 0., 0., 2.));
-  eStrains.push_back(Vector6d( 0., 0., 1., 2., 0., 0.));
-  eStrains.push_back(Vector6d( 0., 0., 1., 0., 2., 0.));
-  eStrains.push_back(Vector6d( 0., 0., 1., 0., 0., 2.));
-  eStrains.push_back(Vector6d( 0., 0., 0., 2., 2., 0.));
-  eStrains.push_back(Vector6d( 0., 0., 0., 2., 0., 2.));
-  eStrains.push_back(Vector6d( 0., 0., 0., 0., 2., 2.));
-  
+  eStrains.push_back(Vector6d(1., 0., 0., 0., 0., 0.));
+  eStrains.push_back(Vector6d(0., 1., 0., 0., 0., 0.));
+  eStrains.push_back(Vector6d(0., 0., 1., 0., 0., 0.));
+  eStrains.push_back(Vector6d(0., 0., 0., 2., 0., 0.));
+  eStrains.push_back(Vector6d(0., 0., 0., 0., 2., 0.));
+  eStrains.push_back(Vector6d(0., 0., 0., 0., 0., 2.));
+  eStrains.push_back(Vector6d(1., 1., 0., 0., 0., 0.));
+  eStrains.push_back(Vector6d(1., 0., 1., 0., 0., 0.));
+  eStrains.push_back(Vector6d(1., 0., 0., 2., 0., 0.));
+  eStrains.push_back(Vector6d(1., 0., 0., 0., 2., 0.));
+  eStrains.push_back(Vector6d(1., 0., 0., 0., 0., 2.));
+  eStrains.push_back(Vector6d(0., 1., 1., 0., 0., 0.));
+  eStrains.push_back(Vector6d(0., 1., 0., 2., 0., 0.));
+  eStrains.push_back(Vector6d(0., 1., 0., 0., 2., 0.));
+  eStrains.push_back(Vector6d(0., 1., 0., 0., 0., 2.));
+  eStrains.push_back(Vector6d(0., 0., 1., 2., 0., 0.));
+  eStrains.push_back(Vector6d(0., 0., 1., 0., 2., 0.));
+  eStrains.push_back(Vector6d(0., 0., 1., 0., 0., 2.));
+  eStrains.push_back(Vector6d(0., 0., 0., 2., 2., 0.));
+  eStrains.push_back(Vector6d(0., 0., 0., 2., 0., 2.));
+  eStrains.push_back(Vector6d(0., 0., 0., 0., 2., 2.));
+
   // The rest (22-28) are only used for crystals of higher symmetry,
   // and are not utilized in this code:
   //
@@ -502,7 +486,6 @@ int main(int argc, char *argv []) {
   // eStrains.push_back(Vector6d( .5, .5,-1., 2., 2., 2.));
   // eStrains.push_back(Vector6d( 0., 0., 0., 2., 2., 4.));
 
-
   // The Universal Linear-Independent Coupling Strains (ULICS) are from:
   //
   // "Calculations of single-crystal elastic constants made simple,"
@@ -511,15 +494,15 @@ int main(int argc, char *argv []) {
   // DOI: 10.1016/j.cpc.2009.11.017
 
   std::vector<Vector6d> sStrains;
-  sStrains.push_back(Vector6d( 1., 2., 3., 4., 5., 6.));
-  sStrains.push_back(Vector6d(-2., 1., 4.,-3., 6.,-5.));
-  sStrains.push_back(Vector6d( 3.,-5.,-1., 6., 2.,-4.));
-  sStrains.push_back(Vector6d(-4.,-6., 5., 1.,-3., 2.));
-  sStrains.push_back(Vector6d( 5., 4., 6.,-2.,-1.,-3.));
-  sStrains.push_back(Vector6d(-6., 3.,-2., 5.,-4., 1.));
+  sStrains.push_back(Vector6d(1., 2., 3., 4., 5., 6.));
+  sStrains.push_back(Vector6d(-2., 1., 4., -3., 6., -5.));
+  sStrains.push_back(Vector6d(3., -5., -1., 6., 2., -4.));
+  sStrains.push_back(Vector6d(-4., -6., 5., 1., -3., 2.));
+  sStrains.push_back(Vector6d(5., 4., 6., -2., -1., -3.));
+  sStrains.push_back(Vector6d(-6., 3., -2., 5., -4., 1.));
 
   std::vector<Vector6d> strainBasis;
-  
+
   if (!method.compare("energy")) {
     strainBasis = eStrains;
   } else {
@@ -529,49 +512,48 @@ int main(int argc, char *argv []) {
   // The matrix to perform the linear least squares fits from the
   // ULICS to find the elastic constants were derived for the ElaStic
   // code, Golesorkhtabara, et al. (cited above):
-  
+
   RealType mat[36][21] = {
-    { 1, 2, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    { 0, 1, 0, 0, 0, 0, 2, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    { 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0},
-    { 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 4, 5, 6, 0, 0, 0},
-    { 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 4, 0, 5, 6, 0},
-    { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 4, 0, 5, 6},
-    {-2, 1, 4,-3, 6,-5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    { 0,-2, 0, 0, 0, 0, 1, 4,-3, 6,-5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    { 0, 0,-2, 0, 0, 0, 0, 1, 0, 0, 0, 4,-3, 6,-5, 0, 0, 0, 0, 0, 0},
-    { 0, 0, 0,-2, 0, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0,-3, 6,-5, 0, 0, 0},
-    { 0, 0, 0, 0,-2, 0, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0,-3, 0, 6,-5, 0},
-    { 0, 0, 0, 0, 0,-2, 0, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0,-3, 0, 6,-5},
-    { 3,-5,-1, 6, 2,-4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    { 0, 3, 0, 0, 0, 0,-5,-1, 6, 2,-4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    { 0, 0, 3, 0, 0, 0, 0,-5, 0, 0, 0,-1, 6, 2,-4, 0, 0, 0, 0, 0, 0},
-    { 0, 0, 0, 3, 0, 0, 0, 0,-5, 0, 0, 0,-1, 0, 0, 6, 2,-4, 0, 0, 0},
-    { 0, 0, 0, 0, 3, 0, 0, 0, 0,-5, 0, 0, 0,-1, 0, 0, 6, 0, 2,-4, 0},
-    { 0, 0, 0, 0, 0, 3, 0, 0, 0, 0,-5, 0, 0, 0,-1, 0, 0, 6, 0, 2,-4},
-    {-4,-6, 5, 1,-3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    { 0,-4, 0, 0, 0, 0,-6, 5, 1,-3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    { 0, 0,-4, 0, 0, 0, 0,-6, 0, 0, 0, 5, 1,-3, 2, 0, 0, 0, 0, 0, 0},
-    { 0, 0, 0,-4, 0, 0, 0, 0,-6, 0, 0, 0, 5, 0, 0, 1,-3, 2, 0, 0, 0},
-    { 0, 0, 0, 0,-4, 0, 0, 0, 0,-6, 0, 0, 0, 5, 0, 0, 1, 0,-3, 2, 0},
-    { 0, 0, 0, 0, 0,-4, 0, 0, 0, 0,-6, 0, 0, 0, 5, 0, 0, 1, 0,-3, 2},
-    { 5, 4, 6,-2,-1,-3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    { 0, 5, 0, 0, 0, 0, 4, 6,-2,-1,-3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    { 0, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 6,-2,-1,-3, 0, 0, 0, 0, 0, 0},
-    { 0, 0, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 6, 0, 0,-2,-1,-3, 0, 0, 0},
-    { 0, 0, 0, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 6, 0, 0,-2, 0,-1,-3, 0},
-    { 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 6, 0, 0,-2, 0,-1,-3},
-    {-6, 3,-2, 5,-4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    { 0,-6, 0, 0, 0, 0, 3,-2, 5,-4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    { 0, 0,-6, 0, 0, 0, 0, 3, 0, 0, 0,-2, 5,-4, 1, 0, 0, 0, 0, 0, 0},
-    { 0, 0, 0,-6, 0, 0, 0, 0, 3, 0, 0, 0,-2, 0, 0, 5,-4, 1, 0, 0, 0},
-    { 0, 0, 0, 0,-6, 0, 0, 0, 0, 3, 0, 0, 0,-2, 0, 0, 5, 0,-4, 1, 0},
-    { 0, 0, 0, 0, 0,-6, 0, 0, 0, 0, 3, 0, 0, 0,-2, 0, 0, 5, 0,-4, 1}
-  };
+      {1, 2, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, 1, 0, 0, 0, 0, 2, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0},
+      {0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 4, 5, 6, 0, 0, 0},
+      {0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 4, 0, 5, 6, 0},
+      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 4, 0, 5, 6},
+      {-2, 1, 4, -3, 6, -5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, -2, 0, 0, 0, 0, 1, 4, -3, 6, -5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, 0, -2, 0, 0, 0, 0, 1, 0, 0, 0, 4, -3, 6, -5, 0, 0, 0, 0, 0, 0},
+      {0, 0, 0, -2, 0, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, -3, 6, -5, 0, 0, 0},
+      {0, 0, 0, 0, -2, 0, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, -3, 0, 6, -5, 0},
+      {0, 0, 0, 0, 0, -2, 0, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, -3, 0, 6, -5},
+      {3, -5, -1, 6, 2, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, 3, 0, 0, 0, 0, -5, -1, 6, 2, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, 0, 3, 0, 0, 0, 0, -5, 0, 0, 0, -1, 6, 2, -4, 0, 0, 0, 0, 0, 0},
+      {0, 0, 0, 3, 0, 0, 0, 0, -5, 0, 0, 0, -1, 0, 0, 6, 2, -4, 0, 0, 0},
+      {0, 0, 0, 0, 3, 0, 0, 0, 0, -5, 0, 0, 0, -1, 0, 0, 6, 0, 2, -4, 0},
+      {0, 0, 0, 0, 0, 3, 0, 0, 0, 0, -5, 0, 0, 0, -1, 0, 0, 6, 0, 2, -4},
+      {-4, -6, 5, 1, -3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, -4, 0, 0, 0, 0, -6, 5, 1, -3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, 0, -4, 0, 0, 0, 0, -6, 0, 0, 0, 5, 1, -3, 2, 0, 0, 0, 0, 0, 0},
+      {0, 0, 0, -4, 0, 0, 0, 0, -6, 0, 0, 0, 5, 0, 0, 1, -3, 2, 0, 0, 0},
+      {0, 0, 0, 0, -4, 0, 0, 0, 0, -6, 0, 0, 0, 5, 0, 0, 1, 0, -3, 2, 0},
+      {0, 0, 0, 0, 0, -4, 0, 0, 0, 0, -6, 0, 0, 0, 5, 0, 0, 1, 0, -3, 2},
+      {5, 4, 6, -2, -1, -3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, 5, 0, 0, 0, 0, 4, 6, -2, -1, -3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 6, -2, -1, -3, 0, 0, 0, 0, 0, 0},
+      {0, 0, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 6, 0, 0, -2, -1, -3, 0, 0, 0},
+      {0, 0, 0, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 6, 0, 0, -2, 0, -1, -3, 0},
+      {0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 6, 0, 0, -2, 0, -1, -3},
+      {-6, 3, -2, 5, -4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, -6, 0, 0, 0, 0, 3, -2, 5, -4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, 0, -6, 0, 0, 0, 0, 3, 0, 0, 0, -2, 5, -4, 1, 0, 0, 0, 0, 0, 0},
+      {0, 0, 0, -6, 0, 0, 0, 0, 3, 0, 0, 0, -2, 0, 0, 5, -4, 1, 0, 0, 0},
+      {0, 0, 0, 0, -6, 0, 0, 0, 0, 3, 0, 0, 0, -2, 0, 0, 5, 0, -4, 1, 0},
+      {0, 0, 0, 0, 0, -6, 0, 0, 0, 0, 3, 0, 0, 0, -2, 0, 0, 5, 0, -4, 1}};
 
   DynamicRectMatrix<RealType> drMat = DynamicRectMatrix<RealType>(36, 21, *mat);
-  
-  //register forcefields, integrators and minimizers
+
+  // register forcefields, integrators and minimizers
   registerAll();
 
   // Parse the input file, set up the system, and read the last frame:
@@ -581,37 +563,41 @@ int main(int argc, char *argv []) {
   ForceManager* forceMan = new ForceManager(info);
 
   // Remove in favor of std::make_unique<> when we switch to C++14 and above
-  std::unique_ptr<Velocitizer> veloSet {Utils::make_unique<Velocitizer>(info)};
+  std::unique_ptr<Velocitizer> veloSet{Utils::make_unique<Velocitizer>(info)};
 
   forceMan->initialize();
   info->update();
-  
+
   Shake* shake = new Shake(info);
   bool hasFlucQ = false;
   FluctuatingChargePropagator* flucQ = new FluctuatingChargeDamped(info);
-    
+
   if (info->usesFluctuatingCharges()) {
     if (info->getNFluctuatingCharges() > 0) {
       hasFlucQ = true;
       flucQ->setForceManager(forceMan);
       flucQ->initialize();
     }
-  }    
-  
+  }
+
   // Important utility classes for computing system properties:
   Thermo thermo(info);
 
   // Just in case we were passed a system that is on the move:
   veloSet->removeComDrift();
 
-  if(args_info.box_flag){
+  if (args_info.box_flag) {
     std::cout << "Doing box optimization\n\n";
-    Mat3x3d oldHmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-    
+    Mat3x3d oldHmat =
+        info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+
     MinimizerParameters* miniPars = simParams->getMinimizerParameters();
-    // OptimizationMethod* minim = OptimizationFactory::getInstance().createOptimization(toUpperCopy(miniPars->getMethod()), info);
-    OptimizationMethod* minim = OptimizationFactory::getInstance().createOptimization("CG", info);
-    
+    // OptimizationMethod* minim =
+    // OptimizationFactory::getInstance().createOptimization(toUpperCopy(miniPars->getMethod()),
+    // info);
+    OptimizationMethod* minim =
+        OptimizationFactory::getInstance().createOptimization("CG", info);
+
     if (minim == NULL) {
       sprintf(painCave.errMsg,
               "Optimization Factory can not create %s OptimizationMethod\n",
@@ -619,30 +605,31 @@ int main(int argc, char *argv []) {
       painCave.isFatal = 1;
       simError();
     }
-    
-    BoxObjectiveFunction boxObjf(info, forceMan); 
-    NoConstraint noConstraint {};
+
+    BoxObjectiveFunction boxObjf(info, forceMan);
+    NoConstraint noConstraint{};
     DumpStatusFunction dsf(info);
     DynamicVector<RealType> initCoords = boxObjf.setInitialCoords();
     Problem problem(boxObjf, noConstraint, dsf, initCoords);
-    
+
     int maxIter = miniPars->getMaxIterations();
     int mssIter = miniPars->getMaxStationaryStateIterations();
     RealType rEps = miniPars->getRootEpsilon();
     RealType fEps = miniPars->getFunctionEpsilon();
     RealType gnEps = miniPars->getGradientNormEpsilon();
     RealType initialStepSize = miniPars->getInitialStepSize();
-    
-    EndCriteria endCriteria(maxIter, mssIter, rEps, fEps, gnEps); 
-    
+
+    EndCriteria endCriteria(maxIter, mssIter, rEps, fEps, gnEps);
+
     minim->minimize(problem, endCriteria, initialStepSize);
     delete minim;
 
-    Mat3x3d newHmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+    Mat3x3d newHmat =
+        info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
     writeBoxGeometries(oldHmat, newHmat, "Original Box Geometry",
                        "Optimized Box Geometry", "Angstroms");
   }
-  
+
   Snapshot* snap = info->getSnapshotManager()->getCurrentSnapshot();
   Mat3x3d refHmat = snap->getHmat();
 
@@ -651,23 +638,23 @@ int main(int argc, char *argv []) {
   RealType V0 = thermo.getVolume();
   ptRef.negate();
   ptRef *= Constants::elasticConvert;
-  
+
   Vector6d stress(0.0);
   Vector6d strain(0.0);
   Vector6d lstress(0.0);
   Mat3x3d epsilon(0.0);
 
-  std::vector<std::vector<RealType> > stressStrain;
+  std::vector<std::vector<RealType>> stressStrain;
   std::vector<RealType> strainValues;
   std::vector<RealType> energyValues;
   DynamicRectMatrix<RealType> C(6, 6, 0.0);
   DynamicRectMatrix<RealType> S(6, 6, 0.0);
   DynamicVector<RealType> ci(21, 0.0);
   DynamicVector<RealType> sigma(36, 0.0);
-  
+
   Vector3d pos;
   SimInfo::MoleculeIterator miter;
-  Molecule * mol;
+  Molecule* mol;
   RealType de;
   Vector3d delta;
 
@@ -682,10 +669,9 @@ int main(int argc, char *argv []) {
   RealType a, b, c;
   RealType energy;
   Mat3x3d pressureTensor;
-  
-  for(std::vector<Vector6d>::iterator it = strainBasis.begin();
-      it != strainBasis.end(); ++it) {
-    
+
+  for (std::vector<Vector6d>::iterator it = strainBasis.begin();
+       it != strainBasis.end(); ++it) {
     strain = *it;
     int ii = std::distance(strainBasis.begin(), it);
 
@@ -693,37 +679,36 @@ int main(int argc, char *argv []) {
     energyValues.clear();
     stressStrain.clear();
     stressStrain.resize(6);
-    
-    for (int n = 0; n < nMax; n++) {
 
-      // First, set up the deformation of the box and coodinates:      
-      de = -0.5*dmax + dmax * RealType(n) / RealType(nMax-1);
+    for (int n = 0; n < nMax; n++) {
+      // First, set up the deformation of the box and coodinates:
+      de = -0.5 * dmax + dmax * RealType(n) / RealType(nMax - 1);
       L = strain * de;
 
       // η is the Lagrangian strain tensor:
-      eta.setupVoigtTensor(L[0], L[1], L[2], L[3]/2., L[4]/2., L[5]/2.);
+      eta.setupVoigtTensor(L[0], L[1], L[2], L[3] / 2., L[4] / 2., L[5] / 2.);
 
       // Make sure the deformation isn't too large:
       if (eta.frobeniusNorm() > 0.7) {
         std::cerr << "Deformation is too large!\n";
       }
-      
+
       // Find the physical strain tensor, ε, from the Lagrangian strain, η:
       // η = ε + 0.5 * ε^2
       norm = 1.0;
       eps = eta;
       while (norm > 1.0e-10) {
-        x = eta - eps*eps / 2.0;
+        x = eta - eps * eps / 2.0;
         test = x - eps;
-        norm = test.frobeniusNorm();       
+        norm = test.frobeniusNorm();
         eps = x;
       }
       deformation = SquareMatrix3<RealType>::identity() + eps;
 
       // Second, do the deformation and compute the energy or stress
       // tensor for this deformation:
-      info->getSnapshotManager()->advance();            
-      for (mol = info->beginMolecule(miter); mol != NULL; 
+      info->getSnapshotManager()->advance();
+      for (mol = info->beginMolecule(miter); mol != NULL;
            mol = info->nextMolecule(miter)) {
         pos = mol->getCom();
         delta = deformation * pos;
@@ -742,106 +727,103 @@ int main(int argc, char *argv []) {
         energyValues.push_back(energy);
 
       } else {
-        
         // Find the Lagragian stress tensor, τ, from the physical
         // stress tensor, σ, that was computed from the pressureTensor
-        // in this code.       
+        // in this code.
         // τ = det(1+ε) (1+ε)^−1 · σ · (1+ε)^−1
         // (Note that 1+ε is the deformation tensor computed above.)
 
         Mat3x3d idm = deformation.inverse();
         RealType ddm = deformation.determinant();
 
-        pressureTensor = thermo.getPressureTensor();        
+        pressureTensor = thermo.getPressureTensor();
         pressureTensor.negate();
         pressureTensor *= Constants::elasticConvert;
-        
+
         Mat3x3d tao = idm * (pressureTensor * idm);
-        tao *= ddm;                    
-        
+        tao *= ddm;
+
         lstress = tao.toVoigtTensor();
 
         for (int j = 0; j < 6; j++) {
           stressStrain[j].push_back(lstress[j]);
         }
-
       }
-      
+
       strainValues.push_back(de);
       info->getSnapshotManager()->resetToPrevious();
     }
-    
+
     // Fit the energy vs. strain (quadratic)  or stress vs. strain (linear)
     if (!method.compare("energy")) {
       quadraticFit(strainValues, energyValues, a, b, c);
-      A2.push_back( a * Constants::energyElasticConvert / V0 );
+      A2.push_back(a * Constants::energyElasticConvert / V0);
     } else {
       for (int j = 0; j < 6; j++) {
         quadraticFit(strainValues, stressStrain[j], a, b, c);
-        sigma(6*ii + j) = b;       
+        sigma(6 * ii + j) = b;
         // sigma(6*ii + j) = slope(strainValues, stressStrain[j]);
-      }       
+      }
     }
   }
-  
-  if (!method.compare("energy")) {
-    C(0,0) = 2.*A2[0];
-    C(0,1) = 1.*(-A2[0]-A2[1]+A2[6]);
-    C(0,2) = 1.*(-A2[0]-A2[2]+A2[7]);
-    C(0,3) = .5*(-A2[0]-A2[3]+A2[8]) ;
-    C(0,4) = .5*(-A2[0]+A2[9]-A2[4]);
-    C(0,5) = .5*(-A2[0]+A2[10]-A2[5]);
-    C(1,1) = 2.*A2[1];
-    C(1,2) = 1.*(A2[11]-A2[1]-A2[2]);
-    C(1,3) = .5*(A2[12]-A2[1]-A2[3]);
-    C(1,4) = .5*(A2[13]-A2[1]-A2[4]);
-    C(1,5) = .5*(A2[14]-A2[1]-A2[5]);
-    C(2,2) = 2.*A2[2] ;
-    C(2,3) = .5*(A2[15]-A2[2]-A2[3]);
-    C(2,4) = .5*(A2[16]-A2[2]-A2[4]);
-    C(2,5) = .5*(A2[17]-A2[2]-A2[5]);
-    C(3,3) = .5*A2[3];
-    C(3,4) = .25*(A2[18]-A2[3]-A2[4]);
-    C(3,5) = .25*(A2[19]-A2[3]-A2[5]);
-    C(4,4) = .5*A2[4];
-    C(4,5) = .25*(A2[20]-A2[4]-A2[5]);
-    C(5,5) = .5*A2[5];
-  } else {
 
+  if (!method.compare("energy")) {
+    C(0, 0) = 2. * A2[0];
+    C(0, 1) = 1. * (-A2[0] - A2[1] + A2[6]);
+    C(0, 2) = 1. * (-A2[0] - A2[2] + A2[7]);
+    C(0, 3) = .5 * (-A2[0] - A2[3] + A2[8]);
+    C(0, 4) = .5 * (-A2[0] + A2[9] - A2[4]);
+    C(0, 5) = .5 * (-A2[0] + A2[10] - A2[5]);
+    C(1, 1) = 2. * A2[1];
+    C(1, 2) = 1. * (A2[11] - A2[1] - A2[2]);
+    C(1, 3) = .5 * (A2[12] - A2[1] - A2[3]);
+    C(1, 4) = .5 * (A2[13] - A2[1] - A2[4]);
+    C(1, 5) = .5 * (A2[14] - A2[1] - A2[5]);
+    C(2, 2) = 2. * A2[2];
+    C(2, 3) = .5 * (A2[15] - A2[2] - A2[3]);
+    C(2, 4) = .5 * (A2[16] - A2[2] - A2[4]);
+    C(2, 5) = .5 * (A2[17] - A2[2] - A2[5]);
+    C(3, 3) = .5 * A2[3];
+    C(3, 4) = .25 * (A2[18] - A2[3] - A2[4]);
+    C(3, 5) = .25 * (A2[19] - A2[3] - A2[5]);
+    C(4, 4) = .5 * A2[4];
+    C(4, 5) = .25 * (A2[20] - A2[4] - A2[5]);
+    C(5, 5) = .5 * A2[5];
+  } else {
     // Least squares to map fits of stress-strain relationships onto
     // elastic matrix:
-    
+
     QR<RealType> qr(drMat);
-    ci = qr.solve( sigma );
-    
-    C(0,0)=ci(0);
-    C(0,1)=ci(1);
-    C(0,2)=ci(2);
-    C(0,3)=ci(3);
-    C(0,4)=ci(4);
-    C(0,5)=ci(5);
-    C(1,1)=ci(6);
-    C(1,2)=ci(7);
-    C(1,3)=ci(8);
-    C(1,4)=ci(9);
-    C(1,5)=ci(10);
-    C(2,2)=ci(11);
-    C(2,3)=ci(12);
-    C(2,4)=ci(13);
-    C(2,5)=ci(14);
-    C(3,3)=ci(15);
-    C(3,4)=ci(16);
-    C(3,5)=ci(17);
-    C(4,4)=ci(18);
-    C(4,5)=ci(19);
-    C(5,5)=ci(20);
+    ci = qr.solve(sigma);
+
+    C(0, 0) = ci(0);
+    C(0, 1) = ci(1);
+    C(0, 2) = ci(2);
+    C(0, 3) = ci(3);
+    C(0, 4) = ci(4);
+    C(0, 5) = ci(5);
+    C(1, 1) = ci(6);
+    C(1, 2) = ci(7);
+    C(1, 3) = ci(8);
+    C(1, 4) = ci(9);
+    C(1, 5) = ci(10);
+    C(2, 2) = ci(11);
+    C(2, 3) = ci(12);
+    C(2, 4) = ci(13);
+    C(2, 5) = ci(14);
+    C(3, 3) = ci(15);
+    C(3, 4) = ci(16);
+    C(3, 5) = ci(17);
+    C(4, 4) = ci(18);
+    C(4, 5) = ci(19);
+    C(5, 5) = ci(20);
   }
 
   // Symmetrize C:
 
   for (int i = 0; i < 5; i++) {
-    for (int j = i+1; j < 6; j++) {
-      C(j,i) = C(i,j);
+    for (int j = i + 1; j < 6; j++) {
+      C(j, i) = C(i, j);
     }
   }
 
@@ -851,8 +833,8 @@ int main(int argc, char *argv []) {
 
   writeMatrix(C, "Elastic Tensor", "GPa");
   writeMatrix(S, "Compliance Tensor", "GPa^-1");
-  
-  writeMaterialProperties(C, S);  
+
+  writeMaterialProperties(C, S);
 
   return 0;
 }

@@ -43,44 +43,47 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include <cstdlib> 
 #include "lattice/CubicLattice.hpp"
+
+#include <cstdlib>
 
 namespace OpenMD {
 
-  CubicLattice::CubicLattice(){
-    latticeParam = 1.0;
-  
-    cellLen[0] = latticeParam;
-    cellLen[1] = latticeParam;
-    cellLen[2] = latticeParam;
-  
-  }
+CubicLattice::CubicLattice() {
+  latticeParam = 1.0;
 
-  std::vector<RealType> CubicLattice::getLatticeConstant(){
-    std::vector<RealType> lc;
-  
-    lc.push_back(cellLen.x());
-    return lc;
-  }
-
-  void CubicLattice::setLatticeConstant(const  std::vector<RealType>& lc){
-  
-    if(lc.empty()){
-      std::cerr << "CubicLattice::setLatticeConstant Error: the lattice constant vector is empty" << std::endl;
-      exit(1);
-    }
-    else if (lc.size() > 1){
-      std::cerr << "CubicLattice::setLatticeConstant Warning: the size of lattice constant vector  is " << lc.size() << std::endl;
-    }
-  
-    latticeParam = lc[0];
-  
-    cellLen[0] = latticeParam;
-    cellLen[1] = latticeParam;
-    cellLen[2] = latticeParam;
-  
-    update();
-  }
-
+  cellLen[0] = latticeParam;
+  cellLen[1] = latticeParam;
+  cellLen[2] = latticeParam;
 }
+
+std::vector<RealType> CubicLattice::getLatticeConstant() {
+  std::vector<RealType> lc;
+
+  lc.push_back(cellLen.x());
+  return lc;
+}
+
+void CubicLattice::setLatticeConstant(const std::vector<RealType>& lc) {
+  if (lc.empty()) {
+    std::cerr << "CubicLattice::setLatticeConstant Error: the lattice constant "
+                 "vector is empty"
+              << std::endl;
+    exit(1);
+  } else if (lc.size() > 1) {
+    std::cerr << "CubicLattice::setLatticeConstant Warning: the size of "
+                 "lattice constant "
+                 "vector  is "
+              << lc.size() << std::endl;
+  }
+
+  latticeParam = lc[0];
+
+  cellLen[0] = latticeParam;
+  cellLen[1] = latticeParam;
+  cellLen[2] = latticeParam;
+
+  update();
+}
+
+}  // namespace OpenMD

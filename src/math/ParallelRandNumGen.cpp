@@ -52,111 +52,108 @@
 
 namespace OpenMD {
 
-  int ParallelRandNumGen::nCreatedRNG_ = 0;
+int ParallelRandNumGen::nCreatedRNG_ = 0;
 
-  ParallelRandNumGen::ParallelRandNumGen(const uint32& oneSeed) {
-
-    unsigned long seed = oneSeed;
+ParallelRandNumGen::ParallelRandNumGen(const uint32& oneSeed) {
+  unsigned long seed = oneSeed;
 
 #ifdef IS_MPI
-    const int primaryNode = 0;
-    MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, primaryNode, MPI_COMM_WORLD); 
+  const int primaryNode = 0;
+  MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, primaryNode, MPI_COMM_WORLD);
 #endif
 
-    if (seed != oneSeed) {
-      sprintf(painCave.errMsg,
-	      "Using different seed to initialize ParallelRandNumGen.\n");
-      painCave.isFatal = 1;;
-      simError();
-    }
+  if (seed != oneSeed) {
+    sprintf(painCave.errMsg,
+            "Using different seed to initialize ParallelRandNumGen.\n");
+    painCave.isFatal = 1;
+    ;
+    simError();
+  }
 
-    int nProcessors;
+  int nProcessors;
 #ifdef IS_MPI
-    MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);
-    MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
+  MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myRank_);
 
 #else
-    nProcessors = 1;
-    myRank_ = 0;
+  nProcessors = 1;
+  myRank_ = 0;
 #endif
-    //In order to generate independent random number stream, the
-    //actual seed used by random number generator is the seed passed
-    //to the constructor plus the number of random number generators
-    //which are already created.
-    unsigned long newSeed = oneSeed + nCreatedRNG_;
-    mtRand_ = Utils::make_unique<MTRand>(newSeed, nProcessors, myRank_);
-    
-    ++nCreatedRNG_;
-  }
+  // In order to generate independent random number stream, the
+  // actual seed used by random number generator is the seed passed
+  // to the constructor plus the number of random number generators
+  // which are already created.
+  unsigned long newSeed = oneSeed + nCreatedRNG_;
+  mtRand_ = Utils::make_unique<MTRand>(newSeed, nProcessors, myRank_);
 
-  ParallelRandNumGen::ParallelRandNumGen() {
-
-    int nProcessors;
-#ifdef IS_MPI
-    MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);
-    MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
-#else
-    nProcessors = 1;
-    myRank_ = 0;
-#endif
-    mtRand_ = Utils::make_unique<MTRand>(nProcessors, myRank_);
-
-    seed();       /** @todo calling virtual function in constructor is
-                      not a good design */
-  }
-
-
-  void ParallelRandNumGen::seed( const uint32 oneSeed ) {
-
-    unsigned long seed = oneSeed;
-#ifdef IS_MPI
-    const int primaryNode = 0;
-    MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, primaryNode, MPI_COMM_WORLD); 
-#endif
-    if (seed != oneSeed) {
-      sprintf(painCave.errMsg,
-	      "Using different seed to initialize ParallelRandNumGen.\n");
-      painCave.isFatal = 1;;
-      simError();
-    }
-    
-    unsigned long newSeed = oneSeed +nCreatedRNG_;
-    mtRand_->seed(newSeed);
-    
-    ++nCreatedRNG_;
-  }
-        
-  void ParallelRandNumGen::seed() {
-
-    std::vector<uint32> bigSeed;
-
-#ifdef IS_MPI
-    int size;
-    const int primaryNode = 0;
-    if (worldRank == primaryNode) {
-#endif
-
-      bigSeed = mtRand_->generateSeeds();
-
-#ifdef IS_MPI
-      size = bigSeed.size();
-      MPI_Bcast(&size, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
-      MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, primaryNode, 
-                MPI_COMM_WORLD);
-    }else {
-      MPI_Bcast(&size, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
-      bigSeed.resize(size);
-      MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, primaryNode, 
-                MPI_COMM_WORLD);
-    }
-#endif
-    
-    if (bigSeed.size() == 1) {
-      mtRand_->seed(bigSeed[0]);
-    } else {
-      mtRand_->seed(&bigSeed[0], bigSeed.size());
-    }
-
-    ++nCreatedRNG_;
-  }        
+  ++nCreatedRNG_;
 }
+
+ParallelRandNumGen::ParallelRandNumGen() {
+  int nProcessors;
+#ifdef IS_MPI
+  MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myRank_);
+#else
+  nProcessors = 1;
+  myRank_ = 0;
+#endif
+  mtRand_ = Utils::make_unique<MTRand>(nProcessors, myRank_);
+
+  seed(); /** @todo calling virtual function in constructor is
+              not a good design */
+}
+
+void ParallelRandNumGen::seed(const uint32 oneSeed) {
+  unsigned long seed = oneSeed;
+#ifdef IS_MPI
+  const int primaryNode = 0;
+  MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, primaryNode, MPI_COMM_WORLD);
+#endif
+  if (seed != oneSeed) {
+    sprintf(painCave.errMsg,
+            "Using different seed to initialize ParallelRandNumGen.\n");
+    painCave.isFatal = 1;
+    ;
+    simError();
+  }
+
+  unsigned long newSeed = oneSeed + nCreatedRNG_;
+  mtRand_->seed(newSeed);
+
+  ++nCreatedRNG_;
+}
+
+void ParallelRandNumGen::seed() {
+  std::vector<uint32> bigSeed;
+
+#ifdef IS_MPI
+  int size;
+  const int primaryNode = 0;
+  if (worldRank == primaryNode) {
+#endif
+
+    bigSeed = mtRand_->generateSeeds();
+
+#ifdef IS_MPI
+    size = bigSeed.size();
+    MPI_Bcast(&size, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
+    MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, primaryNode,
+              MPI_COMM_WORLD);
+  } else {
+    MPI_Bcast(&size, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
+    bigSeed.resize(size);
+    MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, primaryNode,
+              MPI_COMM_WORLD);
+  }
+#endif
+
+  if (bigSeed.size() == 1) {
+    mtRand_->seed(bigSeed[0]);
+  } else {
+    mtRand_->seed(&bigSeed[0], bigSeed.size());
+  }
+
+  ++nCreatedRNG_;
+}
+}  // namespace OpenMD

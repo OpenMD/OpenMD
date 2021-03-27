@@ -42,174 +42,188 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
+#include "integrators/NPrT.hpp"
+
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
 #include "integrators/IntegratorCreator.hpp"
-#include "integrators/NPrT.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
-  NPrT::NPrT(SimInfo* info) : NPT(info) {
-    Globals* simParams = info_->getSimParams();
-    if (!simParams->haveSurfaceTension()) {
-      sprintf(painCave.errMsg,
-              "If you use the NPT integrator, you must set tauBarostat.\n");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    } else {
-      surfaceTension_= simParams->getSurfaceTension()* Constants::surfaceTensionConvert * Constants::energyConvert;
+NPrT::NPrT(SimInfo* info) : NPT(info) {
+  Globals* simParams = info_->getSimParams();
+  if (!simParams->haveSurfaceTension()) {
+    sprintf(painCave.errMsg,
+            "If you use the NPT integrator, you must set tauBarostat.\n");
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal = 1;
+    simError();
+  } else {
+    surfaceTension_ = simParams->getSurfaceTension() *
+                      Constants::surfaceTensionConvert *
+                      Constants::energyConvert;
 
-      // Default value of privilegedAxis is "z"
-      if (simParams->getPrivilegedAxis() == "x")
-	axis_ = 0;
-      else if (simParams->getPrivilegedAxis() == "y")
-	axis_ = 1;
-      else if (simParams->getPrivilegedAxis() == "z")
-	axis_ = 2;
-	     
-      // Compute complementary axes to the privileged axis
-      axis1_ = (axis_ + 1) % 3;
-      axis2_ = (axis_ + 2) % 3;
-    }
+    // Default value of privilegedAxis is "z"
+    if (simParams->getPrivilegedAxis() == "x")
+      axis_ = 0;
+    else if (simParams->getPrivilegedAxis() == "y")
+      axis_ = 1;
+    else if (simParams->getPrivilegedAxis() == "z")
+      axis_ = 2;
 
+    // Compute complementary axes to the privileged axis
+    axis1_ = (axis_ + 1) % 3;
+    axis2_ = (axis_ + 2) % 3;
   }
-  void NPrT::evolveEtaA() {
-    Mat3x3d hmat = snap->getHmat();
-    RealType hz = hmat(axis_, axis_);
-    RealType Axy = hmat(axis1_,axis1_) * hmat(axis2_, axis2_);
-    RealType sx = -hz * (press(axis1_, axis1_) - targetPressure/Constants::pressureConvert);
-    RealType sy = -hz * (press(axis2_, axis2_) - targetPressure/Constants::pressureConvert);
-    eta(axis1_,axis1_) -= dt2* Axy * (sx - surfaceTension_) / (NkBT*tb2);
-    eta(axis2_,axis2_) -= dt2* Axy * (sy - surfaceTension_) / (NkBT*tb2);
-    eta(axis_,axis_) += dt2 *  instaVol * (press(axis_, axis_) - targetPressure/Constants::pressureConvert) / (NkBT*tb2);
-    oldEta_ = eta;  
-  }
+}
+void NPrT::evolveEtaA() {
+  Mat3x3d hmat = snap->getHmat();
+  RealType hz = hmat(axis_, axis_);
+  RealType Axy = hmat(axis1_, axis1_) * hmat(axis2_, axis2_);
+  RealType sx = -hz * (press(axis1_, axis1_) -
+                       targetPressure / Constants::pressureConvert);
+  RealType sy = -hz * (press(axis2_, axis2_) -
+                       targetPressure / Constants::pressureConvert);
+  eta(axis1_, axis1_) -= dt2 * Axy * (sx - surfaceTension_) / (NkBT * tb2);
+  eta(axis2_, axis2_) -= dt2 * Axy * (sy - surfaceTension_) / (NkBT * tb2);
+  eta(axis_, axis_) +=
+      dt2 * instaVol *
+      (press(axis_, axis_) - targetPressure / Constants::pressureConvert) /
+      (NkBT * tb2);
+  oldEta_ = eta;
+}
 
-  void NPrT::evolveEtaB() {
-    Mat3x3d hmat = snap->getHmat();
-    RealType hz = hmat(axis_, axis_);
-    RealType Axy = hmat(axis1_,axis1_) * hmat(axis2_, axis2_);
-    prevEta_ = eta;
-    RealType sx = -hz * (press(axis1_, axis1_) - targetPressure/Constants::pressureConvert);
-    RealType sy = -hz * (press(axis2_, axis2_) - targetPressure/Constants::pressureConvert);
-    eta(axis1_,axis1_) = oldEta_(axis1_, axis1_) - dt2 * Axy * (sx -surfaceTension_) / (NkBT*tb2);
-    eta(axis2_,axis2_) = oldEta_(axis2_, axis2_) - dt2 * Axy * (sy -surfaceTension_) / (NkBT*tb2);
-    eta(axis_,axis_) = oldEta_(axis_, axis_) + dt2 *  instaVol *
-	    (press(axis_, axis_) - targetPressure/Constants::pressureConvert) / (NkBT*tb2);
-  }
+void NPrT::evolveEtaB() {
+  Mat3x3d hmat = snap->getHmat();
+  RealType hz = hmat(axis_, axis_);
+  RealType Axy = hmat(axis1_, axis1_) * hmat(axis2_, axis2_);
+  prevEta_ = eta;
+  RealType sx = -hz * (press(axis1_, axis1_) -
+                       targetPressure / Constants::pressureConvert);
+  RealType sy = -hz * (press(axis2_, axis2_) -
+                       targetPressure / Constants::pressureConvert);
+  eta(axis1_, axis1_) = oldEta_(axis1_, axis1_) -
+                        dt2 * Axy * (sx - surfaceTension_) / (NkBT * tb2);
+  eta(axis2_, axis2_) = oldEta_(axis2_, axis2_) -
+                        dt2 * Axy * (sy - surfaceTension_) / (NkBT * tb2);
+  eta(axis_, axis_) =
+      oldEta_(axis_, axis_) +
+      dt2 * instaVol *
+          (press(axis_, axis_) - targetPressure / Constants::pressureConvert) /
+          (NkBT * tb2);
+}
 
-  void NPrT::calcVelScale(){
+void NPrT::calcVelScale() {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      vScale_(i, j) = eta(i, j);
 
-    for (int i = 0; i < 3; i++ ) {
-      for (int j = 0; j < 3; j++ ) {
-	vScale_(i, j) = eta(i, j);
-
-	if (i == j) {
-	  vScale_(i, j) += thermostat.first;
-	}
+      if (i == j) {
+        vScale_(i, j) += thermostat.first;
       }
     }
   }
-
-  void NPrT::getVelScaleA(Vector3d& sc, const Vector3d& vel){
-    sc = vScale_ * vel;
-  }
-
-  void NPrT::getVelScaleB(Vector3d& sc, int index ) {
-    sc = vScale_ * oldVel[index];
-  }
-
-  void NPrT::getPosScale(const Vector3d& pos, const Vector3d& COM, int index, Vector3d& sc) {
-
-    /**@todo */
-    Vector3d rj = (oldPos[index] + pos)/(RealType)2.0 -COM;
-    sc = eta * rj;
-  }
-
-  void NPrT::scaleSimBox(){
-    Mat3x3d scaleMat;
-
-    scaleMat(axis1_, axis1_) = exp(dt*eta(axis1_, axis1_));
-    scaleMat(axis2_, axis2_) = exp(dt*eta(axis2_, axis2_));    
-    scaleMat(axis_, axis_) = exp(dt*eta(axis_, axis_));
-    Mat3x3d hmat = snap->getHmat();
-    hmat = hmat *scaleMat;
-    snap->setHmat(hmat);
-
-  }
-
-  bool NPrT::etaConverged() {
-    int i;
-    RealType diffEta, sumEta;
-
-    sumEta = 0;
-    for(i = 0; i < 3; i++) {
-      sumEta += pow(prevEta_(i, i) - eta(i, i), 2);
-    }
-    
-    diffEta = sqrt( sumEta / 3.0 );
-
-    return ( diffEta <= etaTolerance );
-  }
-
-  RealType NPrT::calcConservedQuantity(){
-    thermostat = snap->getThermostat();
-    loadEta();
-    
-    // We need NkBT a lot, so just set it here: This is the RAW number
-    // of integrableObjects, so no subtraction or addition of constraints or
-    // orientational degrees of freedom:
-    NkBT = info_->getNGlobalIntegrableObjects()*Constants::kB *targetTemp;
-
-    // fkBT is used because the thermostat operates on more degrees of freedom
-    // than the barostat (when there are particles with orientational degrees
-    // of freedom).  
-    fkBT = info_->getNdf()*Constants::kB *targetTemp;    
-    
-
-    RealType totalEnergy = thermo.getTotalEnergy();
-
-    RealType thermostat_kinetic = fkBT * tt2 * thermostat.first * thermostat.first /(2.0 * Constants::energyConvert);
-
-    RealType thermostat_potential = fkBT* thermostat.second / Constants::energyConvert;
-
-    SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
-    RealType trEta = tmp.trace();
-    
-    RealType barostat_kinetic = NkBT * tb2 * trEta /(2.0 * Constants::energyConvert);
-
-    RealType barostat_potential = (targetPressure * thermo.getVolume() / Constants::pressureConvert) /Constants::energyConvert;
-
-    Mat3x3d hmat = snap->getHmat();
-    RealType area = hmat(axis1_,axis1_) * hmat(axis2_, axis2_);
-
-    RealType conservedQuantity = totalEnergy + thermostat_kinetic
-      + thermostat_potential + barostat_kinetic + barostat_potential
-      - surfaceTension_ * area/ Constants::energyConvert;
-
-    return conservedQuantity;
-
-  }
-
-  void NPrT::loadEta() {
-    eta= snap->getBarostat();
-
-    //if (!eta.isDiagonal()) {
-    //    sprintf( painCave.errMsg,
-    //             "NPrT error: the diagonal elements of eta matrix are not the same or etaMat is not a diagonal matrix");
-    //    painCave.isFatal = 1;
-    //    simError();
-    //}
-  }
-
-  void NPrT::saveEta() {
-    snap->setBarostat(eta);
-  }
-
 }
 
+void NPrT::getVelScaleA(Vector3d& sc, const Vector3d& vel) {
+  sc = vScale_ * vel;
+}
 
+void NPrT::getVelScaleB(Vector3d& sc, int index) {
+  sc = vScale_ * oldVel[index];
+}
+
+void NPrT::getPosScale(const Vector3d& pos, const Vector3d& COM, int index,
+                       Vector3d& sc) {
+  /**@todo */
+  Vector3d rj = (oldPos[index] + pos) / (RealType)2.0 - COM;
+  sc = eta * rj;
+}
+
+void NPrT::scaleSimBox() {
+  Mat3x3d scaleMat;
+
+  scaleMat(axis1_, axis1_) = exp(dt * eta(axis1_, axis1_));
+  scaleMat(axis2_, axis2_) = exp(dt * eta(axis2_, axis2_));
+  scaleMat(axis_, axis_) = exp(dt * eta(axis_, axis_));
+  Mat3x3d hmat = snap->getHmat();
+  hmat = hmat * scaleMat;
+  snap->setHmat(hmat);
+}
+
+bool NPrT::etaConverged() {
+  int i;
+  RealType diffEta, sumEta;
+
+  sumEta = 0;
+  for (i = 0; i < 3; i++) {
+    sumEta += pow(prevEta_(i, i) - eta(i, i), 2);
+  }
+
+  diffEta = sqrt(sumEta / 3.0);
+
+  return (diffEta <= etaTolerance);
+}
+
+RealType NPrT::calcConservedQuantity() {
+  thermostat = snap->getThermostat();
+  loadEta();
+
+  // We need NkBT a lot, so just set it here: This is the RAW number
+  // of integrableObjects, so no subtraction or addition of constraints or
+  // orientational degrees of freedom:
+  NkBT = info_->getNGlobalIntegrableObjects() * Constants::kB * targetTemp;
+
+  // fkBT is used because the thermostat operates on more degrees of freedom
+  // than the barostat (when there are particles with orientational degrees
+  // of freedom).
+  fkBT = info_->getNdf() * Constants::kB * targetTemp;
+
+  RealType totalEnergy = thermo.getTotalEnergy();
+
+  RealType thermostat_kinetic = fkBT * tt2 * thermostat.first *
+                                thermostat.first /
+                                (2.0 * Constants::energyConvert);
+
+  RealType thermostat_potential =
+      fkBT * thermostat.second / Constants::energyConvert;
+
+  SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
+  RealType trEta = tmp.trace();
+
+  RealType barostat_kinetic =
+      NkBT * tb2 * trEta / (2.0 * Constants::energyConvert);
+
+  RealType barostat_potential =
+      (targetPressure * thermo.getVolume() / Constants::pressureConvert) /
+      Constants::energyConvert;
+
+  Mat3x3d hmat = snap->getHmat();
+  RealType area = hmat(axis1_, axis1_) * hmat(axis2_, axis2_);
+
+  RealType conservedQuantity =
+      totalEnergy + thermostat_kinetic + thermostat_potential +
+      barostat_kinetic + barostat_potential -
+      surfaceTension_ * area / Constants::energyConvert;
+
+  return conservedQuantity;
+}
+
+void NPrT::loadEta() {
+  eta = snap->getBarostat();
+
+  // if (!eta.isDiagonal()) {
+  //    sprintf( painCave.errMsg,
+  //             "NPrT error: the diagonal elements of eta matrix are not the
+  //             same or etaMat is not a diagonal matrix");
+  //    painCave.isFatal = 1;
+  //    simError();
+  //}
+}
+
+void NPrT::saveEta() { snap->setBarostat(eta); }
+
+}  // namespace OpenMD

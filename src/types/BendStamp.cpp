@@ -42,25 +42,22 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#include <cstdlib>
-#include <cstring>
 
 #include "types/BendStamp.hpp"
+
+#include <cstdlib>
+#include <cstring>
 namespace OpenMD {
-  
-  BendStamp::BendStamp(): hasOverride_(false) {
-    DefineOptionalParameter(GhostVectorSource, "ghostVectorSource");
-  }
-  
-  BendStamp::~BendStamp() {
-    
-  }
-  
-  void BendStamp::validate() {
-    DataHolder::validate();
-    CheckParameter(GhostVectorSource, isNonNegative());    
-    
-  }
-  
+
+BendStamp::BendStamp() : hasOverride_(false) {
+  DefineOptionalParameter(GhostVectorSource, "ghostVectorSource");
 }
+
+BendStamp::~BendStamp() {}
+
+void BendStamp::validate() {
+  DataHolder::validate();
+  CheckParameter(GhostVectorSource, isNonNegative());
+}
+
+}  // namespace OpenMD
