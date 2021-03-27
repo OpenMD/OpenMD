@@ -59,8 +59,8 @@ void DataStorageTestCase::testDataStorage() {
 
   // test reserve
 
-  DataStorage ds2(10000,
-                  DataStorage::dslForce | DataStorage::dslAmat | DataStorage::dslZAngle);
+  DataStorage ds2(10000, DataStorage::dslForce | DataStorage::dslAmat |
+                             DataStorage::dslZAngle);
 
   CPPUNIT_ASSERT(!(ds2.getStorageLayout() & DataStorage::dslPosition));
   CPPUNIT_ASSERT(!(ds2.getStorageLayout() & DataStorage::dslVelocity));
@@ -132,26 +132,43 @@ void DataStorageTestCase::testDataStorage() {
 
   ds2.copy(0, 2, 10);
 
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.zAngle[10], 7.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.zAngle[11], 3.5, OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.zAngle[10], 7.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.zAngle[11], 3.5,
+                               OpenMD::NumericConstant::epsilon);
 
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[10][0], 6.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[10][1], 7.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[10][2], 8.0, OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[10][0], 6.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[10][1], 7.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[10][2], 8.0,
+                               OpenMD::NumericConstant::epsilon);
 
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[11][0], 9.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[11][1], 10.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[11][2], 11.0, OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[11][0], 9.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[11][1], 10.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[11][2], 11.0,
+                               OpenMD::NumericConstant::epsilon);
 
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](0, 0), 1.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](0, 1), 2.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](0, 2), 3.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](1, 0), 4.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](1, 1), 5.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](1, 2), 6.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](2, 0), 7.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](2, 1), 8.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](2, 2), 9.0, OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](0, 0), 1.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](0, 1), 2.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](0, 2), 3.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](1, 0), 4.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](1, 1), 5.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](1, 2), 6.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](2, 0), 7.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](2, 1), 8.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](2, 2), 9.0,
+                               OpenMD::NumericConstant::epsilon);
 
   CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](0, 0), 11.0,
                                OpenMD::NumericConstant::epsilon);

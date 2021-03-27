@@ -66,7 +66,9 @@ StuntDouble::StuntDouble(ObjectType objType, DataStoragePointer storage)
 StuntDouble::~StuntDouble() {}
 
 void StuntDouble::zeroForces() { setFrc(V3Zero); }
-void StuntDouble::addProperty(GenericData* genData) { properties_.addProperty(genData); }
+void StuntDouble::addProperty(GenericData* genData) {
+  properties_.addProperty(genData);
+}
 
 void StuntDouble::removeProperty(std::string& propName) {
   properties_.removeProperty(propName);

@@ -118,20 +118,26 @@ void SquareMatrixTestCase::testJacobi() {
   SMat3x3::jacobi(a, w1L, v);
 
   CPPUNIT_ASSERT_DOUBLES_EQUAL(w1L[0], w1R[0], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(w1L[1], w1R[1], OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(w1L[2], w1R[2], OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(w1L[1], w1R[1],
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(w1L[2], w1R[2],
+                               OpenMD::NumericConstant::epsilon);
 }
 
 void SquareMatrixTestCase::testTrace() {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(identMat.trace(), 3.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(symMat.trace(), 4.0, OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(identMat.trace(), 3.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(symMat.trace(), 4.0,
+                               OpenMD::NumericConstant::epsilon);
 }
 void SquareMatrixTestCase::testIsSymmertric() {
   CPPUNIT_ASSERT(identMat.isSymmetric());
   CPPUNIT_ASSERT(symMat.isSymmetric());
 }
 
-void SquareMatrixTestCase::testIsOrthogonal() { CPPUNIT_ASSERT(ortMat.isOrthogonal()); }
+void SquareMatrixTestCase::testIsOrthogonal() {
+  CPPUNIT_ASSERT(ortMat.isOrthogonal());
+}
 
 void SquareMatrixTestCase::testIsDiagonal() {
   CPPUNIT_ASSERT(identMat.isDiagonal());

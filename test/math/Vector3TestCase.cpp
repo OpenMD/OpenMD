@@ -129,9 +129,11 @@ void Vector3TestCase::testAccessEntries() {
   tmp.x() = 78.01;
   tmp.y() = 21.0;
   tmp.z() = 133.12;
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.x(), 78.01, OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.x(), 78.01,
+                               OpenMD::NumericConstant::epsilon);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.y(), 21.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.z(), 133.12, OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.z(), 133.12,
+                               OpenMD::NumericConstant::epsilon);
 }
 
 void Vector3TestCase::testOtherTemplateFunctions() {

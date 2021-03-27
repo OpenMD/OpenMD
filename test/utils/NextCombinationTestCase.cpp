@@ -73,11 +73,14 @@ void NextCombinationTestCase::testNextCombination() {
   CPPUNIT_ASSERT(results[0][0] == 0 && results[0].size() == 1);
   CPPUNIT_ASSERT(results[1][0] == 1 && results[1].size() == 1);
   CPPUNIT_ASSERT(results[2][0] == 4 && results[2].size() == 1);
-  CPPUNIT_ASSERT(results[3][0] == 0 && results[3][1] == 1 && results[3].size() == 2);
-  CPPUNIT_ASSERT(results[4][0] == 0 && results[4][1] == 4 && results[4].size() == 2);
-  CPPUNIT_ASSERT(results[5][0] == 1 && results[5][1] == 4 && results[5].size() == 2);
-  CPPUNIT_ASSERT(results[6][0] == 0 && results[6][1] == 1 && results[6][2] == 4 &&
-                 results[6].size() == 3);
+  CPPUNIT_ASSERT(results[3][0] == 0 && results[3][1] == 1 &&
+                 results[3].size() == 2);
+  CPPUNIT_ASSERT(results[4][0] == 0 && results[4][1] == 4 &&
+                 results[4].size() == 2);
+  CPPUNIT_ASSERT(results[5][0] == 1 && results[5][1] == 4 &&
+                 results[5].size() == 2);
+  CPPUNIT_ASSERT(results[6][0] == 0 && results[6][1] == 1 &&
+                 results[6][2] == 4 && results[6].size() == 3);
 
   std::vector<std::string> sv;
   std::vector<std::vector<std::string>::iterator> sic;

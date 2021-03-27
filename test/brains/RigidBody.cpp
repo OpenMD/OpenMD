@@ -88,7 +88,8 @@ void RigidBody::setA(const RotMat3x3d& a, int snapshotNo) {
   }
 }
 
-void DirectionalAtom::setUnitFrameFromEuler(double phi, double theta, double psi) {
+void DirectionalAtom::setUnitFrameFromEuler(double phi, double theta,
+                                            double psi) {
   sU_.setupRotMat(phi, theta, psi);
 }
 
@@ -232,12 +233,13 @@ void RigidBody::calcRefCoords() {
   if (n_linear_coords > 1) {
           sprintf( painCave.errMsg,
                "RigidBody error.\n"
-               "\tOpenMD found more than one axis in this rigid body with a vanishing \n"
+               "\tOpenMD found more than one axis in this rigid body with a
+vanishing \n"
                "\tmoment of inertia.  This can happen in one of three ways:\n"
                "\t 1) Only one atom was specified, or \n"
                "\t 2) All atoms were specified at the same location, or\n"
                "\t 3) The programmers did something stupid.\n"
-               "\tIt is silly to use a rigid body to describe this situation.  Be
+               "\tIt is silly to use a rigid body to describe this situation. Be
 smarter.\n"
                );
       painCave.isFatal = 1;
@@ -346,8 +348,9 @@ bool RigidBody::getAtomPos(Vector3d& pos, Atom* atom) {
     pos = getPos() + ref;
     return true;
   } else {
-    std::cerr << "Atom " << atom->getGlobalIndex() << " does not belong to Rigid body "
-              << getGlobalIndex() << std::endl;
+    std::cerr << "Atom " << atom->getGlobalIndex()
+              << " does not belong to Rigid body " << getGlobalIndex()
+              << std::endl;
     return false;
   }
 }
@@ -392,8 +395,9 @@ bool RigidBody::getAtomVel(Vector3d& vel, Atom* atom) {
   if (i != atoms_.end()) {
     return getAtomVel(vel, i - atoms_.begin());
   } else {
-    std::cerr << "Atom " << atom->getGlobalIndex() << " does not belong to Rigid body "
-              << getGlobalIndex() << std::endl;
+    std::cerr << "Atom " << atom->getGlobalIndex()
+              << " does not belong to Rigid body " << getGlobalIndex()
+              << std::endl;
     return false;
   }
 }
@@ -417,8 +421,9 @@ bool RigidBody::getAtomRefCoor(Vector3d& coor, Atom* atom) {
     coor = refCoords_[i - atoms_.begin()];
     return true;
   } else {
-    std::cerr << "Atom " << atom->getGlobalIndex() << " does not belong to Rigid body "
-              << getGlobalIndex() << std::endl;
+    std::cerr << "Atom " << atom->getGlobalIndex()
+              << " does not belong to Rigid body " << getGlobalIndex()
+              << std::endl;
     return false;
   }
 }
