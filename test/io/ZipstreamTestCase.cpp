@@ -105,7 +105,8 @@ void ZipstreamTeseCase::test_buffer_to_buffer() {
   char in_buffer[n] = {'\0'};
   char zip_buffer[n] = {'\0'};
 
-  for (size_t i = 0; i < n - 1; ++i) in_buffer[i] = static_cast<char>(48 + i % 48);
+  for (size_t i = 0; i < n - 1; ++i)
+    in_buffer[i] = static_cast<char>(48 + i % 48);
 
   ostringstream out;
   zip_ostream zipper(out);
@@ -130,7 +131,8 @@ void ZipstreamTeseCase::test_wbuffer_to_wbuffer() {
   wchar_t in_buffer[n] = {'\0'};
   wchar_t zip_buffer[n] = {'\0'};
 
-  for (size_t i = 0; i < n - 1; ++i) in_buffer[i] = static_cast<wchar_t>(48 + i % 48);
+  for (size_t i = 0; i < n - 1; ++i)
+    in_buffer[i] = static_cast<wchar_t>(48 + i % 48);
 
   wostringstream out;
   zip_wostream zipper(out);
@@ -146,10 +148,10 @@ void ZipstreamTeseCase::test_wbuffer_to_wbuffer() {
 
   wcerr << L"buffers equals: " << endl
         << L"-----------------" << endl
-        << L"\t crc source:" << crc32(0L, (unsigned char*)in_buffer, n * sizeof(wchar_t))
-        << endl
-        << L"\t crc result:" << crc32(0L, (unsigned char*)zip_buffer, n * sizeof(wchar_t))
-        << endl;
+        << L"\t crc source:"
+        << crc32(0L, (unsigned char*)in_buffer, n * sizeof(wchar_t)) << endl
+        << L"\t crc result:"
+        << crc32(0L, (unsigned char*)zip_buffer, n * sizeof(wchar_t)) << endl;
 }
 
 void ZipstreamTeseCase::test_string_string() {
@@ -174,8 +176,8 @@ void ZipstreamTeseCase::test_string_string() {
   zip_ostream zipper(ostringstream_);
 
   // writing data
-  zipper << f << " " << d << " " << ui << " " << ul << " " << us << " " << c << " "
-         << dum;
+  zipper << f << " " << d << " " << ui << " " << ul << " " << us << " " << c
+         << " " << dum;
   // zip ostream needs special flushing...
   zipper.zflush();
 
@@ -225,7 +227,8 @@ void ZipstreamTeseCase::test_wstring_wstring() {
   zip_wostream wzipper(wostringstream_);
 
   // writing data
-  wzipper << f << L" " << d << L" " << ui << L" " << ul << L" " << us << L" " << dum;
+  wzipper << f << L" " << d << L" " << ui << L" " << ul << L" " << us << L" "
+          << dum;
   // zip ostream needs special flushing...
   wzipper.zflush();
 
@@ -281,8 +284,8 @@ void ZipstreamTeseCase::test_file_file() {
     // creating the zip layer
     zip_ostream fzipper(ofstream_, add_gzip_header);
     // writing data
-    fzipper << f << " " << d << " " << ui << " " << ul << " " << us << " " << c << " "
-            << dum;
+    fzipper << f << " " << d << " " << ui << " " << ul << " " << us << " " << c
+            << " " << dum;
     // zip ostream needs special flushing...
     fzipper.zflush();
     crc_z = fzipper.rdbuf()->get_crc();
@@ -308,8 +311,8 @@ void ZipstreamTeseCase::test_file_file() {
   out_size_uz = funzipper.rdbuf()->get_out_size();
 
   // ouputing results
-  cerr << "tests file-to-file (char, " << (funzipper.is_gzip() ? "gzip" : "no gzip")
-       << "):" << endl
+  cerr << "tests file-to-file (char, "
+       << (funzipper.is_gzip() ? "gzip" : "no gzip") << "):" << endl
        << "------------------------------" << endl
        << "double : " << d << " " << d_r << endl
        << "char : " << c << " " << c_r << endl
@@ -326,7 +329,8 @@ void ZipstreamTeseCase::test_file_file() {
           "<<funzipper.get_gzip_data_size()<<endl
        << "compressed data size: " << out_size_z << " " << in_size_uz << endl
        << "check_crc: " << (funzipper.check_crc() ? "ok" : "failed") << endl
-       << "check_data_size: " << (funzipper.check_data_size() ? "ok" : "failed") << endl;
+       << "check_data_size: " << (funzipper.check_data_size() ? "ok" : "failed")
+       << endl;
 }
 
 void ZipstreamTeseCase::test_crc() {
@@ -356,7 +360,7 @@ void ZipstreamTeseCase::test_crc() {
 
   std::cout << "DoMyTest() "
             << ", outsize " << unzipper.get_out_size() << ", insize "
-            << unzipper.get_in_size() << ", z_err " << unzipper.get_zerr() << ", crc "
-            << unzipper.get_crc() << ", gzip data size " << unzipper.get_gzip_data_size()
-            << std::endl;
+            << unzipper.get_in_size() << ", z_err " << unzipper.get_zerr()
+            << ", crc " << unzipper.get_crc() << ", gzip data size "
+            << unzipper.get_gzip_data_size() << std::endl;
 }

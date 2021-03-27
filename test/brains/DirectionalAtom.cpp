@@ -47,7 +47,8 @@
 
 namespace OpenMD {
 
-DirectionalAtom::DirectionalAtom(DirectionalAtomType* dAtomType) : Atom(dAtomType) {
+DirectionalAtom::DirectionalAtom(DirectionalAtomType* dAtomType)
+    : Atom(dAtomType) {
   objType_ = otDAtom;
 }
 
@@ -75,7 +76,8 @@ void DirectionalAtom::setA(const RotMat3x3d& a, int snapshotNo) {
 
 void DirectionalAtom::rotateBy(const RotMat3x3d& m) { setA(m * getA()); }
 
-void DirectionalAtom::setUnitFrameFromEuler(double phi, double theta, double psi) {
+void DirectionalAtom::setUnitFrameFromEuler(double phi, double theta,
+                                            double psi) {
   sU_.setupRotMat(phi, theta, psi);
 }
 

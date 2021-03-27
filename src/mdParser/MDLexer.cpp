@@ -643,7 +643,9 @@ void MDLexer::mCPPComment(bool _createToken) {
   {  // ( ... )*
     for (;;) {
       if ((_tokenSet_1.member(LA(1)))) {
-        { match(_tokenSet_1); }
+        {
+          match(_tokenSet_1);
+        }
       } else {
         goto _loop105;
       }

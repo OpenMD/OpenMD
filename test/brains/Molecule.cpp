@@ -116,9 +116,10 @@ void Molecule::complete() {
   }
 
   // find all free atoms (which do not belong to rigid bodies)
-  // performs the "difference" operation from set theory,  the output range contains a
-  // copy of every element that is contained in [allAtoms.begin(), allAtoms.end()) and not
-  // contained in [rigidAtoms.begin(), rigidAtoms.end()).
+  // performs the "difference" operation from set theory,  the output range
+  // contains a copy of every element that is contained in [allAtoms.begin(),
+  // allAtoms.end()) and not contained in [rigidAtoms.begin(),
+  // rigidAtoms.end()).
   std::set_difference(allAtoms.begin(), allAtoms.end(), rigidAtoms.begin(),
                       rigidAtoms.end(), std::back_inserter(integrableObjects_));
 
@@ -180,17 +181,20 @@ RigidBody* Molecule::nextRigidBody(std::vector<RigidBody*>::iterator& i) {
   return (i == rigidBodies_.end()) ? NULL : *i;
 }
 
-StuntDouble* Molecule::beginIntegrableObject(std::vector<StuntDouble*>::iterator& i) {
+StuntDouble* Molecule::beginIntegrableObject(
+    std::vector<StuntDouble*>::iterator& i) {
   i = integrableObjects_.begin();
   return (i == integrableObjects_.end()) ? NULL : *i;
 }
 
-StuntDouble* Molecule::nextIntegrableObject(std::vector<StuntDouble*>::iterator& i) {
+StuntDouble* Molecule::nextIntegrableObject(
+    std::vector<StuntDouble*>::iterator& i) {
   ++i;
   return (i == integrableObjects_.end()) ? NULL : *i;
 }
 
-CutoffGroup* Molecule::beginCutoffGroup(std::vector<CutoffGroup*>::iterator& i) {
+CutoffGroup* Molecule::beginCutoffGroup(
+    std::vector<CutoffGroup*>::iterator& i) {
   i = cutoffGroups_.begin();
   return (i == cutoffGroups_.end()) ? NULL : *i;
 }
@@ -269,7 +273,8 @@ Vector3d Molecule::getCom() {
   double totalMass = 0;
   double mass;
 
-  for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)) {
+  for (sd = beginIntegrableObject(i); sd != NULL;
+       sd = nextIntegrableObject(i)) {
     mass = sd->getMass();
     totalMass += mass;
     com += sd->getPos() * mass;
@@ -284,7 +289,8 @@ void Molecule::moveCom(const Vetor3d& delta) {
   StuntDouble* sd;
   std::vector<StuntDouble*>::iterator i;
 
-  for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)) {
+  for (sd = beginIntegrableObject(i); sd != NULL;
+       sd = nextIntegrableObject(i)) {
     s->setPos(sd->getPos() + delta);
   }
 }
@@ -296,7 +302,8 @@ Vector3d Molecule::getComVel() {
   double totalMass = 0;
   double mass;
 
-  for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)) {
+  for (sd = beginIntegrableObject(i); sd != NULL;
+       sd = nextIntegrableObject(i)) {
     mass = sd->getMass();
     totalMass += mass;
     velCom += sd->getVel() * mass;

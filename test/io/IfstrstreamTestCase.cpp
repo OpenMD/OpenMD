@@ -82,7 +82,8 @@ void IfstrstreamTestCase::testOpen() {
   char buffer[MAXLEN];
 
   string firstLine =
-      "! This is the forcefield file for the Dipolar Unified-atom Force Field (DUFF).";
+      "! This is the forcefield file for the Dipolar Unified-atom Force Field "
+      "(DUFF).";
 
   ifstrstream fin1;
   fin1.open("DUFF.frc");
@@ -106,7 +107,8 @@ void IfstrstreamTestCase::testPrimaryConstructor() {
   char buffer[MAXLEN];
 
   string firstLine =
-      "! This is the forcefield file for the Dipolar Unified-atom Force Field (DUFF).";
+      "! This is the forcefield file for the Dipolar Unified-atom Force Field "
+      "(DUFF).";
 
   ifstrstream fin1;
   fin1.open("DUFF.frc");

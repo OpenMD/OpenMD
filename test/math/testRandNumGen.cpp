@@ -87,11 +87,13 @@ void testGaussian() {
   vector<unsigned long int> histogram(size, 0);
   vector<double> normalizedHistogram(size);
   for (unsigned long int i = 0; i < num; ++i) {
-    int index = static_cast<int>(randNumGen.randNorm(mean, variance) / interval);
+    int index =
+        static_cast<int>(randNumGen.randNorm(mean, variance) / interval);
     ++histogram[index];
   }
 
-  std::transform(histogram.begin(), histogram.end(), normalizedHistogram.begin(),
+  std::transform(histogram.begin(), histogram.end(),
+                 normalizedHistogram.begin(),
                  std::bind(std::divides<double>(), placeholders::_1, num));
   std::ofstream gaussian("gaussian.dat");
   for (int i = 0; i < size; ++i) {
@@ -121,7 +123,8 @@ void testParallelRandNumGen() {
 
       for (int j = 0; j < nProcessors; ++j) {
         if (j != primaryNode) {
-          MPI_Recv(&mpiRandNums[j], 1, MPI_UNSIGNED_LONG, j, i, MPI_COMM_WORLD, &istatus);
+          MPI_Recv(&mpiRandNums[j], 1, MPI_UNSIGNED_LONG, j, i, MPI_COMM_WORLD,
+                   &istatus);
         }
 
         singleRandNums[j] = mpiRandNumGen.randInt();

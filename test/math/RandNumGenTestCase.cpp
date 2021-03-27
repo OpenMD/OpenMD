@@ -57,7 +57,8 @@ void RandNumGenTestCase::testUniform() {
   std::vector<unsigned long int> histogram(N, 0);
   const int num = 1000000;
   for (int i = 0; i < num; ++i) {
-    ++histogram[randNumGen.randInt(N - 1)];  // rantInt returns an integer in [0, N-1]
+    ++histogram[randNumGen.randInt(
+        N - 1)];  // rantInt returns an integer in [0, N-1]
   }
 
   int avg = num / N;
@@ -76,7 +77,8 @@ void RandNumGenTestCase::testGaussian() {
   double interval = 0.001;
   unsigned long int histogram[1000];
   for (int i = 0; i < num; ++i) {
-    int index = static_cast<int>(randNumGen.randNorm(mean, variance) / interval);
+    int index =
+        static_cast<int>(randNumGen.randNorm(mean, variance) / interval);
     ++histogram[index];
   }
 
@@ -103,7 +105,8 @@ void RandNumGenTestCase::testMPIRNG() {
 
       for (int j = 0; j < nProcessors; ++j) {
         if (j != primaryNode) {
-          MPI_Recv(&mpiRandNums[j], 1, MPI_UNSIGNED_LONG, j, i, MPI_COMM_WORLD, &istatus);
+          MPI_Recv(&mpiRandNums[j], 1, MPI_UNSIGNED_LONG, j, i, MPI_COMM_WORLD,
+                   &istatus);
         }
 
         singleRandNums[j] = mpiRandNumGen.randInt();

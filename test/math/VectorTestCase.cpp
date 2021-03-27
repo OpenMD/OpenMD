@@ -244,15 +244,20 @@ void VectorTestCase::testAccessEntries() {
 
 void VectorTestCase::testOtherMemberFunctions() {
   // test length()
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(zero.length(), 0.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(one.length(), 2.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(v2.length(), sqrt(14.0), OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(zero.length(), 0.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(one.length(), 2.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(v2.length(), sqrt(14.0),
+                               OpenMD::NumericConstant::epsilon);
 
   // test lengthSquare()
   CPPUNIT_ASSERT_DOUBLES_EQUAL(zero.lengthSquare(), 0.0,
                                OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(one.lengthSquare(), 4.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(v2.lengthSquare(), 14.0, OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(one.lengthSquare(), 4.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(v2.lengthSquare(), 14.0,
+                               OpenMD::NumericConstant::epsilon);
 
   // test normalize()
   Vec4 a1 = one;
@@ -269,18 +274,25 @@ void VectorTestCase::testOtherMemberFunctions() {
   // test getArray
   double tempV[4];
   v3.getArray(tempV);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(tempV[0], v3[0], OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(tempV[1], v3[1], OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(tempV[2], v3[2], OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(tempV[3], v3[3], OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(tempV[0], v3[0],
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(tempV[1], v3[1],
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(tempV[2], v3[2],
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(tempV[3], v3[3],
+                               OpenMD::NumericConstant::epsilon);
 }
 void VectorTestCase::testOtherTemplateFunctions() {
   // test dot
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(dot(one, two), 8.0, OpenMD::NumericConstant::epsilon);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(dot(v1, v3), 20.0, OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(dot(one, two), 8.0,
+                               OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(dot(v1, v3), 20.0,
+                               OpenMD::NumericConstant::epsilon);
 
   // test distance
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(distance(one, two), 2.0, OpenMD::NumericConstant::epsilon);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(distance(one, two), 2.0,
+                               OpenMD::NumericConstant::epsilon);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(distance(v1, v2), sqrt(56.0),
                                OpenMD::NumericConstant::epsilon);
 

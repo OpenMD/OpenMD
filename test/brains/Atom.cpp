@@ -46,7 +46,8 @@
 #include "primitives/Atom.hpp"
 namespace OpenMD {
 
-Atom::Atom(AtomType* at) : StuntDouble(otAtom, &Snapshot::atomData), atomType_(at) {}
+Atom::Atom(AtomType* at)
+    : StuntDouble(otAtom, &Snapshot::atomData), atomType_(at) {}
 
 Mat3x3d Atom::getI() { return Mat3x3d::identity(); }
 
