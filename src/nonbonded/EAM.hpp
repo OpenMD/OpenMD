@@ -48,144 +48,141 @@
 
 #include <memory>
 
-#include "nonbonded/NonBondedInteraction.hpp"
-#include "nonbonded/Electrostatic.hpp"
-#include "types/EAMAdapter.hpp"
 #include "brains/ForceField.hpp"
-#include "math/Vector3.hpp"
 #include "math/CubicSpline.hpp"
+#include "math/Vector3.hpp"
+#include "nonbonded/Electrostatic.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
+#include "types/EAMAdapter.hpp"
 
 namespace OpenMD {
 
-  struct EAMAtomData {
-    CubicSplinePtr rho;
-    CubicSplinePtr F;
-    CubicSplinePtr Z;
-    CubicSplinePtr phiCC;
-    CubicSplinePtr phiCV;
-    RealType rcut;
-    RealType nValence;
-    RealType nMobile;
-    bool isFluctuatingCharge;
+struct EAMAtomData {
+  CubicSplinePtr rho;
+  CubicSplinePtr F;
+  CubicSplinePtr Z;
+  CubicSplinePtr phiCC;
+  CubicSplinePtr phiCV;
+  RealType rcut;
+  RealType nValence;
+  RealType nMobile;
+  bool isFluctuatingCharge;
+};
+
+struct EAMInteractionData {
+  CubicSplinePtr phi;
+  CubicSplinePtr phiCC;
+  RealType Ci = 0.0;  // to zero out the CV interaction in the eam-explict
+                      // interaction for EAMTable and EAMZhou
+  RealType Cj = 0.0;  // to zero out the CV interaction in the eam-explict
+                      // interaction for EAMTable and EAMZhou
+  RealType rcut;
+  bool explicitlySet;
+};
+
+enum EAMMixingMethod {
+  eamJohnson,
+  eamDaw,
+  eamDream1,
+  eamDream2,
+  eamUnknownMix
+};
+
+class EAM : public MetallicInteraction {
+ public:
+  EAM();
+  void setForceField(ForceField* ff) { forceField_ = ff; };
+  void setElectrostatic(Electrostatic* el) { electrostatic_ = el; };
+  void setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+    simTypes_ = simtypes;
+    initialize();
   };
+  void addType(AtomType* atomType);
+  void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType dr,
+                              int nr, std::vector<RealType> phiAB);
 
-  struct EAMInteractionData {
-    CubicSplinePtr phi;
-    CubicSplinePtr phiCC;
-    RealType Ci = 0.0; // to zero out the CV interaction in the eam-explict interaction for EAMTable and EAMZhou
-    RealType Cj = 0.0; // to zero out the CV interaction in the eam-explict interaction for EAMTable and EAMZhou
-    RealType rcut;
-    bool explicitlySet;
-  };
+  void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType re,
+                              RealType alpha, RealType beta, RealType A,
+                              RealType B, RealType kappa, RealType lambda);
 
-  enum EAMMixingMethod{
-    eamJohnson,
-    eamDaw,
-    eamDream1,
-    eamDream2,
-    eamUnknownMix
-  };
-  
-  class EAM : public MetallicInteraction {
-  public:
-    EAM();
-    void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setElectrostatic(Electrostatic *el) { electrostatic_ = el;};    
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
-    void addType(AtomType* atomType);
-    void addExplicitInteraction(AtomType* atype1, AtomType* atype2,
-                                RealType dr, int nr,
-                                std::vector<RealType> phiAB);
-    
-    void addExplicitInteraction(AtomType* atype1, AtomType* atype2,
-                                RealType re, RealType alpha, RealType beta,
-                                RealType A, RealType B, RealType kappa,
-                                RealType lambda);
-    
-    void addExplicitInteraction(AtomType* atype1, AtomType* atype2,
-                                RealType re, RealType alpha,
-                                RealType A, RealType Ci, RealType Cj);
-    
-    RealType fastPower(RealType x, int y);
+  void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType re,
+                              RealType alpha, RealType A, RealType Ci,
+                              RealType Cj);
 
-    RealType ZhouPhiCoreCore(RealType r, RealType re, RealType A,
-                             RealType alpha, RealType kappa);
-    RealType ZhouPhiCoreValence(RealType r, RealType re, RealType B,
-                                RealType beta, RealType lambda);
-    
-    RealType ZhouPhi(RealType r, RealType re, RealType A, RealType B,
-                     RealType alpha, RealType beta, RealType kappa,
-                     RealType lambda);
-    
-    RealType ZhouRho(RealType r, RealType re, RealType fe,
-                     RealType beta, RealType lambda);
- 
-   RealType PhiCoreCore(RealType r, RealType re, RealType A,
-                             RealType alpha);
-    RealType PhiCoreValence(RealType r, RealType re, RealType B,
-                                RealType beta);
-    
-    RealType Phi(RealType r, RealType re, RealType A, RealType B,
-                     RealType alpha, RealType beta);
-    
-    RealType Rho(RealType r, RealType re, RealType fe,
-                     RealType beta);
-    RealType gFunc(RealType q, RealType nV, RealType nM);
-    RealType gPrime(RealType q, RealType nV, RealType nM);
-    RealType Zhou2001Functional(RealType rho, RealType rhoe,
-                                std::vector<RealType> Fn,
-                                std::vector<RealType> F, RealType Fe,
-                                RealType eta);
-    RealType Zhou2004Functional(RealType rho, RealType rhoe, RealType rhos,
-                                std::vector<RealType> Fn,
-                                std::vector<RealType> F, RealType Fe,
-                                RealType eta, RealType rhol, RealType rhoh);
-    RealType Zhou2005Functional(RealType rho, RealType rhoe, RealType rhos,
-                                std::vector<RealType> Fn,
-                                std::vector<RealType> F,
-                                RealType F3plus, RealType F3minus,
-                                RealType Fe, RealType eta);
-    RealType Zhou2005OxygenFunctional(RealType rho,
-                                      std::vector<RealType> OrhoLimits,
-                                      std::vector<RealType> OrhoE,
-                                      std::vector<std::vector<RealType> > OF);
-    RealType RoseFunctional(RealType rho, RealType rhoe, RealType F0);
-    
-                                      
-    void calcDensity(InteractionData &idat);
-    void calcFunctional(SelfData &sdat);
-    void calcForce(InteractionData &idat);
-    
-    virtual string getName() { return name_; }
-    virtual int getHash() { return EAM_INTERACTION; }
-    virtual RealType getSuggestedCutoffRadius(pair<AtomType*,AtomType*> atypes);
-    void setCutoffRadius( RealType rCut );
+  RealType fastPower(RealType x, int y);
 
-  private:
-    void initialize();
-    CubicSplinePtr getPhi(AtomType* atomType1, AtomType* atomType2);
-    
-    bool initialized_;
-    bool haveCutoffRadius_;
-    set<int> EAMtypes;         /**< The set of AtomType idents that are EAM types */
-    vector<int> EAMtids;       /**< The mapping from AtomType ident -> EAM type ident */
-    vector<EAMAtomData> EAMdata; /**< The EAM atomic data indexed by EAM type ident */
-    vector<vector<EAMInteractionData> > MixingMap;  /**< The mixing parameters between two EAM types */
-    int nEAM_;
+  RealType ZhouPhiCoreCore(RealType r, RealType re, RealType A, RealType alpha,
+                           RealType kappa);
+  RealType ZhouPhiCoreValence(RealType r, RealType re, RealType B,
+                              RealType beta, RealType lambda);
 
-    ForceField* forceField_;
-    Electrostatic* electrostatic_;
-    set<AtomType*> simTypes_;
-    RealType pre11_;
-    RealType eamRcut_;
-    RealType oss_;
-    Vector3d rhat;
+  RealType ZhouPhi(RealType r, RealType re, RealType A, RealType B,
+                   RealType alpha, RealType beta, RealType kappa,
+                   RealType lambda);
 
-    EAMMixingMethod mixMeth_;
-    string name_;
+  RealType ZhouRho(RealType r, RealType re, RealType fe, RealType beta,
+                   RealType lambda);
 
-  };
-}
+  RealType PhiCoreCore(RealType r, RealType re, RealType A, RealType alpha);
+  RealType PhiCoreValence(RealType r, RealType re, RealType B, RealType beta);
 
+  RealType Phi(RealType r, RealType re, RealType A, RealType B, RealType alpha,
+               RealType beta);
+
+  RealType Rho(RealType r, RealType re, RealType fe, RealType beta);
+  RealType gFunc(RealType q, RealType nV, RealType nM);
+  RealType gPrime(RealType q, RealType nV, RealType nM);
+  RealType Zhou2001Functional(RealType rho, RealType rhoe,
+                              std::vector<RealType> Fn, std::vector<RealType> F,
+                              RealType Fe, RealType eta);
+  RealType Zhou2004Functional(RealType rho, RealType rhoe, RealType rhos,
+                              std::vector<RealType> Fn, std::vector<RealType> F,
+                              RealType Fe, RealType eta, RealType rhol,
+                              RealType rhoh);
+  RealType Zhou2005Functional(RealType rho, RealType rhoe, RealType rhos,
+                              std::vector<RealType> Fn, std::vector<RealType> F,
+                              RealType F3plus, RealType F3minus, RealType Fe,
+                              RealType eta);
+  RealType Zhou2005OxygenFunctional(RealType rho,
+                                    std::vector<RealType> OrhoLimits,
+                                    std::vector<RealType> OrhoE,
+                                    std::vector<std::vector<RealType> > OF);
+  RealType RoseFunctional(RealType rho, RealType rhoe, RealType F0);
+
+  void calcDensity(InteractionData& idat);
+  void calcFunctional(SelfData& sdat);
+  void calcForce(InteractionData& idat);
+
+  virtual string getName() { return name_; }
+  virtual int getHash() { return EAM_INTERACTION; }
+  virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
+  void setCutoffRadius(RealType rCut);
+
+ private:
+  void initialize();
+  CubicSplinePtr getPhi(AtomType* atomType1, AtomType* atomType2);
+
+  bool initialized_;
+  bool haveCutoffRadius_;
+  set<int> EAMtypes;   /**< The set of AtomType idents that are EAM types */
+  vector<int> EAMtids; /**< The mapping from AtomType ident -> EAM type ident */
+  vector<EAMAtomData>
+      EAMdata; /**< The EAM atomic data indexed by EAM type ident */
+  vector<vector<EAMInteractionData> >
+      MixingMap; /**< The mixing parameters between two EAM types */
+  int nEAM_;
+
+  ForceField* forceField_;
+  Electrostatic* electrostatic_;
+  set<AtomType*> simTypes_;
+  RealType pre11_;
+  RealType eamRcut_;
+  RealType oss_;
+  Vector3d rhat;
+
+  EAMMixingMethod mixMeth_;
+  string name_;
+};
+}  // namespace OpenMD
 
 #endif
