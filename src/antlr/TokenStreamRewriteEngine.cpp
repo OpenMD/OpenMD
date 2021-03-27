@@ -115,7 +115,7 @@ void TokenStreamRewriteEngine::toStream(std::ostream& out,
 
   while (tokenCursor <= lastToken) {
     //			std::cout << "tokenCursor = " << tokenCursor << " first
-    //prog index
+    // prog index
     //=
     //"
     //<<
