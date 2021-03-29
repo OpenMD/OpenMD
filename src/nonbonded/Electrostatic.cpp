@@ -1265,9 +1265,9 @@ void Electrostatic::calcSelfCorrection(SelfData& sdat) {
     case esm_TAYLOR_SHIFTED:
     case esm_EWALD_FULL:
       if (i_is_Charge) {
-        selfPot += selfMult1_ * pre11_ * C_a * (C_a + sdat.skippedCharge);
+        selfPot += selfMult1_ * pre11_ * pow(C_a + sdat.skippedCharge, 2);
         if (i_is_Fluctuating) {
-          fqf -= selfMult1_ * pre11_ * (2.0 * C_a + sdat.skippedCharge);
+          fqf -= selfMult1_ * pre11_ * 2.0 * (C_a + sdat.skippedCharge);
         }
       }
       if (i_is_Dipole) selfPot += selfMult2_ * pre22_ * DdD;
