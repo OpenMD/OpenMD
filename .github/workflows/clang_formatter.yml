@@ -1,5 +1,8 @@
 name: clang-format-check
-on: [push]
+on:
+ schedule:
+ - cron: "0 5 * * 6"
+ 
 jobs:
  formatting-check:
   name: Formatting Check
