@@ -1,10 +1,6 @@
 name: build
 
-on:
- workflow_run:
-    workflows: ["clang-format-check"]
-    types:
-      - completed
+on: [push]
 
 env:
   BUILD_TYPE: Release
