@@ -83,7 +83,7 @@ void FluctuatingChargeAtomTypesSectionParser::parseLine(ForceField& ff,
   }
 
   // conversion to kcal / mol
-  eus_ = options_.getEnergyUnitScaling();
+  eus_ = options_.getFluctuatingChargeEnergyUnitScaling();
   // conversion to electrons
   cus_ = options_.getChargeUnitScaling();
   // conversion to angstroms

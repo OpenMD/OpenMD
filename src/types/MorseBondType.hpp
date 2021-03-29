@@ -42,67 +42,63 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_MORSEBONDTYPE_HPP
 #define TYPES_MORSEBONDTYPE_HPP
 
-#include "types/BondType.hpp"
+#include <cmath>
 
+#include "types/BondType.hpp"
 namespace OpenMD {
 
-  /**
-   * @class MorseBondType 
-   *
-   * @brief MorseBondType is a more realistic bond potential.
-   *
-   * The functional form is given by: 
-     \f[ 
-        V(r) = D_e (1 - e^{-\beta (r - r_0)})^2 
-      \f] 
-   * where \f$D_e\f$ is the bond dissociation energy (in
-   * kcal / mol), \f$\beta\f$ is an inverse distance parameter related
-   * to the force constant. \f$\beta = \sqrt{\frac{k}{2 D_e}}\f$, and
-   * \f$r_0\f$ is the equilibrium bond length.
-   */
-  class MorseBondType : public BondType {
-    
-  public:
-    
-    MorseBondType( RealType myR0, RealType myD, RealType myBeta) 
-      : BondType(myR0), De(myD), beta(myBeta) {
-    }
-    
-    void setWellDepth(RealType myD) { De = myD;}
-    
-    void setBeta(RealType myBeta) { beta = myBeta; }
-    
-    void setWellDepthAndForceConstant(RealType myD, RealType myK) {
-      De = myD;
-      beta = sqrt(myK/(2.0*De));
-    }
-    
-    RealType getWellDepth() {return De;}
-    
-    RealType getBeta() {return beta;}
-    
-    RealType getForceConstant() {return 2.0*De*beta*beta;}
-    
-    virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
-      RealType dr, eterm, eterm2;
-      
-      dr = r - r0;
-      eterm = exp(-beta*dr);
-      eterm2 = eterm*eterm;
+/**
+ * @class MorseBondType
+ *
+ * @brief MorseBondType is a more realistic bond potential.
+ *
+ * The functional form is given by:
+   \f[
+      V(r) = D_e (1 - e^{-\beta (r - r_0)})^2
+    \f]
+ * where \f$D_e\f$ is the bond dissociation energy (in
+ * kcal / mol), \f$\beta\f$ is an inverse distance parameter related
+ * to the force constant. \f$\beta = \sqrt{\frac{k}{2 D_e}}\f$, and
+ * \f$r_0\f$ is the equilibrium bond length.
+ */
+class MorseBondType : public BondType {
+ public:
+  MorseBondType(RealType myR0, RealType myD, RealType myBeta)
+      : BondType(myR0), De(myD), beta(myBeta) {}
 
-      V = De*(1 - 2.0*eterm  + eterm2);
-      dVdr = 2.0 * De * beta * (eterm - eterm2);
-    }
-    
-  private:
-    
-    RealType De;
-    RealType beta;
-    
-  };
-}
+  void setWellDepth(RealType myD) { De = myD; }
+
+  void setBeta(RealType myBeta) { beta = myBeta; }
+
+  void setWellDepthAndForceConstant(RealType myD, RealType myK) {
+    De = myD;
+    beta = sqrt(myK / (2.0 * De));
+  }
+
+  RealType getWellDepth() { return De; }
+
+  RealType getBeta() { return beta; }
+
+  RealType getForceConstant() { return 2.0 * De * beta * beta; }
+
+  virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
+    RealType dr, eterm, eterm2;
+
+    dr = r - r0;
+    eterm = exp(-beta * dr);
+    eterm2 = eterm * eterm;
+
+    V = De * (1 - 2.0 * eterm + eterm2);
+    dVdr = 2.0 * De * beta * (eterm - eterm2);
+  }
+
+ private:
+  RealType De;
+  RealType beta;
+};
+}  // namespace OpenMD
 #endif

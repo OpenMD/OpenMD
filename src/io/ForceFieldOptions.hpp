@@ -59,8 +59,9 @@ namespace OpenMD {
     DeclareParameter(DistanceMixingRule, std::string);
     DeclareParameter(DistanceType, std::string);
     DeclareParameter(EnergyMixingRule, std::string);
-    DeclareParameter(EnergyUnitScaling, RealType);
+    DeclareParameter(EnergyUnitScaling, RealType);   
     DeclareParameter(MetallicEnergyUnitScaling, RealType);
+    DeclareParameter(FluctuatingChargeEnergyUnitScaling, RealType);
     DeclareParameter(DistanceUnitScaling, RealType);
     DeclareParameter(AngleUnitScaling, RealType);
     DeclareParameter(ChargeUnitScaling, RealType);

@@ -60,6 +60,9 @@ ForceFieldOptions::ForceFieldOptions() {
                                           "EnergyUnitScaling", 1.0);
   DefineOptionalParameterWithDefaultValue(MetallicEnergyUnitScaling,
                                           "MetallicEnergyUnitScaling", 1.0);
+  DefineOptionalParameterWithDefaultValue(FluctuatingChargeEnergyUnitScaling,
+                                          "FluctuatingChargeEnergyUnitScaling",
+                                          1.0);
   DefineOptionalParameterWithDefaultValue(DistanceUnitScaling,
                                           "DistanceUnitScaling", 1.0);
   DefineOptionalParameterWithDefaultValue(AngleUnitScaling, "AngleUnitScaling",
