@@ -1,0 +1,195 @@
+#!@Python3_EXECUTABLE@
+"""Pressure Correlation function
+
+Computes various correlation functions of the pressure 
+that have been stored in a stat file.
+
+Usage: stat2pcorr 
+
+Options:
+  -h, --help              show this help
+  -f, --stat-file=...     use specified stat file
+  -o, --output-file=...   use specified output (.pcorr) file
+
+The script will compute: <(P(t)-<P>)*(P(0)-<P>)> / < (P(0) - <P>)^2 >
+
+Example:
+   stat2pcorr -f ring5.stat -o ring5.pcorr
+
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__version__ = "$Revision$"
+__date__ = "$Date$"
+
+__copyright__ = "Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved."
+__license__ = "OpenMD"
+
+import sys
+import getopt
+import string
+import math
+
+def usage():
+    print(__doc__)
+
+def readStatFile(statFileName):
+
+    global time
+    global temperature
+    global pressure
+    global volume
+    time = []
+    temperature = []
+    pressure = []
+    volume = []
+
+    statFile = open(statFileName, 'r')
+
+    print("reading File")
+    pressSum = 0.0
+    volSum = 0.0
+    tempSum = 0.0
+    
+    line = statFile.readline()
+    while ("#" in line):
+        line = statFile.readline()
+
+    while True:
+        L = line.split()
+        time.append(float(L[0]))
+        temperature.append(float(L[4]))
+        #
+        # OpenMD prints out pressure in units of atm.
+        #
+        pressure.append(float(L[5]))
+        volume.append(float(L[6]))
+                
+        line = statFile.readline()
+        if not line: break
+        
+    statFile.close()
+    
+def computeAverages():
+
+    global tempAve
+    global pressAve
+    global volAve
+    global pvAve
+    
+    print("computing Averages")
+
+    tempSum = 0.0
+    pressSum = 0.0
+    volSum = 0.0
+    pvSum = 0.0
+
+    temp2Sum = 0.0
+    press2Sum = 0.0
+    vol2Sum = 0.0
+    pv2Sum = 0.0
+    
+    # converts amu*fs^-2*Ang^-1 -> atm
+    pressureConvert = 1.63882576e8
+
+    for i in range(len(time)):
+        tempSum = tempSum + temperature[i]
+        pressSum = pressSum + pressure[i]
+        volSum = volSum + volume[i]
+        # in units of amu Ang^2 fs^-1
+        pvTerm = pressure[i]*volume[i] / pressureConvert
+        pvSum = pvSum + pvTerm
+        temp2Sum = temp2Sum + math.pow(temperature[i], 2)
+        press2Sum = press2Sum + math.pow(pressure[i], 2)
+        vol2Sum = vol2Sum + math.pow(volume[i], 2)
+        pv2Sum = pv2Sum + math.pow(pvTerm, 2)
+
+    tempAve = tempSum / float(len(time))
+    pressAve = pressSum / float(len(time))
+    volAve = volSum / float(len(time))
+    pvAve = pvSum / float(len(time))
+
+    tempSdev = math.sqrt(temp2Sum / float(len(time)) - math.pow(tempAve, 2))
+    pressSdev = math.sqrt(press2Sum / float(len(time)) - math.pow(pressAve, 2))
+    if (vol2Sum / float(len(time)) < math.pow(volAve, 2)):
+        volSdev = 0.0
+    else:
+        volSdev = math.sqrt(vol2Sum / float(len(time)) - math.pow(volAve, 2))
+    pvSdev = math.sqrt(pv2Sum / float(len(time)) - math.pow(pvAve, 2))
+
+    print("   Average pressure = %f +/- %f (atm)" % (pressAve, pressSdev))
+    print("     Average volume = %f +/- %f (Angst^3)" % (volAve, volSdev))
+    print("Average temperature = %f +/- %f (K)" % (tempAve, tempSdev))
+    print(" Average PV product = %f +/- %f (amu Angst^2 fs^-1)" % (pvAve, pvSdev))
+
+def computeCorrelations(outputFileName):
+
+    # converts amu*fs^-2*Ang^-1 -> atm
+    pressureConvert = 1.63882576e8
+    
+    # Boltzmann's constant amu*Ang^2*fs^-2/K
+    kB = 8.31451e-7
+        
+    if doCorrelation:
+        Pcorr = []
+        print("computing Pressure Correlation Function")        
+        # i corresponds to dt
+        for i in range(len(time)):
+            # j is the starting time for the correlation
+            pp = 0.0
+            for j in range( len(time) - i ):
+                deltaP1 = pressure[j] - pressAve
+                deltaP2 = pressure[j+i] - pressAve
+                pp = pp + deltaP1*deltaP2
+
+            Pcorr.append(pp / float(len(time) - i))
+
+    outputFile = open(outputFileName, 'w')
+    for i in range(len(time)):
+        if doCorrelation:
+            outputFile.write("%f\t%13e\n" % (time[i], Pcorr[i] / Pcorr[0]))
+            
+    outputFile.close()
+
+def main(argv):
+    global doCorrelation
+    global haveStatFileName
+    global haveOutputFileName
+    
+    haveStatFileName = False
+    haveOutputFileName = False
+    doCorrelation = True
+ 
+    try:                                
+        opts, args = getopt.getopt(argv, "hf:o:", ["help", "stat-file=", "output-file="]) 
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()
+        elif opt in ("-f", "--stat-file"): 
+            statFileName = arg
+            haveStatFileName = True
+        elif opt in ("-o", "--output-file"): 
+            outputFileName = arg
+            haveOutputFileName = True
+    if (not haveStatFileName):
+        usage() 
+        print("No stat file was specified")
+        sys.exit()
+    if (not haveOutputFileName):
+        usage()
+        print("No output file was specified")
+        sys.exit()
+        
+    readStatFile(statFileName);
+    computeAverages();
+    computeCorrelations(outputFileName);
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
