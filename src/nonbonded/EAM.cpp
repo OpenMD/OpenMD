@@ -570,7 +570,8 @@ void EAM::addType(AtomType* atomType) {
       int Nr = 2000;
       // eamAtomData.rcut = latticeConstant * sqrt(10.0) / 2.0;
       // eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
-      eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re));
+      // eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re));
+      eamAtomData.rcut = re + (20.0 / beta);
       RealType dr = eamAtomData.rcut / (RealType)(Nr - 1);
       RealType r;
 
@@ -659,7 +660,8 @@ void EAM::addType(AtomType* atomType) {
       int Nr = 2000;
       // eamAtomData.rcut = latticeConstant * sqrt(10.0) / 2.0;
       // eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
-      eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re));
+      // eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re));
+      eamAtomData.rcut = re + (20.0 / beta);
       RealType dr = eamAtomData.rcut / (RealType)(Nr - 1);
       RealType r;
       RealType phiCC, phiCV;
@@ -710,7 +712,8 @@ void EAM::addType(AtomType* atomType) {
       // eamAtomData.rcut = 6.0;
       // eamAtomData.rcut = re * (pow(10.0, 3.0/10.0) + nu );
 
-      eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re));
+      // eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re));
+      eamAtomData.rcut = re + (20.0 / beta);
       RealType dr = eamAtomData.rcut / (RealType)(Nr - 1);
       RealType r;
 
@@ -1159,8 +1162,12 @@ void EAM::calcForce(InteractionData& idat) {
       if (isExplicit) {
         // phi is total potential for EAMTable and EAMZhou but CC interaction
         // for EAMOxide potential
-        CubicSplinePtr phi = MixingMap[eamtid1][eamtid2].phi;
-        phi->getValueAndDerivativeAt(idat.rij, phab, dvpdr);
+        bool insideCutOff = (idat.rij < rcij);
+        if (insideCutOff) {
+          CubicSplinePtr phi = MixingMap[eamtid1][eamtid2].phi;
+          phi->getValueAndDerivativeAt(idat.rij, phab, dvpdr);
+        }
+
       } else {
         // Core-Core part first - no fluctuating charge, just Johnson mixing:
 
@@ -1227,7 +1234,6 @@ void EAM::calcForce(InteractionData& idat) {
       phi->getValueAndDerivativeAt(idat.rij, phab, dvpdr);
     }
   }
-
   drhoidr = si * drha;
   drhojdr = sj * drhb;
 
