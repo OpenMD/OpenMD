@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file MoleculeCreator.hpp
  * @author tlin
@@ -54,14 +54,14 @@
 #define BRAINS_MOLECULECREATOR_HPP
 
 #include "brains/SimInfo.hpp"
+#include "primitives/Molecule.hpp"
 #include "types/AtomStamp.hpp"
-#include "types/BondStamp.hpp"
 #include "types/BendStamp.hpp"
+#include "types/BondStamp.hpp"
 #include "types/CutoffGroupStamp.hpp"
+#include "types/InversionStamp.hpp"
 #include "types/RigidBodyStamp.hpp"
 #include "types/TorsionStamp.hpp"
-#include "types/InversionStamp.hpp"
-#include "primitives/Molecule.hpp"
 namespace OpenMD {
 
   /**
@@ -70,37 +70,35 @@ namespace OpenMD {
    */
   class MoleculeCreator {
   public:
-    virtual Molecule* createMolecule(ForceField* ff, MoleculeStamp *molStamp,
-				     int stampId, int globalIndex,  
+    virtual Molecule* createMolecule(ForceField* ff, MoleculeStamp* molStamp,
+                                     int stampId, int globalIndex,
                                      LocalIndexManager* localIndexMan);
 
   protected:
-        
     /** Create an atom by its stamp */
-    virtual Atom* createAtom(ForceField* ff, Molecule* mol, AtomStamp* stamp, 
-			     LocalIndexManager* localIndexMan);
-    virtual RigidBody* createRigidBody(MoleculeStamp *molStamp, Molecule* mol, 
-				       RigidBodyStamp* rbStamp,  
-                                       LocalIndexManager* localIndexMan); 
-    virtual Bond* createBond(ForceField* ff, Molecule* mol, BondStamp* stamp, 
+    virtual Atom* createAtom(ForceField* ff, Molecule* mol, AtomStamp* stamp,
                              LocalIndexManager* localIndexMan);
-    virtual Bend* createBend(ForceField* ff, Molecule* mol, BendStamp* stamp, 
-                             LocalIndexManager* localIndexMan);
-    virtual Torsion* createTorsion(ForceField* ff, Molecule* mol, 
-                                   TorsionStamp* stamp, 
-                                   LocalIndexManager* localIndexMan);
-    virtual Inversion* createInversion(ForceField* ff, Molecule* mol, 
-                                       InversionStamp* stamp, 
+    virtual RigidBody* createRigidBody(MoleculeStamp* molStamp, Molecule* mol,
+                                       RigidBodyStamp* rbStamp,
                                        LocalIndexManager* localIndexMan);
-    virtual CutoffGroup* createCutoffGroup(Molecule* mol, 
-                                           CutoffGroupStamp* stamp, 
+    virtual Bond* createBond(ForceField* ff, Molecule* mol, BondStamp* stamp,
+                             LocalIndexManager* localIndexMan);
+    virtual Bend* createBend(ForceField* ff, Molecule* mol, BendStamp* stamp,
+                             LocalIndexManager* localIndexMan);
+    virtual Torsion* createTorsion(ForceField* ff, Molecule* mol,
+                                   TorsionStamp* stamp,
+                                   LocalIndexManager* localIndexMan);
+    virtual Inversion* createInversion(ForceField* ff, Molecule* mol,
+                                       InversionStamp* stamp,
+                                       LocalIndexManager* localIndexMan);
+    virtual CutoffGroup* createCutoffGroup(Molecule* mol,
+                                           CutoffGroupStamp* stamp,
                                            LocalIndexManager* localIndexMan);
-    virtual CutoffGroup* createCutoffGroup(Molecule * mol, Atom* atom, 
+    virtual CutoffGroup* createCutoffGroup(Molecule* mol, Atom* atom,
                                            LocalIndexManager* localIndexMan);
-    virtual void createConstraintPair(Molecule* mol);     
+    virtual void createConstraintPair(Molecule* mol);
     virtual void createConstraintElem(Molecule* mol);
   };
 
-
-}
-#endif //BRAINS_MOLECULECREATOR_HPP
+}  // namespace OpenMD
+#endif  // BRAINS_MOLECULECREATOR_HPP

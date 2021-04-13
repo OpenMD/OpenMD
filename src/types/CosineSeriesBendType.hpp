@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_COSINESERIESBENDTYPE_HPP
 #define TYPES_COSINESERIESBENDTYPE_HPP
 
@@ -50,47 +50,43 @@
 
 namespace OpenMD {
   /**
-   * @class CosineSeriesBendType 
+   * @class CosineSeriesBendType
    *
    * A bend used primarily in UFF that utilizes a Fourier series in
    * terms of the cosine of the bend angle:
    *
-   * \f[ Vbend = k \left[ C_0 + C_1 \cos(\theta) + C_2 \cos(2 \theta) \right] \f]
+   * \f[ Vbend = k \left[ C_0 + C_1 \cos(\theta) + C_2 \cos(2 \theta) \right]
+   * \f]
    */
   class CosineSeriesBendType : public BendType {
-    
   public:
-    
     CosineSeriesBendType(RealType theta, RealType k) : BendType(theta), k_(k) {
       RealType st = sin(theta);
       RealType ct = cos(theta);
-      c2_ = 1.0 / (4.0 * st*st);
-      c1_ = -4.0 * c2_ * ct;
-      c0_ = c2_ * (2.0 * ct * ct + 1.0);     
+      c2_         = 1.0 / (4.0 * st * st);
+      c1_         = -4.0 * c2_ * ct;
+      c0_         = c2_ * (2.0 * ct * ct + 1.0);
     }
-    
-    void setForceConstant(RealType k) {k_ = k; }
-    
-    RealType getForceConstant() {return k_;}
-    
-    void calcForce(RealType theta, RealType& V, RealType& dVdtheta) {
 
+    void setForceConstant(RealType k) { k_ = k; }
+
+    RealType getForceConstant() { return k_; }
+
+    void calcForce(RealType theta, RealType& V, RealType& dVdtheta) {
       RealType ct = cos(theta);
-      RealType st = sin(theta);    
+      RealType st = sin(theta);
 
       // use cos 2t = (2 cos^2 - 1)
-      V =  k_ * (c0_ + c1_ * ct + c2_ * (2.0 * ct * ct - 1.0)); 
-      dVdtheta = - k_ * (c1_ * st + 2.0 * c2_ * sin(2.0 * theta));
+      V        = k_ * (c0_ + c1_ * ct + c2_ * (2.0 * ct * ct - 1.0));
+      dVdtheta = -k_ * (c1_ * st + 2.0 * c2_ * sin(2.0 * theta));
     }
-    
+
   private:
     RealType k_;
     RealType c0_;
     RealType c1_;
     RealType c2_;
-    
   };
-  
-}//end namespace OpenMD
-#endif //TYPES_COSINESERIESBENDTYPE_HPP
 
+}  // end namespace OpenMD
+#endif  // TYPES_COSINESERIESBENDTYPE_HPP

@@ -1,5 +1,5 @@
- /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+/*
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef NONBONDED_SC_HPP
 #define NONBONDED_SC_HPP
 
-#include "nonbonded/NonBondedInteraction.hpp"
 #include "brains/ForceField.hpp"
 #include "math/CubicSpline.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
 #include "types/SuttonChenAdapter.hpp"
 
 namespace OpenMD {
@@ -61,7 +61,7 @@ namespace OpenMD {
     RealType epsilon;
     RealType rCut;
   };
-  
+
   struct SCInteractionData {
     RealType alpha;
     RealType epsilon;
@@ -73,45 +73,50 @@ namespace OpenMD {
     CubicSpline* phi;
     bool explicitlySet;
   };
-    
+
   class SC : public MetallicInteraction {
-    
-  public:    
+  public:
     SC();
     ~SC();
-    void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
+    void setForceField(ForceField* ff) { forceField_ = ff; };
+    void setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+      simTypes_ = simtypes;
+      initialize();
+    };
     void addType(AtomType* atomType);
-    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType epsilon, RealType m, RealType n, RealType alpha);
-    void calcDensity(InteractionData &idat);
-    void calcFunctional(SelfData &sdat);
-    void calcForce(InteractionData &idat);
-    virtual string getName() {return name_;}
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2,
+                                RealType epsilon, RealType m, RealType n,
+                                RealType alpha);
+    void calcDensity(InteractionData& idat);
+    void calcFunctional(SelfData& sdat);
+    void calcForce(InteractionData& idat);
+    virtual string getName() { return name_; }
     virtual int getHash() { return SC_INTERACTION; }
-    virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
-   
+    virtual RealType getSuggestedCutoffRadius(
+        pair<AtomType*, AtomType*> atypes);
+
   private:
     void initialize();
     RealType getAlpha(AtomType* atomType1, AtomType* atomType2);
     RealType getEpsilon(AtomType* atomType1, AtomType* atomType2);
     RealType getM(AtomType* atomType1, AtomType* atomType2);
     RealType getN(AtomType* atomType1, AtomType* atomType2);
-    
+
     string name_;
     bool initialized_;
-    set<int> SCtypes;         /**< The set of AtomType idents that are SC types */
-    vector<int> SCtids;       /**< The mapping from AtomType ident -> SC type ident */
-    vector<SCAtomData> SCdata; /**< The EAM atomic data indexed by SC type ident */
-    vector<vector<SCInteractionData> > MixingMap;  /**< The mixing parameters between two SC types */
+    set<int> SCtypes;   /**< The set of AtomType idents that are SC types */
+    vector<int> SCtids; /**< The mapping from AtomType ident -> SC type ident */
+    vector<SCAtomData>
+        SCdata; /**< The EAM atomic data indexed by SC type ident */
+    vector<vector<SCInteractionData>>
+        MixingMap; /**< The mixing parameters between two SC types */
     int nSC_;
 
     ForceField* forceField_;
     set<AtomType*> simTypes_;
 
     int np_;
-    
   };
-}
+}  // namespace OpenMD
 
-                               
 #endif

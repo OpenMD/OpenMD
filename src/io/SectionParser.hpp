@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_SECTIONPARSER_HPP
 #define IO_SECTIONPARSER_HPP
 
@@ -52,37 +52,35 @@
 #include "utils/StringTokenizer.hpp"
 
 namespace OpenMD {
-  
+
   class ForceField;
-  
+
   /**
-  * @class SectionParser SectionParser.hpp "io/SectionParser.hpp"
+   * @class SectionParser SectionParser.hpp "io/SectionParser.hpp"
    * @todo document
    */
   class SectionParser {
   public:
     virtual ~SectionParser() = default;
     void parse(std::istream& input, ForceField& ff, int lineNo);
-    
-    const std::string& getSectionName() const {
-      return sectionName_;
-    }
+
+    const std::string& getSectionName() const { return sectionName_; }
     virtual void validateSection(ForceField& ff) {}
-    
+
   protected:
     void setSectionName(const std::string& sectionName) {
       sectionName_ = sectionName;
     }
-    
+
   private:
     bool isEndSection(const std::string& line);
-    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo) = 0;
+    virtual void parseLine(ForceField& ff, const std::string& line,
+                           int lineNo) = 0;
     std::string stripComments(const std::string& line);
-    
+
     std::string sectionName_;
   };
 
+}  // namespace OpenMD
 
-}
-
-#endif //IO_SECTIONPARSER_HPP
+#endif  // IO_SECTIONPARSER_HPP

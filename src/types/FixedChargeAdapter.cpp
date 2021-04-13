@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,60 +52,60 @@
 
 namespace OpenMD {
 
-bool FixedChargeAdapter::isFixedCharge() { return at_->hasProperty(FCtypeID); }
-
-FixedChargeAtypeParameters FixedChargeAdapter::getFixedChargeParam() {
-  if (!isFixedCharge()) {
-    sprintf(
-        painCave.errMsg,
-        "FixedChargeAdapter::getFixedChargeParam was passed an atomType (%s)\n"
-        "\tthat does not appear to be a fixed charge atom.\n",
-        at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  bool FixedChargeAdapter::isFixedCharge() {
+    return at_->hasProperty(FCtypeID);
   }
 
-  std::shared_ptr<GenericData> data = at_->getPropertyByName(FCtypeID);
-  if (data == nullptr) {
-    sprintf(
-        painCave.errMsg,
-        "FixedChargeAdapter::getFixedChargeParam could not find fixed charge\n"
-        "\tparameters for atomType %s.\n",
-        at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  FixedChargeAtypeParameters FixedChargeAdapter::getFixedChargeParam() {
+    if (!isFixedCharge()) {
+      sprintf(painCave.errMsg,
+              "FixedChargeAdapter::getFixedChargeParam was passed an atomType "
+              "(%s)\n"
+              "\tthat does not appear to be a fixed charge atom.\n",
+              at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(FCtypeID);
+    if (data == nullptr) {
+      sprintf(painCave.errMsg,
+              "FixedChargeAdapter::getFixedChargeParam could not find fixed "
+              "charge\n"
+              "\tparameters for atomType %s.\n",
+              at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    std::shared_ptr<FixedChargeAtypeData> fcData =
+        std::dynamic_pointer_cast<FixedChargeAtypeData>(data);
+    if (fcData == nullptr) {
+      sprintf(painCave.errMsg,
+              "FixedChargeAdapter::getFixedChargeParam could not convert\n"
+              "\tGenericData to FixedChargeAtypeData for atom type %s\n",
+              at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    return fcData->getData();
   }
 
-  std::shared_ptr<FixedChargeAtypeData> fcData =
-      std::dynamic_pointer_cast<FixedChargeAtypeData>(data);
-  if (fcData == nullptr) {
-    sprintf(painCave.errMsg,
-            "FixedChargeAdapter::getFixedChargeParam could not convert\n"
-            "\tGenericData to FixedChargeAtypeData for atom type %s\n",
-            at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  RealType FixedChargeAdapter::getCharge() {
+    FixedChargeAtypeParameters fcParam = getFixedChargeParam();
+    return fcParam.charge;
   }
 
-  return fcData->getData();
-}
+  void FixedChargeAdapter::makeFixedCharge(RealType charge) {
+    if (isFixedCharge()) { at_->removeProperty(FCtypeID); }
 
-RealType FixedChargeAdapter::getCharge() {
-  FixedChargeAtypeParameters fcParam = getFixedChargeParam();
-  return fcParam.charge;
-}
+    FixedChargeAtypeParameters fcParam {};
+    fcParam.charge = charge;
 
-void FixedChargeAdapter::makeFixedCharge(RealType charge) {
-  if (isFixedCharge()) {
-    at_->removeProperty(FCtypeID);
+    at_->addProperty(std::make_shared<FixedChargeAtypeData>(FCtypeID, fcParam));
   }
-
-  FixedChargeAtypeParameters fcParam{};
-  fcParam.charge = charge;
-
-  at_->addProperty(std::make_shared<FixedChargeAtypeData>(FCtypeID, fcParam));
-}
 }  // namespace OpenMD

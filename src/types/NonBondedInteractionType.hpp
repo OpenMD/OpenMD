@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -59,7 +59,7 @@
 
 namespace OpenMD {
 
-  typedef  struct{
+  typedef struct {
     bool is_LennardJones;
     bool is_Morse;
     bool is_MAW;
@@ -74,7 +74,7 @@ namespace OpenMD {
   } NonBondedInteractionTypeProperties;
 
   /**
-   * @class NonBondedInteractionType 
+   * @class NonBondedInteractionType
    *
    * NonBondedInteractionType class is responsible for keeping track
    * of static (unchanging) parameters for explicit non-bonded
@@ -83,11 +83,11 @@ namespace OpenMD {
   class NonBondedInteractionType {
   public:
     NonBondedInteractionType();
-    virtual ~NonBondedInteractionType() { } ;
-   
-    void setLennardJones();    
+    virtual ~NonBondedInteractionType() {};
+
+    void setLennardJones();
     bool isLennardJones();
-    void setMorse();    
+    void setMorse();
     bool isMorse();
     void setMAW();
     bool isMAW();
@@ -109,59 +109,55 @@ namespace OpenMD {
     void setInversePowerSeries();
     bool isInversePowerSeries();
 
-    
     void setAtomTypes(std::pair<AtomType*, AtomType*> ats);
     std::pair<AtomType*, AtomType*> getAtomTypes();
-   
-    //below functions are just forward functions
+
+    // below functions are just forward functions
     /**
      * Adds property into property map
      * @param genData GenericData to be added into PropertyMap
      */
     void addProperty(std::shared_ptr<GenericData> genData);
-    
+
     /**
      * Removes property from PropertyMap by name
      * @param propName the name of property to be removed
      */
     void removeProperty(const std::string& propName);
-    
+
     /**
      * Returns all names of properties
      * @return all names of properties
      */
     std::vector<std::string> getPropertyNames();
-    
+
     /**
      * Returns all of the properties in PropertyMap
      * @return all of the properties in PropertyMap
-     */      
-    std::vector<std::shared_ptr<GenericData> > getProperties();
-    
+     */
+    std::vector<std::shared_ptr<GenericData>> getProperties();
+
     /**
-     * Returns property 
+     * Returns property
      * @param propName name of property
      * @return a pointer point to property with propName. If no
      * property named propName exists, return NULL
-     */      
+     */
     std::shared_ptr<GenericData> getPropertyByName(const std::string& propName);
 
-    
   protected:
     NonBondedInteractionTypeProperties nbitp;
     std::pair<AtomType*, AtomType*> atomTypes_;
-    
+
   private:
-    //prevent copy construction and copy assignment, since property
-    //map contains pointers which can not be copied and managed
-    //safely, except make the generic data at PropertyMap as copy on
-    //write shared pointer
+    // prevent copy construction and copy assignment, since property
+    // map contains pointers which can not be copied and managed
+    // safely, except make the generic data at PropertyMap as copy on
+    // write shared pointer
     NonBondedInteractionType(const NonBondedInteractionType&);
     NonBondedInteractionType& operator=(const NonBondedInteractionType& nbit);
     PropertyMap properties_;
-    
-  };  
+  };
 
-} //end namespace OpenMD
-#endif //TYPES_NONBONDEDINTERACTIONTYPE_HPP
-
+}  // end namespace OpenMD
+#endif  // TYPES_NONBONDEDINTERACTIONTYPE_HPP

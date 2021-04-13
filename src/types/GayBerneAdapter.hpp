@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,19 +42,19 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_GAYBERNEADAPTER_HPP
 #define TYPES_GAYBERNEADAPTER_HPP
 
-#include "utils/GenericData.hpp"
 #include "types/AtomType.hpp"
+#include "utils/GenericData.hpp"
 
 using namespace std;
 namespace OpenMD {
 
   string const GBtypeID = "GB";
 
-  struct GBAtypeParameters{
+  struct GBAtypeParameters {
     RealType GB_d;
     RealType GB_l;
     RealType GB_eps_X;
@@ -62,14 +62,15 @@ namespace OpenMD {
     RealType GB_eps_E;
     RealType GB_dw;
   };
-  typedef SimpleTypeData<GBAtypeParameters> GBAtypeData; 
-  
+  typedef SimpleTypeData<GBAtypeParameters> GBAtypeData;
+
   class GayBerneAdapter {
   public:
     GayBerneAdapter(AtomType* AT) { at_ = AT; };
 
-    void makeGayBerne(RealType d, RealType l, RealType eps_X, RealType eps_S, RealType eps_E, RealType dw);
-    
+    void makeGayBerne(RealType d, RealType l, RealType eps_X, RealType eps_S,
+                      RealType eps_E, RealType dw);
+
     bool isGayBerne();
     RealType getD();
     RealType getL();
@@ -80,7 +81,7 @@ namespace OpenMD {
 
   private:
     AtomType* at_;
-    GBAtypeParameters  getGayBerneParam();
+    GBAtypeParameters getGayBerneParam();
   };
-}
+}  // namespace OpenMD
 #endif

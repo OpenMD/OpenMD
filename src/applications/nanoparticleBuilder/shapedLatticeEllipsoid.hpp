@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,30 +44,27 @@
  */
 
 #ifndef NANOPARTICLEBUILDER_SHAPEDLATTICEELLIPSOID_HPP
-#define NANOPARTICLEBUILDER_SHAPEDLATTICEELLIPSOID_HPP 
+#define NANOPARTICLEBUILDER_SHAPEDLATTICEELLIPSOID_HPP
+
+#include <cmath>
 
 #include "lattice/shapedLattice.hpp"
 #include "math/Vector3.hpp"
-#include <cmath>
-namespace OpenMD{
+namespace OpenMD {
   /**
    * Implements an ellipsoid-shaped lattice
    *
    */
-  class shapedLatticeEllipsoid: public shapedLattice{
+  class shapedLatticeEllipsoid : public shapedLattice {
   public:
-    shapedLatticeEllipsoid(RealType latticeConstant,
-			   std::string latticeType, RealType rAxial,
-			   RealType rEquatorial);
+    shapedLatticeEllipsoid(RealType latticeConstant, std::string latticeType,
+                           RealType rAxial, RealType rEquatorial);
     virtual bool isInterior(Vector3d point);
+
   private:
     RealType rAxial_;
     RealType rEquatorial_;
   };
-}
+}  // namespace OpenMD
 
 #endif /* NANOPARTICLEBUILDER_SHAPEDLATTICEELLIPSOID_HPP */
-
-
-
-

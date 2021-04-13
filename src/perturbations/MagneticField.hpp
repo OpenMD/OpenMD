@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -43,7 +43,6 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-
 /*! \file perturbations/MagneticField.hpp
     \brief Uniform Magnetic Field perturbation
 */
@@ -51,8 +50,8 @@
 #ifndef PERTURBATIONS_MAGNETICFIELD_HPP
 #define PERTURBATIONS_MAGNETICFIELD_HPP
 
-#include "perturbations/Perturbation.hpp"
 #include "brains/SimInfo.hpp"
+#include "perturbations/Perturbation.hpp"
 
 namespace OpenMD {
 
@@ -81,7 +80,6 @@ namespace OpenMD {
 
   */
   class MagneticField : public Perturbation {
-
   public:
     MagneticField(SimInfo* info);
 
@@ -97,5 +95,5 @@ namespace OpenMD {
     Vector3d MF;
   };
 
-} //end namespace OpenMD
+}  // end namespace OpenMD
 #endif

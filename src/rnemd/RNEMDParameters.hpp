@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -56,7 +56,6 @@ namespace OpenMD {
   namespace RNEMD {
 
     class RNEMDParameters : public DataHolder {
-
       DeclareParameter(UseRNEMD, bool);
       DeclareParameter(ObjectSelection, std::string);
       DeclareParameter(OutputSelection, std::string);
@@ -65,9 +64,9 @@ namespace OpenMD {
       DeclareParameter(ExchangeTime, RealType);
       DeclareParameter(KineticFlux, RealType);
       DeclareParameter(MomentumFlux, RealType);
-      DeclareParameter(MomentumFluxVector, std::vector<RealType> );
+      DeclareParameter(MomentumFluxVector, std::vector<RealType>);
       DeclareParameter(AngularMomentumFlux, RealType);
-      DeclareParameter(AngularMomentumFluxVector, std::vector<RealType> );
+      DeclareParameter(AngularMomentumFluxVector, std::vector<RealType>);
       DeclareParameter(SlabWidth, RealType);
       DeclareParameter(SlabACenter, RealType);
       DeclareParameter(SlabBCenter, RealType);
@@ -76,7 +75,7 @@ namespace OpenMD {
       DeclareParameter(SelectionA, std::string);
       DeclareParameter(SelectionB, std::string);
       DeclareParameter(DividingArea, RealType);
-      DeclareParameter(CoordinateOrigin, std::vector<RealType> );
+      DeclareParameter(CoordinateOrigin, std::vector<RealType>);
       DeclareParameter(OutputFileName, std::string);
       DeclareParameter(OutputBins, int);
       DeclareParameter(OutputBinWidth, RealType);
@@ -93,7 +92,7 @@ namespace OpenMD {
     private:
       bool calculateElectricField_ {false};
     };
-  }
-}
+  }  // namespace RNEMD
+}  // namespace OpenMD
 
-#endif // OPENMD_RNEMD_RNEMDPARAMETERS_HPP
+#endif  // OPENMD_RNEMD_RNEMDPARAMETERS_HPP

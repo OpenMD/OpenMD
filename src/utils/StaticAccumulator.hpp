@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -65,16 +65,18 @@ namespace OpenMD {
 
     template<typename T>
     class StaticAccumulator {
-      static_assert(std::is_default_constructible<T>::value, "Accumulator type parameters must be default constructible.");
+      static_assert(
+          std::is_default_constructible<T>::value,
+          "Accumulator type parameters must be default constructible.");
 
     public:
       void add(const T& val) {
         Count_++;
 
-        Val_    = val;
+        Val_ = val;
         Total_ += val;
-        Avg_   += (val       - Avg_ ) / static_cast<RealType>(Count_);
-        Avg2_  += (val * val - Avg2_) / static_cast<RealType>(Count_);
+        Avg_ += (val - Avg_) / static_cast<RealType>(Count_);
+        Avg2_ += (val * val - Avg2_) / static_cast<RealType>(Count_);
 
         if (Count_ <= 1) {
           Max_ = val;
@@ -85,13 +87,9 @@ namespace OpenMD {
         }
       }
 
-      std::size_t getCount() const {
-        return Count_;
-      }
+      std::size_t getCount() const { return Count_; }
 
-      T getLastValue() const {
-        return Val_;
-      }
+      T getLastValue() const { return Val_; }
 
       T getTotal() const {
         assert(Count_ != 0);
@@ -99,13 +97,15 @@ namespace OpenMD {
       }
 
       RealType getMax() const {
-        static_assert( std::is_arithmetic<T>::value, "getMax() requires a RealType Accumulator." );
+        static_assert(std::is_arithmetic<T>::value,
+                      "getMax() requires a RealType Accumulator.");
         assert(Count_ != 0);
         return Max_;
       }
 
       RealType getMin() const {
-        static_assert( std::is_arithmetic<T>::value, "getMin() requires a RealType Accumulator." );
+        static_assert(std::is_arithmetic<T>::value,
+                      "getMin() requires a RealType Accumulator.");
         assert(Count_ != 0);
         return Min_;
       }
@@ -125,14 +125,15 @@ namespace OpenMD {
 
       RealType getStdDev() const {
         assert(Count_ != 0);
-        T sd = std::sqrt( this->getVariance() );
+        T sd = std::sqrt(this->getVariance());
 
         return sd;
       }
 
       RealType get95percentConfidenceInterval() const {
         assert(Count_ != 0);
-        T ci = 1.960 * this->getStdDev() / std::sqrt( static_cast<RealType>(Count_) );
+        T ci = 1.960 * this->getStdDev() /
+               std::sqrt(static_cast<RealType>(Count_));
 
         return ci;
       }
@@ -143,60 +144,52 @@ namespace OpenMD {
       RealType Max_ {}, Min_ {}, Avg_ {}, Avg2_ {};
     };
 
-
     // Specializations for commonly used Accumulator types
     template<>
-    class StaticAccumulator< std::vector<RealType> > {
+    class StaticAccumulator<std::vector<RealType>> {
     public:
       /* A flag specifying that a given bin is empty and should be ignored
         during calls to add() */
-      constexpr static RealType BinEmptyFlag = std::numeric_limits<RealType>::max();
+      constexpr static RealType BinEmptyFlag =
+          std::numeric_limits<RealType>::max();
 
       void add(const std::vector<RealType>& val) {
-        if ( val.empty() || (val.size() != Avg_.size() && !Avg_.empty()) ) {
-          sprintf(painCave.errMsg,
-                  "Size of vector passed to add() did not match the size of the StaticAccumulator.");
+        if (val.empty() || (val.size() != Avg_.size() && !Avg_.empty())) {
+          sprintf(painCave.errMsg, "Size of vector passed to add() did not "
+                                   "match the size of the StaticAccumulator.");
           painCave.isFatal = 1;
           simError();
         }
 
-        if ( Avg_.empty() ) {
-          Count_.resize( val.size() );
-          Val_.resize( val.size() );
-          Total_.resize( val.size() );
-          Avg_.resize( val.size() );
-          Avg2_.resize( val.size() );
+        if (Avg_.empty()) {
+          Count_.resize(val.size());
+          Val_.resize(val.size());
+          Total_.resize(val.size());
+          Avg_.resize(val.size());
+          Avg2_.resize(val.size());
         }
 
         for (std::size_t i = 0; i < val.size(); i++) {
           /* If our placeholder, BinEmptyFlag, is passed to add(), we should
               not record data at the current index */
-          if (val[i] == BinEmptyFlag)
-            continue;
+          if (val[i] == BinEmptyFlag) continue;
 
           Count_[i]++;
-          Val_[i]    =  val[i];
-          Total_[i] +=  val[i];
-          Avg_[i]   += (val[i]          - Avg_[i] ) / static_cast<RealType>(Count_[i]);
-          Avg2_[i]  += (val[i] * val[i] - Avg2_[i]) / static_cast<RealType>(Count_[i]);
+          Val_[i] = val[i];
+          Total_[i] += val[i];
+          Avg_[i] += (val[i] - Avg_[i]) / static_cast<RealType>(Count_[i]);
+          Avg2_[i] +=
+              (val[i] * val[i] - Avg2_[i]) / static_cast<RealType>(Count_[i]);
         }
       }
 
-      std::vector<std::size_t> getCount() const {
-        return Count_;
-      }
+      std::vector<std::size_t> getCount() const { return Count_; }
 
-      std::vector<RealType> getLastValue() const {
-        return Val_;
-      }
+      std::vector<RealType> getLastValue() const { return Val_; }
 
-      std::vector<RealType> getTotal() const {
-        return Total_;
-      }
+      std::vector<RealType> getTotal() const { return Total_; }
 
-      std::vector<RealType> getAverage() const {
-        return Avg_;
-      }
+      std::vector<RealType> getAverage() const { return Avg_; }
 
       std::vector<RealType> getVariance() const {
         std::vector<RealType> var(Avg_.size());
@@ -214,7 +207,7 @@ namespace OpenMD {
         std::vector<RealType> variance = this->getVariance();
 
         for (std::size_t i = 0; i < variance.size(); i++) {
-          sd[i] = std::sqrt( variance[i] );
+          sd[i] = std::sqrt(variance[i]);
         }
 
         return sd;
@@ -225,7 +218,8 @@ namespace OpenMD {
         std::vector<RealType> stdDev = this->getStdDev();
 
         for (std::size_t i = 0; i < stdDev.size(); i++) {
-          ci[i] = 1.960 * stdDev[i] / std::sqrt( static_cast<RealType>(Count_[i]) );
+          ci[i] =
+              1.960 * stdDev[i] / std::sqrt(static_cast<RealType>(Count_[i]));
         }
 
         return ci;
@@ -236,28 +230,24 @@ namespace OpenMD {
       std::vector<RealType> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
     };
 
-
     template<unsigned int Dim>
-    class StaticAccumulator< Vector<RealType, Dim> > {
+    class StaticAccumulator<Vector<RealType, Dim>> {
     public:
       void add(const Vector<RealType, Dim>& val) {
         Count_++;
 
         for (std::size_t i = 0; i < Dim; i++) {
-          Val_[i]    =  val[i];
-          Total_[i] +=  val[i];
-          Avg_[i]   += (val[i]          - Avg_[i] ) / static_cast<RealType>(Count_);
-          Avg2_[i]  += (val[i] * val[i] - Avg2_[i]) / static_cast<RealType>(Count_);
+          Val_[i] = val[i];
+          Total_[i] += val[i];
+          Avg_[i] += (val[i] - Avg_[i]) / static_cast<RealType>(Count_);
+          Avg2_[i] +=
+              (val[i] * val[i] - Avg2_[i]) / static_cast<RealType>(Count_);
         }
       }
 
-      std::size_t getCount() const {
-        return Count_;
-      }
+      std::size_t getCount() const { return Count_; }
 
-      Vector<RealType, Dim> getLastValue() const {
-        return Val_;
-      }
+      Vector<RealType, Dim> getLastValue() const { return Val_; }
 
       Vector<RealType, Dim> getTotal() const {
         assert(Count_ != 0);
@@ -291,7 +281,7 @@ namespace OpenMD {
         Vector<RealType, Dim> variance = this->getVariance();
 
         for (std::size_t i = 0; i < Dim; i++) {
-          sd[i] = std::sqrt( variance[i] );
+          sd[i] = std::sqrt(variance[i]);
         }
 
         return sd;
@@ -304,7 +294,7 @@ namespace OpenMD {
         Vector<RealType, Dim> stdDev = this->getStdDev();
 
         for (std::size_t i = 0; i < Dim; i++) {
-          ci[i] = 1.960 * stdDev[i] / std::sqrt( static_cast<RealType>(Count_) );
+          ci[i] = 1.960 * stdDev[i] / std::sqrt(static_cast<RealType>(Count_));
         }
 
         return ci;
@@ -315,30 +305,27 @@ namespace OpenMD {
       Vector<RealType, Dim> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
     };
 
-
     template<unsigned int Dim>
-    class StaticAccumulator< SquareMatrix<RealType, Dim> > {
+    class StaticAccumulator<SquareMatrix<RealType, Dim>> {
     public:
       void add(const SquareMatrix<RealType, Dim>& val) {
         Count_++;
 
         for (std::size_t i = 0; i < Dim; i++) {
           for (std::size_t j = 0; j < Dim; j++) {
-            Val_(i,j)    =  val(i,j);
-            Total_(i,j) +=  val(i,j);
-            Avg_(i,j)   += (val(i,j)            - Avg_(i,j) ) / static_cast<RealType>(Count_);
-            Avg2_(i,j)  += (val(i,j) * val(i,j) - Avg2_(i,j)) / static_cast<RealType>(Count_);
+            Val_(i, j) = val(i, j);
+            Total_(i, j) += val(i, j);
+            Avg_(i, j) +=
+                (val(i, j) - Avg_(i, j)) / static_cast<RealType>(Count_);
+            Avg2_(i, j) += (val(i, j) * val(i, j) - Avg2_(i, j)) /
+                           static_cast<RealType>(Count_);
           }
         }
       }
 
-      std::size_t getCount() const {
-        return Count_;
-      }
+      std::size_t getCount() const { return Count_; }
 
-      SquareMatrix<RealType, Dim> getLastValue() const {
-        return Val_;
-      }
+      SquareMatrix<RealType, Dim> getLastValue() const { return Val_; }
 
       SquareMatrix<RealType, Dim> getTotal() const {
         assert(Count_ != 0);
@@ -359,8 +346,8 @@ namespace OpenMD {
 
         for (std::size_t i = 0; i < Dim; i++) {
           for (std::size_t j = 0; j < Dim; j++) {
-            var(i,j) = (Avg2_(i,j) - Avg_(i,j)  * Avg_(i,j));
-            if ( var(i,j) < 0 ) var(i,j) = 0;
+            var(i, j) = (Avg2_(i, j) - Avg_(i, j) * Avg_(i, j));
+            if (var(i, j) < 0) var(i, j) = 0;
           }
         }
 
@@ -375,7 +362,7 @@ namespace OpenMD {
 
         for (std::size_t i = 0; i < Dim; i++) {
           for (std::size_t j = 0; j < Dim; j++) {
-            sd(i,j) = std::sqrt( variance(i,j) );
+            sd(i, j) = std::sqrt(variance(i, j));
           }
         }
 
@@ -390,7 +377,8 @@ namespace OpenMD {
 
         for (std::size_t i = 0; i < Dim; i++) {
           for (std::size_t j = 0; j < Dim; j++) {
-            ci(i,j) = 1.960 * stdDev(i,j) / std::sqrt( static_cast<RealType>(Count_) );
+            ci(i, j) =
+                1.960 * stdDev(i, j) / std::sqrt(static_cast<RealType>(Count_));
           }
         }
 
@@ -402,10 +390,9 @@ namespace OpenMD {
       SquareMatrix<RealType, Dim> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
     };
 
-
     // Type aliases for the most commonly used StaticAccumulators
-    using RealAccumulator 		 = StaticAccumulator<RealType>;
-    using StdVectorAccumulator = StaticAccumulator< std::vector<RealType> >;
+    using RealAccumulator      = StaticAccumulator<RealType>;
+    using StdVectorAccumulator = StaticAccumulator<std::vector<RealType>>;
     // using Vector3dAccumulator  = StaticAccumulator<Vector3d>;
     // using PotVecAccumulator    = StaticAccumulator<potVec>;
     // using Mat3x3dAccumulator   = StaticAccumulator<Mat3x3d>;
@@ -414,8 +401,9 @@ namespace OpenMD {
     // using VectorAccumulator = StaticAccumulator< Vector<RealType, Dim> >;
 
     // template<unsigned int Dim>
-    // using SquareMatrixAccumulator = StaticAccumulator< SquareMatrix<RealType, Dim> >;
-  }
-}
+    // using SquareMatrixAccumulator = StaticAccumulator< SquareMatrix<RealType,
+    // Dim> >;
+  }  // namespace Utils
+}  // namespace OpenMD
 
-#endif // OPENMD_UTILS_STATICACCUMULATOR_HPP
+#endif  // OPENMD_UTILS_STATICACCUMULATOR_HPP

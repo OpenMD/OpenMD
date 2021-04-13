@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,12 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_BENDTYPEPARSER_HPP
 #define TYPES_BENDTYPEPARSER_HPP
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
+
 #include "types/BendType.hpp"
 
 namespace OpenMD {
@@ -61,10 +62,9 @@ namespace OpenMD {
     BendType* parseLine(const std::string& line, RealType kScale);
     BendType* parseTypeAndPars(const std::string& type,
                                std::vector<RealType> pars);
-        
-  private:
 
-    enum BendTypeEnum{
+  private:
+    enum BendTypeEnum {
       btHarmonic,
       btGhostBend,
       btUreyBradley,
@@ -77,14 +77,11 @@ namespace OpenMD {
       btHarmonicSine,
       btUnknown
     };
-            
-    BendTypeEnum getBendTypeEnum(const std::string& str);  
 
-    std::map<std::string, BendTypeEnum> stringToEnumMap_;  
+    BendTypeEnum getBendTypeEnum(const std::string& str);
+
+    std::map<std::string, BendTypeEnum> stringToEnumMap_;
   };
-}
+}  // namespace OpenMD
 
 #endif
-
-
-

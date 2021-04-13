@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,24 +46,24 @@
 #ifndef APPLICATIONS_STATICPROPS_SURFACEDIFFUSION_HPP
 #define APPLICATIONS_STATICPROPS_SURFACEDIFFUSION_HPP
 
+#include <fstream>
 #include <string>
 #include <vector>
-#include <fstream>
+
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 namespace OpenMD {
-  
-  class SurfaceDiffusion: public StaticAnalyser {
-    
+
+  class SurfaceDiffusion : public StaticAnalyser {
   public:
-    SurfaceDiffusion(SimInfo* info, const std::string& filename, const std::string& sele, RealType len);
-    
+    SurfaceDiffusion(SimInfo* info, const std::string& filename,
+                     const std::string& sele, RealType len);
+
     virtual void process();
-    
+
   private:
-    
     double round(double r);
     void solventAccessible();
     void mobileAtomsFirst();
@@ -72,42 +72,40 @@ namespace OpenMD {
     void positionCorrelation();
 
     Snapshot* currentSnapshot_;
-    
+
     int nProcessed_;
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan1_;
-  
+
     string filename_;
-    int bins_; 
+    int bins_;
     int selectionCount_;
     double singleMoveDistance_;
     int frames_;
     bool doSolvent_;
 
-
-    //All positions of all frames of selected indices
-    //positions_[0][i]
+    // All positions of all frames of selected indices
+    // positions_[0][i]
     // First particle at frame i
-    std::vector< std::vector<Vector3d> > positions_;
-    std::vector< std::vector<Vector3d> > positions2_;
+    std::vector<std::vector<Vector3d>> positions_;
+    std::vector<std::vector<Vector3d>> positions2_;
 
-    //mobility of particle i at time j
+    // mobility of particle i at time j
     // moBool[i][j]
     // moBool.resize(selectionCount_);
     // for(){
     //  moBool[i].resize(frames);
     // }
-    std::vector< std::vector<bool> > moBool_;
-    std::vector< std::vector<bool> > moBool2_;
+    std::vector<std::vector<bool>> moBool_;
+    std::vector<std::vector<bool>> moBool2_;
 
-    std::vector< std::vector<StuntDouble*> > gridSD_;
+    std::vector<std::vector<StuntDouble*>> gridSD_;
     std::vector<StuntDouble*> gridHighZ_;
     std::vector<StuntDouble*> gridLowZ_;
     std::vector<StuntDouble*> forIndex_;
     std::vector<Vector3d> firstPosition_;
     std::vector<Vector3d> lastPosition_;
-
 
     std::vector<int> SAIndices_;
     std::vector<int> mobileIndices_;
@@ -121,9 +119,6 @@ namespace OpenMD {
     RealType minDistance_;
     RealType probe_;
   };
-  
-}
+
+}  // namespace OpenMD
 #endif
-
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,14 +42,14 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file HarmonicsineBendType.hpp
  * @author    gezelter
  * @date  06/18/2010
  * @version 1.1
- */ 
- 
+ */
+
 #ifndef TYPES_HARMONICSINEBENDTYPE_HPP
 #define TYPES_HARMONICSINEBENDTYPE_HPP
 
@@ -57,30 +57,27 @@
 
 namespace OpenMD {
   /**
-   * @class HarmonicSineBendType 
+   * @class HarmonicSineBendType
    *
    * A bend using the square of the sine of the angle instead of
-   * the angle itself: 
+   * the angle itself:
    * \f[ Vbend = \frac{1}{8} k_\theta \sin^2( 2 \theta) \f]
    */
   class HarmonicSineBendType : public BendType {
-    
   public:
-    
     HarmonicSineBendType(RealType k) : BendType(0.0), k_(k) {}
-    
-    void setForceConstant(RealType k) {k_ = k; }    
-    RealType getForceConstant() {return k_;}
-    
+
+    void setForceConstant(RealType k) { k_ = k; }
+    RealType getForceConstant() { return k_; }
+
     void calcForce(RealType theta, RealType& V, RealType& dVdtheta) {
-      V = 0.125 * k_ * sin(2.0 * theta);
+      V        = 0.125 * k_ * sin(2.0 * theta);
       dVdtheta = 0.25 * k_ * sin(4.0 * theta);
     }
-    
-  private:
-    RealType k_;    
-  };
-  
-}//end namespace OpenMD
-#endif //TYPES_HARMONICSINEBENDTYPE_HPP
 
+  private:
+    RealType k_;
+  };
+
+}  // end namespace OpenMD
+#endif  // TYPES_HARMONICSINEBENDTYPE_HPP

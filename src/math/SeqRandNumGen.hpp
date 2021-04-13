@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,33 +48,33 @@
 
 #include <vector>
 
-#include "utils/simError.h"
 #include "math/RandNumGen.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
 
   /**
-   * @class SeqRandNumGen 
+   * @class SeqRandNumGen
    * @brief a sequential random number generator
    */
   class SeqRandNumGen : public RandNumGen {
   public:
-    typedef unsigned long uint32; 
-        
-    SeqRandNumGen( const uint32& oneSeed);
+    typedef unsigned long uint32;
+
+    SeqRandNumGen(const uint32& oneSeed);
 
     SeqRandNumGen();
-	
-    virtual void seed( const uint32 oneSeed );
-	
+
+    virtual void seed(const uint32 oneSeed);
+
     virtual void seed();
 
   private:
     SeqRandNumGen(const SeqRandNumGen&);
-    SeqRandNumGen& operator =(const SeqRandNumGen&);
-         
+    SeqRandNumGen& operator=(const SeqRandNumGen&);
+
     static int nCreatedRNG_; /**< number of created random number of generator*/
   };
-}
+}  // namespace OpenMD
 
-#endif 
+#endif

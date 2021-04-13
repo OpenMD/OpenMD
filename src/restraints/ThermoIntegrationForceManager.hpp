@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,22 +42,21 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef RESTRAINTS_THERMOINTEGRATIONFORCEMANAGER_HPP
 #define RESTRAINTS_THERMOINTEGRATIONFORCEMANAGER_HPP
 
 #include "restraints/RestraintForceManager.hpp"
 
 namespace OpenMD {
-  
+
   class ThermoIntegrationForceManager : public RestraintForceManager {
-    
   public:
     ThermoIntegrationForceManager(SimInfo* info);
     ~ThermoIntegrationForceManager();
-    
+
     virtual void calcForces();
-    
+
   private:
     Globals* simParam;
     Snapshot* currSnapshot_;
@@ -68,6 +67,6 @@ namespace OpenMD {
     RealType lrPot_;
     RealType vHarm_;
   };
-  
-}
-#endif 
+
+}  // namespace OpenMD
+#endif

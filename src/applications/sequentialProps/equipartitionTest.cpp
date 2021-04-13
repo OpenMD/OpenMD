@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -55,74 +55,76 @@
 
 namespace OpenMD {
 
-Equipartition::Equipartition(SimInfo* info, const std::string& filename,
-                             const std::string& sele1, const std::string& sele2)
-    : SequentialAnalyzer(info, filename, sele1, sele2) {
-  setOutputName(getPrefix(filename) + ".temp");
-}
-
-void Equipartition::doFrame(int frame) {
-  StuntDouble* sd;
-  int i;
-
-  if (evaluator1_.isDynamic()) {
-    seleMan1_.setSelectionSet(evaluator1_.evaluate());
+  Equipartition::Equipartition(SimInfo* info, const std::string& filename,
+                               const std::string& sele1,
+                               const std::string& sele2) :
+      SequentialAnalyzer(info, filename, sele1, sele2) {
+    setOutputName(getPrefix(filename) + ".temp");
   }
 
-  const RealType kb = 8.31451e-7;
-  Vector3d linMom_Temp;
-  Vector3d angMom_Temp;
-  int count = 0;
-  for (sd = seleMan1_.beginSelected(i); sd != NULL;
-       sd = seleMan1_.nextSelected(i)) {
-    count++;
-    Vector3d linMom = sd->getVel() * sd->getMass();
-    linMom_Temp[0] += linMom[0] * linMom[0] / (kb * sd->getMass());
-    linMom_Temp[1] += linMom[1] * linMom[1] / (kb * sd->getMass());
-    linMom_Temp[2] += linMom[2] * linMom[2] / (kb * sd->getMass());
-    if (sd->isDirectional()) {
-      Vector3d angMom = sd->getJ();
-      Mat3x3d momentInertia = sd->getI();
-      angMom_Temp[0] += angMom[0] * angMom[0] / (kb * momentInertia(0, 0));
-      angMom_Temp[1] += angMom[1] * angMom[1] / (kb * momentInertia(1, 1));
-      angMom_Temp[2] += angMom[2] * angMom[2] / (kb * momentInertia(2, 2));
-    }
-  }
+  void Equipartition::doFrame(int frame) {
+    StuntDouble* sd;
+    int i;
 
-  linMom_Temp /= count;
-  angMom_Temp /= count;
-  TempP_.push_back(linMom_Temp);
-  TempJ_.push_back(angMom_Temp);
-}
-
-void Equipartition::writeSequence() {
-  std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
-
-  if (ofs.is_open()) {
-    Revision r;
-
-    ofs << "# " << getSequenceType() << "\n";
-    ofs << "# OpenMD " << r.getFullRevision() << "\n";
-    ofs << "# " << r.getBuildDate() << "\n";
-    ofs << "# selection script1: \"" << selectionScript1_;
-    if (!paramString_.empty()) ofs << "# parameters: " << paramString_ << "\n";
-
-    ofs << "#time\t Tpx\t Tpy \t Tpz \t Tjx \t Tjy \t Tjz\n";
-
-    for (unsigned int i = 0; i < times_.size(); ++i) {
-      ofs << times_[i] << "\t" << TempP_[i].x() << "\t" << TempP_[i].y() << "\t"
-          << TempP_[i].z() << "\t" << TempJ_[i].x() << "\t" << TempJ_[i].y()
-          << "\t" << TempJ_[i].z() << "\n";
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
-  } else {
-    sprintf(painCave.errMsg,
-            "Equipartition::writeSequence Error: failed to open %s\n",
-            outputFilename_.c_str());
-    painCave.isFatal = 1;
-    simError();
+    const RealType kb = 8.31451e-7;
+    Vector3d linMom_Temp;
+    Vector3d angMom_Temp;
+    int count = 0;
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {
+      count++;
+      Vector3d linMom = sd->getVel() * sd->getMass();
+      linMom_Temp[0] += linMom[0] * linMom[0] / (kb * sd->getMass());
+      linMom_Temp[1] += linMom[1] * linMom[1] / (kb * sd->getMass());
+      linMom_Temp[2] += linMom[2] * linMom[2] / (kb * sd->getMass());
+      if (sd->isDirectional()) {
+        Vector3d angMom       = sd->getJ();
+        Mat3x3d momentInertia = sd->getI();
+        angMom_Temp[0] += angMom[0] * angMom[0] / (kb * momentInertia(0, 0));
+        angMom_Temp[1] += angMom[1] * angMom[1] / (kb * momentInertia(1, 1));
+        angMom_Temp[2] += angMom[2] * angMom[2] / (kb * momentInertia(2, 2));
+      }
+    }
+
+    linMom_Temp /= count;
+    angMom_Temp /= count;
+    TempP_.push_back(linMom_Temp);
+    TempJ_.push_back(angMom_Temp);
   }
 
-  ofs.close();
-}
+  void Equipartition::writeSequence() {
+    std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
+
+    if (ofs.is_open()) {
+      Revision r;
+
+      ofs << "# " << getSequenceType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_;
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+
+      ofs << "#time\t Tpx\t Tpy \t Tpz \t Tjx \t Tjy \t Tjz\n";
+
+      for (unsigned int i = 0; i < times_.size(); ++i) {
+        ofs << times_[i] << "\t" << TempP_[i].x() << "\t" << TempP_[i].y()
+            << "\t" << TempP_[i].z() << "\t" << TempJ_[i].x() << "\t"
+            << TempJ_[i].y() << "\t" << TempJ_[i].z() << "\n";
+      }
+
+    } else {
+      sprintf(painCave.errMsg,
+              "Equipartition::writeSequence Error: failed to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    ofs.close();
+  }
 }  // namespace OpenMD

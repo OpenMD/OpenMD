@@ -1,0 +1,43 @@
+---
+Language:        Cpp
+BasedOnStyle:    Google
+
+## Custom Formatting
+AccessModifierOffset: -2
+AlignConsecutiveAssignments: true
+AllowShortBlocksOnASingleLine: Always
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakBeforeMultilineStrings: false
+BreakInheritanceList: AfterColon
+BreakBeforeTernaryOperators: false
+BreakConstructorInitializers: AfterColon
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+DeriveLineEnding: false
+DerivePointerAlignment: false
+IncludeCategories:
+  ## Other libraries
+  - Regex:           '^<.*/.*[\.h\.hpp]>'
+    Priority:        3
+    SortPriority:    0
+  ## C system headers
+  - Regex:           '^<.*\.h>'
+    Priority:        1
+    SortPriority:    0
+  ## C++ standard library headers
+  - Regex:           '^<.*'
+    Priority:        2
+    SortPriority:    0
+  ## Other project files
+  - Regex:           '.*'
+    Priority:        4
+    SortPriority:    0
+IndentCaseLabels: false
+IndentWrappedFunctionNames: true
+NamespaceIndentation: All
+SpaceAfterTemplateKeyword: false
+SpaceBeforeCpp11BracedList: true
+SpacesInContainerLiterals: false
+Standard:        c++11
+TabWidth:        8
+...
+

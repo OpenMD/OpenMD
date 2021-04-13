@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -56,11 +56,9 @@ bool pairComparator(const evIndex& l, const evIndex& r) {
 }
 
 NanoLength::NanoLength(SimInfo* info, const std::string& filename,
-                       const std::string& sele)
-    : StaticAnalyser(info, filename, 1),
-      selectionScript_(sele),
-      seleMan_(info),
-      evaluator_(info) {
+                       const std::string& sele) :
+    StaticAnalyser(info, filename, 1),
+    selectionScript_(sele), seleMan_(info), evaluator_(info) {
   setOutputName(getPrefix(filename) + ".length");
 
   osq.open(getOutputFileName().c_str());
@@ -78,7 +76,7 @@ void NanoLength::process() {
   int i;
 
   DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
+  int nFrames   = reader.getNFrames();
   frameCounter_ = 0;
 
   theAtoms_.reserve(info_->getNGlobalAtoms());
@@ -87,7 +85,7 @@ void NanoLength::process() {
     reader.readFrame(istep);
     frameCounter_++;
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    RealType time = currentSnapshot_->getTime();
+    RealType time    = currentSnapshot_->getTime();
 
     // Clear pos vector between each frame.
     theAtoms_.clear();
@@ -106,9 +104,7 @@ void NanoLength::process() {
     RealType rodLength = getLength(theAtoms_);
 
     osq.precision(7);
-    if (osq.is_open()) {
-      osq << time << "\t" << rodLength << std::endl;
-    }
+    if (osq.is_open()) { osq << time << "\t" << rodLength << std::endl; }
   }
   osq.close();
 }
@@ -130,7 +126,7 @@ RealType NanoLength::getLength(std::vector<StuntDouble*> atoms) {
   for (std::vector<StuntDouble*>::iterator i = atoms.begin(); i != atoms.end();
        ++i) {
     Mat3x3d IAtom(0.0);
-    mtmp = (*i)->getMass();
+    mtmp           = (*i)->getMass();
     Vector3d delta = (*i)->getPos() - COM;
     IAtom -= outProduct(delta, delta) * mtmp;
     RealType r2 = delta.lengthSquare();
@@ -168,14 +164,14 @@ RealType NanoLength::getLength(std::vector<StuntDouble*> atoms) {
   // now project the delta from the center of mass onto the long
   // axis of the object
 
-  Vector3d longAxis = A.getColumn(2);
+  Vector3d longAxis   = A.getColumn(2);
   RealType axisLength = longAxis.length();
-  RealType projmin = 0.0;
-  RealType projmax = 0.0;
+  RealType projmin    = 0.0;
+  RealType projmax    = 0.0;
 
   for (std::vector<StuntDouble*>::iterator i = atoms.begin(); i != atoms.end();
        ++i) {
-    Vector3d delta = (*i)->getPos() - COM;
+    Vector3d delta      = (*i)->getPos() - COM;
     RealType projection = dot(delta, longAxis) / axisLength;
     if (projection > projmax) projmax = projection;
     if (projection < projmin) projmin = projection;

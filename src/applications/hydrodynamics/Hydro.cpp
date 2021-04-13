@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -79,9 +79,7 @@ int main(int argc, char* argv[]) {
   std::string prefix;
 
   // parse the command line option
-  if (cmdline_parser(argc, argv, &args_info) != 0) {
-    exit(1);
-  }
+  if (cmdline_parser(argc, argv, &args_info) != 0) { exit(1); }
 
   // get the dumpfile name and meta-data file name
   if (args_info.input_given) {
@@ -149,7 +147,7 @@ int main(int argc, char* argv[]) {
 
         SDShape tmp;
         tmp.shape = ShapeBuilder::createShape(sd);
-        tmp.sd = sd;
+        tmp.sd    = sd;
         uniqueStuntDoubles.insert(
             std::map<std::string, SDShape>::value_type(sd->getType(), tmp));
       }
@@ -162,8 +160,8 @@ int main(int argc, char* argv[]) {
   std::map<std::string, SDShape>::iterator si;
   for (si = uniqueStuntDoubles.begin(); si != uniqueStuntDoubles.end(); ++si) {
     HydrodynamicsModel* model = NULL;
-    Shape* shape = si->second.shape;
-    StuntDouble* sd = si->second.sd;
+    Shape* shape              = si->second.shape;
+    StuntDouble* sd           = si->second.sd;
 
     // if (shape->hasAnalyticalSolution()) {
     //  model = new AnalyticalModel(sd, info);
@@ -171,13 +169,13 @@ int main(int argc, char* argv[]) {
     if (args_info.model_given) {
       std::string modelName;
       switch (args_info.model_arg) {
-        case model_arg_RoughShell:
-          modelName = "RoughShell";
-          break;
-        case model_arg_BeadModel:
-        default:
-          modelName = "BeadModel";
-          break;
+      case model_arg_RoughShell:
+        modelName = "RoughShell";
+        break;
+      case model_arg_BeadModel:
+      default:
+        modelName = "BeadModel";
+        break;
       }
 
       model =

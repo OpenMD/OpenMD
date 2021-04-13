@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,29 +50,29 @@
 #include <iostream>
 
 namespace OpenMD {
-Component::Component() : moleculeStamp_(NULL) {
-  DefineParameter(Type, "type");
-  DefineParameter(NMol, "nMol");
-  DefineParameter(Region, "region");
-}
-
-Component::~Component() {}
-
-void Component::validate() {
-  CheckParameter(Type, isNotEmpty());
-  CheckParameter(NMol, isPositive());
-  CheckParameter(Region, isNonNegative());
-}
-
-bool Component::findMoleculeStamp(
-    const std::map<std::string, MoleculeStamp*>& molStamps) {
-  bool ret = false;
-  std::map<std::string, MoleculeStamp*>::const_iterator i;
-  i = molStamps.find(getType());
-  if (i != molStamps.end()) {
-    moleculeStamp_ = i->second;
-    ret = true;
+  Component::Component() : moleculeStamp_(NULL) {
+    DefineParameter(Type, "type");
+    DefineParameter(NMol, "nMol");
+    DefineParameter(Region, "region");
   }
-  return ret;
-}
+
+  Component::~Component() {}
+
+  void Component::validate() {
+    CheckParameter(Type, isNotEmpty());
+    CheckParameter(NMol, isPositive());
+    CheckParameter(Region, isNonNegative());
+  }
+
+  bool Component::findMoleculeStamp(
+      const std::map<std::string, MoleculeStamp*>& molStamps) {
+    bool ret = false;
+    std::map<std::string, MoleculeStamp*>::const_iterator i;
+    i = molStamps.find(getType());
+    if (i != molStamps.end()) {
+      moleculeStamp_ = i->second;
+      ret            = true;
+    }
+    return ret;
+  }
 }  // namespace OpenMD

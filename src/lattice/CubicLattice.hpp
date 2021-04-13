@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,27 +42,30 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef LATTICE_CUBICLATTICE_HPP
 #define LATTICE_CUBICLATTICE_HPP
-#include "lattice/Lattice.hpp"
 #include <string>
 #include <vector>
 
+#include "lattice/Lattice.hpp"
+
 namespace OpenMD {
 
-  class CubicLattice : public Lattice{
+  class CubicLattice : public Lattice {
   protected:
     CubicLattice();
-  public:
-    //get lattice constant of unit cell
-    virtual  std::vector<RealType> getLatticeConstant();
 
-    //set lattice constant of unit cell
-    virtual void setLatticeConstant(const  std::vector<RealType>& lc);
+  public:
+    // get lattice constant of unit cell
+    virtual std::vector<RealType> getLatticeConstant();
+
+    // set lattice constant of unit cell
+    virtual void setLatticeConstant(const std::vector<RealType>& lc);
+
   protected:
     RealType latticeParam;
   };
 
-}
+}  // namespace OpenMD
 #endif

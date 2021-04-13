@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file TupleMatcher.hpp
  * @author    tlin
  * @date  10/27/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef UTILS_TUPLEMATCHER_HPP
 #define UTILS_TUPLEMATCHER_HPP
@@ -58,17 +58,18 @@ namespace OpenMD {
 
   template<class TupleType, class ReturnType>
   class TupleMatcher {
-    static ReturnType match(const std::map<TupleType, ReturnType>& container, const TupleType& t) {
+    static ReturnType match(const std::map<TupleType, ReturnType>& container,
+                            const TupleType& t) {
       typename std::map<TupleType, ReturnType>::iterator i;
-      
+
       i = container.find(t);
       if (i != container.end()) {
-	return i->second;
+        return i->second;
       } else {
-	return NULL;
+        return NULL;
       }
     }
   };
-    
-}
-#endif //UTILS_TUPLEMATCHER_HPP
+
+}  // namespace OpenMD
+#endif  // UTILS_TUPLEMATCHER_HPP

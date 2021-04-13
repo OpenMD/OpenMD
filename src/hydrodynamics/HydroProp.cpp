@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,85 +50,85 @@
 
 namespace OpenMD {
 
-HydroProp::HydroProp() : hasCOR(false), hasXi(false) {}
+  HydroProp::HydroProp() : hasCOR(false), hasXi(false) {}
 
-HydroProp::HydroProp(Vector3d cor, Mat6x6d Xi, Mat6x6d D)
-    : cor_(cor), Xi_(Xi), D_(D), hasCOR(true), hasXi(true) {}
+  HydroProp::HydroProp(Vector3d cor, Mat6x6d Xi, Mat6x6d D) :
+      cor_(cor), Xi_(Xi), D_(D), hasCOR(true), hasXi(true) {}
 
-HydroProp::HydroProp(const std::string &frictionLine)
-    : hasCOR(false), hasXi(false) {
-  StringTokenizer tokenizer(frictionLine);
-  if (tokenizer.countTokens() >= 40) {
-    name_ = tokenizer.nextToken();
-    cor_[0] = tokenizer.nextTokenAsDouble();
-    cor_[1] = tokenizer.nextTokenAsDouble();
-    cor_[2] = tokenizer.nextTokenAsDouble();
+  HydroProp::HydroProp(const std::string& frictionLine) :
+      hasCOR(false), hasXi(false) {
+    StringTokenizer tokenizer(frictionLine);
+    if (tokenizer.countTokens() >= 40) {
+      name_   = tokenizer.nextToken();
+      cor_[0] = tokenizer.nextTokenAsDouble();
+      cor_[1] = tokenizer.nextTokenAsDouble();
+      cor_[2] = tokenizer.nextTokenAsDouble();
 
-    hasCOR = true;
+      hasCOR = true;
 
-    Xitt_(0, 0) = tokenizer.nextTokenAsDouble();
-    Xitt_(0, 1) = tokenizer.nextTokenAsDouble();
-    Xitt_(0, 2) = tokenizer.nextTokenAsDouble();
-    Xitt_(1, 0) = tokenizer.nextTokenAsDouble();
-    Xitt_(1, 1) = tokenizer.nextTokenAsDouble();
-    Xitt_(1, 2) = tokenizer.nextTokenAsDouble();
-    Xitt_(2, 0) = tokenizer.nextTokenAsDouble();
-    Xitt_(2, 1) = tokenizer.nextTokenAsDouble();
-    Xitt_(2, 2) = tokenizer.nextTokenAsDouble();
+      Xitt_(0, 0) = tokenizer.nextTokenAsDouble();
+      Xitt_(0, 1) = tokenizer.nextTokenAsDouble();
+      Xitt_(0, 2) = tokenizer.nextTokenAsDouble();
+      Xitt_(1, 0) = tokenizer.nextTokenAsDouble();
+      Xitt_(1, 1) = tokenizer.nextTokenAsDouble();
+      Xitt_(1, 2) = tokenizer.nextTokenAsDouble();
+      Xitt_(2, 0) = tokenizer.nextTokenAsDouble();
+      Xitt_(2, 1) = tokenizer.nextTokenAsDouble();
+      Xitt_(2, 2) = tokenizer.nextTokenAsDouble();
 
-    Xirt_(0, 0) = tokenizer.nextTokenAsDouble();
-    Xirt_(0, 1) = tokenizer.nextTokenAsDouble();
-    Xirt_(0, 2) = tokenizer.nextTokenAsDouble();
-    Xirt_(1, 0) = tokenizer.nextTokenAsDouble();
-    Xirt_(1, 1) = tokenizer.nextTokenAsDouble();
-    Xirt_(1, 2) = tokenizer.nextTokenAsDouble();
-    Xirt_(2, 0) = tokenizer.nextTokenAsDouble();
-    Xirt_(2, 1) = tokenizer.nextTokenAsDouble();
-    Xirt_(2, 2) = tokenizer.nextTokenAsDouble();
+      Xirt_(0, 0) = tokenizer.nextTokenAsDouble();
+      Xirt_(0, 1) = tokenizer.nextTokenAsDouble();
+      Xirt_(0, 2) = tokenizer.nextTokenAsDouble();
+      Xirt_(1, 0) = tokenizer.nextTokenAsDouble();
+      Xirt_(1, 1) = tokenizer.nextTokenAsDouble();
+      Xirt_(1, 2) = tokenizer.nextTokenAsDouble();
+      Xirt_(2, 0) = tokenizer.nextTokenAsDouble();
+      Xirt_(2, 1) = tokenizer.nextTokenAsDouble();
+      Xirt_(2, 2) = tokenizer.nextTokenAsDouble();
 
-    Xitr_(0, 0) = tokenizer.nextTokenAsDouble();
-    Xitr_(0, 1) = tokenizer.nextTokenAsDouble();
-    Xitr_(0, 2) = tokenizer.nextTokenAsDouble();
-    Xitr_(1, 0) = tokenizer.nextTokenAsDouble();
-    Xitr_(1, 1) = tokenizer.nextTokenAsDouble();
-    Xitr_(1, 2) = tokenizer.nextTokenAsDouble();
-    Xitr_(2, 0) = tokenizer.nextTokenAsDouble();
-    Xitr_(2, 1) = tokenizer.nextTokenAsDouble();
-    Xitr_(2, 2) = tokenizer.nextTokenAsDouble();
+      Xitr_(0, 0) = tokenizer.nextTokenAsDouble();
+      Xitr_(0, 1) = tokenizer.nextTokenAsDouble();
+      Xitr_(0, 2) = tokenizer.nextTokenAsDouble();
+      Xitr_(1, 0) = tokenizer.nextTokenAsDouble();
+      Xitr_(1, 1) = tokenizer.nextTokenAsDouble();
+      Xitr_(1, 2) = tokenizer.nextTokenAsDouble();
+      Xitr_(2, 0) = tokenizer.nextTokenAsDouble();
+      Xitr_(2, 1) = tokenizer.nextTokenAsDouble();
+      Xitr_(2, 2) = tokenizer.nextTokenAsDouble();
 
-    Xirr_(0, 0) = tokenizer.nextTokenAsDouble();
-    Xirr_(0, 1) = tokenizer.nextTokenAsDouble();
-    Xirr_(0, 2) = tokenizer.nextTokenAsDouble();
-    Xirr_(1, 0) = tokenizer.nextTokenAsDouble();
-    Xirr_(1, 1) = tokenizer.nextTokenAsDouble();
-    Xirr_(1, 2) = tokenizer.nextTokenAsDouble();
-    Xirr_(2, 0) = tokenizer.nextTokenAsDouble();
-    Xirr_(2, 1) = tokenizer.nextTokenAsDouble();
-    Xirr_(2, 2) = tokenizer.nextTokenAsDouble();
+      Xirr_(0, 0) = tokenizer.nextTokenAsDouble();
+      Xirr_(0, 1) = tokenizer.nextTokenAsDouble();
+      Xirr_(0, 2) = tokenizer.nextTokenAsDouble();
+      Xirr_(1, 0) = tokenizer.nextTokenAsDouble();
+      Xirr_(1, 1) = tokenizer.nextTokenAsDouble();
+      Xirr_(1, 2) = tokenizer.nextTokenAsDouble();
+      Xirr_(2, 0) = tokenizer.nextTokenAsDouble();
+      Xirr_(2, 1) = tokenizer.nextTokenAsDouble();
+      Xirr_(2, 2) = tokenizer.nextTokenAsDouble();
 
-    Xi_.setSubMatrix(0, 0, Xitt_);
-    Xi_.setSubMatrix(0, 3, Xirt_);
-    Xi_.setSubMatrix(3, 0, Xitr_);
-    Xi_.setSubMatrix(3, 3, Xirr_);
+      Xi_.setSubMatrix(0, 0, Xitt_);
+      Xi_.setSubMatrix(0, 3, Xirt_);
+      Xi_.setSubMatrix(3, 0, Xitr_);
+      Xi_.setSubMatrix(3, 3, Xirr_);
 
-    hasXi = true;
+      hasXi = true;
 
-    CholeskyDecomposition(Xi_, S_);
-  }
-}
-
-void HydroProp::complete() {
-  if (hasXi) {
-    for (int i1 = 0; i1 < 3; i1++) {
-      for (int j1 = 0; j1 < 3; j1++) {
-        Xitt_(i1, j1) = Xi_(i1, j1);
-        Xirt_(i1, j1) = Xi_(i1, j1 + 3);
-        Xitr_(i1, j1) = Xi_(i1 + 3, j1);
-        Xirr_(i1, j1) = Xi_(i1 + 3, j1 + 3);
-      }
+      CholeskyDecomposition(Xi_, S_);
     }
-    CholeskyDecomposition(Xi_, S_);
   }
-}
+
+  void HydroProp::complete() {
+    if (hasXi) {
+      for (int i1 = 0; i1 < 3; i1++) {
+        for (int j1 = 0; j1 < 3; j1++) {
+          Xitt_(i1, j1) = Xi_(i1, j1);
+          Xirt_(i1, j1) = Xi_(i1, j1 + 3);
+          Xitr_(i1, j1) = Xi_(i1 + 3, j1);
+          Xirr_(i1, j1) = Xi_(i1 + 3, j1 + 3);
+        }
+      }
+      CholeskyDecomposition(Xi_, S_);
+    }
+  }
 
 }  // namespace OpenMD

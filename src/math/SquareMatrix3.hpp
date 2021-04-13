@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file SquareMatrix3.hpp
  * @author Teng Lin
@@ -51,72 +51,59 @@
  */
 
 #ifndef MATH_SQUAREMATRIX3_HPP
-#define  MATH_SQUAREMATRIX3_HPP
-#include "config.h"
+#define MATH_SQUAREMATRIX3_HPP
 #include <cmath>
-#include <vector>
 #include <limits>
+#include <vector>
+
 #include "Quaternion.hpp"
 #include "SquareMatrix.hpp"
 #include "Vector3.hpp"
+#include "config.h"
 namespace OpenMD {
 
   template<typename Real>
   class SquareMatrix3 : public SquareMatrix<Real, 3> {
   public:
-
     typedef Real ElemType;
     typedef Real* ElemPoinerType;
-            
+
     /** default constructor */
-    SquareMatrix3() : SquareMatrix<Real, 3>() {
-    }
+    SquareMatrix3() : SquareMatrix<Real, 3>() {}
 
-    /** Constructs and initializes every element of this matrix to a scalar */ 
-    SquareMatrix3(Real s) : SquareMatrix<Real,3>(s){
-    }
+    /** Constructs and initializes every element of this matrix to a scalar */
+    SquareMatrix3(Real s) : SquareMatrix<Real, 3>(s) {}
 
-    /** Constructs and initializes from an array */ 
-    SquareMatrix3(Real* array) : SquareMatrix<Real,3>(array){
-    }
-
+    /** Constructs and initializes from an array */
+    SquareMatrix3(Real* array) : SquareMatrix<Real, 3>(array) {}
 
     /** copy  constructor */
-    SquareMatrix3(const SquareMatrix<Real, 3>& m)  : SquareMatrix<Real, 3>(m) {
-    }
-            
-    SquareMatrix3( const Vector3<Real>& eulerAngles) {
+    SquareMatrix3(const SquareMatrix<Real, 3>& m) : SquareMatrix<Real, 3>(m) {}
+
+    SquareMatrix3(const Vector3<Real>& eulerAngles) {
       setupRotMat(eulerAngles);
     }
-            
+
     SquareMatrix3(Real phi, Real theta, Real psi) {
       setupRotMat(phi, theta, psi);
     }
 
-    SquareMatrix3(const Quaternion<Real>& q) {
-      setupRotMat(q);
+    SquareMatrix3(const Quaternion<Real>& q) { setupRotMat(q); }
 
-    }
+    SquareMatrix3(Real w, Real x, Real y, Real z) { setupRotMat(w, x, y, z); }
 
-    SquareMatrix3(Real w, Real x, Real y, Real z) {
-      setupRotMat(w, x, y, z);
-    }
-            
     /** copy assignment operator */
-    SquareMatrix3<Real>& operator =(const SquareMatrix<Real, 3>& m) {
-      if (this == &m)
-	return *this;
+    SquareMatrix3<Real>& operator=(const SquareMatrix<Real, 3>& m) {
+      if (this == &m) return *this;
       SquareMatrix<Real, 3>::operator=(m);
       return *this;
     }
 
-
-    SquareMatrix3<Real>& operator =(const Quaternion<Real>& q) {
+    SquareMatrix3<Real>& operator=(const Quaternion<Real>& q) {
       this->setupRotMat(q);
       return *this;
     }
 
-    
     /**
      * Sets this matrix to a rotation matrix by three euler angles
      * @ param euler
@@ -135,17 +122,17 @@ namespace OpenMD {
       Real sphi, stheta, spsi;
       Real cphi, ctheta, cpsi;
 
-      sphi = sin(phi);
+      sphi   = sin(phi);
       stheta = sin(theta);
-      spsi = sin(psi);
-      cphi = cos(phi);
+      spsi   = sin(psi);
+      cphi   = cos(phi);
       ctheta = cos(theta);
-      cpsi = cos(psi);
+      cpsi   = cos(psi);
 
       this->data_[0][0] = cpsi * cphi - ctheta * sphi * spsi;
       this->data_[0][1] = cpsi * sphi + ctheta * cphi * spsi;
       this->data_[0][2] = spsi * stheta;
-                
+
       this->data_[1][0] = -spsi * cphi - ctheta * sphi * cpsi;
       this->data_[1][1] = -spsi * sphi + ctheta * cphi * cpsi;
       this->data_[1][2] = cpsi * stheta;
@@ -154,7 +141,6 @@ namespace OpenMD {
       this->data_[2][1] = -stheta * cphi;
       this->data_[2][2] = ctheta;
     }
-
 
     /**
      * Sets this matrix to a rotation matrix by quaternion
@@ -166,7 +152,7 @@ namespace OpenMD {
 
     /**
      * Sets this matrix to a rotation matrix by quaternion
-     * @param w the first element 
+     * @param w the first element
      * @param x the second element
      * @param y the third element
      * @param z the fourth element
@@ -176,9 +162,7 @@ namespace OpenMD {
       *this = q.toRotationMatrix3();
     }
 
-    void setupSkewMat(Vector3<Real> v) {
-      setupSkewMat(v[0], v[1], v[2]);
-    }
+    void setupSkewMat(Vector3<Real> v) { setupSkewMat(v[0], v[1], v[2]); }
 
     void setupSkewMat(Real v1, Real v2, Real v3) {
       this->data_[0][0] = 0;
@@ -189,7 +173,7 @@ namespace OpenMD {
       this->data_[1][2] = -v1;
       this->data_[2][0] = -v2;
       this->data_[2][1] = v1;
-      this->data_[2][2] = 0;               
+      this->data_[2][2] = 0;
     }
 
     /**
@@ -199,7 +183,7 @@ namespace OpenMD {
     void setupVoigtTensor(Vector<Real, 6> vt) {
       setupVoigtTensor(vt[0], vt[1], vt[2], vt[3], vt[4], vt[5]);
     }
-    
+
     void setupVoigtTensor(Real v1, Real v2, Real v3, Real v4, Real v5,
                           Real v6) {
       this->data_[0][0] = v1;
@@ -212,7 +196,7 @@ namespace OpenMD {
       this->data_[0][1] = v6;
       this->data_[1][0] = v6;
     }
-    
+
     /**
      * Sets this matrix to an upper-triangular (asymmetric) tensor
      * using Voigt Notation
@@ -221,7 +205,7 @@ namespace OpenMD {
     void setupUpperTriangularVoigtTensor(Vector<Real, 6> vt) {
       setupUpperTriangularVoigtTensor(vt[0], vt[1], vt[2], vt[3], vt[4], vt[5]);
     }
-    
+
     void setupUpperTriangularVoigtTensor(Real v1, Real v2, Real v3, Real v4,
                                          Real v5, Real v6) {
       this->data_[0][0] = v1;
@@ -231,7 +215,7 @@ namespace OpenMD {
       this->data_[0][2] = v5;
       this->data_[0][1] = v6;
     }
-         
+
     /**
      * Uses Rodrigues' rotation formula for a rotation matrix.
      * @param axis the axis to rotate around
@@ -244,73 +228,68 @@ namespace OpenMD {
 
       *this = ct * SquareMatrix3<Real>::identity();
       *this += st * SquareMatrix3<Real>::setupSkewMat(axis);
-      *this += (1-ct) * SquareMatrix3<Real>::outProduct(axis, axis);      
+      *this += (1 - ct) * SquareMatrix3<Real>::outProduct(axis, axis);
     }
-    
+
     /**
      * Returns the quaternion from this rotation matrix
      * @return the quaternion from this rotation matrix
      * @exception invalid rotation matrix
-     */            
+     */
     Quaternion<Real> toQuaternion() {
       Quaternion<Real> q;
       Real t, s;
-      Real ad1, ad2, ad3;    
+      Real ad1, ad2, ad3;
       t = this->data_[0][0] + this->data_[1][1] + this->data_[2][2] + 1.0;
 
-      if( t > std::numeric_limits<RealType>::epsilon() ){
-
-	s = 0.5 / sqrt( t );
-	q[0] = 0.25 / s;
-	q[1] = (this->data_[1][2] - this->data_[2][1]) * s;
-	q[2] = (this->data_[2][0] - this->data_[0][2]) * s;
-	q[3] = (this->data_[0][1] - this->data_[1][0]) * s;
+      if (t > std::numeric_limits<RealType>::epsilon()) {
+        s    = 0.5 / sqrt(t);
+        q[0] = 0.25 / s;
+        q[1] = (this->data_[1][2] - this->data_[2][1]) * s;
+        q[2] = (this->data_[2][0] - this->data_[0][2]) * s;
+        q[3] = (this->data_[0][1] - this->data_[1][0]) * s;
       } else {
+        ad1 = this->data_[0][0];
+        ad2 = this->data_[1][1];
+        ad3 = this->data_[2][2];
 
-	ad1 = this->data_[0][0];
-	ad2 = this->data_[1][1];
-	ad3 = this->data_[2][2];
-
-	if( ad1 >= ad2 && ad1 >= ad3 ){
-
-	  s = 0.5 / sqrt( 1.0 + this->data_[0][0] - this->data_[1][1] -
-                          this->data_[2][2] );
-	  q[0] = (this->data_[1][2] - this->data_[2][1]) * s;
-	  q[1] = 0.25 / s;
-	  q[2] = (this->data_[0][1] + this->data_[1][0]) * s;
-	  q[3] = (this->data_[0][2] + this->data_[2][0]) * s;
-	} else if ( ad2 >= ad1 && ad2 >= ad3 ) {
-	  s = 0.5 / sqrt( 1.0 + this->data_[1][1] - this->data_[0][0] -
-                          this->data_[2][2] );
-	  q[0] = (this->data_[2][0] - this->data_[0][2] ) * s;
-	  q[1] = (this->data_[0][1] + this->data_[1][0]) * s;
-	  q[2] = 0.25 / s;
-	  q[3] = (this->data_[1][2] + this->data_[2][1]) * s;
-	} else {
-
-	  s = 0.5 / sqrt( 1.0 + this->data_[2][2] - this->data_[0][0] -
-                          this->data_[1][1] );
-	  q[0] = (this->data_[0][1] - this->data_[1][0]) * s;
-	  q[1] = (this->data_[0][2] + this->data_[2][0]) * s;
-	  q[2] = (this->data_[1][2] + this->data_[2][1]) * s;
-	  q[3] = 0.25 / s;
-	}
-      }             
+        if (ad1 >= ad2 && ad1 >= ad3) {
+          s    = 0.5 / sqrt(1.0 + this->data_[0][0] - this->data_[1][1] -
+                         this->data_[2][2]);
+          q[0] = (this->data_[1][2] - this->data_[2][1]) * s;
+          q[1] = 0.25 / s;
+          q[2] = (this->data_[0][1] + this->data_[1][0]) * s;
+          q[3] = (this->data_[0][2] + this->data_[2][0]) * s;
+        } else if (ad2 >= ad1 && ad2 >= ad3) {
+          s    = 0.5 / sqrt(1.0 + this->data_[1][1] - this->data_[0][0] -
+                         this->data_[2][2]);
+          q[0] = (this->data_[2][0] - this->data_[0][2]) * s;
+          q[1] = (this->data_[0][1] + this->data_[1][0]) * s;
+          q[2] = 0.25 / s;
+          q[3] = (this->data_[1][2] + this->data_[2][1]) * s;
+        } else {
+          s    = 0.5 / sqrt(1.0 + this->data_[2][2] - this->data_[0][0] -
+                         this->data_[1][1]);
+          q[0] = (this->data_[0][1] - this->data_[1][0]) * s;
+          q[1] = (this->data_[0][2] + this->data_[2][0]) * s;
+          q[2] = (this->data_[1][2] + this->data_[2][1]) * s;
+          q[3] = 0.25 / s;
+        }
+      }
 
       return q;
-                
     }
 
     /**
      * Returns the euler angles from this rotation matrix
-     * @return the euler angles in a vector 
+     * @return the euler angles in a vector
      * @exception invalid rotation matrix
-     * We use so-called "x-convention", which is the most common definition. 
-     * In this convention, the rotation given by Euler angles (phi, theta, 
-     * psi), where the first rotation is by an angle phi about the z-axis, 
-     * the second is by an angle theta (0 <= theta <= 180) about the x-axis, 
-     * and the third is by an angle psi about the z-axis (again). 
-     */            
+     * We use so-called "x-convention", which is the most common definition.
+     * In this convention, the rotation given by Euler angles (phi, theta,
+     * psi), where the first rotation is by an angle phi about the z-axis,
+     * the second is by an angle theta (0 <= theta <= 180) about the x-axis,
+     * and the third is by an angle psi about the z-axis (again).
+     */
     Vector3<Real> toEulerAngles() {
       Vector3<Real> myEuler;
       Real phi;
@@ -318,12 +297,12 @@ namespace OpenMD {
       Real psi;
       Real ctheta;
       Real stheta;
-                
+
       // set the tolerance for Euler angles and rotation elements
 
-      theta = acos(std::min((RealType)1.0,
-                            std::max((RealType)-1.0, this->data_[2][2])));
-      ctheta = this->data_[2][2]; 
+      theta = acos(
+          std::min((RealType)1.0, std::max((RealType)-1.0, this->data_[2][2])));
+      ctheta = this->data_[2][2];
       stheta = sqrt(1.0 - ctheta * ctheta);
 
       // when sin(theta) is close to 0, we need to consider
@@ -331,27 +310,25 @@ namespace OpenMD {
       // phi (or psi), and then determine the psi (or phi) or
       // vice-versa. We'll assume that phi always gets the rotation,
       // and psi is 0 in cases of singularity.
-      // we use atan2 instead of atan, since atan2 will give us -Pi to Pi. 
+      // we use atan2 instead of atan, since atan2 will give us -Pi to Pi.
       // Since 0 <= theta <= 180, sin(theta) will be always
       // non-negative. Therefore, it will never change the sign of both of
       // the parameters passed to atan2.
 
-      if (fabs(stheta) < 1e-6){
-	psi = 0.0;
-	phi = atan2(-this->data_[1][0], this->data_[0][0]);  
+      if (fabs(stheta) < 1e-6) {
+        psi = 0.0;
+        phi = atan2(-this->data_[1][0], this->data_[0][0]);
       }
       // we only have one unique solution
-      else{    
-	phi = atan2(this->data_[2][0], -this->data_[2][1]);
-	psi = atan2(this->data_[0][2], this->data_[1][2]);
+      else {
+        phi = atan2(this->data_[2][0], -this->data_[2][1]);
+        psi = atan2(this->data_[0][2], this->data_[1][2]);
       }
 
-      //wrap phi and psi, make sure they are in the range from 0 to 2*Pi
-      if (phi < 0)
-	phi += 2.0 * Constants::PI;
+      // wrap phi and psi, make sure they are in the range from 0 to 2*Pi
+      if (phi < 0) phi += 2.0 * Constants::PI;
 
-      if (psi < 0)
-	psi += 2.0 * Constants::PI;
+      if (psi < 0) psi += 2.0 * Constants::PI;
 
       myEuler[0] = phi;
       myEuler[1] = theta;
@@ -360,7 +337,6 @@ namespace OpenMD {
       return myEuler;
     }
 
-    
     Vector<Real, 6> toVoigtTensor() {
       Vector<Real, 6> voigt;
       voigt[0] = this->data_[0][0];
@@ -371,10 +347,10 @@ namespace OpenMD {
       voigt[5] = 0.5 * (this->data_[0][1] + this->data_[1][0]);
       return voigt;
     }
-            
+
     /** Returns the determinant of this matrix. */
     Real determinant() const {
-      Real x,y,z;
+      Real x, y, z;
 
       x = this->data_[0][0] * (this->data_[1][1] * this->data_[2][2] -
                                this->data_[1][2] * this->data_[2][1]);
@@ -382,66 +358,69 @@ namespace OpenMD {
                                this->data_[1][0] * this->data_[2][2]);
       z = this->data_[0][2] * (this->data_[1][0] * this->data_[2][1] -
                                this->data_[1][1] * this->data_[2][0]);
-      return(x + y + z);
-    }            
+      return (x + y + z);
+    }
 
     /** Returns the trace of this matrix. */
     Real trace() const {
       return this->data_[0][0] + this->data_[1][1] + this->data_[2][2];
     }
-            
+
     /**
      * Sets the value of this matrix to the inverse of itself.
      * @note since this simple algorithm can be applied to invert a 3 by 3
      * matrix, we hide the implementation of inverse in SquareMatrix
      * class
      */
-    SquareMatrix3<Real>  inverse() const {
+    SquareMatrix3<Real> inverse() const {
       SquareMatrix3<Real> m;
       RealType det = determinant();
-      m(0, 0) = this->data_[1][1]*this->data_[2][2]
-        - this->data_[1][2]*this->data_[2][1];
-      m(1, 0) = this->data_[1][2]*this->data_[2][0]
-        - this->data_[1][0]*this->data_[2][2];
-      m(2, 0) = this->data_[1][0]*this->data_[2][1]
-        - this->data_[1][1]*this->data_[2][0];
-      m(0, 1) = this->data_[2][1]*this->data_[0][2]
-        - this->data_[2][2]*this->data_[0][1];
-      m(1, 1) = this->data_[2][2]*this->data_[0][0]
-        - this->data_[2][0]*this->data_[0][2];
-      m(2, 1) = this->data_[2][0]*this->data_[0][1]
-        - this->data_[2][1]*this->data_[0][0];
-      m(0, 2) = this->data_[0][1]*this->data_[1][2]
-        - this->data_[0][2]*this->data_[1][1];
-      m(1, 2) = this->data_[0][2]*this->data_[1][0]
-        - this->data_[0][0]*this->data_[1][2];
-      m(2, 2) = this->data_[0][0]*this->data_[1][1]
-        - this->data_[0][1]*this->data_[1][0];
+      m(0, 0)      = this->data_[1][1] * this->data_[2][2] -
+                this->data_[1][2] * this->data_[2][1];
+      m(1, 0) = this->data_[1][2] * this->data_[2][0] -
+                this->data_[1][0] * this->data_[2][2];
+      m(2, 0) = this->data_[1][0] * this->data_[2][1] -
+                this->data_[1][1] * this->data_[2][0];
+      m(0, 1) = this->data_[2][1] * this->data_[0][2] -
+                this->data_[2][2] * this->data_[0][1];
+      m(1, 1) = this->data_[2][2] * this->data_[0][0] -
+                this->data_[2][0] * this->data_[0][2];
+      m(2, 1) = this->data_[2][0] * this->data_[0][1] -
+                this->data_[2][1] * this->data_[0][0];
+      m(0, 2) = this->data_[0][1] * this->data_[1][2] -
+                this->data_[0][2] * this->data_[1][1];
+      m(1, 2) = this->data_[0][2] * this->data_[1][0] -
+                this->data_[0][0] * this->data_[1][2];
+      m(2, 2) = this->data_[0][0] * this->data_[1][1] -
+                this->data_[0][1] * this->data_[1][0];
       m /= det;
       return m;
     }
 
-    SquareMatrix3<Real> transpose() const{
+    SquareMatrix3<Real> transpose() const {
       SquareMatrix3<Real> result;
-                
+
       for (unsigned int i = 0; i < 3; i++)
-	for (unsigned int j = 0; j < 3; j++)              
-	  result(j, i) = this->data_[i][j];
+        for (unsigned int j = 0; j < 3; j++)
+          result(j, i) = this->data_[i][j];
 
       return result;
     }
     /**
      * Extract the eigenvalues and eigenvectors from a 3x3 matrix.
-     * The eigenvectors (the columns of V) will be normalized. 
+     * The eigenvectors (the columns of V) will be normalized.
      * The eigenvectors are aligned optimally with the x, y, and z
      * axes respectively.
-     * @param a symmetric matrix whose eigenvectors are to be computed. On return, the matrix is overwritten             
-     * @param w will contain the eigenvalues of the matrix On return of this function
-     * @param v the columns of this matrix will contain the eigenvectors. The eigenvectors are normalized and mutually orthogonal.              
+     * @param a symmetric matrix whose eigenvectors are to be computed. On
+     * return, the matrix is overwritten
+     * @param w will contain the eigenvalues of the matrix On return of this
+     * function
+     * @param v the columns of this matrix will contain the eigenvectors. The
+     * eigenvectors are normalized and mutually orthogonal.
      * @warning a will be overwritten
      */
     static void diagonalize(SquareMatrix3<Real>& a, Vector3<Real>& w,
-                            SquareMatrix3<Real>& v); 
+                            SquareMatrix3<Real>& v);
   };
   /*=========================================================================
 
@@ -459,74 +438,73 @@ namespace OpenMD {
     =========================================================================*/
   template<typename Real>
   void SquareMatrix3<Real>::diagonalize(SquareMatrix3<Real>& a,
-                                        Vector3<Real>& w, 
-					SquareMatrix3<Real>& v) {
-    int i,j,k,maxI;
+                                        Vector3<Real>& w,
+                                        SquareMatrix3<Real>& v) {
+    int i, j, k, maxI;
     Real tmp, maxVal;
     Vector3<Real> v_maxI, v_k, v_j;
 
     // diagonalize using Jacobi
     SquareMatrix3<Real>::jacobi(a, w, v);
     // if all the eigenvalues are the same, return identity matrix
-    if (w[0] == w[1] && w[0] == w[2] ) {
+    if (w[0] == w[1] && w[0] == w[2]) {
       v = SquareMatrix3<Real>::identity();
       return;
     }
 
     // transpose temporarily, it makes it easier to sort the eigenvectors
-    v = v.transpose(); 
-        
+    v = v.transpose();
+
     // if two eigenvalues are the same, re-orthogonalize to optimally line
     // up the eigenvectors with the x, y, and z axes
     for (i = 0; i < 3; i++) {
-      if (w((i+1)%3) == w((i+2)%3)) {// two eigenvalues are the same
-	// find maximum element of the independant eigenvector
-	maxVal = fabs(v(i, 0));
-	maxI = 0;
-	for (j = 1; j < 3; j++) {
-	  if (maxVal < (tmp = fabs(v(i, j)))){
-	    maxVal = tmp;
-	    maxI = j;
-	  }
-	}
-            
-	// swap the eigenvector into its proper position
-	if (maxI != i) {
-	  tmp = w(maxI);
-	  w(maxI) = w(i);
-	  w(i) = tmp;
+      if (w((i + 1) % 3) == w((i + 2) % 3)) {  // two eigenvalues are the same
+        // find maximum element of the independant eigenvector
+        maxVal = fabs(v(i, 0));
+        maxI   = 0;
+        for (j = 1; j < 3; j++) {
+          if (maxVal < (tmp = fabs(v(i, j)))) {
+            maxVal = tmp;
+            maxI   = j;
+          }
+        }
 
-	  v.swapRow(i, maxI);
-	}
-	// maximum element of eigenvector should be positive
-	if (v(maxI, maxI) < 0) {
-	  v(maxI, 0) = -v(maxI, 0);
-	  v(maxI, 1) = -v(maxI, 1);
-	  v(maxI, 2) = -v(maxI, 2);
-	}
+        // swap the eigenvector into its proper position
+        if (maxI != i) {
+          tmp     = w(maxI);
+          w(maxI) = w(i);
+          w(i)    = tmp;
 
-	// re-orthogonalize the other two eigenvectors
-	j = (maxI+1)%3;
-	k = (maxI+2)%3;
+          v.swapRow(i, maxI);
+        }
+        // maximum element of eigenvector should be positive
+        if (v(maxI, maxI) < 0) {
+          v(maxI, 0) = -v(maxI, 0);
+          v(maxI, 1) = -v(maxI, 1);
+          v(maxI, 2) = -v(maxI, 2);
+        }
 
-	v(j, 0) = 0.0; 
-	v(j, 1) = 0.0; 
-	v(j, 2) = 0.0;
-	v(j, j) = 1.0;
+        // re-orthogonalize the other two eigenvectors
+        j = (maxI + 1) % 3;
+        k = (maxI + 2) % 3;
 
-	/** @todo */
-	v_maxI = v.getRow(maxI);
-	v_j = v.getRow(j);
-	v_k = cross(v_maxI, v_j);
-	v_k.normalize();
-	v_j = cross(v_k, v_maxI);
-	v.setRow(j, v_j);
-	v.setRow(k, v_k);
+        v(j, 0) = 0.0;
+        v(j, 1) = 0.0;
+        v(j, 2) = 0.0;
+        v(j, j) = 1.0;
 
+        /** @todo */
+        v_maxI = v.getRow(maxI);
+        v_j    = v.getRow(j);
+        v_k    = cross(v_maxI, v_j);
+        v_k.normalize();
+        v_j = cross(v_k, v_maxI);
+        v.setRow(j, v_j);
+        v.setRow(k, v_k);
 
-	// transpose vectors back to columns
-	v = v.transpose();
-	return;
+        // transpose vectors back to columns
+        v = v.transpose();
+        return;
       }
     }
 
@@ -536,24 +514,24 @@ namespace OpenMD {
     // find the vector with the largest x element, make that vector
     // the first vector
     maxVal = fabs(v(0, 0));
-    maxI = 0;
+    maxI   = 0;
     for (i = 1; i < 3; i++) {
       if (maxVal < (tmp = fabs(v(i, 0)))) {
-	maxVal = tmp;
-	maxI = i;
+        maxVal = tmp;
+        maxI   = i;
       }
     }
 
     // swap eigenvalue and eigenvector
     if (maxI != 0) {
-      tmp = w(maxI);
+      tmp     = w(maxI);
       w(maxI) = w(0);
-      w(0) = tmp;
+      w(0)    = tmp;
       v.swapRow(maxI, 0);
     }
     // do the same for the y element
     if (fabs(v(1, 1)) < fabs(v(2, 1))) {
-      tmp = w(2);
+      tmp  = w(2);
       w(2) = w(1);
       w(1) = tmp;
       v.swapRow(2, 1);
@@ -562,9 +540,9 @@ namespace OpenMD {
     // ensure that the sign of the eigenvectors is correct
     for (i = 0; i < 2; i++) {
       if (v(i, i) < 0) {
-	v(i, 0) = -v(i, 0);
-	v(i, 1) = -v(i, 1);
-	v(i, 2) = -v(i, 2);
+        v(i, 0) = -v(i, 0);
+        v(i, 1) = -v(i, 1);
+        v(i, 2) = -v(i, 2);
       }
     }
 
@@ -577,49 +555,46 @@ namespace OpenMD {
 
     // transpose the eigenvectors back again
     v = v.transpose();
-    return ;
+    return;
   }
 
   /**
-   * Return the multiplication of two matrixes  (m1 * m2). 
+   * Return the multiplication of two matrixes  (m1 * m2).
    * @return the multiplication of two matrixes
    * @param m1 the first matrix
    * @param m2 the second matrix
    */
-  template<typename Real> 
-  inline SquareMatrix3<Real> operator *(const SquareMatrix3<Real>& m1,
-                                        const SquareMatrix3<Real>& m2) {
+  template<typename Real>
+  inline SquareMatrix3<Real> operator*(const SquareMatrix3<Real>& m1,
+                                       const SquareMatrix3<Real>& m2) {
     SquareMatrix3<Real> result;
 
     for (unsigned int i = 0; i < 3; i++)
       for (unsigned int j = 0; j < 3; j++)
-	for (unsigned int k = 0; k < 3; k++)
-	  result(i, j)  += m1(i, k) * m2(k, j);                
+        for (unsigned int k = 0; k < 3; k++)
+          result(i, j) += m1(i, k) * m2(k, j);
 
     return result;
   }
 
-  template<typename Real> 
+  template<typename Real>
   inline SquareMatrix3<Real> outProduct(const Vector3<Real>& v1,
                                         const Vector3<Real>& v2) {
     SquareMatrix3<Real> result;
 
     for (unsigned int i = 0; i < 3; i++) {
       for (unsigned int j = 0; j < 3; j++) {
-	result(i, j)  = v1[i] * v2[j];                
+        result(i, j) = v1[i] * v2[j];
       }
     }
-            
-    return result;        
+
+    return result;
   }
 
-    
   typedef SquareMatrix3<RealType> Mat3x3d;
   typedef SquareMatrix3<RealType> RotMat3x3d;
 
   const Mat3x3d M3Zero(0.0);
 
-
-} //namespace OpenMD
-#endif // MATH_SQUAREMATRIX3_HPP
-
+}  // namespace OpenMD
+#endif  // MATH_SQUAREMATRIX3_HPP

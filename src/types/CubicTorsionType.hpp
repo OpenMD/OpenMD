@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file TorsionType.hpp
  * @author    tlin
  * @date  11/01/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_CUBICTORSIONTYPE_HPP
 #define TYPES_CUBICTORSIONTYPE_HPP
@@ -57,49 +57,43 @@
 
 namespace OpenMD {
   /**
-   * @class CubicTorsionType 
+   * @class CubicTorsionType
    * @todo document
    */
   class CubicTorsionType : public TorsionType {
-    
   public:
-    
-    CubicTorsionType(RealType k3, RealType k2, RealType k1, RealType k0) 
-      : k3_(k3), k2_(k2),  k1_(k1), k0_(k0){
-    }
-    
+    CubicTorsionType(RealType k3, RealType k2, RealType k1, RealType k0) :
+        k3_(k3), k2_(k2), k1_(k1), k0_(k0) {}
+
     void setForceConstant(RealType k3, RealType k2, RealType k1, RealType k0) {
       k3_ = k3;
       k2_ = k2;
       k1_ = k1;
       k0_ = k0;
     }
-    
-    void getForceConstant(RealType& k3, RealType& k2, RealType& k1, 
+
+    void getForceConstant(RealType& k3, RealType& k2, RealType& k1,
                           RealType& k0) {
       k3 = k3_;
       k2 = k2_;
       k1 = k1_;
       k0 = k0_;
     }
-    
-    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi){ 
+
+    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) {
       RealType cosPhi2 = cosPhi * cosPhi;
       RealType cosPhi3 = cosPhi2 * cosPhi;
-            
-      V =k0_ + k1_ * cosPhi + k2_*cosPhi2 + k3_*cosPhi3;
-      dVdCosPhi = k1_ + 2.0*k2_ * cosPhi + 3.0 * k3_*cosPhi2;     
+
+      V         = k0_ + k1_ * cosPhi + k2_ * cosPhi2 + k3_ * cosPhi3;
+      dVdCosPhi = k1_ + 2.0 * k2_ * cosPhi + 3.0 * k3_ * cosPhi2;
     }
-    
+
   private:
-    
     RealType k3_;
     RealType k2_;
     RealType k1_;
     RealType k0_;
-    
   };
-  
-}//end namespace OpenMD
-#endif //TYPES_CUBICTORSIONTYPE_HPP
 
+}  // end namespace OpenMD
+#endif  // TYPES_CUBICTORSIONTYPE_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file SimSnapshotManager.hpp
  * @author tlin
@@ -56,14 +56,15 @@
 #include "brains/Snapshot.hpp"
 #include "brains/SnapshotManager.hpp"
 
-namespace OpenMD{
+namespace OpenMD {
 
-  //forward declaration
+  // forward declaration
   class SimInfo;
   /**
-   * @class SimSnapshotManager SimSnapshotManager.hpp "brains/SimSnapshotManager.hpp"
-   * @brief SimSnapshotManager class is the concrete snapshot manager for actual simulation
-   * SimSnapshotManager only maintains two snapshots. 
+   * @class SimSnapshotManager SimSnapshotManager.hpp
+   * "brains/SimSnapshotManager.hpp"
+   * @brief SimSnapshotManager class is the concrete snapshot manager for actual
+   * simulation SimSnapshotManager only maintains two snapshots.
    * @see PropSimSnapshotManager
    */
   class SimSnapshotManager : public SnapshotManager {
@@ -74,7 +75,7 @@ namespace OpenMD{
     virtual bool resetToPrevious();
 
     virtual Snapshot* getSnapshot(int id);
-            
+
     virtual int getCapacity();
 
     virtual void setCapacity(int capacity);
@@ -83,5 +84,5 @@ namespace OpenMD{
     SimInfo* info_ {nullptr};
   };
 
-}
-#endif //BRAINS_SIMSNAPSHOTMANAGER_HPP
+}  // namespace OpenMD
+#endif  // BRAINS_SIMSNAPSHOTMANAGER_HPP

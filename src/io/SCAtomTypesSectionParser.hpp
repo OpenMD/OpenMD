@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,26 +46,24 @@
 #ifndef IO_SCATOMTYPESSECTIONPARSER_HPP
 #define IO_SCATOMTYPESSECTIONPARSER_HPP
 
-#include "io/SectionParser.hpp"
 #include "io/ForceFieldOptions.hpp"
+#include "io/SectionParser.hpp"
 
 namespace OpenMD {
-  
+
   /**
-  * @class SCAtomTypesSectionParser SCAtomTypesSectionParser.hpp "io/SCAtomTypesSectionParser.hpp"
+   * @class SCAtomTypesSectionParser SCAtomTypesSectionParser.hpp
+   * "io/SCAtomTypesSectionParser.hpp"
    */
   class SCAtomTypesSectionParser : public SectionParser {
-public:
+  public:
     SCAtomTypesSectionParser(ForceFieldOptions& options);
-    
-private:
+
+  private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
     ForceFieldOptions& options_;
   };
-  
-  
-} //namespace OpenMD
 
-#endif //IO_SCATOMTYPESSECTIONPARSER_HPP
+}  // namespace OpenMD
 
-
+#endif  // IO_SCATOMTYPESSECTIONPARSER_HPP

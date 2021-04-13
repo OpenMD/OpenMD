@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,18 +46,18 @@
 #include "lattice/Lattice.hpp"
 
 namespace OpenMD {
-void Lattice::getLatticePointsPos(std::vector<Vector3d>& latticePos, int nx,
-                                  int ny, int nz) {
-  latticePos.resize(nCellSites);
+  void Lattice::getLatticePointsPos(std::vector<Vector3d>& latticePos, int nx,
+                                    int ny, int nz) {
+    latticePos.resize(nCellSites);
 
-  for (int i = 0; i < nCellSites; i++) {
-    latticePos[i][0] =
-        origin[0] + cellSitesPos[i][0] + cellLen[0] * (RealType(nx) - 0.5);
-    latticePos[i][1] =
-        origin[1] + cellSitesPos[i][1] + cellLen[1] * (RealType(ny) - 0.5);
-    latticePos[i][2] =
-        origin[2] + cellSitesPos[i][2] + cellLen[2] * (RealType(nz) - 0.5);
+    for (int i = 0; i < nCellSites; i++) {
+      latticePos[i][0] =
+          origin[0] + cellSitesPos[i][0] + cellLen[0] * (RealType(nx) - 0.5);
+      latticePos[i][1] =
+          origin[1] + cellSitesPos[i][1] + cellLen[1] * (RealType(ny) - 0.5);
+      latticePos[i][2] =
+          origin[2] + cellSitesPos[i][2] + cellLen[2] * (RealType(nz) - 0.5);
+    }
   }
-}
 
 }  // namespace OpenMD

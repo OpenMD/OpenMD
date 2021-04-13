@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,28 +46,29 @@
 #ifndef VISITORS_LIPIDTRANSVISITOR_HPP
 #define VISITORS_LIPIDTRANSVISITOR_HPP
 
-#include "visitors/BaseVisitor.hpp"
-#include "primitives/StuntDouble.hpp"
-#include "visitors/AtomData.hpp"
-#include "primitives/Molecule.hpp"
 #include "brains/SimInfo.hpp"
+#include "primitives/Molecule.hpp"
+#include "primitives/StuntDouble.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
+#include "visitors/AtomData.hpp"
+#include "visitors/BaseVisitor.hpp"
 namespace OpenMD {
 
   class LipidTransVisitor : public BaseVisitor {
   public:
     using BaseVisitor::visit;
-    LipidTransVisitor(SimInfo* info, const std::string& originSeleScript, const std::string& refSeleScript); 
-        
+    LipidTransVisitor(SimInfo* info, const std::string& originSeleScript,
+                      const std::string& refSeleScript);
+
     virtual void visit(Atom* atom) { internalVisit(atom); }
-    virtual void visit(DirectionalAtom* datom) { internalVisit(datom);}
-    virtual void visit(RigidBody* rb) { internalVisit(rb);}
+    virtual void visit(DirectionalAtom* datom) { internalVisit(datom); }
+    virtual void visit(RigidBody* rb) { internalVisit(rb); }
 
     virtual const std::string toString();
 
     void update();
-        
+
   protected:
     void internalVisit(StuntDouble* sd);
     SimInfo* info_ {nullptr};
@@ -80,5 +81,5 @@ namespace OpenMD {
     RotMat3x3d rotMat_;
     Vector3d origin_;
   };
-}
+}  // namespace OpenMD
 #endif

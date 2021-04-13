@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,18 +42,18 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef NONBONDED_ELECTROSTATIC_HPP
 #define NONBONDED_ELECTROSTATIC_HPP
 
-#include "nonbonded/NonBondedInteraction.hpp"
-#include "types/AtomType.hpp"
-#include "primitives/Atom.hpp"
 #include "brains/ForceField.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "math/CubicSpline.hpp"
 #include "brains/SimInfo.hpp"
 #include "flucq/FluctuatingChargeForces.hpp"
+#include "math/CubicSpline.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
+#include "primitives/Atom.hpp"
+#include "types/AtomType.hpp"
 
 namespace OpenMD {
 
@@ -69,52 +69,50 @@ namespace OpenMD {
     int slaterN;
     RealType slaterZeta;
     Vector3d dipole;
-    Mat3x3d  quadrupole;
+    Mat3x3d quadrupole;
   };
-      
-  enum ElectrostaticSummationMethod{
+
+  enum ElectrostaticSummationMethod {
     esm_HARD,
     esm_SWITCHING_FUNCTION,
     esm_SHIFTED_POTENTIAL,
     esm_SHIFTED_FORCE,
     esm_TAYLOR_SHIFTED,
     esm_REACTION_FIELD,
-    esm_EWALD_FULL,  
-    esm_EWALD_PME,   /**< PME  Ewald methods aren't supported yet */
-    esm_EWALD_SPME   /**< SPME Ewald methods aren't supported yet */
+    esm_EWALD_FULL,
+    esm_EWALD_PME, /**< PME  Ewald methods aren't supported yet */
+    esm_EWALD_SPME /**< SPME Ewald methods aren't supported yet */
   };
 
-  enum ElectrostaticScreeningMethod{
-    UNDAMPED,
-    DAMPED
-  };
-  
+  enum ElectrostaticScreeningMethod { UNDAMPED, DAMPED };
+
   class Electrostatic : public ElectrostaticInteraction {
-    
-  public:    
+  public:
     Electrostatic();
     ~Electrostatic();
-    void setForceField(ForceField *ff);
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes);
-    void setSimInfo(SimInfo* info) {info_ = info;};
+    void setForceField(ForceField* ff);
+    void setSimulatedAtomTypes(set<AtomType*>& simtypes);
+    void setSimInfo(SimInfo* info) { info_ = info; };
     void addType(AtomType* atomType);
-    virtual void calcForce(InteractionData &idat);
-    virtual void calcSelfCorrection(SelfData &sdat);
-    virtual string getName() {return name_;}
-    virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
-    void setCutoffRadius( RealType rCut );
-    void setElectrostaticSummationMethod( ElectrostaticSummationMethod esm );
-    void setElectrostaticScreeningMethod( ElectrostaticScreeningMethod sm );
-    void setDampingAlpha( RealType alpha );
-    void setReactionFieldDielectric( RealType dielectric );
+    virtual void calcForce(InteractionData& idat);
+    virtual void calcSelfCorrection(SelfData& sdat);
+    virtual string getName() { return name_; }
+    virtual RealType getSuggestedCutoffRadius(
+        pair<AtomType*, AtomType*> atypes);
+    void setCutoffRadius(RealType rCut);
+    void setElectrostaticSummationMethod(ElectrostaticSummationMethod esm);
+    void setElectrostaticScreeningMethod(ElectrostaticScreeningMethod sm);
+    void setDampingAlpha(RealType alpha);
+    void setReactionFieldDielectric(RealType dielectric);
     void calcSurfaceTerm(bool slabGeometry, int axis, RealType& pot);
-    void ReciprocalSpaceSum(RealType &pot);
+    void ReciprocalSpaceSum(RealType& pot);
 
     // Used by EAM to compute local fields:
     RealType getFieldFunction(RealType r);
 
-    // Utility routine 
-    void getSitePotentials(Atom* a1, Atom* a2, bool excluded, RealType &spot1, RealType &spot2);
+    // Utility routine
+    void getSitePotentials(Atom* a1, Atom* a2, bool excluded, RealType& spot1,
+                           RealType& spot2);
 
   private:
     void initialize();
@@ -128,13 +126,18 @@ namespace OpenMD {
     int nElectro_;
     int nFlucq_;
 
-    set<int> Etypes;             /**< The set of AtomType idents that are Electrostatic types */
-    vector<int> Etids;           /**< The mapping from AtomType ident -> Electrostatic ident */
-    set<int> FQtypes;            /**< The set of AtomType idents that are fluctuating types */
-    vector<int> FQtids;          /**< The mapping from AtomType ident -> fluctuating ident */
-    vector<ElectrostaticAtomData> ElectrostaticMap; /**< data about Electrostatic types */
-    vector<vector<CubicSplinePtr> > Jij;              /**< Coulomb integral for two fq types */
-    
+    set<int>
+        Etypes; /**< The set of AtomType idents that are Electrostatic types */
+    vector<int>
+        Etids; /**< The mapping from AtomType ident -> Electrostatic ident */
+    set<int>
+        FQtypes; /**< The set of AtomType idents that are fluctuating types */
+    vector<int>
+        FQtids; /**< The mapping from AtomType ident -> fluctuating ident */
+    vector<ElectrostaticAtomData>
+        ElectrostaticMap; /**< data about Electrostatic types */
+    vector<vector<CubicSplinePtr>>
+        Jij; /**< Coulomb integral for two fq types */
 
     SimInfo* info_ {nullptr};
     ForceField* forceField_;
@@ -154,17 +157,17 @@ namespace OpenMD {
     RealType angstromToM_;
     RealType debyeToCm_;
     int np_;
-    ElectrostaticSummationMethod summationMethod_;    
+    ElectrostaticSummationMethod summationMethod_;
     ElectrostaticScreeningMethod screeningMethod_;
     map<string, ElectrostaticSummationMethod> summationMap_;
     map<string, ElectrostaticScreeningMethod> screeningMap_;
     RealType dampingAlpha_;
     RealType dielectric_;
     RealType preRF_;
-    RealType selfMult1_; 
+    RealType selfMult1_;
     RealType selfMult2_;
     RealType selfMult4_;
-    
+
     CubicSplinePtr v01s;
     CubicSplinePtr v11s;
     CubicSplinePtr v21s;
@@ -177,34 +180,34 @@ namespace OpenMD {
 
     ElectrostaticAtomData data1;
     ElectrostaticAtomData data2;
-    RealType C_a, C_b;  // Charges 
+    RealType C_a, C_b;  // Charges
     Vector3d D_a, D_b;  // Dipoles (space-fixed)
-    Mat3x3d  Q_a, Q_b;  // Quadrupoles (space-fixed)
+    Mat3x3d Q_a, Q_b;   // Quadrupoles (space-fixed)
 
-    RealType ri;                                 // Distance utility scalar
-    RealType rdDa, rdDb;                         // Dipole utility scalars
-    Vector3d rxDa, rxDb;                         // Dipole utility vectors
-    RealType rdQar, rdQbr, trQa, trQb;           // Quadrupole utility scalars
-    Vector3d Qar, Qbr, rQa, rQb, rxQar, rxQbr;   // Quadrupole utility vectors
+    RealType ri;                                // Distance utility scalar
+    RealType rdDa, rdDb;                        // Dipole utility scalars
+    Vector3d rxDa, rxDb;                        // Dipole utility vectors
+    RealType rdQar, rdQbr, trQa, trQb;          // Quadrupole utility scalars
+    Vector3d Qar, Qbr, rQa, rQb, rxQar, rxQbr;  // Quadrupole utility vectors
     RealType pref;
 
-    RealType DadDb, trQaQb, DadQbr, DbdQar;       // Cross-interaction scalars
+    RealType DadDb, trQaQb, DadQbr, DbdQar;  // Cross-interaction scalars
     RealType rQaQbr;
-    Vector3d DaxDb, DadQb, DbdQa, DaxQbr, DbxQar; // Cross-interaction vectors
+    Vector3d DaxDb, DadQb, DbdQa, DaxQbr, DbxQar;  // Cross-interaction vectors
     Vector3d rQaQb, QaQbr, QaxQb, rQaxQbr;
-    Mat3x3d  QaQb;                                // Cross-interaction matrices
+    Mat3x3d QaQb;  // Cross-interaction matrices
 
-    RealType U;  // Potential
-    Vector3d F;  // Force
-    Vector3d Ta; // Torque on site a
-    Vector3d Tb; // Torque on site b
-    Vector3d Ea; // Electric field at site a
-    Vector3d Eb; // Electric field at site b
-    RealType Pa; // Site potential at site a
-    RealType Pb; // Site potential at site b
-    RealType dUdCa; // fluctuating charge force at site a
-    RealType dUdCb; // fluctuating charge force at site a
-    
+    RealType U;      // Potential
+    Vector3d F;      // Force
+    Vector3d Ta;     // Torque on site a
+    Vector3d Tb;     // Torque on site b
+    Vector3d Ea;     // Electric field at site a
+    Vector3d Eb;     // Electric field at site b
+    RealType Pa;     // Site potential at site a
+    RealType Pb;     // Site potential at site b
+    RealType dUdCa;  // fluctuating charge force at site a
+    RealType dUdCb;  // fluctuating charge force at site a
+
     // Indirect interactions mediated by the reaction field.
     RealType indirect_Pot;  // Potential
     Vector3d indirect_F;    // Force
@@ -215,11 +218,11 @@ namespace OpenMD {
     RealType excluded_Pot;
 
     RealType rfContrib, coulInt;
-    
+
     // spline for coulomb integral
     CubicSplinePtr J;
     Vector3d rhat;
-      
+
     // logicals
 
     bool a_is_Charge;
@@ -234,7 +237,6 @@ namespace OpenMD {
     bool b_is_Fluctuating;
     bool b_uses_SlaterIntra;
   };
-}
+}  // namespace OpenMD
 
-                               
 #endif

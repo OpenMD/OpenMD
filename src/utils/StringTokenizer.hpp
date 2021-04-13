@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file StringTokenizer.hpp
  * @author tlin
@@ -53,92 +53,99 @@
 #ifndef UTIL_STRINGTOKENIZER_HPP
 #define UTIL_STRINGTOKENIZER_HPP
 
-#include <string>
 #include <cstdlib>
+#include <string>
 #include <vector>
+
 #include "config.h"
 namespace OpenMD {
 
   /**
    * @class StringTokenizer
-   * @brief The string tokenizer class allows an application to break a string into tokens
-   * The set of delimiters (the characters that separate tokens) may be specified either 
-   * at creation time or on a per-token basis. 
-   * An instance of StringTokenizer behaves in one of two ways, depending on whether it was 
+   * @brief The string tokenizer class allows an application to break a string
+   * into tokens The set of delimiters (the characters that separate tokens) may
+   * be specified either at creation time or on a per-token basis. An instance
+   * of StringTokenizer behaves in one of two ways, depending on whether it was
    * created with the returnTokens flag having the value true or false.
    */
   class StringTokenizer {
   public:
-
     /**
-     * Constructs a string tokenizer for the specified string. The characters in the delim argument
-     * are the delimiters for separating tokens. characters are skipped and only serve as 
-     * separators between tokens.
+     * Constructs a string tokenizer for the specified string. The characters in
+     * the delim argument are the delimiters for separating tokens. characters
+     * are skipped and only serve as separators between tokens.
      * @param str a string to be parsed.
      * @param delim the delimiters, default value is " ;\t\n\r".
-     * @note this is still a little bit java like implementation. Pure c++ one should use TokenIterator.
-     * Boost's tokenizer class is one of them 
+     * @note this is still a little bit java like implementation. Pure c++ one
+     * should use TokenIterator. Boost's tokenizer class is one of them
      */
-    StringTokenizer(const std::string & str,
-		    const std::string & delim = " ;\t\n\r");
+    StringTokenizer(const std::string& str,
+                    const std::string& delim = " ;\t\n\r");
 
     /**
-     * Constructs a string tokenizer for an iterator range [first, last). The characters in the delim argument
-     * are the delimiters for separating tokens. characters are skipped and only serve as 
-     * separators between tokens.
+     * Constructs a string tokenizer for an iterator range [first, last). The
+     * characters in the delim argument are the delimiters for separating
+     * tokens. characters are skipped and only serve as separators between
+     * tokens.
      * @param first begin iterator
      * @param last end iterator
      * @param delim the delimiters, default value is " ;\t\n\r".
-     * @note this is still a little bit java like implementation. Pure c++ one should use TokenIterator.
-     * Boost's tokenizer class is one of them 
+     * @note this is still a little bit java like implementation. Pure c++ one
+     * should use TokenIterator. Boost's tokenizer class is one of them
      */
     StringTokenizer(std::string::const_iterator& first,
                     std::string::const_iterator& last,
-		    const std::string & delim = " ;\t\n\r");
+                    const std::string& delim = " ;\t\n\r");
 
     /**
-     * Constructs a string tokenizer for the specified string. The characters in the delim argument
-     * are the delimiters for separating tokens. 
-     * If the returnTokens flag is true, then the delimiter characters are also returned as tokens. 
-     * Each delimiter is returned as a string of length one. If the flag is false, the delimiter 
-     * characters are skipped and only serve as separators between tokens.
-     * @param str a string to be parsed. 
-     * @param delim the delimiters. 
-     * @param returnTokens flag indicating whether to return the delimiters as tokens.
+     * Constructs a string tokenizer for the specified string. The characters in
+     * the delim argument are the delimiters for separating tokens. If the
+     * returnTokens flag is true, then the delimiter characters are also
+     * returned as tokens. Each delimiter is returned as a string of length one.
+     * If the flag is false, the delimiter characters are skipped and only serve
+     * as separators between tokens.
+     * @param str a string to be parsed.
+     * @param delim the delimiters.
+     * @param returnTokens flag indicating whether to return the delimiters as
+     * tokens.
      */
-    StringTokenizer(const std::string&str, const std::string&delim,
-		    bool returnTokens);
+    StringTokenizer(const std::string& str, const std::string& delim,
+                    bool returnTokens);
 
     /**
-     * Calculates the number of times that this tokenizer's nextToken method can be called 
-     * before it generates an exception.
-     * @return the number of tokens remaining in the string using the current delimiter set.
+     * Calculates the number of times that this tokenizer's nextToken method can
+     * be called before it generates an exception.
+     * @return the number of tokens remaining in the string using the current
+     * delimiter set.
      */
     int countTokens();
 
     /**
      * Tests if there are more tokens available from this tokenizer's string.
-     * @return true if there are more tokens available from this tokenizer's string, false otherwise
+     * @return true if there are more tokens available from this tokenizer's
+     * string, false otherwise
      */
     bool hasMoreTokens();
 
     /**
      * Returns the next token from this string tokenizer.
      * @return the next token from this string tokenizer.
-     * @exception NoSuchElementException if there are no more tokens in this tokenizer's string
+     * @exception NoSuchElementException if there are no more tokens in this
+     * tokenizer's string
      */
     std::string nextToken();
 
     /**
      * Skips the next token from this string tokenizer.
-     * @exception NoSuchElementException if there are no more tokens in this tokenizer's string
+     * @exception NoSuchElementException if there are no more tokens in this
+     * tokenizer's string
      */
     void skipToken();
 
-    //actually, nextToken Can be template function
-    //template <typename ReturnType>
-    //ReturnType nextToken();
-        
+    // actually, nextToken Can be template function
+    // template <typename ReturnType>
+    // ReturnType nextToken();
+
     /**
      * Returns the next token from this string tokenizer as a bool.
      * @return the next token from this string tokenizer  as a bool.
@@ -164,39 +171,36 @@ namespace OpenMD {
     RealType nextTokenAsDouble();
 
     /**
-     * Returns the next token without advancing the position of the StringTokenizer.
+     * Returns the next token without advancing the position of the
+     * StringTokenizer.
      * @return the next token
      */
-    std::string  peekNextToken();
+    std::string peekNextToken();
 
     /**
      * Returns the current delimiter set of this string tokenizer
      * @return the current delimiter set
      */
-    const std::string& getDelimiters() {
-      return delim_;
-    }
+    const std::string& getDelimiters() { return delim_; }
 
-    /** 
+    /**
      * Returns the original string before tokenizing.
-     * @return the original string before tokenizing 
+     * @return the original string before tokenizing
      */
-    const std::string& getOriginal() {
-      return tokenString_;
-    }
+    const std::string& getOriginal() { return tokenString_; }
 
-    /** 
+    /**
      * Returns all of the tokens
      * @return all of the tokens
      */
     std::vector<std::string> getAllTokens();
-    /** 
+    /**
      * Returns the remaining unparsed string
      * @return the remaining unparsed string
      */
     std::string getRemainingString();
-  private:
 
+  private:
     /**
      * Test if character is in current delimiter set.
      * @param c character to be tested
@@ -206,18 +210,18 @@ namespace OpenMD {
 
     /** convert a fortran number to a c/c++ number */
     void convertFortranNumber(std::string& fortranNumber);
-         
 
     std::string tokenString_;
 
-    std::string delim_;         /**< current delimiter set of this string tokenizer */
+    std::string delim_; /**< current delimiter set of this string tokenizer */
 
-    bool returnTokens_; /**< flag indicating whether to return the delimiters as tokens */
+    bool returnTokens_; /**< flag indicating whether to return the delimiters as
+                           tokens */
 
     std::string::const_iterator currentPos_;
     std::string::const_iterator end_;
   };
 
-}                               //namespace OpenMD
+}  // namespace OpenMD
 
-#endif                          //UTIL_STRINGTOKENIZER_HPP
+#endif  // UTIL_STRINGTOKENIZER_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -47,9 +47,6 @@
 #include <mpi.h>
 #endif
 
-#include <sys/stat.h>
-#include <sys/types.h>
-
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -58,6 +55,9 @@
 #include <memory>
 #include <sstream>
 #include <string>
+
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "io/RestReader.hpp"
 #include "primitives/Molecule.hpp"
@@ -69,227 +69,223 @@
 
 namespace OpenMD {
 
-void RestReader::scanFile() {
-  std::streampos prevPos;
-  std::streampos currPos;
+  void RestReader::scanFile() {
+    std::streampos prevPos;
+    std::streampos currPos;
 
 #ifdef IS_MPI
 
-  if (worldRank == 0) {
+    if (worldRank == 0) {
 #endif  // is_mpi
 
-    inFile_->clear();
-    currPos = inFile_->tellg();
-    prevPos = currPos;
-
-    bool foundOpenSnapshotTag = false;
-    int lineNo = 0;
-    while (!foundOpenSnapshotTag && inFile_->getline(buffer, bufferSize)) {
-      ++lineNo;
-
-      std::string line = buffer;
+      inFile_->clear();
       currPos = inFile_->tellg();
-      if (line.find("<Snapshot>") != std::string::npos) {
-        foundOpenSnapshotTag = true;
-        framePos_ = (long long)prevPos;
-      }
       prevPos = currPos;
-    }
+
+      bool foundOpenSnapshotTag = false;
+      int lineNo                = 0;
+      while (!foundOpenSnapshotTag && inFile_->getline(buffer, bufferSize)) {
+        ++lineNo;
+
+        std::string line = buffer;
+        currPos          = inFile_->tellg();
+        if (line.find("<Snapshot>") != std::string::npos) {
+          foundOpenSnapshotTag = true;
+          framePos_            = (long long)prevPos;
+        }
+        prevPos = currPos;
+      }
 
 #ifdef IS_MPI
-  }
-  MPI_Bcast(&framePos_, 1, MPI_LONG_LONG, 0, MPI_COMM_WORLD);
+    }
+    MPI_Bcast(&framePos_, 1, MPI_LONG_LONG, 0, MPI_COMM_WORLD);
 #endif  // is_mpi
-}
+  }
 
-void RestReader::readSet() {
-  std::string line;
+  void RestReader::readSet() {
+    std::string line;
 
 #ifndef IS_MPI
-
-  inFile_->clear();
-  inFile_->seekg(framePos_);
-
-  std::istream& inputStream = *inFile_;
-#else
-
-  int primaryNode = 0;
-  std::stringstream sstream;
-  if (worldRank == primaryNode) {
-    std::string sendBuffer;
 
     inFile_->clear();
     inFile_->seekg(framePos_);
 
-    while (inFile_->getline(buffer, bufferSize)) {
-      line = buffer;
-      sendBuffer += line;
-      sendBuffer += '\n';
-      if (line.find("</Snapshot>") != std::string::npos) {
-        break;
+    std::istream& inputStream = *inFile_;
+#else
+
+    int primaryNode = 0;
+    std::stringstream sstream;
+    if (worldRank == primaryNode) {
+      std::string sendBuffer;
+
+      inFile_->clear();
+      inFile_->seekg(framePos_);
+
+      while (inFile_->getline(buffer, bufferSize)) {
+        line = buffer;
+        sendBuffer += line;
+        sendBuffer += '\n';
+        if (line.find("</Snapshot>") != std::string::npos) { break; }
       }
+
+      int sendBufferSize = sendBuffer.size();
+      MPI_Bcast(&sendBufferSize, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
+      MPI_Bcast((void*)sendBuffer.c_str(), sendBufferSize, MPI_CHAR,
+                primaryNode, MPI_COMM_WORLD);
+
+      sstream.str(sendBuffer);
+    } else {
+      int sendBufferSize;
+      MPI_Bcast(&sendBufferSize, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
+      char* recvBuffer = new char[sendBufferSize + 1];
+      assert(recvBuffer);
+      recvBuffer[sendBufferSize] = '\0';
+      MPI_Bcast(recvBuffer, sendBufferSize, MPI_CHAR, primaryNode,
+                MPI_COMM_WORLD);
+      sstream.str(recvBuffer);
+      delete[] recvBuffer;
     }
 
-    int sendBufferSize = sendBuffer.size();
-    MPI_Bcast(&sendBufferSize, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
-    MPI_Bcast((void*)sendBuffer.c_str(), sendBufferSize, MPI_CHAR, primaryNode,
-              MPI_COMM_WORLD);
-
-    sstream.str(sendBuffer);
-  } else {
-    int sendBufferSize;
-    MPI_Bcast(&sendBufferSize, 1, MPI_INT, primaryNode, MPI_COMM_WORLD);
-    char* recvBuffer = new char[sendBufferSize + 1];
-    assert(recvBuffer);
-    recvBuffer[sendBufferSize] = '\0';
-    MPI_Bcast(recvBuffer, sendBufferSize, MPI_CHAR, primaryNode,
-              MPI_COMM_WORLD);
-    sstream.str(recvBuffer);
-    delete[] recvBuffer;
-  }
-
-  std::istream& inputStream = sstream;
+    std::istream& inputStream = sstream;
 #endif
 
-  inputStream.getline(buffer, bufferSize);
+    inputStream.getline(buffer, bufferSize);
 
-  line = buffer;
-  if (line.find("<Snapshot>") == std::string::npos) {
-    sprintf(painCave.errMsg, "RestReader Error: can not find <Snapshot>\n");
-    painCave.isFatal = 1;
-    simError();
+    line = buffer;
+    if (line.find("<Snapshot>") == std::string::npos) {
+      sprintf(painCave.errMsg, "RestReader Error: can not find <Snapshot>\n");
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    // read frameData
+    readFrameProperties(inputStream);
+
+    // read StuntDoubles
+    readStuntDoubles(inputStream);
+
+    inputStream.getline(buffer, bufferSize);
+    line = buffer;
+    if (line.find("</Snapshot>") == std::string::npos) {
+      sprintf(painCave.errMsg, "RestReader Error: can not find </Snapshot>\n");
+      painCave.isFatal = 1;
+      simError();
+    }
   }
 
-  // read frameData
-  readFrameProperties(inputStream);
+  void RestReader::readReferenceStructure() {
+    // We need temporary storage to keep track of all StuntDouble positions
+    // in case some of the restraints are molecular (i.e. if they use
+    // multiple SD positions to determine restrained orientations or positions:
 
-  // read StuntDoubles
-  readStuntDoubles(inputStream);
+    all_pos_.clear();
+    all_pos_.resize(info_->getNGlobalIntegrableObjects());
 
-  inputStream.getline(buffer, bufferSize);
-  line = buffer;
-  if (line.find("</Snapshot>") == std::string::npos) {
-    sprintf(painCave.errMsg, "RestReader Error: can not find </Snapshot>\n");
-    painCave.isFatal = 1;
-    simError();
-  }
-}
+    // Restraint files are just standard dump files, but with the reference
+    // structure stored in the first frame (frame 0).
+    // RestReader overloads readSet and explicitly handles all of the
+    // ObjectRestraints in that method:
 
-void RestReader::readReferenceStructure() {
-  // We need temporary storage to keep track of all StuntDouble positions
-  // in case some of the restraints are molecular (i.e. if they use
-  // multiple SD positions to determine restrained orientations or positions:
+    scanFile();
 
-  all_pos_.clear();
-  all_pos_.resize(info_->getNGlobalIntegrableObjects());
+    readSet();
 
-  // Restraint files are just standard dump files, but with the reference
-  // structure stored in the first frame (frame 0).
-  // RestReader overloads readSet and explicitly handles all of the
-  // ObjectRestraints in that method:
+    // all ObjectRestraints have been handled, now we have to worry about
+    // molecular restraints:
 
-  scanFile();
+    SimInfo::MoleculeIterator i;
+    Molecule::IntegrableObjectIterator j;
+    Molecule* mol;
+    StuntDouble* sd;
 
-  readSet();
+    // no need to worry about parallel molecules, as molecules are not
+    // split across processor boundaries.  Just loop over all molecules
+    // we know about:
 
-  // all ObjectRestraints have been handled, now we have to worry about
-  // molecular restraints:
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
+      // is this molecule restrained?
+      std::shared_ptr<GenericData> data = mol->getPropertyByName("Restraint");
 
-  SimInfo::MoleculeIterator i;
-  Molecule::IntegrableObjectIterator j;
-  Molecule* mol;
-  StuntDouble* sd;
+      if (data != nullptr) {
+        // make sure we can reinterpret the generic data as restraint data:
 
-  // no need to worry about parallel molecules, as molecules are not
-  // split across processor boundaries.  Just loop over all molecules
-  // we know about:
+        std::shared_ptr<RestraintData> restData =
+            std::dynamic_pointer_cast<RestraintData>(data);
 
-  for (mol = info_->beginMolecule(i); mol != NULL;
-       mol = info_->nextMolecule(i)) {
-    // is this molecule restrained?
-    std::shared_ptr<GenericData> data = mol->getPropertyByName("Restraint");
+        if (restData != nullptr) {
+          // make sure we can reinterpet the restraint data as a
+          // pointer to a MolecularRestraint:
 
-    if (data != nullptr) {
-      // make sure we can reinterpret the generic data as restraint data:
+          MolecularRestraint* mRest =
+              dynamic_cast<MolecularRestraint*>(restData->getData());
 
-      std::shared_ptr<RestraintData> restData =
-          std::dynamic_pointer_cast<RestraintData>(data);
+          if (mRest == NULL) {
+            sprintf(painCave.errMsg,
+                    "Can not cast RestraintData to MolecularRestraint\n");
+            painCave.severity = OPENMD_ERROR;
+            painCave.isFatal  = 1;
+            simError();
+          } else {
+            // now we need to pack the stunt doubles for the reference
+            // structure:
 
-      if (restData != nullptr) {
-        // make sure we can reinterpet the restraint data as a
-        // pointer to a MolecularRestraint:
+            std::vector<Vector3d> ref;
+            int count = 0;
+            RealType mass, mTot;
+            Vector3d COM(0.0);
 
-        MolecularRestraint* mRest =
-            dynamic_cast<MolecularRestraint*>(restData->getData());
+            mTot = 0.0;
+            // loop over the stunt doubles in this molecule in the order we
+            // will be looping them in the restraint code:
 
-        if (mRest == NULL) {
-          sprintf(painCave.errMsg,
-                  "Can not cast RestraintData to MolecularRestraint\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();
-        } else {
-          // now we need to pack the stunt doubles for the reference
-          // structure:
+            for (sd = mol->beginIntegrableObject(j); sd != NULL;
+                 sd = mol->nextIntegrableObject(j)) {
+              // push back the reference positions of the stunt
+              // doubles from the *globally* sorted array of
+              // positions:
 
-          std::vector<Vector3d> ref;
-          int count = 0;
-          RealType mass, mTot;
-          Vector3d COM(0.0);
-
-          mTot = 0.0;
-          // loop over the stunt doubles in this molecule in the order we
-          // will be looping them in the restraint code:
-
-          for (sd = mol->beginIntegrableObject(j); sd != NULL;
-               sd = mol->nextIntegrableObject(j)) {
-            // push back the reference positions of the stunt
-            // doubles from the *globally* sorted array of
-            // positions:
-
-            ref.push_back(all_pos_[sd->getGlobalIntegrableObjectIndex()]);
-            mass = sd->getMass();
-            COM = COM + mass * ref[count];
-            mTot = mTot + mass;
-            count = count + 1;
+              ref.push_back(all_pos_[sd->getGlobalIntegrableObjectIndex()]);
+              mass  = sd->getMass();
+              COM   = COM + mass * ref[count];
+              mTot  = mTot + mass;
+              count = count + 1;
+            }
+            COM /= mTot;
+            mRest->setReferenceStructure(ref, COM);
           }
-          COM /= mTot;
-          mRest->setReferenceStructure(ref, COM);
         }
       }
     }
   }
-}
 
-void RestReader::parseDumpLine(const std::string& line) {
-  StringTokenizer tokenizer(line);
-  int nTokens;
+  void RestReader::parseDumpLine(const std::string& line) {
+    StringTokenizer tokenizer(line);
+    int nTokens;
 
-  nTokens = tokenizer.countTokens();
+    nTokens = tokenizer.countTokens();
 
-  if (nTokens < 2) {
-    sprintf(painCave.errMsg, "RestReader Error: Not enough Tokens.\n%s\n",
-            line.c_str());
-    painCave.isFatal = 1;
-    simError();
-  }
+    if (nTokens < 2) {
+      sprintf(painCave.errMsg, "RestReader Error: Not enough Tokens.\n%s\n",
+              line.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
 
-  int index = tokenizer.nextTokenAsInt();
+    int index = tokenizer.nextTokenAsInt();
 
-  StuntDouble* sd = info_->getIOIndexToIntegrableObject(index);
+    StuntDouble* sd = info_->getIOIndexToIntegrableObject(index);
 
-  if (sd == NULL) {
-    return;
-  }
+    if (sd == NULL) { return; }
 
-  std::string type = tokenizer.nextToken();
-  int size = type.size();
+    std::string type = tokenizer.nextToken();
+    int size         = type.size();
 
-  Vector3d pos;
-  Quat4d q;
+    Vector3d pos;
+    Quat4d q;
 
-  for (int i = 0; i < size; ++i) {
-    switch (type[i]) {
+    for (int i = 0; i < size; ++i) {
+      switch (type[i]) {
       case 'p': {
         pos[0] = tokenizer.nextTokenAsDouble();
         pos[1] = tokenizer.nextTokenAsDouble();
@@ -356,83 +352,79 @@ void RestReader::parseDumpLine(const std::string& line) {
         simError();
         break;
       }
-    }
-    // keep the position in case we need it for a molecular restraint:
+      }
+      // keep the position in case we need it for a molecular restraint:
 
-    all_pos_[index] = pos;
+      all_pos_[index] = pos;
 
-    // is this io restrained?
-    std::shared_ptr<GenericData> data = sd->getPropertyByName("Restraint");
+      // is this io restrained?
+      std::shared_ptr<GenericData> data = sd->getPropertyByName("Restraint");
 
-    if (data != nullptr) {
-      // make sure we can reinterpret the generic data as restraint data:
-      std::shared_ptr<RestraintData> restData =
-          std::dynamic_pointer_cast<RestraintData>(data);
-      if (restData != nullptr) {
-        // make sure we can reinterpet the restraint data as a pointer to
-        // an ObjectRestraint:
-        ObjectRestraint* oRest =
-            dynamic_cast<ObjectRestraint*>(restData->getData());
-        if (oRest == NULL) {
-          sprintf(painCave.errMsg,
-                  "Can not cast RestraintData to ObjectRestraint\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();
-        } else {
-          if (sd->isDirectional()) {
-            oRest->setReferenceStructure(pos, q.toRotationMatrix3());
+      if (data != nullptr) {
+        // make sure we can reinterpret the generic data as restraint data:
+        std::shared_ptr<RestraintData> restData =
+            std::dynamic_pointer_cast<RestraintData>(data);
+        if (restData != nullptr) {
+          // make sure we can reinterpet the restraint data as a pointer to
+          // an ObjectRestraint:
+          ObjectRestraint* oRest =
+              dynamic_cast<ObjectRestraint*>(restData->getData());
+          if (oRest == NULL) {
+            sprintf(painCave.errMsg,
+                    "Can not cast RestraintData to ObjectRestraint\n");
+            painCave.severity = OPENMD_ERROR;
+            painCave.isFatal  = 1;
+            simError();
           } else {
-            oRest->setReferenceStructure(pos);
+            if (sd->isDirectional()) {
+              oRest->setReferenceStructure(pos, q.toRotationMatrix3());
+            } else {
+              oRest->setReferenceStructure(pos);
+            }
           }
         }
       }
     }
   }
-}
 
-void RestReader::readStuntDoubles(std::istream& inputStream) {
-  inputStream.getline(buffer, bufferSize);
-  std::string line(buffer);
+  void RestReader::readStuntDoubles(std::istream& inputStream) {
+    inputStream.getline(buffer, bufferSize);
+    std::string line(buffer);
 
-  if (line.find("<StuntDoubles>") == std::string::npos) {
-    sprintf(painCave.errMsg, "RestReader Error: Missing <StuntDoubles>\n");
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  while (inputStream.getline(buffer, bufferSize)) {
-    line = buffer;
-
-    if (line.find("</StuntDoubles>") != std::string::npos) {
-      break;
+    if (line.find("<StuntDoubles>") == std::string::npos) {
+      sprintf(painCave.errMsg, "RestReader Error: Missing <StuntDoubles>\n");
+      painCave.isFatal = 1;
+      simError();
     }
 
-    parseDumpLine(line);
-  }
-}
+    while (inputStream.getline(buffer, bufferSize)) {
+      line = buffer;
 
-void RestReader::readFrameProperties(std::istream& inputStream) {
-  inputStream.getline(buffer, bufferSize);
-  std::string line(buffer);
+      if (line.find("</StuntDoubles>") != std::string::npos) { break; }
 
-  if (line.find("<FrameData>") == std::string::npos) {
-    sprintf(painCave.errMsg, "RestReader Error: Missing <FrameData>\n");
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  // restraints don't care about frame data (unless we need to wrap
-  // coordinates, but we'll worry about that later), so
-  // we'll just scan ahead until the end of the frame data:
-
-  while (inputStream.getline(buffer, bufferSize)) {
-    line = buffer;
-
-    if (line.find("</FrameData>") != std::string::npos) {
-      break;
+      parseDumpLine(line);
     }
   }
-}
+
+  void RestReader::readFrameProperties(std::istream& inputStream) {
+    inputStream.getline(buffer, bufferSize);
+    std::string line(buffer);
+
+    if (line.find("<FrameData>") == std::string::npos) {
+      sprintf(painCave.errMsg, "RestReader Error: Missing <FrameData>\n");
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    // restraints don't care about frame data (unless we need to wrap
+    // coordinates, but we'll worry about that later), so
+    // we'll just scan ahead until the end of the frame data:
+
+    while (inputStream.getline(buffer, bufferSize)) {
+      line = buffer;
+
+      if (line.find("</FrameData>") != std::string::npos) { break; }
+    }
+  }
 
 }  // end namespace OpenMD

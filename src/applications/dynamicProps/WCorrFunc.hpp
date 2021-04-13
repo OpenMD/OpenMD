@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -59,9 +59,8 @@ namespace OpenMD {
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
     virtual void validateSelection(SelectionManager& seleMan);
 
-
-    std::vector<std::vector<RealType> > charge_velocities_;
+    std::vector<std::vector<RealType>> charge_velocities_;
   };
 
-}
+}  // namespace OpenMD
 #endif

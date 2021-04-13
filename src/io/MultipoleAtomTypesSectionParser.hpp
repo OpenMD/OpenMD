@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,12 +42,12 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_MULTIPOLEATOMTYPESSECTIONPARSER_HPP
 #define IO_MULTIPOLEATOMTYPESSECTIONPARSER_HPP
 
-#include "io/SectionParser.hpp"
 #include "io/ForceFieldOptions.hpp"
+#include "io/SectionParser.hpp"
 #include "types/MultipoleAdapter.hpp"
 
 namespace OpenMD {
@@ -55,14 +55,15 @@ namespace OpenMD {
   class MultipoleAtomTypesSectionParser : public SectionParser {
   public:
     MultipoleAtomTypesSectionParser(ForceFieldOptions& options);
-    
+
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    
-    void parseDipole(StringTokenizer& tokenizer, RealType& dipoleMoment, int lineNo);
-    void parseQuadrupole(StringTokenizer& tokenizer, Vector3d& quadrupoleMoments, int lineNo);
-    ForceFieldOptions& options_;
-  };  
-} 
-#endif
 
+    void parseDipole(StringTokenizer& tokenizer, RealType& dipoleMoment,
+                     int lineNo);
+    void parseQuadrupole(StringTokenizer& tokenizer,
+                         Vector3d& quadrupoleMoments, int lineNo);
+    ForceFieldOptions& options_;
+  };
+}  // namespace OpenMD
+#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -55,155 +55,156 @@
 
 namespace OpenMD {
 
-GCNSeq::GCNSeq(SimInfo* info, const std::string& filename,
-               const std::string& sele1, const std::string& sele2,
-               RealType rCut, int bins)
-    : SequentialAnalyzer(info, filename, sele1, sele2),
-      rCut_(rCut),
-      bins_(bins) {
-  setSequenceType("Generalized Coordination Number Distribution");
-  setOutputName(getPrefix(filename) + ".gcnSeq");
+  GCNSeq::GCNSeq(SimInfo* info, const std::string& filename,
+                 const std::string& sele1, const std::string& sele2,
+                 RealType rCut, int bins) :
+      SequentialAnalyzer(info, filename, sele1, sele2),
+      rCut_(rCut), bins_(bins) {
+    setSequenceType("Generalized Coordination Number Distribution");
+    setOutputName(getPrefix(filename) + ".gcnSeq");
 
-  nnMax_ = 12;
-  RealType binMax_ = nnMax_ * 1.5;
-  delta_ = binMax_ / bins_;
-  usePBC_ = info->getSimParams()->getUsePeriodicBoundaryConditions();
+    nnMax_           = 12;
+    RealType binMax_ = nnMax_ * 1.5;
+    delta_           = binMax_ / bins_;
+    usePBC_          = info->getSimParams()->getUsePeriodicBoundaryConditions();
 
-  std::stringstream params;
-  params << " rcut = " << rCut_ << ", nbins = " << bins_
-         << ", max neighbors = " << nnMax_;
-  const std::string paramString = params.str();
-  setParameterString(paramString);
-}
+    std::stringstream params;
+    params << " rcut = " << rCut_ << ", nbins = " << bins_
+           << ", max neighbors = " << nnMax_;
+    const std::string paramString = params.str();
+    setParameterString(paramString);
+  }
 
-void GCNSeq::doFrame(int istep) {
-  SelectionManager common(info_);
+  void GCNSeq::doFrame(int istep) {
+    SelectionManager common(info_);
 
-  std::vector<std::vector<int>> listNN;
-  std::vector<int> globalToLocal;
+    std::vector<std::vector<int>> listNN;
+    std::vector<int> globalToLocal;
 
-  StuntDouble* sd1;
-  StuntDouble* sd2;
+    StuntDouble* sd1;
+    StuntDouble* sd2;
 
-  int iterator1;
-  int iterator2;
-  unsigned int mapIndex1(0);
-  unsigned int mapIndex2(0);
-  unsigned int tempIndex(0);
-  unsigned int whichBin(0);
-  RealType gcn(0.0);
-  Vector3d pos1;
-  Vector3d pos2;
-  Vector3d diff;
-  RealType distance;
+    int iterator1;
+    int iterator2;
+    unsigned int mapIndex1(0);
+    unsigned int mapIndex2(0);
+    unsigned int tempIndex(0);
+    unsigned int whichBin(0);
+    RealType gcn(0.0);
+    Vector3d pos1;
+    Vector3d pos2;
+    Vector3d diff;
+    RealType distance;
 
-  // First have to calculate lists of nearest neighbors (listNN_):
+    // First have to calculate lists of nearest neighbors (listNN_):
 
-  selectionCount1_ = seleMan1_.getSelectionCount();
-  selectionCount2_ = seleMan2_.getSelectionCount();
+    selectionCount1_ = seleMan1_.getSelectionCount();
+    selectionCount2_ = seleMan2_.getSelectionCount();
 
-  // We need a common selection set:
-  common = seleMan1_ | seleMan2_;
-  int commonCount = common.getSelectionCount();
+    // We need a common selection set:
+    common          = seleMan1_ | seleMan2_;
+    int commonCount = common.getSelectionCount();
 
-  globalToLocal.clear();
-  globalToLocal.resize(
-      info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies(), -1);
-  for (unsigned int i = 0; i < listNN.size(); i++) listNN.at(i).clear();
-  listNN.clear();
-  listNN.resize(commonCount);
-  std::vector<RealType> histo;
-  histo.resize(bins_, 0.0);
+    globalToLocal.clear();
+    globalToLocal.resize(
+        info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies(), -1);
+    for (unsigned int i = 0; i < listNN.size(); i++)
+      listNN.at(i).clear();
+    listNN.clear();
+    listNN.resize(commonCount);
+    std::vector<RealType> histo;
+    histo.resize(bins_, 0.0);
 
-  mapIndex1 = 0;
-  for (sd1 = common.beginSelected(iterator1); sd1 != NULL;
-       sd1 = common.nextSelected(iterator1)) {
-    globalToLocal.at(sd1->getGlobalIndex()) = mapIndex1;
+    mapIndex1 = 0;
+    for (sd1 = common.beginSelected(iterator1); sd1 != NULL;
+         sd1 = common.nextSelected(iterator1)) {
+      globalToLocal.at(sd1->getGlobalIndex()) = mapIndex1;
 
-    pos1 = sd1->getPos();
+      pos1 = sd1->getPos();
 
-    mapIndex2 = 0;
-    for (sd2 = common.beginSelected(iterator2); sd2 != NULL;
-         sd2 = common.nextSelected(iterator2)) {
-      if (mapIndex1 < mapIndex2) {
-        pos2 = sd2->getPos();
-        diff = pos2 - pos1;
-        if (usePBC_) currentSnapshot_->wrapVector(diff);
-        distance = diff.length();
-        if (distance < rCut_) {
-          listNN.at(mapIndex1).push_back(mapIndex2);
-          listNN.at(mapIndex2).push_back(mapIndex1);
+      mapIndex2 = 0;
+      for (sd2 = common.beginSelected(iterator2); sd2 != NULL;
+           sd2 = common.nextSelected(iterator2)) {
+        if (mapIndex1 < mapIndex2) {
+          pos2 = sd2->getPos();
+          diff = pos2 - pos1;
+          if (usePBC_) currentSnapshot_->wrapVector(diff);
+          distance = diff.length();
+          if (distance < rCut_) {
+            listNN.at(mapIndex1).push_back(mapIndex2);
+            listNN.at(mapIndex2).push_back(mapIndex1);
+          }
+        }
+        mapIndex2++;
+      }
+      mapIndex1++;
+    }
+
+    // Fill up the histogram with gcn values
+    for (sd1 = seleMan1_.beginSelected(iterator1); sd1 != NULL;
+         sd1 = seleMan1_.nextSelected(iterator1)) {
+      mapIndex1 = globalToLocal.at(sd1->getGlobalIndex());
+      gcn       = 0.0;
+      for (unsigned int i = 0; i < listNN.at(mapIndex1).size(); i++) {
+        // tempIndex is the index of one of i's nearest neighbors
+        tempIndex = listNN.at(mapIndex1).at(i);
+        gcn += listNN.at(tempIndex).size();
+      }
+
+      gcn      = gcn / nnMax_;
+      whichBin = int(gcn / delta_);
+      if (whichBin < histo.size()) {
+        histo[whichBin] += 1;
+      } else {
+        cerr << "In frame " << istep << ", object " << sd1->getGlobalIndex()
+             << " has GCN value = " << gcn << "\n";
+      }
+    }
+
+    for (unsigned int n = 0; n < histo.size(); n++) {
+      if (selectionCount1_ > 0)
+        histo[n] /= RealType(selectionCount1_);
+      else
+        histo[n] = 0.0;
+    }
+
+    count_.push_back(selectionCount1_);
+    histogram_.push_back(histo);
+  }
+
+  void GCNSeq::writeSequence() {
+    std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
+
+    if (ofs.is_open()) {
+      Revision r;
+      RealType binValue(0.0);
+
+      ofs << "# " << getSequenceType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+
+      ofs << "#time\tvalue\n";
+
+      for (unsigned int i = 0; i < times_.size(); ++i) {
+        ofs << "#Frame " << i << "\n";
+        ofs << "#Selection 1 Count: " << count_[i] << "\n";
+
+        for (unsigned int n = 0; n < histogram_[i].size(); n++) {
+          binValue = n * delta_;
+          ofs << binValue << "\t" << histogram_[i][n] << "\n";
         }
       }
-      mapIndex2++;
-    }
-    mapIndex1++;
-  }
-
-  // Fill up the histogram with gcn values
-  for (sd1 = seleMan1_.beginSelected(iterator1); sd1 != NULL;
-       sd1 = seleMan1_.nextSelected(iterator1)) {
-    mapIndex1 = globalToLocal.at(sd1->getGlobalIndex());
-    gcn = 0.0;
-    for (unsigned int i = 0; i < listNN.at(mapIndex1).size(); i++) {
-      // tempIndex is the index of one of i's nearest neighbors
-      tempIndex = listNN.at(mapIndex1).at(i);
-      gcn += listNN.at(tempIndex).size();
-    }
-
-    gcn = gcn / nnMax_;
-    whichBin = int(gcn / delta_);
-    if (whichBin < histo.size()) {
-      histo[whichBin] += 1;
     } else {
-      cerr << "In frame " << istep << ", object " << sd1->getGlobalIndex()
-           << " has GCN value = " << gcn << "\n";
+      sprintf(painCave.errMsg, "GCN::writeSequence Error: failed to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
     }
+
+    ofs.close();
   }
-
-  for (unsigned int n = 0; n < histo.size(); n++) {
-    if (selectionCount1_ > 0)
-      histo[n] /= RealType(selectionCount1_);
-    else
-      histo[n] = 0.0;
-  }
-
-  count_.push_back(selectionCount1_);
-  histogram_.push_back(histo);
-}
-
-void GCNSeq::writeSequence() {
-  std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
-
-  if (ofs.is_open()) {
-    Revision r;
-    RealType binValue(0.0);
-
-    ofs << "# " << getSequenceType() << "\n";
-    ofs << "# OpenMD " << r.getFullRevision() << "\n";
-    ofs << "# " << r.getBuildDate() << "\n";
-    ofs << "# selection script1: \"" << selectionScript1_;
-    ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-    if (!paramString_.empty()) ofs << "# parameters: " << paramString_ << "\n";
-
-    ofs << "#time\tvalue\n";
-
-    for (unsigned int i = 0; i < times_.size(); ++i) {
-      ofs << "#Frame " << i << "\n";
-      ofs << "#Selection 1 Count: " << count_[i] << "\n";
-
-      for (unsigned int n = 0; n < histogram_[i].size(); n++) {
-        binValue = n * delta_;
-        ofs << binValue << "\t" << histogram_[i][n] << "\n";
-      }
-    }
-  } else {
-    sprintf(painCave.errMsg, "GCN::writeSequence Error: failed to open %s\n",
-            outputFilename_.c_str());
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  ofs.close();
-}
 }  // namespace OpenMD

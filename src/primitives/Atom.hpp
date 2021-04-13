@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file Atom.hpp
  * @author    tlin
  * @date  10/22/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef PRIMITIVES_ATOM_HPP
 #define PRIMITIVES_ATOM_HPP
@@ -56,89 +56,63 @@
 #include "primitives/StuntDouble.hpp"
 #include "types/AtomType.hpp"
 
-namespace OpenMD{
+namespace OpenMD {
   class Atom : public StuntDouble {
   public:
     Atom(AtomType* at);
-    
-    virtual std::string getType() {return atomType_->getName();}
-    
+
+    virtual std::string getType() { return atomType_->getName(); }
+
     /**
      * Returns the inertia tensor of this stuntdouble
      * @return the inertia tensor of this stuntdouble
-     */ 
+     */
     virtual Mat3x3d getI();
-    
+
     /**
      * Returns the gradient of this stuntdouble
      * @return the inertia tensor of this stuntdouble
-     */ 
+     */
     virtual std::vector<RealType> getGrad();
-    
+
     virtual void accept(BaseVisitor* v);
-    
-    /** 
+
+    /**
      * Returns the AtomType of this Atom.
      * @return the atom type of this atom
      */
-    AtomType* getAtomType() {
-      return atomType_;
-    }
-    
-    //forward  functions of AtomType class
-    bool isCharge()  {
-      return atomType_->isCharge(); 
-    }
-    
-    bool isDirectional() {
-      return atomType_->isDirectional(); 
-    }
-    
-    bool isDipole()  { 
-      return atomType_->isDipole(); 
-    }
-    
-    bool isMultipole()  { 
-      return atomType_->isMultipole(); 
-    }
-    
-    bool isGayBerne()  {
-      return atomType_->isGayBerne(); 
-    }
-            
-    bool isSticky()  { 
-      return atomType_->isSticky(); 
-    }
+    AtomType* getAtomType() { return atomType_; }
 
-    bool isShape()  { 
-      return atomType_->isShape(); 
-    }            
-    
-    bool isMetal() {
-      return atomType_->isMetal();
-    }
+    // forward  functions of AtomType class
+    bool isCharge() { return atomType_->isCharge(); }
 
-    bool isFluctuatingCharge() {
-      return atomType_->isFluctuatingCharge();
-    }
+    bool isDirectional() { return atomType_->isDirectional(); }
 
-    int getIdent() {
-      return atomType_->getIdent();
-    }
-    
-    RealType getChargeMass() {
-      return chargeMass_;
-    }
+    bool isDipole() { return atomType_->isDipole(); }
 
-    void setChargeMass(RealType cm) {
-      chargeMass_ = cm;
-    }
+    bool isMultipole() { return atomType_->isMultipole(); }
+
+    bool isGayBerne() { return atomType_->isGayBerne(); }
+
+    bool isSticky() { return atomType_->isSticky(); }
+
+    bool isShape() { return atomType_->isShape(); }
+
+    bool isMetal() { return atomType_->isMetal(); }
+
+    bool isFluctuatingCharge() { return atomType_->isFluctuatingCharge(); }
+
+    int getIdent() { return atomType_->getIdent(); }
+
+    RealType getChargeMass() { return chargeMass_; }
+
+    void setChargeMass(RealType cm) { chargeMass_ = cm; }
 
   protected:
     AtomType* atomType_;
     RealType chargeMass_;
   };
-  
-}//namespace OpenMD
 
-#endif //PRIMITIVES_ATOM_HPP
+}  // namespace OpenMD
+
+#endif  // PRIMITIVES_ATOM_HPP

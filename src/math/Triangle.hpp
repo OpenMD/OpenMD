@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -43,21 +43,19 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-
 #ifndef MATH_FACET_HPP
 #define MATH_FACET_HPP
 
-#include "math/Vector3.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "config.h"
-#include "primitives/StuntDouble.hpp"
-
 #include <vector>
 
+#include "config.h"
+#include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
+#include "primitives/StuntDouble.hpp"
 
 namespace OpenMD {
 
-/**
+  /**
    * @class Triangle
    *
    * Triangle provides geometric data to OpenMD. Triangle includes
@@ -65,53 +63,50 @@ namespace OpenMD {
    * that belong to this triangle.
    */
   class Triangle {
-
   public:
     Triangle();
-    virtual ~Triangle() { };
+    virtual ~Triangle() {};
 
     void setNormal(Vector3d normal) {
-      normal_ = normal;
+      normal_     = normal;
       HaveNormal_ = true;
     }
     void setUnitNormal(Vector3d normal) {
-      unitnormal_ = normal;
+      unitnormal_     = normal;
       HaveUnitNormal_ = true;
     }
 
     void addVertices(Vector3d P1, Vector3d P2, Vector3d P3);
 
-    void addVertexSD(StuntDouble* thisSD){
-      vertexSD_.push_back(thisSD);
-    }
+    void addVertexSD(StuntDouble* thisSD) { vertexSD_.push_back(thisSD); }
 
-    std::vector<StuntDouble*> getVertices(){return vertexSD_;}
+    std::vector<StuntDouble*> getVertices() { return vertexSD_; }
 
     void setArea(RealType area) {
-      area_ = area;
+      area_     = area;
       HaveArea_ = true;
     }
-    
+
     Vector3d getNormal() {
       if (HaveNormal_) {
-	return normal_;
+        return normal_;
       } else {
-	return computeNormal();
+        return computeNormal();
       }
     }
-   Vector3d getUnitNormal() {
+    Vector3d getUnitNormal() {
       if (HaveUnitNormal_) {
-	return unitnormal_;
+        return unitnormal_;
       } else {
-	return computeUnitNormal();
+        return computeUnitNormal();
       }
     }
-    
-    RealType getArea() { 
-      if(HaveArea_){
-	return area_;
-      }else{
-	return computeArea();
+
+    RealType getArea() {
+      if (HaveArea_) {
+        return area_;
+      } else {
+        return computeArea();
       }
     }
 
@@ -120,106 +115,83 @@ namespace OpenMD {
     Vector3d computeCentroid();
     Vector3d computeUnitNormal();
 
-    void setCentroid(Vector3d centroid) { 
-      centroid_ = centroid;
+    void setCentroid(Vector3d centroid) {
+      centroid_     = centroid;
       HaveCentroid_ = true;
     }
 
     Vector3d getCentroid() {
       if (HaveCentroid_) {
-	return centroid_;
+        return centroid_;
       } else {
-	return computeCentroid();
+        return computeCentroid();
       }
     }
-    
-    Vector3d getFacetVelocity(){
-      return facetVelocity_;
-    }
-    
-    void setFacetVelocity(Vector3d facetVelocity){
+
+    Vector3d getFacetVelocity() { return facetVelocity_; }
+
+    void setFacetVelocity(Vector3d facetVelocity) {
       facetVelocity_ = facetVelocity;
     }
 
-    void setFacetMass(RealType mass){
-      mass_ = mass;
-    }
+    void setFacetMass(RealType mass) { mass_ = mass; }
 
-    RealType getFacetMass(){
-      return mass_;
-    }
+    RealType getFacetMass() { return mass_; }
 
-    RealType a(){
-      return a_.length();
-    }
+    RealType a() { return a_.length(); }
 
-    RealType b(){
-      return b_.length();
-    }
+    RealType b() { return b_.length(); }
 
-    RealType c(){
-      return c_.length();
-    }
+    RealType c() { return c_.length(); }
 
     RealType getHydroLength() {
       RealType a1 = a();
       RealType b1 = b();
       RealType c1 = c();
-      RealType t1 =  a1 + b1 + c1;
-      RealType t4 =  a1 + b1 - c1;
+      RealType t1 = a1 + b1 + c1;
+      RealType t4 = a1 + b1 - c1;
 
-      return 32.0 * c1 / log(t1*t1/t4/t4);
+      return 32.0 * c1 / log(t1 * t1 / t4 / t4);
     }
 
-
-    RealType getIncircleRadius() {
-      return 2.0 * getArea() / (a() + b() + c());
-    }
+    RealType getIncircleRadius() { return 2.0 * getArea() / (a() + b() + c()); }
 
     RealType getCircumcircleRadius() {
       RealType a1 = a();
       RealType b1 = b();
       RealType c1 = c();
-      RealType t1 =  a1 + b1 + c1;
+      RealType t1 = a1 + b1 + c1;
       RealType t2 = -a1 + b1 + c1;
-      RealType t3 =  a1 - b1 + c1;
-      RealType t4 =  a1 + b1 - c1;
+      RealType t3 = a1 - b1 + c1;
+      RealType t4 = a1 + b1 - c1;
       return a1 * b1 * c1 / sqrt(t1 * t2 * t3 * t4);
     }
-      
+
     Mat3x3d computeHydrodynamicTensor(RealType viscosity);
 
-
   private:
-    Mat3x3d hydro_tensor(const Vector3d& ri, const Vector3d& rj0, const Vector3d& rj1, const Vector3d& rj2,RealType s, RealType viscosity);
-    
+    Mat3x3d hydro_tensor(const Vector3d& ri, const Vector3d& rj0,
+                         const Vector3d& rj1, const Vector3d& rj2, RealType s,
+                         RealType viscosity);
+
     /* Local Indentity of vertex atoms in pos array*/
-    std::vector <StuntDouble*> vertexSD_;
+    std::vector<StuntDouble*> vertexSD_;
     Vector3d normal_;
     Vector3d unitnormal_;
     Vector3d centroid_;
     Vector3d vertices_[3];
-    RealType area_;    
+    RealType area_;
     RealType mass_;
     Vector3d facetVelocity_;
-    //Length of triangle sides
-    Vector3d a_,b_,c_;
+    // Length of triangle sides
+    Vector3d a_, b_, c_;
     bool HaveArea_;
     bool HaveNormal_;
     bool HaveUnitNormal_;
     bool HaveCentroid_;
-    
-  }; // End class Triangle
-    
-    
 
-} //end namespace OpenMD
+  };  // End class Triangle
 
+}  // end namespace OpenMD
 
-
-#endif // MATH_FACET_HPP
-
-
-
-
-
+#endif  // MATH_FACET_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file HydrodynamicsModelFactory.hpp
  * @author Teng Lin
@@ -53,15 +53,16 @@
 #ifndef APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODELFACTORY_HPP
 #define APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODELFACTORY_HPP
 #include <cassert>
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
-#include <iostream>
+
 #include "utils/any.hpp"
 
 namespace OpenMD {
 
-  //forward declaration
+  // forward declaration
   class HydrodynamicsModel;
   class HydrodynamicsModelCreator;
   class StuntDouble;
@@ -69,62 +70,61 @@ namespace OpenMD {
 
   /**
    * @class HydrodynamicsModelFactory
-   * Factory pattern and Singleton Pattern are used to define an interface for creating an HydrodynamicsModel.
+   * Factory pattern and Singleton Pattern are used to define an interface for
+   * creating an HydrodynamicsModel.
    */
   class HydrodynamicsModelFactory {
   public:
-                
     typedef std::map<std::string, HydrodynamicsModelCreator*> CreatorMapType;
     typedef std::vector<std::string> IdentVectorType;
     typedef std::vector<std::string>::iterator IdentVectorIterator;
 
-    ~HydrodynamicsModelFactory();                    
+    ~HydrodynamicsModelFactory();
 
     /**
      * Returns an instance of HydrodynamicsModel factory
      * @return an instance of HydrodynamicsModel factory
-     */        
+     */
     static HydrodynamicsModelFactory* getInstance() {
-
-      if (instance_ == NULL) {
-	instance_ = new HydrodynamicsModelFactory();
-      }
+      if (instance_ == NULL) { instance_ = new HydrodynamicsModelFactory(); }
       return instance_;
-            
     }
 
     /**
      * Registers a creator with a type identifier
      * @return true if registration is successful, otherwise return false
-     * @param creator the object responsible to create the concrete object 
+     * @param creator the object responsible to create the concrete object
      */
     bool registerHydrodynamicsModel(HydrodynamicsModelCreator* creator);
 
     /**
-     * Unregisters the creator for the given type identifier. If the type identifier 
-     * was previously registered, the function returns true.
-     * @return truethe type identifier was previously registered and the creator is removed,
-     * otherwise return false
+     * Unregisters the creator for the given type identifier. If the type
+     * identifier was previously registered, the function returns true.
+     * @return truethe type identifier was previously registered and the creator
+     * is removed, otherwise return false
      * @param id the identification of the concrete object
      */
     bool unregisterHydrodynamicsModel(const std::string& id);
     /**
-     * Looks up the type identifier in the internal map. If it is found, it invokes the
-     * corresponding creator for the type identifier and returns its result. 
-     * @return a pointer of the concrete object, return NULL if no creator is registed for 
-     * creating this concrete object
+     * Looks up the type identifier in the internal map. If it is found, it
+     * invokes the corresponding creator for the type identifier and returns its
+     * result.
+     * @return a pointer of the concrete object, return NULL if no creator is
+     * registed for creating this concrete object
      * @param id the identification of the concrete object
      * @param sd a pointer to the StuntDouble being modeled
      * @param info a pointer to the SimInfo object
      */
-    HydrodynamicsModel* createHydrodynamicsModel(const std::string& id, StuntDouble* sd, SimInfo* info);
+    HydrodynamicsModel* createHydrodynamicsModel(const std::string& id,
+                                                 StuntDouble* sd,
+                                                 SimInfo* info);
 
-    /** 
+    /**
      *  Returns all of the registed  type identifiers
      * @return all of the registed  type identifiers
      */
     IdentVectorType getIdents();
-        
+
   private:
     HydrodynamicsModelFactory() {}
     static HydrodynamicsModelFactory* instance_;
@@ -132,8 +132,7 @@ namespace OpenMD {
   };
 
   /** write out all of the type identifiers to an output stream */
-  std::ostream& operator <<(std::ostream& o, HydrodynamicsModelFactory& factory);
+  std::ostream& operator<<(std::ostream& o, HydrodynamicsModelFactory& factory);
 
-}//namespace OpenMD
-#endif //INTEGRATORS_INTEGRATORFACTORY_HPP
-
+}  // namespace OpenMD
+#endif  // INTEGRATORS_INTEGRATORFACTORY_HPP

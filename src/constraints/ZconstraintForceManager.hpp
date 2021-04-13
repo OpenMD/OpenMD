@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,12 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef CONSTRAINTS_ZCONSTRAINTFORCEMANAGER_HPP
 #define CONSTRAINTS_ZCONSTRAINTFORCEMANAGER_HPP
 #include <list>
 #include <string>
 #include <vector>
+
 #include "brains/ForceManager.hpp"
 #include "constraints/ZconsStruct.hpp"
 #include "io/ZConsWriter.hpp"
@@ -57,35 +58,38 @@ namespace OpenMD {
   public:
     ZconstraintForceManager(SimInfo* info);
     ~ZconstraintForceManager();
-        
+
     virtual void calcForces();
 
     RealType getZConsTime() { return zconsTime_; }
-    std::string getZConsOutput() { return zconsOutput_; }    
+    std::string getZConsOutput() { return zconsOutput_; }
 
     void update();
     virtual void init();
-  private:
 
+  private:
     bool isZMol(Molecule* mol);
     void thermalize(void);
 
     void zeroVelocity();
     void doZconstraintForce();
     void doHarmonic();
-    bool checkZConsState();        
+    bool checkZConsState();
     void updateZPos();
     void updateCantPos();
     void calcTotalMassMovingZMols();
     bool haveMovingZMols();
     bool haveFixedZMols();
-    RealType getZTargetPos(int index);        
-    RealType getZFOfFixedZMols(Molecule* mol, StuntDouble* sd, RealType totalForce) ;
-    RealType getZFOfMovingMols(Molecule* mol, RealType totalForce) ;
-    RealType getHFOfFixedZMols(Molecule* mol, StuntDouble* sd, RealType totalForce);
-    RealType getHFOfUnconsMols(Molecule* mol, RealType totalForce);        
+    RealType getZTargetPos(int index);
+    RealType getZFOfFixedZMols(Molecule* mol, StuntDouble* sd,
+                               RealType totalForce);
+    RealType getZFOfMovingMols(Molecule* mol, RealType totalForce);
+    RealType getHFOfFixedZMols(Molecule* mol, StuntDouble* sd,
+                               RealType totalForce);
+    RealType getHFOfUnconsMols(Molecule* mol, RealType totalForce);
 
-    std::list<ZconstraintMol> movingZMols_;/**<   moving zconstraint molecules*/
+    std::list<ZconstraintMol>
+        movingZMols_;                      /**<   moving zconstraint molecules*/
     std::list<ZconstraintMol> fixedZMols_; /**< fixed zconstraint molecules*/
     std::vector<Molecule*> unzconsMols_;   /**< free molecules*/
 
@@ -93,7 +97,7 @@ namespace OpenMD {
     std::string zconsOutput_;
     RealType zconsTol_;
     bool usingSMD_;
-    RealType zconsFixingTime_;  
+    RealType zconsFixingTime_;
     RealType zconsGap_;
     bool usingZconsGap_;
     RealType dt_;
@@ -106,12 +110,12 @@ namespace OpenMD {
     RealType currZconsTime_;
 
     RealType totMassMovingZMols_;
-    RealType totMassUnconsMols_;  /**< mass of unconstrained molecules
+    RealType totMassUnconsMols_; /**< mass of unconstrained molecules
                                      in the system (never changes) */
 
     ZConsWriter* fzOut;
     const RealType infiniteTime;
   };
 
-}
-#endif 
+}  // namespace OpenMD
+#endif

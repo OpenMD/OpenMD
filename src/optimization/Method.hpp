@@ -30,19 +30,19 @@
 
 namespace QuantLib {
 
-    class Problem;
-    
-    //! Abstract class for constrained optimization method
-    class OptimizationMethod {
-      public:
-        virtual ~OptimizationMethod() {}
+  class Problem;
 
-        //! minimize the optimization problem P
-        virtual EndCriteria::Type minimize(Problem& P,
-                                           const EndCriteria& endCriteria,
-                                           RealType initialStepSize) = 0;
-    };
+  //! Abstract class for constrained optimization method
+  class OptimizationMethod {
+  public:
+    virtual ~OptimizationMethod() {}
 
-}
+    //! minimize the optimization problem P
+    virtual EndCriteria::Type minimize(Problem& P,
+                                       const EndCriteria& endCriteria,
+                                       RealType initialStepSize) = 0;
+  };
+
+}  // namespace QuantLib
 
 #endif

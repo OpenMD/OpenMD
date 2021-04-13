@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,14 +42,14 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef NONBONDED_MAW_HPP
 #define NONBONDED_MAW_HPP
 
-#include "types/MAWInteractionType.hpp"
-#include "nonbonded/NonBondedInteraction.hpp"
 #include "brains/ForceField.hpp"
 #include "math/Vector3.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
+#include "types/MAWInteractionType.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -65,30 +65,35 @@ namespace OpenMD {
   };
 
   class MAW : public VanDerWaalsInteraction {
-    
-  public:    
+  public:
     MAW();
-    void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
-    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType De, RealType beta, RealType Re, RealType ca1, RealType cb1); 
-    virtual void calcForce(InteractionData &idat);
-    virtual string getName() {return name_;}
+    void setForceField(ForceField* ff) { forceField_ = ff; };
+    void setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+      simTypes_ = simtypes;
+      initialize();
+    };
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType De,
+                                RealType beta, RealType Re, RealType ca1,
+                                RealType cb1);
+    virtual void calcForce(InteractionData& idat);
+    virtual string getName() { return name_; }
     virtual int getHash() { return MAW_INTERACTION; }
-    virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
-    
+    virtual RealType getSuggestedCutoffRadius(
+        pair<AtomType*, AtomType*> atypes);
+
   private:
     void initialize();
     bool initialized_;
-    set<int> MAWtypes;           /**< The set of AtomType idents that are MAW types */
-    vector<int> MAWtids;         /**< The mapping from AtomType ident -> MAW type ident */
-    vector<vector<MAWInteractionData> > MixingMap;  /**< The mixing parameters
-                                                       between two Morse types */
-    ForceField* forceField_;    
+    set<int> MAWtypes; /**< The set of AtomType idents that are MAW types */
+    vector<int>
+        MAWtids; /**< The mapping from AtomType ident -> MAW type ident */
+    vector<vector<MAWInteractionData>>
+        MixingMap; /**< The mixing parameters
+                        between two Morse types */
+    ForceField* forceField_;
     set<AtomType*> simTypes_;
     string name_;
-    
   };
-}
+}  // namespace OpenMD
 
-                               
 #endif

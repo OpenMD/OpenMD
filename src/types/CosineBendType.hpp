@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,14 +42,14 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file CosineBendType.hpp
  * @author    gezelter
  * @date  06/18/2010
  * @version 1.1
- */ 
- 
+ */
+
 #ifndef TYPES_COSINEBENDTYPE_HPP
 #define TYPES_COSINEBENDTYPE_HPP
 
@@ -57,41 +57,36 @@
 
 namespace OpenMD {
   /**
-   * @class CosineBendType 
+   * @class CosineBendType
    *
    * A simple harmonic bend using the cosine of the angle instead of
-   * the angle itself: 
+   * the angle itself:
    * \f[ Vbend = (\cos(\theta) - \cos(\theta_0))^2 \f]
    */
   class CosineBendType : public BendType {
-    
   public:
-    
     CosineBendType(RealType theta, RealType k) : BendType(theta), k_(k) {
       c0_ = cos(theta);
     }
-    
-    void setForceConstant(RealType k) {k_ = k; }
-    
-    RealType getForceConstant() {return k_;}
-    
-    void calcForce(RealType theta, RealType& V, RealType& dVdtheta) {
 
-      RealType ct = cos(theta);
-      RealType st = sin(theta);
+    void setForceConstant(RealType k) { k_ = k; }
+
+    RealType getForceConstant() { return k_; }
+
+    void calcForce(RealType theta, RealType& V, RealType& dVdtheta) {
+      RealType ct    = cos(theta);
+      RealType st    = sin(theta);
       RealType delta = ct - c0_;
-      
+
       V = 0.5 * k_ * delta * delta;
 
-      dVdtheta = - k_ * delta * st;
+      dVdtheta = -k_ * delta * st;
     }
-    
+
   private:
     RealType k_;
     RealType c0_;
-    
   };
-  
-}//end namespace OpenMD
-#endif //TYPES_COSINEBENDTYPE_HPP
 
+}  // end namespace OpenMD
+#endif  // TYPES_COSINEBENDTYPE_HPP

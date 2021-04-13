@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,6 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
 
 /*! \file perturbations/UniformGradient.hpp
     \brief Uniform Electric Field Gradient perturbation
@@ -51,11 +50,11 @@
 #ifndef PERTURBATIONS_UNIFORMGRADIENT_HPP
 #define PERTURBATIONS_UNIFORMGRADIENT_HPP
 
-#include "perturbations/Perturbation.hpp"
 #include "brains/SimInfo.hpp"
+#include "perturbations/Perturbation.hpp"
 
 namespace OpenMD {
-   
+
   //! Applies a uniform electric field gradient to the system
   /*! The gradient is applied as an external perturbation.  The user specifies
 
@@ -63,20 +62,20 @@ namespace OpenMD {
     uniformGradientStrength = c;
     uniformGradientDirection1 = (a1, a2, a3)
     uniformGradientDirection2 = (b1, b2, b3);
-  \endcode 
-    
-    in the .omd file where the two direction vectors, \f$ \mathbf{a} \f$ 
-    and \f$ \mathbf{b} \f$ are unit vectors, and the value of \f$ g \f$ 
+  \endcode
+
+    in the .omd file where the two direction vectors, \f$ \mathbf{a} \f$
+    and \f$ \mathbf{b} \f$ are unit vectors, and the value of \f$ g \f$
     is in units of \f$ V / \AA^2 \f$
 
     The electrostatic potential corresponding to this uniform gradient is
 
-    \f$ \phi(\mathbf{r})  = - \frac{g}{2} \left[ 
+    \f$ \phi(\mathbf{r})  = - \frac{g}{2} \left[
     \left(a_1 b_1 - \frac{\cos\psi}{3}\right) x^2
     + (a_1 b_2 + a_2 b_1) x y + (a_1 b_3 + a_3 b_1) x z +
-    + (a_2 b_1 + a_1 b_2) y x 
+    + (a_2 b_1 + a_1 b_2) y x
     + \left(a_2 b_2 - \frac{\cos\psi}{3}\right) y^2
-    + (a_2 b_3 + a_3 b_2) y z + (a_3 b_1 + a_1 b_3) z x 
+    + (a_2 b_3 + a_3 b_2) y z + (a_3 b_1 + a_1 b_3) z x
     + (a_3 b_2 + a_2 b_3) z y
     + \left(a_3 b_3 - \frac{\cos\psi}{3}\right) z^2 \right] \f$
 
@@ -86,12 +85,12 @@ namespace OpenMD {
 
     The corresponding field is:
 
-    \f$ \mathbf{E} = \frac{g}{2} \left( \begin{array}{c} 
-    2\left(a_1 b_1 - \frac{\cos\psi}{3}\right) x +  (a_1 b_2 + a_2 b_1) y 
+    \f$ \mathbf{E} = \frac{g}{2} \left( \begin{array}{c}
+    2\left(a_1 b_1 - \frac{\cos\psi}{3}\right) x +  (a_1 b_2 + a_2 b_1) y
     + (a_1 b_3 + a_3 b_1) z  \\
-    (a_2 b_1 + a_1 b_2)  x + 2 \left(a_2 b_2 - \frac{\cos\psi}{3}\right) y 
+    (a_2 b_1 + a_1 b_2)  x + 2 \left(a_2 b_2 - \frac{\cos\psi}{3}\right) y
     + (a_2 b_3 + a_3 b_2) z \\
-    (a_3 b_1 + a_1 b_3) x +  (a_3 b_2 + a_2 b_3) y 
+    (a_3 b_1 + a_1 b_3) x +  (a_3 b_2 + a_2 b_3) y
     + 2 \left(a_3 b_3 - \frac{\cos\psi}{3}\right) z \end{array} \right) \f$
 
     The field also grows unbounded and is not periodic.  For these reasons,
@@ -99,38 +98,36 @@ namespace OpenMD {
 
     The corresponding field gradient is:
 
-    \f$ \nabla \mathbf{E} = \frac{g}{2} \left( \begin{array}{ccc}  
-    2\left(a_1 b_1 - \frac{\cos\psi}{3}\right)  &  
+    \f$ \nabla \mathbf{E} = \frac{g}{2} \left( \begin{array}{ccc}
+    2\left(a_1 b_1 - \frac{\cos\psi}{3}\right)  &
     (a_1 b_2 + a_2 b_1) & (a_1 b_3 + a_3 b_1) \\
-    (a_2 b_1 + a_1 b_2)  & 2 \left(a_2 b_2 - \frac{\cos\psi}{3}\right) & 
+    (a_2 b_1 + a_1 b_2)  & 2 \left(a_2 b_2 - \frac{\cos\psi}{3}\right) &
     (a_2 b_3 + a_3 b_2) \\
-    (a_3 b_1 + a_1 b_3) & (a_3 b_2 + a_2 b_3) & 
+    (a_3 b_1 + a_1 b_3) & (a_3 b_2 + a_2 b_3) &
     2 \left(a_3 b_3 - \frac{\cos\psi}{3}\right) \end{array} \right) \f$
 
     which is uniform everywhere.
 
-    The uniform field gradient applies a force on charged atoms, 
-    \f$ \mathbf{F} = C \mathbf{E}(\mathbf{r}) \f$.  
-    For dipolar atoms, the gradient applies both a potential, 
-    \f$ U = -\mathbf{D} \cdot \mathbf{E}(\mathbf{r}) \f$, a force, 
+    The uniform field gradient applies a force on charged atoms,
+    \f$ \mathbf{F} = C \mathbf{E}(\mathbf{r}) \f$.
+    For dipolar atoms, the gradient applies both a potential,
+    \f$ U = -\mathbf{D} \cdot \mathbf{E}(\mathbf{r}) \f$, a force,
     \f$ \mathbf{F} = \mathbf{D} \cdot \nabla \mathbf{E} \f$, and a torque,
     \f$ \mathbf{\tau} = \mathbf{D} \times \mathbf{E}(\mathbf{r}) \f$.
-    
-    For quadrupolar atoms, the uniform field gradient exerts a potential, 
-    \f$ U = - \mathsf{Q}:\nabla \mathbf{E} \f$, and a torque 
-    \f$ \mathbf{F} = 2 \mathsf{Q} \times \nabla \mathbf{E} \f$
-    
-  */ 
-  class UniformGradient : public Perturbation {
-    
 
+    For quadrupolar atoms, the uniform field gradient exerts a potential,
+    \f$ U = - \mathsf{Q}:\nabla \mathbf{E} \f$, and a torque
+    \f$ \mathbf{F} = 2 \mathsf{Q} \times \nabla \mathbf{E} \f$
+
+  */
+  class UniformGradient : public Perturbation {
   public:
     UniformGradient(SimInfo* info);
-    
+
   protected:
     virtual void initialize();
     virtual void applyPerturbation();
-    
+
   private:
     bool initialized;
     bool doUniformGradient;
@@ -139,10 +136,8 @@ namespace OpenMD {
     SimInfo* info_ {nullptr};
     Mat3x3d Grad_;
     Vector3d a_, b_;
-    RealType g_, cpsi_;    
+    RealType g_, cpsi_;
   };
 
-
-} //end namespace OpenMD
+}  // end namespace OpenMD
 #endif
-

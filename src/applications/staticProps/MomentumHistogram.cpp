@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -60,22 +60,20 @@
 #include "utils/simError.h"
 namespace OpenMD {
 
-MomentumHistogram::MomentumHistogram(SimInfo* info, const std::string& filename,
-                                     const std::string& sele, int nbins,
-                                     int momentum_type, int momentum_component)
-    : StaticAnalyser(info, filename, nbins),
-      selectionScript_(sele),
-      evaluator_(info),
-      seleMan_(info),
-      nBins_(nbins),
-      mom_type_(momentum_type),
-      mom_comp_(momentum_component) {
-  evaluator_.loadScriptString(sele);
-  if (!evaluator_.isDynamic()) {
-    seleMan_.setSelectionSet(evaluator_.evaluate());
-  }
+  MomentumHistogram::MomentumHistogram(SimInfo* info,
+                                       const std::string& filename,
+                                       const std::string& sele, int nbins,
+                                       int momentum_type,
+                                       int momentum_component) :
+      StaticAnalyser(info, filename, nbins),
+      selectionScript_(sele), evaluator_(info), seleMan_(info), nBins_(nbins),
+      mom_type_(momentum_type), mom_comp_(momentum_component) {
+    evaluator_.loadScriptString(sele);
+    if (!evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
 
-  switch (mom_type_) {
+    switch (mom_type_) {
     case 1:
       momentumLabel_ = "Angular Momentum: J";
       break;
@@ -83,9 +81,9 @@ MomentumHistogram::MomentumHistogram(SimInfo* info, const std::string& filename,
     default:
       momentumLabel_ = "Linear Momentum: P";
       break;
-  }
+    }
 
-  switch (mom_comp_) {
+    switch (mom_comp_) {
     case 0:
       componentLabel_ = "x";
       break;
@@ -96,33 +94,33 @@ MomentumHistogram::MomentumHistogram(SimInfo* info, const std::string& filename,
     default:
       componentLabel_ = "z";
       break;
+    }
+
+    setOutputName(getPrefix(filename) + ".MomentumHistogram");
   }
 
-  setOutputName(getPrefix(filename) + ".MomentumHistogram");
-}
+  void MomentumHistogram::process() {
+    StuntDouble* sd;
+    int ii;
 
-void MomentumHistogram::process() {
-  StuntDouble* sd;
-  int ii;
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
 
-  if (evaluator_.isDynamic()) {
-    seleMan_.setSelectionSet(evaluator_.evaluate());
-  }
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
+    nProcessed_ = nFrames / step_;
+    vector<RealType> momentum;
 
-  DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
-  nProcessed_ = nFrames / step_;
-  vector<RealType> momentum;
+    nProcessed_ = nFrames / step_;
 
-  nProcessed_ = nFrames / step_;
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-  for (int istep = 0; istep < nFrames; istep += step_) {
-    reader.readFrame(istep);
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
-    for (sd = seleMan_.beginSelected(ii); sd != NULL;
-         sd = seleMan_.nextSelected(ii)) {
-      switch (mom_type_) {
+      for (sd = seleMan_.beginSelected(ii); sd != NULL;
+           sd = seleMan_.nextSelected(ii)) {
+        switch (mom_type_) {
         case 0: {
           Vector3d linMom = sd->getVel() * sd->getMass();
           momentum.push_back(linMom[mom_comp_]);
@@ -135,76 +133,77 @@ void MomentumHistogram::process() {
             momentum.push_back(angMom[mom_comp_]);
           }
         } break;
-      }
-    }
-  }
-
-  if (momentum.empty()) {
-    sprintf(painCave.errMsg, "Momentum for selected atom not found.\n");
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  std::sort(momentum.begin(), momentum.end());
-
-  RealType min = momentum.front();
-  RealType max = momentum.back();
-
-  RealType delta_momentum = (max - min) / (nBins_);
-
-  if (delta_momentum == 0) {
-    bincenter_.push_back(min);
-    histList_.push_back(momentum.size());
-  } else {
-    // fill the center for histogram
-    for (int j = 0; j < nBins_ + 3; ++j) {
-      bincenter_.push_back(min + (j - 1) * delta_momentum);
-      histList_.push_back(0);
-    }
-
-    // filling up the histogram whith the densities
-    int bin_center_pos = 0;
-    vector<RealType>::iterator index;
-    RealType momentum_length = static_cast<RealType>(momentum.size());
-
-    bool hist_update;
-    for (index = momentum.begin(); index < momentum.end(); index++) {
-      hist_update = true;
-      while (hist_update) {
-        if (*index >= bincenter_[bin_center_pos] &&
-            *index < bincenter_[bin_center_pos + 1]) {
-          histList_[bin_center_pos] += 1.0 / (momentum_length * delta_momentum);
-          hist_update = false;
-        } else {
-          bin_center_pos++;
-          hist_update = true;
         }
       }
     }
-  }
-  write();
-}
 
-void MomentumHistogram::write() {
-  std::ofstream rdfStream(outputFilename_.c_str());
-  if (rdfStream.is_open()) {
-    rdfStream << "#" << momentumLabel_ << componentLabel_
-              << " distribtution \n";
-    rdfStream << "# nFrames:\t" << nProcessed_ << "\n";
-    rdfStream << "# selection: (" << selectionScript_ << ")\n";
-    rdfStream << "# "
-              << "Bin_center"
-              << "\tcount\n";
-    for (unsigned int i = 0; i < histList_.size(); ++i) {
-      rdfStream << bincenter_[i] << "\t" << histList_[i] << "\n";
+    if (momentum.empty()) {
+      sprintf(painCave.errMsg, "Momentum for selected atom not found.\n");
+      painCave.isFatal = 1;
+      simError();
     }
 
-  } else {
-    sprintf(painCave.errMsg, "MomentumHistogram: unable to open %s\n",
-            outputFilename_.c_str());
-    painCave.isFatal = 1;
-    simError();
+    std::sort(momentum.begin(), momentum.end());
+
+    RealType min = momentum.front();
+    RealType max = momentum.back();
+
+    RealType delta_momentum = (max - min) / (nBins_);
+
+    if (delta_momentum == 0) {
+      bincenter_.push_back(min);
+      histList_.push_back(momentum.size());
+    } else {
+      // fill the center for histogram
+      for (int j = 0; j < nBins_ + 3; ++j) {
+        bincenter_.push_back(min + (j - 1) * delta_momentum);
+        histList_.push_back(0);
+      }
+
+      // filling up the histogram whith the densities
+      int bin_center_pos = 0;
+      vector<RealType>::iterator index;
+      RealType momentum_length = static_cast<RealType>(momentum.size());
+
+      bool hist_update;
+      for (index = momentum.begin(); index < momentum.end(); index++) {
+        hist_update = true;
+        while (hist_update) {
+          if (*index >= bincenter_[bin_center_pos] &&
+              *index < bincenter_[bin_center_pos + 1]) {
+            histList_[bin_center_pos] +=
+                1.0 / (momentum_length * delta_momentum);
+            hist_update = false;
+          } else {
+            bin_center_pos++;
+            hist_update = true;
+          }
+        }
+      }
+    }
+    write();
   }
-  rdfStream.close();
-}
+
+  void MomentumHistogram::write() {
+    std::ofstream rdfStream(outputFilename_.c_str());
+    if (rdfStream.is_open()) {
+      rdfStream << "#" << momentumLabel_ << componentLabel_
+                << " distribtution \n";
+      rdfStream << "# nFrames:\t" << nProcessed_ << "\n";
+      rdfStream << "# selection: (" << selectionScript_ << ")\n";
+      rdfStream << "# "
+                << "Bin_center"
+                << "\tcount\n";
+      for (unsigned int i = 0; i < histList_.size(); ++i) {
+        rdfStream << bincenter_[i] << "\t" << histList_[i] << "\n";
+      }
+
+    } else {
+      sprintf(painCave.errMsg, "MomentumHistogram: unable to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+    rdfStream.close();
+  }
 }  // namespace OpenMD

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,121 +51,121 @@
 
 namespace OpenMD {
 
-int* PairList::getPairList() {
-  if (modified_) {
-    pairList_.clear();
+  int* PairList::getPairList() {
+    if (modified_) {
+      pairList_.clear();
 
-    for (std::set<std::pair<int, int>>::iterator i = pairSet_.begin();
-         i != pairSet_.end(); ++i) {
-      pairList_.push_back(i->first + 1);
-      pairList_.push_back(i->second + 1);
+      for (std::set<std::pair<int, int>>::iterator i = pairSet_.begin();
+           i != pairSet_.end(); ++i) {
+        pairList_.push_back(i->first + 1);
+        pairList_.push_back(i->second + 1);
+      }
+      modified_ = false;
     }
-    modified_ = false;
+
+    return pairList_.empty() ? NULL : &(pairList_[0]);
   }
 
-  return pairList_.empty() ? NULL : &(pairList_[0]);
-}
+  void PairList::addPair(int i, int j) {
+    if (i == j) {
+      return;
+    } else if (i > j) {
+      std::swap(i, j);
+    }
 
-void PairList::addPair(int i, int j) {
-  if (i == j) {
-    return;
-  } else if (i > j) {
-    std::swap(i, j);
-  }
+    std::set<std::pair<int, int>>::iterator iter =
+        pairSet_.find(std::make_pair(i, j));
 
-  std::set<std::pair<int, int>>::iterator iter =
-      pairSet_.find(std::make_pair(i, j));
-
-  if (iter == pairSet_.end()) {
-    pairSet_.insert(std::make_pair(i, j));
-    modified_ = true;
-  }
-}
-
-void PairList::addPairs(std::set<int>& set1, std::set<int>& set2) {
-  for (std::set<int>::iterator iter1 = set1.begin(); iter1 != set1.end();
-       ++iter1) {
-    for (std::set<int>::iterator iter2 = set2.begin(); iter2 != set2.end();
-         ++iter2) {
-      this->addPair(*iter1, *iter2);
+    if (iter == pairSet_.end()) {
+      pairSet_.insert(std::make_pair(i, j));
+      modified_ = true;
     }
   }
-}
 
-template <typename IterType1, typename IterType2>
-void PairList::addPairs(IterType1 iter1_first, IterType1 iter1_last,
-                        IterType2 iter2_first, IterType2 iter2_last) {
-  for (IterType1 iter1 = iter1_first; iter1 != iter1_last; ++iter1) {
-    for (IterType2 iter2 = iter2_first; iter2 != iter2_last; ++iter2) {
-      this->addPair(*iter1, *iter2);
+  void PairList::addPairs(std::set<int>& set1, std::set<int>& set2) {
+    for (std::set<int>::iterator iter1 = set1.begin(); iter1 != set1.end();
+         ++iter1) {
+      for (std::set<int>::iterator iter2 = set2.begin(); iter2 != set2.end();
+           ++iter2) {
+        this->addPair(*iter1, *iter2);
+      }
     }
   }
-}
 
-void PairList::removePair(int i, int j) {
-  if (i == j) {
-    return;
-  } else if (i > j) {
-    std::swap(i, j);
-  }
-
-  std::set<std::pair<int, int>>::iterator iter =
-      pairSet_.find(std::make_pair(i, j));
-
-  if (iter != pairSet_.end()) {
-    pairSet_.erase(iter);
-    modified_ = true;
-  }
-}
-
-void PairList::removePairs(std::set<int>& set1, std::set<int>& set2) {
-  for (std::set<int>::iterator iter1 = set1.begin(); iter1 != set1.end();
-       ++iter1) {
-    for (std::set<int>::iterator iter2 = set2.begin(); iter2 != set2.end();
-         ++iter2) {
-      this->removePair(*iter1, *iter2);
+  template<typename IterType1, typename IterType2>
+  void PairList::addPairs(IterType1 iter1_first, IterType1 iter1_last,
+                          IterType2 iter2_first, IterType2 iter2_last) {
+    for (IterType1 iter1 = iter1_first; iter1 != iter1_last; ++iter1) {
+      for (IterType2 iter2 = iter2_first; iter2 != iter2_last; ++iter2) {
+        this->addPair(*iter1, *iter2);
+      }
     }
   }
-}
 
-template <typename IterType1, typename IterType2>
-void PairList::removePairs(IterType1 iter1_first, IterType1 iter1_last,
-                           IterType2 iter2_first, IterType2 iter2_last) {
-  for (IterType1 iter1 = iter1_first; iter1 != iter1_last; ++iter1) {
-    for (IterType2 iter2 = iter2_first; iter2 != iter2_last; ++iter2) {
-      this->removePair(*iter1, *iter2);
+  void PairList::removePair(int i, int j) {
+    if (i == j) {
+      return;
+    } else if (i > j) {
+      std::swap(i, j);
+    }
+
+    std::set<std::pair<int, int>>::iterator iter =
+        pairSet_.find(std::make_pair(i, j));
+
+    if (iter != pairSet_.end()) {
+      pairSet_.erase(iter);
+      modified_ = true;
     }
   }
-}
 
-bool PairList::hasPair(int i, int j) {
-  if (i == j) {
-    return false;
-  } else if (i > j) {
-    std::swap(i, j);
+  void PairList::removePairs(std::set<int>& set1, std::set<int>& set2) {
+    for (std::set<int>::iterator iter1 = set1.begin(); iter1 != set1.end();
+         ++iter1) {
+      for (std::set<int>::iterator iter2 = set2.begin(); iter2 != set2.end();
+           ++iter2) {
+        this->removePair(*iter1, *iter2);
+      }
+    }
   }
 
-  std::set<std::pair<int, int>>::iterator iter =
-      pairSet_.find(std::make_pair(i, j));
-  return iter == pairSet_.end() ? false : true;
-}
-
-int PairList::getSize() { return pairSet_.size(); }
-
-std::ostream& operator<<(std::ostream& o, PairList& e) {
-  std::set<std::pair<int, int>>::iterator i;
-
-  int index;
-
-  index = 0;
-
-  for (i = e.pairSet_.begin(); i != e.pairSet_.end(); ++i) {
-    o << "pairList[" << index << "] i, j: " << (*i).first << " - "
-      << (*i).second << "\n";
-    index++;
+  template<typename IterType1, typename IterType2>
+  void PairList::removePairs(IterType1 iter1_first, IterType1 iter1_last,
+                             IterType2 iter2_first, IterType2 iter2_last) {
+    for (IterType1 iter1 = iter1_first; iter1 != iter1_last; ++iter1) {
+      for (IterType2 iter2 = iter2_first; iter2 != iter2_last; ++iter2) {
+        this->removePair(*iter1, *iter2);
+      }
+    }
   }
 
-  return o;
-}
+  bool PairList::hasPair(int i, int j) {
+    if (i == j) {
+      return false;
+    } else if (i > j) {
+      std::swap(i, j);
+    }
+
+    std::set<std::pair<int, int>>::iterator iter =
+        pairSet_.find(std::make_pair(i, j));
+    return iter == pairSet_.end() ? false : true;
+  }
+
+  int PairList::getSize() { return pairSet_.size(); }
+
+  std::ostream& operator<<(std::ostream& o, PairList& e) {
+    std::set<std::pair<int, int>>::iterator i;
+
+    int index;
+
+    index = 0;
+
+    for (i = e.pairSet_.begin(); i != e.pairSet_.end(); ++i) {
+      o << "pairList[" << index << "] i, j: " << (*i).first << " - "
+        << (*i).second << "\n";
+      index++;
+    }
+
+    return o;
+  }
 
 }  // namespace OpenMD

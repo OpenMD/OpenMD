@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -53,43 +53,44 @@
 #include "utils/simError.h"
 
 namespace OpenMD {
-DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename,
-                               const std::string& sele1,
-                               const std::string& sele2)
-    : ObjectACF<RealType>(info, filename, sele1, sele2,
+  DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename,
+                                 const std::string& sele1,
+                                 const std::string& sele2) :
+      ObjectACF<RealType>(info, filename, sele1, sele2,
                           DataStorage::dslAmat | DataStorage::dslDipole) {
-  setCorrFuncType("Dipole Correlation Function");
-  setOutputName(getPrefix(dumpFilename_) + ".dcorr");
-  setLabelString("<D(0).D(t)>");
-  dipoles_.resize(nFrames_);
-}
+    setCorrFuncType("Dipole Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".dcorr");
+    setLabelString("<D(0).D(t)>");
+    dipoles_.resize(nFrames_);
+  }
 
-int DipoleCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-  dipoles_[frame].push_back(sd->getDipole());
-  return dipoles_[frame].size() - 1;
-}
+  int DipoleCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    dipoles_[frame].push_back(sd->getDipole());
+    return dipoles_[frame].size() - 1;
+  }
 
-RealType DipoleCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
-  Vector3d v1 = dipoles_[frame1][id1];
-  Vector3d v2 = dipoles_[frame2][id2];
-  return dot(v1, v2) / (v1.length() * v2.length());
-}
+  RealType DipoleCorrFunc::calcCorrVal(int frame1, int frame2, int id1,
+                                       int id2) {
+    Vector3d v1 = dipoles_[frame1][id1];
+    Vector3d v2 = dipoles_[frame2][id2];
+    return dot(v1, v2) / (v1.length() * v2.length());
+  }
 
-void DipoleCorrFunc::validateSelection(SelectionManager& seleMan) {
-  StuntDouble* sd;
-  int i;
-  for (sd = seleMan1_.beginSelected(i); sd != NULL;
-       sd = seleMan1_.nextSelected(i)) {
-    AtomType* at = static_cast<Atom*>(sd)->getAtomType();
-    MultipoleAdapter ma = MultipoleAdapter(at);
+  void DipoleCorrFunc::validateSelection(SelectionManager& seleMan) {
+    StuntDouble* sd;
+    int i;
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {
+      AtomType* at        = static_cast<Atom*>(sd)->getAtomType();
+      MultipoleAdapter ma = MultipoleAdapter(at);
 
-    if (!ma.isDipole()) {
-      sprintf(painCave.errMsg,
-              "DipoleCorrFunc::validateSelection Error: selected atoms do\n"
-              "\tnot have a dipole\n");
-      painCave.isFatal = 1;
-      simError();
+      if (!ma.isDipole()) {
+        sprintf(painCave.errMsg,
+                "DipoleCorrFunc::validateSelection Error: selected atoms do\n"
+                "\tnot have a dipole\n");
+        painCave.isFatal = 1;
+        simError();
+      }
     }
   }
-}
 }  // namespace OpenMD

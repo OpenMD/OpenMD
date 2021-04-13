@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -73,11 +73,9 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 
-
 namespace OpenMD {
 
   class Hxy : public StaticAnalyser {
-
   public:
     Hxy(SimInfo* info, const std::string& filename, const std::string& sele,
         int nbins_x, int nbins_y, int nbins_z, int nrbins);
@@ -98,9 +96,9 @@ namespace OpenMD {
     unsigned int nBinsZ_;
     RealType dfreq_;
 
-    std::vector< std::vector< std::vector<RealType> > > dens_;
-    std::vector< std::vector<RealType> > minHeight_;
-    std::vector< std::vector<RealType> > maxHeight_;
+    std::vector<std::vector<std::vector<RealType>>> dens_;
+    std::vector<std::vector<RealType>> minHeight_;
+    std::vector<std::vector<RealType>> maxHeight_;
     std::vector<RealType> mag1, newmag1;
     std::vector<RealType> mag2, newmag2;
 
@@ -108,6 +106,6 @@ namespace OpenMD {
     OutputData* top_;
     OutputData* bottom_;
   };
-}
+}  // namespace OpenMD
 
 #endif

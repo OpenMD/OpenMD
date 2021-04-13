@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,27 +48,27 @@
 
 #include <string>
 #include <vector>
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
+
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "nonbonded/Electrostatic.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
 
 using namespace std;
 namespace OpenMD {
-  
+
   class NitrileFrequencyMap : public StaticAnalyser {
-    
   public:
-    NitrileFrequencyMap(SimInfo* info, const string& filename, 
+    NitrileFrequencyMap(SimInfo* info, const string& filename,
                         const string& sele1, int nbins);
-        
+
     virtual void process();
-    
+
   private:
     bool excludeAtomPair(int atom1, int atom2);
     void processHistogram();
     void writeProbs();
-        
+
     SimInfo* info_ {nullptr};
     Snapshot* currentSnapshot_;
 
@@ -76,7 +76,7 @@ namespace OpenMD {
     SelectionManager seleMan1_;
     SelectionEvaluator evaluator1_;
 
-    int nProcessed_;    
+    int nProcessed_;
     vector<int> count_;
     vector<RealType> histogram_;
     vector<RealType> freqs_;
@@ -84,15 +84,10 @@ namespace OpenMD {
     RealType minFreq_;
     RealType maxFreq_;
     int nBins_;
-    vector<vector<int> > excludesForAtom;
+    vector<vector<int>> excludesForAtom;
     Electrostatic* electrostatic_;
     Vector3d EF_;
-
-
   };
-  
-}
+
+}  // namespace OpenMD
 #endif
-
-
-

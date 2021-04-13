@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -56,168 +56,168 @@
 using namespace std;
 
 namespace OpenMD {
-AtomType::AtomType() {
-  // initially, all atom types are their own base types.
-  base_ = this;
-  hasBase_ = false;
+  AtomType::AtomType() {
+    // initially, all atom types are their own base types.
+    base_    = this;
+    hasBase_ = false;
 
-  // initialize to an error:
-  ident_ = -1;
+    // initialize to an error:
+    ident_ = -1;
 
-  // and massless:
-  mass_ = 0.0;
-  myResponsibilities_["mass"] = false;
-}
-
-void AtomType::useBase(AtomType* base) {
-  hasBase_ = true;
-  base_ = base;
-  base->addZig(this);
-}
-
-void AtomType::copyAllData(AtomType* orig) {
-  // makes an exact replica of another atom type down to the
-  // atom ID and any base attachments it may have.
-  // use with caution!
-
-  hasBase_ = orig->hasBase_;
-  base_ = orig->base_;
-  mass_ = orig->mass_;
-  name_ = string(orig->name_);
-  ident_ = orig->ident_;
-
-  map<string, bool>::iterator i;
-  ;
-  map<string, RealType>::iterator j;
-
-  for (i = orig->myResponsibilities_.begin();
-       i != orig->myResponsibilities_.end(); ++i) {
-    myResponsibilities_[(*i).first] = orig->myResponsibilities_[(*i).first];
+    // and massless:
+    mass_                       = 0.0;
+    myResponsibilities_["mass"] = false;
   }
 
-  for (j = orig->myValues_.begin(); j != orig->myValues_.end(); ++j) {
-    myValues_[(*j).first] = orig->myValues_[(*j).first];
+  void AtomType::useBase(AtomType* base) {
+    hasBase_ = true;
+    base_    = base;
+    base->addZig(this);
   }
 
-  std::vector<std::shared_ptr<GenericData>> oprops = orig->getProperties();
-  std::vector<std::shared_ptr<GenericData>>::iterator it;
+  void AtomType::copyAllData(AtomType* orig) {
+    // makes an exact replica of another atom type down to the
+    // atom ID and any base attachments it may have.
+    // use with caution!
 
-  for (it = oprops.begin(); it != oprops.end(); ++it) {
-    addProperty(*it);
-  }
-}
+    hasBase_ = orig->hasBase_;
+    base_    = orig->base_;
+    mass_    = orig->mass_;
+    name_    = string(orig->name_);
+    ident_   = orig->ident_;
 
-void AtomType::addProperty(std::shared_ptr<GenericData> genData) {
-  myResponsibilities_[genData->getID()] = true;
-  properties_.addProperty(genData);
-}
+    map<string, bool>::iterator i;
+    ;
+    map<string, RealType>::iterator j;
 
-void AtomType::removeProperty(const string& propName) {
-  properties_.removeProperty(propName);
-  myResponsibilities_[propName] = false;
-}
+    for (i = orig->myResponsibilities_.begin();
+         i != orig->myResponsibilities_.end(); ++i) {
+      myResponsibilities_[(*i).first] = orig->myResponsibilities_[(*i).first];
+    }
 
-std::vector<string> AtomType::getPropertyNames() {
-  return properties_.getPropertyNames();
-}
+    for (j = orig->myValues_.begin(); j != orig->myValues_.end(); ++j) {
+      myValues_[(*j).first] = orig->myValues_[(*j).first];
+    }
 
-std::vector<std::shared_ptr<GenericData>> AtomType::getProperties() {
-  return properties_.getProperties();
-}
+    std::vector<std::shared_ptr<GenericData>> oprops = orig->getProperties();
+    std::vector<std::shared_ptr<GenericData>>::iterator it;
 
-bool AtomType::hasProperty(const string& propName) {
-  if (hasBase_ && !myResponsibilities_[propName]) {
-    return base_->hasProperty(propName);
-  } else
-    return properties_.hasProperty(propName);
-}
-
-std::shared_ptr<GenericData> AtomType::getPropertyByName(
-    const string& propName) {
-  if (hasBase_ && !myResponsibilities_[propName]) {
-    return base_->getPropertyByName(propName);
-  } else
-    return properties_.getPropertyByName(propName);
-}
-
-void AtomType::setMass(RealType m) {
-  myResponsibilities_["mass"] = true;
-  mass_ = m;
-}
-
-RealType AtomType::getMass(void) {
-  if (hasBase_ && !myResponsibilities_["mass"])
-    return base_->getMass();
-  else
-    return mass_;
-}
-
-void AtomType::setIdent(int id) { ident_ = id; }
-
-int AtomType::getIdent() { return ident_; }
-
-void AtomType::setName(const string& name) { name_ = name; }
-
-string AtomType::getName() { return name_; }
-
-bool AtomType::isLennardJones() { return hasProperty("LJ"); }
-
-bool AtomType::isElectrostatic() { return isCharge() || isMultipole(); }
-
-bool AtomType::isEAM() { return hasProperty("EAM"); }
-
-bool AtomType::isCharge() { return isFixedCharge() || isFluctuatingCharge(); }
-
-bool AtomType::isDirectional() { return hasProperty("Directional"); }
-
-bool AtomType::isFluctuatingCharge() { return hasProperty("FlucQ"); }
-
-bool AtomType::isFixedCharge() { return hasProperty("Charge"); }
-
-bool AtomType::isDipole() {
-  MultipoleAdapter ma = MultipoleAdapter(this);
-  if (ma.isMultipole()) {
-    return ma.isDipole();
-  } else
-    return false;
-}
-
-bool AtomType::isQuadrupole() {
-  MultipoleAdapter ma = MultipoleAdapter(this);
-  if (ma.isMultipole()) {
-    return ma.isQuadrupole();
-  } else
-    return false;
-}
-
-bool AtomType::isMultipole() { return hasProperty("Multipole"); }
-
-bool AtomType::isGayBerne() { return hasProperty("GB"); }
-
-bool AtomType::isSticky() { return hasProperty("Sticky"); }
-
-bool AtomType::isStickyPower() {
-  StickyAdapter sa = StickyAdapter(this);
-  return sa.isStickyPower();
-}
-
-bool AtomType::isShape() { return hasProperty("Shape"); }
-
-bool AtomType::isSC() { return hasProperty("SC"); }
-
-bool AtomType::isMetal() { return isSC() || isEAM(); }
-
-std::vector<AtomType*> AtomType::allYourBase() {
-  std::vector<AtomType*> myChain;
-
-  if (hasBase_) {
-    myChain = base_->allYourBase();
-    myChain.insert(myChain.begin(), this);
-  } else {
-    myChain.push_back(this);
+    for (it = oprops.begin(); it != oprops.end(); ++it) {
+      addProperty(*it);
+    }
   }
 
-  return myChain;
-}
+  void AtomType::addProperty(std::shared_ptr<GenericData> genData) {
+    myResponsibilities_[genData->getID()] = true;
+    properties_.addProperty(genData);
+  }
+
+  void AtomType::removeProperty(const string& propName) {
+    properties_.removeProperty(propName);
+    myResponsibilities_[propName] = false;
+  }
+
+  std::vector<string> AtomType::getPropertyNames() {
+    return properties_.getPropertyNames();
+  }
+
+  std::vector<std::shared_ptr<GenericData>> AtomType::getProperties() {
+    return properties_.getProperties();
+  }
+
+  bool AtomType::hasProperty(const string& propName) {
+    if (hasBase_ && !myResponsibilities_[propName]) {
+      return base_->hasProperty(propName);
+    } else
+      return properties_.hasProperty(propName);
+  }
+
+  std::shared_ptr<GenericData> AtomType::getPropertyByName(
+      const string& propName) {
+    if (hasBase_ && !myResponsibilities_[propName]) {
+      return base_->getPropertyByName(propName);
+    } else
+      return properties_.getPropertyByName(propName);
+  }
+
+  void AtomType::setMass(RealType m) {
+    myResponsibilities_["mass"] = true;
+    mass_                       = m;
+  }
+
+  RealType AtomType::getMass(void) {
+    if (hasBase_ && !myResponsibilities_["mass"])
+      return base_->getMass();
+    else
+      return mass_;
+  }
+
+  void AtomType::setIdent(int id) { ident_ = id; }
+
+  int AtomType::getIdent() { return ident_; }
+
+  void AtomType::setName(const string& name) { name_ = name; }
+
+  string AtomType::getName() { return name_; }
+
+  bool AtomType::isLennardJones() { return hasProperty("LJ"); }
+
+  bool AtomType::isElectrostatic() { return isCharge() || isMultipole(); }
+
+  bool AtomType::isEAM() { return hasProperty("EAM"); }
+
+  bool AtomType::isCharge() { return isFixedCharge() || isFluctuatingCharge(); }
+
+  bool AtomType::isDirectional() { return hasProperty("Directional"); }
+
+  bool AtomType::isFluctuatingCharge() { return hasProperty("FlucQ"); }
+
+  bool AtomType::isFixedCharge() { return hasProperty("Charge"); }
+
+  bool AtomType::isDipole() {
+    MultipoleAdapter ma = MultipoleAdapter(this);
+    if (ma.isMultipole()) {
+      return ma.isDipole();
+    } else
+      return false;
+  }
+
+  bool AtomType::isQuadrupole() {
+    MultipoleAdapter ma = MultipoleAdapter(this);
+    if (ma.isMultipole()) {
+      return ma.isQuadrupole();
+    } else
+      return false;
+  }
+
+  bool AtomType::isMultipole() { return hasProperty("Multipole"); }
+
+  bool AtomType::isGayBerne() { return hasProperty("GB"); }
+
+  bool AtomType::isSticky() { return hasProperty("Sticky"); }
+
+  bool AtomType::isStickyPower() {
+    StickyAdapter sa = StickyAdapter(this);
+    return sa.isStickyPower();
+  }
+
+  bool AtomType::isShape() { return hasProperty("Shape"); }
+
+  bool AtomType::isSC() { return hasProperty("SC"); }
+
+  bool AtomType::isMetal() { return isSC() || isEAM(); }
+
+  std::vector<AtomType*> AtomType::allYourBase() {
+    std::vector<AtomType*> myChain;
+
+    if (hasBase_) {
+      myChain = base_->allYourBase();
+      myChain.insert(myChain.begin(), this);
+    } else {
+      myChain.push_back(this);
+    }
+
+    return myChain;
+  }
 
 }  // namespace OpenMD

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,12 +42,12 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_SUTTONCHENADAPTER_HPP
 #define TYPES_SUTTONCHENADAPTER_HPP
 
-#include "utils/GenericData.hpp"
 #include "types/AtomType.hpp"
+#include "utils/GenericData.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -61,14 +61,15 @@ namespace OpenMD {
     RealType alpha;
     RealType epsilon;
   };
-  typedef SimpleTypeData<SCAtypeParameters> SCAtypeData;   
-  
+  typedef SimpleTypeData<SCAtypeParameters> SCAtypeData;
+
   class SuttonChenAdapter {
   public:
     SuttonChenAdapter(AtomType* AT) { at_ = AT; };
 
-    void makeSuttonChen(RealType c, RealType m, RealType n, RealType alpha, RealType epsilon);
-    
+    void makeSuttonChen(RealType c, RealType m, RealType n, RealType alpha,
+                        RealType epsilon);
+
     bool isSuttonChen();
     RealType getC();
     RealType getM();
@@ -78,7 +79,7 @@ namespace OpenMD {
 
   private:
     AtomType* at_;
-    SCAtypeParameters  getSuttonChenParam();
+    SCAtypeParameters getSuttonChenParam();
   };
-}
+}  // namespace OpenMD
 #endif

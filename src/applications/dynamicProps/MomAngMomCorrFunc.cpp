@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,57 +46,58 @@
 #include "applications/dynamicProps/MomAngMomCorrFunc.hpp"
 
 namespace OpenMD {
-MomAngMomCorrFunc::MomAngMomCorrFunc(SimInfo* info, const std::string& filename,
-                                     const std::string& sele1,
-                                     const std::string& sele2)
-    : ObjectCCF<RealType>(info, filename, sele1, sele2,
+  MomAngMomCorrFunc::MomAngMomCorrFunc(SimInfo* info,
+                                       const std::string& filename,
+                                       const std::string& sele1,
+                                       const std::string& sele2) :
+      ObjectCCF<RealType>(info, filename, sele1, sele2,
                           DataStorage::dslVelocity | DataStorage::dslAmat |
                               DataStorage::dslAngularMomentum) {
-  setCorrFuncType("Momentum - Angular Momentum Correlation Function");
-  setOutputName(getPrefix(dumpFilename_) + ".pjcorr");
+    setCorrFuncType("Momentum - Angular Momentum Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".pjcorr");
 
-  momenta_.resize(nFrames_);
-  js_.resize(nFrames_);
-}
+    momenta_.resize(nFrames_);
+    js_.resize(nFrames_);
+  }
 
-int MomAngMomCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-  momenta_[frame].push_back(sd->getMass() * sd->getVel());
-  return momenta_[frame].size() - 1;
-}
+  int MomAngMomCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    momenta_[frame].push_back(sd->getMass() * sd->getVel());
+    return momenta_[frame].size() - 1;
+  }
 
-int MomAngMomCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
-  // The lab frame vector corresponding to the body-fixed
-  // z-axis is simply the second column of A.transpose()
-  // or, identically, the second row of A itself.
-  Vector3d u = sd->getA().getRow(2);
-  Vector3d j = sd->getJ();
+  int MomAngMomCorrFunc::computeProperty2(int frame, StuntDouble* sd) {
+    // The lab frame vector corresponding to the body-fixed
+    // z-axis is simply the second column of A.transpose()
+    // or, identically, the second row of A itself.
+    Vector3d u = sd->getA().getRow(2);
+    Vector3d j = sd->getJ();
 
-  js_[frame].push_back(cross(j, u));
-  return js_[frame].size() - 1;
-}
+    js_[frame].push_back(cross(j, u));
+    return js_[frame].size() - 1;
+  }
 
-RealType MomAngMomCorrFunc::calcCorrVal(int frame1, int frame2, int id1,
-                                        int id2) {
-  RealType pj = dot(momenta_[frame1][id1], js_[frame2][id2]);
-  return pj;
-}
+  RealType MomAngMomCorrFunc::calcCorrVal(int frame1, int frame2, int id1,
+                                          int id2) {
+    RealType pj = dot(momenta_[frame1][id1], js_[frame2][id2]);
+    return pj;
+  }
 
-void MomAngMomCorrFunc::validateSelection(SelectionManager& seleMan) {
-  StuntDouble* sd;
-  int i;
+  void MomAngMomCorrFunc::validateSelection(SelectionManager& seleMan) {
+    StuntDouble* sd;
+    int i;
 
-  for (sd = seleMan.beginSelected(i); sd != NULL;
-       sd = seleMan.nextSelected(i)) {
-    if (!sd->isDirectional()) {
-      sprintf(painCave.errMsg,
-              "MomAngMomCorrFunc::validateSelection Error: selection "
-              "%d (%s)\n"
-              "\t is not a Directional object\n",
-              sd->getGlobalIndex(), sd->getType().c_str());
-      painCave.isFatal = 1;
-      simError();
+    for (sd = seleMan.beginSelected(i); sd != NULL;
+         sd = seleMan.nextSelected(i)) {
+      if (!sd->isDirectional()) {
+        sprintf(painCave.errMsg,
+                "MomAngMomCorrFunc::validateSelection Error: selection "
+                "%d (%s)\n"
+                "\t is not a Directional object\n",
+                sd->getGlobalIndex(), sd->getType().c_str());
+        painCave.isFatal = 1;
+        simError();
+      }
     }
   }
-}
 
 }  // namespace OpenMD

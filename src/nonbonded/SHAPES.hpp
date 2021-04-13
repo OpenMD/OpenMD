@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,46 +42,47 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef NONBONDED_SHAPES_HPP
 #define NONBONDED_SHAPES_HPP
 
-#include "nonbonded/NonBondedInteraction.hpp"
-#include "types/ShapeAtomType.hpp"
 #include "brains/ForceField.hpp"
 #include "math/SquareMatrix3.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
+#include "types/ShapeAtomType.hpp"
 
 using namespace std;
 namespace OpenMD {
 
   class SHAPES : public VanDerWaalsInteraction {
-    
-  public:    
+  public:
     SHAPES();
-    void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
-    virtual void calcForce(InteractionData &idat);
-    
+    void setForceField(ForceField* ff) { forceField_ = ff; };
+    void setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+      simTypes_ = simtypes;
+      initialize();
+    };
+    virtual void calcForce(InteractionData& idat);
+
   private:
     void initialize();
     void addShape(ShapeAtomType* atomType);
     void addLJ(AtomType* atomType);
-    LJParam  getLJParam(AtomType* atomType);
+    LJParam getLJParam(AtomType* atomType);
     RealType getLJSigma(AtomType* atomType);
     RealType getLJEpsilon(AtomType* atomType);
     RealType getGayBerneCut(int atid);
-  
+
     bool initialized_;
     map<int, ShapeAtomType*> ShapesMap;
-    map<int, AtomType*> LJMap;   
-   
+    map<int, AtomType*> LJMap;
+
     ForceField* forceField_;
     set<AtomType*> simTypes_;
 
     int lMax_;
     int mMax_;
   };
-}
+}  // namespace OpenMD
 
-                               
 #endif

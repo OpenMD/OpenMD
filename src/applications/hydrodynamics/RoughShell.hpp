@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,21 +51,19 @@
 #include "utils/Grid3d.hpp"
 
 namespace OpenMD {
-  
+
   class RoughShell : public ApproximationModel {
   public:
-    
     RoughShell(StuntDouble* sd, SimInfo* info);
     virtual ~RoughShell() { delete shape_; }
     void setSigma(RealType sigma) { sigma_ = sigma; }
     RealType getSigma() { return sigma_; }
-    
+
   private:
-    
     virtual bool createBeads(vector<BeadParam>& beads);
     RealType sigma_;
     Shape* shape_;
   };
-  
-}
+
+}  // namespace OpenMD
 #endif

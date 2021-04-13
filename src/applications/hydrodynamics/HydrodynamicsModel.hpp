@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -47,18 +47,18 @@
 #define APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
 #include <vector>
 
-#include "math/Vector3.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "math/DynamicRectMatrix.hpp"
-#include "primitives/Molecule.hpp"
 #include "hydrodynamics/HydroProp.hpp"
+#include "math/DynamicRectMatrix.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
+#include "primitives/Molecule.hpp"
 
 namespace OpenMD {
 
   struct BeadParam {
     std::string atomName;
     Vector3d pos;
-    RealType mass;  //to compute center of mass in ApproximationModel.cpp
+    RealType mass;  // to compute center of mass in ApproximationModel.cpp
     RealType radius;
   };
 
@@ -72,22 +72,26 @@ namespace OpenMD {
     HydrodynamicsModel(StuntDouble* sd, SimInfo* info) : sd_(sd), info_(info) {}
     virtual ~HydrodynamicsModel() = default;
 
-    virtual bool calcHydroProps(Shape* shape, RealType viscosity, RealType temperature);
+    virtual bool calcHydroProps(Shape* shape, RealType viscosity,
+                                RealType temperature);
 
     virtual void init() {};
     virtual void writeBeads(std::ostream& os) = 0;
     void writeHydroProps(std::ostream& os);
-    //HydroProp* getHydroPropsAtCR() {return cr_;}  //function not called in any other file
-    //HydroProp* getHydroPropsAtCD() {return cd_;}  //function not called in any other file
-    //HydroProp* getHydroPropsAtCOM() {return com_;}  //function not called in any other file
+    // HydroProp* getHydroPropsAtCR() {return cr_;}  //function not called in
+    // any other file HydroProp* getHydroPropsAtCD() {return cd_;}  //function
+    // not called in any other file HydroProp* getHydroPropsAtCOM() {return
+    // com_;}  //function not called in any other file
 
-    void setCR(HydroProp* cr) {cr_ = cr;}
-    void setCD(HydroProp* cd) {cd_ = cd;}
-    void setCOM(HydroProp* com) {com_ = com;}
-    std::string getStuntDoubleName() { return sd_->getType();}
+    void setCR(HydroProp* cr) { cr_ = cr; }
+    void setCD(HydroProp* cd) { cd_ = cd; }
+    void setCOM(HydroProp* com) { com_ = com; }
+    std::string getStuntDoubleName() { return sd_->getType(); }
+
   protected:
     StuntDouble* sd_;
     SimInfo* info_ {nullptr};
+
   private:
     HydroProp* cr_;
     HydroProp* cd_;
@@ -95,6 +99,6 @@ namespace OpenMD {
     std::vector<BeadParam> beads_;
   };
 
-}
+}  // namespace OpenMD
 
 #endif

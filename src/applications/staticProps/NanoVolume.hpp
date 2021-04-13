@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,11 +46,12 @@
 #ifndef APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
 #define APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
 #include <vector>
+
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "config.h"
 #include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 #ifdef HAVE_QHULL
 #include "math/ConvexHull.hpp"
@@ -59,17 +60,18 @@
 namespace OpenMD {
   class NanoVolume : public StaticAnalyser {
   public:
-    NanoVolume(SimInfo* info, const std::string& filename, const std::string& sele);
+    NanoVolume(SimInfo* info, const std::string& filename,
+               const std::string& sele);
     virtual void process();
-    
-  private:    
+
+  private:
     Snapshot* currentSnapshot_;
     std::string selectionScript_;
     SelectionManager seleMan_;
     SelectionEvaluator evaluator_;
     std::vector<StuntDouble*> theAtoms_;
     int frameCounter_;
-    std::ofstream osq;   
+    std::ofstream osq;
   };
-}
+}  // namespace OpenMD
 #endif /*NANOVOLUME_HPP_*/

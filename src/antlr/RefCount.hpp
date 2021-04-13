@@ -13,68 +13,54 @@
 namespace antlr {
 #endif
 
-template<class T>
-class ANTLR_API RefCount {
-private:
-	struct Ref {
-		T* const ptr;
-		unsigned int count;
+  template<class T>
+  class ANTLR_API RefCount {
+  private:
+    struct Ref {
+      T* const ptr;
+      unsigned int count;
 
-		Ref(T* p) : ptr(p), count(1) {}
-		~Ref() {delete ptr;}
-		Ref* increment() {++count;return this;}
-		bool decrement() {return (--count==0);}
-	private:
-		Ref(const Ref&);
-		Ref& operator=(const Ref&);
-	}* ref;
+      Ref(T* p) : ptr(p), count(1) {}
+      ~Ref() { delete ptr; }
+      Ref* increment() {
+        ++count;
+        return this;
+      }
+      bool decrement() { return (--count == 0); }
 
-public:
-	explicit RefCount(T* p = 0)
-	: ref(p ? new Ref(p) : 0)
-	{
-	}
-	RefCount(const RefCount<T>& other)
-	: ref(other.ref ? other.ref->increment() : 0)
-	{
-	}
-	~RefCount()
-	{
-		if (ref && ref->decrement())
-			delete ref;
-	}
-	RefCount<T>& operator=(const RefCount<T>& other)
-	{
-		Ref* tmp = other.ref ? other.ref->increment() : 0;
-		if (ref && ref->decrement())
-			delete ref;
-		ref = tmp;
-		return *this;
-	}
+    private:
+      Ref(const Ref&);
+      Ref& operator=(const Ref&);
+    } * ref;
 
-	operator T* () const
-	{
-		return ref ? ref->ptr : 0;
-	}
+  public:
+    explicit RefCount(T* p = 0) : ref(p ? new Ref(p) : 0) {}
+    RefCount(const RefCount<T>& other) :
+        ref(other.ref ? other.ref->increment() : 0) {}
+    ~RefCount() {
+      if (ref && ref->decrement()) delete ref;
+    }
+    RefCount<T>& operator=(const RefCount<T>& other) {
+      Ref* tmp = other.ref ? other.ref->increment() : 0;
+      if (ref && ref->decrement()) delete ref;
+      ref = tmp;
+      return *this;
+    }
 
-	T* operator->() const
-	{
-		return ref ? ref->ptr : 0;
-	}
+    operator T*() const { return ref ? ref->ptr : 0; }
 
-	T* get() const
-	{
-		return ref ? ref->ptr : 0;
-	}
+    T* operator->() const { return ref ? ref->ptr : 0; }
 
-	template<class newType> operator RefCount<newType>()
-	{
-		return RefCount<newType>(ref);
-	}
-};
+    T* get() const { return ref ? ref->ptr : 0; }
+
+    template<class newType>
+    operator RefCount<newType>() {
+      return RefCount<newType>(ref);
+    }
+  };
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif //INC_RefCount_hpp__
+#endif  // INC_RefCount_hpp__

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file OplsTorsionType.hpp
  * @author    teng lin
  * @date  11/16/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_OPLSTORSIONTYPE_HPP
 #define TYPES_OPLSTORSIONTYPE_HPP
@@ -62,66 +62,59 @@ namespace OpenMD {
    * These torsion types are defined identically with functional form given
    * in the following paper:
    *
-   * "Development and Testing of the OPLS All-Atom Force Field on 
+   * "Development and Testing of the OPLS All-Atom Force Field on
    * Conformational Energetics and Properties of Organic Liquids,"  by
-   * William L. Jorgensen, David S. Maxwell, and Julian Tirado-Rives, 
+   * William L. Jorgensen, David S. Maxwell, and Julian Tirado-Rives,
    * J. Am. Chem. Soc.; 1996; 118(45) pp 11225 - 11236;
    * DOI: 10.1021/ja9621760
    *
    * This torsion potential has the form:
-   * 
+   *
    *  Vtors = 0.5* (v1*(1+cos(phi)) + v2*(1-cos(2*phi)) + v3*(1+cos(3*phi)))
    *
-   * Notes: 
-   * 
+   * Notes:
+   *
    * 1) OpenMD converts internally to a Polynomial torsion type because
    *    all of the phase angles are zero in the OPLS paper.
    * 2) Coefficients are assumed to be in kcal / mol, and be careful about
    *    that factor of 1/2 when importing the coefficients!
    */
-  class OplsTorsionType : public PolynomialTorsionType{
-    
+  class OplsTorsionType : public PolynomialTorsionType {
   public:
-    
-    OplsTorsionType(RealType v1, RealType v2, RealType v3, bool trans180) :  
-      PolynomialTorsionType(), v1_(v1), v2_(v2), v3_(v3) {
-      
-      //convert OPLS Torsion Type to Polynomial Torsion type
+    OplsTorsionType(RealType v1, RealType v2, RealType v3, bool trans180) :
+        PolynomialTorsionType(), v1_(v1), v2_(v2), v3_(v3) {
+      // convert OPLS Torsion Type to Polynomial Torsion type
       RealType c0 = v2 + 0.5 * (v1 + v3);
       RealType c1 = 0.5 * (v1 - 3.0 * v3);
       RealType c2 = -v2;
       RealType c3 = 2.0 * v3;
-      
+
       if (!trans180) {
         c1 = -c1;
         c3 = -c3;
       }
-               
+
       setCoefficient(0, c0);
       setCoefficient(1, c1);
       setCoefficient(2, c2);
       setCoefficient(3, c3);
     }
-    
-    friend std::ostream& operator <<(std::ostream& os, OplsTorsionType& ott);
-    
+
+    friend std::ostream& operator<<(std::ostream& os, OplsTorsionType& ott);
+
   private:
-    
     RealType v1_;
     RealType v2_;
     RealType v3_;
-    
   };
-  
-  std::ostream& operator <<(std::ostream& os, OplsTorsionType& ott) {
-    
+
+  std::ostream& operator<<(std::ostream& os, OplsTorsionType& ott) {
     os << "This OplsTorsionType has below form:" << std::endl;
-    os << ott.v1_ << "/2*(1+cos(phi))" << " + "
-       << ott.v2_ << "/2*(1-cos(2*phi))" << " + "
-       << ott.v3_ << "/2*(1+cos(3*phi))" << std::endl;
+    os << ott.v1_ << "/2*(1+cos(phi))"
+       << " + " << ott.v2_ << "/2*(1-cos(2*phi))"
+       << " + " << ott.v3_ << "/2*(1+cos(3*phi))" << std::endl;
     return os;
   }
-  
-  
-} //end namespace OpenMD
-#endif //TYPES_OPLSTORSIONTYPE_HPP
+
+}  // end namespace OpenMD
+#endif  // TYPES_OPLSTORSIONTYPE_HPP

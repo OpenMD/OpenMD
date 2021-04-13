@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -47,28 +47,28 @@
 
 namespace OpenMD {
 
-bool replaceWithWildCard(std::vector<std::vector<std::string>::iterator>& cont,
-                         std::vector<std::string>& sequence,
-                         std::vector<std::string>& result,
-                         const std::string& wildCard) {
-  if (cont.size() > sequence.size()) {
-    std::cerr << "the size of iterator container is greater than the size of "
-                 "sequence";
-  }
-
-  bool hasMoreCombination =
-      next_combination(cont, sequence.begin(), sequence.end());
-  if (hasMoreCombination) {
-    result.clear();
-    result.insert(result.begin(), sequence.size(), wildCard);
-    std::vector<std::vector<std::string>::iterator>::iterator i;
-    for (i = cont.begin(); i != cont.end(); ++i) {
-      result[*i - sequence.begin()] = **i;
+  bool replaceWithWildCard(
+      std::vector<std::vector<std::string>::iterator>& cont,
+      std::vector<std::string>& sequence, std::vector<std::string>& result,
+      const std::string& wildCard) {
+    if (cont.size() > sequence.size()) {
+      std::cerr << "the size of iterator container is greater than the size of "
+                   "sequence";
     }
-  }
 
-  return hasMoreCombination;
+    bool hasMoreCombination =
+        next_combination(cont, sequence.begin(), sequence.end());
+    if (hasMoreCombination) {
+      result.clear();
+      result.insert(result.begin(), sequence.size(), wildCard);
+      std::vector<std::vector<std::string>::iterator>::iterator i;
+      for (i = cont.begin(); i != cont.end(); ++i) {
+        result[*i - sequence.begin()] = **i;
+      }
+    }
 
-}  // end replaceWildCard
+    return hasMoreCombination;
+
+  }  // end replaceWildCard
 
 }  // namespace OpenMD

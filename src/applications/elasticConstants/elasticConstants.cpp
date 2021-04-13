@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -82,9 +82,9 @@ using namespace JAMA;
 #include <numeric>
 #include <vector>
 
-template <typename Real>
+template<typename Real>
 class Vector6 : public Vector<Real, 6> {
- public:
+public:
   typedef Real ElemType;
   typedef Real* ElemPoinerType;
   Vector6() : Vector<Real, 6>() {}
@@ -105,9 +105,7 @@ class Vector6 : public Vector<Real, 6> {
   inline Vector6(const Vector<Real, 6>& v) : Vector<Real, 6>(v) {}
 
   inline Vector6<Real>& operator=(const Vector<Real, 6>& v) {
-    if (this == &v) {
-      return *this;
-    }
+    if (this == &v) { return *this; }
     Vector<Real, 6>::operator=(v);
     return *this;
   }
@@ -121,12 +119,12 @@ RealType slope(const std::vector<RealType>& x, const std::vector<RealType>& y) {
   // }
   // std::cerr << "&\n";
 
-  const size_t n = x.size();
-  const RealType s_x = std::accumulate(x.begin(), x.end(), 0.0);
-  const RealType s_y = std::accumulate(y.begin(), y.end(), 0.0);
+  const size_t n      = x.size();
+  const RealType s_x  = std::accumulate(x.begin(), x.end(), 0.0);
+  const RealType s_y  = std::accumulate(y.begin(), y.end(), 0.0);
   const RealType s_xx = std::inner_product(x.begin(), x.end(), x.begin(), 0.0);
   const RealType s_xy = std::inner_product(x.begin(), x.end(), y.begin(), 0.0);
-  const RealType a = (n * s_xy - s_x * s_y) / (n * s_xx - s_x * s_x);
+  const RealType a    = (n * s_xy - s_x * s_y) / (n * s_xx - s_x * s_x);
   return a;
 }
 
@@ -401,7 +399,7 @@ int main(int argc, char* argv[]) {
       sprintf(painCave.errMsg,
               "No input file name was specified on the command line");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   }
@@ -558,18 +556,18 @@ int main(int argc, char* argv[]) {
 
   // Parse the input file, set up the system, and read the last frame:
   SimCreator creator;
-  SimInfo* info = creator.createSim(inputFileName, true);
-  Globals* simParams = info->getSimParams();
+  SimInfo* info          = creator.createSim(inputFileName, true);
+  Globals* simParams     = info->getSimParams();
   ForceManager* forceMan = new ForceManager(info);
 
   // Remove in favor of std::make_unique<> when we switch to C++14 and above
-  std::unique_ptr<Velocitizer> veloSet{Utils::make_unique<Velocitizer>(info)};
+  std::unique_ptr<Velocitizer> veloSet {Utils::make_unique<Velocitizer>(info)};
 
   forceMan->initialize();
   info->update();
 
-  Shake* shake = new Shake(info);
-  bool hasFlucQ = false;
+  Shake* shake                       = new Shake(info);
+  bool hasFlucQ                      = false;
   FluctuatingChargePropagator* flucQ = new FluctuatingChargeDamped(info);
 
   if (info->usesFluctuatingCharges()) {
@@ -607,16 +605,16 @@ int main(int argc, char* argv[]) {
     }
 
     BoxObjectiveFunction boxObjf(info, forceMan);
-    NoConstraint noConstraint{};
+    NoConstraint noConstraint {};
     DumpStatusFunction dsf(info);
     DynamicVector<RealType> initCoords = boxObjf.setInitialCoords();
     Problem problem(boxObjf, noConstraint, dsf, initCoords);
 
-    int maxIter = miniPars->getMaxIterations();
-    int mssIter = miniPars->getMaxStationaryStateIterations();
-    RealType rEps = miniPars->getRootEpsilon();
-    RealType fEps = miniPars->getFunctionEpsilon();
-    RealType gnEps = miniPars->getGradientNormEpsilon();
+    int maxIter              = miniPars->getMaxIterations();
+    int mssIter              = miniPars->getMaxStationaryStateIterations();
+    RealType rEps            = miniPars->getRootEpsilon();
+    RealType fEps            = miniPars->getFunctionEpsilon();
+    RealType gnEps           = miniPars->getGradientNormEpsilon();
     RealType initialStepSize = miniPars->getInitialStepSize();
 
     EndCriteria endCriteria(maxIter, mssIter, rEps, fEps, gnEps);
@@ -630,12 +628,12 @@ int main(int argc, char* argv[]) {
                        "Optimized Box Geometry", "Angstroms");
   }
 
-  Snapshot* snap = info->getSnapshotManager()->getCurrentSnapshot();
+  Snapshot* snap  = info->getSnapshotManager()->getCurrentSnapshot();
   Mat3x3d refHmat = snap->getHmat();
 
   forceMan->calcForces();
   Mat3x3d ptRef = thermo.getPressureTensor();
-  RealType V0 = thermo.getVolume();
+  RealType V0   = thermo.getVolume();
   ptRef.negate();
   ptRef *= Constants::elasticConvert;
 
@@ -683,7 +681,7 @@ int main(int argc, char* argv[]) {
     for (int n = 0; n < nMax; n++) {
       // First, set up the deformation of the box and coodinates:
       de = -0.5 * dmax + dmax * RealType(n) / RealType(nMax - 1);
-      L = strain * de;
+      L  = strain * de;
 
       // η is the Lagrangian strain tensor:
       eta.setupVoigtTensor(L[0], L[1], L[2], L[3] / 2., L[4] / 2., L[5] / 2.);
@@ -696,12 +694,12 @@ int main(int argc, char* argv[]) {
       // Find the physical strain tensor, ε, from the Lagrangian strain, η:
       // η = ε + 0.5 * ε^2
       norm = 1.0;
-      eps = eta;
+      eps  = eta;
       while (norm > 1.0e-10) {
-        x = eta - eps * eps / 2.0;
+        x    = eta - eps * eps / 2.0;
         test = x - eps;
         norm = test.frobeniusNorm();
-        eps = x;
+        eps  = x;
       }
       deformation = SquareMatrix3<RealType>::identity() + eps;
 
@@ -710,7 +708,7 @@ int main(int argc, char* argv[]) {
       info->getSnapshotManager()->advance();
       for (mol = info->beginMolecule(miter); mol != NULL;
            mol = info->nextMolecule(miter)) {
-        pos = mol->getCom();
+        pos   = mol->getCom();
         delta = deformation * pos;
         mol->moveCom(delta - pos);
       }
@@ -733,7 +731,7 @@ int main(int argc, char* argv[]) {
         // τ = det(1+ε) (1+ε)^−1 · σ · (1+ε)^−1
         // (Note that 1+ε is the deformation tensor computed above.)
 
-        Mat3x3d idm = deformation.inverse();
+        Mat3x3d idm  = deformation.inverse();
         RealType ddm = deformation.determinant();
 
         pressureTensor = thermo.getPressureTensor();

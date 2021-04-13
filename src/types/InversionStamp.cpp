@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,9 +49,9 @@
 #include <cstring>
 namespace OpenMD {
 
-InversionStamp::InversionStamp() : hasOverride_(false) {}
+  InversionStamp::InversionStamp() : hasOverride_(false) {}
 
-InversionStamp::~InversionStamp() {}
+  InversionStamp::~InversionStamp() {}
 
-void InversionStamp::validate() { DataHolder::validate(); }
+  void InversionStamp::validate() { DataHolder::validate(); }
 }  // namespace OpenMD

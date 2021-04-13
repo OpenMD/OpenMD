@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file SimCreator.hpp
  * @author tlin
@@ -54,10 +54,11 @@
 #define BRAINS_SIMCREATOR_HPP
 
 #include <iostream>
-#include "primitives/Molecule.hpp"
+
+#include "brains/ForceField.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/Globals.hpp"
-#include "brains/ForceField.hpp"
+#include "primitives/Molecule.hpp"
 
 namespace OpenMD {
 
@@ -70,29 +71,30 @@ namespace OpenMD {
    */
   class SimCreator {
   public:
-
     virtual ~SimCreator() = default;
 
     /**
      * Setup Simulation
      * @return a pointer to SimInfo
      * @param mdFileName the meta-data file name
-     * @param loadInitCoords should the initial coordinates be loaded from a file?
+     * @param loadInitCoords should the initial coordinates be loaded from a
+     * file?
      */
-    SimInfo* createSim(const std::string & mdFileName, bool loadInitCoords = true);
-        
+    SimInfo* createSim(const std::string& mdFileName,
+                       bool loadInitCoords = true);
+
   private:
-        
     /**
      * Parses the meta-data file
      * @param mdFileName the meta-data file name
      * @param rawMetaData the raw meta-data stream
-     * @param mdFileVersion the version of code used to create the meta-data file
+     * @param mdFileVersion the version of code used to create the meta-data
+     * file
      * @param metaDataStartingLine the starting line of the meta-data block
      * @return a pointer to the simulation parameters in a #Globals object
      */
-    Globals*  parseFile(std::istream& rawMetaData, const std::string& mdFileName, int mdFileVersion, int metaDataStartingLine);
-
+    Globals* parseFile(std::istream& rawMetaData, const std::string& mdFileName,
+                       int mdFileVersion, int metaDataStartingLine);
 
     /** create the molecules belong to current processor*/
     virtual void createMolecules(SimInfo* info);
@@ -102,8 +104,8 @@ namespace OpenMD {
      * objects are being simulated
      */
     int computeStorageLayout(SimInfo* info);
-    
-    /** 
+
+    /**
      * Sets the global index for atoms, rigidbodies and cutoff groups
      * and fill up globalGroupMembership and globalMolMembership
      * arrays which map atoms' global index to the global index of the
@@ -112,21 +114,20 @@ namespace OpenMD {
      */
     void setGlobalIndex(SimInfo* info);
 
-    void gatherParameters(SimInfo *info, const std::string& mdfile);             
-        
+    void gatherParameters(SimInfo* info, const std::string& mdfile);
+
     /**
-     * Divide the molecules among the processors 
+     * Divide the molecules among the processors
      */
-         
+
     void divideMolecules(SimInfo* info);
 
     /** Load initial coordinates */
-    void loadCoordinates(SimInfo* info, const std::string& mdFileName);     
+    void loadCoordinates(SimInfo* info, const std::string& mdFileName);
 
-    std::string mdFileName_;  //save the meta-data file name which may be used later
-
+    std::string
+        mdFileName_;  // save the meta-data file name which may be used later
   };
 
-} //end namespace OpenMD
-#endif //BRAINS_SIMCREATOR_HPP
-
+}  // end namespace OpenMD
+#endif  // BRAINS_SIMCREATOR_HPP

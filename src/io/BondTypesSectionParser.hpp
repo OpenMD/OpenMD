@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,28 +42,26 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_BONDTYPESSECTIONPARSER_HPP
 #define IO_BONDTYPESSECTIONPARSER_HPP
-#include "io/SectionParser.hpp"
 #include "io/ForceFieldOptions.hpp"
+#include "io/SectionParser.hpp"
 namespace OpenMD {
 
   /**
-   * @class BondTypesSectionParser BondTypesSectionParser.hpp "io/BondTypesSectionParser.hpp"
+   * @class BondTypesSectionParser BondTypesSectionParser.hpp
+   * "io/BondTypesSectionParser.hpp"
    */
   class BondTypesSectionParser : public SectionParser {
   public:
     BondTypesSectionParser(ForceFieldOptions& options);
-            
-  private:            
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);  
+
+  private:
+    void parseLine(ForceField& ff, const std::string& line, int lineNo);
     ForceFieldOptions& options_;
   };
 
+}  // namespace OpenMD
 
-} //namespace OpenMD
-
-#endif //IO_BONDTYPESSECTIONPARSER_HPP
-
-
+#endif  // IO_BONDTYPESSECTIONPARSER_HPP

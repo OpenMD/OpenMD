@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file Inversion.hpp
  * @author    tlin
@@ -53,8 +53,8 @@
 #ifndef PRIMITIVES_INVERSION_HPP
 #define PRIMITIVES_INVERSION_HPP
 
-#include "primitives/ShortRangeInteraction.hpp"
 #include "primitives/Atom.hpp"
+#include "primitives/ShortRangeInteraction.hpp"
 #include "types/InversionType.hpp"
 
 namespace OpenMD {
@@ -74,25 +74,25 @@ namespace OpenMD {
    */
   class Inversion : public ShortRangeInteraction {
   public:
-    using ShortRangeInteraction::getValue;
     using ShortRangeInteraction::getPrevValue;
+    using ShortRangeInteraction::getValue;
 
     Inversion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4,
               InversionType* it);
     virtual ~Inversion() {}
     virtual void calcForce(RealType& angle, bool doParticlePot);
-        
+
     RealType getValue(int snapshotNo) {
       // In OpenMD's version of an inversion, the central atom
       // comes first.  However, to get the planarity in a typical cosine
       // version of this potential (i.e. Amber-style), the central atom
       // is treated as atom *3* in a standard torsion form:
-      
+
       Vector3d pos1 = atoms_[1]->getPos(snapshotNo);
       Vector3d pos2 = atoms_[2]->getPos(snapshotNo);
       Vector3d pos3 = atoms_[0]->getPos(snapshotNo);
       Vector3d pos4 = atoms_[3]->getPos(snapshotNo);
-      
+
       Vector3d r31 = pos1 - pos3;
       snapshotMan_->getSnapshot(snapshotNo)->wrapVector(r31);
       Vector3d r23 = pos3 - pos2;
@@ -103,56 +103,41 @@ namespace OpenMD {
       //  Calculate the cross products and distances
       Vector3d A = cross(r31, r43);
       Vector3d B = cross(r43, r23);
-      
+
       A.normalize();
       B.normalize();
-      
+
       //  Calculate the sin and cos
-      RealType cos_phi = dot(A, B) ;
+      RealType cos_phi = dot(A, B);
       if (cos_phi > 1.0) cos_phi = 1.0;
       if (cos_phi < -1.0) cos_phi = -1.0;
       return acos(cos_phi);
     }
 
+    RealType getPotential() { return potential_; }
 
-    RealType getPotential() {
-      return potential_;
-    }
+    Atom* getAtomA() { return atoms_[0]; }
 
-    Atom* getAtomA() {
-      return atoms_[0];
-    }
+    Atom* getAtomB() { return atoms_[1]; }
 
-    Atom* getAtomB() {
-      return atoms_[1];
-    }
+    Atom* getAtomC() { return atoms_[2]; }
 
-    Atom* getAtomC() {
-      return atoms_[2];
-    }
+    Atom* getAtomD() { return atoms_[3]; }
 
-    Atom* getAtomD() {
-      return atoms_[3];
-    }
-
-    InversionType * getInversionType() {
-      return inversionType_;
-    }
-    virtual std::string getName() { return name_;}        
+    InversionType* getInversionType() { return inversionType_; }
+    virtual std::string getName() { return name_; }
     /** Sets the name of this inversion for selections */
-    virtual void setName(const std::string& name) { name_ = name;}
+    virtual void setName(const std::string& name) { name_ = name; }
 
-    void accept(BaseVisitor* v) {
-      v->visit(this);
-    }    
+    void accept(BaseVisitor* v) { v->visit(this); }
 
   protected:
     InversionType* inversionType_;
     InversionKey inversionKey_;
-    std::string name_;        
+    std::string name_;
 
     RealType potential_;
-  };    
+  };
 
-}
-#endif //PRIMITIVES_INVERSION_HPP
+}  // namespace OpenMD
+#endif  // PRIMITIVES_INVERSION_HPP

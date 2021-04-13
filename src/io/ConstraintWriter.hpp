@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,17 +42,17 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_CONSTRAINTWRITER_HPP
 #define IO_CONSTRAINTWRITER_HPP
 
 #define _LARGEFILE_SOURCE64
-# ifndef _FILE_OFFSET_BITS
-#   define _FILE_OFFSET_BITS 64
-# endif
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#endif
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 
 #include "brains/SimInfo.hpp"
@@ -60,7 +60,7 @@
 
 namespace OpenMD {
 
-  struct ConstraintData{
+  struct ConstraintData {
     int atom1;
     int atom2;
     RealType constraintForce;
@@ -68,15 +68,14 @@ namespace OpenMD {
   };
 
   class ConstraintWriter {
-
   public:
     ConstraintWriter(SimInfo* info, const std::string& filename);
-    ~ConstraintWriter();  
+    ~ConstraintWriter();
     void writeConstraintForces(const std::list<ConstraintPair*>& constraints);
-          
+
   private:
     SimInfo* info_ {nullptr};
     std::ofstream output_;
   };
-}
+}  // namespace OpenMD
 #endif

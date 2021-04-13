@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -55,15 +55,15 @@ namespace OpenMD {
     Sphere(Vector3d origin, RealType radius);
     virtual bool isInterior(Vector3d pos);
     virtual std::pair<Vector3d, Vector3d> getBoundingBox();
-    virtual bool hasAnalyticalSolution() {return true;}    
+    virtual bool hasAnalyticalSolution() { return true; }
     virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature);
-    
-    RealType getRadius() {return radius_;}
-    
+
+    RealType getRadius() { return radius_; }
+
   private:
     Vector3d origin_;
     RealType radius_;
   };
-  
-}
+
+}  // namespace OpenMD
 #endif

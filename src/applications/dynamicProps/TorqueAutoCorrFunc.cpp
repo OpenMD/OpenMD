@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,69 +49,69 @@
 #include "utils/Revision.hpp"
 
 namespace OpenMD {
-TorqueAutoCorrFunc::TorqueAutoCorrFunc(SimInfo* info,
-                                       const std::string& filename,
-                                       const std::string& sele1,
-                                       const std::string& sele2)
-    : ObjectACF<Mat3x3d>(info, filename, sele1, sele2,
+  TorqueAutoCorrFunc::TorqueAutoCorrFunc(SimInfo* info,
+                                         const std::string& filename,
+                                         const std::string& sele1,
+                                         const std::string& sele2) :
+      ObjectACF<Mat3x3d>(info, filename, sele1, sele2,
                          DataStorage::dslForce | DataStorage::dslAmat |
                              DataStorage::dslTorque) {
-  setCorrFuncType("Torque Auto Correlation Function");
-  setOutputName(getPrefix(dumpFilename_) + ".tacorr");
+    setCorrFuncType("Torque Auto Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".tacorr");
 
-  torques_.resize(nFrames_);
-  sumTorques_ = V3Zero;
-  torquesCount_ = 0;
-}
+    torques_.resize(nFrames_);
+    sumTorques_   = V3Zero;
+    torquesCount_ = 0;
+  }
 
-void TorqueAutoCorrFunc::validateSelection(SelectionManager& seleMan) {
-  StuntDouble* sd;
-  int i;
+  void TorqueAutoCorrFunc::validateSelection(SelectionManager& seleMan) {
+    StuntDouble* sd;
+    int i;
 
-  for (sd = seleMan.beginSelected(i); sd != NULL;
-       sd = seleMan.nextSelected(i)) {
-    if (!sd->isDirectional()) {
-      sprintf(painCave.errMsg,
-              "TorqueAutoCorrFunc::validateSelection Error: selection "
-              "%d (%s)\n"
-              "\t is not a Directional object\n",
-              sd->getGlobalIndex(), sd->getType().c_str());
-      painCave.isFatal = 1;
-      simError();
+    for (sd = seleMan.beginSelected(i); sd != NULL;
+         sd = seleMan.nextSelected(i)) {
+      if (!sd->isDirectional()) {
+        sprintf(painCave.errMsg,
+                "TorqueAutoCorrFunc::validateSelection Error: selection "
+                "%d (%s)\n"
+                "\t is not a Directional object\n",
+                sd->getGlobalIndex(), sd->getType().c_str());
+        painCave.isFatal = 1;
+        simError();
+      }
     }
   }
-}
 
-int TorqueAutoCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-  Mat3x3d A = sd->getA();
-  Vector3d t = sd->getTrq();
-  propertyTemp = A * t;
-  torques_[frame].push_back(propertyTemp);
-  sumTorques_ += propertyTemp;
-  torquesCount_++;
-  return torques_[frame].size() - 1;
-}
+  int TorqueAutoCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    Mat3x3d A    = sd->getA();
+    Vector3d t   = sd->getTrq();
+    propertyTemp = A * t;
+    torques_[frame].push_back(propertyTemp);
+    sumTorques_ += propertyTemp;
+    torquesCount_++;
+    return torques_[frame].size() - 1;
+  }
 
-Mat3x3d TorqueAutoCorrFunc::calcCorrVal(int frame1, int frame2, int id1,
-                                        int id2) {
-  return outProduct(torques_[frame1][id1], torques_[frame2][id2]);
-}
+  Mat3x3d TorqueAutoCorrFunc::calcCorrVal(int frame1, int frame2, int id1,
+                                          int id2) {
+    return outProduct(torques_[frame1][id1], torques_[frame2][id2]);
+  }
 
-void TorqueAutoCorrFunc::postCorrelate() {
-  // Gets the average of the torques
-  sumTorques_ /= RealType(torquesCount_);
+  void TorqueAutoCorrFunc::postCorrelate() {
+    // Gets the average of the torques
+    sumTorques_ /= RealType(torquesCount_);
 
-  Mat3x3d correlationOfAverages_ = outProduct(sumTorques_, sumTorques_);
-  for (unsigned int i = 0; i < nTimeBins_; ++i) {
-    if (count_[i] > 0) {
-      histogram_[i] /= RealType(count_[i]);
+    Mat3x3d correlationOfAverages_ = outProduct(sumTorques_, sumTorques_);
+    for (unsigned int i = 0; i < nTimeBins_; ++i) {
+      if (count_[i] > 0) {
+        histogram_[i] /= RealType(count_[i]);
 
-      // The outerProduct correlation of the averages is subtracted
-      // from the correlation value:
-      histogram_[i] -= correlationOfAverages_;
-    } else {
-      histogram_[i] = M3Zero;
+        // The outerProduct correlation of the averages is subtracted
+        // from the correlation value:
+        histogram_[i] -= correlationOfAverages_;
+      } else {
+        histogram_[i] = M3Zero;
+      }
     }
   }
-}
 }  // namespace OpenMD

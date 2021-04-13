@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,17 +42,18 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef RESTRAINTS_MOLECULARRESTRAINT_HPP
 #define RESTRAINTS_MOLECULARRESTRAINT_HPP
 
 #include <vector>
-#include "restraints/Restraint.hpp"
+
 #include "math/Vector3.hpp"
+#include "restraints/Restraint.hpp"
 
 namespace OpenMD {
   /**
-   * @class MolecularRestraint 
+   * @class MolecularRestraint
    *
    * MolecularRestraint is the restraint (both positional and
    * orientational) for the configuration of a flexible Molecule
@@ -64,33 +65,31 @@ namespace OpenMD {
    * the center of mass relative to the reference structure.
    */
   class MolecularRestraint : public Restraint {
-    
   public:
-    
-    MolecularRestraint() : Restraint()  { }
-    
+    MolecularRestraint() : Restraint() {}
+
     void setReferenceStructure(std::vector<Vector3d> ref, Vector3d refCom) {
-      ref_ = ref;
-      refCom_ = refCom;     
+      ref_    = ref;
+      refCom_ = refCom;
 
       std::vector<Vector3d>::iterator i;
-       
+
       for (i = ref_.begin(); i != ref_.end(); ++i) {
         (*i) = (*i) - refCom_;
       }
-      
+
       forces_.clear();
       forces_.resize(ref_.size());
     }
-    
+
     void calcForce(std::vector<Vector3d> struc, Vector3d molCom);
-    
+
     std::vector<Vector3d> getRestraintForces() { return forces_; }
-                
-  private:    
+
+  private:
     std::vector<Vector3d> ref_;
     std::vector<Vector3d> forces_;
     Vector3d refCom_;
   };
-}
+}  // namespace OpenMD
 #endif

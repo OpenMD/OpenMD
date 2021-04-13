@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,60 +49,60 @@
 #include "utils/simError.h"
 namespace OpenMD {
 
-SimSnapshotManager::SimSnapshotManager(SimInfo* info, int storageLayout)
-    : SnapshotManager(storageLayout), info_(info) {
-  int nAtoms = info_->getNAtoms();
-  int nRigidBodies = info_->getNRigidBodies();
-  int nCutoffGroups = info_->getNCutoffGroups();
-  bool usePBC = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+  SimSnapshotManager::SimSnapshotManager(SimInfo* info, int storageLayout) :
+      SnapshotManager(storageLayout), info_(info) {
+    int nAtoms        = info_->getNAtoms();
+    int nRigidBodies  = info_->getNRigidBodies();
+    int nCutoffGroups = info_->getNCutoffGroups();
+    bool usePBC = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-  // allocate memory for snapshots
-  previousSnapshot_ =
-      new Snapshot(nAtoms, nRigidBodies, nCutoffGroups, storageLayout, usePBC);
-  currentSnapshot_ =
-      new Snapshot(nAtoms, nRigidBodies, nCutoffGroups, storageLayout, usePBC);
-}
-
-SimSnapshotManager::~SimSnapshotManager() {
-  delete previousSnapshot_;
-  delete currentSnapshot_;
-  previousSnapshot_ = NULL;
-  currentSnapshot_ = NULL;
-}
-
-bool SimSnapshotManager::advance() {
-  *previousSnapshot_ = *currentSnapshot_;
-  currentSnapshot_->setID(currentSnapshot_->getID() + 1);
-  currentSnapshot_->clearDerivedProperties();
-  return true;
-}
-
-bool SimSnapshotManager::resetToPrevious() {
-  int prevID = previousSnapshot_->getID();
-  *currentSnapshot_ = *previousSnapshot_;
-  currentSnapshot_->setID(prevID);
-  return true;
-}
-
-Snapshot* SimSnapshotManager::getSnapshot(int id) {
-  if (currentSnapshot_ != NULL && currentSnapshot_->getID() == id) {
-    return currentSnapshot_;
-  } else if (previousSnapshot_ != NULL && previousSnapshot_->getID() == id) {
-    return previousSnapshot_;
-  } else {
-    return NULL;
+    // allocate memory for snapshots
+    previousSnapshot_ = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
+                                     storageLayout, usePBC);
+    currentSnapshot_  = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
+                                    storageLayout, usePBC);
   }
-}
 
-int SimSnapshotManager::getCapacity() { return 2; }
+  SimSnapshotManager::~SimSnapshotManager() {
+    delete previousSnapshot_;
+    delete currentSnapshot_;
+    previousSnapshot_ = NULL;
+    currentSnapshot_  = NULL;
+  }
 
-void SimSnapshotManager::setCapacity(int capacity) {
-  // give warning message
-  sprintf(painCave.errMsg,
-          "SimSnapshotManager error: can not set capacity for "
-          "SimSnapshotManager.\n");
-  painCave.isFatal = 0;
-  simError();
-}
+  bool SimSnapshotManager::advance() {
+    *previousSnapshot_ = *currentSnapshot_;
+    currentSnapshot_->setID(currentSnapshot_->getID() + 1);
+    currentSnapshot_->clearDerivedProperties();
+    return true;
+  }
+
+  bool SimSnapshotManager::resetToPrevious() {
+    int prevID        = previousSnapshot_->getID();
+    *currentSnapshot_ = *previousSnapshot_;
+    currentSnapshot_->setID(prevID);
+    return true;
+  }
+
+  Snapshot* SimSnapshotManager::getSnapshot(int id) {
+    if (currentSnapshot_ != NULL && currentSnapshot_->getID() == id) {
+      return currentSnapshot_;
+    } else if (previousSnapshot_ != NULL && previousSnapshot_->getID() == id) {
+      return previousSnapshot_;
+    } else {
+      return NULL;
+    }
+  }
+
+  int SimSnapshotManager::getCapacity() { return 2; }
+
+  void SimSnapshotManager::setCapacity(int capacity) {
+    // give warning message
+    sprintf(painCave.errMsg,
+            "SimSnapshotManager error: can not set capacity for "
+            "SimSnapshotManager.\n");
+    painCave.isFatal = 0;
+    simError();
+  }
 
 }  // namespace OpenMD

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -56,8 +56,7 @@ namespace OpenMD {
     FluctuatingChargeAtomTypesSectionParser(ForceFieldOptions& options);
 
   private:
-
-    enum FluctuatingTypeEnum{
+    enum FluctuatingTypeEnum {
       fqtHardness,
       fqtEAMPolynomial,
       fqtDREAM2,
@@ -68,7 +67,7 @@ namespace OpenMD {
     void parseLine(ForceField& ff, const string& line, int lineNo);
 
     FluctuatingTypeEnum getFluctuatingTypeEnum(const std::string& str);
-    
+
     std::map<std::string, FluctuatingTypeEnum> stringToEnumMap_;
     ForceFieldOptions& options_;
     RealType eus_;  //!< Energy unit scaling
@@ -76,6 +75,6 @@ namespace OpenMD {
     RealType dus_;  //!< Distance unit scaling
     RealType oss_;  //!< Oxidation state scaling
   };
-}
+}  // namespace OpenMD
 
 #endif

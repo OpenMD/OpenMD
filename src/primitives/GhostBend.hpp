@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,14 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file GhostBend.hpp
  * @author    tlin
  * @date  11/01/2004
  * @version 1.0
- */ 
-
+ */
 
 #ifndef PRIMITIVES_GHOSTBEND_HPP
 #define PRIMITIVES_GHOSTBEND_HPP
@@ -58,15 +57,13 @@
 #include "primitives/DirectionalAtom.hpp"
 
 namespace OpenMD {
-  
+
   class GhostBend : public Bend {
   public:
-    GhostBend(Atom* atom1, DirectionalAtom* ghostAtom, BendType* bt) 
-      : Bend(atom1, ghostAtom, ghostAtom, bt) {      
-    }
-    
-    virtual void calcForce(RealType& angle, bool doParticlePot);    
-  };  
-} //end namespace OpenMD
-#endif //PRIMITIVES_GHOSTBEND_HPP
+    GhostBend(Atom* atom1, DirectionalAtom* ghostAtom, BendType* bt) :
+        Bend(atom1, ghostAtom, ghostAtom, bt) {}
 
+    virtual void calcForce(RealType& angle, bool doParticlePot);
+  };
+}  // end namespace OpenMD
+#endif  // PRIMITIVES_GHOSTBEND_HPP

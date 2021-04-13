@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,12 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_ATOMTYPE_HPP
 
 #define TYPES_ATOMTYPE_HPP
 
 #include <string>
+
 #include "config.h"
 #include "utils/PropertyMap.hpp"
 
@@ -62,24 +63,24 @@ namespace OpenMD {
    * an atom are not intended to be properties of an atom type
    */
   class AtomType {
-  public:    
+  public:
     AtomType();
-    
-    virtual ~AtomType() { } ;
+
+    virtual ~AtomType() {};
 
     virtual void useBase(AtomType* base);
-    virtual void copyAllData(AtomType* orig);   
+    virtual void copyAllData(AtomType* orig);
     void setMass(RealType m);
-    RealType getMass();        
-    void setIdent(int id);    
-    int getIdent();    
-    void setName(const string&name);
+    RealType getMass();
+    void setIdent(int id);
+    int getIdent();
+    void setName(const string& name);
     string getName();
     std::vector<AtomType*> allYourBase();
-    std::vector<AtomType*> allYourZIG() {return everyZIG;}
-    void addZig(AtomType* at) {everyZIG.push_back(at);}
+    std::vector<AtomType*> allYourZIG() { return everyZIG; }
+    void addZig(AtomType* at) { everyZIG.push_back(at); }
 
-    //below functions are just forward functions
+    // below functions are just forward functions
     /**
      * Adds property into property map
      * @param genData GenericData to be added into PropertyMap
@@ -101,22 +102,22 @@ namespace OpenMD {
     /**
      * Returns all of the properties in PropertyMap
      * @return all of the properties in PropertyMap
-     */      
-    std::vector<std::shared_ptr<GenericData> > getProperties();
+     */
+    std::vector<std::shared_ptr<GenericData>> getProperties();
 
     /**
-     * Checks if property is in this PropertyMap 
+     * Checks if property is in this PropertyMap
      * @param propName name of property
      * @return boolean
-     */      
+     */
     bool hasProperty(const string& propName);
 
     /**
-     * Returns property 
+     * Returns property
      * @param propName name of property
      * @return a pointer point to property with propName. If no
      * property named propName exists, return NULL
-     */      
+     */
     std::shared_ptr<GenericData> getPropertyByName(const string& propName);
 
     bool isLennardJones();
@@ -140,21 +141,21 @@ namespace OpenMD {
     int ident_;
     RealType mass_;
     string name_;
-    bool hasBase_; // All your base are belong to us
+    bool hasBase_;  // All your base are belong to us
     AtomType* base_;
-    vector< AtomType*> everyZIG;  // list of atom types which use us as a base
-    map< string, bool> myResponsibilities_;
-    map< string, RealType> myValues_;
+    vector<AtomType*> everyZIG;  // list of atom types which use us as a base
+    map<string, bool> myResponsibilities_;
+    map<string, RealType> myValues_;
 
   private:
-    //prevent copy construction and copy assignment, since property
-    //map contains pointers which can not be copied and managed
-    //safely, except make the generic data at PropertyMap as copy on
-    //write shared pointer
+    // prevent copy construction and copy assignment, since property
+    // map contains pointers which can not be copied and managed
+    // safely, except make the generic data at PropertyMap as copy on
+    // write shared pointer
     AtomType(const AtomType&);
     AtomType& operator=(const AtomType& atomType);
     PropertyMap properties_;
-  };  
-}
+  };
+}  // namespace OpenMD
 
 #endif

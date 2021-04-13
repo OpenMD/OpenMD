@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,9 +44,9 @@
  */
 #include "types/FragmentStamp.hpp"
 namespace OpenMD {
-FragmentStamp::FragmentStamp(int index) : index_(index) {
-  DefineParameter(Name, "name");
-}
+  FragmentStamp::FragmentStamp(int index) : index_(index) {
+    DefineParameter(Name, "name");
+  }
 
-void FragmentStamp::validate() { CheckParameter(Name, isNotEmpty()); }
+  void FragmentStamp::validate() { CheckParameter(Name, isNotEmpty()); }
 }  // namespace OpenMD

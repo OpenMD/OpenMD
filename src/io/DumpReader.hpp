@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,75 +42,72 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-  
-/** 
- * @file DumpReader.hpp 
- * @author tlin 
- * @date 11/15/2004 
- * @version 2.0 
- */ 
- 
-#ifndef IO_DUMPREADER_HPP 
-#define IO_DUMPREADER_HPP 
- 
-#include <cstdio> 
-#include <string> 
-#include "brains/SimInfo.hpp" 
-#include "primitives/StuntDouble.hpp" 
-namespace OpenMD { 
- 
-  /** 
-   * @class DumpReader DumpReader.hpp "io/DumpReader.hpp" 
-   * @todo get rid of more junk code from DumpReader 
-   */ 
-  class DumpReader { 
-  public: 
- 
-    DumpReader(SimInfo* info, const std::string & filename); 
-    //DumpReader(SimInfo * info, istream & is); 
- 
-    virtual ~DumpReader(); 
- 
-    /** Returns the number of frames in the dump file*/ 
-    int getNFrames(); 
- 
-    void setNeedCOMprops(bool ncp) {
-      needCOMprops_ = ncp;
-    }
-         
-    virtual void readFrame(int whichFrame); 
- 
-  protected: 
- 
-    void scanFile();  
-    void readSet(int whichFrame); 
-    virtual void parseDumpLine(const std::string&); 
-    virtual void parseSiteLine(const std::string&);  
+
+/**
+ * @file DumpReader.hpp
+ * @author tlin
+ * @date 11/15/2004
+ * @version 2.0
+ */
+
+#ifndef IO_DUMPREADER_HPP
+#define IO_DUMPREADER_HPP
+
+#include <cstdio>
+#include <string>
+
+#include "brains/SimInfo.hpp"
+#include "primitives/StuntDouble.hpp"
+namespace OpenMD {
+
+  /**
+   * @class DumpReader DumpReader.hpp "io/DumpReader.hpp"
+   * @todo get rid of more junk code from DumpReader
+   */
+  class DumpReader {
+  public:
+    DumpReader(SimInfo* info, const std::string& filename);
+    // DumpReader(SimInfo * info, istream & is);
+
+    virtual ~DumpReader();
+
+    /** Returns the number of frames in the dump file*/
+    int getNFrames();
+
+    void setNeedCOMprops(bool ncp) { needCOMprops_ = ncp; }
+
+    virtual void readFrame(int whichFrame);
+
+  protected:
+    void scanFile();
+    void readSet(int whichFrame);
+    virtual void parseDumpLine(const std::string&);
+    virtual void parseSiteLine(const std::string&);
     virtual void readFrameProperties(std::istream& inputStream);
     int readStuntDoubles(std::istream& inputStream);
     void readSiteData(std::istream& inputStream);
-         
-    SimInfo* info_ {nullptr}; 
- 
-    std::string filename_; 
-    bool isScanned_; 
- 
-    int nframes_; 
- 
-    std::istream* inFile_; 
-     
-    std::vector<std::streampos> framePos_; 
- 
-    bool needPos_; 
-    bool needVel_; 
-    bool needQuaternion_; 
+
+    SimInfo* info_ {nullptr};
+
+    std::string filename_;
+    bool isScanned_;
+
+    int nframes_;
+
+    std::istream* inFile_;
+
+    std::vector<std::streampos> framePos_;
+
+    bool needPos_;
+    bool needVel_;
+    bool needQuaternion_;
     bool needAngMom_;
     bool needCOMprops_;
 
     const static int bufferSize = 4096;
     char buffer[bufferSize];
-  }; 
- 
-}      //end namespace OpenMD 
- 
-#endif //IO_DUMPREADER_HPP 
+  };
+
+}  // end namespace OpenMD
+
+#endif  // IO_DUMPREADER_HPP

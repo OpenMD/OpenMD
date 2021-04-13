@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,10 +45,10 @@
 
 #ifndef APPLICATIONS_STATICPROPS_TETRAHEDRALITYHBMATRIX_HPP
 #define APPLICATIONS_STATICPROPS_TETRAHEDRALITYHBMATRIX_HPP
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
 
 namespace OpenMD {
 
@@ -75,39 +75,38 @@ namespace OpenMD {
    *    liquid water," by J.R. Errington and P.G. Debenedetti, Nature
    *    409, pp. 318-321 (2001).
    */
-  class TetrahedralityHBMatrix : public StaticAnalyser{
+  class TetrahedralityHBMatrix : public StaticAnalyser {
   public:
-    TetrahedralityHBMatrix(SimInfo* info, const std::string& filename, 
+    TetrahedralityHBMatrix(SimInfo* info, const std::string& filename,
                            const std::string& sele, double rCut, double OOCut,
                            double thetaCut, double OHCut, int nbins);
-    
+
     virtual void process();
-    
+
   private:
     virtual void initializeHistogram();
-    virtual void collectHistogram(RealType q1, RealType q2);    
+    virtual void collectHistogram(RealType q1, RealType q2);
     void writeOutput();
 
     Snapshot* currentSnapshot_;
     std::string selectionScript_;
-    SelectionManager seleMan_;    
-    SelectionEvaluator evaluator_;           
-            
+    SelectionManager seleMan_;
+    SelectionEvaluator evaluator_;
+
     RealType rCut_;
     RealType OOCut_;
     RealType thetaCut_;
     RealType OHCut_;
     unsigned int count_;
-    
+
     RealType MinQ_;
     RealType MaxQ_;
     RealType deltaQ_;
 
     std::vector<RealType> Q_;
-    
-    std::vector<std::vector<unsigned int> > Q_histogram_;
+
+    std::vector<std::vector<unsigned int>> Q_histogram_;
   };
-}
+}  // namespace OpenMD
 
 #endif
-

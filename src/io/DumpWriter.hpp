@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_DUMPWRITER_HPP
 #define IO_DUMPWRITER_HPP
 
@@ -50,47 +50,46 @@
 #ifndef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64
 #endif
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <cstring>
 #include <cstdio>
 #include <cstdlib>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <string>
 
-#include "primitives/Atom.hpp"
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
+#include "primitives/Atom.hpp"
 #include "primitives/StuntDouble.hpp"
 
 namespace OpenMD {
 
   /**
    * @class DumpWriter DumpWriter.hpp "io/DumpWriter.hpp"
-   * @todo 
+   * @todo
    */
-  class DumpWriter{
-
+  class DumpWriter {
   public:
     DumpWriter(SimInfo* info);
     DumpWriter(SimInfo* info, const std::string& filename);
-    DumpWriter(SimInfo* info, const std::string& filename,  bool writeDumpFile);
+    DumpWriter(SimInfo* info, const std::string& filename, bool writeDumpFile);
     ~DumpWriter();
 
     void writeDumpAndEor();
     void writeDump();
     void writeEor();
-    
-  private:  
-        
+
+  private:
     void writeFrame(std::ostream& os);
     void writeFrameProperties(std::ostream& os, Snapshot* s);
     std::string prepareDumpLine(StuntDouble* sd);
     std::string prepareSiteLine(StuntDouble* sd, int ioIndex, int siteIndex);
     std::ostream* createOStream(const std::string& filename);
     void writeClosing(std::ostream& os);
-    
+
     SimInfo* info_ {nullptr};
     std::string filename_;
     std::ostream* dumpFile_;
@@ -106,5 +105,5 @@ namespace OpenMD {
     bool createDumpFile_;
   };
 
-}
-#endif //#define IO_DUMPWRITER_HPP
+}  // namespace OpenMD
+#endif  //#define IO_DUMPWRITER_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,43 +42,44 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_MULTIPOLEADAPTER_HPP
 #define TYPES_MULTIPOLEADAPTER_HPP
 
-#include "utils/GenericData.hpp"
-#include "types/AtomType.hpp"
 #include "math/SquareMatrix3.hpp"
+#include "types/AtomType.hpp"
+#include "utils/GenericData.hpp"
 
 using namespace std;
 namespace OpenMD {
 
   string const MultipoleTypeID = "Multipole";
 
-  struct MultipoleAtypeParameters{
+  struct MultipoleAtypeParameters {
     bool isDipole;
     bool isQuadrupole;
     Vector3d dipole;
     Mat3x3d quadrupole;
   };
-  typedef SimpleTypeData<MultipoleAtypeParameters> MultipoleAtypeData;   
-  
+  typedef SimpleTypeData<MultipoleAtypeParameters> MultipoleAtypeData;
+
   class MultipoleAdapter {
   public:
     MultipoleAdapter(AtomType* AT) { at_ = AT; };
 
-    void makeMultipole(Vector3d dipole, Mat3x3d quadrupole, bool isDipole, bool isQuadrupole);
-    
+    void makeMultipole(Vector3d dipole, Mat3x3d quadrupole, bool isDipole,
+                       bool isQuadrupole);
+
     bool isMultipole();
     bool isDipole();
     bool isQuadrupole();
 
     Vector3d getDipole();
-    Mat3x3d  getQuadrupole();
+    Mat3x3d getQuadrupole();
 
   private:
     AtomType* at_;
-    MultipoleAtypeParameters  getMultipoleParam();
+    MultipoleAtypeParameters getMultipoleParam();
   };
-}
+}  // namespace OpenMD
 #endif

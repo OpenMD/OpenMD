@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,18 +42,18 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef INTEGRATOR_LDFORCEMANAGER_HPP
 #define INTEGRATOR_LDFORCEMANAGER_HPP
 
 #include "brains/ForceManager.hpp"
-#include "primitives/Molecule.hpp"
-#include "math/SeqRandNumGen.hpp"
-#include "hydrodynamics/Shape.hpp"
 #include "brains/Velocitizer.hpp"
+#include "hydrodynamics/Shape.hpp"
+#include "math/SeqRandNumGen.hpp"
+#include "primitives/Molecule.hpp"
 
 namespace OpenMD {
-   
+
   struct SDShape {
     StuntDouble* sd;
     Shape* shape;
@@ -64,59 +64,46 @@ namespace OpenMD {
     Mat3x3d Icr;    /**< Moment of Inertia at Center of Resistance */
     Mat3x3d IcrInv; /**< Icr^{-1}  */
   };
-    
+
   /**
    * @class LDForceManager
-   * Force manager for Lagevin Dynamics applying friction and random 
+   * Force manager for Lagevin Dynamics applying friction and random
    * forces as well as torques.
    */
-  class LDForceManager : public ForceManager{
-    
+  class LDForceManager : public ForceManager {
   public:
-    LDForceManager(SimInfo * info);
-    
-    int getMaxIterationNumber() {
-      return maxIterNum_;
-    }
-        
-    void setMaxIterationNumber(int maxIter) {
-      maxIterNum_ = maxIter;
-    }
+    LDForceManager(SimInfo* info);
 
-    RealType getForceTolerance() {
-      return forceTolerance_;
-    }
+    int getMaxIterationNumber() { return maxIterNum_; }
 
-    void setForceTolerance(RealType tol) {
-      forceTolerance_ = tol;
-    }
+    void setMaxIterationNumber(int maxIter) { maxIterNum_ = maxIter; }
 
-    RealType getDt2() {
-      return dt2_;
-    }
+    RealType getForceTolerance() { return forceTolerance_; }
 
-    void setDt2(RealType dt2) {
-      dt2_ = dt2;
-    }
+    void setForceTolerance(RealType tol) { forceTolerance_ = tol; }
 
+    RealType getDt2() { return dt2_; }
+
+    void setDt2(RealType dt2) { dt2_ = dt2; }
 
   protected:
     virtual void postCalculation();
-    
+
   private:
-    std::map<std::string, HydroProp*> parseFrictionFile(const std::string& filename);
+    std::map<std::string, HydroProp*> parseFrictionFile(
+        const std::string& filename);
     MomentData* getMomentData(StuntDouble* sd);
-    
+
     void genRandomForceAndTorque(Vector3d& force, Vector3d& torque,
                                  unsigned int index, RealType variance);
 
     std::map<std::string, HydroProp*> hydroPropMap_;
     std::vector<HydroProp*> hydroProps_;
 
-    std::map<std::string, MomentData*> momentsMap_; 
+    std::map<std::string, MomentData*> momentsMap_;
     std::vector<MomentData*> moments_;
-    
-    SeqRandNumGen randNumGen_;    
+
+    SeqRandNumGen randNumGen_;
     RealType variance_;
     RealType langevinBufferRadius_;
     RealType frozenBufferRadius_;
@@ -128,7 +115,6 @@ namespace OpenMD {
     RealType forceTolerance_;
     RealType dt2_;
   };
-  
-} //end namespace OpenMD
-#endif //BRAINS_FORCEMANAGER_HPP
 
+}  // end namespace OpenMD
+#endif  // BRAINS_FORCEMANAGER_HPP

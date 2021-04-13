@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,28 +49,28 @@
 
 namespace OpenMD {
 
-// Just need the dipole of the system for each frame
-SystemDipoleCorrFunc::SystemDipoleCorrFunc(SimInfo* info,
-                                           const std::string& filename,
-                                           const std::string& sele1,
-                                           const std::string& sele2)
-    : SystemACF<RealType>(info, filename, sele1, sele2,
+  // Just need the dipole of the system for each frame
+  SystemDipoleCorrFunc::SystemDipoleCorrFunc(SimInfo* info,
+                                             const std::string& filename,
+                                             const std::string& sele1,
+                                             const std::string& sele2) :
+      SystemACF<RealType>(info, filename, sele1, sele2,
                           DataStorage::dslPosition | DataStorage::dslAmat |
                               DataStorage::dslDipole |
                               DataStorage::dslFlucQPosition) {
-  setCorrFuncType("SystemDipoleCorrFunc");
-  setOutputName(getPrefix(dumpFilename_) + ".sysdipcorr");
-  setLabelString("<M(0).M(t)>");
-  sysDipoles_.resize(nFrames_);
-  thermo_ = new Thermo(info_);
-}
+    setCorrFuncType("SystemDipoleCorrFunc");
+    setOutputName(getPrefix(dumpFilename_) + ".sysdipcorr");
+    setLabelString("<M(0).M(t)>");
+    sysDipoles_.resize(nFrames_);
+    thermo_ = new Thermo(info_);
+  }
 
-void SystemDipoleCorrFunc::computeProperty1(int frame) {
-  sysDipoles_[frame] = thermo_->getSystemDipole();
-  return;
-}
+  void SystemDipoleCorrFunc::computeProperty1(int frame) {
+    sysDipoles_[frame] = thermo_->getSystemDipole();
+    return;
+  }
 
-RealType SystemDipoleCorrFunc::calcCorrVal(int frame1, int frame2) {
-  return dot(sysDipoles_[frame1], sysDipoles_[frame2]);
-}
+  RealType SystemDipoleCorrFunc::calcCorrVal(int frame1, int frame2) {
+    return dot(sysDipoles_[frame1], sysDipoles_[frame2]);
+  }
 }  // namespace OpenMD

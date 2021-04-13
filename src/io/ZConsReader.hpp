@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,43 +42,41 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_ZCONSREADER_HPP
 #define IO_ZCONSREADER_HPP
 
 #include <fstream>
 #include <string>
 #include <vector>
+
 #include "brains/SimInfo.hpp"
 #include "constraints/ZconsStruct.hpp"
 namespace OpenMD {
-  
-  
+
   /**
    * @class ZConsReader
    * @todo document
    */
-  class ZConsReader{
+  class ZConsReader {
   public:
-    
     ZConsReader(SimInfo* info);
-    
+
     void readNextFrame();
     bool hasNextFrame();
-    int getNZMols() {return allZmols_.size();}
-    int getNFixedZmols() {return fixedZmolData_.size();}
-    const std::vector<ZconsData>& getFixedZMolData() {return fixedZmolData_; }    
-    RealType getCurTime() {return curTime_; }
-    
+    int getNZMols() { return allZmols_.size(); }
+    int getNFixedZmols() { return fixedZmolData_.size(); }
+    const std::vector<ZconsData>& getFixedZMolData() { return fixedZmolData_; }
+    RealType getCurTime() { return curTime_; }
+
   private:
-    
-    std::ifstream istream_;    
-    SimInfo* info_ {nullptr};    
+    std::ifstream istream_;
+    SimInfo* info_ {nullptr};
     std::vector<int> allZmols_;
-    RealType curTime_;    
+    RealType curTime_;
     std::vector<ZconsData> fixedZmolData_;
-    const static int MAXBUFFERSIZE = 2000;    
+    const static int MAXBUFFERSIZE = 2000;
   };
-  
-}
+
+}  // namespace OpenMD
 #endif

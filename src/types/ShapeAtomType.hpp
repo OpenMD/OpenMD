@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file ShapeAtomType.hpp
  * @author Dan Gezelter
@@ -54,23 +54,28 @@
 #define TYPES_SHAPEATOMTYPE_HPP
 
 #include <vector>
+
 #include "math/RealSphericalHarmonic.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "utils/GenericData.hpp"
 #include "utils/simError.h"
 
-namespace OpenMD {   
+namespace OpenMD {
   class ShapeAtomType {
-    
-  public: 
-    
-    ShapeAtomType(){ }
+  public:
+    ShapeAtomType() {}
     ~ShapeAtomType();
-    
-    std::vector<RealSphericalHarmonic*> getContactFuncs(void) {return contactFuncs;}
-    std::vector<RealSphericalHarmonic*> getRangeFuncs(void) {return rangeFuncs;}
-    std::vector<RealSphericalHarmonic*> getStrengthFuncs(void) {return strengthFuncs;}
-    
+
+    std::vector<RealSphericalHarmonic*> getContactFuncs(void) {
+      return contactFuncs;
+    }
+    std::vector<RealSphericalHarmonic*> getRangeFuncs(void) {
+      return rangeFuncs;
+    }
+    std::vector<RealSphericalHarmonic*> getStrengthFuncs(void) {
+      return strengthFuncs;
+    }
+
     void setContactFuncs(std::vector<RealSphericalHarmonic*> cf) {
       contactFuncs = cf;
     }
@@ -80,35 +85,35 @@ namespace OpenMD {
     void setStrengthFuncs(std::vector<RealSphericalHarmonic*> sf) {
       strengthFuncs = sf;
     }
-    
+
     /**
      * Gets the value of the contact function at a particular orientation
      * @param costheta
      * @param phi
      */
     RealType getContactValueAt(RealType costheta, RealType phi);
-    
+
     /**
      * Gets the value of the range function at a particular orientation
      * @param costheta
      * @param phi
      */
     RealType getRangeValueAt(RealType costheta, RealType phi);
-    
+
     /**
      * Gets the value of the strength function at a particular orientation
      * @param costheta
      * @param phi
      */
     RealType getStrengthValueAt(RealType costheta, RealType phi);
-    
-  private:    
+
+  private:
     std::vector<RealSphericalHarmonic*> contactFuncs;  // The contact functions
     std::vector<RealSphericalHarmonic*> rangeFuncs;    // The range functions
-    std::vector<RealSphericalHarmonic*> strengthFuncs; // The strength functions
-  }; 
+    std::vector<RealSphericalHarmonic*>
+        strengthFuncs;  // The strength functions
+  };
 
-  typedef SimpleTypeData<ShapeAtomType*> ShapeAtypeData;  
-}
+  typedef SimpleTypeData<ShapeAtomType*> ShapeAtypeData;
+}  // namespace OpenMD
 #endif
-

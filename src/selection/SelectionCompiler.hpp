@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,15 +49,15 @@
 #include <string>
 #include <vector>
 
+#include "brains/SimInfo.hpp"
 #include "selection/SelectionToken.hpp"
 #include "selection/TokenMap.hpp"
-#include "brains/SimInfo.hpp"
 
 namespace OpenMD {
 
-
   /**
-   * @class SelectionCompiler SelectionCompiler.hpp "selection/SelectionCompiler.hpp"
+   * @class SelectionCompiler SelectionCompiler.hpp
+   "selection/SelectionCompiler.hpp"
    * @brief compile a selection script to tokens
    * @todo document
    * <pre>
@@ -82,26 +82,21 @@ namespace OpenMD {
    clauseWithin     ::= WITHIN ( clauseDistance , expression )
 
    clauseDistance   ::= integer | decimal
-        
+
    clauseName::= *|string{.string{.string}}
 
 
    * </pre>
    */
-  class SelectionCompiler{
+  class SelectionCompiler {
   public:
-    bool compile(const std::string& filename, const std::string& script );
-        
+    bool compile(const std::string& filename, const std::string& script);
 
-    std::vector<int> getLineNumbers() {
-      return lineNumbers;
-    }
+    std::vector<int> getLineNumbers() { return lineNumbers; }
 
-    std::vector<int> getLineIndices() {
-      return lineIndices;
-    }
+    std::vector<int> getLineIndices() { return lineIndices; }
 
-    std::vector<std::vector<Token> > getAatokenCompiled() {
+    std::vector<std::vector<Token>> getAatokenCompiled() {
       return aatokenCompiled;
     }
 
@@ -109,21 +104,16 @@ namespace OpenMD {
       std::string strError = errorMessage;
       strError += " : " + errorLine + "\n";
 
-      if (!filename.empty()) {
-	strError += filename;
-      }
+      if (!filename.empty()) { strError += filename; }
 
       return strError;
     }
 
-        
   private:
-
     bool internalCompile();
 
-
     bool lookingAtLeadingWhitespace();
-    //bool lookingAtComment();
+    // bool lookingAtComment();
     bool lookingAtEndOfLine();
     bool lookingAtEndOfStatement();
     bool lookingAtString();
@@ -133,12 +123,12 @@ namespace OpenMD {
     bool lookingAtSpecialString();
 
     std::string getUnescapedStringLiteral();
-    int getHexitValue(char ch);        
+    int getHexitValue(char ch);
 
     bool compileCommand(const std::vector<Token>& ltoken);
-    bool compileExpression();        
-    bool compileExpression(int itoken);        
-        
+    bool compileExpression();
+    bool compileExpression(int itoken);
+
     bool clauseOr();
     bool clauseAnd();
     bool clauseNot();
@@ -146,7 +136,7 @@ namespace OpenMD {
     bool clauseWithin();
     bool clauseAlphaHull();
     bool clauseComparator();
-    bool clauseChemObjName();        
+    bool clauseChemObjName();
     bool clauseIndex();
     Token tokenNext();
     boost::any valuePeek();
@@ -156,33 +146,26 @@ namespace OpenMD {
     bool isNameValid(const std::string& name);
 
     bool compileError(const std::string& errorMsg) {
-
-      sprintf( painCave.errMsg,
-               "SelectionCompiler Error: %s\n", errorMsg.c_str());
+      sprintf(painCave.errMsg, "SelectionCompiler Error: %s\n",
+              errorMsg.c_str());
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
 
-      error = true;
+      error              = true;
       this->errorMessage = errorMsg;
       return false;
     }
-        
-    bool commandExpected() {
-      return compileError("command expected");
-    }
+
+    bool commandExpected() { return compileError("command expected"); }
 
     bool invalidExpressionToken(const std::string& ident) {
       return compileError("invalid expression token:" + ident);
     }
 
-    bool unrecognizedToken() {
-      return compileError("unrecognized token");
-    }
+    bool unrecognizedToken() { return compileError("unrecognized token"); }
 
-    bool badArgumentCount() {
-      return compileError("bad argument count");
-    }
+    bool badArgumentCount() { return compileError("bad argument count"); }
 
     bool endOfExpressionExpected() {
       return compileError("end of expression expected");
@@ -196,20 +179,18 @@ namespace OpenMD {
       return compileError("right parenthesis expected");
     }
 
-    bool commaExpected() {
-      return compileError("comma expected");
-    }
+    bool commaExpected() { return compileError("comma expected"); }
 
     bool unrecognizedExpressionToken() {
       boost::any tmp = valuePeek();
       std::string tokenStr;
 
       try {
-	tokenStr = boost::any_cast<std::string>(tmp);                
-      } catch(const boost::bad_any_cast &) {
-	return compileError("any_cast error");
+        tokenStr = boost::any_cast<std::string>(tmp);
+      } catch (const boost::bad_any_cast&) {
+        return compileError("any_cast error");
       }
-            
+
       return compileError("unrecognized expression token:" + tokenStr);
     }
 
@@ -217,20 +198,18 @@ namespace OpenMD {
       return compileError("comparison operator expected");
     }
 
-    bool numberExpected() {
-      return compileError("number expected");
-    }        
-        
+    bool numberExpected() { return compileError("number expected"); }
+
     bool numberOrKeywordExpected() {
       return compileError("number or keyword expected");
-    }        
-        
+    }
+
     std::string filename;
     std::string script;
 
     std::vector<int> lineNumbers;
     std::vector<int> lineIndices;
-    std::vector<std::vector<Token> >aatokenCompiled;
+    std::vector<std::vector<Token>> aatokenCompiled;
 
     bool error;
     std::string errorMessage;
@@ -249,9 +228,8 @@ namespace OpenMD {
     std::vector<Token> atokenInfix;
     std::size_t itokenInfix;
 
-    //std::vector<Token> compiledTokens_;
+    // std::vector<Token> compiledTokens_;
   };
 
-}
+}  // namespace OpenMD
 #endif
-

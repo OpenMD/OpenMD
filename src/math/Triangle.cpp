@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -47,19 +47,11 @@
 
 using namespace OpenMD;
 
-Triangle::Triangle()
-    : normal_(V3Zero),
-      centroid_(V3Zero),
-      area_(0.0),
-      mass_(0.0),
-      facetVelocity_(V3Zero),
-      a_(V3Zero),
-      b_(V3Zero),
-      c_(V3Zero),
-      HaveArea_(false),
-      HaveNormal_(false),
-      HaveUnitNormal_(false),
-      HaveCentroid_(false) {}
+Triangle::Triangle() :
+    normal_(V3Zero), centroid_(V3Zero), area_(0.0), mass_(0.0),
+    facetVelocity_(V3Zero), a_(V3Zero), b_(V3Zero), c_(V3Zero),
+    HaveArea_(false), HaveNormal_(false), HaveUnitNormal_(false),
+    HaveCentroid_(false) {}
 
 void Triangle::addVertices(Vector3d P1, Vector3d P2, Vector3d P3) {
   vertices_[0] = P1;
@@ -74,26 +66,26 @@ void Triangle::addVertices(Vector3d P1, Vector3d P2, Vector3d P3) {
 
 RealType Triangle::computeArea() {
   HaveArea_ = true;
-  area_ = getNormal().length() * 0.5;
+  area_     = getNormal().length() * 0.5;
   return area_;
 }
 // This should return the normal for our calculations.
 Vector3d Triangle::computeNormal() {
   HaveNormal_ = true;
-  normal_ = cross(a_, b_);
+  normal_     = cross(a_, b_);
   return normal_;
 }
 // This should return the normal for our calculations.
 Vector3d Triangle::computeUnitNormal() {
   HaveUnitNormal_ = true;
-  unitnormal_ = cross(a_, b_);
+  unitnormal_     = cross(a_, b_);
   unitnormal_.normalize();
   return unitnormal_;
 }
 
 Vector3d Triangle::computeCentroid() {
   HaveCentroid_ = true;
-  centroid_ = (vertices_[0] + vertices_[1] + vertices_[2]) / RealType(3.0);
+  centroid_     = (vertices_[0] + vertices_[1] + vertices_[2]) / RealType(3.0);
   return centroid_;
 }
 

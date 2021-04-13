@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -53,103 +53,103 @@
 
 namespace OpenMD {
 
-MagneticField::MagneticField(SimInfo* info)
-    : initialized(false), doMagneticField(false), info_(info) {
-  simParams = info_->getSimParams();
-}
-
-void MagneticField::initialize() {
-  std::vector<RealType> mf;
-
-  if (simParams->haveMagneticField()) {
-    doMagneticField = true;
-    mf = simParams->getMagneticField();
+  MagneticField::MagneticField(SimInfo* info) :
+      initialized(false), doMagneticField(false), info_(info) {
+    simParams = info_->getSimParams();
   }
-  if (mf.size() != 3) {
-    sprintf(painCave.errMsg,
-            "MagneticField: Incorrect number of parameters specified.\n"
-            "\tthere should be 3 parameters, but %lu were specified.\n",
-            mf.size());
-    painCave.isFatal = 1;
-    simError();
+
+  void MagneticField::initialize() {
+    std::vector<RealType> mf;
+
+    if (simParams->haveMagneticField()) {
+      doMagneticField = true;
+      mf              = simParams->getMagneticField();
+    }
+    if (mf.size() != 3) {
+      sprintf(painCave.errMsg,
+              "MagneticField: Incorrect number of parameters specified.\n"
+              "\tthere should be 3 parameters, but %lu were specified.\n",
+              mf.size());
+      painCave.isFatal = 1;
+      simError();
+    }
+    MF.x() = mf[0];
+    MF.y() = mf[1];
+    MF.z() = mf[2];
+
+    initialized = true;
   }
-  MF.x() = mf[0];
-  MF.y() = mf[1];
-  MF.z() = mf[2];
 
-  initialized = true;
-}
+  void MagneticField::applyPerturbation() {
+    if (!initialized) initialize();
 
-void MagneticField::applyPerturbation() {
-  if (!initialized) initialize();
+    SimInfo::MoleculeIterator i;
+    Molecule::AtomIterator j;
+    Molecule* mol;
+    Atom* atom;
+    AtomType* atype;
 
-  SimInfo::MoleculeIterator i;
-  Molecule::AtomIterator j;
-  Molecule* mol;
-  Atom* atom;
-  AtomType* atype;
+    int l, m, n;
+    RealType C;
+    Vector3d v;
+    Vector3d f;
+    Vector3d r;
+    Vector3d t;
+    Vector3d D;
+    Vector3d AngMomentum;
+    Vector3d omega;
+    Mat3x3d I;
+    bool isCharge;
 
-  int l, m, n;
-  RealType C;
-  Vector3d v;
-  Vector3d f;
-  Vector3d r;
-  Vector3d t;
-  Vector3d D;
-  Vector3d AngMomentum;
-  Vector3d omega;
-  Mat3x3d I;
-  bool isCharge;
+    if (doMagneticField) {
+      for (mol = info_->beginMolecule(i); mol != NULL;
+           mol = info_->nextMolecule(i)) {
+        for (atom = mol->beginAtom(j); atom != NULL; atom = mol->nextAtom(j)) {
+          isCharge = false;
+          C        = 0.0;
 
-  if (doMagneticField) {
-    for (mol = info_->beginMolecule(i); mol != NULL;
-         mol = info_->nextMolecule(i)) {
-      for (atom = mol->beginAtom(j); atom != NULL; atom = mol->nextAtom(j)) {
-        isCharge = false;
-        C = 0.0;
+          atype = atom->getAtomType();
+          r     = atom->getPos();
+          v     = atom->getVel();
 
-        atype = atom->getAtomType();
-        r = atom->getPos();
-        v = atom->getVel();
-
-        FixedChargeAdapter fca = FixedChargeAdapter(atype);
-        if (fca.isFixedCharge()) {
-          isCharge = true;
-          C = fca.getCharge();
-        }
-
-        C *= Constants::chargeFieldConvert;
-
-        if (isCharge) {
-          f = cross(v, MF) * C * Constants::magneticFieldConvert;
-          atom->addFrc(f);
-        }
-
-        MultipoleAdapter ma = MultipoleAdapter(atype);
-        if (ma.isDipole()) {
-          D = atom->getDipole() * Constants::dipoleFieldConvert;
-
-          t = cross(D, cross(v, MF));
-          atom->addTrq(t);
-
-          AngMomentum = atom->getJ();
-          I = atom->getI();
-          if (atom->isLinear()) {
-            l = atom->linearAxis();
-            m = (l + 1) % 3;
-            n = (l + 2) % 3;
-            omega[l] = 0;
-            omega[m] = AngMomentum[m] / I(m, m);
-            omega[n] = AngMomentum[n] / I(n, n);
-          } else {
-            omega = I.inverse() * AngMomentum;
+          FixedChargeAdapter fca = FixedChargeAdapter(atype);
+          if (fca.isFixedCharge()) {
+            isCharge = true;
+            C        = fca.getCharge();
           }
 
-          f = cross(cross(omega, D), MF);
-          atom->addFrc(f);
+          C *= Constants::chargeFieldConvert;
+
+          if (isCharge) {
+            f = cross(v, MF) * C * Constants::magneticFieldConvert;
+            atom->addFrc(f);
+          }
+
+          MultipoleAdapter ma = MultipoleAdapter(atype);
+          if (ma.isDipole()) {
+            D = atom->getDipole() * Constants::dipoleFieldConvert;
+
+            t = cross(D, cross(v, MF));
+            atom->addTrq(t);
+
+            AngMomentum = atom->getJ();
+            I           = atom->getI();
+            if (atom->isLinear()) {
+              l        = atom->linearAxis();
+              m        = (l + 1) % 3;
+              n        = (l + 2) % 3;
+              omega[l] = 0;
+              omega[m] = AngMomentum[m] / I(m, m);
+              omega[n] = AngMomentum[n] / I(n, n);
+            } else {
+              omega = I.inverse() * AngMomentum;
+            }
+
+            f = cross(cross(omega, D), MF);
+            atom->addFrc(f);
+          }
         }
       }
     }
   }
-}
 }  // namespace OpenMD

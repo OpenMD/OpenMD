@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,28 +51,20 @@
 
 namespace OpenMD {
   /**
-   * @class SDKBendType 
+   * @class SDKBendType
    *
    */
   class SDKBendType : public HarmonicBendType {
-    
   public:
-    
-    SDKBendType(RealType theta0, RealType ktheta, RealType sigma, 
+    SDKBendType(RealType theta0, RealType ktheta, RealType sigma,
                 RealType epsilon, int nRep, int mAtt) :
-      HarmonicBendType(theta0, ktheta),
-      smbt_(ShiftedMieBondType(sigma, epsilon, nRep, mAtt)){
-    }    
-    
-    ShiftedMieBondType* getShiftedMieBondType() {
-      return &smbt_;
-    }
-                
-  private:    
+        HarmonicBendType(theta0, ktheta),
+        smbt_(ShiftedMieBondType(sigma, epsilon, nRep, mAtt)) {}
+
+    ShiftedMieBondType* getShiftedMieBondType() { return &smbt_; }
+
+  private:
     ShiftedMieBondType smbt_;
-    
-  };  
-}
-#endif 
-
-
+  };
+}  // namespace OpenMD
+#endif

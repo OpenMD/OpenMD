@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,12 +46,12 @@
 #ifndef SELECTION_DISTANCEFINDER_HPP
 #define SELECTION_DISTANCEFINDER_HPP
 #include "brains/SimInfo.hpp"
-#include "selection/SelectionSet.hpp"
-#include "primitives/StuntDouble.hpp"
-#include "primitives/Bond.hpp"
 #include "primitives/Bend.hpp"
-#include "primitives/Torsion.hpp"
+#include "primitives/Bond.hpp"
 #include "primitives/Inversion.hpp"
+#include "primitives/StuntDouble.hpp"
+#include "primitives/Torsion.hpp"
+#include "selection/SelectionSet.hpp"
 namespace OpenMD {
 
   class DistanceFinder {
@@ -69,8 +69,7 @@ namespace OpenMD {
     std::vector<Inversion*> inversions_;
     std::vector<Molecule*> molecules_;
     vector<int> nObjects_;
-        
   };
 
-}
-#endif 
+}  // namespace OpenMD
+#endif

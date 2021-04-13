@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef VISITORS_OTHERVISITOR_HPP
 #define VISITORS_OTHERVISITOR_HPP
 
@@ -51,21 +51,22 @@
 #include <string>
 #include <vector>
 
-#include "visitors/BaseVisitor.hpp"
 #include "primitives/StuntDouble.hpp"
-#include "visitors/AtomData.hpp"
-#include "selection/SelectionManager.hpp"
 #include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+#include "visitors/AtomData.hpp"
+#include "visitors/BaseVisitor.hpp"
 
 namespace OpenMD {
 
   class SimInfo;
 
-  class WrappingVisitor : public BaseVisitor{
+  class WrappingVisitor : public BaseVisitor {
   public:
-    using BaseVisitor::visit; 
-    WrappingVisitor(SimInfo* info, bool useCom = true) : BaseVisitor(), useCom_(useCom) {
-      this->info = info;
+    using BaseVisitor::visit;
+    WrappingVisitor(SimInfo* info, bool useCom = true) :
+        BaseVisitor(), useCom_(useCom) {
+      this->info  = info;
       visitorName = "WrappingVisitor";
     }
     virtual void visit(Atom* atom);
@@ -75,43 +76,43 @@ namespace OpenMD {
     virtual const std::string toString();
 
     virtual void update();
-    
+
   private:
     void internalVisit(StuntDouble* sd);
-    SimInfo* info {nullptr};    
+    SimInfo* info {nullptr};
     Vector3d origin_;
     bool useCom_ {false};
   };
 
-  class ReplicateVisitor : public BaseVisitor{
+  class ReplicateVisitor : public BaseVisitor {
   public:
-    using BaseVisitor::visit; 
+    using BaseVisitor::visit;
     ReplicateVisitor(SimInfo* info, Vector3i opt);
     virtual void visit(Atom* atom);
     virtual void visit(DirectionalAtom* datom);
     virtual void visit(RigidBody* rb);
 
     virtual const std::string toString();
+
   protected:
     void internalVisit(StuntDouble* sd);
     void replicate(std::vector<std::shared_ptr<AtomInfo>>& infoList,
-		   std::shared_ptr<AtomData> data,
-                   const Mat3x3d& box);
-    
+                   std::shared_ptr<AtomData> data, const Mat3x3d& box);
+
   private:
     std::vector<Vector3d> dir;
     SimInfo* info {nullptr};
     Vector3i replicateOpt;
   };
 
-  class XYZVisitor : public BaseVisitor{
+  class XYZVisitor : public BaseVisitor {
   public:
-    using BaseVisitor::visit; 
-    
+    using BaseVisitor::visit;
+
     XYZVisitor(SimInfo* info);
-    
+
     XYZVisitor(SimInfo* info, const std::string& script);
-    
+
     virtual void visit(Atom* atom);
     virtual void visit(DirectionalAtom* datom);
     virtual void visit(RigidBody* rb);
@@ -119,27 +120,27 @@ namespace OpenMD {
     virtual void update();
 
     virtual const std::string toString();
-    
-    void writeFrame(std::ostream& outStream);    
-    void clear() {frame.clear();}
-    void doPositions(bool pos) {doPositions_ = pos;}
-    void doVelocities(bool vel) {doVelocities_ = vel;}
-    void doForces(bool frc) {doForces_ = frc;}
-    void doVectors(bool vec) {doVectors_ = vec;}
-    void doCharges(bool chg) {doCharges_ = chg;}
-    void doElectricFields(bool efl) {doElectricFields_ = efl;}
-    void doGlobalIDs(bool gid) {doGlobalIDs_ = gid;}
+
+    void writeFrame(std::ostream& outStream);
+    void clear() { frame.clear(); }
+    void doPositions(bool pos) { doPositions_ = pos; }
+    void doVelocities(bool vel) { doVelocities_ = vel; }
+    void doForces(bool frc) { doForces_ = frc; }
+    void doVectors(bool vec) { doVectors_ = vec; }
+    void doCharges(bool chg) { doCharges_ = chg; }
+    void doElectricFields(bool efl) { doElectricFields_ = efl; }
+    void doGlobalIDs(bool gid) { doGlobalIDs_ = gid; }
 
   protected:
     void internalVisit(StuntDouble* sd);
     bool isSelected(StuntDouble* sd);
 
-  private:  
+  private:
     std::string trimmedName(const std::string& atomType);
 
     SimInfo* info {nullptr};
     SelectionManager seleMan;
-    SelectionEvaluator evaluator; 
+    SelectionEvaluator evaluator;
     std::vector<std::string> frame;
     bool doPositions_ {false};
     bool doVelocities_ {false};
@@ -150,14 +151,16 @@ namespace OpenMD {
     bool doGlobalIDs_ {false};
   };
 
-  class PrepareVisitor : public BaseVisitor{
+  class PrepareVisitor : public BaseVisitor {
   public:
-    using BaseVisitor::visit; 
-    PrepareVisitor() : BaseVisitor() {visitorName = "prepareVisitor";}
+    using BaseVisitor::visit;
+    PrepareVisitor() : BaseVisitor() { visitorName = "prepareVisitor"; }
 
-    virtual void visit(Atom* atom) {internalVisit(atom);}
-    virtual void visit(DirectionalAtom* datom) {internalVisit(reinterpret_cast<Atom*>(datom));}
-    virtual void visit(RigidBody* rb) {internalVisit(rb);}
+    virtual void visit(Atom* atom) { internalVisit(atom); }
+    virtual void visit(DirectionalAtom* datom) {
+      internalVisit(reinterpret_cast<Atom*>(datom));
+    }
+    virtual void visit(RigidBody* rb) { internalVisit(rb); }
 
     virtual const std::string toString();
 
@@ -166,21 +169,21 @@ namespace OpenMD {
     void internalVisit(RigidBody* rb);
   };
 
-  class WaterTypeVisitor : public BaseVisitor{
+  class WaterTypeVisitor : public BaseVisitor {
   public:
-    using BaseVisitor::visit; 
-    WaterTypeVisitor() ;
+    using BaseVisitor::visit;
+    WaterTypeVisitor();
     virtual void visit(Atom* atom) {}
     virtual void visit(DirectionalAtom* datom) {}
     virtual void visit(RigidBody* rb);
-    
+
     virtual const std::string toString();
-    
+
   private:
     std::string trimmedName(const std::string& atomType);
-    
+
     std::set<std::string> waterTypeList;
   };
-} // namespace OpenMD
+}  // namespace OpenMD
 
-#endif // _OTHERVISITOR_H_
+#endif  // _OTHERVISITOR_H_

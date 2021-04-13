@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file NPTi.hpp
  * @author tlin
@@ -58,11 +58,9 @@ namespace OpenMD {
 
   class NPTi : public NPT {
   public:
-
     NPTi(SimInfo* info);
 
   private:
-
     virtual void evolveEtaA();
     virtual void evolveEtaB();
 
@@ -71,22 +69,22 @@ namespace OpenMD {
     virtual void scaleSimBox();
 
     virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel);
-    virtual void getVelScaleB(Vector3d& sc, int index );
-    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM, int index, Vector3d& sc);
+    virtual void getVelScaleB(Vector3d& sc, int index);
+    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM,
+                             int index, Vector3d& sc);
 
     virtual void calcVelScale();
     virtual RealType calcConservedQuantity();
 
     virtual void loadEta();
     virtual void saveEta();
-    
+
     RealType eta;
     RealType oldEta;
     RealType prevEta;
     RealType vScale;
-        
   };
 
-}      //end namespace OpenMD
+}  // end namespace OpenMD
 
-#endif //INTEGRATORS_NPTI_HPP
+#endif  // INTEGRATORS_NPTI_HPP

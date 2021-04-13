@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -53,38 +53,42 @@ namespace OpenMD {
   public:
     Displacement(SimInfo* info, const std::string& filename,
                  const std::string& sele1, const std::string& sele2);
+
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2);
-    std::vector<std::vector<Vector3d> > positions_;
+    std::vector<std::vector<Vector3d>> positions_;
   };
 
   class DisplacementZ : public ObjectACF<Vector3d> {
   public:
     DisplacementZ(SimInfo* info, const std::string& filename,
                   const std::string& sele1, const std::string& sele2,
-                  int nZbins, int axis=2);
+                  int nZbins, int axis = 2);
+
   private:
     virtual void computeFrame(int frame);
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual void correlateFrames(int frame1, int frame2, int timeBin);
-    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2, int timeBin);
-    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2) { return Vector3d(0.0);}
+    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2,
+                                 int timeBin);
+    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2) {
+      return Vector3d(0.0);
+    }
 
     virtual void postCorrelate();
     virtual void writeCorrelate();
 
-    std::vector<std::vector<Vector3d> > positions_;
-    std::vector<std::vector<int> > zBins_;
-    std::vector<std::vector<Vector3d> > histograms_;
-    std::vector<std::vector<int> > counts_;
+    std::vector<std::vector<Vector3d>> positions_;
+    std::vector<std::vector<int>> zBins_;
+    std::vector<std::vector<Vector3d>> histograms_;
+    std::vector<std::vector<int>> counts_;
     Mat3x3d hmat_;
     RealType halfBoxZ_;
     unsigned int nZBins_;
     int axis_;
     std::string axisLabel_;
-
   };
 
-}
+}  // namespace OpenMD
 #endif

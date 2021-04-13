@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_DIRECTIONALADAPTER_HPP
 #define TYPES_DIRECTIONALADAPTER_HPP
 
-#include "utils/GenericData.hpp"
-#include "types/AtomType.hpp"
 #include "math/SquareMatrix3.hpp"
+#include "types/AtomType.hpp"
+#include "utils/GenericData.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -58,21 +58,21 @@ namespace OpenMD {
   struct DirectionalAtypeParameters {
     Mat3x3d I;
   };
-  typedef SimpleTypeData<DirectionalAtypeParameters> DirectionalAtypeData;   
-  
+  typedef SimpleTypeData<DirectionalAtypeParameters> DirectionalAtypeData;
+
   class DirectionalAdapter {
   public:
     DirectionalAdapter(AtomType* AT) { at_ = AT; };
 
     void makeDirectional(Mat3x3d I);
-    
+
     bool isDirectional();
 
     Mat3x3d getI();
 
   private:
     AtomType* at_;
-    DirectionalAtypeParameters  getDirectionalParam();
+    DirectionalAtypeParameters getDirectionalParam();
   };
-}
+}  // namespace OpenMD
 #endif

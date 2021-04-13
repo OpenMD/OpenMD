@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_TORSIONSTAMP_HPP
 #define TYPES_TORSIONSTAMP_HPP
 #include "types/DataHolder.hpp"
@@ -50,51 +50,46 @@
 namespace OpenMD {
   class TorsionStamp : public DataHolder {
     DeclareParameter(GhostVectorSource, int);
+
   public:
-    
     TorsionStamp();
     virtual ~TorsionStamp();
-    
-    int getMemberAt( int index ) {return members_.at(index);}
-    int getNMembers() {return members_.size();}
-    std::vector<int> getMembers() {return members_;}
+
+    int getMemberAt(int index) { return members_.at(index); }
+    int getNMembers() { return members_.size(); }
+    std::vector<int> getMembers() { return members_; }
     void setMembers(const std::vector<int>& members) {
       members_ = members;
       if (members_.size() < 3 || members_.size() > 4) {
         std::ostringstream oss;
-        oss << "members" << containerToString(members) << " is invalid" << 
-          std::endl;
+        oss << "members" << containerToString(members) << " is invalid"
+            << std::endl;
         throw OpenMDException(oss.str());
       }
-    }        
-    
+    }
+
     void setMembers(IntTuple4 tuple) {
       members_.push_back(tuple.first);
       members_.push_back(tuple.second);
       members_.push_back(tuple.third);
-      members_.push_back(tuple.fourth);            
+      members_.push_back(tuple.fourth);
     }
     void overrideType(std::string type, std::vector<RealType> pars) {
-      orType_ = type;
-      orPars_ = pars;
+      orType_      = type;
+      orPars_      = pars;
       hasOverride_ = true;
     }
     virtual void validate();
     bool hasOverride() { return hasOverride_; }
-    std::string getOverrideType() {
-      return orType_;
-    }
+    std::string getOverrideType() { return orType_; }
 
-    std::vector<RealType> getOverridePars() {
-      return orPars_;
-    }        
+    std::vector<RealType> getOverridePars() { return orPars_; }
 
-  private:   
+  private:
     std::vector<int> members_;
     bool hasOverride_;
     std::string orType_;
     std::vector<RealType> orPars_;
-
   };
-}
+}  // namespace OpenMD
 #endif

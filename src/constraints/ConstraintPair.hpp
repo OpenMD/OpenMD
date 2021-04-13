@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,56 +42,51 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
 
 #ifndef CONSTRAINTS_CONTRAINTPAIR_HPP
 #define CONSTRAINTS_CONTRAINTPAIR_HPP
 
-#include "primitives/StuntDouble.hpp"
 #include "constraints/ConstraintElem.hpp"
+#include "primitives/StuntDouble.hpp"
 namespace OpenMD {
-
 
   /**
    * @class ConstraintPair
    * @todo document
    */
   class ConstraintPair {
-
   public:
-
-    ConstraintPair(ConstraintElem* elem1, ConstraintElem* elem2, 
-                   RealType len, bool printForce) 
-      : consElem1_(elem1), consElem2_(elem2), dist2(len*len), 
-        printForce_(printForce) { }
+    ConstraintPair(ConstraintElem* elem1, ConstraintElem* elem2, RealType len,
+                   bool printForce) :
+        consElem1_(elem1),
+        consElem2_(elem2), dist2(len * len), printForce_(printForce) {}
 
     ~ConstraintPair() {
       delete consElem1_;
       delete consElem2_;
     }
     /** Return the first constraint elemet */
-    ConstraintElem* getConsElem1() {return consElem1_;}
+    ConstraintElem* getConsElem1() { return consElem1_; }
 
     /** Retunr the second constraint element */
-    ConstraintElem* getConsElem2() {return consElem2_;}
+    ConstraintElem* getConsElem2() { return consElem2_; }
 
-    bool isMoved() { return consElem1_->getMoved() || consElem2_->getMoved(); }        
-    RealType getConsDistSquare() {return dist2;}
+    bool isMoved() { return consElem1_->getMoved() || consElem2_->getMoved(); }
+    RealType getConsDistSquare() { return dist2; }
     void setConstraintForce(RealType frc) { force_ = frc; }
-    void addConstraintForce(RealType frc) { force_ += frc;}
-    void resetConstraintForce() {force_ = 0.0; }
+    void addConstraintForce(RealType frc) { force_ += frc; }
+    void resetConstraintForce() { force_ = 0.0; }
     RealType getConstraintForce() { return force_; }
-    bool getPrintForce() {return printForce_;}
+    bool getPrintForce() { return printForce_; }
 
   private:
-        
     ConstraintElem* consElem1_;
-    ConstraintElem* consElem2_;        
+    ConstraintElem* consElem2_;
     RealType dist2;
     RealType force_;
     bool printForce_;
   };
 
-}
+}  // namespace OpenMD
 
-#endif 
+#endif

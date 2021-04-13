@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file ForceManager.hpp
  * @author tlin
@@ -54,13 +54,13 @@
 #define BRAINS_FORCEMANAGER_HPP
 
 #include "brains/SimInfo.hpp"
-#include "primitives/Molecule.hpp"
-#include "nonbonded/Cutoffs.hpp"
-#include "nonbonded/SwitchingFunction.hpp"
-#include "nonbonded/InteractionManager.hpp"
-#include "perturbations/Perturbation.hpp"
-#include "parallel/ForceDecomposition.hpp"
 #include "brains/Thermo.hpp"
+#include "nonbonded/Cutoffs.hpp"
+#include "nonbonded/InteractionManager.hpp"
+#include "nonbonded/SwitchingFunction.hpp"
+#include "parallel/ForceDecomposition.hpp"
+#include "perturbations/Perturbation.hpp"
+#include "primitives/Molecule.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 
@@ -79,17 +79,16 @@ namespace OpenMD {
    * parsed so that the atom types are known.
    */
   class ForceManager {
-
   public:
-    ForceManager(SimInfo * info);                          
+    ForceManager(SimInfo* info);
     virtual ~ForceManager();
     virtual void calcForces();
     virtual void calcSelectedForces(Molecule* mol1, Molecule* mol2);
     void setDoElectricField(bool def) { doElectricField_ = def; }
     void initialize();
 
-  protected: 
-    bool initialized_ {false}; 
+  protected:
+    bool initialized_ {false};
     bool doParticlePot_ {false};
     bool doElectricField_ {false};
     bool doSitePotential_ {false};
@@ -101,35 +100,36 @@ namespace OpenMD {
     int axis_ {false};
 
     virtual void setupCutoffs();
-    virtual void preCalculation();        
+    virtual void preCalculation();
     virtual void shortRangeInteractions();
     virtual void longRangeInteractions();
     virtual void postCalculation();
 
-    virtual void selectedPreCalculation(Molecule* mol1, Molecule* mol2);        
+    virtual void selectedPreCalculation(Molecule* mol1, Molecule* mol2);
     virtual void selectedShortRangeInteractions(Molecule* mol1, Molecule* mol2);
     virtual void selectedLongRangeInteractions(Molecule* mol1, Molecule* mol2);
     virtual void selectedPostCalculation(Molecule* mol1, Molecule* mol2);
-    
-    SimInfo* info_ {nullptr};        
+
+    SimInfo* info_ {nullptr};
     ForceField* forceField_ {nullptr};
     InteractionManager* interactionMan_ {nullptr};
     ForceDecomposition* fDecomp_ {nullptr};
     SwitchingFunction* switcher_ {nullptr};
     Thermo* thermo {nullptr};
 
-    SwitchingFunctionType sft_;/**< Type of switching function in use */
-    RealType rCut_;            /**< cutoff radius for non-bonded interactions */
+    SwitchingFunctionType sft_; /**< Type of switching function in use */
+    RealType rCut_; /**< cutoff radius for non-bonded interactions */
     RealType rCutSq_;
-    RealType rSwitch_;         /**< inner radius of switching function */
-    CutoffMethod cutoffMethod_;/**< Cutoff Method for most non-bonded interactions */
+    RealType rSwitch_; /**< inner radius of switching function */
+    CutoffMethod
+        cutoffMethod_; /**< Cutoff Method for most non-bonded interactions */
 
     set<AtomType*> atomTypes_;
-    vector<pair<AtomType*, AtomType*> > interactions_;
+    vector<pair<AtomType*, AtomType*>> interactions_;
     map<Bend*, BendDataSet> bendDataSets;
     map<Torsion*, TorsionDataSet> torsionDataSets;
     map<Inversion*, InversionDataSet> inversionDataSets;
-    //vector<pair<int, int> > neighborList_;
+    // vector<pair<int, int> > neighborList_;
     vector<int> neighborList_;
     vector<int> point_;
 
@@ -145,10 +145,9 @@ namespace OpenMD {
     SelectionManager seleMan_;
     SelectionEvaluator evaluator_;
     // And all of the variables and structures for long range interactions:
-    
+
     InteractionData idat;
     SelfData sdat;
-
   };
-} 
-#endif //BRAINS_FORCEMANAGER_HPP
+}  // namespace OpenMD
+#endif  // BRAINS_FORCEMANAGER_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef UTILS_TUPLE_HPP
 #define UTILS_TUPLE_HPP
 
 namespace OpenMD {
 
-  template <class T1, class T2, class T3>
+  template<class T1, class T2, class T3>
   struct tuple3 {
     typedef T1 first_type;
     typedef T2 second_type;
@@ -58,16 +58,16 @@ namespace OpenMD {
     T2 second;
     T3 third;
     tuple3() {}
-    tuple3(const T1& a, const T2& b, const T3& c) : first(a), second(b), third(c) {}
+    tuple3(const T1& a, const T2& b, const T3& c) :
+        first(a), second(b), third(c) {}
   };
 
-  template <class T1, class T2, class T3>
-  tuple3<T1,T2,T3> make_tuple3( T1 t1, T2 t2, T3 t3 ) {
-    return tuple3<T1,T2,T3>( t1, t2, t3 ); 
+  template<class T1, class T2, class T3>
+  tuple3<T1, T2, T3> make_tuple3(T1 t1, T2 t2, T3 t3) {
+    return tuple3<T1, T2, T3>(t1, t2, t3);
   }
 
-
-  template <class T1, class T2, class T3, class T4>
+  template<class T1, class T2, class T3, class T4>
   struct tuple4 {
     typedef T1 first_type;
     typedef T2 second_type;
@@ -79,55 +79,53 @@ namespace OpenMD {
     T3 third;
     T4 fourth;
     tuple4() {}
-    tuple4(const T1& a, const T2& b, const T3& c, const T4& d)
-      : first(a), second(b), third(c), fourth(d) {}
+    tuple4(const T1& a, const T2& b, const T3& c, const T4& d) :
+        first(a), second(b), third(c), fourth(d) {}
   };
 
-  template <class T1, class T2, class T3, class T4>
-  tuple4<T1,T2,T3,T4> make_tuple4( T1 t1, T2 t2, T3 t3, T4 t4 ) {
-    return tuple4<T1,T2,T3,T4>( t1, t2, t3, t4 );
+  template<class T1, class T2, class T3, class T4>
+  tuple4<T1, T2, T3, T4> make_tuple4(T1 t1, T2 t2, T3 t3, T4 t4) {
+    return tuple4<T1, T2, T3, T4>(t1, t2, t3, t4);
   }
-  
+
   template<class T1, class T2, class T3>
-  inline bool operator < (const tuple3<T1, T2, T3>& t1, const tuple3<T1, T2, T3>& t2) {
-    
-    return t1.first < t2.first
-      || (!(t2.first < t1.first) && t1.second < t2.second)
-      || (!(t2.first < t1.first) && !(t2.second < t1.second) && t1.third < t2.third);
+  inline bool operator<(const tuple3<T1, T2, T3>& t1,
+                        const tuple3<T1, T2, T3>& t2) {
+    return t1.first < t2.first ||
+           (!(t2.first < t1.first) && t1.second < t2.second) ||
+           (!(t2.first < t1.first) && !(t2.second < t1.second) &&
+            t1.third < t2.third);
   }
-  
-  
-  inline bool operator < (const tuple3<int, int, std::vector<std::string> >& t1, const tuple3<int, int, std::vector<std::string> >& t2) {
-    
+
+  inline bool operator<(const tuple3<int, int, std::vector<std::string>>& t1,
+                        const tuple3<int, int, std::vector<std::string>>& t2) {
     if (t1.first < t2.first)
       return true;
     else {
-      if (t1.first > t2.first) 
-        return false;
-    
-      if (t1.second < t2.second) 
+      if (t1.first > t2.first) return false;
+
+      if (t1.second < t2.second)
         return true;
-      else 
-        if (t1.second > t2.second) 
-          return false;
-    
+      else if (t1.second > t2.second)
+        return false;
+
       return true;
-    }  
+    }
   }
 
   template<class T1, class T2, class T3, class T4>
-  inline bool operator < (const tuple4<T1, T2, T3, T4>& t1, const tuple4<T1, T2, T3, T4>& t2) {
-  
-    return t1.first < t2.first
-      || (!(t2.first < t1.first) && t1.second < t2.second)
-      || (!(t2.first < t1.first) && !(t2.second < t1.second) && t1.third < t2.third)
-      || (!(t2.first < t1.first) && !(t2.second < t1.second) && !(t2.third < t1.third) && t1.fourth < t2.fourth);
+  inline bool operator<(const tuple4<T1, T2, T3, T4>& t1,
+                        const tuple4<T1, T2, T3, T4>& t2) {
+    return t1.first < t2.first ||
+           (!(t2.first < t1.first) && t1.second < t2.second) ||
+           (!(t2.first < t1.first) && !(t2.second < t1.second) &&
+            t1.third < t2.third) ||
+           (!(t2.first < t1.first) && !(t2.second < t1.second) &&
+            !(t2.third < t1.third) && t1.fourth < t2.fourth);
   }
   typedef tuple3<int, int, int> IntTuple3;
   typedef tuple4<int, int, int, int> IntTuple4;
 
-}
+}  // namespace OpenMD
 
-
-#endif //UTILS_TUPLE_HPP
-
+#endif  // UTILS_TUPLE_HPP

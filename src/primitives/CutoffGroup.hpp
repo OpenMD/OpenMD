@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,139 +42,118 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef PRIMITIVES_CUTOFFGROUP_HPP
 
 #define PRIMITIVES_CUTOFFGROUP_HPP
 
-#include "primitives/Atom.hpp"
 #include "math/Vector3.hpp"
+#include "primitives/Atom.hpp"
 
 namespace OpenMD {
   class CutoffGroup {
   public:
-    
     CutoffGroup() : globalIndex(-1), localIndex_(-1), snapshotMan_(NULL) {
-
-      storage_ = &Snapshot::cgData;
+      storage_      = &Snapshot::cgData;
       haveTotalMass = false;
-      totalMass = 0.0;
+      totalMass     = 0.0;
     }
-    
+
     /**
      * Sets the Snapshot Manager of this cutoffGroup
      */
-    void setSnapshotManager(SnapshotManager* sman) {
-      snapshotMan_ = sman;
-    }
+    void setSnapshotManager(SnapshotManager* sman) { snapshotMan_ = sman; }
 
+    void addAtom(Atom* atom) { cutoffAtomList.push_back(atom); }
 
-    void addAtom(Atom *atom) {
-      cutoffAtomList.push_back(atom);
-    }
-    
-    Atom *beginAtom(std::vector<Atom *>::iterator & i) {
+    Atom* beginAtom(std::vector<Atom*>::iterator& i) {
       i = cutoffAtomList.begin();
       return i != cutoffAtomList.end() ? *i : NULL;
     }
-    
-    Atom *nextAtom(std::vector<Atom *>::iterator & i) {
+
+    Atom* nextAtom(std::vector<Atom*>::iterator& i) {
       i++;
       return i != cutoffAtomList.end() ? *i : NULL;
     }
 
     std::vector<Atom*> getAtoms() { return cutoffAtomList; }
     RealType getMass() {
-      
       if (!haveTotalMass) {
-	totalMass = 0.0;
-        
-        std::vector<Atom *>::iterator i;
-	for(Atom* atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
-	  RealType mass = atom->getMass();
-	  totalMass += mass;
-	}
-        
-	haveTotalMass = true;
+        totalMass = 0.0;
+
+        std::vector<Atom*>::iterator i;
+        for (Atom* atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
+          RealType mass = atom->getMass();
+          totalMass += mass;
+        }
+
+        haveTotalMass = true;
       }
-      
+
       return totalMass;
     }
-    
-    void updateCOM() {
 
+    void updateCOM() {
       DataStorage& data = snapshotMan_->getCurrentSnapshot()->*storage_;
-      bool needsVel = false;
+      bool needsVel     = false;
       if (data.getStorageLayout() & DataStorage::dslVelocity) needsVel = true;
 
       if (cutoffAtomList.size() == 1) {
         data.position[localIndex_] = cutoffAtomList[0]->getPos();
-        if (needsVel)
-          data.velocity[localIndex_] = cutoffAtomList[0]->getVel();
+        if (needsVel) data.velocity[localIndex_] = cutoffAtomList[0]->getVel();
       } else {
-        std::vector<Atom *>::iterator i;
-        Atom * atom;
-        RealType totalMass = getMass();
+        std::vector<Atom*>::iterator i;
+        Atom* atom;
+        RealType totalMass         = getMass();
         data.position[localIndex_] = V3Zero;
         if (needsVel) data.velocity[localIndex_] = V3Zero;
-        
-	for(atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
+
+        for (atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
           data.position[localIndex_] += atom->getMass() * atom->getPos();
           if (needsVel)
             data.velocity[localIndex_] += atom->getMass() * atom->getVel();
-	}     
-	data.position[localIndex_] /= totalMass;
-        if (needsVel) data.velocity[localIndex_] /= totalMass;          
-      }      
+        }
+        data.position[localIndex_] /= totalMass;
+        if (needsVel) data.velocity[localIndex_] /= totalMass;
+      }
     }
-
 
     Vector3d getPos() {
-      return ((snapshotMan_->getCurrentSnapshot())->*storage_).position[localIndex_];      
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_)
+          .position[localIndex_];
     }
     Vector3d getVel() {
-      return ((snapshotMan_->getCurrentSnapshot())->*storage_).velocity[localIndex_];      
-    }
-    
-    int getNumAtom() {
-      return cutoffAtomList.size();
-    }
-    
-    int getGlobalIndex() {
-      return globalIndex;
-    }
-    
-    void setGlobalIndex(int id) {
-      this->globalIndex = id;
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_)
+          .velocity[localIndex_];
     }
 
-    /** 
+    int getNumAtom() { return cutoffAtomList.size(); }
+
+    int getGlobalIndex() { return globalIndex; }
+
+    void setGlobalIndex(int id) { this->globalIndex = id; }
+
+    /**
      * Returns the local index of this cutoffGroup
      * @return the local index of this cutoffGroup
      */
-    int getLocalIndex() {
-      return localIndex_;
-    }
+    int getLocalIndex() { return localIndex_; }
 
     /**
      * Sets the local index of this cutoffGroup
      * @param index new index to be set
-     */        
-    void setLocalIndex(int index) {
-      localIndex_ = index;
-    }
-    
+     */
+    void setLocalIndex(int index) { localIndex_ = index; }
+
   private:
-    
-    std::vector<Atom *>cutoffAtomList;
+    std::vector<Atom*> cutoffAtomList;
     bool haveTotalMass;
     RealType totalMass;
-    int globalIndex;    
+    int globalIndex;
 
     int localIndex_;
     DataStoragePointer storage_;
     SnapshotManager* snapshotMan_;
-
-  };  
-} //end namespace OpenMD
-#endif //PRIMITIVES_CUTOFFGROUP_HPP  
+  };
+}  // end namespace OpenMD
+#endif  // PRIMITIVES_CUTOFFGROUP_HPP

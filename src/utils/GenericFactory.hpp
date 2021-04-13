@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file GenericFactory.hpp
  * @author Teng Lin
@@ -61,12 +61,16 @@ namespace OpenMD {
 
   /**
    * @class GenericFactory GenericFactory.hpp "utils/GenericFactory.hpp"
-   * @brief GenericFactory is a template based Object Factory 
+   * @brief GenericFactory is a template based Object Factory
    * Factory pattern is used to define an interface for creating an object.
-   * 
-   * @param Object the base class of the hierarchy for which you provide the object factory.
-   * @param IdentType the object that identifies the type of the concrete object. Default type is  std::string * @param Creator  the callable entity that creates objects. This type must support operator(),
-   * taking no parameters and returning a pointer to Object. Default type is function pointer.
+   *
+   * @param Object the base class of the hierarchy for which you provide the
+   object factory.
+   * @param IdentType the object that identifies the type of the concrete
+   object. Default type is  std::string * @param Creator  the callable entity
+   that creates objects. This type must support operator(),
+   * taking no parameters and returning a pointer to Object. Default type is
+   function pointer.
    *
    * Usage:
    * @code
@@ -74,7 +78,7 @@ namespace OpenMD {
    * class Shape {
    * ...
    * };
-   * 
+   *
    * //instantiating a new object factory
    * typedef GenericFactory<Shape> ShapeFactory;
    *
@@ -89,9 +93,12 @@ namespace OpenMD {
    * }
    *
    * //register createLine
-   * //note: must put ShapeFactory::getInstance()->registerCreator("Line", createLine) on the right
-   * //hand side, otherwise the compiler will consider it as a function declaration
-   * const bool registeredLine = ShapeFactory::getInstance()->registerCreator("Line", createLine);
+   * //note: must put ShapeFactory::getInstance()->registerCreator("Line",
+   createLine) on the right
+   * //hand side, otherwise the compiler will consider it as a function
+   declaration
+   * const bool registeredLine =
+   ShapeFactory::getInstance()->registerCreator("Line", createLine);
    *
    * //Circle class
    * class Circle : public Shape{
@@ -99,16 +106,17 @@ namespace OpenMD {
    * };
    *
    * //declare function to create Circle
-   * Shape* createCircle() { 
+   * Shape* createCircle() {
    *   return new Circle;
    * }
    *
    * //register createCircle
-   * const bool registeredCircle = ShapeFactory::getInstance()->registerCreator("Circle", createCircle); 
+   * const bool registeredCircle =
+   ShapeFactory::getInstance()->registerCreator("Circle", createCircle);
    *
    * //create object by ident
    * Line* line = ShapeFactory::getInstance()->createObject("Line");
-   * Circle* circle = ShapeFactory::getInstance()->createObject("Circle"); 
+   * Circle* circle = ShapeFactory::getInstance()->createObject("Circle");
    * @endcode
    *
    * Or the user can use predefined macro DECLARE_CREATOR and REGISTER_CREATOR
@@ -117,7 +125,7 @@ namespace OpenMD {
    * class Shape {
    * ...
    * };
-   * 
+   *
    * //instantiating a new object factory
    * typedef GenericFactory<Shape> ShapeFactory;
    *
@@ -126,37 +134,37 @@ namespace OpenMD {
    * ...
    * };
    *
-   * //declare function using macro 
+   * //declare function using macro
    * DECLARE_CREATOR(Shape, Line)
-   * 
+   *
    * //register using macro
    * REGISTER_CREATOR(ShapeFactory, "Line", Line);
- 
+
    * //Circle class
    * class Circle : public Shape{
    * ...
    * };
    *
-   * //declare function using macro 
+   * //declare function using macro
    * DECLARE_CREATOR(Shape, Circle)
-   * 
+   *
    * //register using macro
    * REGISTER_CREATOR(ShapeFactory, "Circle", Circle);
    * @endcode
    */
-  template<class Object, typename IdentType = std::string, typename Creator = Object* (*)()>
+  template<class Object, typename IdentType = std::string,
+           typename Creator = Object* (*)()>
   class GenericFactory {
   public:
     typedef GenericFactory<Object, IdentType, Creator> FactoryType;
     typedef std::map<IdentType, Creator> CreatorMapType;
-        
+
     /**
      * Returns an instance of object factory
      * @return an instance of object factory
-     */        
-    static FactoryType* getInstance(){
-      if (instance_ == NULL)
-	instance_ = new FactoryType;
+     */
+    static FactoryType* getInstance() {
+      if (instance_ == NULL) instance_ = new FactoryType;
       return instance_;
     }
 
@@ -164,18 +172,17 @@ namespace OpenMD {
      * Registers a creator with a type identifier
      * @return true if registration is succeed, otherwise return false
      * @param id the identification of the concrete object
-     * @param creator the object responsible to create the concrete object 
+     * @param creator the object responsible to create the concrete object
      */
     bool registerCreator(const IdentType& id, Creator creator) {
-      return creatorMap_.insert(
-				CreatorMapType::value_type(id, creator)).second;
+      return creatorMap_.insert(CreatorMapType::value_type(id, creator)).second;
     }
 
     /**
-     * Unregisters the creator for the given type identifier. If the type identifier 
-     * was previously registered, the function returns true.
-     * @return truethe type identifier was previously registered and the creator is removed,
-     * otherwise return false
+     * Unregisters the creator for the given type identifier. If the type
+     * identifier was previously registered, the function returns true.
+     * @return truethe type identifier was previously registered and the creator
+     * is removed, otherwise return false
      * @param id the identification of the concrete object
      */
     bool unregisterCreator(const IdentType& id) {
@@ -183,23 +190,24 @@ namespace OpenMD {
     }
 
     /**
-     * Looks up the type identifier in the internal map. If it is found, it invokes the
-     * corresponding creator for the type identifier and returns its result. 
-     * @return a pointer of the concrete object, return NULL if no creator is registed for 
-     * creating this concrete object
+     * Looks up the type identifier in the internal map. If it is found, it
+     * invokes the corresponding creator for the type identifier and returns its
+     * result.
+     * @return a pointer of the concrete object, return NULL if no creator is
+     * registed for creating this concrete object
      * @param id the identification of the concrete object
      */
     Object* createObject(const IdentType& id) {
       typename CreatorMapType::iterator i = creatorMap_.find(id);
       if (i != creatorMap_.end()) {
-	//invoke functor to create object
-	return (i->second)();
+        // invoke functor to create object
+        return (i->second)();
       } else {
-	return NULL;
+        return NULL;
       }
     }
 
-    /** 
+    /**
      *  Returns all of the registed  type identifiers
      * @return all of the registed  type identifiers
      */
@@ -208,9 +216,9 @@ namespace OpenMD {
       typename CreatorMapType::iterator i;
 
       for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-	idents.push_back(i->first);
+        idents.push_back(i->first);
       }
-            
+
       return idents;
     }
 
@@ -221,7 +229,7 @@ namespace OpenMD {
 
   /** write out all of the type identifiers to an output stream */
   template<typename O, typename I, typename C>
-  std::ostream& operator <<(std::ostream& o, GenericFactory<O, I, C>& factory) {
+  std::ostream& operator<<(std::ostream& o, GenericFactory<O, I, C>& factory) {
     std::vector<I> idents;
     std::vector<I>::iterator i;
 
@@ -235,20 +243,17 @@ namespace OpenMD {
     return o;
   }
 
-  //static template class member
-  template<class Object, typename IdentType,typename Creator>
-  GenericFactory<Object,IdentType,Creator>* GenericFactory<Object,IdentType,Creator>::instance_ ; 
-
+  // static template class member
+  template<class Object, typename IdentType, typename Creator>
+  GenericFactory<Object, IdentType, Creator>*
+      GenericFactory<Object, IdentType, Creator>::instance_;
 
 #define DECLARE_CREATOR(abstractObject, concreteObject) \
-  inline abstractObject* create##concreteObject(){	\
-    return new concreteObject;				\
-  }
+  inline abstractObject* create##concreteObject() { return new concreteObject; }
 
-#define REGISTER_CREATOR(factory, ident, concreteObject)		\
-  const bool registered##concreteObject = factory::getInstance()->registerCreator(ident, create##concreteObject); 
+#define REGISTER_CREATOR(factory, ident, concreteObject) \
+  const bool registered##concreteObject =                \
+      factory::getInstance()->registerCreator(ident, create##concreteObject);
 
-
-}//namespace OpenMD
-#endif //UTIL_GENERICFACTORY_HPP
-
+}  // namespace OpenMD
+#endif  // UTIL_GENERICFACTORY_HPP

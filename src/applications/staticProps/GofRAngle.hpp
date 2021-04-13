@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,43 +50,36 @@
 namespace OpenMD {
 
   class GofRAngle : public RadialDistrFunc {
-    
   public:
-    GofRAngle(SimInfo* info, const std::string& filename, 
-              const std::string& sele1, const std::string& sele2, 
-              RealType len, int nrbins, int nangleBins);
-    GofRAngle(SimInfo* info, const std::string& filename, 
-              const std::string& sele1, const std::string& sele2, 
-              const std::string& sele3, 
-              RealType len, int nrbins, int nangleBins);
+    GofRAngle(SimInfo* info, const std::string& filename,
+              const std::string& sele1, const std::string& sele2, RealType len,
+              int nrbins, int nangleBins);
+    GofRAngle(SimInfo* info, const std::string& filename,
+              const std::string& sele1, const std::string& sele2,
+              const std::string& sele3, RealType len, int nrbins,
+              int nangleBins);
 
-    int getNRBins() {
-      return nRBins_; 
-    }
+    int getNRBins() { return nRBins_; }
 
-    RealType getLength() {
-      return len_;
-    }
+    RealType getLength() { return len_; }
 
-    int getNAngleBins() {return nAngleBins_;}
-        
+    int getNAngleBins() { return nAngleBins_; }
+
   private:
-
     virtual void preProcess();
-    virtual void processNonOverlapping( SelectionManager& sman1,
-                                        SelectionManager& sman2);
-    virtual void processOverlapping( SelectionManager& sman );
+    virtual void processNonOverlapping(SelectionManager& sman1,
+                                       SelectionManager& sman2);
+    virtual void processOverlapping(SelectionManager& sman);
 
     virtual void initializeHistogram();
     virtual void processHistogram();
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2, 
+    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2,
                                   StuntDouble* sd3);
     virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) = 0;
-    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
-                                   StuntDouble* sd3) = 0;
+    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2,
+                                   StuntDouble* sd3)                   = 0;
     virtual void writeRdf();
-
 
   protected:
     RealType deltaCosAngle_;
@@ -99,62 +92,58 @@ namespace OpenMD {
     std::string selectionScript3_;
     SelectionManager seleMan3_;
     SelectionEvaluator evaluator3_;
-        
-    std::vector<std::vector<int> > histogram_;
-    std::vector<std::vector<RealType> > avgGofr_;
+
+    std::vector<std::vector<int>> histogram_;
+    std::vector<std::vector<RealType>> avgGofr_;
     int npairs_;
   };
 
-
   class GofRTheta : public GofRAngle {
   public:
-    GofRTheta(SimInfo* info, const std::string& filename, 
-              const std::string& sele1, const std::string& sele2, 
-              RealType len, int nrbins, int nangleBins)
-      : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
-	setOutputName(getPrefix(filename) + ".gofrt");
-      }
-    GofRTheta(SimInfo* info, const std::string& filename, 
+    GofRTheta(SimInfo* info, const std::string& filename,
+              const std::string& sele1, const std::string& sele2, RealType len,
+              int nrbins, int nangleBins) :
+        GofRAngle(info, filename, sele1, sele2, len, nrbins, nangleBins) {
+      setOutputName(getPrefix(filename) + ".gofrt");
+    }
+    GofRTheta(SimInfo* info, const std::string& filename,
               const std::string& sele1, const std::string& sele2,
-              const std::string& sele3,
-              RealType len, int nrbins, int nangleBins)
-      : GofRAngle (info, filename, sele1, sele2, sele3, len, nrbins, 
-                   nangleBins) {
-	setOutputName(getPrefix(filename) + ".gofrt");
-      }
-        
+              const std::string& sele3, RealType len, int nrbins,
+              int nangleBins) :
+        GofRAngle(info, filename, sele1, sele2, sele3, len, nrbins,
+                  nangleBins) {
+      setOutputName(getPrefix(filename) + ".gofrt");
+    }
+
   private:
     virtual void processHistogram();
-    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
-    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
-                                   StuntDouble* sd3);        
+    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);
+    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2,
+                                   StuntDouble* sd3);
   };
-
 
   class GofROmega : public GofRAngle {
   public:
-    GofROmega(SimInfo* info, const std::string& filename, 
-              const std::string& sele1, const std::string& sele2, 
-              RealType len, int nrbins, int nangleBins)
-      : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
-	setOutputName(getPrefix(filename) + ".gofro");
-      }
-    GofROmega(SimInfo* info, const std::string& filename, 
+    GofROmega(SimInfo* info, const std::string& filename,
+              const std::string& sele1, const std::string& sele2, RealType len,
+              int nrbins, int nangleBins) :
+        GofRAngle(info, filename, sele1, sele2, len, nrbins, nangleBins) {
+      setOutputName(getPrefix(filename) + ".gofro");
+    }
+    GofROmega(SimInfo* info, const std::string& filename,
               const std::string& sele1, const std::string& sele2,
-              const std::string& sele3,
-              RealType len, int nrbins, int nangleBins)
-      : GofRAngle (info, filename, sele1, sele2, sele3, len, nrbins, 
-                   nangleBins) {
-	setOutputName(getPrefix(filename) + ".gofro");
-      }
-    
+              const std::string& sele3, RealType len, int nrbins,
+              int nangleBins) :
+        GofRAngle(info, filename, sele1, sele2, sele3, len, nrbins,
+                  nangleBins) {
+      setOutputName(getPrefix(filename) + ".gofro");
+    }
+
   private:
-    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);     
-    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2, 
-                                   StuntDouble* sd3);        
-   
+    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);
+    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2,
+                                   StuntDouble* sd3);
   };
 
-}
+}  // namespace OpenMD
 #endif
-

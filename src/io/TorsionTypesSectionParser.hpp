@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,19 +42,20 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_TORSIONTYPESSECTIONPARSER_HPP
 #define IO_TORSIONTYPESSECTIONPARSER_HPP
-#include "io/SectionParser.hpp"
 #include "io/ForceFieldOptions.hpp"
+#include "io/SectionParser.hpp"
 
 namespace OpenMD {
 
   /**
-   * @class TorsionTypesSectionParser TorsionTypesSectionParser.hpp "io/TorsionTypesSectionParser.hpp"
+   * @class TorsionTypesSectionParser TorsionTypesSectionParser.hpp
+   * "io/TorsionTypesSectionParser.hpp"
    */
   class TorsionTypesSectionParser : public SectionParser {
-  public:            
+  public:
     TorsionTypesSectionParser(ForceFieldOptions& options);
 
   private:
@@ -62,11 +63,6 @@ namespace OpenMD {
     ForceFieldOptions& options_;
   };
 
+}  // namespace OpenMD
 
-} //namespace OpenMD
-
-#endif //IO_TORSIONTYPESSECTIONPARSER_HPP
-
-
-
-
+#endif  // IO_TORSIONTYPESSECTIONPARSER_HPP

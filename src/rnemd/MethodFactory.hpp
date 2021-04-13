@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,8 +50,8 @@
 #include <string>
 
 #include "brains/SimInfo.hpp"
-#include "rnemd/RNEMD.hpp"
 #include "rnemd/NIVS.hpp"
+#include "rnemd/RNEMD.hpp"
 #include "rnemd/Swap.hpp"
 #include "rnemd/VSS.hpp"
 #include "utils/CI_String.hpp"
@@ -62,10 +62,10 @@ namespace OpenMD {
 
     class MethodFactory {
     public:
-      explicit MethodFactory(const std::string& methodStr) : methodStr_ {Utils::traits_cast<Utils::ci_char_traits>(methodStr)} {}
+      explicit MethodFactory(const std::string& methodStr) :
+          methodStr_ {Utils::traits_cast<Utils::ci_char_traits>(methodStr)} {}
 
       std::unique_ptr<RNEMD> create(SimInfo* info) {
-
         if (methodStr_ == "Swap")
           return Utils::make_unique<SwapMethod>(info);
 
@@ -79,7 +79,7 @@ namespace OpenMD {
     private:
       const Utils::ci_string methodStr_;
     };
-  }
-}
+  }  // namespace RNEMD
+}  // namespace OpenMD
 
-#endif // RNEMDMETHODS_METHODFACTORY_HPP
+#endif  // RNEMDMETHODS_METHODFACTORY_HPP

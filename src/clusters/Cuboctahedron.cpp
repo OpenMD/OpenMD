@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -55,83 +55,83 @@ using namespace std;
 
 namespace OpenMD {
 
-bool pairCompare(const pair<RealType, int>& l, const pair<RealType, int>& r) {
-  return l.first < r.first;
-}
-
-Cuboctahedron::Cuboctahedron(std::string lattice, int cells, int planes)
-    : lattice_(lattice), L_(cells), M_(planes) {
-  Basis.clear();
-  Points.clear();
-
-  //
-  // Initialize Basis vectors.
-  //
-  toUpper(lattice);
-
-  if (lattice == "BCC") {
-    Basis.push_back(Vector3d(0.0, 0.0, 0.0));
-    Basis.push_back(Vector3d(0.5, 0.5, 0.5));
-  } else if (lattice == "SC") {
-    Basis.push_back(Vector3d(0.0, 0.0, 0.0));
-  } else {
-    // Default is FCC:
-    Basis.push_back(Vector3d(0.0, 0.0, 0.0));
-    Basis.push_back(Vector3d(0.5, 0.5, 0.0));
-    Basis.push_back(Vector3d(0.5, 0.0, 0.5));
-    Basis.push_back(Vector3d(0.0, 0.5, 0.5));
+  bool pairCompare(const pair<RealType, int>& l, const pair<RealType, int>& r) {
+    return l.first < r.first;
   }
-}
 
-vector<Vector3d> Cuboctahedron::getPoints() {
-  // center of cluster
+  Cuboctahedron::Cuboctahedron(std::string lattice, int cells, int planes) :
+      lattice_(lattice), L_(cells), M_(planes) {
+    Basis.clear();
+    Points.clear();
 
-  Vector3d c(0.0);
+    //
+    // Initialize Basis vectors.
+    //
+    toUpper(lattice);
 
-  Vector3d d;
-  vector<Vector3d> rawPoints;
-  vector<pair<RealType, int>> dists;
-  int idx;
+    if (lattice == "BCC") {
+      Basis.push_back(Vector3d(0.0, 0.0, 0.0));
+      Basis.push_back(Vector3d(0.5, 0.5, 0.5));
+    } else if (lattice == "SC") {
+      Basis.push_back(Vector3d(0.0, 0.0, 0.0));
+    } else {
+      // Default is FCC:
+      Basis.push_back(Vector3d(0.0, 0.0, 0.0));
+      Basis.push_back(Vector3d(0.5, 0.5, 0.0));
+      Basis.push_back(Vector3d(0.5, 0.0, 0.5));
+      Basis.push_back(Vector3d(0.0, 0.5, 0.5));
+    }
+  }
 
-  for (int i = -L_; i <= L_; i++) {
-    for (int j = -L_; j <= L_; j++) {
-      for (int k = -L_; k <= L_; k++) {
-        for (vector<Vector3d>::iterator l = Basis.begin(); l != Basis.end();
-             ++l) {
-          Vector3d point = (*l) + Vector3d(i, j, k);
-          if (inCluster(point)) {
-            rawPoints.push_back(point);
-            d = point - c;
-            idx = dists.size();
-            dists.push_back(make_pair(d.lengthSquare(), idx));
+  vector<Vector3d> Cuboctahedron::getPoints() {
+    // center of cluster
+
+    Vector3d c(0.0);
+
+    Vector3d d;
+    vector<Vector3d> rawPoints;
+    vector<pair<RealType, int>> dists;
+    int idx;
+
+    for (int i = -L_; i <= L_; i++) {
+      for (int j = -L_; j <= L_; j++) {
+        for (int k = -L_; k <= L_; k++) {
+          for (vector<Vector3d>::iterator l = Basis.begin(); l != Basis.end();
+               ++l) {
+            Vector3d point = (*l) + Vector3d(i, j, k);
+            if (inCluster(point)) {
+              rawPoints.push_back(point);
+              d   = point - c;
+              idx = dists.size();
+              dists.push_back(make_pair(d.lengthSquare(), idx));
+            }
           }
         }
       }
     }
+
+    // Sort the atoms using distance from center of cluster:
+
+    sort(dists.begin(), dists.end(), pairCompare);
+
+    for (vector<pair<RealType, int>>::iterator i = dists.begin();
+         i != dists.end(); ++i) {
+      Points.push_back(rawPoints[(*i).second] - c);
+    }
+
+    return Points;
   }
 
-  // Sort the atoms using distance from center of cluster:
+  bool Cuboctahedron::inCluster111(Vector3d r) {
+    Vector3d c   = r.abs();
+    RealType rad = 0.5 * RealType(L_);
 
-  sort(dists.begin(), dists.end(), pairCompare);
-
-  for (vector<pair<RealType, int>>::iterator i = dists.begin();
-       i != dists.end(); ++i) {
-    Points.push_back(rawPoints[(*i).second] - c);
+    if ((c.x() < rad) && (c.y() < rad) && (c.z() < rad) &&
+        (c.x() + c.y() + c.z() < RealType(M_)))
+      return true;
+    else
+      return false;
   }
 
-  return Points;
-}
-
-bool Cuboctahedron::inCluster111(Vector3d r) {
-  Vector3d c = r.abs();
-  RealType rad = 0.5 * RealType(L_);
-
-  if ((c.x() < rad) && (c.y() < rad) && (c.z() < rad) &&
-      (c.x() + c.y() + c.z() < RealType(M_)))
-    return true;
-  else
-    return false;
-}
-
-bool Cuboctahedron::inCluster(Vector3d r) { return inCluster111(r); }
+  bool Cuboctahedron::inCluster(Vector3d r) { return inCluster111(r); }
 }  // namespace OpenMD

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -62,19 +62,19 @@ namespace OpenMD {
     virtual void correlateFrames(int frame1, int frame2, int timeBin);
     virtual void postCorrelate();
     virtual void writeCorrelate();
-    virtual RealType calcCorrVal(int frame1, int frame2) {return -1;}
+    virtual RealType calcCorrVal(int frame1, int frame2) { return -1; }
 
     Thermo* thermo_;
-    
+
     std::vector<Vector3d> Jc_;
     std::vector<int> JcCount_;
 
-    std::vector<std::vector<Vector3d> > typeJc_;
-    std::vector<std::vector<int> > typeCounts_;
+    std::vector<std::vector<Vector3d>> typeJc_;
+    std::vector<std::vector<int>> typeCounts_;
 
-    std::vector<std::vector<RealType> > myHistogram_;
+    std::vector<std::vector<RealType>> myHistogram_;
 
     std::vector<AtomType*> outputTypes_;
   };
-}
+}  // namespace OpenMD
 #endif

@@ -25,32 +25,32 @@
 #ifndef quantlib_line_search_based_optimization_method_h
 #define quantlib_line_search_based_optimization_method_h
 
-#include "optimization/Method.hpp"
 #include "math/DynamicVector.hpp"
+#include "optimization/Method.hpp"
 
 using namespace OpenMD;
 namespace QuantLib {
 
-    class LineSearch;
+  class LineSearch;
 
-    class LineSearchBasedMethod : public OptimizationMethod {
-      public:
-        LineSearchBasedMethod(LineSearch* lSearch = NULL);
-        virtual ~LineSearchBasedMethod();
+  class LineSearchBasedMethod : public OptimizationMethod {
+  public:
+    LineSearchBasedMethod(LineSearch* lSearch = NULL);
+    virtual ~LineSearchBasedMethod();
 
-        virtual EndCriteria::Type minimize(Problem& P,
-                                           const EndCriteria& endCriteria,
-                                           RealType initialStepSize);
-      protected:
-        //! computes the new search direction
-        virtual DynamicVector<RealType>
-        getUpdatedDirection(const Problem &P,
-                            RealType gold2,
-                            const DynamicVector<RealType>& gradient) = 0;
-        //! line search
-       LineSearch* lineSearch_;
-    };
+    virtual EndCriteria::Type minimize(Problem& P,
+                                       const EndCriteria& endCriteria,
+                                       RealType initialStepSize);
 
-}
+  protected:
+    //! computes the new search direction
+    virtual DynamicVector<RealType> getUpdatedDirection(
+        const Problem& P, RealType gold2,
+        const DynamicVector<RealType>& gradient) = 0;
+    //! line search
+    LineSearch* lineSearch_;
+  };
+
+}  // namespace QuantLib
 
 #endif

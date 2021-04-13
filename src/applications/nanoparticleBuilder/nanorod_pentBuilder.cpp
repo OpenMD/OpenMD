@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -99,9 +99,8 @@ int main(int argc, char* argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg,
-            "No input .omd file name was specified "
-            "on the command line");
+    sprintf(painCave.errMsg, "No input .omd file name was specified "
+                             "on the command line");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
     simError();
@@ -111,9 +110,9 @@ int main(int argc, char* argv[]) {
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
 
-  latticeConstant = args_info.latticeConstant_arg;
-  rodRadius = args_info.radius_arg;
-  rodLength = args_info.length_arg;
+  latticeConstant    = args_info.latticeConstant_arg;
+  rodRadius          = args_info.radius_arg;
+  rodLength          = args_info.length_arg;
   Globals* simParams = oldInfo->getSimParams();
 
   /* Create nanorod */
@@ -154,9 +153,9 @@ int main(int argc, char* argv[]) {
   rotation45[2][1] = 0;
   rotation45[2][2] = 1;*/
 
-  phi = 0.0;
+  phi   = 0.0;
   theta = 72.0 * Constants::PI / 180.0;
-  psi = 0.0;
+  psi   = 0.0;
 
   // Rotates 72 degrees about y-axis
   RotMat3x3d rotation72(phi, theta, psi);
@@ -171,36 +170,36 @@ int main(int argc, char* argv[]) {
   rotation72[2][1] = 0;
   rotation72[2][2] = sqrt(5)/4 - 0.25;*/
 
-  vector<Vector3d> getsites = nanoRod.getSites();
+  vector<Vector3d> getsites        = nanoRod.getSites();
   vector<Vector3d> getorientations = nanoRod.getOrientations();
   vector<Vector3d> sites;
   vector<Vector3d> orientations;
 
   for (unsigned int index = 0; index < getsites.size(); index++) {
-    Vector3d mySite = getsites[index];
+    Vector3d mySite   = getsites[index];
     Vector3d myOrient = getorientations[index];
-    Vector3d mySite2 = rotation45 * mySite;
-    Vector3d o2 = rotation45 * myOrient;
+    Vector3d mySite2  = rotation45 * mySite;
+    Vector3d o2       = rotation45 * myOrient;
     sites.push_back(mySite2);
     orientations.push_back(o2);
 
     mySite2 = rotation72 * mySite2;
-    o2 = rotation72 * o2;
+    o2      = rotation72 * o2;
     sites.push_back(mySite2);
     orientations.push_back(o2);
 
     mySite2 = rotation72 * mySite2;
-    o2 = rotation72 * o2;
+    o2      = rotation72 * o2;
     sites.push_back(mySite2);
     orientations.push_back(o2);
 
     mySite2 = rotation72 * mySite2;
-    o2 = rotation72 * o2;
+    o2      = rotation72 * o2;
     sites.push_back(mySite2);
     orientations.push_back(o2);
 
     mySite2 = rotation72 * mySite2;
-    o2 = rotation72 * o2;
+    o2      = rotation72 * o2;
     sites.push_back(mySite2);
     orientations.push_back(o2);
   }
@@ -225,7 +224,8 @@ int main(int argc, char* argv[]) {
   Vector3d myLoc;
   RealType myR;
 
-  for (unsigned int i = 0; i < sites.size(); i++) isVacancy.push_back(false);
+  for (unsigned int i = 0; i < sites.size(); i++)
+    isVacancy.push_back(false);
 
   // cerr << "checking vacancyPercent" << "\n";
   if (args_info.vacancyPercent_given) {
@@ -254,10 +254,8 @@ int main(int argc, char* argv[]) {
       if (vIR >= 0.0 && vOR <= rodRadius && vOR >= vIR) {
         for (unsigned int i = 0; i < sites.size(); i++) {
           myLoc = sites[i];
-          myR = myLoc.length();
-          if (myR >= vIR && myR <= vOR) {
-            vacancyTargets.push_back(i);
-          }
+          myR   = myLoc.length();
+          if (myR >= vIR && myR <= vOR) { vacancyTargets.push_back(i); }
         }
         std::shuffle(vacancyTargets.begin(), vacancyTargets.end(), gen);
 
@@ -269,7 +267,7 @@ int main(int argc, char* argv[]) {
                 "\tsites between %lf and %lf.",
                 (int)vacancyTargets.size(), vIR, vOR);
         painCave.severity = OPENMD_INFO;
-        painCave.isFatal = 0;
+        painCave.isFatal  = 0;
         simError();
 
         isVacancy.clear();
@@ -307,9 +305,8 @@ int main(int argc, char* argv[]) {
   // cerr << "nComponents = " << nComponents << "\n";
 
   if (args_info.molFraction_given && args_info.shellRadius_given) {
-    sprintf(painCave.errMsg,
-            "Specify either molFraction or shellRadius "
-            "arguments, but not both!");
+    sprintf(painCave.errMsg, "Specify either molFraction or shellRadius "
+                             "arguments, but not both!");
     painCave.isFatal = 1;
     simError();
   }
@@ -370,16 +367,14 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < nComponents; i++) {
       if (molFractions.at(i) < 0.0) {
-        sprintf(painCave.errMsg,
-                "One of the requested molFractions was"
-                " less than zero!");
+        sprintf(painCave.errMsg, "One of the requested molFractions was"
+                                 " less than zero!");
         painCave.isFatal = 1;
         simError();
       }
       if (molFractions.at(i) > 1.0) {
-        sprintf(painCave.errMsg,
-                "One of the requested molFractions was"
-                " greater than one!");
+        sprintf(painCave.errMsg, "One of the requested molFractions was"
+                                 " greater than one!");
         painCave.isFatal = 1;
         simError();
       }
@@ -435,7 +430,7 @@ int main(int argc, char* argv[]) {
     //  cerr << "molFraction given 2" << "\n";
     sprintf(painCave.errMsg,
             "Creating a randomized spherically-capped nanorod.");
-    painCave.isFatal = 0;
+    painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
     simError();
     /* Random rod is the default case*/
@@ -447,7 +442,7 @@ int main(int argc, char* argv[]) {
 
   } else {
     sprintf(painCave.errMsg, "Creating an fcc nanorod.");
-    painCave.isFatal = 0;
+    painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
     simError();
 
@@ -461,7 +456,7 @@ int main(int argc, char* argv[]) {
 
     for (unsigned int i = 0; i < sites.size(); i++) {
       myLoc = sites[i];
-      myR = myLoc.length();
+      myR   = myLoc.length();
       // smallestSoFar = rodRadius;
       // cerr << "vac = " << isVacancy[i]<< "\n";
 
@@ -474,7 +469,7 @@ int main(int argc, char* argv[]) {
         //     }
         //   }
         // }
-        myComponent = 0;
+        myComponent          = 0;
         componentFromSite[i] = myComponent;
         nMol[myComponent]++;
         //	cerr << "nMol for myComp(" << myComponent<<") = " <<
@@ -563,7 +558,7 @@ int main(int argc, char* argv[]) {
           "A new OpenMD file called \"%s\" has been "
           "generated.\n",
           outputFileName.c_str());
-  painCave.isFatal = 0;
+  painCave.isFatal  = 0;
   painCave.severity = OPENMD_INFO;
   simError();
   return 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -54,69 +54,69 @@ namespace OpenMD {
     HBondJump(SimInfo* info, const std::string& filename,
               const std::string& sele1, const std::string& sele2, double OOCut,
               double thetaCut, double OHCut);
-    
+
   protected:
     virtual void correlation();
     virtual void computeFrame(int istep);
-    
-    virtual void computeProperty1(int frame) {return;}
-    virtual void computeProperty2(int frame) {return;}
-    virtual int computeProperty1(int frame, Molecule* mol) {return -1;}
-    virtual int computeProperty1(int frame, StuntDouble* sd) {return -1;}
-    virtual int computeProperty1(int frame, Bond* bond) {return -1;}
-    virtual int computeProperty2(int frame, Molecule* mol) {return -1;}
-    virtual int computeProperty2(int frame, StuntDouble* sd) {return -1;}
-    virtual int computeProperty2(int frame, Bond* bond) {return -1;}
 
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return 0.0;}
+    virtual void computeProperty1(int frame) { return; }
+    virtual void computeProperty2(int frame) { return; }
+    virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
+    virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
+    virtual int computeProperty1(int frame, Bond* bond) { return -1; }
+    virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
+    virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
+    virtual int computeProperty2(int frame, Bond* bond) { return -1; }
+
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {
+      return 0.0;
+    }
     virtual RealType calcCorrVal(int frame1, int frame2) { return 0.0; }
-       
+
     virtual void postCorrelate();
 
-    virtual int  registerHydrogen(int frame, int hIndex);
-    virtual void findHBonds( int frame );
+    virtual int registerHydrogen(int frame, int hIndex);
+    virtual void findHBonds(int frame);
     bool isHBond(Vector3d donorPos, Vector3d hPos, Vector3d acceptorPos);
     void registerHydrogenBond(int frame, int index, int hIndex, int aIndex);
-    void processNonOverlapping(int frame, SelectionManager& sman1, 
+    void processNonOverlapping(int frame, SelectionManager& sman1,
                                SelectionManager& sman2);
     void processOverlapping(int frame, SelectionManager& sman);
-    
-    std::vector<std::vector<int> >  GIDtoH_;
-    std::vector<std::vector<int> >  hydrogen_;
-    std::vector<std::vector<int> >  acceptor_;
-    std::vector<std::vector<int> >  lastAcceptor_;
-    std::vector<std::vector<bool> > selected_;
-    std::vector<std::vector<int> >  acceptorStartFrame_;
-    
+
+    std::vector<std::vector<int>> GIDtoH_;
+    std::vector<std::vector<int>> hydrogen_;
+    std::vector<std::vector<int>> acceptor_;
+    std::vector<std::vector<int>> lastAcceptor_;
+    std::vector<std::vector<bool>> selected_;
+    std::vector<std::vector<int>> acceptorStartFrame_;
+
     RealType OOCut_;
     RealType thetaCut_;
     RealType OHCut_;
 
     SelectionManager sele1_minus_common_;
     SelectionManager sele2_minus_common_;
-    SelectionManager common_;    
+    SelectionManager common_;
   };
 
   class HBondJumpZ : public HBondJump {
   public:
     HBondJumpZ(SimInfo* info, const std::string& filename,
                const std::string& sele1, const std::string& sele2, double OOCut,
-               double thetaCut, double OHCut, int nZbins, int axis=2);
-    virtual int  registerHydrogen(int frame, int hIndex);
-    virtual void findHBonds( int frame );
+               double thetaCut, double OHCut, int nZbins, int axis = 2);
+    virtual int registerHydrogen(int frame, int hIndex);
+    virtual void findHBonds(int frame);
     virtual void correlation();
     virtual void postCorrelate();
     virtual void writeCorrelate();
-    
+
   private:
-    std::vector<std::vector<RealType> > histogram_;
-    std::vector<std::vector<int> > counts_;
-    std::vector<std::vector<int> > zbin_;
+    std::vector<std::vector<RealType>> histogram_;
+    std::vector<std::vector<int>> counts_;
+    std::vector<std::vector<int>> zbin_;
     unsigned int nZBins_;
     int axis_;
     std::string axisLabel_;
-
   };
-}
+}  // namespace OpenMD
 #endif
-

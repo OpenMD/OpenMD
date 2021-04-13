@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,106 +52,104 @@
 
 namespace OpenMD {
 
-bool StickyAdapter::isSticky() { return at_->hasProperty(StickyTypeID); }
+  bool StickyAdapter::isSticky() { return at_->hasProperty(StickyTypeID); }
 
-StickyAtypeParameters StickyAdapter::getStickyParam() {
-  if (!isSticky()) {
-    sprintf(painCave.errMsg,
-            "StickyAdapter::getStickyParam was passed an atomType (%s)\n"
-            "\tthat does not appear to be a Sticky atom.\n",
-            at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  StickyAtypeParameters StickyAdapter::getStickyParam() {
+    if (!isSticky()) {
+      sprintf(painCave.errMsg,
+              "StickyAdapter::getStickyParam was passed an atomType (%s)\n"
+              "\tthat does not appear to be a Sticky atom.\n",
+              at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(StickyTypeID);
+    if (data == nullptr) {
+      sprintf(painCave.errMsg,
+              "StickyAdapter::getStickyParam could not find Sticky\n"
+              "\tparameters for atomType %s.\n",
+              at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    std::shared_ptr<StickyAtypeData> stickyData =
+        std::dynamic_pointer_cast<StickyAtypeData>(data);
+    if (stickyData == nullptr) {
+      sprintf(painCave.errMsg,
+              "StickyAdapter::getStickyParam could not convert\n"
+              "\tGenericData to StickyAtypeData for atom type %s\n",
+              at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    return stickyData->getData();
   }
 
-  std::shared_ptr<GenericData> data = at_->getPropertyByName(StickyTypeID);
-  if (data == nullptr) {
-    sprintf(painCave.errMsg,
-            "StickyAdapter::getStickyParam could not find Sticky\n"
-            "\tparameters for atomType %s.\n",
-            at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  bool StickyAdapter::isStickyPower() {
+    if (isSticky()) {
+      StickyAtypeParameters stickyParam = getStickyParam();
+      return stickyParam.isPower;
+    } else
+      return false;
   }
 
-  std::shared_ptr<StickyAtypeData> stickyData =
-      std::dynamic_pointer_cast<StickyAtypeData>(data);
-  if (stickyData == nullptr) {
-    sprintf(painCave.errMsg,
-            "StickyAdapter::getStickyParam could not convert\n"
-            "\tGenericData to StickyAtypeData for atom type %s\n",
-            at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  return stickyData->getData();
-}
-
-bool StickyAdapter::isStickyPower() {
-  if (isSticky()) {
+  RealType StickyAdapter::getW0() {
     StickyAtypeParameters stickyParam = getStickyParam();
-    return stickyParam.isPower;
-  } else
-    return false;
-}
-
-RealType StickyAdapter::getW0() {
-  StickyAtypeParameters stickyParam = getStickyParam();
-  return stickyParam.w0;
-}
-
-RealType StickyAdapter::getV0() {
-  StickyAtypeParameters stickyParam = getStickyParam();
-  return stickyParam.v0;
-}
-
-RealType StickyAdapter::getV0p() {
-  StickyAtypeParameters stickyParam = getStickyParam();
-  return stickyParam.v0p;
-}
-
-RealType StickyAdapter::getRl() {
-  StickyAtypeParameters stickyParam = getStickyParam();
-  return stickyParam.rl;
-}
-
-RealType StickyAdapter::getRu() {
-  StickyAtypeParameters stickyParam = getStickyParam();
-  return stickyParam.ru;
-}
-
-RealType StickyAdapter::getRlp() {
-  StickyAtypeParameters stickyParam = getStickyParam();
-  return stickyParam.rlp;
-}
-
-RealType StickyAdapter::getRup() {
-  StickyAtypeParameters stickyParam = getStickyParam();
-  return stickyParam.rup;
-}
-
-void StickyAdapter::makeSticky(RealType w0, RealType v0, RealType v0p,
-                               RealType rl, RealType ru, RealType rlp,
-                               RealType rup, bool isPower) {
-  if (isSticky()) {
-    at_->removeProperty(StickyTypeID);
+    return stickyParam.w0;
   }
 
-  StickyAtypeParameters stickyParam{};
-  stickyParam.w0 = w0;
-  stickyParam.v0 = v0;
-  stickyParam.v0p = v0p;
-  stickyParam.rl = rl;
-  stickyParam.ru = ru;
-  stickyParam.rlp = rlp;
-  stickyParam.rup = rup;
-  stickyParam.isPower = isPower;
+  RealType StickyAdapter::getV0() {
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.v0;
+  }
 
-  at_->addProperty(
-      std::make_shared<StickyAtypeData>(StickyTypeID, stickyParam));
-}
+  RealType StickyAdapter::getV0p() {
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.v0p;
+  }
+
+  RealType StickyAdapter::getRl() {
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.rl;
+  }
+
+  RealType StickyAdapter::getRu() {
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.ru;
+  }
+
+  RealType StickyAdapter::getRlp() {
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.rlp;
+  }
+
+  RealType StickyAdapter::getRup() {
+    StickyAtypeParameters stickyParam = getStickyParam();
+    return stickyParam.rup;
+  }
+
+  void StickyAdapter::makeSticky(RealType w0, RealType v0, RealType v0p,
+                                 RealType rl, RealType ru, RealType rlp,
+                                 RealType rup, bool isPower) {
+    if (isSticky()) { at_->removeProperty(StickyTypeID); }
+
+    StickyAtypeParameters stickyParam {};
+    stickyParam.w0      = w0;
+    stickyParam.v0      = v0;
+    stickyParam.v0p     = v0p;
+    stickyParam.rl      = rl;
+    stickyParam.ru      = ru;
+    stickyParam.rlp     = rlp;
+    stickyParam.rup     = rup;
+    stickyParam.isPower = isPower;
+
+    at_->addProperty(
+        std::make_shared<StickyAtypeData>(StickyTypeID, stickyParam));
+  }
 }  // namespace OpenMD

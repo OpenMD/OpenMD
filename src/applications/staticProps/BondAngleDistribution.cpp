@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -54,163 +54,160 @@
 using namespace std;
 namespace OpenMD {
 
-BondAngleDistribution::BondAngleDistribution(SimInfo* info,
-                                             const string& filename,
-                                             const string& sele, double rCut,
-                                             int nbins)
-    : StaticAnalyser(info, filename, nbins),
-      selectionScript_(sele),
-      seleMan_(info),
-      evaluator_(info) {
-  setAnalysisType("Bond Angle Distribution");
-  setOutputName(getPrefix(filename) + ".bad");
+  BondAngleDistribution::BondAngleDistribution(SimInfo* info,
+                                               const string& filename,
+                                               const string& sele, double rCut,
+                                               int nbins) :
+      StaticAnalyser(info, filename, nbins),
+      selectionScript_(sele), seleMan_(info), evaluator_(info) {
+    setAnalysisType("Bond Angle Distribution");
+    setOutputName(getPrefix(filename) + ".bad");
 
-  evaluator_.loadScriptString(sele);
-  if (!evaluator_.isDynamic()) {
-    seleMan_.setSelectionSet(evaluator_.evaluate());
-  }
-
-  // Set up cutoff radius:
-
-  rCut_ = rCut;
-
-  std::stringstream params;
-  params << " rcut = " << rCut_ << ", nbins = " << nBins_;
-  const std::string paramString = params.str();
-  setParameterString(paramString);
-
-  // Theta can take values from 0 to 180
-
-  deltaTheta_ = (180.0) / nBins_;
-  histogram_.resize(nBins_);
-}
-
-void BondAngleDistribution::initializeHistogram() {
-  for (int bin = 0; bin < nBins_; bin++) {
-    histogram_[bin] = 0;
-  }
-}
-
-void BondAngleDistribution::process() {
-  Molecule* mol;
-  Atom* atom;
-  int myIndex;
-  SimInfo::MoleculeIterator mi;
-  Molecule::AtomIterator ai;
-  StuntDouble* sd;
-  Vector3d vec;
-  std::vector<Vector3d> bondvec;
-  RealType r;
-  int nBonds;
-  int i;
-
-  bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-  DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
-  frameCounter_ = 0;
-
-  nTotBonds_ = 0;
-
-  for (int istep = 0; istep < nFrames; istep += step_) {
-    reader.readFrame(istep);
-    frameCounter_++;
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
-    if (evaluator_.isDynamic()) {
+    evaluator_.loadScriptString(sele);
+    if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
-    // outer loop is over the selected StuntDoubles:
+    // Set up cutoff radius:
 
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {
-      myIndex = sd->getGlobalIndex();
-      nBonds = 0;
-      bondvec.clear();
+    rCut_ = rCut;
 
-      // inner loop is over all other atoms in the system:
+    std::stringstream params;
+    params << " rcut = " << rCut_ << ", nbins = " << nBins_;
+    const std::string paramString = params.str();
+    setParameterString(paramString);
 
-      for (mol = info_->beginMolecule(mi); mol != NULL;
-           mol = info_->nextMolecule(mi)) {
-        for (atom = mol->beginAtom(ai); atom != NULL;
-             atom = mol->nextAtom(ai)) {
-          if (atom->getGlobalIndex() != myIndex) {
-            vec = sd->getPos() - atom->getPos();
+    // Theta can take values from 0 to 180
 
-            if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(vec);
+    deltaTheta_ = (180.0) / nBins_;
+    histogram_.resize(nBins_);
+  }
 
-            // Calculate "bonds" and make a pair list
+  void BondAngleDistribution::initializeHistogram() {
+    for (int bin = 0; bin < nBins_; bin++) {
+      histogram_[bin] = 0;
+    }
+  }
 
-            r = vec.length();
+  void BondAngleDistribution::process() {
+    Molecule* mol;
+    Atom* atom;
+    int myIndex;
+    SimInfo::MoleculeIterator mi;
+    Molecule::AtomIterator ai;
+    StuntDouble* sd;
+    Vector3d vec;
+    std::vector<Vector3d> bondvec;
+    RealType r;
+    int nBonds;
+    int i;
 
-            // Check to see if neighbor is in bond cutoff
+    bool usePeriodicBoundaryConditions_ =
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-            if (r < rCut_) {
-              // Add neighbor to bond list's
-              bondvec.push_back(vec);
-              nBonds++;
-              nTotBonds_++;
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames   = reader.getNFrames();
+    frameCounter_ = 0;
+
+    nTotBonds_ = 0;
+
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      frameCounter_++;
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+
+      if (evaluator_.isDynamic()) {
+        seleMan_.setSelectionSet(evaluator_.evaluate());
+      }
+
+      // outer loop is over the selected StuntDoubles:
+
+      for (sd = seleMan_.beginSelected(i); sd != NULL;
+           sd = seleMan_.nextSelected(i)) {
+        myIndex = sd->getGlobalIndex();
+        nBonds  = 0;
+        bondvec.clear();
+
+        // inner loop is over all other atoms in the system:
+
+        for (mol = info_->beginMolecule(mi); mol != NULL;
+             mol = info_->nextMolecule(mi)) {
+          for (atom = mol->beginAtom(ai); atom != NULL;
+               atom = mol->nextAtom(ai)) {
+            if (atom->getGlobalIndex() != myIndex) {
+              vec = sd->getPos() - atom->getPos();
+
+              if (usePeriodicBoundaryConditions_)
+                currentSnapshot_->wrapVector(vec);
+
+              // Calculate "bonds" and make a pair list
+
+              r = vec.length();
+
+              // Check to see if neighbor is in bond cutoff
+
+              if (r < rCut_) {
+                // Add neighbor to bond list's
+                bondvec.push_back(vec);
+                nBonds++;
+                nTotBonds_++;
+              }
             }
           }
-        }
 
-        for (int i = 0; i < nBonds - 1; i++) {
-          Vector3d vec1 = bondvec[i];
-          vec1.normalize();
-          for (int j = i + 1; j < nBonds; j++) {
-            Vector3d vec2 = bondvec[j];
+          for (int i = 0; i < nBonds - 1; i++) {
+            Vector3d vec1 = bondvec[i];
+            vec1.normalize();
+            for (int j = i + 1; j < nBonds; j++) {
+              Vector3d vec2 = bondvec[j];
 
-            vec2.normalize();
+              vec2.normalize();
 
-            RealType theta = acos(dot(vec1, vec2)) * 180.0 / Constants::PI;
+              RealType theta = acos(dot(vec1, vec2)) * 180.0 / Constants::PI;
 
-            if (theta > 180.0) {
-              theta = 360.0 - theta;
+              if (theta > 180.0) { theta = 360.0 - theta; }
+              int whichBin = int(theta / deltaTheta_);
+
+              histogram_[whichBin] += 2;
             }
-            int whichBin = int(theta / deltaTheta_);
-
-            histogram_[whichBin] += 2;
           }
         }
       }
     }
+
+    writeBondAngleDistribution();
   }
 
-  writeBondAngleDistribution();
-}
+  void BondAngleDistribution::writeBondAngleDistribution() {
+    RealType norm = (RealType)nTotBonds_ * ((RealType)nTotBonds_ - 1.0) / 2.0;
 
-void BondAngleDistribution::writeBondAngleDistribution() {
-  RealType norm = (RealType)nTotBonds_ * ((RealType)nTotBonds_ - 1.0) / 2.0;
+    std::ofstream ofs(getOutputFileName().c_str());
 
-  std::ofstream ofs(getOutputFileName().c_str());
+    if (ofs.is_open()) {
+      Revision r;
 
-  if (ofs.is_open()) {
-    Revision r;
+      ofs << "# " << getAnalysisType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script: \"" << selectionScript_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
 
-    ofs << "# " << getAnalysisType() << "\n";
-    ofs << "# OpenMD " << r.getFullRevision() << "\n";
-    ofs << "# " << r.getBuildDate() << "\n";
-    ofs << "# selection script: \"" << selectionScript_ << "\"\n";
-    if (!paramString_.empty()) ofs << "# parameters: " << paramString_ << "\n";
+      // Normalize by number of frames and write it out:
+      for (int i = 0; i < nBins_; ++i) {
+        RealType Thetaval = i * deltaTheta_;
+        ofs << Thetaval;
+        ofs << "\t" << (RealType)histogram_[i] / norm / frameCounter_;
+        ofs << "\n";
+      }
 
-    // Normalize by number of frames and write it out:
-    for (int i = 0; i < nBins_; ++i) {
-      RealType Thetaval = i * deltaTheta_;
-      ofs << Thetaval;
-      ofs << "\t" << (RealType)histogram_[i] / norm / frameCounter_;
-      ofs << "\n";
+      ofs.close();
+
+    } else {
+      sprintf(painCave.errMsg, "BondAngleDistribution: unable to open %s\n",
+              (getOutputFileName() + "q").c_str());
+      painCave.isFatal = 1;
+      simError();
     }
-
-    ofs.close();
-
-  } else {
-    sprintf(painCave.errMsg, "BondAngleDistribution: unable to open %s\n",
-            (getOutputFileName() + "q").c_str());
-    painCave.isFatal = 1;
-    simError();
   }
-}
 }  // namespace OpenMD

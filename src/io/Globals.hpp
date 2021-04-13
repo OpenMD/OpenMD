@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,20 +46,19 @@
 #ifndef IO_GLOBALS_HPP
 #define IO_GLOBALS_HPP
 
-#include <iostream>
-
 #include <cstdlib>
-#include <vector>
-#include <string>
+#include <iostream>
 #include <map>
+#include <string>
+#include <vector>
 
-#include "types/Component.hpp"
-#include "types/ZconsStamp.hpp"
-#include "types/RestraintStamp.hpp"
-#include "types/MoleculeStamp.hpp"
 #include "flucq/FluctuatingChargeParameters.hpp"
-#include "rnemd/RNEMDParameters.hpp"
 #include "optimization/MinimizerParameters.hpp"
+#include "rnemd/RNEMDParameters.hpp"
+#include "types/Component.hpp"
+#include "types/MoleculeStamp.hpp"
+#include "types/RestraintStamp.hpp"
+#include "types/ZconsStamp.hpp"
 #include "utils/ParameterManager.hpp"
 
 namespace OpenMD {
@@ -149,13 +148,13 @@ namespace OpenMD {
     DeclareParameter(HULL_Method, std::string);
     DeclareParameter(Alpha, RealType);
     DeclareAlterableParameter(MDfileVersion, int);
-    DeclareParameter(UniformField, std::vector<RealType> );
-    DeclareParameter(MagneticField,std::vector<RealType>)
-    DeclareParameter(UniformGradientStrength, RealType );
-    DeclareParameter(UniformGradientDirection1, std::vector<RealType> );
-    DeclareParameter(UniformGradientDirection2, std::vector<RealType> );
+    DeclareParameter(UniformField, std::vector<RealType>);
+    DeclareParameter(MagneticField, std::vector<RealType>)
+        DeclareParameter(UniformGradientStrength, RealType);
+    DeclareParameter(UniformGradientDirection1, std::vector<RealType>);
+    DeclareParameter(UniformGradientDirection2, std::vector<RealType>);
 
-    DeclareParameter(ElectricField, std::vector<RealType> );
+    DeclareParameter(ElectricField, std::vector<RealType>);
     DeclareParameter(ConstraintTime, RealType);
 
     DeclareParameter(PotentialSelection, std::string);
@@ -167,30 +166,34 @@ namespace OpenMD {
     bool addZConsStamp(ZConsStamp* zcons);
     bool addRestraintStamp(RestraintStamp* rest);
     bool addMoleculeStamp(MoleculeStamp* molStamp);
-    int getNComponents() {return components_.size();}
-    std::vector<Component*> getComponents() {return components_;}
-    Component* getComponentAt(int index) {return components_.at(index);}
+    int getNComponents() { return components_.size(); }
+    std::vector<Component*> getComponents() { return components_; }
+    Component* getComponentAt(int index) { return components_.at(index); }
 
-    int getNZconsStamps() {return zconstraints_.size();}
-    std::vector<ZConsStamp*> getZconsStamps() {return zconstraints_;}
-    ZConsStamp* getZconsStampAt(int index) {return zconstraints_.at(index);}
+    int getNZconsStamps() { return zconstraints_.size(); }
+    std::vector<ZConsStamp*> getZconsStamps() { return zconstraints_; }
+    ZConsStamp* getZconsStampAt(int index) { return zconstraints_.at(index); }
 
-    int getNRestraintStamps() {return restraints_.size();}
-    std::vector<RestraintStamp*> getRestraintStamps() {return restraints_;}
-    RestraintStamp* getRestraintStampAt(int index) {return restraints_.at(index);}
+    int getNRestraintStamps() { return restraints_.size(); }
+    std::vector<RestraintStamp*> getRestraintStamps() { return restraints_; }
+    RestraintStamp* getRestraintStampAt(int index) {
+      return restraints_.at(index);
+    }
 
     bool addFluctuatingChargeParameters(FluctuatingChargeParameters* flucqPars);
-    FluctuatingChargeParameters* getFluctuatingChargeParameters() {return flucQpars_;}
+    FluctuatingChargeParameters* getFluctuatingChargeParameters() {
+      return flucQpars_;
+    }
 
     bool addRNEMDParameters(RNEMD::RNEMDParameters* rnemdPars);
-    RNEMD::RNEMDParameters* getRNEMDParameters() {return rnemdPars_;}
+    RNEMD::RNEMDParameters* getRNEMDParameters() { return rnemdPars_; }
 
     bool addMinimizerParameters(MinimizerParameters* miniPars);
-    MinimizerParameters* getMinimizerParameters() {return minimizerPars_;}
+    MinimizerParameters* getMinimizerParameters() { return minimizerPars_; }
 
     virtual void validate();
-  private:
 
+  private:
     std::vector<Component*> components_;
     std::vector<ZConsStamp*> zconstraints_;
     std::vector<RestraintStamp*> restraints_;
@@ -199,6 +202,6 @@ namespace OpenMD {
     FluctuatingChargeParameters* flucQpars_;
     RNEMD::RNEMDParameters* rnemdPars_;
     MinimizerParameters* minimizerPars_;
-};
-}
+  };
+}  // namespace OpenMD
 #endif

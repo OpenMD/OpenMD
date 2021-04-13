@@ -1,8 +1,8 @@
 #ifndef OPTIMIZATION_STATUSFUNCTION_HPP
 #define OPTIMIZATION_STATUSFUNCTION_HPP
+#include "brains/Stats.hpp"
 #include "config.h"
 #include "io/DumpWriter.hpp"
-#include "brains/Stats.hpp"
 #include "io/StatWriter.hpp"
 
 namespace OpenMD {
@@ -10,10 +10,9 @@ namespace OpenMD {
   public:
     virtual ~StatusFunction() {}
     virtual void writeStatus(int functionCount, int gradientCount,
-                             const DynamicVector<RealType>& x, RealType f) {
-    }
+                             const DynamicVector<RealType>& x, RealType f) {}
   };
-  
+
   //! No status
   class NoStatus : public StatusFunction {
   public:
@@ -22,21 +21,20 @@ namespace OpenMD {
   };
 
   class DumpStatusFunction : public StatusFunction {
-
   public:
     DumpStatusFunction(SimInfo* info) : StatusFunction(), info_(info) {
-      stats = new Stats(info_);
-      dumpWriter = new DumpWriter(info_);     
+      stats      = new Stats(info_);
+      dumpWriter = new DumpWriter(info_);
       Stats::StatsBitSet mask;
       mask.set(Stats::TIME);
       mask.set(Stats::POTENTIAL_ENERGY);
       stats->setStatsMask(mask);
       statWriter = new StatWriter(info_->getStatFileName(), stats);
     }
-    
+
     virtual void writeStatus(int functionCount, int gradientCount,
                              const DynamicVector<RealType>& x, RealType f) {
-      Snapshot* curSnapshot =info_->getSnapshotManager()->getCurrentSnapshot();
+      Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
       curSnapshot->setTime(functionCount);
       stats->collectStats();
       statWriter->writeStat();
@@ -48,12 +46,12 @@ namespace OpenMD {
       delete dumpWriter;
       delete statWriter;
     }
-    
+
   private:
     SimInfo* info_ {nullptr};
     Stats* stats;
     DumpWriter* dumpWriter;
-    StatWriter* statWriter;    
+    StatWriter* statWriter;
   };
-}
+}  // namespace OpenMD
 #endif

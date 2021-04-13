@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file ifstrstream.hpp
  * @author Teng Lin
@@ -81,37 +81,38 @@ namespace OpenMD {
    *       in.close();
    * @endcode
    */
-  class ifstrstream : public std::basic_istream<char, std::char_traits<char> > {
+  class ifstrstream : public std::basic_istream<char, std::char_traits<char>> {
   public:
-    //traits
-    typedef char                     char_type;
+    // traits
+    typedef char char_type;
     typedef std::char_traits<char>::int_type int_type;
     typedef std::char_traits<char>::pos_type pos_type;
     typedef std::char_traits<char>::off_type off_type;
     typedef std::char_traits<char> traits_type;
-    
-    typedef std::basic_ios<char, std::char_traits<char> >       _Basic_ios;
-    typedef std::basic_istream<char, std::char_traits<char> >   _Base;   
-    typedef std::basic_streambuf<char, std::char_traits<char> > _Buf;
-    typedef std::basic_stringbuf<char, std::char_traits<char> > _StringBuf;
-    typedef std::basic_filebuf<char, std::char_traits<char> >   _FileBuf;
-  
+
+    typedef std::basic_ios<char, std::char_traits<char>> _Basic_ios;
+    typedef std::basic_istream<char, std::char_traits<char>> _Base;
+    typedef std::basic_streambuf<char, std::char_traits<char>> _Buf;
+    typedef std::basic_stringbuf<char, std::char_traits<char>> _StringBuf;
+    typedef std::basic_filebuf<char, std::char_traits<char>> _FileBuf;
+
     static const int FileNotExists = -1;
-    static const int FileIOError = -2;
-        
+    static const int FileIOError   = -2;
+
   public:
-        
     /**  Constructs an object of class ifstream.  */
     ifstrstream();
-        
+
     /**
      * Explicit constructor
      * @param filename String containing the name of the file to be opened
      * @param mode Flags describing the requested i/o mode for the
-     * file, default value is ios_base::in      
+     * file, default value is ios_base::in
      * @param checkFilename Flags indicating checking the file name in parallel
      */
-    explicit ifstrstream(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false);
+    explicit ifstrstream(const char* filename,
+                         std::ios_base::openmode mode = std::ios_base::in,
+                         bool checkFilename           = false);
 
     /**
      * virtual destructor will close the file(in single mode) and
@@ -129,7 +130,9 @@ namespace OpenMD {
      * @param mode Flags describing the requested i/o mode for the file
      * @param checkFilename Flags indicating checking the file name in parallel
      */
-    void open(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false);
+    void open(const char* filename,
+              std::ios_base::openmode mode = std::ios_base::in,
+              bool checkFilename           = false);
 
     /**
      * Tests if the stream is currently associated with a valid buffer.
@@ -138,7 +141,7 @@ namespace OpenMD {
      * the processors (parallel mode), otherwise false is returned
 
      */
-    bool is_open ( );
+    bool is_open();
 
     /**
      * In single mode, closes a file. The stream's file buffer is
@@ -146,31 +149,31 @@ namespace OpenMD {
      * parallel mode, clean up.
      */
     void close();
-    
+
     /**
      * Gets the stream buffer object associated with the stream
      * @return A pointer to the stream buffer object (filebuf in
      * single mode, stringbuf in parallel mode) associated with the
      * stream.
      */
-  _Buf* rdbuf();
+    _Buf* rdbuf();
 
   private:
-
     /**
      * Internal function used to open the file
-     * @return true if succesfully opens a file (single mode) or gets the file content (parallel mode) 
-     * otherwise returns false
+     * @return true if succesfully opens a file (single mode) or gets the file
+     * content (parallel mode) otherwise returns false
      * @param filename String containing the name of the file to be opened
      * @param mode Flags describing the requested i/o mode for the file
      * @param checkFilename Flags indicating checking the file name in parallel
      * @todo use try - catch syntax to make the program more readable
      */
-    bool internalOpen(const char* filename, std::ios_base::openmode mode, bool checkFilename);
-    
-    _StringBuf   internalStringBuf_; /** internal stream buffer */        
-    _FileBuf     internalFileBuf_;    /** internal stream buffer */        
-    bool isRead;        /** file opened flag */
+    bool internalOpen(const char* filename, std::ios_base::openmode mode,
+                      bool checkFilename);
+
+    _StringBuf internalStringBuf_; /** internal stream buffer */
+    _FileBuf internalFileBuf_;     /** internal stream buffer */
+    bool isRead;                   /** file opened flag */
   };
-}
+}  // namespace OpenMD
 #endif

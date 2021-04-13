@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,8 +42,8 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#ifndef LATTICE_LATTICECREATOR_HPP 
+
+#ifndef LATTICE_LATTICECREATOR_HPP
 #define LATTICE_LATTICECREATOR_HPP
 
 #include <string>
@@ -60,11 +60,11 @@ namespace OpenMD {
   public:
     LatticeCreator(const std::string& ident) : ident_(ident) {}
     virtual ~LatticeCreator() = default;
-        
+
     const std::string& getIdent() const { return ident_; }
 
     virtual Lattice* create() const = 0;
-            
+
   private:
     std::string ident_;
   };
@@ -77,9 +77,9 @@ namespace OpenMD {
   class LatticeBuilder : public LatticeCreator {
   public:
     LatticeBuilder(const std::string& ident) : LatticeCreator(ident) {}
-    virtual  Lattice* create() const {return new ConcreteLattice();}
+    virtual Lattice* create() const { return new ConcreteLattice(); }
   };
 
-}
+}  // namespace OpenMD
 
-#endif //USETHEFORCE_FORCEFIELDCREATOR_HPP
+#endif  // USETHEFORCE_FORCEFIELDCREATOR_HPP

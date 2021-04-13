@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,18 +46,16 @@
 #include "primitives/SDKBend.hpp"
 
 namespace OpenMD {
-SDKBend::SDKBend(Atom* atom1, Atom* atom2, Atom* atom3, SDKBendType* bt)
-    : Bend(atom1, atom2, atom3, bt), bond_(NULL) {
-  bond_ = new Bond(atom1, atom3, bt->getShiftedMieBondType());
-}
-
-SDKBend::~SDKBend() { delete bond_; }
-
-void SDKBend::calcForce(RealType& angle, bool doParticlePot) {
-  Bend::calcForce(angle, doParticlePot);
-  bond_->calcForce(doParticlePot);
-  if (doParticlePot) {
-    atoms_[1]->addParticlePot(bond_->getPotential());
+  SDKBend::SDKBend(Atom* atom1, Atom* atom2, Atom* atom3, SDKBendType* bt) :
+      Bend(atom1, atom2, atom3, bt), bond_(NULL) {
+    bond_ = new Bond(atom1, atom3, bt->getShiftedMieBondType());
   }
-}
+
+  SDKBend::~SDKBend() { delete bond_; }
+
+  void SDKBend::calcForce(RealType& angle, bool doParticlePot) {
+    Bend::calcForce(angle, doParticlePot);
+    bond_->calcForce(doParticlePot);
+    if (doParticlePot) { atoms_[1]->addParticlePot(bond_->getPotential()); }
+  }
 }  // namespace OpenMD

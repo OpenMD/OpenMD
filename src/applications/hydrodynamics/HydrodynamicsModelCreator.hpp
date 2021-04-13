@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,8 +42,8 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#ifndef APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODELCREATOR_HPP 
+
+#ifndef APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODELCREATOR_HPP
 #define APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODELCREATOR_HPP
 
 #include <string>
@@ -62,8 +62,9 @@ namespace OpenMD {
     virtual ~HydrodynamicsModelCreator() = default;
     const std::string& getIdent() const { return ident_; }
 
-    virtual HydrodynamicsModel* create(StuntDouble* sd, SimInfo* info) const = 0;
-            
+    virtual HydrodynamicsModel* create(StuntDouble* sd,
+                                       SimInfo* info) const = 0;
+
   private:
     std::string ident_;
   };
@@ -75,11 +76,13 @@ namespace OpenMD {
   template<class ConcreteHydrodynamicsModel>
   class HydrodynamicsModelBuilder : public HydrodynamicsModelCreator {
   public:
-    HydrodynamicsModelBuilder(const std::string& ident) : HydrodynamicsModelCreator(ident) {}
-    virtual  HydrodynamicsModel* create(StuntDouble* sd, SimInfo* info) const {return new ConcreteHydrodynamicsModel(sd, info);}
+    HydrodynamicsModelBuilder(const std::string& ident) :
+        HydrodynamicsModelCreator(ident) {}
+    virtual HydrodynamicsModel* create(StuntDouble* sd, SimInfo* info) const {
+      return new ConcreteHydrodynamicsModel(sd, info);
+    }
   };
 
-}
+}  // namespace OpenMD
 
-#endif //INTEGRATORS_INTEGRATORCREATOR_HPP
-
+#endif  // INTEGRATORS_INTEGRATORCREATOR_HPP

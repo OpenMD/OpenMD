@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,27 +50,20 @@
 namespace OpenMD {
 
   class RhoR : public StaticAnalyser {
-    
   public:
+    RhoR(SimInfo* info, const std::string& filename, const std::string& sele,
+         RealType len, int nrbins, RealType particleR);
 
-    RhoR(SimInfo* info, const std::string& filename, const std::string& sele, RealType  len, 
-	 int nrbins, RealType particleR);
+    int getNRBins() { return nRBins_; }
 
-    int getNRBins() {
-      return nRBins_; 
-    }
+    RealType getLength() { return len_; }
 
-    RealType getLength() {
-      return len_;
-    }
-        
     virtual void process();
-  private:
 
+  private:
     void processHistogram();
 
     void writeRhoR();
-
 
     Snapshot* currentSnapshot_;
 
@@ -78,8 +71,6 @@ namespace OpenMD {
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
-
-
 
     RealType len_;
     int nRBins_;
@@ -90,5 +81,5 @@ namespace OpenMD {
     std::vector<RealType> avgRhoR_;
   };
 
-}
+}  // namespace OpenMD
 #endif

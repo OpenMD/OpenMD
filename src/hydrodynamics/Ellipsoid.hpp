@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,8 +48,8 @@
 #include "hydrodynamics/Shape.hpp"
 #include "math/SquareMatrix3.hpp"
 namespace OpenMD {
-  
-  /** @class Ellipsoid 
+
+  /** @class Ellipsoid
    *
    * An ellipsoid in OpenMD is restricted to having two equal
    * equatorial semi-axes.  OpenMD treats the "special" axis as the
@@ -57,36 +57,36 @@ namespace OpenMD {
    *
    *   z^2 / a^2  +  (x^2 + y^2) / b^2   = 1
    *
-   * If a >= b, the ellipsoid is a prolate spheroid, and if a < b, 
-   * the ellipsoid is oblate.  Ellipsoids are specified in the constructor 
-   * using an axial length (a), and a equatorial length (b).  A Vector3d 
-   * can be used to position the center of the ellipsoid, and a rotation 
+   * If a >= b, the ellipsoid is a prolate spheroid, and if a < b,
+   * the ellipsoid is oblate.  Ellipsoids are specified in the constructor
+   * using an axial length (a), and a equatorial length (b).  A Vector3d
+   * can be used to position the center of the ellipsoid, and a rotation
    * matrix can also be used to orient the ellipsoid to a preferred lab-fixed
    * coordinate frame.
    */
-  class Ellipsoid : public Shape{
+  class Ellipsoid : public Shape {
   public:
-    Ellipsoid(Vector3d origin, RealType rAxial, RealType rEquatorial, Mat3x3d rotMat);
+    Ellipsoid(Vector3d origin, RealType rAxial, RealType rEquatorial,
+              Mat3x3d rotMat);
     virtual bool isInterior(Vector3d pos);
     virtual std::pair<Vector3d, Vector3d> getBoundingBox();
-    virtual bool hasAnalyticalSolution() {return true;}
-    
+    virtual bool hasAnalyticalSolution() { return true; }
+
     virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature);
-    
-    RealType getRAxial() {return rAxial_;}
-    RealType getREquatorial() {return rEquatorial_;}
-    RealType getRMajor() {return rMajor_;}
-    RealType getRMinor() {return rMinor_;}
-    
+
+    RealType getRAxial() { return rAxial_; }
+    RealType getREquatorial() { return rEquatorial_; }
+    RealType getRMajor() { return rMajor_; }
+    RealType getRMinor() { return rMinor_; }
+
   private:
-    
     Vector3d origin_;
     RealType rAxial_;
     RealType rEquatorial_;
     RealType rMajor_;
     RealType rMinor_;
     Mat3x3d rotMat_;
-  };  
-}
+  };
+}  // namespace OpenMD
 
 #endif

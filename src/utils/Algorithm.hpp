@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,20 +44,21 @@
  */
 
 #include <functional>
+
 #include "config.h"
 namespace OpenMD {
 
-  /** 
-   * copy_if is one of the missing functions in STL. 
-   * copy_if copies elements from the range [first, last) to the range [result, result + (last-first)), 
-   * except that any element for which pred is false is not copied.
+  /**
+   * copy_if is one of the missing functions in STL.
+   * copy_if copies elements from the range [first, last) to the range [result,
+   * result + (last-first)), except that any element for which pred is false is
+   * not copied.
    */
   template<typename InputIterator, typename OutputIterator, typename Predicate>
-  OutputIterator copy_if(InputIterator first, InputIterator last, OutputIterator result, Predicate p) {
+  OutputIterator copy_if(InputIterator first, InputIterator last,
+                         OutputIterator result, Predicate p) {
     while (first != last) {
-      if (p(*first)) {
-	*result++ = *first;
-      }
+      if (p(*first)) { *result++ = *first; }
       ++first;
     }
 
@@ -68,13 +69,9 @@ namespace OpenMD {
   struct logical_xor : public std::binary_function<T, T, bool> {
     T operator()(const T& x, const T& y) { return x ^ y; }
   };
-  
+
   template<typename T>
   struct to_bool : public std::unary_function<T, bool> {
-    bool operator()(const T& x) const {
-      return x != 0;
-    }
+    bool operator()(const T& x) const { return x != 0; }
   };
-}
-
-
+}  // namespace OpenMD

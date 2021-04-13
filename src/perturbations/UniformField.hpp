@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,6 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
 
 /*! \file perturbations/UniformField.hpp
     \brief Uniform Electric Field perturbation
@@ -51,18 +50,18 @@
 #ifndef PERTURBATIONS_UNIFORMFIELD_HPP
 #define PERTURBATIONS_UNIFORMFIELD_HPP
 
-#include "perturbations/Perturbation.hpp"
 #include "brains/SimInfo.hpp"
+#include "perturbations/Perturbation.hpp"
 
 namespace OpenMD {
-   
+
   //! Applies a uniform (vector) electric field to the system
   /*! The field is applied as an external perturbation.  The user specifies
 
   \code{.unparsed}
     uniformField = (a, b, c);
-  \endcode 
-    
+  \endcode
+
     in the .omd file where the values of a, b, and c are in units of
     \f$ V / \AA \f$
 
@@ -73,7 +72,7 @@ namespace OpenMD {
     which grows unbounded and is not periodic.  For these reasons,
     care should be taken in using a Uniform field with point charges.
 
-    The field itself is 
+    The field itself is
 
     \f$ \mathbf{E} = \left( \begin{array}{c} a \\ b \\ c \end{array} \right) \f$
 
@@ -81,16 +80,15 @@ namespace OpenMD {
    = C \mathbf{E} \f$.  For dipolar atoms, the field applies both a
    potential, \f$ U = - \mathbf{D} \cdot \mathbf{E} \f$ and a torque,
    \f$ \mathbf{\tau} = \mathbf{D} \times \mathbf{E} \f$.
-  */ 
+  */
   class UniformField : public Perturbation {
-    
   public:
     UniformField(SimInfo* info);
-    
+
   protected:
     virtual void initialize();
     virtual void applyPerturbation();
-    
+
   private:
     bool initialized;
     bool doUniformField;
@@ -99,7 +97,6 @@ namespace OpenMD {
     SimInfo* info_ {nullptr};
     Vector3d EF;
   };
-  
-} //end namespace OpenMD
-#endif
 
+}  // end namespace OpenMD
+#endif

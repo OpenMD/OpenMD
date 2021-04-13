@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file SphericalHarmonic.hpp
  * @author Dan Gezelter
@@ -53,9 +53,10 @@
 #ifndef MATH_SPHERICALHARMONIC_HPP
 #define MATH_SPHERICALHARMONIC_HPP
 
-#include <cstring>
 #include <cmath>
 #include <complex>
+#include <cstring>
+
 #include "config.h"
 
 #ifdef SINGLE_PRECISION
@@ -67,30 +68,27 @@ typedef std::complex<double> ComplexType;
 namespace OpenMD {
   class SphericalHarmonic {
   public:
-    
     SphericalHarmonic();
-    virtual ~SphericalHarmonic() {} 
-    
+    virtual ~SphericalHarmonic() {}
+
     void setL(int theL) { L = theL; };
     int getL() { return L; }
-    
+
     void setM(int theM) { M = theM; };
     int getM() { return M; }
-    
+
     ComplexType getValueAt(RealType costheta, RealType phi);
-    
+
   protected:
-    
-    RealType LegendreP (int l, int m, RealType x);
-    RealType Legendre (int l, int m, RealType x);
-    RealType Ptilde (int l, int m, RealType x);
-    RealType mpow (int j);
-    RealType Fact (int j);
-    
+    RealType LegendreP(int l, int m, RealType x);
+    RealType Legendre(int l, int m, RealType x);
+    RealType Ptilde(int l, int m, RealType x);
+    RealType mpow(int j);
+    RealType Fact(int j);
+
     int L;
     int M;
-    
   };
-}
+}  // namespace OpenMD
 
 #endif

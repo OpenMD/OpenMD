@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,13 +46,13 @@
 #ifndef UTILS_ACCUMULATOR_HPP
 #define UTILS_ACCUMULATOR_HPP
 
-#include <cmath>
 #include <cassert>
+#include <cmath>
+
 #include "math/Vector3.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
 
 namespace OpenMD {
-
 
   class BaseAccumulator {
   public:
@@ -60,29 +60,22 @@ namespace OpenMD {
     /**
      * get the number of accumulated values
      */
-    virtual size_t count()  {
-      return Count_;
-    }
+    virtual size_t count() { return Count_; }
     virtual ~BaseAccumulator() {};
-    
+
   protected:
     size_t Count_;
   };
-
 
   /**
    * Basic Accumulator class for numbers.
    */
   class Accumulator : public BaseAccumulator {
-
     typedef RealType ElementType;
     typedef RealType ResultType;
 
   public:
-
-    Accumulator() : BaseAccumulator() {
-      this->clear();
-    }
+    Accumulator() : BaseAccumulator() { this->clear(); }
 
     ~Accumulator() {};
 
@@ -91,9 +84,9 @@ namespace OpenMD {
      */
     virtual void add(ElementType const& val) {
       Count_++;
-      Avg_   += (val       - Avg_ ) / Count_;
-      Avg2_  += (val * val - Avg2_) / Count_;
-      Val_    = val;
+      Avg_ += (val - Avg_) / Count_;
+      Avg2_ += (val * val - Avg2_) / Count_;
+      Val_ = val;
       Total_ += val;
       if (Count_ <= 1) {
         Max_ = val;
@@ -115,11 +108,10 @@ namespace OpenMD {
       Val_   = 0;
     }
 
-
     /**
      * return the most recently added value
      */
-    void getLastValue(ElementType &ret)  {
+    void getLastValue(ElementType& ret) {
       ret = Val_;
       return;
     }
@@ -127,7 +119,7 @@ namespace OpenMD {
     /**
      * compute the Mean
      */
-    void getAverage(ResultType &ret)  {
+    void getAverage(ResultType& ret) {
       assert(Count_ != 0);
       ret = Avg_;
       return;
@@ -136,7 +128,7 @@ namespace OpenMD {
     /**
      * return the Total accumulated sum
      */
-    void getTotal(ResultType &ret)  {
+    void getTotal(ResultType& ret) {
       assert(Count_ != 0);
       ret = Total_;
       return;
@@ -145,7 +137,7 @@ namespace OpenMD {
     /**
      * compute the Variance
      */
-    void getVariance(ResultType &ret)  {
+    void getVariance(ResultType& ret) {
       assert(Count_ != 0);
       ret = (Avg2_ - Avg_ * Avg_);
       if (ret < 0) ret = 0;
@@ -155,7 +147,7 @@ namespace OpenMD {
     /**
      * compute error of average value
      */
-    void getStdDev(ResultType &ret)  {
+    void getStdDev(ResultType& ret) {
       assert(Count_ != 0);
       RealType var;
       this->getVariance(var);
@@ -166,7 +158,7 @@ namespace OpenMD {
     /**
      * return the largest value
      */
-    void getMax(ElementType &ret)  {
+    void getMax(ElementType& ret) {
       assert(Count_ != 0);
       ret = Max_;
       return;
@@ -175,7 +167,7 @@ namespace OpenMD {
     /**
      * return the smallest value
      */
-    void getMin(ElementType &ret)  {
+    void getMin(ElementType& ret) {
       assert(Count_ != 0);
       ret = Max_;
       return;
@@ -190,7 +182,7 @@ namespace OpenMD {
      *   x - c <= true mean <= x + c
      *
      */
-    void get95percentConfidenceInterval(ResultType &ret) {
+    void get95percentConfidenceInterval(ResultType& ret) {
       assert(Count_ != 0);
       RealType sd;
       this->getStdDev(sd);
@@ -208,14 +200,11 @@ namespace OpenMD {
   };
 
   class VectorAccumulator : public BaseAccumulator {
-
     typedef Vector3d ElementType;
     typedef Vector3d ResultType;
 
   public:
-    VectorAccumulator() : BaseAccumulator() {
-      this->clear();
-    }
+    VectorAccumulator() : BaseAccumulator() { this->clear(); }
 
     /**
      * Accumulate another value
@@ -223,15 +212,15 @@ namespace OpenMD {
     void add(ElementType const& val) {
       Count_++;
       RealType len(0.0);
-      for (unsigned int i =0; i < 3; i++) {
-        Avg_[i]   += (val[i]          - Avg_[i] ) / Count_;
-        Avg2_[i]  += (val[i] * val[i] - Avg2_[i]) / Count_;
-        Val_[i]    = val[i];
+      for (unsigned int i = 0; i < 3; i++) {
+        Avg_[i] += (val[i] - Avg_[i]) / Count_;
+        Avg2_[i] += (val[i] * val[i] - Avg2_[i]) / Count_;
+        Val_[i] = val[i];
         Total_[i] += val[i];
-        len       += val[i] * val[i];
+        len += val[i] * val[i];
       }
       len = sqrt(len);
-      AvgLen_  += (len       - AvgLen_ ) / Count_;
+      AvgLen_ += (len - AvgLen_) / Count_;
       AvgLen2_ += (len * len - AvgLen2_) / Count_;
 
       if (Count_ <= 1) {
@@ -259,7 +248,7 @@ namespace OpenMD {
     /**
      * return the most recently added value
      */
-    void getLastValue(ElementType &ret) {
+    void getLastValue(ElementType& ret) {
       ret = Val_;
       return;
     }
@@ -267,7 +256,7 @@ namespace OpenMD {
     /**
      * compute the Mean
      */
-    void getAverage(ResultType &ret) {
+    void getAverage(ResultType& ret) {
       assert(Count_ != 0);
       ret = Avg_;
       return;
@@ -276,7 +265,7 @@ namespace OpenMD {
     /**
      * return the Total accumulated sum
      */
-    void getTotal(ResultType &ret)  {
+    void getTotal(ResultType& ret) {
       assert(Count_ != 0);
       ret = Total_;
       return;
@@ -285,10 +274,10 @@ namespace OpenMD {
     /**
      * compute the Variance
      */
-    void getVariance(ResultType &ret) {
+    void getVariance(ResultType& ret) {
       assert(Count_ != 0);
       for (unsigned int i = 0; i < 3; i++) {
-        ret[i] = (Avg2_[i] - Avg_[i]  * Avg_[i]);
+        ret[i] = (Avg2_[i] - Avg_[i] * Avg_[i]);
         if (ret[i] < 0) ret[i] = 0;
       }
       return;
@@ -297,7 +286,7 @@ namespace OpenMD {
     /**
      * compute error of average value
      */
-    void getStdDev(ResultType &ret) {
+    void getStdDev(ResultType& ret) {
       assert(Count_ != 0);
       ResultType var;
       this->getVariance(var);
@@ -316,7 +305,7 @@ namespace OpenMD {
      *   x - c <= true mean <= x + c
      *
      */
-    void get95percentConfidenceInterval(ResultType &ret) {
+    void get95percentConfidenceInterval(ResultType& ret) {
       assert(Count_ != 0);
       ResultType sd;
       this->getStdDev(sd);
@@ -329,7 +318,7 @@ namespace OpenMD {
     /**
      * return the largest length
      */
-    void getMaxLength(RealType &ret) {
+    void getMaxLength(RealType& ret) {
       assert(Count_ != 0);
       ret = Max_;
       return;
@@ -338,7 +327,7 @@ namespace OpenMD {
     /**
      * return the smallest length
      */
-    void getMinLength(RealType &ret) {
+    void getMinLength(RealType& ret) {
       assert(Count_ != 0);
       ret = Min_;
       return;
@@ -347,7 +336,7 @@ namespace OpenMD {
     /**
      * return the largest length
      */
-    void getAverageLength(RealType &ret) {
+    void getAverageLength(RealType& ret) {
       assert(Count_ != 0);
       ret = AvgLen_;
       return;
@@ -356,9 +345,9 @@ namespace OpenMD {
     /**
      * compute the Variance of the length
      */
-    void getLengthVariance(RealType &ret) {
+    void getLengthVariance(RealType& ret) {
       assert(Count_ != 0);
-      ret= (AvgLen2_ - AvgLen_ * AvgLen_);
+      ret = (AvgLen2_ - AvgLen_ * AvgLen_);
       if (ret < 0) ret = 0;
       return;
     }
@@ -366,7 +355,7 @@ namespace OpenMD {
     /**
      * compute error of average value
      */
-    void getLengthStdDev(RealType &ret) {
+    void getLengthStdDev(RealType& ret) {
       assert(Count_ != 0);
       RealType var;
       this->getLengthVariance(var);
@@ -383,14 +372,13 @@ namespace OpenMD {
      *   x - c <= true mean <= x + c
      *
      */
-    void getLength95percentConfidenceInterval(ResultType &ret) {
+    void getLength95percentConfidenceInterval(ResultType& ret) {
       assert(Count_ != 0);
       RealType sd;
       this->getLengthStdDev(sd);
       ret = 1.960 * sd / sqrt(RealType(Count_));
       return;
     }
-
 
   private:
     ResultType Val_;
@@ -401,18 +389,14 @@ namespace OpenMD {
     RealType AvgLen2_;
     RealType Min_;
     RealType Max_;
-
   };
 
   class PotVecAccumulator : public BaseAccumulator {
-
     typedef potVec ElementType;
     typedef potVec ResultType;
 
   public:
-    PotVecAccumulator() : BaseAccumulator() {
-      this->clear();
-    }
+    PotVecAccumulator() : BaseAccumulator() { this->clear(); }
 
     /**
      * Accumulate another value
@@ -420,15 +404,15 @@ namespace OpenMD {
     void add(ElementType const& val) {
       Count_++;
       RealType len(0.0);
-      for (unsigned int i =0; i < N_INTERACTION_FAMILIES; i++) {
-        Avg_[i]   += (val[i]          - Avg_[i] ) / Count_;
-        Avg2_[i]  += (val[i] * val[i] - Avg2_[i]) / Count_;
-        Val_[i]    = val[i];
+      for (unsigned int i = 0; i < N_INTERACTION_FAMILIES; i++) {
+        Avg_[i] += (val[i] - Avg_[i]) / Count_;
+        Avg2_[i] += (val[i] * val[i] - Avg2_[i]) / Count_;
+        Val_[i] = val[i];
         Total_[i] += val[i];
-        len       += val[i] * val[i];
+        len += val[i] * val[i];
       }
       len = sqrt(len);
-      AvgLen_  += (len       - AvgLen_ ) / Count_;
+      AvgLen_ += (len - AvgLen_) / Count_;
       AvgLen2_ += (len * len - AvgLen2_) / Count_;
 
       if (Count_ <= 1) {
@@ -445,19 +429,19 @@ namespace OpenMD {
      */
     void clear() {
       Count_ = 0;
-      const Vector<RealType,N_INTERACTION_FAMILIES> potVecZero(0.0);
-      Avg_      = potVecZero;
-      Avg2_     = potVecZero;
-      Val_      = potVecZero;
-      Total_    = potVecZero;
-      AvgLen_   = 0;
-      AvgLen2_  = 0;
+      const Vector<RealType, N_INTERACTION_FAMILIES> potVecZero(0.0);
+      Avg_     = potVecZero;
+      Avg2_    = potVecZero;
+      Val_     = potVecZero;
+      Total_   = potVecZero;
+      AvgLen_  = 0;
+      AvgLen2_ = 0;
     }
 
     /**
      * return the most recently added value
      */
-    void getLastValue(ElementType &ret) {
+    void getLastValue(ElementType& ret) {
       ret = Val_;
       return;
     }
@@ -465,7 +449,7 @@ namespace OpenMD {
     /**
      * compute the Mean
      */
-    void getAverage(ResultType &ret) {
+    void getAverage(ResultType& ret) {
       assert(Count_ != 0);
       ret = Avg_;
       return;
@@ -474,7 +458,7 @@ namespace OpenMD {
     /**
      * return the Total accumulated sum
      */
-    void getTotal(ResultType &ret)  {
+    void getTotal(ResultType& ret) {
       assert(Count_ != 0);
       ret = Total_;
       return;
@@ -482,10 +466,10 @@ namespace OpenMD {
     /**
      * compute the Variance
      */
-    void getVariance(ResultType &ret) {
+    void getVariance(ResultType& ret) {
       assert(Count_ != 0);
-      for (unsigned int i =0; i < N_INTERACTION_FAMILIES; i++) {
-        ret[i] = (Avg2_[i] - Avg_[i]  * Avg_[i]);
+      for (unsigned int i = 0; i < N_INTERACTION_FAMILIES; i++) {
+        ret[i] = (Avg2_[i] - Avg_[i] * Avg_[i]);
         if (ret[i] < 0) ret[i] = 0;
       }
       return;
@@ -494,11 +478,11 @@ namespace OpenMD {
     /**
      * compute error of average value
      */
-    void getStdDev(ResultType &ret) {
+    void getStdDev(ResultType& ret) {
       assert(Count_ != 0);
       ResultType var;
       this->getVariance(var);
-      for (unsigned int i =0; i < N_INTERACTION_FAMILIES; i++) {
+      for (unsigned int i = 0; i < N_INTERACTION_FAMILIES; i++) {
         ret[i] = sqrt(var[i]);
       }
       return;
@@ -513,11 +497,11 @@ namespace OpenMD {
      *   x - c <= true mean <= x + c
      *
      */
-    void get95percentConfidenceInterval(ResultType &ret) {
+    void get95percentConfidenceInterval(ResultType& ret) {
       assert(Count_ != 0);
       ResultType sd;
       this->getStdDev(sd);
-      for (unsigned int i =0; i < N_INTERACTION_FAMILIES; i++) {
+      for (unsigned int i = 0; i < N_INTERACTION_FAMILIES; i++) {
         ret[i] = 1.960 * sd[i] / sqrt(RealType(Count_));
       }
       return;
@@ -526,7 +510,7 @@ namespace OpenMD {
     /**
      * return the largest length
      */
-    void getMaxLength(RealType &ret) {
+    void getMaxLength(RealType& ret) {
       assert(Count_ != 0);
       ret = Max_;
       return;
@@ -535,7 +519,7 @@ namespace OpenMD {
     /**
      * return the smallest length
      */
-    void getMinLength(RealType &ret) {
+    void getMinLength(RealType& ret) {
       assert(Count_ != 0);
       ret = Min_;
       return;
@@ -544,7 +528,7 @@ namespace OpenMD {
     /**
      * return the largest length
      */
-    void getAverageLength(RealType &ret) {
+    void getAverageLength(RealType& ret) {
       assert(Count_ != 0);
       ret = AvgLen_;
       return;
@@ -553,9 +537,9 @@ namespace OpenMD {
     /**
      * compute the Variance of the length
      */
-    void getLengthVariance(RealType &ret) {
+    void getLengthVariance(RealType& ret) {
       assert(Count_ != 0);
-      ret= (AvgLen2_ - AvgLen_ * AvgLen_);
+      ret = (AvgLen2_ - AvgLen_ * AvgLen_);
       if (ret < 0) ret = 0;
       return;
     }
@@ -563,7 +547,7 @@ namespace OpenMD {
     /**
      * compute error of average value
      */
-    void getLengthStdDev(RealType &ret) {
+    void getLengthStdDev(RealType& ret) {
       assert(Count_ != 0);
       RealType var;
       this->getLengthVariance(var);
@@ -580,14 +564,13 @@ namespace OpenMD {
      *   x - c <= true mean <= x + c
      *
      */
-    void getLength95percentConfidenceInterval(ResultType &ret) {
+    void getLength95percentConfidenceInterval(ResultType& ret) {
       assert(Count_ != 0);
       RealType sd;
       this->getLengthStdDev(sd);
       ret = 1.960 * sd / sqrt(RealType(Count_));
       return;
     }
-
 
   private:
     ResultType Val_;
@@ -598,19 +581,14 @@ namespace OpenMD {
     RealType AvgLen2_;
     RealType Min_;
     RealType Max_;
-
   };
 
-
   class MatrixAccumulator : public BaseAccumulator {
-
     typedef Mat3x3d ElementType;
     typedef Mat3x3d ResultType;
 
   public:
-    MatrixAccumulator() : BaseAccumulator() {
-      this->clear();
-    }
+    MatrixAccumulator() : BaseAccumulator() { this->clear(); }
 
     /**
      * Accumulate another value
@@ -619,10 +597,10 @@ namespace OpenMD {
       Count_++;
       for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int j = 0; j < 3; j++) {
-          Avg_(i,j)   += (val(i,j)       -      Avg_(i,j) ) / Count_;
-          Avg2_(i,j)  += (val(i,j) * val(i,j) - Avg2_(i,j)) / Count_;
-          Val_(i,j)    = val(i,j);
-          Total_(i,j) += val(i,j);
+          Avg_(i, j) += (val(i, j) - Avg_(i, j)) / Count_;
+          Avg2_(i, j) += (val(i, j) * val(i, j) - Avg2_(i, j)) / Count_;
+          Val_(i, j) = val(i, j);
+          Total_(i, j) += val(i, j);
         }
       }
     }
@@ -631,17 +609,17 @@ namespace OpenMD {
      * reset the Accumulator to the empty state
      */
     void clear() {
-      Count_  = 0;
-      Avg_   *= 0.0;
-      Avg2_  *= 0.0;
-      Val_   *= 0.0;
+      Count_ = 0;
+      Avg_ *= 0.0;
+      Avg2_ *= 0.0;
+      Val_ *= 0.0;
       Total_ *= 0.0;
     }
 
     /**
      * return the most recently added value
      */
-    void getLastValue(ElementType &ret) {
+    void getLastValue(ElementType& ret) {
       ret = Val_;
       return;
     }
@@ -649,7 +627,7 @@ namespace OpenMD {
     /**
      * compute the Mean
      */
-    void getAverage(ResultType &ret) {
+    void getAverage(ResultType& ret) {
       assert(Count_ != 0);
       ret = Avg_;
       return;
@@ -658,7 +636,7 @@ namespace OpenMD {
     /**
      * return the Total accumulated sum
      */
-    void getTotal(ResultType &ret)  {
+    void getTotal(ResultType& ret) {
       assert(Count_ != 0);
       ret = Total_;
       return;
@@ -667,12 +645,12 @@ namespace OpenMD {
     /**
      * compute the Variance
      */
-    void getVariance(ResultType &ret) {
+    void getVariance(ResultType& ret) {
       assert(Count_ != 0);
       for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int j = 0; j < 3; j++) {
-          ret(i,j) = (Avg2_(i,j) - Avg_(i,j)  * Avg_(i,j));
-          if ( ret(i,j) < 0 ) ret(i,j) = 0;
+          ret(i, j) = (Avg2_(i, j) - Avg_(i, j) * Avg_(i, j));
+          if (ret(i, j) < 0) ret(i, j) = 0;
         }
       }
       return;
@@ -681,13 +659,13 @@ namespace OpenMD {
     /**
      * compute error of average value
      */
-    void getStdDev(ResultType &ret) {
+    void getStdDev(ResultType& ret) {
       assert(Count_ != 0);
       Mat3x3d var;
       this->getVariance(var);
       for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int j = 0; j < 3; j++) {
-          ret(i,j) = sqrt(var(i,j));
+          ret(i, j) = sqrt(var(i, j));
         }
       }
       return;
@@ -702,13 +680,13 @@ namespace OpenMD {
      *   x - c <= true mean <= x + c
      *
      */
-    void get95percentConfidenceInterval(ResultType &ret) {
+    void get95percentConfidenceInterval(ResultType& ret) {
       assert(Count_ != 0);
       Mat3x3d sd;
       this->getStdDev(sd);
       for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int j = 0; j < 3; j++) {
-          ret(i,j) = 1.960 * sd(i,j) / sqrt(RealType(Count_));
+          ret(i, j) = 1.960 * sd(i, j) / sqrt(RealType(Count_));
         }
       }
       return;
@@ -721,7 +699,6 @@ namespace OpenMD {
     ResultType Total_;
   };
 
-
-}
+}  // namespace OpenMD
 
 #endif

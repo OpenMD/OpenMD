@@ -8,85 +8,71 @@
  * $Id$
  */
 
-#include <antlr/config.hpp>
-#include <antlr/TokenBuffer.hpp>
-#include <antlr/RefCount.hpp>
 #include <string>
+
+#include <antlr/RefCount.hpp>
+#include <antlr/TokenBuffer.hpp>
+#include <antlr/config.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-/** This object contains the data associated with an
- * input stream of tokens.  Multiple parsers
- * share a single ParserSharedInputState to parse
- * the same stream of tokens.
- */
-class ANTLR_API ParserInputState {
-public:
-	/** Construct a new ParserInputState
-	 * @param in the TokenBuffer to read from. The object is deleted together
-	 * with the ParserInputState object.
-	 */
-	ParserInputState( TokenBuffer* in )
-	: guessing(0)
-	, filename()
-	, input(in)
-	, inputResponsible(true)
-	{
-	}
-	/** Construct a new ParserInputState
-	 * @param in the TokenBuffer to read from.
-	 */
-	ParserInputState( TokenBuffer& in )
-	: guessing(0)
-	, filename("")
-	, input(&in)
-	, inputResponsible(false)
-	{
-	}
+  /** This object contains the data associated with an
+   * input stream of tokens.  Multiple parsers
+   * share a single ParserSharedInputState to parse
+   * the same stream of tokens.
+   */
+  class ANTLR_API ParserInputState {
+  public:
+    /** Construct a new ParserInputState
+     * @param in the TokenBuffer to read from. The object is deleted together
+     * with the ParserInputState object.
+     */
+    ParserInputState(TokenBuffer* in) :
+        guessing(0), filename(), input(in), inputResponsible(true) {}
+    /** Construct a new ParserInputState
+     * @param in the TokenBuffer to read from.
+     */
+    ParserInputState(TokenBuffer& in) :
+        guessing(0), filename(""), input(&in), inputResponsible(false) {}
 
-	virtual ~ParserInputState()
-	{
-		if (inputResponsible)
-			delete input;
-	}
+    virtual ~ParserInputState() {
+      if (inputResponsible) delete input;
+    }
 
-	TokenBuffer& getInput( void )
-	{
-		return *input;
-	}
+    TokenBuffer& getInput(void) { return *input; }
 
-	/// Reset the ParserInputState and the underlying TokenBuffer
-	void reset( void )
-	{
-		input->reset();
-		guessing = 0;
-	}
+    /// Reset the ParserInputState and the underlying TokenBuffer
+    void reset(void) {
+      input->reset();
+      guessing = 0;
+    }
 
-public:
-	/** Are we guessing (guessing>0)? */
-	int guessing;
-	/** What file (if known) caused the problem?
-	 * @todo wrap this one..
-	 */
-	ANTLR_USE_NAMESPACE(std)string filename;
-private:
-	/** Where to get token objects */
-	TokenBuffer* input;
-	/// Do we need to free the TokenBuffer or is it owned by another..
-	bool inputResponsible;
+  public:
+    /** Are we guessing (guessing>0)? */
+    int guessing;
+    /** What file (if known) caused the problem?
+     * @todo wrap this one..
+     */
+    ANTLR_USE_NAMESPACE(std) string filename;
 
-	// we don't want these:
-	ParserInputState(const ParserInputState&);
-	ParserInputState& operator=(const ParserInputState&);
-};
+  private:
+    /** Where to get token objects */
+    TokenBuffer* input;
+    /// Do we need to free the TokenBuffer or is it owned by another..
+    bool inputResponsible;
 
-/// A reference counted ParserInputState
-typedef RefCount<ParserInputState> ParserSharedInputState;
+    // we don't want these:
+    ParserInputState(const ParserInputState&);
+    ParserInputState& operator=(const ParserInputState&);
+  };
+
+  /// A reference counted ParserInputState
+  typedef RefCount<ParserInputState> ParserSharedInputState;
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif //INC_ParserSharedInputState_hpp__
+#endif  // INC_ParserSharedInputState_hpp__

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -47,97 +47,97 @@
 
 namespace OpenMD {
 
-TokenMap* TokenMap::instance_ = NULL;
+  TokenMap* TokenMap::instance_ = NULL;
 
-TokenMap::TokenMap() {
-  tokenMap_.insert(TokenMapType::value_type(
-      "define", Token(Token::define, std::string("define"))));
-  tokenMap_.insert(TokenMapType::value_type(
-      "select", Token(Token::select, std::string("select"))));
-  // tokenMap_.insert(TokenMapType::value_type("selected",
-  // Token(Token::selected, std::string("selected"))));
+  TokenMap::TokenMap() {
+    tokenMap_.insert(TokenMapType::value_type(
+        "define", Token(Token::define, std::string("define"))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "select", Token(Token::select, std::string("select"))));
+    // tokenMap_.insert(TokenMapType::value_type("selected",
+    // Token(Token::selected, std::string("selected"))));
 
-  // expressions
-  tokenMap_.insert(
-      TokenMapType::value_type("(", Token(Token::leftparen, std::string("("))));
-  tokenMap_.insert(TokenMapType::value_type(
-      ")", Token(Token::rightparen, std::string(")"))));
+    // expressions
+    tokenMap_.insert(TokenMapType::value_type(
+        "(", Token(Token::leftparen, std::string("("))));
+    tokenMap_.insert(TokenMapType::value_type(
+        ")", Token(Token::rightparen, std::string(")"))));
 
-  tokenMap_.insert(
-      TokenMapType::value_type("and", Token(Token::opAnd, std::string("and"))));
-  tokenMap_.insert(
-      TokenMapType::value_type("&", Token(Token::opAnd, std::string("and"))));
-  tokenMap_.insert(
-      TokenMapType::value_type("&&", Token(Token::opAnd, std::string("and"))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "and", Token(Token::opAnd, std::string("and"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("&", Token(Token::opAnd, std::string("and"))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "&&", Token(Token::opAnd, std::string("and"))));
 
-  tokenMap_.insert(
-      TokenMapType::value_type("or", Token(Token::opOr, std::string("or"))));
-  tokenMap_.insert(
-      TokenMapType::value_type(",", Token(Token::opOr, std::string("or"))));
-  tokenMap_.insert(
-      TokenMapType::value_type("|", Token(Token::opOr, std::string("or"))));
-  tokenMap_.insert(
-      TokenMapType::value_type("||", Token(Token::opOr, std::string("or"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("or", Token(Token::opOr, std::string("or"))));
+    tokenMap_.insert(
+        TokenMapType::value_type(",", Token(Token::opOr, std::string("or"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("|", Token(Token::opOr, std::string("or"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("||", Token(Token::opOr, std::string("or"))));
 
-  tokenMap_.insert(
-      TokenMapType::value_type("not", Token(Token::opNot, std::string("not"))));
-  tokenMap_.insert(
-      TokenMapType::value_type("!", Token(Token::opNot, std::string("not"))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "not", Token(Token::opNot, std::string("not"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("!", Token(Token::opNot, std::string("not"))));
 
-  tokenMap_.insert(
-      TokenMapType::value_type("<", Token(Token::opLT, std::string("<"))));
-  tokenMap_.insert(
-      TokenMapType::value_type("<=", Token(Token::opLE, std::string("<="))));
-  tokenMap_.insert(
-      TokenMapType::value_type(">=", Token(Token::opGE, std::string(">="))));
-  tokenMap_.insert(
-      TokenMapType::value_type(">", Token(Token::opGT, std::string(">"))));
-  tokenMap_.insert(
-      TokenMapType::value_type("==", Token(Token::opEQ, std::string("=="))));
-  tokenMap_.insert(
-      TokenMapType::value_type("!=", Token(Token::opNE, std::string("!="))));
-  tokenMap_.insert(TokenMapType::value_type(
-      "within", Token(Token::within, std::string("within"))));
-  tokenMap_.insert(
-      TokenMapType::value_type(".", Token(Token::dot, std::string("."))));
-  tokenMap_.insert(TokenMapType::value_type(
-      "mass", Token(Token::mass, std::string("mass"))));
-  tokenMap_.insert(TokenMapType::value_type(
-      "charge", Token(Token::charge, std::string("charge"))));
-  tokenMap_.insert(TokenMapType::value_type(
-      "hull", Token(Token::hull, std::string("hull"))));
-  tokenMap_.insert(TokenMapType::value_type(
-      "alphahull", Token(Token::alphahull, std::string("alphahull"))));
-  tokenMap_.insert(
-      TokenMapType::value_type("x", Token(Token::x, std::string("x"))));
-  tokenMap_.insert(
-      TokenMapType::value_type("y", Token(Token::y, std::string("y"))));
-  tokenMap_.insert(
-      TokenMapType::value_type("z", Token(Token::z, std::string("z"))));
-  tokenMap_.insert(TokenMapType::value_type(
-      "wrappedx", Token(Token::wrappedX, std::string("wrappedx"))));
-  tokenMap_.insert(TokenMapType::value_type(
-      "wrappedy", Token(Token::wrappedY, std::string("wrappedy"))));
-  tokenMap_.insert(TokenMapType::value_type(
-      "wrappedz", Token(Token::wrappedZ, std::string("wrappedz"))));
-  tokenMap_.insert(TokenMapType::value_type(
-      "atomno", Token(Token::atomno, std::string("atomno"))));
-  tokenMap_.insert(
-      TokenMapType::value_type("r", Token(Token::r, std::string("r"))));
-  tokenMap_.insert(
-      TokenMapType::value_type("to", Token(Token::to, std::string("to"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("<", Token(Token::opLT, std::string("<"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("<=", Token(Token::opLE, std::string("<="))));
+    tokenMap_.insert(
+        TokenMapType::value_type(">=", Token(Token::opGE, std::string(">="))));
+    tokenMap_.insert(
+        TokenMapType::value_type(">", Token(Token::opGT, std::string(">"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("==", Token(Token::opEQ, std::string("=="))));
+    tokenMap_.insert(
+        TokenMapType::value_type("!=", Token(Token::opNE, std::string("!="))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "within", Token(Token::within, std::string("within"))));
+    tokenMap_.insert(
+        TokenMapType::value_type(".", Token(Token::dot, std::string("."))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "mass", Token(Token::mass, std::string("mass"))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "charge", Token(Token::charge, std::string("charge"))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "hull", Token(Token::hull, std::string("hull"))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "alphahull", Token(Token::alphahull, std::string("alphahull"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("x", Token(Token::x, std::string("x"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("y", Token(Token::y, std::string("y"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("z", Token(Token::z, std::string("z"))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "wrappedx", Token(Token::wrappedX, std::string("wrappedx"))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "wrappedy", Token(Token::wrappedY, std::string("wrappedy"))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "wrappedz", Token(Token::wrappedZ, std::string("wrappedz"))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "atomno", Token(Token::atomno, std::string("atomno"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("r", Token(Token::r, std::string("r"))));
+    tokenMap_.insert(
+        TokenMapType::value_type("to", Token(Token::to, std::string("to"))));
 
-  tokenMap_.insert(
-      TokenMapType::value_type("all", Token(Token::all, std::string("all"))));
-  tokenMap_.insert(TokenMapType::value_type(
-      "none", Token(Token::none, std::string("none"))));
-}
+    tokenMap_.insert(
+        TokenMapType::value_type("all", Token(Token::all, std::string("all"))));
+    tokenMap_.insert(TokenMapType::value_type(
+        "none", Token(Token::none, std::string("none"))));
+  }
 
-Token* TokenMap::getToken(const std::string& ident) {
-  std::map<std::string, Token>::iterator i = tokenMap_.find(ident);
+  Token* TokenMap::getToken(const std::string& ident) {
+    std::map<std::string, Token>::iterator i = tokenMap_.find(ident);
 
-  return i != tokenMap_.end() ? &(i->second) : NULL;
-}
+    return i != tokenMap_.end() ? &(i->second) : NULL;
+  }
 
-TokenMap::~TokenMap() { tokenMap_.clear(); }
+  TokenMap::~TokenMap() { tokenMap_.clear(); }
 }  // namespace OpenMD

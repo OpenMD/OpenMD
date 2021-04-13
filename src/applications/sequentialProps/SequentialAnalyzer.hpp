@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,8 +49,8 @@
 #include <string>
 #include <vector>
 
-#include "brains/SimInfo.hpp"
 #include "brains/BlockSnapshotManager.hpp"
+#include "brains/SimInfo.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
@@ -58,15 +58,16 @@
 namespace OpenMD {
 
   /**
-   * @class SequentialAnalyzer SequentialAnalyzer.hpp "applications/sequentialProps/SequentialAnalyzer"
+   * @class SequentialAnalyzer SequentialAnalyzer.hpp
+   * "applications/sequentialProps/SequentialAnalyzer"
    * @brief Base class for Sequence Analyzer
    */
- 
+
   class SequentialAnalyzer {
   public:
     SequentialAnalyzer(SimInfo* info, const std::string& filename,
                        const std::string& sele1, const std::string& sele2);
-    
+
     virtual ~SequentialAnalyzer() = default;
     virtual void doSequence();
 
@@ -74,31 +75,25 @@ namespace OpenMD {
       outputFilename_ = filename;
     }
 
-    const std::string& getOutputFileName() const {
-      return outputFilename_;
-    }
+    const std::string& getOutputFileName() const { return outputFilename_; }
 
     void setStep(int step) {
       assert(step > 0);
-      step_ = step;    
+      step_ = step;
     }
 
     int getStep() { return step_; }
 
-    const std::string& getSequenceType() const {
-      return sequenceType_;
-    }
+    const std::string& getSequenceType() const { return sequenceType_; }
 
-    void setSequenceType(const std::string& type) {
-      sequenceType_ = type;
-    }
+    void setSequenceType(const std::string& type) { sequenceType_ = type; }
 
     void setParameterString(const std::string& params) {
       paramString_ = params;
     }
 
   protected:
-    virtual void preSequence() {}        
+    virtual void preSequence() {}
     virtual void postSequence() {}
     virtual void writeSequence();
     virtual void doFrame(int frame) = 0;
@@ -116,14 +111,14 @@ namespace OpenMD {
     SelectionEvaluator evaluator2_;
 
     int step_;
-    
+
     std::string outputFilename_;
     int frame_;
     int storageLayout_;
     std::vector<RealType> times_;
-    std::vector<RealType> values_;    
+    std::vector<RealType> values_;
     std::string sequenceType_;
-    std::string paramString_;    
+    std::string paramString_;
   };
-}
+}  // namespace OpenMD
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,126 +45,132 @@
 
 #ifndef MDPARSER_SIMPLEPREPROCESSOR_HPP
 #define MDPARSER_SIMPLEPREPROCESSOR_HPP
+#include <fstream>
 #include <iostream>
 #include <set>
-#include <fstream>
 #include <sstream>
+
+#include "utils/OpenMDException.hpp"
 #include "utils/StringTokenizer.hpp"
 #include "utils/Trim.hpp"
-#include "utils/OpenMDException.hpp"
 #include "utils/simError.h"
-
 
 /**
  * @class SimplePreprocessor
  * @brief A simple preprocessor.
- * @note only supports \#include \#ifdef, \#ifndef, \#endif, \#define and \#undef, c-like multiple line
- *  comment is not supported, macro substitute is not supported.
+ * @note only supports \#include \#ifdef, \#ifndef, \#endif, \#define and
+ * \#undef, c-like multiple line comment is not supported, macro substitute is
+ * not supported.
  */
-namespace OpenMD { 
-class SimplePreprocessor {
-    public:
-        bool preprocess(std::istream& myStream, const std::string& filename, int startingLine, ostream& os) {
-            std::set<std::string> defineSet;
-            std::stack<bool> ifStates;
+namespace OpenMD {
+  class SimplePreprocessor {
+  public:
+    bool preprocess(std::istream& myStream, const std::string& filename,
+                    int startingLine, ostream& os) {
+      std::set<std::string> defineSet;
+      std::stack<bool> ifStates;
 
-            ifStates.push(true);
-            return doPreprocess(myStream, filename, startingLine, os, defineSet, ifStates);
-        }
-        
-    private:
-        bool doPreprocess(std::istream& myStream, const std::string& filename, int startingLine, ostream& os, std::set<std::string>& defineSet, std::stack<bool>& ifStates) {
-            //std::ifstream input(filename.c_str());
-            //if (!input.is_open()) {
-            //    std::stringstream ss;
-            //    ss << "Can not open " << filename << " for preprocessing\n";
-            //    
-            //    sprintf(painCave.errMsg,
-            //            "Can not open (%s) for processing. \n"
-            //            "\tPlease check md file name syntax.\n", filename.c_str());
-            //    
-            //    painCave.isFatal = 1;
-            //    simError();
-            //    
-            //    throw OpenMDException(ss.str());                
-            //}
-            int lineNo = startingLine;
-            os << "#line " << lineNo << " \"" << filename << "\"\n";
-            const int bufferSize = 8192;
-            char buffer[bufferSize];
-            while(myStream.getline(buffer, bufferSize)) {
-              ++lineNo;
-              std::string line = trimLeftCopy(buffer);
-              if (!line.empty() && line[0] == '#') {
-                    StringTokenizer tokenizer(line.substr(1, line.length()));
-                    std::vector<std::string> tokens = tokenizer.getAllTokens();
-                    if (tokens.empty()) {
-                        return false;
-                    }
-                    if (tokens[0] == "endif") {
-                        ifStates.pop();
-                        if (ifStates.empty()) {
-                            std::cout << "Error in preprocessing: endif \n";
-                            return false;
-                        }
-                        os << std::endl;                        
-                    } else if (tokens.size() == 2) {
-                        if (tokens[0] == "include") {
-                            SimplePreprocessor subPreprocessor;
-                            std::string includeFilename = tokens[1];
-                            includeFilename = includeFilename.substr(1, includeFilename.length() -2);
-                            std::ifstream includeStream(includeFilename.c_str());
-                            if (!includeStream.is_open()) {
-                                std::stringstream ss;
-                                ss << "Can not open " << includeFilename << " for preprocessing\n";
-                                throw OpenMDException(ss.str()); 
-                            }
-                            
-                            bool ret = subPreprocessor.doPreprocess(includeStream, includeFilename, 1, os, defineSet, ifStates);
-                            if (!ret) {
-                                std::cout << "Error in preprocessing\n";
-                                return false;
-                            }
-                            os << "#line " << lineNo << " \"" << filename << "\"\n";
-                        } else if (tokens[0] == "define") {
-                           defineSet.insert(tokens[1]);
-                           os << std::endl;
-                        } else if (tokens[0] == "undef") {
-                           defineSet.erase(tokens[1]);
-                           os << std::endl;
-                        } else if (tokens[0] == "ifdef") {
-                           if (defineSet.find(tokens[1]) != defineSet.end() ) {
-                                ifStates.push(true);
-                           } else {
-                              ifStates.push(false);
-                           }
-                           os << std::endl;
-                        } else if (tokens[0] == "ifndef") {
-                           if (defineSet.find(tokens[1]) == defineSet.end() ) {
-                                ifStates.push(true);
-                           } else {
-                              ifStates.push(false);
-                           }
-                           os << std::endl;
-                        } else {
-                            std::cout << tokens[0] << " is not supported (yet)." << std::endl;
-                            return false;
-                        }
-                    }else {
-                        return false;
-                    }
-                    
-              }else if (ifStates.top()){
-                os << buffer << std::endl;
-              }
-              
+      ifStates.push(true);
+      return doPreprocess(myStream, filename, startingLine, os, defineSet,
+                          ifStates);
+    }
+
+  private:
+    bool doPreprocess(std::istream& myStream, const std::string& filename,
+                      int startingLine, ostream& os,
+                      std::set<std::string>& defineSet,
+                      std::stack<bool>& ifStates) {
+      // std::ifstream input(filename.c_str());
+      // if (!input.is_open()) {
+      //    std::stringstream ss;
+      //    ss << "Can not open " << filename << " for preprocessing\n";
+      //
+      //    sprintf(painCave.errMsg,
+      //            "Can not open (%s) for processing. \n"
+      //            "\tPlease check md file name syntax.\n", filename.c_str());
+      //
+      //    painCave.isFatal = 1;
+      //    simError();
+      //
+      //    throw OpenMDException(ss.str());
+      //}
+      int lineNo = startingLine;
+      os << "#line " << lineNo << " \"" << filename << "\"\n";
+      const int bufferSize = 8192;
+      char buffer[bufferSize];
+      while (myStream.getline(buffer, bufferSize)) {
+        ++lineNo;
+        std::string line = trimLeftCopy(buffer);
+        if (!line.empty() && line[0] == '#') {
+          StringTokenizer tokenizer(line.substr(1, line.length()));
+          std::vector<std::string> tokens = tokenizer.getAllTokens();
+          if (tokens.empty()) { return false; }
+          if (tokens[0] == "endif") {
+            ifStates.pop();
+            if (ifStates.empty()) {
+              std::cout << "Error in preprocessing: endif \n";
+              return false;
             }
+            os << std::endl;
+          } else if (tokens.size() == 2) {
+            if (tokens[0] == "include") {
+              SimplePreprocessor subPreprocessor;
+              std::string includeFilename = tokens[1];
+              includeFilename =
+                  includeFilename.substr(1, includeFilename.length() - 2);
+              std::ifstream includeStream(includeFilename.c_str());
+              if (!includeStream.is_open()) {
+                std::stringstream ss;
+                ss << "Can not open " << includeFilename
+                   << " for preprocessing\n";
+                throw OpenMDException(ss.str());
+              }
 
-            return true;
+              bool ret = subPreprocessor.doPreprocess(
+                  includeStream, includeFilename, 1, os, defineSet, ifStates);
+              if (!ret) {
+                std::cout << "Error in preprocessing\n";
+                return false;
+              }
+              os << "#line " << lineNo << " \"" << filename << "\"\n";
+            } else if (tokens[0] == "define") {
+              defineSet.insert(tokens[1]);
+              os << std::endl;
+            } else if (tokens[0] == "undef") {
+              defineSet.erase(tokens[1]);
+              os << std::endl;
+            } else if (tokens[0] == "ifdef") {
+              if (defineSet.find(tokens[1]) != defineSet.end()) {
+                ifStates.push(true);
+              } else {
+                ifStates.push(false);
+              }
+              os << std::endl;
+            } else if (tokens[0] == "ifndef") {
+              if (defineSet.find(tokens[1]) == defineSet.end()) {
+                ifStates.push(true);
+              } else {
+                ifStates.push(false);
+              }
+              os << std::endl;
+            } else {
+              std::cout << tokens[0] << " is not supported (yet)." << std::endl;
+              return false;
+            }
+          } else {
+            return false;
+          }
+
+        } else if (ifStates.top()) {
+          os << buffer << std::endl;
         }
-    private:
-        
-};
+      }
 
-}
+      return true;
+    }
+
+  private:
+  };
+
+}  // namespace OpenMD
 #endif

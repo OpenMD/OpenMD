@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,15 +42,15 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef VISITORS_BASEVISITOR_HPP
 #define VISITORS_BASEVISITOR_HPP
+#include <cstdio>
 #include <iostream>
 #include <string>
-#include <cstdio>
 
 namespace OpenMD {
-    
+
   class Atom;
   class DirectionalAtom;
   class RigidBody;
@@ -60,7 +60,7 @@ namespace OpenMD {
   class Inversion;
   class SimInfo;
 
-  class BaseVisitor{
+  class BaseVisitor {
   public:
     virtual ~BaseVisitor() {}
     virtual void visit(Atom* atom) {}
@@ -73,29 +73,30 @@ namespace OpenMD {
 
     virtual void update() {}
 
-    const std::string& getVisitorName() {return visitorName;}
+    const std::string& getVisitorName() { return visitorName; }
     virtual const std::string toString() {
       std::string result;
       char buffer[65535];
 
-      sprintf(buffer,"------------------------------------------------------------------\n");
-      result += buffer;      
-      
-      sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
-      result += buffer;      
+      sprintf(buffer, "--------------------------------------------------------"
+                      "----------\n");
+      result += buffer;
 
-      sprintf(buffer, "------------------------------------------------------------------\n");
-      result += buffer;      
+      sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+      result += buffer;
+
+      sprintf(buffer, "--------------------------------------------------------"
+                      "----------\n");
+      result += buffer;
 
       return result;
     }
 
   protected:
-    
     BaseVisitor() {}
 
     std::string visitorName;
   };
 
-}//end namespace OpenMD
+}  // end namespace OpenMD
 #endif

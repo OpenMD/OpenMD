@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef INTEGRATORS_FLUCTUATINGCHARGEFORCES_HPP
 #define INTEGRATORS_FLUCTUATINGCHARGEFORCES_HPP
 
@@ -51,7 +51,7 @@
 
 using namespace std;
 namespace OpenMD {
-            
+
   struct FluctuatingChargeAtomData {
     RealType hardness;
     RealType electronegativity;
@@ -64,9 +64,12 @@ namespace OpenMD {
   class FluctuatingChargeForces {
   public:
     FluctuatingChargeForces(SimInfo* info);
-    void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes;};
-    void getSelfInteraction(int atid, RealType charge, RealType &potential, RealType &force);
+    void setForceField(ForceField* ff) { forceField_ = ff; };
+    void setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+      simTypes_ = simtypes;
+    };
+    void getSelfInteraction(int atid, RealType charge, RealType& potential,
+                            RealType& force);
     void addType(AtomType* atomType);
 
   protected:
@@ -77,11 +80,14 @@ namespace OpenMD {
 
     FluctuatingChargeAtomData data;
 
-    set<int> FQtypes;     /**< The set of AtomType idents that are fluctuating types */
-    vector<int> FQtids;   /**< The mapping from AtomType ident -> fluctuating ident */
-    vector<FluctuatingChargeAtomData> FQMap; /**< data about fluctuating types */
+    set<int>
+        FQtypes; /**< The set of AtomType idents that are fluctuating types */
+    vector<int>
+        FQtids; /**< The mapping from AtomType ident -> fluctuating ident */
+    vector<FluctuatingChargeAtomData>
+        FQMap; /**< data about fluctuating types */
 
     bool initialized_;
   };
-}
+}  // namespace OpenMD
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,19 +42,19 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_RESTWRITER_HPP
 #define IO_RESTWRITER_HPP
 
 #define _LARGEFILE_SOURCE64
-# ifndef _FILE_OFFSET_BITS
-#   define _FILE_OFFSET_BITS 64
-# endif
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#endif
 
-#include <iostream>
 #include <fstream>
-#include <string>
+#include <iostream>
 #include <map>
+#include <string>
 #include <vector>
 
 #include "brains/SimInfo.hpp"
@@ -62,22 +62,21 @@
 
 namespace OpenMD {
 
-  class RestWriter{
-    
+  class RestWriter {
   public:
     RestWriter(SimInfo* info, const std::string& filename,
-	       std::vector<Restraint*> restraints);
+               std::vector<Restraint*> restraints);
     ~RestWriter();
 
-    void writeRest(std::vector<std::map<int, Restraint::RealPair> > restInfo);
+    void writeRest(std::vector<std::map<int, Restraint::RealPair>> restInfo);
 
     void writeClosing(std::ostream& os);
-    
-  private:    
+
+  private:
     SimInfo* info_ {nullptr};
-    std::ostream *output_;
+    std::ostream* output_;
     bool createRestFile_;
   };
 
-}
+}  // namespace OpenMD
 #endif

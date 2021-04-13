@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,29 +42,29 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file TorsionType.hpp
  * @author    tlin
  * @date  11/01/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_TORSIONTYPE_HPP
 #define TYPES_TORSIONTYPE_HPP
 #include "config.h"
 namespace OpenMD {
-  
+
   /**
    * @class TorsionType TorsionType.hpp "types/TorsionType.hpp"
    */
-  class TorsionType{
+  class TorsionType {
   public:
     virtual ~TorsionType() {}
-    
-    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) = 0;
-    
+
+    virtual void calcForce(RealType cosPhi, RealType& V,
+                           RealType& dVdCosPhi) = 0;
   };
-  
-} //end namespace OpenMD
-#endif //TYPES_TORSIONTYPE_HPP
+
+}  // end namespace OpenMD
+#endif  // TYPES_TORSIONTYPE_HPP

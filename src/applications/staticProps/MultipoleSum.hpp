@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,20 +45,18 @@
 
 #ifndef APPLICATIONS_STATICPROPS_MULTIPOLESUM_HPP
 #define APPLICATIONS_STATICPROPS_MULTIPOLESUM_HPP
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 namespace OpenMD {
 
   class MultipoleSum : public StaticAnalyser {
-
   public:
     MultipoleSum(SimInfo* info, const std::string& filename,
                  const std::string& sele1, RealType rmax, int nrbins);
 
   private:
-
     virtual void process();
     virtual void writeOut();
 
@@ -75,9 +73,7 @@ namespace OpenMD {
     std::string selectionScript1_;
     SelectionManager seleMan1_;
     SelectionEvaluator evaluator1_;
-
   };
 
-
-}
+}  // namespace OpenMD
 #endif

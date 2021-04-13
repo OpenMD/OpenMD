@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -62,14 +62,14 @@ namespace OpenMD {
   class RNEMDZ : public SlabStatistics {
   public:
     RNEMDZ(SimInfo* info, const std::string& filename, const std::string& sele,
-           int nzbins, int axis=2);
+           int nzbins, int axis = 2);
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin) {}
 
   protected:
     enum OutputFields {
       BEGININDEX = 0,
-      Z = BEGININDEX,
+      Z          = BEGININDEX,
       TEMPERATURE,
       VELOCITY,
       DENSITY,
@@ -81,7 +81,7 @@ namespace OpenMD {
       ENDINDEX
     };
 
-    typedef std::bitset<ENDINDEX-BEGININDEX> OutputBitSet;
+    typedef std::bitset<ENDINDEX - BEGININDEX> OutputBitSet;
 
     int outputTypeCount_;
     std::vector<AtomType*> outputTypes_;
@@ -98,7 +98,6 @@ namespace OpenMD {
     OutputBitSet outputMask_;
   };
 
-
   class RNEMDR : public ShellStatistics {
   public:
     RNEMDR(SimInfo* info, const std::string& filename, const std::string& sele,
@@ -109,14 +108,14 @@ namespace OpenMD {
   protected:
     enum OutputFields {
       BEGININDEX = 0,
-      R = BEGININDEX,
+      R          = BEGININDEX,
       TEMPERATURE,
       ANGULARVELOCITY,
       DENSITY,
       ENDINDEX
     };
 
-    typedef std::bitset<ENDINDEX-BEGININDEX> OutputBitSet;
+    typedef std::bitset<ENDINDEX - BEGININDEX> OutputBitSet;
 
     OutputData* temperature;
     OutputData* angularVelocity;
@@ -125,25 +124,24 @@ namespace OpenMD {
     OutputBitSet outputMask_;
   };
 
-
   class RNEMDRTheta : public ShellStatistics {
   public:
     RNEMDRTheta(SimInfo* info, const std::string& filename,
                 const std::string& sele, int nrbins, int nanglebins);
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin) {}
-    std::pair<int,int> getBins(Vector3d pos);
+    std::pair<int, int> getBins(Vector3d pos);
     void writeOutput();
 
   protected:
     enum OutputFields {
       BEGININDEX = 0,
-      R = BEGININDEX,
+      R          = BEGININDEX,
       ANGULARVELOCITY,
       ENDINDEX
     };
 
-    typedef std::bitset<ENDINDEX-BEGININDEX> OutputBitSet;
+    typedef std::bitset<ENDINDEX - BEGININDEX> OutputBitSet;
 
     int nAngleBins_;
     Vector3d fluxVector_;
@@ -152,6 +150,6 @@ namespace OpenMD {
 
     OutputBitSet outputMask_;
   };
-}
+}  // namespace OpenMD
 
 #endif

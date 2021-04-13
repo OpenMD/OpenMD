@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -54,26 +54,23 @@
 
 #include <string>
 #include <vector>
+
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 namespace OpenMD {
 
   class DensityHistogram : public StaticAnalyser {
-
   public:
     DensityHistogram(SimInfo* info, const std::string& filename,
                      const std::string& sele, int nbins);
 
-    int getNBins() {
-      return nBins_;
-    }
+    int getNBins() { return nBins_; }
 
     virtual void process();
 
   private:
-
     virtual void writeDensity();
 
     Snapshot* currentSnapshot_;
@@ -85,8 +82,7 @@ namespace OpenMD {
     RealType averageDensity_;
     std::vector<RealType> bincenter_;
     std::vector<RealType> histList_;
-
   };
 
-}
+}  // namespace OpenMD
 #endif

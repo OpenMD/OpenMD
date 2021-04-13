@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,28 +42,28 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_STICKYPOWERATOMTYPESSECTIONPARSER_HPP
 #define IO_STICKYPOWERATOMTYPESSECTIONPARSER_HPP
 
-#include "io/SectionParser.hpp"
 #include "io/ForceFieldOptions.hpp"
+#include "io/SectionParser.hpp"
 
 namespace OpenMD {
 
   /**
-   * @class StickyPowerAtomTypesSectionParser StickyPowerAtomTypesSectionParser.hpp "io/StickyAtomTypesSectionParser.hpp"
+   * @class StickyPowerAtomTypesSectionParser
+   * StickyPowerAtomTypesSectionParser.hpp "io/StickyAtomTypesSectionParser.hpp"
    */
   class StickyPowerAtomTypesSectionParser : public SectionParser {
   public:
     StickyPowerAtomTypesSectionParser(ForceFieldOptions& options);
+
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
     ForceFieldOptions& options_;
   };
 
+}  // namespace OpenMD
 
-} //namespace OpenMD
-
-#endif //IO_STICKYPOWERATOMTYPESSECTIONPARSER_HPP
-
+#endif  // IO_STICKYPOWERATOMTYPESSECTIONPARSER_HPP

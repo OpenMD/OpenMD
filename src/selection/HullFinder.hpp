@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,10 +46,10 @@
 #ifndef SELECTION_HULLFINDER_HPP
 #define SELECTION_HULLFINDER_HPP
 #include "brains/SimInfo.hpp"
-#include "selection/SelectionSet.hpp"
-#include "primitives/StuntDouble.hpp"
 #include "math/Hull.hpp"
 #include "math/Triangle.hpp"
+#include "primitives/StuntDouble.hpp"
+#include "selection/SelectionSet.hpp"
 
 namespace OpenMD {
 
@@ -57,12 +57,12 @@ namespace OpenMD {
   public:
     HullFinder(SimInfo* si);
     ~HullFinder();
-    
+
     SelectionSet findHull();
     SelectionSet findHull(int frame);
     RealType getSurfaceArea() { return surfaceArea_; }
     RealType getVolume() { return volume_; }
-    
+
     SimInfo* info_ {nullptr};
     std::vector<StuntDouble*> stuntdoubles_;
     std::vector<Bond*> bonds_;
@@ -81,7 +81,7 @@ namespace OpenMD {
   class AlphaHullFinder : public HullFinder {
   public:
     AlphaHullFinder(SimInfo* si);
-    void setAlpha(RealType alpha);    
+    void setAlpha(RealType alpha);
   };
-}
-#endif 
+}  // namespace OpenMD
+#endif

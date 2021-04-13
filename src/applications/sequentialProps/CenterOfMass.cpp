@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -55,64 +55,66 @@
 
 namespace OpenMD {
 
-CenterOfMass::CenterOfMass(SimInfo* info, const std::string& filename,
-                           const std::string& sele1, const std::string& sele2)
-    : SequentialAnalyzer(info, filename, sele1, sele2) {
-  setOutputName(getPrefix(filename) + ".com");
-}
-
-void CenterOfMass::doFrame(int frame) {
-  StuntDouble* sd;
-  int i;
-
-  if (evaluator1_.isDynamic()) {
-    seleMan1_.setSelectionSet(evaluator1_.evaluate());
+  CenterOfMass::CenterOfMass(SimInfo* info, const std::string& filename,
+                             const std::string& sele1,
+                             const std::string& sele2) :
+      SequentialAnalyzer(info, filename, sele1, sele2) {
+    setOutputName(getPrefix(filename) + ".com");
   }
 
-  RealType mtot = 0.0;
-  Vector3d com(V3Zero);
-  RealType mass;
+  void CenterOfMass::doFrame(int frame) {
+    StuntDouble* sd;
+    int i;
 
-  for (sd = seleMan1_.beginSelected(i); sd != NULL;
-       sd = seleMan1_.nextSelected(i)) {
-    mass = sd->getMass();
-    mtot += mass;
-    com += sd->getPos() * mass;
-  }
-
-  com /= mtot;
-
-  values_.push_back(com);
-}
-
-void CenterOfMass::writeSequence() {
-  std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
-
-  if (ofs.is_open()) {
-    Revision r;
-
-    ofs << "# " << getSequenceType() << "\n";
-    ofs << "# OpenMD " << r.getFullRevision() << "\n";
-    ofs << "# " << r.getBuildDate() << "\n";
-    ofs << "# selection script1: \"" << selectionScript1_;
-    ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-    if (!paramString_.empty()) ofs << "# parameters: " << paramString_ << "\n";
-
-    ofs << "#time\tvalue\n";
-
-    for (unsigned int i = 0; i < times_.size(); ++i) {
-      ofs << times_[i] << "\t" << values_[i].x() << "\t" << values_[i].y()
-          << "\t" << values_[i].z() << "\n";
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
-  } else {
-    sprintf(painCave.errMsg,
-            "CenterOfMass::writeSequence Error: failed to open %s\n",
-            outputFilename_.c_str());
-    painCave.isFatal = 1;
-    simError();
+    RealType mtot = 0.0;
+    Vector3d com(V3Zero);
+    RealType mass;
+
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {
+      mass = sd->getMass();
+      mtot += mass;
+      com += sd->getPos() * mass;
+    }
+
+    com /= mtot;
+
+    values_.push_back(com);
   }
 
-  ofs.close();
-}
+  void CenterOfMass::writeSequence() {
+    std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
+
+    if (ofs.is_open()) {
+      Revision r;
+
+      ofs << "# " << getSequenceType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
+
+      ofs << "#time\tvalue\n";
+
+      for (unsigned int i = 0; i < times_.size(); ++i) {
+        ofs << times_[i] << "\t" << values_[i].x() << "\t" << values_[i].y()
+            << "\t" << values_[i].z() << "\n";
+      }
+
+    } else {
+      sprintf(painCave.errMsg,
+              "CenterOfMass::writeSequence Error: failed to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    ofs.close();
+  }
 }  // namespace OpenMD

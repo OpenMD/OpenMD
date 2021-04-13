@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,14 +42,14 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file PropertyMap.hpp
  * @author tlin
  * @date 09/21/2004
  * @version 1.0
  */
- 
+
 #ifndef UTIL_PROPERTYMAP_HPP
 #define UTIL_PROPERTYMAP_HPP
 
@@ -60,20 +60,21 @@
 
 #include <utils/GenericData.hpp>
 
-namespace OpenMD{
+namespace OpenMD {
 
   /**
    * @class PropertyMap
-   * PropertyMap class maintains a list of GenericData. Type of Property is actually GenericData.
+   * PropertyMap class maintains a list of GenericData. Type of Property is
+   * actually GenericData.
    */
-  class PropertyMap{
+  class PropertyMap {
   public:
-
     /** trivial constructor */
     PropertyMap() {}
 
     /**
-     * Virtual Destructor responsible for deleting all of the generc data in PropertyMap
+     * Virtual Destructor responsible for deleting all of the generc data in
+     * PropertyMap
      */
     virtual ~PropertyMap() = default;
 
@@ -110,8 +111,8 @@ namespace OpenMD{
      * @return all of the properties in PropertyMap
      *
      * @see #getPropertyByName
-     */      
-    std::vector<std::shared_ptr<GenericData> > getProperties();
+     */
+    std::vector<std::shared_ptr<GenericData>> getProperties();
 
     /**
      * Checks if property is in this PropertyMap
@@ -121,27 +122,27 @@ namespace OpenMD{
      * @return boolean
      *
      * @see #getProperties, #getPropertyByName
-     */      
+     */
     bool hasProperty(const std::string& propName);
 
     /**
-     * Returns property 
+     * Returns property
      *
      * @param propName name of property
      *
-     * @return a pointer point to property with propName. If no property named propName
-     * exists, return NULL
+     * @return a pointer point to property with propName. If no property named
+     * propName exists, return NULL
      *
      * @see #getProperties
-     */      
+     */
     std::shared_ptr<GenericData> getPropertyByName(const std::string& propName);
-    //template<typename T = GenericData*> T getPropertyByName(std:std::string& propName);
+    // template<typename T = GenericData*> T getPropertyByName(std:std::string&
+    // propName);
 
   protected:
-    std::map<std::string, std::shared_ptr<GenericData> > propMap_;
+    std::map<std::string, std::shared_ptr<GenericData>> propMap_;
 
   private:
-
     /** prevent copy constructing */
     PropertyMap(const PropertyMap&);
 
@@ -149,6 +150,6 @@ namespace OpenMD{
     PropertyMap& operator=(const PropertyMap&);
   };
 
-}// namespace OpenMD
+}  // namespace OpenMD
 
-#endif //UTIL_PROPERTYMAP_HPP
+#endif  // UTIL_PROPERTYMAP_HPP

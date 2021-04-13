@@ -24,16 +24,16 @@
 
 #include "randomBuilderCmd.hpp"
 
-const char *gengetopt_args_info_purpose = "";
+const char* gengetopt_args_info_purpose = "";
 
-const char *gengetopt_args_info_usage =
+const char* gengetopt_args_info_usage =
     "Usage: randomBuilder [OPTIONS]... [FILES]...";
 
-const char *gengetopt_args_info_versiontext = "";
+const char* gengetopt_args_info_versiontext = "";
 
-const char *gengetopt_args_info_description = "";
+const char* gengetopt_args_info_description = "";
 
-const char *gengetopt_args_info_help[] = {
+const char* gengetopt_args_info_help[] = {
     "  -h, --help                Print help and exit",
     "  -V, --version             Print version and exit",
     "  -o, --output=STRING       Output file name (mandatory)",
@@ -58,67 +58,67 @@ typedef enum {
   ARG_DOUBLE
 } cmdline_parser_arg_type;
 
-static void clear_given(struct gengetopt_args_info *args_info);
-static void clear_args(struct gengetopt_args_info *args_info);
+static void clear_given(struct gengetopt_args_info* args_info);
+static void clear_args(struct gengetopt_args_info* args_info);
 
-static int cmdline_parser_internal(int argc, char **argv,
-                                   struct gengetopt_args_info *args_info,
-                                   struct cmdline_parser_params *params,
-                                   const char *additional_error);
+static int cmdline_parser_internal(int argc, char** argv,
+                                   struct gengetopt_args_info* args_info,
+                                   struct cmdline_parser_params* params,
+                                   const char* additional_error);
 
-static int cmdline_parser_required2(struct gengetopt_args_info *args_info,
-                                    const char *prog_name,
-                                    const char *additional_error);
+static int cmdline_parser_required2(struct gengetopt_args_info* args_info,
+                                    const char* prog_name,
+                                    const char* additional_error);
 
-const char *cmdline_parser_lattice_values[] = {
+const char* cmdline_parser_lattice_values[] = {
     "FCC", "BCC", "SC", 0}; /*< Possible values for lattice. */
 
-static char *gengetopt_strdup(const char *s);
+static char* gengetopt_strdup(const char* s);
 
-static void clear_given(struct gengetopt_args_info *args_info) {
-  args_info->help_given = 0;
-  args_info->version_given = 0;
-  args_info->output_given = 0;
-  args_info->density_given = 0;
-  args_info->nx_given = 0;
-  args_info->ny_given = 0;
-  args_info->nz_given = 0;
+static void clear_given(struct gengetopt_args_info* args_info) {
+  args_info->help_given        = 0;
+  args_info->version_given     = 0;
+  args_info->output_given      = 0;
+  args_info->density_given     = 0;
+  args_info->nx_given          = 0;
+  args_info->ny_given          = 0;
+  args_info->nz_given          = 0;
   args_info->molFraction_given = 0;
-  args_info->lattice_given = 0;
+  args_info->lattice_given     = 0;
 }
 
-static void clear_args(struct gengetopt_args_info *args_info) {
+static void clear_args(struct gengetopt_args_info* args_info) {
   FIX_UNUSED(args_info);
-  args_info->output_arg = NULL;
-  args_info->output_orig = NULL;
-  args_info->density_orig = NULL;
-  args_info->nx_orig = NULL;
-  args_info->ny_orig = NULL;
-  args_info->nz_orig = NULL;
-  args_info->molFraction_arg = NULL;
+  args_info->output_arg       = NULL;
+  args_info->output_orig      = NULL;
+  args_info->density_orig     = NULL;
+  args_info->nx_orig          = NULL;
+  args_info->ny_orig          = NULL;
+  args_info->nz_orig          = NULL;
+  args_info->molFraction_arg  = NULL;
   args_info->molFraction_orig = NULL;
-  args_info->lattice_arg = NULL;
-  args_info->lattice_orig = NULL;
+  args_info->lattice_arg      = NULL;
+  args_info->lattice_orig     = NULL;
 }
 
-static void init_args_info(struct gengetopt_args_info *args_info) {
-  args_info->help_help = gengetopt_args_info_help[0];
-  args_info->version_help = gengetopt_args_info_help[1];
-  args_info->output_help = gengetopt_args_info_help[2];
-  args_info->density_help = gengetopt_args_info_help[3];
-  args_info->nx_help = gengetopt_args_info_help[4];
-  args_info->ny_help = gengetopt_args_info_help[5];
-  args_info->nz_help = gengetopt_args_info_help[6];
+static void init_args_info(struct gengetopt_args_info* args_info) {
+  args_info->help_help        = gengetopt_args_info_help[0];
+  args_info->version_help     = gengetopt_args_info_help[1];
+  args_info->output_help      = gengetopt_args_info_help[2];
+  args_info->density_help     = gengetopt_args_info_help[3];
+  args_info->nx_help          = gengetopt_args_info_help[4];
+  args_info->ny_help          = gengetopt_args_info_help[5];
+  args_info->nz_help          = gengetopt_args_info_help[6];
   args_info->molFraction_help = gengetopt_args_info_help[7];
-  args_info->molFraction_min = 0;
-  args_info->molFraction_max = 0;
-  args_info->lattice_help = gengetopt_args_info_help[8];
+  args_info->molFraction_min  = 0;
+  args_info->molFraction_max  = 0;
+  args_info->lattice_help     = gengetopt_args_info_help[8];
 }
 
 void cmdline_parser_print_version(void) {
   printf("%s %s\n",
-         (strlen(CMDLINE_PARSER_PACKAGE_NAME) ? CMDLINE_PARSER_PACKAGE_NAME
-                                              : CMDLINE_PARSER_PACKAGE),
+         (strlen(CMDLINE_PARSER_PACKAGE_NAME) ? CMDLINE_PARSER_PACKAGE_NAME :
+                                                CMDLINE_PARSER_PACKAGE),
          CMDLINE_PARSER_VERSION);
 
   if (strlen(gengetopt_args_info_versiontext) > 0)
@@ -147,33 +147,33 @@ void cmdline_parser_print_help(void) {
     printf("%s\n", gengetopt_args_info_help[i++]);
 }
 
-void cmdline_parser_init(struct gengetopt_args_info *args_info) {
+void cmdline_parser_init(struct gengetopt_args_info* args_info) {
   clear_given(args_info);
   clear_args(args_info);
   init_args_info(args_info);
 
-  args_info->inputs = 0;
+  args_info->inputs     = 0;
   args_info->inputs_num = 0;
 }
 
-void cmdline_parser_params_init(struct cmdline_parser_params *params) {
+void cmdline_parser_params_init(struct cmdline_parser_params* params) {
   if (params) {
-    params->override = 0;
-    params->initialize = 1;
-    params->check_required = 1;
+    params->override        = 0;
+    params->initialize      = 1;
+    params->check_required  = 1;
     params->check_ambiguity = 0;
-    params->print_errors = 1;
+    params->print_errors    = 1;
   }
 }
 
-struct cmdline_parser_params *cmdline_parser_params_create(void) {
-  struct cmdline_parser_params *params = (struct cmdline_parser_params *)malloc(
+struct cmdline_parser_params* cmdline_parser_params_create(void) {
+  struct cmdline_parser_params* params = (struct cmdline_parser_params*)malloc(
       sizeof(struct cmdline_parser_params));
   cmdline_parser_params_init(params);
   return params;
 }
 
-static void free_string_field(char **s) {
+static void free_string_field(char** s) {
   if (*s) {
     free(*s);
     *s = 0;
@@ -184,33 +184,33 @@ static void free_string_field(char **s) {
 union generic_value {
   int int_arg;
   double double_arg;
-  char *string_arg;
-  const char *default_string_arg;
+  char* string_arg;
+  const char* default_string_arg;
 };
 
 /** @brief holds temporary values for multiple options */
 struct generic_list {
   union generic_value arg;
-  char *orig;
-  struct generic_list *next;
+  char* orig;
+  struct generic_list* next;
 };
 
 /**
  * @brief add a node at the head of the list
  */
-static void add_node(struct generic_list **list) {
-  struct generic_list *new_node =
-      (struct generic_list *)malloc(sizeof(struct generic_list));
-  new_node->next = *list;
-  *list = new_node;
+static void add_node(struct generic_list** list) {
+  struct generic_list* new_node =
+      (struct generic_list*)malloc(sizeof(struct generic_list));
+  new_node->next           = *list;
+  *list                    = new_node;
   new_node->arg.string_arg = 0;
-  new_node->orig = 0;
+  new_node->orig           = 0;
 }
 
 /**
  * The passed arg parameter is NOT set to 0 from this function
  */
-static void free_multiple_field(unsigned int len, void *arg, char ***orig) {
+static void free_multiple_field(unsigned int len, void* arg, char*** orig) {
   unsigned int i;
   if (arg) {
     for (i = 0; i < len; ++i) {
@@ -223,7 +223,7 @@ static void free_multiple_field(unsigned int len, void *arg, char ***orig) {
   }
 }
 
-static void cmdline_parser_release(struct gengetopt_args_info *args_info) {
+static void cmdline_parser_release(struct gengetopt_args_info* args_info) {
   unsigned int i;
   free_string_field(&(args_info->output_arg));
   free_string_field(&(args_info->output_orig));
@@ -232,13 +232,14 @@ static void cmdline_parser_release(struct gengetopt_args_info *args_info) {
   free_string_field(&(args_info->ny_orig));
   free_string_field(&(args_info->nz_orig));
   free_multiple_field(args_info->molFraction_given,
-                      (void *)(args_info->molFraction_arg),
+                      (void*)(args_info->molFraction_arg),
                       &(args_info->molFraction_orig));
   args_info->molFraction_arg = 0;
   free_string_field(&(args_info->lattice_arg));
   free_string_field(&(args_info->lattice_orig));
 
-  for (i = 0; i < args_info->inputs_num; ++i) free(args_info->inputs[i]);
+  for (i = 0; i < args_info->inputs_num; ++i)
+    free(args_info->inputs[i]);
 
   if (args_info->inputs_num) free(args_info->inputs);
 
@@ -252,7 +253,7 @@ static void cmdline_parser_release(struct gengetopt_args_info *args_info) {
  * -1 if no value matched,
  * -2 if more than one value has matched
  */
-static int check_possible_values(const char *val, const char *values[]) {
+static int check_possible_values(const char* val, const char* values[]) {
   int i, found, last;
   size_t len;
 
@@ -276,13 +277,11 @@ static int check_possible_values(const char *val, const char *values[]) {
   return (found ? -2 : -1); /* return many values or none matched */
 }
 
-static void write_into_file(FILE *outfile, const char *opt, const char *arg,
-                            const char *values[]) {
+static void write_into_file(FILE* outfile, const char* opt, const char* arg,
+                            const char* values[]) {
   int found = -1;
   if (arg) {
-    if (values) {
-      found = check_possible_values(arg, values);
-    }
+    if (values) { found = check_possible_values(arg, values); }
     if (found >= 0)
       fprintf(outfile, "%s=\"%s\" # %s\n", opt, arg, values[found]);
     else
@@ -292,15 +291,15 @@ static void write_into_file(FILE *outfile, const char *opt, const char *arg,
   }
 }
 
-static void write_multiple_into_file(FILE *outfile, int len, const char *opt,
-                                     char **arg, const char *values[]) {
+static void write_multiple_into_file(FILE* outfile, int len, const char* opt,
+                                     char** arg, const char* values[]) {
   int i;
 
   for (i = 0; i < len; ++i)
     write_into_file(outfile, opt, (arg ? arg[i] : 0), values);
 }
 
-int cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info) {
+int cmdline_parser_dump(FILE* outfile, struct gengetopt_args_info* args_info) {
   int i = 0;
 
   if (!outfile) {
@@ -331,9 +330,9 @@ int cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info) {
   return i;
 }
 
-int cmdline_parser_file_save(const char *filename,
-                             struct gengetopt_args_info *args_info) {
-  FILE *outfile;
+int cmdline_parser_file_save(const char* filename,
+                             struct gengetopt_args_info* args_info) {
+  FILE* outfile;
   int i = 0;
 
   outfile = fopen(filename, "w");
@@ -350,29 +349,29 @@ int cmdline_parser_file_save(const char *filename,
   return i;
 }
 
-void cmdline_parser_free(struct gengetopt_args_info *args_info) {
+void cmdline_parser_free(struct gengetopt_args_info* args_info) {
   cmdline_parser_release(args_info);
 }
 
 /** @brief replacement of strdup, which is not standard */
-char *gengetopt_strdup(const char *s) {
-  char *result = 0;
+char* gengetopt_strdup(const char* s) {
+  char* result = 0;
   if (!s) return result;
 
-  result = (char *)malloc(strlen(s) + 1);
-  if (result == (char *)0) return (char *)0;
+  result = (char*)malloc(strlen(s) + 1);
+  if (result == (char*)0) return (char*)0;
   strcpy(result, s);
   return result;
 }
 
-static char *get_multiple_arg_token(const char *arg) {
-  const char *tok;
-  char *ret;
+static char* get_multiple_arg_token(const char* arg) {
+  const char* tok;
+  char* ret;
   size_t len, num_of_escape, i, j;
 
   if (!arg) return 0;
 
-  tok = strchr(arg, ',');
+  tok           = strchr(arg, ',');
   num_of_escape = 0;
 
   /* make sure it is not escaped */
@@ -392,7 +391,7 @@ static char *get_multiple_arg_token(const char *arg) {
 
   len -= num_of_escape;
 
-  ret = (char *)malloc(len);
+  ret = (char*)malloc(len);
 
   i = 0;
   j = 0;
@@ -407,8 +406,8 @@ static char *get_multiple_arg_token(const char *arg) {
   return ret;
 }
 
-static const char *get_multiple_arg_token_next(const char *arg) {
-  const char *tok;
+static const char* get_multiple_arg_token_next(const char* arg) {
+  const char* tok;
 
   if (!arg) return 0;
 
@@ -428,15 +427,15 @@ static const char *get_multiple_arg_token_next(const char *arg) {
   return tok + 1;
 }
 
-static int check_multiple_option_occurrences(const char *prog_name,
+static int check_multiple_option_occurrences(const char* prog_name,
                                              unsigned int option_given,
                                              unsigned int min, unsigned int max,
-                                             const char *option_desc);
+                                             const char* option_desc);
 
-int check_multiple_option_occurrences(const char *prog_name,
+int check_multiple_option_occurrences(const char* prog_name,
                                       unsigned int option_given,
                                       unsigned int min, unsigned int max,
-                                      const char *option_desc) {
+                                      const char* option_desc) {
   int error_occurred = 0;
 
   if (option_given && (min > 0 || max > 0)) {
@@ -474,39 +473,39 @@ int check_multiple_option_occurrences(const char *prog_name,
 
   return error_occurred;
 }
-int cmdline_parser(int argc, char **argv,
-                   struct gengetopt_args_info *args_info) {
+int cmdline_parser(int argc, char** argv,
+                   struct gengetopt_args_info* args_info) {
   return cmdline_parser2(argc, argv, args_info, 0, 1, 1);
 }
 
-int cmdline_parser_ext(int argc, char **argv,
-                       struct gengetopt_args_info *args_info,
-                       struct cmdline_parser_params *params) {
+int cmdline_parser_ext(int argc, char** argv,
+                       struct gengetopt_args_info* args_info,
+                       struct cmdline_parser_params* params) {
   int result;
   result = cmdline_parser_internal(argc, argv, args_info, params, 0);
 
   return result;
 }
 
-int cmdline_parser2(int argc, char **argv,
-                    struct gengetopt_args_info *args_info, int override,
+int cmdline_parser2(int argc, char** argv,
+                    struct gengetopt_args_info* args_info, int override,
                     int initialize, int check_required) {
   int result;
   struct cmdline_parser_params params;
 
-  params.override = override;
-  params.initialize = initialize;
-  params.check_required = check_required;
+  params.override        = override;
+  params.initialize      = initialize;
+  params.check_required  = check_required;
   params.check_ambiguity = 0;
-  params.print_errors = 1;
+  params.print_errors    = 1;
 
   result = cmdline_parser_internal(argc, argv, args_info, &params, 0);
 
   return result;
 }
 
-int cmdline_parser_required(struct gengetopt_args_info *args_info,
-                            const char *prog_name) {
+int cmdline_parser_required(struct gengetopt_args_info* args_info,
+                            const char* prog_name) {
   int result = EXIT_SUCCESS;
 
   if (cmdline_parser_required2(args_info, prog_name, 0) > 0)
@@ -515,9 +514,9 @@ int cmdline_parser_required(struct gengetopt_args_info *args_info,
   return result;
 }
 
-int cmdline_parser_required2(struct gengetopt_args_info *args_info,
-                             const char *prog_name,
-                             const char *additional_error) {
+int cmdline_parser_required2(struct gengetopt_args_info* args_info,
+                             const char* prog_name,
+                             const char* additional_error) {
   int error_occurred = 0;
   FIX_UNUSED(additional_error);
 
@@ -583,11 +582,11 @@ int cmdline_parser_required2(struct gengetopt_args_info *args_info,
  */
 
 struct option {
-  const char *name;
+  const char* name;
   /* has_arg can't be an enum because some compilers complain about
      type mismatches in all the code that assumes it is an int.  */
   int has_arg;
-  int *flag;
+  int* flag;
   int val;
 };
 
@@ -632,7 +631,7 @@ struct custom_getopt_data {
   int custom_optind;
   int custom_opterr;
   int custom_optopt;
-  char *custom_optarg;
+  char* custom_optarg;
 
   /* True if the internal members have been initialized.  */
   int initialized;
@@ -643,7 +642,7 @@ struct custom_getopt_data {
    * we left off.  If this is zero, or a null string, it means resume the scan
    * by advancing to the next ARGV-element.
    */
-  char *nextchar;
+  char* nextchar;
 
   /*
    * Describe the part of ARGV that contains non-options that have been skipped.
@@ -666,7 +665,7 @@ struct custom_getopt_data {
  * For communication from `custom_getopt' to the caller.  When `custom_getopt'
  * finds an option that takes an argument, the argument value is returned here.
  */
-static char *custom_optarg;
+static char* custom_optarg;
 
 /*
  * Index in ARGV of the next element to be scanned.  This is used for
@@ -705,11 +704,11 @@ static int custom_optopt = '?';
  * `first_nonopt' and `last_nonopt' are relocated so that they describe the new
  * indices of the non-options in ARGV after they are moved.
  */
-static void exchange(char **argv, struct custom_getopt_data *d) {
+static void exchange(char** argv, struct custom_getopt_data* d) {
   int bottom = d->first_nonopt;
   int middle = d->last_nonopt;
-  int top = d->custom_optind;
-  char *tem;
+  int top    = d->custom_optind;
+  char* tem;
 
   /*
    * Exchange the shorter segment with the far end of the longer segment.
@@ -725,8 +724,8 @@ static void exchange(char **argv, struct custom_getopt_data *d) {
 
       /* Swap it with the top part of the top segment.  */
       for (i = 0; i < len; i++) {
-        tem = argv[bottom + i];
-        argv[bottom + i] = argv[top - (middle - bottom) + i];
+        tem                               = argv[bottom + i];
+        argv[bottom + i]                  = argv[top - (middle - bottom) + i];
         argv[top - (middle - bottom) + i] = tem;
       }
       /* Exclude the moved bottom segment from further swapping.  */
@@ -738,7 +737,7 @@ static void exchange(char **argv, struct custom_getopt_data *d) {
 
       /* Swap it with the bottom part of the bottom segment.  */
       for (i = 0; i < len; i++) {
-        tem = argv[bottom + i];
+        tem              = argv[bottom + i];
         argv[bottom + i] = argv[middle + i];
         argv[middle + i] = tem;
       }
@@ -752,24 +751,24 @@ static void exchange(char **argv, struct custom_getopt_data *d) {
 }
 
 /* Initialize the internal data when the first call is made.  */
-static void custom_getopt_initialize(struct custom_getopt_data *d) {
+static void custom_getopt_initialize(struct custom_getopt_data* d) {
   /*
    * Start processing options with ARGV-element 1 (since ARGV-element 0
    * is the program name); the sequence of previously skipped non-option
    * ARGV-elements is empty.
    */
   d->first_nonopt = d->last_nonopt = d->custom_optind;
-  d->nextchar = NULL;
-  d->initialized = 1;
+  d->nextchar                      = NULL;
+  d->initialized                   = 1;
 }
 
 #define NONOPTION_P \
   (argv[d->custom_optind][0] != '-' || argv[d->custom_optind][1] == '\0')
 
 /* return: zero: continue, nonzero: return given value to user */
-static int shuffle_argv(int argc, char *const *argv,
-                        const struct option *longopts,
-                        struct custom_getopt_data *d) {
+static int shuffle_argv(int argc, char* const* argv,
+                        const struct option* longopts,
+                        struct custom_getopt_data* d) {
   /*
    * Give FIRST_NONOPT & LAST_NONOPT rational values if CUSTOM_OPTIND has been
    * moved back by the user (who may also have changed the arguments).
@@ -781,14 +780,15 @@ static int shuffle_argv(int argc, char *const *argv,
    * non-options, exchange them so that the options come first.
    */
   if (d->first_nonopt != d->last_nonopt && d->last_nonopt != d->custom_optind)
-    exchange((char **)argv, d);
+    exchange((char**)argv, d);
   else if (d->last_nonopt != d->custom_optind)
     d->first_nonopt = d->custom_optind;
   /*
    * Skip any additional non-options and extend the range of
    * non-options previously skipped.
    */
-  while (d->custom_optind < argc && NONOPTION_P) d->custom_optind++;
+  while (d->custom_optind < argc && NONOPTION_P)
+    d->custom_optind++;
   d->last_nonopt = d->custom_optind;
   /*
    * The special ARGV-element `--' means premature end of options.  Skip
@@ -798,10 +798,10 @@ static int shuffle_argv(int argc, char *const *argv,
   if (d->custom_optind != argc && !strcmp(argv[d->custom_optind], "--")) {
     d->custom_optind++;
     if (d->first_nonopt != d->last_nonopt && d->last_nonopt != d->custom_optind)
-      exchange((char **)argv, d);
+      exchange((char**)argv, d);
     else if (d->first_nonopt == d->last_nonopt)
       d->first_nonopt = d->custom_optind;
-    d->last_nonopt = argc;
+    d->last_nonopt   = argc;
     d->custom_optind = argc;
   }
   /*
@@ -843,15 +843,15 @@ static int shuffle_argv(int argc, char *const *argv,
  * This distinction seems to be the most useful approach.
  *
  */
-static int check_long_opt(int argc, char *const *argv, const char *optstring,
-                          const struct option *longopts, int *longind,
-                          int print_errors, struct custom_getopt_data *d) {
-  char *nameend;
-  const struct option *p;
-  const struct option *pfound = NULL;
-  int exact = 0;
-  int ambig = 0;
-  int indfound = -1;
+static int check_long_opt(int argc, char* const* argv, const char* optstring,
+                          const struct option* longopts, int* longind,
+                          int print_errors, struct custom_getopt_data* d) {
+  char* nameend;
+  const struct option* p;
+  const struct option* pfound = NULL;
+  int exact                   = 0;
+  int ambig                   = 0;
+  int indfound                = -1;
   int option_index;
 
   for (nameend = d->nextchar; *nameend && *nameend != '=';
@@ -864,13 +864,13 @@ static int check_long_opt(int argc, char *const *argv, const char *optstring,
       if ((unsigned int)(nameend - d->nextchar) ==
           (unsigned int)strlen(p->name)) {
         /* Exact match found.  */
-        pfound = p;
+        pfound   = p;
         indfound = option_index;
-        exact = 1;
+        exact    = 1;
         break;
       } else if (pfound == NULL) {
         /* First nonexact match found.  */
-        pfound = p;
+        pfound   = p;
         indfound = option_index;
       } else if (pfound->has_arg != p->has_arg || pfound->flag != p->flag ||
                  pfound->val != p->val)
@@ -945,16 +945,16 @@ static int check_long_opt(int argc, char *const *argv, const char *optstring,
               argv[d->custom_optind][0], d->nextchar);
     }
   }
-  d->nextchar = (char *)"";
+  d->nextchar = (char*)"";
   d->custom_optind++;
   d->custom_optopt = 0;
   return '?';
 }
 
-static int check_short_opt(int argc, char *const *argv, const char *optstring,
-                           int print_errors, struct custom_getopt_data *d) {
-  char c = *d->nextchar++;
-  const char *temp = strchr(optstring, c);
+static int check_short_opt(int argc, char* const* argv, const char* optstring,
+                           int print_errors, struct custom_getopt_data* d) {
+  char c           = *d->nextchar++;
+  const char* temp = strchr(optstring, c);
 
   /* Increment `custom_optind' when we start to process its last character.  */
   if (*d->nextchar == '\0') ++d->custom_optind;
@@ -1076,9 +1076,9 @@ static int check_short_opt(int argc, char *const *argv, const char *optstring,
  * '\0'.  This behavior is specific to the GNU `getopt'.
  */
 
-static int getopt_internal_r(int argc, char *const *argv, const char *optstring,
-                             const struct option *longopts, int *longind,
-                             struct custom_getopt_data *d) {
+static int getopt_internal_r(int argc, char* const* argv, const char* optstring,
+                             const struct option* longopts, int* longind,
+                             struct custom_getopt_data* d) {
   int ret, print_errors = d->custom_opterr;
 
   if (optstring[0] == ':') print_errors = 0;
@@ -1104,9 +1104,9 @@ static int getopt_internal_r(int argc, char *const *argv, const char *optstring,
   return check_short_opt(argc, argv, optstring, print_errors, d);
 }
 
-static int custom_getopt_internal(int argc, char *const *argv,
-                                  const char *optstring,
-                                  const struct option *longopts, int *longind) {
+static int custom_getopt_internal(int argc, char* const* argv,
+                                  const char* optstring,
+                                  const struct option* longopts, int* longind) {
   int result;
   /* Keep a global copy of all internal members of d */
   static struct custom_getopt_data d;
@@ -1120,13 +1120,13 @@ static int custom_getopt_internal(int argc, char *const *argv,
   return result;
 }
 
-static int custom_getopt_long(int argc, char *const *argv, const char *options,
-                              const struct option *long_options,
-                              int *opt_index) {
+static int custom_getopt_long(int argc, char* const* argv, const char* options,
+                              const struct option* long_options,
+                              int* opt_index) {
   return custom_getopt_internal(argc, argv, options, long_options, opt_index);
 }
 
-static char *package_name = 0;
+static char* package_name = 0;
 
 /**
  * @brief updates an option
@@ -1147,21 +1147,21 @@ static char *package_name = 0;
  * @param short_opt the corresponding short option (or '-' if none)
  * @param additional_error possible further error specification
  */
-static int update_arg(void *field, char **orig_field, unsigned int *field_given,
-                      unsigned int *prev_given, char *value,
-                      const char *possible_values[], const char *default_value,
+static int update_arg(void* field, char** orig_field, unsigned int* field_given,
+                      unsigned int* prev_given, char* value,
+                      const char* possible_values[], const char* default_value,
                       cmdline_parser_arg_type arg_type, int check_ambiguity,
                       int override, int no_free, int multiple_option,
-                      const char *long_opt, char short_opt,
-                      const char *additional_error) {
-  char *stop_char = 0;
-  const char *val = value;
+                      const char* long_opt, char short_opt,
+                      const char* additional_error) {
+  char* stop_char = 0;
+  const char* val = value;
   int found;
-  char **string_field;
+  char** string_field;
   FIX_UNUSED(field);
 
   stop_char = 0;
-  found = 0;
+  found     = 0;
 
   if (!multiple_option && prev_given &&
       (*prev_given || (check_ambiguity && *field_given))) {
@@ -1196,49 +1196,49 @@ static int update_arg(void *field, char **orig_field, unsigned int *field_given,
   if (possible_values) val = possible_values[found];
 
   switch (arg_type) {
-    case ARG_INT:
-      if (val) *((int *)field) = strtol(val, &stop_char, 0);
-      break;
-    case ARG_DOUBLE:
-      if (val) *((double *)field) = strtod(val, &stop_char);
-      break;
-    case ARG_STRING:
-      if (val) {
-        string_field = (char **)field;
-        if (!no_free && *string_field)
-          free(*string_field); /* free previous string */
-        *string_field = gengetopt_strdup(val);
-      }
-      break;
-    default:
-      break;
+  case ARG_INT:
+    if (val) *((int*)field) = strtol(val, &stop_char, 0);
+    break;
+  case ARG_DOUBLE:
+    if (val) *((double*)field) = strtod(val, &stop_char);
+    break;
+  case ARG_STRING:
+    if (val) {
+      string_field = (char**)field;
+      if (!no_free && *string_field)
+        free(*string_field); /* free previous string */
+      *string_field = gengetopt_strdup(val);
+    }
+    break;
+  default:
+    break;
   };
 
   /* check numeric conversion */
   switch (arg_type) {
-    case ARG_INT:
-    case ARG_DOUBLE:
-      if (val && !(stop_char && *stop_char == '\0')) {
-        fprintf(stderr, "%s: invalid numeric value: %s\n", package_name, val);
-        return 1; /* failure */
-      }
-      break;
-    default:;
+  case ARG_INT:
+  case ARG_DOUBLE:
+    if (val && !(stop_char && *stop_char == '\0')) {
+      fprintf(stderr, "%s: invalid numeric value: %s\n", package_name, val);
+      return 1; /* failure */
+    }
+    break;
+  default:;
   };
 
   /* store the original value */
   switch (arg_type) {
-    case ARG_NO:
-      break;
-    default:
-      if (value && orig_field) {
-        if (no_free) {
-          *orig_field = value;
-        } else {
-          if (*orig_field) free(*orig_field); /* free previous string */
-          *orig_field = gengetopt_strdup(value);
-        }
+  case ARG_NO:
+    break;
+  default:
+    if (value && orig_field) {
+      if (no_free) {
+        *orig_field = value;
+      } else {
+        if (*orig_field) free(*orig_field); /* free previous string */
+        *orig_field = gengetopt_strdup(value);
       }
+    }
   };
 
   return 0; /* OK */
@@ -1248,16 +1248,16 @@ static int update_arg(void *field, char **orig_field, unsigned int *field_given,
  * @brief store information about a multiple option in a temporary list
  * @param list where to (temporarily) store multiple options
  */
-static int update_multiple_arg_temp(struct generic_list **list,
-                                    unsigned int *prev_given, const char *val,
-                                    const char *possible_values[],
-                                    const char *default_value,
+static int update_multiple_arg_temp(struct generic_list** list,
+                                    unsigned int* prev_given, const char* val,
+                                    const char* possible_values[],
+                                    const char* default_value,
                                     cmdline_parser_arg_type arg_type,
-                                    const char *long_opt, char short_opt,
-                                    const char *additional_error) {
+                                    const char* long_opt, char short_opt,
+                                    const char* additional_error) {
   /* store single arguments */
-  char *multi_token;
-  const char *multi_next;
+  char* multi_token;
+  const char* multi_next;
 
   if (arg_type == ARG_NO) {
     (*prev_given)++;
@@ -1265,11 +1265,11 @@ static int update_multiple_arg_temp(struct generic_list **list,
   }
 
   multi_token = get_multiple_arg_token(val);
-  multi_next = get_multiple_arg_token_next(val);
+  multi_next  = get_multiple_arg_token_next(val);
 
   while (1) {
     add_node(list);
-    if (update_arg((void *)&((*list)->arg), &((*list)->orig), 0, prev_given,
+    if (update_arg((void*)&((*list)->arg), &((*list)->orig), 0, prev_given,
                    multi_token, possible_values, default_value, arg_type, 0, 1,
                    1, 1, long_opt, short_opt, additional_error)) {
       if (multi_token) free(multi_token);
@@ -1278,7 +1278,7 @@ static int update_multiple_arg_temp(struct generic_list **list,
 
     if (multi_next) {
       multi_token = get_multiple_arg_token(multi_next);
-      multi_next = get_multiple_arg_token_next(multi_next);
+      multi_next  = get_multiple_arg_token_next(multi_next);
     } else
       break;
   }
@@ -1289,9 +1289,9 @@ static int update_multiple_arg_temp(struct generic_list **list,
 /**
  * @brief free the passed list (including possible string argument)
  */
-static void free_list(struct generic_list *list, short string_arg) {
+static void free_list(struct generic_list* list, short string_arg) {
   if (list) {
-    struct generic_list *tmp;
+    struct generic_list* tmp;
     while (list) {
       tmp = list;
       if (string_arg && list->arg.string_arg) free(list->arg.string_arg);
@@ -1305,97 +1305,96 @@ static void free_list(struct generic_list *list, short string_arg) {
 /**
  * @brief updates a multiple option starting from the passed list
  */
-static void update_multiple_arg(void *field, char ***orig_field,
+static void update_multiple_arg(void* field, char*** orig_field,
                                 unsigned int field_given,
                                 unsigned int prev_given,
-                                union generic_value *default_value,
+                                union generic_value* default_value,
                                 cmdline_parser_arg_type arg_type,
-                                struct generic_list *list) {
+                                struct generic_list* list) {
   int i;
-  struct generic_list *tmp;
+  struct generic_list* tmp;
 
   if (prev_given && list) {
-    *orig_field = (char **)realloc(*orig_field,
-                                   (field_given + prev_given) * sizeof(char *));
+    *orig_field = (char**)realloc(*orig_field,
+                                  (field_given + prev_given) * sizeof(char*));
 
     switch (arg_type) {
-      case ARG_INT:
-        *((int **)field) = (int *)realloc(
-            *((int **)field), (field_given + prev_given) * sizeof(int));
-        break;
-      case ARG_DOUBLE:
-        *((double **)field) = (double *)realloc(
-            *((double **)field), (field_given + prev_given) * sizeof(double));
-        break;
-      case ARG_STRING:
-        *((char ***)field) = (char **)realloc(
-            *((char ***)field), (field_given + prev_given) * sizeof(char *));
-        break;
-      default:
-        break;
+    case ARG_INT:
+      *((int**)field) = (int*)realloc(*((int**)field),
+                                      (field_given + prev_given) * sizeof(int));
+      break;
+    case ARG_DOUBLE:
+      *((double**)field) = (double*)realloc(
+          *((double**)field), (field_given + prev_given) * sizeof(double));
+      break;
+    case ARG_STRING:
+      *((char***)field) = (char**)realloc(
+          *((char***)field), (field_given + prev_given) * sizeof(char*));
+      break;
+    default:
+      break;
     };
 
     for (i = (prev_given - 1); i >= 0; --i) {
       tmp = list;
 
       switch (arg_type) {
-        case ARG_INT:
-          (*((int **)field))[i + field_given] = tmp->arg.int_arg;
-          break;
-        case ARG_DOUBLE:
-          (*((double **)field))[i + field_given] = tmp->arg.double_arg;
-          break;
-        case ARG_STRING:
-          (*((char ***)field))[i + field_given] = tmp->arg.string_arg;
-          break;
-        default:
-          break;
+      case ARG_INT:
+        (*((int**)field))[i + field_given] = tmp->arg.int_arg;
+        break;
+      case ARG_DOUBLE:
+        (*((double**)field))[i + field_given] = tmp->arg.double_arg;
+        break;
+      case ARG_STRING:
+        (*((char***)field))[i + field_given] = tmp->arg.string_arg;
+        break;
+      default:
+        break;
       }
       (*orig_field)[i + field_given] = list->orig;
-      list = list->next;
+      list                           = list->next;
       free(tmp);
     }
   } else { /* set the default value */
     if (default_value && !field_given) {
       switch (arg_type) {
-        case ARG_INT:
-          if (!*((int **)field)) {
-            *((int **)field) = (int *)malloc(sizeof(int));
-            (*((int **)field))[0] = default_value->int_arg;
-          }
-          break;
-        case ARG_DOUBLE:
-          if (!*((double **)field)) {
-            *((double **)field) = (double *)malloc(sizeof(double));
-            (*((double **)field))[0] = default_value->double_arg;
-          }
-          break;
-        case ARG_STRING:
-          if (!*((char ***)field)) {
-            *((char ***)field) = (char **)malloc(sizeof(char *));
-            (*((char ***)field))[0] =
-                gengetopt_strdup(default_value->string_arg);
-          }
-          break;
-        default:
-          break;
+      case ARG_INT:
+        if (!*((int**)field)) {
+          *((int**)field)      = (int*)malloc(sizeof(int));
+          (*((int**)field))[0] = default_value->int_arg;
+        }
+        break;
+      case ARG_DOUBLE:
+        if (!*((double**)field)) {
+          *((double**)field)      = (double*)malloc(sizeof(double));
+          (*((double**)field))[0] = default_value->double_arg;
+        }
+        break;
+      case ARG_STRING:
+        if (!*((char***)field)) {
+          *((char***)field)      = (char**)malloc(sizeof(char*));
+          (*((char***)field))[0] = gengetopt_strdup(default_value->string_arg);
+        }
+        break;
+      default:
+        break;
       }
       if (!(*orig_field)) {
-        *orig_field = (char **)malloc(sizeof(char *));
+        *orig_field      = (char**)malloc(sizeof(char*));
         (*orig_field)[0] = 0;
       }
     }
   }
 }
 
-int cmdline_parser_internal(int argc, char **argv,
-                            struct gengetopt_args_info *args_info,
-                            struct cmdline_parser_params *params,
-                            const char *additional_error) {
+int cmdline_parser_internal(int argc, char** argv,
+                            struct gengetopt_args_info* args_info,
+                            struct cmdline_parser_params* params,
+                            const char* additional_error) {
   int c; /* Character of the parsed option.  */
 
-  struct generic_list *molFraction_list = NULL;
-  int error_occurred = 0;
+  struct generic_list* molFraction_list = NULL;
+  int error_occurred                    = 0;
   struct gengetopt_args_info local_args_info;
 
   int override;
@@ -1403,16 +1402,16 @@ int cmdline_parser_internal(int argc, char **argv,
   int check_required;
   int check_ambiguity;
 
-  char *optarg;
+  char* optarg;
   int optind;
   int opterr;
   int optopt;
 
   package_name = argv[0];
 
-  override = params->override;
-  initialize = params->initialize;
-  check_required = params->check_required;
+  override        = params->override;
+  initialize      = params->initialize;
+  check_required  = params->check_required;
   check_ambiguity = params->check_ambiguity;
 
   if (initialize) cmdline_parser_init(args_info);
@@ -1449,100 +1448,99 @@ int cmdline_parser_internal(int argc, char **argv,
     if (c == -1) break; /* Exit from `while (1)' loop.  */
 
     switch (c) {
-      case 'h': /* Print help and exit.  */
-        cmdline_parser_print_help();
-        cmdline_parser_free(&local_args_info);
-        exit(EXIT_SUCCESS);
+    case 'h': /* Print help and exit.  */
+      cmdline_parser_print_help();
+      cmdline_parser_free(&local_args_info);
+      exit(EXIT_SUCCESS);
 
-      case 'V': /* Print version and exit.  */
-        cmdline_parser_print_version();
-        cmdline_parser_free(&local_args_info);
-        exit(EXIT_SUCCESS);
+    case 'V': /* Print version and exit.  */
+      cmdline_parser_print_version();
+      cmdline_parser_free(&local_args_info);
+      exit(EXIT_SUCCESS);
 
-      case 'o': /* Output file name.  */
+    case 'o': /* Output file name.  */
 
-        if (update_arg((void *)&(args_info->output_arg),
-                       &(args_info->output_orig), &(args_info->output_given),
-                       &(local_args_info.output_given), optarg, 0, 0,
-                       ARG_STRING, check_ambiguity, override, 0, 0, "output",
-                       'o', additional_error))
-          goto failure;
-
-        break;
-      case 'l': /* Lattice Type.  */
-
-        if (update_arg((void *)&(args_info->lattice_arg),
-                       &(args_info->lattice_orig), &(args_info->lattice_given),
-                       &(local_args_info.lattice_given), optarg,
-                       cmdline_parser_lattice_values, 0, ARG_STRING,
-                       check_ambiguity, override, 0, 0, "lattice", 'l',
-                       additional_error))
-          goto failure;
-
-        break;
-
-      case 0: /* Long option with no short option */
-        /* density (g/cm^3).  */
-        if (strcmp(long_options[option_index].name, "density") == 0) {
-          if (update_arg(
-                  (void *)&(args_info->density_arg), &(args_info->density_orig),
-                  &(args_info->density_given), &(local_args_info.density_given),
-                  optarg, 0, 0, ARG_DOUBLE, check_ambiguity, override, 0, 0,
-                  "density", '-', additional_error))
-            goto failure;
-
-        }
-        /* number of unit cells in x.  */
-        else if (strcmp(long_options[option_index].name, "nx") == 0) {
-          if (update_arg((void *)&(args_info->nx_arg), &(args_info->nx_orig),
-                         &(args_info->nx_given), &(local_args_info.nx_given),
-                         optarg, 0, 0, ARG_INT, check_ambiguity, override, 0, 0,
-                         "nx", '-', additional_error))
-            goto failure;
-
-        }
-        /* number of unit cells in y.  */
-        else if (strcmp(long_options[option_index].name, "ny") == 0) {
-          if (update_arg((void *)&(args_info->ny_arg), &(args_info->ny_orig),
-                         &(args_info->ny_given), &(local_args_info.ny_given),
-                         optarg, 0, 0, ARG_INT, check_ambiguity, override, 0, 0,
-                         "ny", '-', additional_error))
-            goto failure;
-
-        }
-        /* number of unit cells in z.  */
-        else if (strcmp(long_options[option_index].name, "nz") == 0) {
-          if (update_arg((void *)&(args_info->nz_arg), &(args_info->nz_orig),
-                         &(args_info->nz_given), &(local_args_info.nz_given),
-                         optarg, 0, 0, ARG_INT, check_ambiguity, override, 0, 0,
-                         "nz", '-', additional_error))
-            goto failure;
-
-        }
-        /* (Default) Builds a multi-component random mixed nanoparticle. Mole
-           Fraction must be specified for each componet > 1 in MD file..  */
-        else if (strcmp(long_options[option_index].name, "molFraction") == 0) {
-          if (update_multiple_arg_temp(&molFraction_list,
-                                       &(local_args_info.molFraction_given),
-                                       optarg, 0, 0, ARG_DOUBLE, "molFraction",
-                                       '-', additional_error))
-            goto failure;
-        }
-
-        break;
-      case '?': /* Invalid option.  */
-        /* `getopt_long' already printed an error message.  */
+      if (update_arg((void*)&(args_info->output_arg), &(args_info->output_orig),
+                     &(args_info->output_given),
+                     &(local_args_info.output_given), optarg, 0, 0, ARG_STRING,
+                     check_ambiguity, override, 0, 0, "output", 'o',
+                     additional_error))
         goto failure;
 
-      default: /* bug: option not considered.  */
-        fprintf(stderr, "%s: option unknown: %c%s\n", CMDLINE_PARSER_PACKAGE, c,
-                (additional_error ? additional_error : ""));
-        abort();
+      break;
+    case 'l': /* Lattice Type.  */
+
+      if (update_arg((void*)&(args_info->lattice_arg),
+                     &(args_info->lattice_orig), &(args_info->lattice_given),
+                     &(local_args_info.lattice_given), optarg,
+                     cmdline_parser_lattice_values, 0, ARG_STRING,
+                     check_ambiguity, override, 0, 0, "lattice", 'l',
+                     additional_error))
+        goto failure;
+
+      break;
+
+    case 0: /* Long option with no short option */
+      /* density (g/cm^3).  */
+      if (strcmp(long_options[option_index].name, "density") == 0) {
+        if (update_arg((void*)&(args_info->density_arg),
+                       &(args_info->density_orig), &(args_info->density_given),
+                       &(local_args_info.density_given), optarg, 0, 0,
+                       ARG_DOUBLE, check_ambiguity, override, 0, 0, "density",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* number of unit cells in x.  */
+      else if (strcmp(long_options[option_index].name, "nx") == 0) {
+        if (update_arg((void*)&(args_info->nx_arg), &(args_info->nx_orig),
+                       &(args_info->nx_given), &(local_args_info.nx_given),
+                       optarg, 0, 0, ARG_INT, check_ambiguity, override, 0, 0,
+                       "nx", '-', additional_error))
+          goto failure;
+
+      }
+      /* number of unit cells in y.  */
+      else if (strcmp(long_options[option_index].name, "ny") == 0) {
+        if (update_arg((void*)&(args_info->ny_arg), &(args_info->ny_orig),
+                       &(args_info->ny_given), &(local_args_info.ny_given),
+                       optarg, 0, 0, ARG_INT, check_ambiguity, override, 0, 0,
+                       "ny", '-', additional_error))
+          goto failure;
+
+      }
+      /* number of unit cells in z.  */
+      else if (strcmp(long_options[option_index].name, "nz") == 0) {
+        if (update_arg((void*)&(args_info->nz_arg), &(args_info->nz_orig),
+                       &(args_info->nz_given), &(local_args_info.nz_given),
+                       optarg, 0, 0, ARG_INT, check_ambiguity, override, 0, 0,
+                       "nz", '-', additional_error))
+          goto failure;
+
+      }
+      /* (Default) Builds a multi-component random mixed nanoparticle. Mole
+           Fraction must be specified for each componet > 1 in MD file..  */
+      else if (strcmp(long_options[option_index].name, "molFraction") == 0) {
+        if (update_multiple_arg_temp(
+                &molFraction_list, &(local_args_info.molFraction_given), optarg,
+                0, 0, ARG_DOUBLE, "molFraction", '-', additional_error))
+          goto failure;
+      }
+
+      break;
+    case '?': /* Invalid option.  */
+      /* `getopt_long' already printed an error message.  */
+      goto failure;
+
+    default: /* bug: option not considered.  */
+      fprintf(stderr, "%s: option unknown: %c%s\n", CMDLINE_PARSER_PACKAGE, c,
+              (additional_error ? additional_error : ""));
+      abort();
     } /* switch */
   }   /* while */
 
   update_multiple_arg(
-      (void *)&(args_info->molFraction_arg), &(args_info->molFraction_orig),
+      (void*)&(args_info->molFraction_arg), &(args_info->molFraction_orig),
       args_info->molFraction_given, local_args_info.molFraction_given, 0,
       ARG_DOUBLE, molFraction_list);
 
@@ -1559,7 +1557,7 @@ int cmdline_parser_internal(int argc, char **argv,
   if (error_occurred) return (EXIT_FAILURE);
 
   if (optind < argc) {
-    int i = 0;
+    int i               = 0;
     int found_prog_name = 0;
     /* whether program name, i.e., argv[0], is in the remaining args
        (this may happen with some implementations of getopt,
@@ -1567,7 +1565,7 @@ int cmdline_parser_internal(int argc, char **argv,
 
     args_info->inputs_num = argc - optind - found_prog_name;
     args_info->inputs =
-        (char **)(malloc((args_info->inputs_num) * sizeof(char *)));
+        (char**)(malloc((args_info->inputs_num) * sizeof(char*)));
     while (optind < argc)
       args_info->inputs[i++] = gengetopt_strdup(argv[optind++]);
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -59,50 +59,48 @@
 using namespace std;
 namespace OpenMD {
 
-shapedLatticeRod::shapedLatticeRod(RealType latticeConstant,
-                                   std::string latticeType, RealType radius,
-                                   RealType length)
-    : shapedLattice(latticeConstant, latticeType) {
-  rodRadius_ = radius;
-  rodLength_ = length;
-  Vector3d dimension;
-  dimension[0] = 3.0 * radius;
-  dimension[1] = 3.0 * radius;
-  dimension[2] = length + 3.0 * radius;
-  setGridDimension(dimension);
-  Vector3d origin;
-  origin[0] = 0;
-  origin[1] = 0;
-  origin[2] = 0;
-  setOrigin(origin);
-}
-
-/**
- * Determines whether a point lies within a spherically-capped
- * nanorod at origin (0,0,0)
- *
- */
-bool shapedLatticeRod::isInterior(Vector3d point) {
-  RealType x, y, z, distance;
-
-  distance = 0;
-
-  x = point[0];
-  y = point[1];
-  z = point[2];
-
-  if (abs(z) >= rodLength_ / 2.0) {
-    RealType delta_z = abs(z) - rodLength_ / 2.0;
-    distance = sqrt((x * x) + (y * y) + (delta_z * delta_z));
-  } else {
-    distance = sqrt((x * x) + (y * y));
+  shapedLatticeRod::shapedLatticeRod(RealType latticeConstant,
+                                     std::string latticeType, RealType radius,
+                                     RealType length) :
+      shapedLattice(latticeConstant, latticeType) {
+    rodRadius_ = radius;
+    rodLength_ = length;
+    Vector3d dimension;
+    dimension[0] = 3.0 * radius;
+    dimension[1] = 3.0 * radius;
+    dimension[2] = length + 3.0 * radius;
+    setGridDimension(dimension);
+    Vector3d origin;
+    origin[0] = 0;
+    origin[1] = 0;
+    origin[2] = 0;
+    setOrigin(origin);
   }
 
-  bool isIT = false;
-  if (distance <= rodRadius_) {
-    isIT = true;
+  /**
+   * Determines whether a point lies within a spherically-capped
+   * nanorod at origin (0,0,0)
+   *
+   */
+  bool shapedLatticeRod::isInterior(Vector3d point) {
+    RealType x, y, z, distance;
+
+    distance = 0;
+
+    x = point[0];
+    y = point[1];
+    z = point[2];
+
+    if (abs(z) >= rodLength_ / 2.0) {
+      RealType delta_z = abs(z) - rodLength_ / 2.0;
+      distance         = sqrt((x * x) + (y * y) + (delta_z * delta_z));
+    } else {
+      distance = sqrt((x * x) + (y * y));
+    }
+
+    bool isIT = false;
+    if (distance <= rodRadius_) { isIT = true; }
+    return isIT;
   }
-  return isIT;
-}
 
 }  // namespace OpenMD

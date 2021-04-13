@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,37 +48,33 @@
 
 #include <string>
 #include <vector>
+
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 using namespace std;
 namespace OpenMD {
-  
+
   class pAngle : public StaticAnalyser {
-    
   public:
-    pAngle(SimInfo* info, const string& filename, 
-           const string& sele1, int nzbins);
-    pAngle(SimInfo* info, const string& filename, 
-           const string& sele1, const string& sele2, int nzbins);
-    pAngle(SimInfo* info, const string& filename, 
-           const string& sele, const int seleOffset, int nzbins);
-    pAngle(SimInfo* info, const string& filename, 
-           const string& sele, const int seleOffset, const int seleOffset2, 
+    pAngle(SimInfo* info, const string& filename, const string& sele1,
            int nzbins);
-    
-    int getNThetaBins() {
-      return nThetaBins_; 
-    }
-    
+    pAngle(SimInfo* info, const string& filename, const string& sele1,
+           const string& sele2, int nzbins);
+    pAngle(SimInfo* info, const string& filename, const string& sele,
+           const int seleOffset, int nzbins);
+    pAngle(SimInfo* info, const string& filename, const string& sele,
+           const int seleOffset, const int seleOffset2, int nzbins);
+
+    int getNThetaBins() { return nThetaBins_; }
+
     virtual void process();
-    
+
   private:
-    
     void processHistogram();
     void writeProbs();
-        
+
     Snapshot* currentSnapshot_;
 
     bool doVect_;
@@ -87,20 +83,17 @@ namespace OpenMD {
     string selectionScript1_;
     string selectionScript2_;
     SelectionManager seleMan1_;
-    SelectionManager seleMan2_;       
+    SelectionManager seleMan2_;
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
     int seleOffset_;
     int seleOffset2_;
 
-    int nProcessed_;    
-    int nThetaBins_;     
+    int nProcessed_;
+    int nThetaBins_;
     vector<int> count_;
     vector<RealType> histogram_;
   };
-  
-}
+
+}  // namespace OpenMD
 #endif
-
-
-

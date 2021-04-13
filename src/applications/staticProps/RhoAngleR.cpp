@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -55,106 +55,103 @@
 
 namespace OpenMD {
 
-AngleR::AngleR(SimInfo* info, const std::string& filename,
-               const std::string& sele, RealType len, int nrbins)
-    : StaticAnalyser(info, filename),
-      selectionScript_(sele),
-      evaluator_(info),
-      seleMan_(info),
-      len_(len),
+  AngleR::AngleR(SimInfo* info, const std::string& filename,
+                 const std::string& sele, RealType len, int nrbins) :
+      StaticAnalyser(info, filename),
+      selectionScript_(sele), evaluator_(info), seleMan_(info), len_(len),
       nRBins_(nrbins) {
-  evaluator_.loadScriptString(sele);
-  if (!evaluator_.isDynamic()) {
-    seleMan_.setSelectionSet(evaluator_.evaluate());
-  }
-
-  deltaR_ = len_ / nRBins_;
-
-  histogram_.resize(nRBins_);
-  count_.resize(nRBins_);
-  avgAngleR_.resize(nRBins_);
-  setOutputName(getPrefix(filename) + ".AngleR");
-}
-
-void AngleR::process() {
-  DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
-  nProcessed_ = nFrames / step_;
-
-  std::fill(avgAngleR_.begin(), avgAngleR_.end(), 0.0);
-  std::fill(histogram_.begin(), histogram_.end(), 0.0);
-  std::fill(count_.begin(), count_.end(), 0);
-
-  for (int istep = 0; istep < nFrames; istep += step_) {
-    int i;
-    StuntDouble* sd;
-    reader.readFrame(istep);
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    Vector3d CenterOfMass = info_->getCom();
-
-    if (evaluator_.isDynamic()) {
+    evaluator_.loadScriptString(sele);
+    if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
-    // determine which atom belongs to which slice
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {
-      Vector3d pos = sd->getPos();
-      Vector3d r1 = CenterOfMass - pos;
-      // only do this if the stunt double actually has a vector associated
-      // with it
-      if (sd->isDirectional()) {
-        Vector3d uz = sd->getA().transpose() * V3Z;
-        // std::cerr << "pos = " << pos << " uz = " << uz << "\n";
-        RealType distance = r1.length();
+    deltaR_ = len_ / nRBins_;
 
-        uz.normalize();
-        r1.normalize();
-        RealType cosangle = dot(r1, uz);
+    histogram_.resize(nRBins_);
+    count_.resize(nRBins_);
+    avgAngleR_.resize(nRBins_);
+    setOutputName(getPrefix(filename) + ".AngleR");
+  }
 
-        if (distance < len_) {
-          int whichBin = distance / deltaR_;
-          histogram_[whichBin] += cosangle;
-          count_[whichBin] += 1;
+  void AngleR::process() {
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
+    nProcessed_ = nFrames / step_;
+
+    std::fill(avgAngleR_.begin(), avgAngleR_.end(), 0.0);
+    std::fill(histogram_.begin(), histogram_.end(), 0.0);
+    std::fill(count_.begin(), count_.end(), 0);
+
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      int i;
+      StuntDouble* sd;
+      reader.readFrame(istep);
+      currentSnapshot_      = info_->getSnapshotManager()->getCurrentSnapshot();
+      Vector3d CenterOfMass = info_->getCom();
+
+      if (evaluator_.isDynamic()) {
+        seleMan_.setSelectionSet(evaluator_.evaluate());
+      }
+
+      // determine which atom belongs to which slice
+      for (sd = seleMan_.beginSelected(i); sd != NULL;
+           sd = seleMan_.nextSelected(i)) {
+        Vector3d pos = sd->getPos();
+        Vector3d r1  = CenterOfMass - pos;
+        // only do this if the stunt double actually has a vector associated
+        // with it
+        if (sd->isDirectional()) {
+          Vector3d uz = sd->getA().transpose() * V3Z;
+          // std::cerr << "pos = " << pos << " uz = " << uz << "\n";
+          RealType distance = r1.length();
+
+          uz.normalize();
+          r1.normalize();
+          RealType cosangle = dot(r1, uz);
+
+          if (distance < len_) {
+            int whichBin = distance / deltaR_;
+            histogram_[whichBin] += cosangle;
+            count_[whichBin] += 1;
+          }
         }
       }
     }
+
+    processHistogram();
+    writeAngleR();
   }
 
-  processHistogram();
-  writeAngleR();
-}
+  void AngleR::processHistogram() {
+    for (int i = 0; i < histogram_.size(); ++i) {
+      if (count_[i] > 0)
+        avgAngleR_[i] += histogram_[i] / count_[i];
+      else
+        avgAngleR_[i] = 0.0;
 
-void AngleR::processHistogram() {
-  for (int i = 0; i < histogram_.size(); ++i) {
-    if (count_[i] > 0)
-      avgAngleR_[i] += histogram_[i] / count_[i];
-    else
-      avgAngleR_[i] = 0.0;
-
-    std::cerr << " count = " << count_[i] << " avgAngle = " << avgAngleR_[i]
-              << "\n";
+      std::cerr << " count = " << count_[i] << " avgAngle = " << avgAngleR_[i]
+                << "\n";
+    }
   }
-}
 
-void AngleR::writeAngleR() {
-  std::ofstream rdfStream(outputFilename_.c_str());
-  if (rdfStream.is_open()) {
-    rdfStream << "#radial density function Angle(r)\n";
-    rdfStream << "#r\tcorrValue\n";
-    for (int i = 0; i < avgAngleR_.size(); ++i) {
-      RealType r = deltaR_ * (i + 0.5);
-      rdfStream << r << "\t" << avgAngleR_[i] << "\n";
+  void AngleR::writeAngleR() {
+    std::ofstream rdfStream(outputFilename_.c_str());
+    if (rdfStream.is_open()) {
+      rdfStream << "#radial density function Angle(r)\n";
+      rdfStream << "#r\tcorrValue\n";
+      for (int i = 0; i < avgAngleR_.size(); ++i) {
+        RealType r = deltaR_ * (i + 0.5);
+        rdfStream << r << "\t" << avgAngleR_[i] << "\n";
+      }
+
+    } else {
+      sprintf(painCave.errMsg, "AngleR: unable to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
     }
 
-  } else {
-    sprintf(painCave.errMsg, "AngleR: unable to open %s\n",
-            outputFilename_.c_str());
-    painCave.isFatal = 1;
-    simError();
+    rdfStream.close();
   }
-
-  rdfStream.close();
-}
 
 }  // namespace OpenMD

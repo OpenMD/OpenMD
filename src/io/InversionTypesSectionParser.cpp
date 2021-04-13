@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,49 +51,50 @@
 
 namespace OpenMD {
 
-InversionTypesSectionParser::InversionTypesSectionParser(
-    ForceFieldOptions& options)
-    : options_(options) {
-  setSectionName("InversionTypes");
-}
-
-void InversionTypesSectionParser::parseLine(ForceField& ff,
-                                            const std::string& line,
-                                            int lineNo) {
-  StringTokenizer tokenizer(line);
-  InversionTypeParser itParser;
-  InversionType* inversionType = NULL;
-
-  int nTokens = tokenizer.countTokens();
-
-  if (nTokens < 5) {
-    sprintf(painCave.errMsg,
-            "InversionTypesSectionParser Error: Not enough tokens at line %d\n",
-            lineNo);
-    painCave.isFatal = 1;
-    simError();
-    return;
+  InversionTypesSectionParser::InversionTypesSectionParser(
+      ForceFieldOptions& options) :
+      options_(options) {
+    setSectionName("InversionTypes");
   }
 
-  std::string at1 = tokenizer.nextToken();
-  std::string at2 = tokenizer.nextToken();
-  std::string at3 = tokenizer.nextToken();
-  std::string at4 = tokenizer.nextToken();
-  std::string remainder = tokenizer.getRemainingString();
+  void InversionTypesSectionParser::parseLine(ForceField& ff,
+                                              const std::string& line,
+                                              int lineNo) {
+    StringTokenizer tokenizer(line);
+    InversionTypeParser itParser;
+    InversionType* inversionType = NULL;
 
-  try {
-    inversionType = itParser.parseLine(remainder);
-  } catch (OpenMDException& e) {
-    sprintf(painCave.errMsg,
-            "InversionTypesSectionParser Error: %s "
-            "at line %d\n",
-            e.what(), lineNo);
-    painCave.isFatal = 1;
-    simError();
-  }
+    int nTokens = tokenizer.countTokens();
 
-  if (inversionType != NULL) {
-    ff.addInversionType(at1, at2, at3, at4, inversionType);
+    if (nTokens < 5) {
+      sprintf(
+          painCave.errMsg,
+          "InversionTypesSectionParser Error: Not enough tokens at line %d\n",
+          lineNo);
+      painCave.isFatal = 1;
+      simError();
+      return;
+    }
+
+    std::string at1       = tokenizer.nextToken();
+    std::string at2       = tokenizer.nextToken();
+    std::string at3       = tokenizer.nextToken();
+    std::string at4       = tokenizer.nextToken();
+    std::string remainder = tokenizer.getRemainingString();
+
+    try {
+      inversionType = itParser.parseLine(remainder);
+    } catch (OpenMDException& e) {
+      sprintf(painCave.errMsg,
+              "InversionTypesSectionParser Error: %s "
+              "at line %d\n",
+              e.what(), lineNo);
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    if (inversionType != NULL) {
+      ff.addInversionType(at1, at2, at3, at4, inversionType);
+    }
   }
-}
 }  // end namespace OpenMD

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,24 +46,24 @@
 #ifndef MATH_HULL_HPP_
 #define MATH_HULL_HPP_
 
-#include "config.h"
-#include "math/Vector3.hpp"
-#include "math/Triangle.hpp"
-#include "primitives/StuntDouble.hpp"
-
 #include <cassert>
-#include <vector>
 #include <string>
+#include <vector>
+
+#include "config.h"
+#include "math/Triangle.hpp"
+#include "math/Vector3.hpp"
+#include "primitives/StuntDouble.hpp"
 
 namespace OpenMD {
   class Hull {
   public:
-    virtual ~Hull(){};
-    virtual void computeHull(std::vector<StuntDouble*> bodydoubles)=0;
-    virtual RealType getArea()=0; //Total area of Hull
-    virtual RealType getVolume()=0; //Total Volume enclosed by Hull
-    virtual std::vector<Triangle > getMesh()=0;
+    virtual ~Hull() {};
+    virtual void computeHull(std::vector<StuntDouble*> bodydoubles) = 0;
+    virtual RealType getArea()   = 0;  // Total area of Hull
+    virtual RealType getVolume() = 0;  // Total Volume enclosed by Hull
+    virtual std::vector<Triangle> getMesh() = 0;
   };
-}
+}  // namespace OpenMD
 
 #endif /*MATH_HULL_HPP_*/

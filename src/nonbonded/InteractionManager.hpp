@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,26 +42,26 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef NONBONDED_INTERACTIONMANAGER_HPP
 #define NONBONDED_INTERACTIONMANAGER_HPP
 
 #include <memory>
 
 #include "brains/SimInfo.hpp"
-#include "types/AtomType.hpp"
-#include "nonbonded/LJ.hpp"
-#include "nonbonded/GB.hpp"
-#include "nonbonded/Sticky.hpp"
 #include "nonbonded/EAM.hpp"
-#include "nonbonded/SC.hpp"
-#include "nonbonded/Morse.hpp"
 #include "nonbonded/Electrostatic.hpp"
-#include "nonbonded/MAW.hpp"
-#include "nonbonded/RepulsivePower.hpp"
-#include "nonbonded/Mie.hpp"
+#include "nonbonded/GB.hpp"
 #include "nonbonded/InversePowerSeries.hpp"
+#include "nonbonded/LJ.hpp"
+#include "nonbonded/MAW.hpp"
+#include "nonbonded/Mie.hpp"
+#include "nonbonded/Morse.hpp"
+#include "nonbonded/RepulsivePower.hpp"
+#include "nonbonded/SC.hpp"
+#include "nonbonded/Sticky.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
+#include "types/AtomType.hpp"
 // #include "flucq/FluctuatingChargeForces.hpp"
 
 using namespace std;
@@ -69,31 +69,30 @@ using namespace std;
 namespace OpenMD {
 
   /**
-   * @class InteractionManager 
+   * @class InteractionManager
    * InteractionManager is responsible for
    * keeping track of the non-bonded interactions (C++)
    */
   class InteractionManager {
-
   public:
     InteractionManager();
     virtual ~InteractionManager() = default;
-    void setSimInfo(SimInfo* info) {info_ = info;} 
+    void setSimInfo(SimInfo* info) { info_ = info; }
     void initialize();
 
     // Fortran support routines
 
-    void doPrePair(InteractionData &idat);
-    void doPreForce(SelfData &sdat);
-    void doPair(InteractionData &idat);    
-    void doSkipCorrection(InteractionData &idat);
-    void doSelfCorrection(SelfData &sdat);
-    void doSurfaceTerm(bool slabGeometry, int axis, RealType &surfacePot);
-    void doReciprocalSpaceSum(RealType &recipPot);
+    void doPrePair(InteractionData& idat);
+    void doPreForce(SelfData& sdat);
+    void doPair(InteractionData& idat);
+    void doSkipCorrection(InteractionData& idat);
+    void doSelfCorrection(SelfData& sdat);
+    void doSurfaceTerm(bool slabGeometry, int axis, RealType& surfacePot);
+    void doReciprocalSpaceSum(RealType& recipPot);
     void setCutoffRadius(RealType rCut);
-    RealType getSuggestedCutoffRadius(int *atid1);   
-    RealType getSuggestedCutoffRadius(AtomType *atype);
-    
+    RealType getSuggestedCutoffRadius(int* atid1);
+    RealType getSuggestedCutoffRadius(AtomType* atype);
+
   private:
     bool initialized_ {false};
 
@@ -114,14 +113,15 @@ namespace OpenMD {
     std::shared_ptr<Mie> mie_ {nullptr};
     std::shared_ptr<MAW> maw_ {nullptr};
     std::shared_ptr<InversePowerSeries> inversePowerSeries_ {nullptr};
-    
+
     map<int, AtomType*> typeMap_;
     /**
      * Each pair of atom types can have multiple interactions, so the
      * natural data structures are a map between the pair, and a set
      * of non-bonded interactions:
      *
-     *  map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > interactions_;
+     *  map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> >
+     * interactions_;
      *
      * Pair creation turns out to be inefficient, and map searching
      * isn't necessary.  Instead of AtomType* sort keys, we now use
@@ -130,11 +130,11 @@ namespace OpenMD {
      * interactions_, but in a way that doesn't require a set iterator
      * inside the main pair loop.
      */
-    vector<vector<set<NonBondedInteractionPtr> > > interactions_;
-    vector<vector<int> > iHash_;
+    vector<vector<set<NonBondedInteractionPtr>>> interactions_;
+    vector<vector<int>> iHash_;
 
     /* sHash_ contains the self-interaction version of iHash_ */
     vector<int> sHash_;
   };
-}
+}  // namespace OpenMD
 #endif

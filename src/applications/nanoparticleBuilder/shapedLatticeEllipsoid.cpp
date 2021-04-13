@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,42 +52,42 @@
 using namespace std;
 namespace OpenMD {
 
-shapedLatticeEllipsoid::shapedLatticeEllipsoid(RealType latticeConstant,
-                                               std::string latticeType,
-                                               RealType rAxial,
-                                               RealType rEquatorial)
-    : shapedLattice(latticeConstant, latticeType) {
-  rAxial_ = rAxial;
-  rEquatorial_ = rEquatorial;
+  shapedLatticeEllipsoid::shapedLatticeEllipsoid(RealType latticeConstant,
+                                                 std::string latticeType,
+                                                 RealType rAxial,
+                                                 RealType rEquatorial) :
+      shapedLattice(latticeConstant, latticeType) {
+    rAxial_      = rAxial;
+    rEquatorial_ = rEquatorial;
 
-  Vector3d dimension;
-  dimension[0] = 2.0 * rEquatorial_;
-  dimension[1] = 2.0 * rEquatorial_;
-  dimension[2] = 2.0 * rAxial_;
-  setGridDimension(dimension);
-  Vector3d origin;
-  origin[0] = latticeConstant / 2.0;
-  origin[1] = latticeConstant / 2.0;
-  origin[2] = latticeConstant / 2.0;
-  setOrigin(origin);
-}
+    Vector3d dimension;
+    dimension[0] = 2.0 * rEquatorial_;
+    dimension[1] = 2.0 * rEquatorial_;
+    dimension[2] = 2.0 * rAxial_;
+    setGridDimension(dimension);
+    Vector3d origin;
+    origin[0] = latticeConstant / 2.0;
+    origin[1] = latticeConstant / 2.0;
+    origin[2] = latticeConstant / 2.0;
+    setOrigin(origin);
+  }
 
-/**
- * Determines whether a point lies within an ellipsoid centered at
- * origin (0,0,0)
- *
- */
-bool shapedLatticeEllipsoid::isInterior(Vector3d pos) {
-  RealType xoverb = pos[0] / rEquatorial_;
-  RealType yoverb = pos[1] / rEquatorial_;
-  RealType zovera = pos[2] / rAxial_;
+  /**
+   * Determines whether a point lies within an ellipsoid centered at
+   * origin (0,0,0)
+   *
+   */
+  bool shapedLatticeEllipsoid::isInterior(Vector3d pos) {
+    RealType xoverb = pos[0] / rEquatorial_;
+    RealType yoverb = pos[1] / rEquatorial_;
+    RealType zovera = pos[2] / rAxial_;
 
-  bool result;
-  if (xoverb * xoverb + yoverb * yoverb + zovera * zovera < 1)
-    result = true;
-  else
-    result = false;
+    bool result;
+    if (xoverb * xoverb + yoverb * yoverb + zovera * zovera < 1)
+      result = true;
+    else
+      result = false;
 
-  return result;
-}
+    return result;
+  }
 }  // namespace OpenMD

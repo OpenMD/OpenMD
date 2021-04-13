@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef VISITOR_ATOMDATA_HPP
 #define VISITOR_ATOMDATA_HPP
 
@@ -50,23 +50,23 @@
 #include <string>
 #include <vector>
 
-#include "utils/GenericData.hpp"
 #include "math/Vector3.hpp"
+#include "utils/GenericData.hpp"
 
 namespace OpenMD {
 
   struct AtomInfo {
-    AtomInfo() : pos(V3Zero), vec(V3Zero), vel(V3Zero), frc(V3Zero),
-                 eField(V3Zero), charge(0.0),
-                 hasCharge(false), hasVector(false), hasVelocity(false), 
-                 hasForce(false), hasElectricField(false), hasGlobalID(false) {}
-    
+    AtomInfo() :
+        pos(V3Zero), vec(V3Zero), vel(V3Zero), frc(V3Zero), eField(V3Zero),
+        charge(0.0), hasCharge(false), hasVector(false), hasVelocity(false),
+        hasForce(false), hasElectricField(false), hasGlobalID(false) {}
+
     std::string atomTypeName;
     int globalID;
     Vector3d pos;
-    Vector3d vec;  
-    Vector3d vel;  
-    Vector3d frc;  
+    Vector3d vec;
+    Vector3d vel;
+    Vector3d frc;
     Vector3d eField;
     RealType charge;
     bool hasCharge;
@@ -77,32 +77,32 @@ namespace OpenMD {
     bool hasGlobalID;
   };
 
-  class AtomData : public GenericData{
+  class AtomData : public GenericData {
   public:
-
     AtomData(const std::string& id = "ATOMDATA") : GenericData(id) {}
-        
-    void addAtomInfo(std::shared_ptr<AtomInfo> info) {data.push_back(info);}
+
+    void addAtomInfo(std::shared_ptr<AtomInfo> info) { data.push_back(info); }
 
     void clearAllAtomInfo();
 
-    std::shared_ptr<AtomInfo> beginAtomInfo(std::vector<std::shared_ptr<AtomInfo>>::iterator& i){
+    std::shared_ptr<AtomInfo> beginAtomInfo(
+        std::vector<std::shared_ptr<AtomInfo>>::iterator& i) {
       i = data.begin();
       return i != data.end() ? *i : nullptr;
     }
 
-    std::shared_ptr<AtomInfo> nextAtomInfo(std::vector<std::shared_ptr<AtomInfo>>::iterator& i){
+    std::shared_ptr<AtomInfo> nextAtomInfo(
+        std::vector<std::shared_ptr<AtomInfo>>::iterator& i) {
       ++i;
       return i != data.end() ? *i : nullptr;
     }
 
-    std::vector<std::shared_ptr<AtomInfo>> getData() {return data;}
+    std::vector<std::shared_ptr<AtomInfo>> getData() { return data; }
 
-    int getSize() {return data.size();}
+    int getSize() { return data.size(); }
 
   protected:
-
     std::vector<std::shared_ptr<AtomInfo>> data;
   };
-}
-#endif //VISITOR_ATOMDATA_HPP
+}  // namespace OpenMD
+#endif  // VISITOR_ATOMDATA_HPP

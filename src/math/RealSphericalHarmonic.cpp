@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -108,8 +108,8 @@ RealType RealSphericalHarmonic::LegendreP(int l, int m, RealType x) {
     else {
       RealType pll = 0.0;
       for (int ll = m + 2; ll <= l; ll++) {
-        pll = (x * (2 * ll - 1) * pmmp1 - (ll + m - 1) * pmm) / (ll - m);
-        pmm = pmmp1;
+        pll   = (x * (2 * ll - 1) * pmmp1 - (ll + m - 1) * pmm) / (ll - m);
+        pmm   = pmmp1;
         pmmp1 = pll;
       }
       return pll;

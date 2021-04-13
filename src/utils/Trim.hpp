@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,81 +42,81 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef UTILS_TRIM_HPP
 #define UTILS_TRIM_HPP
 
-#include <string>
 #include <cctype>
+#include <string>
+
 #include "utils/Predicate.hpp"
 
 /**
  * @file Trim.hpp
- * Defines trim algorithms. Trim algorithms are used to remove trailing and leading spaces from a string. 
+ * Defines trim algorithms. Trim algorithms are used to remove trailing and
+ * leading spaces from a string.
  */
 namespace OpenMD {
 
   /**
-   * Remove all leading spaces in-place. The supplied predicate is used to determine which 
-   * characters are considered spaces
+   * Remove all leading spaces in-place. The supplied predicate is used to
+   * determine which characters are considered spaces
    * @param str An input sequence
    * @param pred The unary predicate identifying spaces
    *
    * @code
    * std::string str = "  acb  trimLeftIf test case"
-   * trimLeftIf(str, pred() || isFromRange('a', 'c')); 
+   * trimLeftIf(str, pred() || isFromRange('a', 'c'));
    * std::cout << str << std::endl; //print "trimLeft test case"
-   * 
+   *
    * @endcode
    */
-  template<typename P>     
+  template<typename P>
   void trimLeftIf(std::string& str, P pred) {
     std::string::iterator i = str.begin();
 
     for (; i != str.end(); ++i) {
-      if (!pred(*i)) {
-	break;
-      }
+      if (!pred(*i)) { break; }
     }
-        
+
     str.erase(str.begin(), i);
   }
 
   /**
-   * Remove all trailing spaces in-place. The supplied predicate is used to determine which 
-   * characters are considered spaces
-   * @param str An input sequence 
+   * Remove all trailing spaces in-place. The supplied predicate is used to
+   * determine which characters are considered spaces
+   * @param str An input sequence
    * @param pred The unary predicate identifying spaces
    */
-  template<typename P>     
+  template<typename P>
   void trimRightIf(std::string& str, P pred) {
     std::string::iterator i = str.end();
 
     for (; i != str.begin();) {
       if (!pred(*(--i))) {
-	++i;
-	break;
+        ++i;
+        break;
       }
     }
-        
+
     str.erase(i, str.end());
   }
 
   /**
-   *Remove all leading and trailing spaces in-place. The supplied predicate is used to determine 
-   * which characters are considered spaces
+   *Remove all leading and trailing spaces in-place. The supplied predicate is
+   *used to determine which characters are considered spaces
    * @param str An input sequence
    * @param pred The unary predicate identifying spaces
    */
-  template<typename P>     
+  template<typename P>
   void trimIf(std::string& str, P pred) {
     trimLeftIf(str, pred);
-    trimRightIf(str, pred);        
+    trimRightIf(str, pred);
   }
 
   /**
-   * Remove all leading spaces from the input. The supplied predicate is used to determine 
-   * which characters are considered spaces
+   * Remove all leading spaces from the input. The supplied predicate is used to
+   * determine which characters are considered spaces
    * @return A trimmed copy of the input
    * @param input An input sequence
    * @param pred The unary predicate identifying spaces
@@ -129,8 +129,8 @@ namespace OpenMD {
   }
 
   /**
-   * Remove all trailing spaces from the input. The supplied predicate is used to determine 
-   * which characters are considered spaces
+   * Remove all trailing spaces from the input. The supplied predicate is used
+   * to determine which characters are considered spaces
    * @return A trimmed copy of the input
    * @param input An input sequence
    * @param pred The unary predicate identifying spaces
@@ -143,20 +143,19 @@ namespace OpenMD {
   }
 
   /**
-   * Remove all leading and trailing spaces from the input. The supplied predicate is used to 
-   * determine which characters are considered spaces
+   * Remove all leading and trailing spaces from the input. The supplied
+   * predicate is used to determine which characters are considered spaces
    * @return A trimmed copy of the input
    * @param input An input sequence
    * @param pred The unary predicate identifying spaces
    */
-  template<typename P>     
+  template<typename P>
   std::string trimCopyIf(const std::string& input, P pred) {
     std::string result(input);
     trimIf(result, pred);
     return result;
   }
 
-    
   /**
    * Remove all leading spaces in-place.
    * @param str An input sequence
@@ -165,7 +164,7 @@ namespace OpenMD {
 
   /**
    * Remove all trailing spaces in-place.
-   * @param str An input sequence 
+   * @param str An input sequence
    */
   void trimRight(std::string& str);
 
@@ -178,7 +177,7 @@ namespace OpenMD {
   /**
    * Remove all leading spaces from the input.
    * @return A trimmed copy of the input
-   * @param input An input sequence 
+   * @param input An input sequence
    */
   std::string trimLeftCopy(const std::string& input);
 
@@ -196,5 +195,5 @@ namespace OpenMD {
    */
   std::string trimCopy(const std::string& input);
 
-}//end namespace OpenMD
-#endif //UTILS_TRIM_HPP    
+}  // end namespace OpenMD
+#endif  // UTILS_TRIM_HPP

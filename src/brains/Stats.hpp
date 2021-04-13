@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,22 +46,22 @@
 #ifndef BRAINS_STATS_HPP
 #define BRAINS_STATS_HPP
 
-#include <string>
-#include <map>
 #include <bitset>
+#include <map>
+#include <string>
 
+#include "brains/SimInfo.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "utils/Accumulator.hpp"
-#include "brains/SimInfo.hpp"
 
 using namespace std;
 namespace OpenMD {
 
-  class Stats{
+  class Stats {
   public:
     enum StatsIndex {
-      BEGININDEX = 0,  //internal use
-      TIME = BEGININDEX,
+      BEGININDEX = 0,  // internal use
+      TIME       = BEGININDEX,
       TOTAL_ENERGY,
       POTENTIAL_ENERGY,
       KINETIC_ENERGY,
@@ -107,7 +107,7 @@ namespace OpenMD {
       NET_CHARGE,
       CHARGE_MOMENTUM,
       CURRENT_DENSITY,
-      ENDINDEX  //internal use
+      ENDINDEX  // internal use
     };
 
     struct StatsData {
@@ -118,7 +118,7 @@ namespace OpenMD {
       std::vector<BaseAccumulator*> accumulatorArray2d;
     };
 
-    typedef bitset<ENDINDEX-BEGININDEX> StatsBitSet;
+    typedef bitset<ENDINDEX - BEGININDEX> StatsBitSet;
     typedef map<std::string, StatsIndex> StatsMapType;
 
     Stats(SimInfo* info);
@@ -128,33 +128,33 @@ namespace OpenMD {
     void collectStats();
     std::string getStatsReport();
 
-    StatsBitSet  getStatsMask();
+    StatsBitSet getStatsMask();
     StatsMapType getStatsMap();
-    void         setStatsMask(StatsBitSet mask);
+    void setStatsMask(StatsBitSet mask);
 
-    string    getTitle(int index);
-    string    getUnits(int index);
-    string    getDataType(int index);
+    string getTitle(int index);
+    string getUnits(int index);
+    string getDataType(int index);
 
-    int       getIntData(int index);
-    RealType  getRealData(int index);
-    Vector3d  getVectorData(int index);
-    potVec    getPotVecData(int index);
-    Mat3x3d   getMatrixData(int index);
+    int getIntData(int index);
+    RealType getRealData(int index);
+    Vector3d getVectorData(int index);
+    potVec getPotVecData(int index);
+    Mat3x3d getMatrixData(int index);
     std::vector<RealType> getArrayData(int index);
 
-    int       getIntAverage(int index);
-    RealType  getRealAverage(int index);
-    Vector3d  getVectorAverage(int index);
-    potVec    getPotVecAverage(int index);
-    Mat3x3d   getMatrixAverage(int index);
+    int getIntAverage(int index);
+    RealType getRealAverage(int index);
+    Vector3d getVectorAverage(int index);
+    potVec getPotVecAverage(int index);
+    Mat3x3d getMatrixAverage(int index);
     std::vector<RealType> getArrayAverage(int index);
 
-    int       getIntError(int index);
-    RealType  getRealError(int index);
-    Vector3d  getVectorError(int index);
-    potVec    getPotVecError(int index);
-    Mat3x3d   getMatrixError(int index);
+    int getIntError(int index);
+    RealType getRealError(int index);
+    Vector3d getVectorError(int index);
+    potVec getPotVecError(int index);
+    Mat3x3d getMatrixError(int index);
     std::vector<RealType> getArrayError(int index);
 
   private:
@@ -165,5 +165,5 @@ namespace OpenMD {
     StatsBitSet statsMask_;
     StatsMapType statsMap_;
   };
-}
+}  // namespace OpenMD
 #endif

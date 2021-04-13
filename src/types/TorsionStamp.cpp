@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,14 +49,14 @@
 #include <cstring>
 namespace OpenMD {
 
-TorsionStamp::TorsionStamp() : hasOverride_(false) {
-  DefineOptionalParameter(GhostVectorSource, "ghostVectorSource");
-}
+  TorsionStamp::TorsionStamp() : hasOverride_(false) {
+    DefineOptionalParameter(GhostVectorSource, "ghostVectorSource");
+  }
 
-TorsionStamp::~TorsionStamp() {}
+  TorsionStamp::~TorsionStamp() {}
 
-void TorsionStamp::validate() {
-  DataHolder::validate();
-  CheckParameter(GhostVectorSource, isNonNegative());
-}
+  void TorsionStamp::validate() {
+    DataHolder::validate();
+    CheckParameter(GhostVectorSource, isNonNegative());
+  }
 }  // namespace OpenMD

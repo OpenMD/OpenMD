@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,15 +42,15 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef NONBONDED_BUCKINGHAM_HPP
 #define NONBONDED_BUCKINGHAM_HPP
 
+#include "brains/ForceField.hpp"
+#include "math/Vector3.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "types/AtomType.hpp"
 #include "types/BuckinghamInteractionType.hpp"
-#include "brains/ForceField.hpp"
-#include "math/Vector3.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -65,32 +65,40 @@ namespace OpenMD {
   };
 
   class Buckingham : public VanDerWaalsInteraction {
-    
-  public:    
+  public:
     Buckingham();
-    void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
-    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType A, RealType B, RealType C, BuckinghamType bt);
-    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType A, RealType B, RealType C, RealType sigma, RealType epsilon, BuckinghamType bt);
-    virtual void calcForce(InteractionData &idat);
-    virtual string getName() {return name_;}
+    void setForceField(ForceField* ff) { forceField_ = ff; };
+    void setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+      simTypes_ = simtypes;
+      initialize();
+    };
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType A,
+                                RealType B, RealType C, BuckinghamType bt);
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType A,
+                                RealType B, RealType C, RealType sigma,
+                                RealType epsilon, BuckinghamType bt);
+    virtual void calcForce(InteractionData& idat);
+    virtual string getName() { return name_; }
     virtual int getHash() { return BUCKINGHAM_INTERACTION; }
-    virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
-    
+    virtual RealType getSuggestedCutoffRadius(
+        pair<AtomType*, AtomType*> atypes);
+
   private:
     void initialize();
     bool initialized_;
-    set<int> Btypes;   /**< The set of AtomType idents that are Buckingham types */
-    vector<int> Btids; /**< The mapping from AtomType ident -> Buckingham type ident */
-    vector<vector<BuckinghamInteractionData> > MixingMap;  /**< The mixing parameters
-                                                         between two Buckingham types */
+    set<int>
+        Btypes; /**< The set of AtomType idents that are Buckingham types */
+    vector<int>
+        Btids; /**< The mapping from AtomType ident -> Buckingham type ident */
+    vector<vector<BuckinghamInteractionData>>
+        MixingMap; /**< The mixing parameters
+                                                         between two Buckingham
+                      types */
 
-    ForceField* forceField_;    
+    ForceField* forceField_;
     set<AtomType*> simTypes_;
     string name_;
-
   };
-}
+}  // namespace OpenMD
 
-                               
 #endif

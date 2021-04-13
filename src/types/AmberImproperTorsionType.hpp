@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,11 +42,11 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file AmberImproperTorsionType.hpp
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_AMBERIMPROPERTORSIONTYPE_HPP
 #define TYPES_AMBERIMPROPERTORSIONTYPE_HPP
@@ -56,45 +56,37 @@
 namespace OpenMD {
 
   /**
-   * @class AmberImproperTorsionType AmberImproperTorsionType.hpp "types/AmberImproperTorsionType.hpp"
-   * 
+   * @class AmberImproperTorsionType AmberImproperTorsionType.hpp
+   * "types/AmberImproperTorsionType.hpp"
+   *
    * This impropertorsion potential has the form:
-   * 
+   *
    *  Vimptors = 0.5*v2*(1-cos(2*(phi-phi0)))
    *
    */
-  class AmberImproperTorsionType : public PolynomialInversionType{
-    
+  class AmberImproperTorsionType : public PolynomialInversionType {
   public:
-    
-    AmberImproperTorsionType(RealType v2) :  
-      PolynomialInversionType(),  v2_(v2) {
-      
-      //convert AmberImproper Torsion Type to Polynomial Inversion type
+    AmberImproperTorsionType(RealType v2) : PolynomialInversionType(), v2_(v2) {
+      // convert AmberImproper Torsion Type to Polynomial Inversion type
       RealType c0 = v2;
       RealType c2 = -v2;
-      
+
       setCoefficient(0, c0);
       setCoefficient(2, c2);
     }
-    
-    friend std::ostream& operator <<(std::ostream& os, AmberImproperTorsionType& ott);
-    
+
+    friend std::ostream& operator<<(std::ostream& os,
+                                    AmberImproperTorsionType& ott);
+
   private:
-    
     RealType v2_;
-    
   };
-  
-  std::ostream& operator <<(std::ostream& os, AmberImproperTorsionType& ott) {
-    
+
+  std::ostream& operator<<(std::ostream& os, AmberImproperTorsionType& ott) {
     os << "This AmberImproperTorsionType has below form:" << std::endl;
     os << ott.v2_ << "/2*(1-cos(2*(phi-phi0)))" << std::endl;
     return os;
   }
-  
-  
-} //end namespace OpenMD
-#endif //TYPES_OPLSTORSIONTYPE_HPP
 
-
+}  // end namespace OpenMD
+#endif  // TYPES_OPLSTORSIONTYPE_HPP

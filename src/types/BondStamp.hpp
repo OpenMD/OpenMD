@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_BONDSTAMP_HPP
 #define TYPES_BONDSTAMP_HPP
 
@@ -57,7 +57,7 @@ namespace OpenMD {
     virtual ~BondStamp();
 
     void setMembers(std::vector<int> members) {
-      if (members.size() ==2) {
+      if (members.size() == 2) {
         a = members[0];
         b = members[1];
         if (a < 0 || b < 0) {
@@ -71,9 +71,9 @@ namespace OpenMD {
         oss << "BondStamp Error: members" << containerToString(members)
             << " is invalid" << std::endl;
         throw OpenMDException(oss.str());
-      }           
+      }
     }
-    
+
     void overrideType(std::string type, RealType pars) {
       orType_ = type;
       orPars_.push_back(pars);
@@ -81,23 +81,19 @@ namespace OpenMD {
     }
 
     void overrideType(std::string type, std::vector<RealType> pars) {
-      orType_ = type;
-      orPars_ = pars;
+      orType_      = type;
+      orPars_      = pars;
       hasOverride_ = true;
     }
-        
-    int getA() {return a;} 
-    int getB() {return b;}
+
+    int getA() { return a; }
+    int getB() { return b; }
     virtual void validate();
 
     bool hasOverride() { return hasOverride_; }
-    std::string getOverrideType() {
-      return orType_;
-    }
+    std::string getOverrideType() { return orType_; }
 
-    std::vector<RealType> getOverridePars() {
-      return orPars_;
-    }        
+    std::vector<RealType> getOverridePars() { return orPars_; }
 
   private:
     int a;
@@ -105,7 +101,6 @@ namespace OpenMD {
     bool hasOverride_;
     std::string orType_;
     std::vector<RealType> orPars_;
-
-  };  
-}
+  };
+}  // namespace OpenMD
 #endif

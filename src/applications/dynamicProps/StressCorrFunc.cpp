@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -57,68 +57,68 @@
 
 namespace OpenMD {
 
-// We need all of the positions, velocities, etc. so that we can
-// recalculate pressures and actions on the fly:
-StressCorrFunc::StressCorrFunc(SimInfo* info, const std::string& filename,
-                               const std::string& sele1,
-                               const std::string& sele2)
-    : SystemACF<Mat3x3d>(info, filename, sele1, sele2,
+  // We need all of the positions, velocities, etc. so that we can
+  // recalculate pressures and actions on the fly:
+  StressCorrFunc::StressCorrFunc(SimInfo* info, const std::string& filename,
+                                 const std::string& sele1,
+                                 const std::string& sele2) :
+      SystemACF<Mat3x3d>(info, filename, sele1, sele2,
                          DataStorage::dslPosition | DataStorage::dslVelocity |
                              DataStorage::dslForce) {
-  setCorrFuncType("StressCorrFunc");
-  setOutputName(getPrefix(dumpFilename_) + ".action");
-  setLabelString("Txx\tTxy\tTxz\tTyx\tTyy\tTyz\tTzx\tTzy\tTzz");
+    setCorrFuncType("StressCorrFunc");
+    setOutputName(getPrefix(dumpFilename_) + ".action");
+    setLabelString("Txx\tTxy\tTxz\tTyx\tTyy\tTyz\tTzx\tTzy\tTzz");
 
-  // We'll need the force manager to compute forces for the average pressure
-  forceMan_ = new ForceManager(info_);
+    // We'll need the force manager to compute forces for the average pressure
+    forceMan_ = new ForceManager(info_);
 
-  // We'll need thermo to compute the pressures from the virial
-  thermo_ = new Thermo(info_);
+    // We'll need thermo to compute the pressures from the virial
+    thermo_ = new Thermo(info_);
 
-  action_.resize(nTimeBins_);
-  time_.resize(nTimeBins_);
-}
-
-void StressCorrFunc::computeProperty1(int frame) {
-  forceMan_->calcForces();
-  RealType vol = thermo_->getVolume();
-  RealType pressure = thermo_->getPressure() / Constants::pressureConvert;
-
-  int i;
-  StuntDouble* sd;
-
-  for (sd = seleMan1_.beginSelected(i); sd != NULL;
-       sd = seleMan1_.nextSelected(i)) {
-    Vector3d r = sd->getPos();
-    Vector3d v = sd->getVel();
-    RealType m = sd->getMass();
-
-    action_[frame] += m * outProduct(r, v);
+    action_.resize(nTimeBins_);
+    time_.resize(nTimeBins_);
   }
 
-  action_[frame] /= vol;
-  time_[frame] = info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
+  void StressCorrFunc::computeProperty1(int frame) {
+    forceMan_->calcForces();
+    RealType vol      = thermo_->getVolume();
+    RealType pressure = thermo_->getPressure() / Constants::pressureConvert;
 
-  pressure_.add(pressure);
-}
+    int i;
+    StuntDouble* sd;
 
-Mat3x3d StressCorrFunc::calcCorrVal(int frame1, int frame2) {
-  Mat3x3d corrTensor(0.0);
-  RealType thisTerm;
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {
+      Vector3d r = sd->getPos();
+      Vector3d v = sd->getVel();
+      RealType m = sd->getMass();
 
-  RealType pAve = pressure_.getAverage();
-
-  for (unsigned int i = 0; i < 3; i++) {
-    for (unsigned int j = 0; j < 3; j++) {
-      if (i == j) {
-        thisTerm = (action_[frame2](i, j) - action_[frame1](i, j) -
-                    pAve * (time_[frame2] - time_[frame1]));
-      } else {
-        thisTerm = (action_[frame2](i, j) - action_[frame1](i, j));
-      }
-      corrTensor(i, j) += thisTerm * thisTerm;
+      action_[frame] += m * outProduct(r, v);
     }
+
+    action_[frame] /= vol;
+    time_[frame] = info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
+
+    pressure_.add(pressure);
   }
-  return corrTensor;
-}
+
+  Mat3x3d StressCorrFunc::calcCorrVal(int frame1, int frame2) {
+    Mat3x3d corrTensor(0.0);
+    RealType thisTerm;
+
+    RealType pAve = pressure_.getAverage();
+
+    for (unsigned int i = 0; i < 3; i++) {
+      for (unsigned int j = 0; j < 3; j++) {
+        if (i == j) {
+          thisTerm = (action_[frame2](i, j) - action_[frame1](i, j) -
+                      pAve * (time_[frame2] - time_[frame1]));
+        } else {
+          thisTerm = (action_[frame2](i, j) - action_[frame1](i, j));
+        }
+        corrTensor(i, j) += thisTerm * thisTerm;
+      }
+    }
+    return corrTensor;
+  }
 }  // namespace OpenMD

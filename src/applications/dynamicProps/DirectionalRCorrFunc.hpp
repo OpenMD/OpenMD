@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,24 +46,23 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_DIRECTIONALRCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_DIRECTIONALRCORRFUNC_HPP
 
-#include "math/Vector3.hpp"
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
+#include "math/Vector3.hpp"
 namespace OpenMD {
 
   class DirectionalRCorrFunc : public ObjectACF<Vector3d> {
   public:
     DirectionalRCorrFunc(SimInfo* info, const std::string& filename,
-                         const std::string& sele1, const std::string& sele2);   
-    
+                         const std::string& sele1, const std::string& sele2);
+
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2);
     virtual void validateSelection(SelectionManager& seleMan);
 
-    std::vector<std::vector<Vector3d> > positions_;
-    std::vector<std::vector<RotMat3x3d> > rotMats_;
+    std::vector<std::vector<Vector3d>> positions_;
+    std::vector<std::vector<RotMat3x3d>> rotMats_;
   };
 
-}
+}  // namespace OpenMD
 #endif
-

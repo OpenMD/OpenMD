@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -63,42 +63,32 @@ namespace OpenMD {
    * \f[ \rho_i = \sum_{j \neq i} \rho_{j}(r_{ij})  \f]
    */
 
-  enum EAMiType {
-    eamitTabulated,
-    eamitZhou,
-    eamitOxides
-  };
+  enum EAMiType { eamitTabulated, eamitZhou, eamitOxides };
 
   class EAMInteractionType : public NonBondedInteractionType {
-
   public:
-
-    EAMInteractionType(RealType re, RealType alpha,
-                       RealType beta, RealType A,
-                       RealType B, RealType kappa,
-                       RealType lambda) {
-
+    EAMInteractionType(RealType re, RealType alpha, RealType beta, RealType A,
+                       RealType B, RealType kappa, RealType lambda) {
       interactionType_ = eamitZhou;
       setEAMZhou();
-      re_ = re;
-      alpha_ = alpha;
-      beta_ = beta;
-      A_ = A;
-      B_ = B;
-      kappa_ = kappa;
+      re_     = re;
+      alpha_  = alpha;
+      beta_   = beta;
+      A_      = A;
+      B_      = B;
+      kappa_  = kappa;
       lambda_ = lambda;
     }
 
-    EAMInteractionType(RealType re, RealType alpha,
-                       RealType A, RealType Ci, RealType Cj) {
-
+    EAMInteractionType(RealType re, RealType alpha, RealType A, RealType Ci,
+                       RealType Cj) {
       interactionType_ = eamitOxides;
       setEAMOxides();
-      re_ = re;
+      re_    = re;
       alpha_ = alpha;
-      A_ = A;
-      Ci_ = Ci;
-      Cj_ = Cj;
+      A_     = A;
+      Ci_    = Ci;
+      Cj_    = Cj;
     }
 
     int getNr() { return nr_; }
@@ -121,7 +111,7 @@ namespace OpenMD {
     int nr_;
     RealType dr_;
     RealType rcut_;
-    std::vector<RealType> phi_;   // phi(r)
+    std::vector<RealType> phi_;  // phi(r)
     // This set is for parameters for the parameterization of EAM described in:
     // Acta mater 49, 4005 (2001), and X. W. Zhou, R. A. Johnson, and
     // H. N. G. Wadley, Phys. Rev. B, 69, 144113 (2004).
@@ -137,5 +127,5 @@ namespace OpenMD {
     RealType Cj_;
     EAMiType interactionType_;
   };
-}
+}  // namespace OpenMD
 #endif

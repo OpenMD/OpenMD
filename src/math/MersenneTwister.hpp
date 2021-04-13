@@ -17,7 +17,7 @@
 
 // Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
 // Copyright (C) 2000 - 2003, Richard J. Wagner
-// All rights reserved.                          
+// All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
@@ -30,15 +30,15 @@
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //
-//   3. The names of its contributors may not be used to endorse or promote 
-//      products derived from this software without specific prior written 
+//   3. The names of its contributors may not be used to endorse or promote
+//      products derived from this software without specific prior written
 //      permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+// A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER
+// OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
 // EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 // PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
 // PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
@@ -61,11 +61,12 @@
 // its own MTRand object)
 
 #include <assert.h>
-#include <iostream>
 #include <limits.h>
+#include <math.h>
 #include <stdio.h>
 #include <time.h>
-#include <math.h>
+
+#include <iostream>
 #include <vector>
 namespace OpenMD {
 
@@ -73,127 +74,139 @@ namespace OpenMD {
     // Data
   public:
     typedef unsigned long uint32;  // unsigned integer type, at least 32 bits
-	
+
     enum { N = 624 };       // length of state vector
     enum { SAVE = N + 1 };  // length of array for save()
 
   private:
     enum { M = 397 };  // period parameter
-	
-    uint32 state[N];   // internal state
-    uint32 *pNext;     // next value to get from state
-    int left;          // number of values left before reload needed
+
+    uint32 state[N];  // internal state
+    uint32* pNext;    // next value to get from state
+    int left;         // number of values left before reload needed
     int nstrides_;
     int stride_;
 
-    //Methods
+    // Methods
   public:
-    MTRand( const uint32& oneSeed, int nstrides, int stride);  // initialize with a simple uint32
-    MTRand( uint32 *const bigSeed, uint32 const seedLength, int nstrides, int stride);  // or an array
-    MTRand(int nstrides, int stride);  // auto-initialize with /dev/urandom or time() and clock()
-	
+    MTRand(const uint32& oneSeed, int nstrides,
+           int stride);  // initialize with a simple uint32
+    MTRand(uint32* const bigSeed, uint32 const seedLength, int nstrides,
+           int stride);  // or an array
+    MTRand(
+        int nstrides,
+        int stride);  // auto-initialize with /dev/urandom or time() and clock()
+
     // Do NOT use for CRYPTOGRAPHY without securely hashing several returned
     // values together, otherwise the generator state can be learned after
     // reading 624 consecutive values.
-	
+
     // Access to 32-bit random numbers
-    RealType rand();                          // real number in [0,1]
-    RealType rand( const RealType& n );         // real number in [0,n]
-    RealType randExc();                       // real number in [0,1)
-    RealType randExc( const RealType& n );      // real number in [0,n)
-    RealType randDblExc();                    // real number in (0,1)
-    RealType randDblExc( const RealType& n );   // real number in (0,n)
-    uint32 randInt();                       // integer in [0,2^32-1] (modified for striding)
-    uint32 rawRandInt();                    // original randInt
-    uint32 randInt( const uint32& n );      // integer in [0,n] for n < 2^32
+    RealType rand();                         // real number in [0,1]
+    RealType rand(const RealType& n);        // real number in [0,n]
+    RealType randExc();                      // real number in [0,1)
+    RealType randExc(const RealType& n);     // real number in [0,n)
+    RealType randDblExc();                   // real number in (0,1)
+    RealType randDblExc(const RealType& n);  // real number in (0,n)
+    uint32 randInt();     // integer in [0,2^32-1] (modified for striding)
+    uint32 rawRandInt();  // original randInt
+    uint32 randInt(const uint32& n);          // integer in [0,n] for n < 2^32
     RealType operator()() { return rand(); }  // same as rand()
-	
+
     // Access to 53-bit random numbers (capacity of IEEE RealType precision)
     RealType rand53();  // real number in [0,1)
-	
+
     // Access to nonuniform random number distributions
-    RealType randNorm( const RealType mean = 0.0, const RealType variance = 0.0 );
-	
+    RealType randNorm(const RealType mean = 0.0, const RealType variance = 0.0);
+
     // Re-seeding functions with same behavior as initializers
-    void seed( const uint32 oneSeed );
-    void seed( uint32 *const bigSeed, const uint32 seedLength = N );
+    void seed(const uint32 oneSeed);
+    void seed(uint32* const bigSeed, const uint32 seedLength = N);
     void seed();
 
-    std::vector<uint32>generateSeeds();	
-        
+    std::vector<uint32> generateSeeds();
+
     // Saving and loading generator state
-    void save( uint32* saveArray ) const;  // to array of size SAVE
-    void load( uint32 *const loadArray );  // from such array
-    friend std::ostream& operator<<( std::ostream& os, const MTRand& mtrand );
-    friend std::istream& operator>>( std::istream& is, MTRand& mtrand );
+    void save(uint32* saveArray) const;  // to array of size SAVE
+    void load(uint32* const loadArray);  // from such array
+    friend std::ostream& operator<<(std::ostream& os, const MTRand& mtrand);
+    friend std::istream& operator>>(std::istream& is, MTRand& mtrand);
 
   protected:
-    void initialize( const uint32 oneSeed );
+    void initialize(const uint32 oneSeed);
     void reload();
-    uint32 hiBit( const uint32& u ) const { return u & 0x80000000UL; }
-    uint32 loBit( const uint32& u ) const { return u & 0x00000001UL; }
-    uint32 loBits( const uint32& u ) const { return u & 0x7fffffffUL; }
-    uint32 mixBits( const uint32& u, const uint32& v ) const
-    { return hiBit(u) | loBits(v); }
+    uint32 hiBit(const uint32& u) const { return u & 0x80000000UL; }
+    uint32 loBit(const uint32& u) const { return u & 0x00000001UL; }
+    uint32 loBits(const uint32& u) const { return u & 0x7fffffffUL; }
+    uint32 mixBits(const uint32& u, const uint32& v) const {
+      return hiBit(u) | loBits(v);
+    }
 #ifdef _MSC_VER
-#pragma warning( push ) // save current warning settings
-#pragma warning( disable : 4146 ) // warning C4146: unary minus operator applied to unsigned type, result still unsigned
+#pragma warning(push)            // save current warning settings
+#pragma warning(disable : 4146)  // warning C4146: unary minus operator applied
+                                 // to unsigned type, result still unsigned
 #endif
-    uint32 twist( const uint32& m, const uint32& s0, const uint32& s1 ) const
-    { return m ^ (mixBits(s0,s1)>>1) ^ (-loBit(s1) & 0x9908b0dfUL); }
+    uint32 twist(const uint32& m, const uint32& s0, const uint32& s1) const {
+      return m ^ (mixBits(s0, s1) >> 1) ^ (-loBit(s1) & 0x9908b0dfUL);
+    }
 #ifdef _MSC_VER
-#pragma warning( pop ) // return warning settings to what they were
+#pragma warning(pop)  // return warning settings to what they were
 #endif
 
-    static uint32 hash( time_t t, clock_t c );
+    static uint32 hash(time_t t, clock_t c);
   };
 
-
-  inline MTRand::MTRand( const uint32& oneSeed, int nstrides, int stride) : nstrides_(nstrides), stride_(stride) {
+  inline MTRand::MTRand(const uint32& oneSeed, int nstrides, int stride) :
+      nstrides_(nstrides), stride_(stride) {
     assert(stride_ < nstrides_ && stride_ >= 0);
-    seed(oneSeed); 
+    seed(oneSeed);
   }
 
-  inline MTRand::MTRand( uint32 *const bigSeed, const uint32 seedLength, int nstrides, int stride) : nstrides_(nstrides), stride_(stride) {
+  inline MTRand::MTRand(uint32* const bigSeed, const uint32 seedLength,
+                        int nstrides, int stride) :
+      nstrides_(nstrides),
+      stride_(stride) {
     assert(stride_ < nstrides_ && stride_ >= 0);
-    seed(bigSeed,seedLength); 
+    seed(bigSeed, seedLength);
   }
 
-  inline MTRand::MTRand(int nstrides, int stride)	: nstrides_(nstrides), stride_(stride){
+  inline MTRand::MTRand(int nstrides, int stride) :
+      nstrides_(nstrides), stride_(stride) {
     assert(stride_ < nstrides_ && stride_ >= 0);
-    seed(); 
+    seed();
   }
 
-  inline RealType MTRand::rand()
-  { return RealType(randInt()) * (1.0/4294967295.0); }
+  inline RealType MTRand::rand() {
+    return RealType(randInt()) * (1.0 / 4294967295.0);
+  }
 
-  inline RealType MTRand::rand( const RealType& n )
-  { return rand() * n; }
+  inline RealType MTRand::rand(const RealType& n) { return rand() * n; }
 
-  inline RealType MTRand::randExc()
-  { return RealType(randInt()) * (1.0/4294967296.0); }
+  inline RealType MTRand::randExc() {
+    return RealType(randInt()) * (1.0 / 4294967296.0);
+  }
 
-  inline RealType MTRand::randExc( const RealType& n )
-  { return randExc() * n; }
+  inline RealType MTRand::randExc(const RealType& n) { return randExc() * n; }
 
-  inline RealType MTRand::randDblExc()
-  { return ( RealType(randInt()) + 0.5 ) * (1.0/4294967296.0); }
+  inline RealType MTRand::randDblExc() {
+    return (RealType(randInt()) + 0.5) * (1.0 / 4294967296.0);
+  }
 
-  inline RealType MTRand::randDblExc( const RealType& n )
-  { return randDblExc() * n; }
+  inline RealType MTRand::randDblExc(const RealType& n) {
+    return randDblExc() * n;
+  }
 
-  inline RealType MTRand::rand53()
-  {
+  inline RealType MTRand::rand53() {
     uint32 a = randInt() >> 5, b = randInt() >> 6;
-    return ( a * 67108864.0 + b ) * (1.0/9007199254740992.0);  // by Isaku Wada
+    return (a * 67108864.0 + b) * (1.0 / 9007199254740992.0);  // by Isaku Wada
   }
 
-  inline RealType MTRand::randNorm( const RealType mean, const RealType variance )
-  {
+  inline RealType MTRand::randNorm(const RealType mean,
+                                   const RealType variance) {
     // Return a real number from a normal (Gaussian) distribution with given
     // mean and variance by Box-Muller method
     assert(variance > 0);
-    RealType r = sqrt( -2.0 * log( 1.0-randDblExc()) * variance);
+    RealType r   = sqrt(-2.0 * log(1.0 - randDblExc()) * variance);
     RealType phi = 2.0 * 3.14159265358979323846264338328 * randExc();
     return mean + r * cos(phi);
   }
@@ -203,41 +216,38 @@ namespace OpenMD {
    * streams on parallel jobs.  It now takes numbers from by striding
    * through the random stream and picking up only one of the random
    * numbers per nstrides_.  The number it picks is the stride_'th
-   * number in the stride sequence.  
+   * number in the stride sequence.
    */
   inline MTRand::uint32 MTRand::randInt() {
-
     std::vector<uint32> ranNums(nstrides_);
-  
+
     for (int i = 0; i < nstrides_; ++i) {
       ranNums[i] = rawRandInt();
     }
-  
+
     return ranNums[stride_];
   }
 
-  /** 
+  /**
    * This is the original randInt function which implements the mersenne
    * twister.
    */
-  inline MTRand::uint32 MTRand::rawRandInt()
-  {
+  inline MTRand::uint32 MTRand::rawRandInt() {
     // Pull a 32-bit integer from the generator state
     // Every other access function simply transforms the numbers extracted here
-	
-    if( left == 0 ) reload();
+
+    if (left == 0) reload();
     --left;
-		
+
     uint32 s1;
     s1 = *pNext++;
     s1 ^= (s1 >> 11);
-    s1 ^= (s1 <<  7) & 0x9d2c5680UL;
+    s1 ^= (s1 << 7) & 0x9d2c5680UL;
     s1 ^= (s1 << 15) & 0xefc60000UL;
-    return ( s1 ^ (s1 >> 18) );
+    return (s1 ^ (s1 >> 18));
   }
 
-  inline MTRand::uint32 MTRand::randInt( const uint32& n )
-  {
+  inline MTRand::uint32 MTRand::randInt(const uint32& n) {
     // Find which bits are used in n
     // Optimized by Magnus Jonsson (magnus@smartelectronix.com)
     uint32 used = n;
@@ -246,26 +256,22 @@ namespace OpenMD {
     used |= used >> 4;
     used |= used >> 8;
     used |= used >> 16;
-	
+
     // Draw numbers until one is found in [0,n]
     uint32 i;
     do
       i = randInt() & used;  // toss unused bits to shorten search
-    while( i > n );
+    while (i > n);
     return i;
   }
 
-
-  inline void MTRand::seed( const uint32 oneSeed )
-  {
+  inline void MTRand::seed(const uint32 oneSeed) {
     // Seed the generator with a simple uint32
     initialize(oneSeed);
     reload();
   }
 
-
-  inline void MTRand::seed( uint32 *const bigSeed, const uint32 seedLength )
-  {
+  inline void MTRand::seed(uint32* const bigSeed, const uint32 seedLength) {
     // Seed the generator with an array of uint32's
     // There are 2^19937-1 possible initial states.  This function allows
     // all of those to be accessed by providing at least 19937 bits (with a
@@ -273,175 +279,158 @@ namespace OpenMD {
     // in each element are discarded.
     // Just call seed() if you want to get array from /dev/urandom
     initialize(19650218UL);
-    int i = 1;
+    int i    = 1;
     uint32 j = 0;
-    int k = ( N > seedLength ? N : seedLength );
-    for( ; k; --k )
-      {
-	state[i] =
-	  state[i] ^ ( (state[i-1] ^ (state[i-1] >> 30)) * 1664525UL );
-	state[i] += ( bigSeed[j] & 0xffffffffUL ) + j;
-	state[i] &= 0xffffffffUL;
-	++i;  ++j;
-	if( i >= N ) { state[0] = state[N-1];  i = 1; }
-	if( j >= seedLength ) j = 0;
+    int k    = (N > seedLength ? N : seedLength);
+    for (; k; --k) {
+      state[i] = state[i] ^ ((state[i - 1] ^ (state[i - 1] >> 30)) * 1664525UL);
+      state[i] += (bigSeed[j] & 0xffffffffUL) + j;
+      state[i] &= 0xffffffffUL;
+      ++i;
+      ++j;
+      if (i >= N) {
+        state[0] = state[N - 1];
+        i        = 1;
       }
-    for( k = N - 1; k; --k )
-      {
-	state[i] =
-	  state[i] ^ ( (state[i-1] ^ (state[i-1] >> 30)) * 1566083941UL );
-	state[i] -= i;
-	state[i] &= 0xffffffffUL;
-	++i;
-	if( i >= N ) { state[0] = state[N-1];  i = 1; }
+      if (j >= seedLength) j = 0;
+    }
+    for (k = N - 1; k; --k) {
+      state[i] =
+          state[i] ^ ((state[i - 1] ^ (state[i - 1] >> 30)) * 1566083941UL);
+      state[i] -= i;
+      state[i] &= 0xffffffffUL;
+      ++i;
+      if (i >= N) {
+        state[0] = state[N - 1];
+        i        = 1;
       }
+    }
     state[0] = 0x80000000UL;  // MSB is 1, assuring non-zero initial array
     reload();
   }
 
-
-  inline void MTRand::seed()
-  {
+  inline void MTRand::seed() {
     std::vector<uint32> seeds;
 
     seeds = generateSeeds();
 
     if (seeds.size() == 1) {
-      seed( seeds[0] );
+      seed(seeds[0]);
     } else {
-      seed( &seeds[0], seeds.size() );
+      seed(&seeds[0], seeds.size());
     }
   }
-
 
   inline std::vector<MTRand::uint32> MTRand::generateSeeds() {
     // Seed the generator with an array from /dev/urandom if available
     // Otherwise use a hash of time() and clock() values
 
-    std::vector<uint32> bigSeed; 
+    std::vector<uint32> bigSeed;
 
     // First try getting an array from /dev/urandom
-    FILE* urandom = fopen( "/dev/urandom", "rb" );
-    if( urandom )
-      {
-	bigSeed.resize(N);
-	uint32 *s = &bigSeed[0];
-	int i = N;
-	bool success = true;
-	while( success && i-- )
-	  success = (fread( s++, sizeof(uint32), 1, urandom ) == 0);
-	fclose(urandom);
-	if( success ) { return bigSeed; }
-      }
-  
+    FILE* urandom = fopen("/dev/urandom", "rb");
+    if (urandom) {
+      bigSeed.resize(N);
+      uint32* s    = &bigSeed[0];
+      int i        = N;
+      bool success = true;
+      while (success && i--)
+        success = (fread(s++, sizeof(uint32), 1, urandom) == 0);
+      fclose(urandom);
+      if (success) { return bigSeed; }
+    }
+
     // Was not successful, so use time() and clock() instead
 
-    bigSeed.push_back(hash( time(NULL), clock()));
+    bigSeed.push_back(hash(time(NULL), clock()));
     return bigSeed;
   }
 
-
-  inline void MTRand::initialize( const uint32 seed )
-  {
+  inline void MTRand::initialize(const uint32 seed) {
     // Initialize generator state with seed
     // See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
     // In previous versions, most significant bits (MSBs) of the seed affect
     // only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto.
-    uint32 *s = state;
-    uint32 *r = state;
-    int i = 1;
-    *s++ = seed & 0xffffffffUL;
-    for( ; i < N; ++i )
-      {
-	*s++ = ( 1812433253UL * ( *r ^ (*r >> 30) ) + i ) & 0xffffffffUL;
-	r++;
-      }
+    uint32* s = state;
+    uint32* r = state;
+    int i     = 1;
+    *s++      = seed & 0xffffffffUL;
+    for (; i < N; ++i) {
+      *s++ = (1812433253UL * (*r ^ (*r >> 30)) + i) & 0xffffffffUL;
+      r++;
+    }
   }
 
-
-  inline void MTRand::reload()
-  {
+  inline void MTRand::reload() {
     // Generate N new values in state
     // Made clearer and faster by Matthew Bellew (matthew.bellew@home.com)
-    uint32 *p = state;
+    uint32* p = state;
     int i;
-    for( i = N - M; i--; ++p )
-      *p = twist( p[M], p[0], p[1] );
-    for( i = M; --i; ++p )
-      *p = twist( p[M-N], p[0], p[1] );
-    *p = twist( p[M-N], p[0], state[0] );
+    for (i = N - M; i--; ++p)
+      *p = twist(p[M], p[0], p[1]);
+    for (i = M; --i; ++p)
+      *p = twist(p[M - N], p[0], p[1]);
+    *p = twist(p[M - N], p[0], state[0]);
 
     left = N, pNext = state;
   }
 
-
-  inline MTRand::uint32 MTRand::hash( time_t t, clock_t c )
-  {
+  inline MTRand::uint32 MTRand::hash(time_t t, clock_t c) {
     // Get a uint32 from t and c
     // Better than uint32(x) in case x is floating point in [0,1]
     // Based on code by Lawrence Kirby (fred@genesis.demon.co.uk)
 
     static uint32 differ = 0;  // guarantee time-based seeds will change
 
-    uint32 h1 = 0;
-    unsigned char *p = (unsigned char *) &t;
-    for( size_t i = 0; i < sizeof(t); ++i )
-      {
-	h1 *= UCHAR_MAX + 2U;
-	h1 += p[i];
-      }
+    uint32 h1        = 0;
+    unsigned char* p = (unsigned char*)&t;
+    for (size_t i = 0; i < sizeof(t); ++i) {
+      h1 *= UCHAR_MAX + 2U;
+      h1 += p[i];
+    }
     uint32 h2 = 0;
-    p = (unsigned char *) &c;
-    for( size_t j = 0; j < sizeof(c); ++j )
-      {
-	h2 *= UCHAR_MAX + 2U;
-	h2 += p[j];
-      }
-    return ( h1 + differ++ ) ^ h2;
+    p         = (unsigned char*)&c;
+    for (size_t j = 0; j < sizeof(c); ++j) {
+      h2 *= UCHAR_MAX + 2U;
+      h2 += p[j];
+    }
+    return (h1 + differ++) ^ h2;
   }
 
-
-  inline void MTRand::save( uint32* saveArray ) const
-  {
-    uint32 *sa = saveArray;
-    const uint32 *s = state;
-    int i = N;
-    for( ; i--; *sa++ = *s++ ) {}
+  inline void MTRand::save(uint32* saveArray) const {
+    uint32* sa      = saveArray;
+    const uint32* s = state;
+    int i           = N;
+    for (; i--; *sa++ = *s++) {}
     *sa = left;
   }
 
-
-  inline void MTRand::load( uint32 *const loadArray )
-  {
-    uint32 *s = state;
-    uint32 *la = loadArray;
-    int i = N;
-    for( ; i--; *s++ = *la++ ) {}
-    left = *la;
-    pNext = &state[N-left];
+  inline void MTRand::load(uint32* const loadArray) {
+    uint32* s  = state;
+    uint32* la = loadArray;
+    int i      = N;
+    for (; i--; *s++ = *la++) {}
+    left  = *la;
+    pNext = &state[N - left];
   }
 
-
-  inline std::ostream& operator<<( std::ostream& os, const MTRand& mtrand )
-  {
-    const MTRand::uint32 *s = mtrand.state;
-    int i = mtrand.N;
-    for( ; i--; os << *s++ << "\t" ) {}
+  inline std::ostream& operator<<(std::ostream& os, const MTRand& mtrand) {
+    const MTRand::uint32* s = mtrand.state;
+    int i                   = mtrand.N;
+    for (; i--; os << *s++ << "\t") {}
     return os << mtrand.left;
   }
 
-
-  inline std::istream& operator>>( std::istream& is, MTRand& mtrand )
-  {
-    MTRand::uint32 *s = mtrand.state;
-    int i = mtrand.N;
-    for( ; i--; is >> *s++ ) {}
+  inline std::istream& operator>>(std::istream& is, MTRand& mtrand) {
+    MTRand::uint32* s = mtrand.state;
+    int i             = mtrand.N;
+    for (; i--; is >> *s++) {}
     is >> mtrand.left;
-    mtrand.pNext = &mtrand.state[mtrand.N-mtrand.left];
+    mtrand.pNext = &mtrand.state[mtrand.N - mtrand.left];
     return is;
   }
 
-}
+}  // namespace OpenMD
 #endif  // MERSENNETWISTER_H
 
 // Change log:

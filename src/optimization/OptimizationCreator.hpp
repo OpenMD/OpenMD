@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,11 +42,12 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#ifndef OPTIMIZATION_OPTIMIZATIONCREATOR_HPP 
+
+#ifndef OPTIMIZATION_OPTIMIZATIONCREATOR_HPP
 #define OPTIMIZATION_OPTIMIZATIONCREATOR_HPP
 
 #include <string>
+
 #include "optimization/Method.hpp"
 
 using namespace QuantLib;
@@ -54,26 +55,28 @@ namespace OpenMD {
 
   class OptimizationMethod;
   class SimInfo;
-  
+
   class OptimizationCreator {
   public:
     OptimizationCreator(const std::string& ident) : ident_(ident) {}
-    virtual ~OptimizationCreator() {}    
-    const std::string& getIdent() const { return ident_; }    
+    virtual ~OptimizationCreator() {}
+    const std::string& getIdent() const { return ident_; }
     virtual QuantLib::OptimizationMethod* create() const = 0;
-    
+
   private:
     std::string ident_;
   };
-  
+
   template<class ConcreteOptimization>
   class OptimizationBuilder : public OptimizationCreator {
   public:
-    OptimizationBuilder(const std::string& ident) : OptimizationCreator(ident) {}
-    virtual  QuantLib::OptimizationMethod* create() const {return new ConcreteOptimization();}
+    OptimizationBuilder(const std::string& ident) :
+        OptimizationCreator(ident) {}
+    virtual QuantLib::OptimizationMethod* create() const {
+      return new ConcreteOptimization();
+    }
   };
-  
-}
 
-#endif //OPTIMIZATIONS_OPTIMIZATIONCREATOR_HPP
+}  // namespace OpenMD
 
+#endif  // OPTIMIZATIONS_OPTIMIZATIONCREATOR_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,23 +42,24 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_EAMATOMTYPESSECTIONPARSER_HPP
 #define IO_EAMATOMTYPESSECTIONPARSER_HPP
 
+#include "io/ForceFieldOptions.hpp"
 #include "io/SectionParser.hpp"
 #include "types/EAMAdapter.hpp"
-#include "io/ForceFieldOptions.hpp"
 
 namespace OpenMD {
 
   /**
-   * @class EAMAtomTypesSectionParser EAMAtomTypesSectionParser.hpp "io/EAMAtomTypesSectionParser.hpp"
+   * @class EAMAtomTypesSectionParser EAMAtomTypesSectionParser.hpp
+   * "io/EAMAtomTypesSectionParser.hpp"
    */
   class EAMAtomTypesSectionParser : public SectionParser {
   public:
     EAMAtomTypesSectionParser(ForceFieldOptions& options);
-            
+
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
     void parseFuncflFile(ForceField& ff, EAMAdapter ea,
@@ -66,12 +67,10 @@ namespace OpenMD {
     void parseEAMArray(std::istream& input, std::vector<RealType>& array,
                        int num);
     ForceFieldOptions& options_;
-    RealType eus_; // Energy unit scaling
-    RealType dus_; // Distance unit scaling
+    RealType eus_;  // Energy unit scaling
+    RealType dus_;  // Distance unit scaling
   };
 
-} //namespace OpenMD
+}  // namespace OpenMD
 
-#endif //IO_EAMATOMTYPESSECTIONPARSER_HPP
-
-
+#endif  // IO_EAMATOMTYPESSECTIONPARSER_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file NPTxyz.hpp
  * @author tlin
@@ -59,16 +59,14 @@
 namespace OpenMD {
   class NPTxyz : public NPTf {
   public:
-
-    NPTxyz(SimInfo * info) : NPTf(info) {}
+    NPTxyz(SimInfo* info) : NPTf(info) {}
 
   private:
-            
     virtual void scaleSimBox();
     virtual RealType calcConservedQuantity();
     virtual void loadEta();
   };
 
-}      //end namespace OpenMD
+}  // end namespace OpenMD
 
-#endif // INTEGRATORS_NPTXYZ_HPP
+#endif  // INTEGRATORS_NPTXYZ_HPP

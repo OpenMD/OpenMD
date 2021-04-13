@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-  
+
 /**
  * @file SnapshotManager.hpp
  * @author tlin
@@ -55,27 +55,25 @@
 
 #include "brains/Snapshot.hpp"
 
-namespace OpenMD{
+namespace OpenMD {
 
   /**
    * @class SnapshotManager SnapshotManager.hpp "brains/SnapshotManager.hpp"
-   * @brief SnapshotManager class is an abstract class which maintains 
+   * @brief SnapshotManager class is an abstract class which maintains
    * a series of snapshots.
-   * 
+   *
    * @see SimSnapshotManager
    * @see PropSnapshotManager
    */
   class SnapshotManager {
   public:
-
     virtual ~SnapshotManager() {
       delete currentSnapshot_;
       delete previousSnapshot_;
     }
-            
+
     virtual bool advance() { return true; }
     virtual bool resetToPrevious() { return true; }
-
 
     virtual Snapshot* getSnapshot(int id) = 0;
 
@@ -83,36 +81,27 @@ namespace OpenMD{
      * Returns the pointer of previous snapshot
      * @return the pointer of previous snapshot
      */
-    Snapshot* getPrevSnapshot() {
-      return previousSnapshot_;
-    }
+    Snapshot* getPrevSnapshot() { return previousSnapshot_; }
 
     /**
      * Returns the pointer of current snapshot
      * @return the pointer of current snapshot
-     */            
-    Snapshot* getCurrentSnapshot() {
-      return currentSnapshot_;
-    }
+     */
+    Snapshot* getCurrentSnapshot() { return currentSnapshot_; }
 
-    int getStorageLayout() {
-      return storageLayout_;
-    }
-    
+    int getStorageLayout() { return storageLayout_; }
+
   private:
     int storageLayout_;
 
   protected:
+    SnapshotManager(int storageLayout) :
+        storageLayout_(storageLayout), currentSnapshot_(NULL),
+        previousSnapshot_(NULL) {}
 
-    SnapshotManager(int storageLayout) : storageLayout_(storageLayout), currentSnapshot_(NULL), previousSnapshot_(NULL) {
-    }
-            
     Snapshot* currentSnapshot_;
     Snapshot* previousSnapshot_;
-            
-
   };
 
-}
-#endif //BRAINS_SNAPSHOTMANAGER_HPP
-
+}  // namespace OpenMD
+#endif  // BRAINS_SNAPSHOTMANAGER_HPP

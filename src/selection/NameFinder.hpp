@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -56,7 +56,7 @@
 
 namespace OpenMD {
 
-  class TreeNode{
+  class TreeNode {
   public:
     std::string name;
     SelectionSet bs;
@@ -68,30 +68,38 @@ namespace OpenMD {
   class NameFinder {
   public:
     NameFinder(SimInfo* info);
-    SelectionSet match(const std::string &name);
+    SelectionSet match(const std::string& name);
 
   private:
     void loadNames();
-    void matchMolecule(const std::string &molName, SelectionSet &bs);
-    void matchStuntDouble(const std::string &molName, const std::string &sdName, SelectionSet &bs);
-    void matchRigidAtoms(const std::string &molName, const std::string &rbName, const std::string &rbAtomName, SelectionSet &bs);
-    void matchBond(const std::string &molName, const std::string &bondName,  SelectionSet &bs);
-    void matchBend(const std::string &molName, const std::string &bendName, SelectionSet &bs);
-    void matchTorsion(const std::string &molName, const std::string &torsionName, SelectionSet &bs);
-    void matchInversion(const std::string &molName, const std::string &inversionName, SelectionSet &bs);
+    void matchMolecule(const std::string& molName, SelectionSet& bs);
+    void matchStuntDouble(const std::string& molName, const std::string& sdName,
+                          SelectionSet& bs);
+    void matchRigidAtoms(const std::string& molName, const std::string& rbName,
+                         const std::string& rbAtomName, SelectionSet& bs);
+    void matchBond(const std::string& molName, const std::string& bondName,
+                   SelectionSet& bs);
+    void matchBend(const std::string& molName, const std::string& bendName,
+                   SelectionSet& bs);
+    void matchTorsion(const std::string& molName,
+                      const std::string& torsionName, SelectionSet& bs);
+    void matchInversion(const std::string& molName,
+                        const std::string& inversionName, SelectionSet& bs);
 
-    void matchInternalIndex(const std::string &name, int internalIndex, SelectionSet &bs);
+    void matchInternalIndex(const std::string& name, int internalIndex,
+                            SelectionSet& bs);
 
-    TreeNodePtr createNode(TreeNodePtr parent, const std::string &name);
+    TreeNodePtr createNode(TreeNodePtr parent, const std::string& name);
     std::vector<TreeNodePtr> getAllChildren(TreeNodePtr node);
-    std::vector<TreeNodePtr> getMatchedChildren(TreeNodePtr node, const std::string &name);
-    bool isMatched(const std::string &str, const std::string &wildcard);
+    std::vector<TreeNodePtr> getMatchedChildren(TreeNodePtr node,
+                                                const std::string& name);
+    bool isMatched(const std::string& str, const std::string& wildcard);
 
-    bool isInteger(const std::string &str);
+    bool isInteger(const std::string& str);
 
     SimInfo* info_ {nullptr};
     vector<int> nObjects_;
     TreeNodePtr root_ {nullptr};
   };
-}
+}  // namespace OpenMD
 #endif

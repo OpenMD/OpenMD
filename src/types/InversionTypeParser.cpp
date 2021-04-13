@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -58,42 +58,42 @@
 
 namespace OpenMD {
 
-InversionTypeParser::InversionTypeParser() {
-  stringToEnumMap_["AmberImproper"] = itAmberImproper;
-  stringToEnumMap_["ImproperCosine"] = itImproperCosine;
-  stringToEnumMap_["Harmonic"] = itHarmonic;
-  stringToEnumMap_["CentralAtomHeight"] = itCentralAtomHeight;
-  stringToEnumMap_["Dreiding"] = itDreiding;
-}
-
-InversionType* InversionTypeParser::parseTypeAndPars(
-    const std::string& type, std::vector<RealType> pars) {
-  std::string line(type);
-
-  std::vector<RealType>::iterator it;
-  for (it = pars.begin(); it != pars.end(); ++it) {
-    line.append("\t");
-    line.append(OpenMD::to_string(*it));
+  InversionTypeParser::InversionTypeParser() {
+    stringToEnumMap_["AmberImproper"]     = itAmberImproper;
+    stringToEnumMap_["ImproperCosine"]    = itImproperCosine;
+    stringToEnumMap_["Harmonic"]          = itHarmonic;
+    stringToEnumMap_["CentralAtomHeight"] = itCentralAtomHeight;
+    stringToEnumMap_["Dreiding"]          = itDreiding;
   }
 
-  return parseLine(line);
-}
+  InversionType* InversionTypeParser::parseTypeAndPars(
+      const std::string& type, std::vector<RealType> pars) {
+    std::string line(type);
 
-InversionType* InversionTypeParser::parseLine(const std::string& line) {
-  StringTokenizer tokenizer(line);
-  InversionType* inversionType = NULL;
+    std::vector<RealType>::iterator it;
+    for (it = pars.begin(); it != pars.end(); ++it) {
+      line.append("\t");
+      line.append(OpenMD::to_string(*it));
+    }
 
-  int nTokens = tokenizer.countTokens();
-
-  if (nTokens < 1) {
-    throw OpenMDException("InversionTypeParser: Not enough tokens");
+    return parseLine(line);
   }
 
-  InversionTypeEnum it = getInversionTypeEnum(tokenizer.nextToken());
+  InversionType* InversionTypeParser::parseLine(const std::string& line) {
+    StringTokenizer tokenizer(line);
+    InversionType* inversionType = NULL;
 
-  nTokens -= 1;
+    int nTokens = tokenizer.countTokens();
 
-  switch (it) {
+    if (nTokens < 1) {
+      throw OpenMDException("InversionTypeParser: Not enough tokens");
+    }
+
+    InversionTypeEnum it = getInversionTypeEnum(tokenizer.nextToken());
+
+    nTokens -= 1;
+
+    switch (it) {
     case itImproperCosine:
 
       if (nTokens < 3 || nTokens % 3 != 0) {
@@ -104,8 +104,8 @@ InversionType* InversionTypeParser::parseLine(const std::string& line) {
         std::vector<ImproperCosineInversionParameter> parameters;
         for (int i = 0; i < nSets; ++i) {
           ImproperCosineInversionParameter currParam;
-          currParam.kchi = tokenizer.nextTokenAsDouble();
-          currParam.n = tokenizer.nextTokenAsInt();
+          currParam.kchi  = tokenizer.nextTokenAsDouble();
+          currParam.n     = tokenizer.nextTokenAsInt();
           currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 *
                             Constants::PI;  // convert to rad
           parameters.push_back(currParam);
@@ -120,7 +120,7 @@ InversionType* InversionTypeParser::parseLine(const std::string& line) {
       if (nTokens < 1) {
         throw OpenMDException("InversionTypeParser: Not enough tokens");
       } else {
-        RealType v2 = tokenizer.nextTokenAsDouble();
+        RealType v2   = tokenizer.nextTokenAsDouble();
         inversionType = new AmberImproperTorsionType(v2);
       }
 
@@ -174,16 +174,16 @@ InversionType* InversionTypeParser::parseLine(const std::string& line) {
     case itUnknown:
     default:
       throw OpenMDException("InversionTypeParser: Unknown Inversion Type");
+    }
+    return inversionType;
   }
-  return inversionType;
-}
 
-InversionTypeParser::InversionTypeEnum
-InversionTypeParser::getInversionTypeEnum(const std::string& str) {
-  std::map<std::string, InversionTypeEnum>::iterator i;
-  i = stringToEnumMap_.find(str);
+  InversionTypeParser::InversionTypeEnum
+      InversionTypeParser::getInversionTypeEnum(const std::string& str) {
+    std::map<std::string, InversionTypeEnum>::iterator i;
+    i = stringToEnumMap_.find(str);
 
-  return i == stringToEnumMap_.end() ? itUnknown : i->second;
-}
+    return i == stringToEnumMap_.end() ? itUnknown : i->second;
+  }
 
 }  // namespace OpenMD

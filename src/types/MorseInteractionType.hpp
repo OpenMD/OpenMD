@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_MORSEINTERACTIONTYPE_HPP
 #define TYPES_MORSEINTERACTIONTYPE_HPP
 
@@ -50,7 +50,7 @@
 
 namespace OpenMD {
   /**
-   * @class MorseInteractionType 
+   * @class MorseInteractionType
    *
    * MorseInteractionType is one of the basic non-bonded interactions
    *
@@ -63,47 +63,32 @@ namespace OpenMD {
    * \f[ V = D_0 \exp(-\beta_0 (r - r_0)) * (\exp(-\beta_0 (r - r_0)) - 2) \f]
    */
 
-  enum MorseType{
-    mtShifted,
-    mtRepulsive,
-    mtUnknown
-  };
-  
+  enum MorseType { mtShifted, mtRepulsive, mtUnknown };
+
   class MorseInteractionType : public NonBondedInteractionType {
-    
   public:
-    
-    MorseInteractionType(RealType myD0, RealType myBeta0, RealType myR0, 
+    MorseInteractionType(RealType myD0, RealType myBeta0, RealType myR0,
                          MorseType myType) {
-      D0 = myD0;
-      beta0 = myBeta0;
-      r0 = myR0;
+      D0              = myD0;
+      beta0           = myBeta0;
+      r0              = myR0;
       interactionType = myType;
       setMorse();
     }
 
-    RealType getD() {
-      return D0;
-    }
-    
-    RealType getBeta() {
-      return beta0;
-    }
+    RealType getD() { return D0; }
 
-    RealType getR() {
-      return r0;
-    }
-    
-    MorseType getInteractionType() {
-      return interactionType;
-    }
+    RealType getBeta() { return beta0; }
 
-  private:   
+    RealType getR() { return r0; }
+
+    MorseType getInteractionType() { return interactionType; }
+
+  private:
     RealType D0;
     RealType beta0;
     RealType r0;
     MorseType interactionType;
-
   };
-}
+}  // namespace OpenMD
 #endif

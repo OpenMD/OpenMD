@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,9 +46,9 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_LEGENDRECORRFUNCZ_HPP
 #define APPLICATIONS_DYNAMICPROPS_LEGENDRECORRFUNCZ_HPP
 
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "math/Polynomial.hpp"
 #include "math/Vector3.hpp"
-#include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -57,7 +57,7 @@ namespace OpenMD {
   public:
     LegendreCorrFuncZ(SimInfo* info, const std::string& filename,
                       const std::string& sele1, const std::string& sele2,
-                      int order, int nZbins, int axis=2);   
+                      int order, int nZbins, int axis = 2);
 
   private:
     virtual void validateSelection(SelectionManager& seleMan);
@@ -73,14 +73,14 @@ namespace OpenMD {
     RealType boxZ_, halfBoxZ_;
     int axis_;
     int xaxis_;
-    int yaxis_; 
+    int yaxis_;
     std::string axisLabel_;
-    
-    std::vector<std::vector<RotMat3x3d> > rotMats_;
-    std::vector<std::vector<Vector3d> > histogram_;
-    std::vector<std::vector<int> > counts_;
-    std::vector<std::vector<int> > zbin_;
+
+    std::vector<std::vector<RotMat3x3d>> rotMats_;
+    std::vector<std::vector<Vector3d>> histogram_;
+    std::vector<std::vector<int>> counts_;
+    std::vector<std::vector<int>> zbin_;
   };
 
-}
+}  // namespace OpenMD
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,50 +50,52 @@
 #include "utils/simError.h"
 namespace OpenMD {
 
-SCAtomTypesSectionParser::SCAtomTypesSectionParser(ForceFieldOptions& options)
-    : options_(options) {
-  setSectionName("SCAtomTypes");
-}
+  SCAtomTypesSectionParser::SCAtomTypesSectionParser(
+      ForceFieldOptions& options) :
+      options_(options) {
+    setSectionName("SCAtomTypes");
+  }
 
-void SCAtomTypesSectionParser::parseLine(ForceField& ff,
-                                         const std::string& line, int lineNo) {
-  StringTokenizer tokenizer(line);
-  int nTokens = tokenizer.countTokens();
+  void SCAtomTypesSectionParser::parseLine(ForceField& ff,
+                                           const std::string& line,
+                                           int lineNo) {
+    StringTokenizer tokenizer(line);
+    int nTokens = tokenizer.countTokens();
 
-  // in SCAtomTypesSectionParser, a line at least contains 6 tokens
-  // atomTypeName, epsilon,c,m,n and alpha
-  if (nTokens < 6) {
-    sprintf(painCave.errMsg,
-            "SCAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-            lineNo);
-    painCave.isFatal = 1;
-    simError();
-  } else {
-    std::string atomTypeName = tokenizer.nextToken();
-    AtomType* atomType = ff.getAtomType(atomTypeName);
-
-    if (atomType != NULL) {
-      SuttonChenAdapter sca = SuttonChenAdapter(atomType);
-
-      RealType epsilon = tokenizer.nextTokenAsDouble();
-      RealType c = tokenizer.nextTokenAsDouble();
-      RealType m = tokenizer.nextTokenAsDouble();
-      RealType n = tokenizer.nextTokenAsDouble();
-      RealType alpha = tokenizer.nextTokenAsDouble();
-
-      epsilon *= options_.getMetallicEnergyUnitScaling();
-      alpha *= options_.getDistanceUnitScaling();
-
-      sca.makeSuttonChen(c, m, n, alpha, epsilon);
-
-    } else {
-      sprintf(
-          painCave.errMsg,
-          "SCAtomTypesSectionParser Error: Atom Type [%s] is not created yet\n",
-          atomTypeName.c_str());
+    // in SCAtomTypesSectionParser, a line at least contains 6 tokens
+    // atomTypeName, epsilon,c,m,n and alpha
+    if (nTokens < 6) {
+      sprintf(painCave.errMsg,
+              "SCAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+              lineNo);
       painCave.isFatal = 1;
       simError();
+    } else {
+      std::string atomTypeName = tokenizer.nextToken();
+      AtomType* atomType       = ff.getAtomType(atomTypeName);
+
+      if (atomType != NULL) {
+        SuttonChenAdapter sca = SuttonChenAdapter(atomType);
+
+        RealType epsilon = tokenizer.nextTokenAsDouble();
+        RealType c       = tokenizer.nextTokenAsDouble();
+        RealType m       = tokenizer.nextTokenAsDouble();
+        RealType n       = tokenizer.nextTokenAsDouble();
+        RealType alpha   = tokenizer.nextTokenAsDouble();
+
+        epsilon *= options_.getMetallicEnergyUnitScaling();
+        alpha *= options_.getDistanceUnitScaling();
+
+        sca.makeSuttonChen(c, m, n, alpha, epsilon);
+
+      } else {
+        sprintf(painCave.errMsg,
+                "SCAtomTypesSectionParser Error: Atom Type [%s] is not created "
+                "yet\n",
+                atomTypeName.c_str());
+        painCave.isFatal = 1;
+        simError();
+      }
     }
   }
-}
 }  // end namespace OpenMD

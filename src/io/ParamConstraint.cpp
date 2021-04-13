@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,26 +46,26 @@
 
 namespace OpenMD {
 
-NotEmptyConstraint isNotEmpty() { return NotEmptyConstraint(); }
+  NotEmptyConstraint isNotEmpty() { return NotEmptyConstraint(); }
 
-ZeroConstraint isZero() { return ZeroConstraint(); }
+  ZeroConstraint isZero() { return ZeroConstraint(); }
 
-ParamConstraintFacade<NonZeroConstraint> isNonZero() {
-  return ParamConstraintFacade<NonZeroConstraint>();
-}
+  ParamConstraintFacade<NonZeroConstraint> isNonZero() {
+    return ParamConstraintFacade<NonZeroConstraint>();
+  }
 
-PositiveConstraint isPositive() { return PositiveConstraint(); }
+  PositiveConstraint isPositive() { return PositiveConstraint(); }
 
-NonPositiveConstraint isNonPositive() { return NonPositiveConstraint(); }
+  NonPositiveConstraint isNonPositive() { return NonPositiveConstraint(); }
 
-NegativeConstraint isNegative() { return NegativeConstraint(); }
+  NegativeConstraint isNegative() { return NegativeConstraint(); }
 
-NonNegativeConstraint isNonNegative() { return NonNegativeConstraint(); }
+  NonNegativeConstraint isNonNegative() { return NonNegativeConstraint(); }
 
-EqualIgnoreCaseConstraint isEqualIgnoreCase(std::string str) {
-  return EqualIgnoreCaseConstraint(str);
-}
+  EqualIgnoreCaseConstraint isEqualIgnoreCase(std::string str) {
+    return EqualIgnoreCaseConstraint(str);
+  }
 
-EvenConstraint isEven() { return EvenConstraint(); }
+  EvenConstraint isEven() { return EvenConstraint(); }
 
 }  // namespace OpenMD

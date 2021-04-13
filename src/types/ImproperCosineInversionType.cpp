@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,28 +52,28 @@
 #include "math/ChebyshevU.hpp"
 
 namespace OpenMD {
-ImproperCosineInversionType::ImproperCosineInversionType(
-    std::vector<ImproperCosineInversionParameter>& parameters) {
-  std::vector<ImproperCosineInversionParameter>::iterator i;
-  i = std::max_element(parameters.begin(), parameters.end(),
-                       LessThanPeriodicityFunctor());
-  if (i != parameters.end()) {
-    int maxPower = i->n;
-    ChebyshevT T(maxPower);
-    ChebyshevU U(maxPower);
+  ImproperCosineInversionType::ImproperCosineInversionType(
+      std::vector<ImproperCosineInversionParameter>& parameters) {
+    std::vector<ImproperCosineInversionParameter>::iterator i;
+    i = std::max_element(parameters.begin(), parameters.end(),
+                         LessThanPeriodicityFunctor());
+    if (i != parameters.end()) {
+      int maxPower = i->n;
+      ChebyshevT T(maxPower);
+      ChebyshevU U(maxPower);
 
-    // convert parameters of impropercosine type inversion into
-    // PolynomialInversion's parameters
-    DoublePolynomial finalPolynomial;
-    for (i = parameters.begin(); i != parameters.end(); ++i) {
-      DoublePolynomial cosTerm = T.getChebyshevPolynomial(i->n);
-      cosTerm *= cos(i->delta) * i->kchi;
-      DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n);
-      sinTerm *= -sin(i->delta) * i->kchi;
-      finalPolynomial = cosTerm + sinTerm;
-      finalPolynomial += i->kchi;
+      // convert parameters of impropercosine type inversion into
+      // PolynomialInversion's parameters
+      DoublePolynomial finalPolynomial;
+      for (i = parameters.begin(); i != parameters.end(); ++i) {
+        DoublePolynomial cosTerm = T.getChebyshevPolynomial(i->n);
+        cosTerm *= cos(i->delta) * i->kchi;
+        DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n);
+        sinTerm *= -sin(i->delta) * i->kchi;
+        finalPolynomial = cosTerm + sinTerm;
+        finalPolynomial += i->kchi;
+      }
+      this->setPolynomial(finalPolynomial);
     }
-    this->setPolynomial(finalPolynomial);
   }
-}
 }  // end namespace OpenMD

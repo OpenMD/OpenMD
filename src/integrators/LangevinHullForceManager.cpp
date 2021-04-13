@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -61,28 +61,28 @@
 using namespace std;
 namespace OpenMD {
 
-LangevinHullForceManager::LangevinHullForceManager(SimInfo* info)
-    : ForceManager(info) {
-  simParams = info->getSimParams();
+  LangevinHullForceManager::LangevinHullForceManager(SimInfo* info) :
+      ForceManager(info) {
+    simParams = info->getSimParams();
 
-  // Remove in favor of std::make_unique<> when we switch to C++14 and above
-  veloMunge = Utils::make_unique<Velocitizer>(info);
+    // Remove in favor of std::make_unique<> when we switch to C++14 and above
+    veloMunge = Utils::make_unique<Velocitizer>(info);
 
-  // Create Hull, Convex Hull for now, other options later.
+    // Create Hull, Convex Hull for now, other options later.
 
-  stringToEnumMap_["Convex"] = hullConvex;
-  stringToEnumMap_["AlphaShape"] = hullAlphaShape;
-  stringToEnumMap_["Unknown"] = hullUnknown;
+    stringToEnumMap_["Convex"]     = hullConvex;
+    stringToEnumMap_["AlphaShape"] = hullAlphaShape;
+    stringToEnumMap_["Unknown"]    = hullUnknown;
 
-  const std::string ht = simParams->getHULL_Method();
+    const std::string ht = simParams->getHULL_Method();
 
-  std::map<std::string, HullTypeEnum>::iterator iter;
-  iter = stringToEnumMap_.find(ht);
-  hullType_ = (iter == stringToEnumMap_.end())
-                  ? LangevinHullForceManager::hullUnknown
-                  : iter->second;
+    std::map<std::string, HullTypeEnum>::iterator iter;
+    iter      = stringToEnumMap_.find(ht);
+    hullType_ = (iter == stringToEnumMap_.end()) ?
+                    LangevinHullForceManager::hullUnknown :
+                    iter->second;
 
-  switch (hullType_) {
+    switch (hullType_) {
     case hullConvex:
       surfaceMesh_ = new ConvexHull();
       break;
@@ -96,194 +96,194 @@ LangevinHullForceManager::LangevinHullForceManager(SimInfo* info)
       painCave.isFatal = 1;
       simError();
       break;
-  }
+    }
 
-  doThermalCoupling_ = true;
-  doPressureCoupling_ = true;
+    doThermalCoupling_  = true;
+    doPressureCoupling_ = true;
 
-  /* Check that the simulation has target pressure and target
+    /* Check that the simulation has target pressure and target
      temperature set */
-  if (!simParams->haveTargetTemp()) {
-    sprintf(painCave.errMsg,
-            "LangevinHullForceManager: no targetTemp (K) was set.\n"
-            "\tOpenMD is turning off the thermal coupling to the bath.\n");
-    painCave.isFatal = 0;
-    painCave.severity = OPENMD_INFO;
-    simError();
-    doThermalCoupling_ = false;
-  } else {
-    targetTemp_ = simParams->getTargetTemp();
-
-    if (!simParams->haveViscosity()) {
+    if (!simParams->haveTargetTemp()) {
       sprintf(painCave.errMsg,
-              "LangevinHullForceManager: no viscosity was set.\n"
+              "LangevinHullForceManager: no targetTemp (K) was set.\n"
               "\tOpenMD is turning off the thermal coupling to the bath.\n");
-      painCave.isFatal = 0;
+      painCave.isFatal  = 0;
       painCave.severity = OPENMD_INFO;
       simError();
       doThermalCoupling_ = false;
     } else {
-      viscosity_ = simParams->getViscosity();
-      if (fabs(viscosity_) < 1e-6) {
+      targetTemp_ = simParams->getTargetTemp();
+
+      if (!simParams->haveViscosity()) {
         sprintf(painCave.errMsg,
-                "LangevinHullDynamics: The bath viscosity was set lower\n"
-                "\tthan 1e-6 poise.  OpenMD is turning off the thermal\n"
-                "\tcoupling to the bath.\n");
-        painCave.isFatal = 0;
+                "LangevinHullForceManager: no viscosity was set.\n"
+                "\tOpenMD is turning off the thermal coupling to the bath.\n");
+        painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;
         simError();
         doThermalCoupling_ = false;
+      } else {
+        viscosity_ = simParams->getViscosity();
+        if (fabs(viscosity_) < 1e-6) {
+          sprintf(painCave.errMsg,
+                  "LangevinHullDynamics: The bath viscosity was set lower\n"
+                  "\tthan 1e-6 poise.  OpenMD is turning off the thermal\n"
+                  "\tcoupling to the bath.\n");
+          painCave.isFatal  = 0;
+          painCave.severity = OPENMD_INFO;
+          simError();
+          doThermalCoupling_ = false;
+        }
       }
     }
-  }
-  if (!simParams->haveTargetPressure()) {
-    sprintf(painCave.errMsg,
-            "LangevinHullForceManager: no targetPressure (atm) was set.\n"
-            "\tOpenMD is turning off the pressure coupling to the bath.\n");
-    painCave.isFatal = 0;
-    painCave.severity = OPENMD_INFO;
-    simError();
-    doPressureCoupling_ = false;
-  } else {
-    // Convert pressure from atm -> amu/(fs^2*Ang)
-    targetPressure_ =
-        simParams->getTargetPressure() / Constants::pressureConvert;
-  }
-  if (simParams->getUsePeriodicBoundaryConditions()) {
-    sprintf(painCave.errMsg,
-            "LangevinHallForceManager: You can't use the Langevin Hull\n"
-            "\tintegrator with periodic boundary conditions turned on!\n");
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  dt_ = simParams->getDt();
-
-  if (doThermalCoupling_) variance_ = 2.0 * Constants::kb * targetTemp_ / dt_;
-
-  // Build a vector of integrable objects to determine if the are
-  // surface atoms
-  Molecule* mol;
-  StuntDouble* sd;
-  SimInfo::MoleculeIterator i;
-  Molecule::IntegrableObjectIterator j;
-
-  for (mol = info_->beginMolecule(i); mol != NULL;
-       mol = info_->nextMolecule(i)) {
-    for (sd = mol->beginIntegrableObject(j); sd != NULL;
-         sd = mol->nextIntegrableObject(j)) {
-      localSites_.push_back(sd);
+    if (!simParams->haveTargetPressure()) {
+      sprintf(painCave.errMsg,
+              "LangevinHullForceManager: no targetPressure (atm) was set.\n"
+              "\tOpenMD is turning off the pressure coupling to the bath.\n");
+      painCave.isFatal  = 0;
+      painCave.severity = OPENMD_INFO;
+      simError();
+      doPressureCoupling_ = false;
+    } else {
+      // Convert pressure from atm -> amu/(fs^2*Ang)
+      targetPressure_ =
+          simParams->getTargetPressure() / Constants::pressureConvert;
     }
-  }
-
-  // We need to make an initial guess at the bounding box in order
-  // to compute long range forces in ForceMatrixDecomposition:
-
-  // Compute surface Mesh
-  surfaceMesh_->computeHull(localSites_);
-}
-
-LangevinHullForceManager::~LangevinHullForceManager() { delete surfaceMesh_; }
-
-void LangevinHullForceManager::postCalculation() {
-  int nTriangles, thisFacet;
-  RealType thisArea;
-  vector<Triangle> sMesh;
-  Triangle thisTriangle;
-  vector<Triangle>::iterator face;
-  vector<StuntDouble*> vertexSDs;
-  vector<StuntDouble*>::iterator vertex;
-
-  Vector3d unitNormal, centroid, facetVel;
-  Vector3d langevinForce, vertexForce;
-  Vector3d extPressure, randomForce, dragForce;
-
-  Mat3x3d hydroTensor, S;
-  vector<Vector3d> randNums;
-
-  // Compute surface Mesh
-  surfaceMesh_->computeHull(localSites_);
-  // Get number of surface stunt doubles
-  sMesh = surfaceMesh_->getMesh();
-  nTriangles = sMesh.size();
-
-  if (doThermalCoupling_) {
-    // Generate all of the necessary random forces
-    randNums = genTriangleForces(nTriangles, variance_);
-  }
-
-  // Loop over the mesh faces
-  thisFacet = 0;
-  for (face = sMesh.begin(); face != sMesh.end(); ++face) {
-    thisTriangle = *face;
-    vertexSDs = thisTriangle.getVertices();
-    thisArea = thisTriangle.getArea();
-    unitNormal = thisTriangle.getUnitNormal();
-    centroid = thisTriangle.getCentroid();
-    facetVel = thisTriangle.getFacetVelocity();
-
-    langevinForce = V3Zero;
-
-    if (doPressureCoupling_) {
-      extPressure =
-          -unitNormal * (targetPressure_ * thisArea) / Constants::energyConvert;
-      langevinForce += extPressure;
+    if (simParams->getUsePeriodicBoundaryConditions()) {
+      sprintf(painCave.errMsg,
+              "LangevinHallForceManager: You can't use the Langevin Hull\n"
+              "\tintegrator with periodic boundary conditions turned on!\n");
+      painCave.isFatal = 1;
+      simError();
     }
+
+    dt_ = simParams->getDt();
+
+    if (doThermalCoupling_) variance_ = 2.0 * Constants::kb * targetTemp_ / dt_;
+
+    // Build a vector of integrable objects to determine if the are
+    // surface atoms
+    Molecule* mol;
+    StuntDouble* sd;
+    SimInfo::MoleculeIterator i;
+    Molecule::IntegrableObjectIterator j;
+
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {
+        localSites_.push_back(sd);
+      }
+    }
+
+    // We need to make an initial guess at the bounding box in order
+    // to compute long range forces in ForceMatrixDecomposition:
+
+    // Compute surface Mesh
+    surfaceMesh_->computeHull(localSites_);
+  }
+
+  LangevinHullForceManager::~LangevinHullForceManager() { delete surfaceMesh_; }
+
+  void LangevinHullForceManager::postCalculation() {
+    int nTriangles, thisFacet;
+    RealType thisArea;
+    vector<Triangle> sMesh;
+    Triangle thisTriangle;
+    vector<Triangle>::iterator face;
+    vector<StuntDouble*> vertexSDs;
+    vector<StuntDouble*>::iterator vertex;
+
+    Vector3d unitNormal, centroid, facetVel;
+    Vector3d langevinForce, vertexForce;
+    Vector3d extPressure, randomForce, dragForce;
+
+    Mat3x3d hydroTensor, S;
+    vector<Vector3d> randNums;
+
+    // Compute surface Mesh
+    surfaceMesh_->computeHull(localSites_);
+    // Get number of surface stunt doubles
+    sMesh      = surfaceMesh_->getMesh();
+    nTriangles = sMesh.size();
 
     if (doThermalCoupling_) {
-      hydroTensor = thisTriangle.computeHydrodynamicTensor(viscosity_);
-      hydroTensor *= Constants::viscoConvert;
-      CholeskyDecomposition(hydroTensor, S);
-      randomForce = S * randNums[thisFacet++];
-      dragForce = -hydroTensor * facetVel;
-      langevinForce += randomForce + dragForce;
+      // Generate all of the necessary random forces
+      randNums = genTriangleForces(nTriangles, variance_);
     }
 
-    // Apply triangle force to stuntdouble vertices
-    for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex) {
-      if ((*vertex) != NULL) {
-        vertexForce = langevinForce / RealType(3.0);
-        (*vertex)->addFrc(vertexForce);
+    // Loop over the mesh faces
+    thisFacet = 0;
+    for (face = sMesh.begin(); face != sMesh.end(); ++face) {
+      thisTriangle = *face;
+      vertexSDs    = thisTriangle.getVertices();
+      thisArea     = thisTriangle.getArea();
+      unitNormal   = thisTriangle.getUnitNormal();
+      centroid     = thisTriangle.getCentroid();
+      facetVel     = thisTriangle.getFacetVelocity();
+
+      langevinForce = V3Zero;
+
+      if (doPressureCoupling_) {
+        extPressure = -unitNormal * (targetPressure_ * thisArea) /
+                      Constants::energyConvert;
+        langevinForce += extPressure;
+      }
+
+      if (doThermalCoupling_) {
+        hydroTensor = thisTriangle.computeHydrodynamicTensor(viscosity_);
+        hydroTensor *= Constants::viscoConvert;
+        CholeskyDecomposition(hydroTensor, S);
+        randomForce = S * randNums[thisFacet++];
+        dragForce   = -hydroTensor * facetVel;
+        langevinForce += randomForce + dragForce;
+      }
+
+      // Apply triangle force to stuntdouble vertices
+      for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex) {
+        if ((*vertex) != NULL) {
+          vertexForce = langevinForce / RealType(3.0);
+          (*vertex)->addFrc(vertexForce);
+        }
       }
     }
+
+    veloMunge->removeComDrift();
+    veloMunge->removeAngularDrift();
+
+    Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+    currSnapshot->setVolume(surfaceMesh_->getVolume());
+    currSnapshot->setHullVolume(surfaceMesh_->getVolume());
+    ForceManager::postCalculation();
   }
 
-  veloMunge->removeComDrift();
-  veloMunge->removeAngularDrift();
-
-  Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-  currSnapshot->setVolume(surfaceMesh_->getVolume());
-  currSnapshot->setHullVolume(surfaceMesh_->getVolume());
-  ForceManager::postCalculation();
-}
-
-vector<Vector3d> LangevinHullForceManager::genTriangleForces(int nTriangles,
-                                                             RealType var) {
-  // zero fill the random vector before starting:
-  vector<Vector3d> gaussRand;
-  gaussRand.resize(nTriangles);
-  std::fill(gaussRand.begin(), gaussRand.end(), V3Zero);
+  vector<Vector3d> LangevinHullForceManager::genTriangleForces(int nTriangles,
+                                                               RealType var) {
+    // zero fill the random vector before starting:
+    vector<Vector3d> gaussRand;
+    gaussRand.resize(nTriangles);
+    std::fill(gaussRand.begin(), gaussRand.end(), V3Zero);
 
 #ifdef IS_MPI
-  if (worldRank == 0) {
+    if (worldRank == 0) {
 #endif
-    for (int i = 0; i < nTriangles; i++) {
-      gaussRand[i][0] = randNumGen_.randNorm(0.0, var);
-      gaussRand[i][1] = randNumGen_.randNorm(0.0, var);
-      gaussRand[i][2] = randNumGen_.randNorm(0.0, var);
+      for (int i = 0; i < nTriangles; i++) {
+        gaussRand[i][0] = randNumGen_.randNorm(0.0, var);
+        gaussRand[i][1] = randNumGen_.randNorm(0.0, var);
+        gaussRand[i][2] = randNumGen_.randNorm(0.0, var);
+      }
+#ifdef IS_MPI
     }
+#endif
+
+    // push these out to the other processors
+
 #ifdef IS_MPI
+    // Same command on all nodes:
+    MPI_Bcast(gaussRand[0].getArrayPointer(), nTriangles * 3, MPI_REALTYPE, 0,
+              MPI_COMM_WORLD);
+#endif
+
+    return gaussRand;
   }
-#endif
-
-  // push these out to the other processors
-
-#ifdef IS_MPI
-  // Same command on all nodes:
-  MPI_Bcast(gaussRand[0].getArrayPointer(), nTriangles * 3, MPI_REALTYPE, 0,
-            MPI_COMM_WORLD);
-#endif
-
-  return gaussRand;
-}
 }  // namespace OpenMD

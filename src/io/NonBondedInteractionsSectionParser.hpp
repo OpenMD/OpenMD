@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,22 +42,22 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
 #define IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
 #include <map>
-#include "io/SectionParser.hpp"
+
 #include "io/ForceFieldOptions.hpp"
+#include "io/SectionParser.hpp"
 
 namespace OpenMD {
 
   class NonBondedInteractionsSectionParser : public SectionParser {
   public:
     NonBondedInteractionsSectionParser(ForceFieldOptions& options);
-            
-  private:
 
-    enum NonBondedInteractionTypeEnum{
+  private:
+    enum NonBondedInteractionTypeEnum {
       ShiftedMorse,
       LennardJones,
       RepulsiveMorse,
@@ -71,21 +71,19 @@ namespace OpenMD {
       InversePowerSeries,
       Unknown
     };
-            
+
     void parseLine(ForceField& ff, const std::string& line, int lineNo);
-  
-    NonBondedInteractionTypeEnum getNonBondedInteractionTypeEnum(const std::string& str);  
-    
-    std::map<std::string, NonBondedInteractionTypeEnum> stringToEnumMap_;   
+
+    NonBondedInteractionTypeEnum getNonBondedInteractionTypeEnum(
+        const std::string& str);
+
+    std::map<std::string, NonBondedInteractionTypeEnum> stringToEnumMap_;
     ForceFieldOptions& options_;
-    RealType meus_; //!< Metallic energy enit scaling
-    RealType eus_;  //!< Energy unit scaling
-    RealType dus_;  //!< Distance unit scaling
+    RealType meus_;  //!< Metallic energy enit scaling
+    RealType eus_;   //!< Energy unit scaling
+    RealType dus_;   //!< Distance unit scaling
   };
 
-
-} //namespace OpenMD
+}  // namespace OpenMD
 
 #endif
-
-

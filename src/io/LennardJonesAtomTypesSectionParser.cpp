@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,58 +52,57 @@
 
 namespace OpenMD {
 
-LennardJonesAtomTypesSectionParser::LennardJonesAtomTypesSectionParser(
-    ForceFieldOptions& options)
-    : options_(options) {
-  setSectionName("LennardJonesAtomTypes");
-}
+  LennardJonesAtomTypesSectionParser::LennardJonesAtomTypesSectionParser(
+      ForceFieldOptions& options) :
+      options_(options) {
+    setSectionName("LennardJonesAtomTypes");
+  }
 
-void LennardJonesAtomTypesSectionParser::parseLine(ForceField& ff,
-                                                   const std::string& line,
-                                                   int lineNo) {
-  StringTokenizer tokenizer(line);
-  int nTokens = tokenizer.countTokens();
+  void LennardJonesAtomTypesSectionParser::parseLine(ForceField& ff,
+                                                     const std::string& line,
+                                                     int lineNo) {
+    StringTokenizer tokenizer(line);
+    int nTokens = tokenizer.countTokens();
 
-  // in LennardJonesAtomTypesSectionParser, a line at least contains 3 tokens
-  // atomTypeName, epsilon and sigma
-  if (nTokens < 3) {
-    sprintf(painCave.errMsg,
-            "LennardJonesAtomTypesSectionParser Error: Not enough tokens at "
-            "line %d\n",
-            lineNo);
-    painCave.isFatal = 1;
-    simError();
-  } else {
-    std::string atomTypeName = tokenizer.nextToken();
-    AtomType* atomType = ff.getAtomType(atomTypeName);
-
-    if (atomType != NULL) {
-      RealType epsilon = tokenizer.nextTokenAsDouble();
-      RealType sigma = tokenizer.nextTokenAsDouble();
-      bool isSoft = false;
-
-      epsilon *= options_.getEnergyUnitScaling();
-      sigma *= options_.getDistanceUnitScaling();
-
-      if (tokenizer.hasMoreTokens()) {
-        std::string pot_type = tokenizer.nextToken();
-        if (pot_type == "soft") {
-          isSoft = true;
-        }
-      }
-
-      LennardJonesAdapter lj = LennardJonesAdapter(atomType);
-      lj.makeLennardJones(sigma, epsilon, isSoft);
-
-    } else {
+    // in LennardJonesAtomTypesSectionParser, a line at least contains 3 tokens
+    // atomTypeName, epsilon and sigma
+    if (nTokens < 3) {
       sprintf(painCave.errMsg,
-              "LennardJonesAtomTypesSectionParser Error: Atom Type [%s] is not "
-              "created yet\n",
-              atomTypeName.c_str());
+              "LennardJonesAtomTypesSectionParser Error: Not enough tokens at "
+              "line %d\n",
+              lineNo);
       painCave.isFatal = 1;
       simError();
+    } else {
+      std::string atomTypeName = tokenizer.nextToken();
+      AtomType* atomType       = ff.getAtomType(atomTypeName);
+
+      if (atomType != NULL) {
+        RealType epsilon = tokenizer.nextTokenAsDouble();
+        RealType sigma   = tokenizer.nextTokenAsDouble();
+        bool isSoft      = false;
+
+        epsilon *= options_.getEnergyUnitScaling();
+        sigma *= options_.getDistanceUnitScaling();
+
+        if (tokenizer.hasMoreTokens()) {
+          std::string pot_type = tokenizer.nextToken();
+          if (pot_type == "soft") { isSoft = true; }
+        }
+
+        LennardJonesAdapter lj = LennardJonesAdapter(atomType);
+        lj.makeLennardJones(sigma, epsilon, isSoft);
+
+      } else {
+        sprintf(
+            painCave.errMsg,
+            "LennardJonesAtomTypesSectionParser Error: Atom Type [%s] is not "
+            "created yet\n",
+            atomTypeName.c_str());
+        painCave.isFatal = 1;
+        simError();
+      }
     }
   }
-}
 
 }  // end namespace OpenMD

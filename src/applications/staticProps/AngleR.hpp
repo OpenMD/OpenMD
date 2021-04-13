@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,20 +50,14 @@
 namespace OpenMD {
 
   class AngleR : public StaticAnalyser {
-    
-  public:    
-    AngleR(SimInfo* info, const std::string& filename,
-           const std::string& sele, RealType len, 
-           int nrbins);
+  public:
+    AngleR(SimInfo* info, const std::string& filename, const std::string& sele,
+           RealType len, int nrbins);
 
-    int getNRBins() {
-      return nRBins_; 
-    }
+    int getNRBins() { return nRBins_; }
 
-    RealType getLength() {
-      return len_;
-    }
-        
+    RealType getLength() { return len_; }
+
     virtual void process();
 
   private:
@@ -82,8 +76,8 @@ namespace OpenMD {
 
     std::vector<RealType> histogram_;
     std::vector<RealType> avgAngleR_;
-    std::vector<int> count_;	
+    std::vector<int> count_;
   };
 
-}
+}  // namespace OpenMD
 #endif

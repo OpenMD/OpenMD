@@ -28,10 +28,10 @@
 
 namespace QuantLib {
 
-    class EndCriteria;
+  class EndCriteria;
 
-    //! Armijo line search.
-    /*! Let \f$ \alpha \f$ and \f$ \beta \f$ be 2 scalars in \f$ [0,1]
+  //! Armijo line search.
+  /*! Let \f$ \alpha \f$ and \f$ \beta \f$ be 2 scalars in \f$ [0,1]
         \f$.  Let \f$ x \f$ be the current value of the unknown, \f$ d
         \f$ the search direction and \f$ t \f$ the step. Let \f$ f \f$
         be the function to minimize.  The line search stops when \f$ t
@@ -45,23 +45,23 @@ namespace QuantLib {
         volume 124 of Applied Mathematical Sciences, Springer-Verlag, NY,
         1997)
     */
-    class ArmijoLineSearch : public LineSearch {
-      public:
-        //! Default constructor
-        ArmijoLineSearch(RealType eps = 1e-8,
-                         RealType alpha = 0.05,
-                         RealType beta = 0.65)
-        : LineSearch(eps), alpha_(alpha), beta_(beta) {}
+  class ArmijoLineSearch : public LineSearch {
+  public:
+    //! Default constructor
+    ArmijoLineSearch(RealType eps = 1e-8, RealType alpha = 0.05,
+                     RealType beta = 0.65) :
+        LineSearch(eps),
+        alpha_(alpha), beta_(beta) {}
 
-        //! Perform line search
-        RealType operator()(Problem& P,             // Optimization problem
-                        EndCriteria::Type& ecType,
-                        const EndCriteria&,
-                        const RealType t_ini);      // initial value of line-search step
-      private:
-        RealType alpha_, beta_;
-    };
+    //! Perform line search
+    RealType operator()(
+        Problem& P,  // Optimization problem
+        EndCriteria::Type& ecType, const EndCriteria&,
+        const RealType t_ini);  // initial value of line-search step
+  private:
+    RealType alpha_, beta_;
+  };
 
-}
+}  // namespace QuantLib
 
 #endif

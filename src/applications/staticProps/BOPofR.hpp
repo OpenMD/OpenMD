@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,74 +45,70 @@
 
 #ifndef APPLICATIONS_STATICPROPS_BOPOFR_HPP
 #define APPLICATIONS_STATICPROPS_BOPOFR_HPP
+#include "applications/staticProps/StaticAnalyser.hpp"
+#include "math/SphericalHarmonic.hpp"
+#include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
-#include "math/Vector3.hpp"
-#include "math/SphericalHarmonic.hpp"
 
 namespace OpenMD {
 
-  class BOPofR : public StaticAnalyser{
+  class BOPofR : public StaticAnalyser {
   public:
-    BOPofR(SimInfo* info, const std::string& filename, 
-           const std::string& sele, double rCut, unsigned int nbins,
-           RealType len);
-    
+    BOPofR(SimInfo* info, const std::string& filename, const std::string& sele,
+           double rCut, unsigned int nbins, RealType len);
+
     virtual void process();
-    
+
   protected:
     virtual void initializeHistogram();
-    virtual void collectHistogram(std::vector<RealType> q, 
-                                  std::vector<ComplexType> what, 
+    virtual void collectHistogram(std::vector<RealType> q,
+                                  std::vector<ComplexType> what,
                                   RealType distCOM) = 0;
-    virtual void writeOrderParameter() = 0;
+    virtual void writeOrderParameter()              = 0;
 
     Snapshot* currentSnapshot_;
     std::string selectionScript_;
-    SelectionManager seleMan_;    
-    SelectionEvaluator evaluator_;           
-            
+    SelectionManager seleMan_;
+    SelectionEvaluator evaluator_;
+
     RealType rCut_;
     static const int lMax_ = 6;
     int frameCounter_;
     RealType len_;
     RealType deltaR_;
-    
-    std::map<std::pair<int,int>,int> m2Min;
-    std::map<std::pair<int,int>,int> m2Max;
-    std::map<std::pair<int,int>,std::vector<RealType> > w3j;
-   
+
+    std::map<std::pair<int, int>, int> m2Min;
+    std::map<std::pair<int, int>, int> m2Max;
+    std::map<std::pair<int, int>, std::vector<RealType>> w3j;
+
     std::vector<int> RCount_;
     std::vector<int> WofR_;
     std::vector<int> QofR_;
   };
 
-
   class IcosahedralOfR : public BOPofR {
   public:
-    IcosahedralOfR(SimInfo* info, const std::string& filename, 
-                   const std::string& sele, double rCut, unsigned int nbins, 
+    IcosahedralOfR(SimInfo* info, const std::string& filename,
+                   const std::string& sele, double rCut, unsigned int nbins,
                    RealType len);
 
-    virtual void collectHistogram(std::vector<RealType> q, 
-                                  std::vector<ComplexType> what, 
+    virtual void collectHistogram(std::vector<RealType> q,
+                                  std::vector<ComplexType> what,
                                   RealType distCOM);
     virtual void writeOrderParameter();
   };
 
   class FCCOfR : public BOPofR {
   public:
-    FCCOfR(SimInfo* info, const std::string& filename, 
-           const std::string& sele, double rCut, unsigned int nbins,
-           RealType len);
+    FCCOfR(SimInfo* info, const std::string& filename, const std::string& sele,
+           double rCut, unsigned int nbins, RealType len);
 
-    virtual void collectHistogram(std::vector<RealType> q, 
-                                  std::vector<ComplexType> what, 
+    virtual void collectHistogram(std::vector<RealType> q,
+                                  std::vector<ComplexType> what,
                                   RealType distCOM);
     virtual void writeOrderParameter();
-  };  
-}
+  };
+}  // namespace OpenMD
 
 #endif
-

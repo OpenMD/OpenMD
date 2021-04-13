@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -57,161 +57,162 @@
 
 namespace OpenMD {
 
-BaseAtomVisitor::BaseAtomVisitor(SimInfo *info) : BaseVisitor() {
-  storageLayout_ = info->getStorageLayout();
-}
-
-void BaseAtomVisitor::visit(RigidBody *rb) {
-  // vector<Atom*> myAtoms;
-  // vector<Atom*>::iterator atomIter;
-
-  // myAtoms = rb->getAtoms();
-
-  // for(atomIter = myAtoms.begin(); atomIter != myAtoms.end(); ++atomIter)
-  //  (*atomIter)->accept(this);
-}
-
-void BaseAtomVisitor::setVisited(Atom *atom) {
-  std::shared_ptr<GenericData> data;
-  data = atom->getPropertyByName("VISITED");
-
-  // if visited property is not existed, add it as new property
-  if (data == nullptr) {
-    data = std::make_shared<GenericData>();
-    data->setID("VISITED");
-    atom->addProperty(data);
-  }
-}
-
-bool BaseAtomVisitor::isVisited(Atom *atom) {
-  std::shared_ptr<GenericData> data;
-  data = atom->getPropertyByName("VISITED");
-  return data == nullptr ? false : true;
-}
-
-//------------------------------------------------------------------------//
-
-void DefaultAtomVisitor::visit(Atom *atom) {
-  std::shared_ptr<AtomData> atomData;
-  std::shared_ptr<AtomInfo> atomInfo;
-  AtomType *atype = atom->getAtomType();
-
-  if (isVisited(atom)) return;
-
-  atomInfo = std::make_shared<AtomInfo>();
-  atomInfo->atomTypeName = atom->getType();
-  atomInfo->globalID = atom->getGlobalIndex();
-  atomInfo->pos = atom->getPos();
-  atomInfo->vel = atom->getVel();
-  atomInfo->frc = atom->getFrc();
-  atomInfo->vec = V3Zero;
-  atomInfo->hasVelocity = true;
-  atomInfo->hasForce = true;
-  atomInfo->hasGlobalID = true;
-
-  FixedChargeAdapter fca = FixedChargeAdapter(atype);
-  if (fca.isFixedCharge()) {
-    atomInfo->hasCharge = true;
-    atomInfo->charge = fca.getCharge();
+  BaseAtomVisitor::BaseAtomVisitor(SimInfo* info) : BaseVisitor() {
+    storageLayout_ = info->getStorageLayout();
   }
 
-  FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-  if (fqa.isFluctuatingCharge()) {
-    atomInfo->hasCharge = true;
-    atomInfo->charge += atom->getFlucQPos();
+  void BaseAtomVisitor::visit(RigidBody* rb) {
+    // vector<Atom*> myAtoms;
+    // vector<Atom*>::iterator atomIter;
+
+    // myAtoms = rb->getAtoms();
+
+    // for(atomIter = myAtoms.begin(); atomIter != myAtoms.end(); ++atomIter)
+    //  (*atomIter)->accept(this);
   }
 
-  if ((storageLayout_ & DataStorage::dslElectricField) &&
-      (atype->isElectrostatic())) {
-    atomInfo->hasElectricField = true;
-    atomInfo->eField = atom->getElectricField();
+  void BaseAtomVisitor::setVisited(Atom* atom) {
+    std::shared_ptr<GenericData> data;
+    data = atom->getPropertyByName("VISITED");
+
+    // if visited property is not existed, add it as new property
+    if (data == nullptr) {
+      data = std::make_shared<GenericData>();
+      data->setID("VISITED");
+      atom->addProperty(data);
+    }
   }
 
-  atomData = std::make_shared<AtomData>();
-  atomData->setID("ATOMDATA");
-  atomData->addAtomInfo(atomInfo);
-
-  atom->addProperty(atomData);
-
-  setVisited(atom);
-}
-
-void DefaultAtomVisitor::visit(DirectionalAtom *datom) {
-  std::shared_ptr<AtomData> atomData;
-  std::shared_ptr<AtomInfo> atomInfo;
-  AtomType *atype = datom->getAtomType();
-
-  if (isVisited(datom)) return;
-
-  atomInfo = std::make_shared<AtomInfo>();
-  atomInfo->atomTypeName = datom->getType();
-  atomInfo->globalID = datom->getGlobalIndex();
-  atomInfo->pos = datom->getPos();
-  atomInfo->vel = datom->getVel();
-  atomInfo->frc = datom->getFrc();
-  atomInfo->hasVelocity = true;
-  atomInfo->hasForce = true;
-  atomInfo->hasGlobalID = true;
-
-  FixedChargeAdapter fca = FixedChargeAdapter(atype);
-  if (fca.isFixedCharge()) {
-    atomInfo->hasCharge = true;
-    atomInfo->charge = fca.getCharge();
+  bool BaseAtomVisitor::isVisited(Atom* atom) {
+    std::shared_ptr<GenericData> data;
+    data = atom->getPropertyByName("VISITED");
+    return data == nullptr ? false : true;
   }
 
-  FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
-  if (fqa.isFluctuatingCharge()) {
-    atomInfo->hasCharge = true;
-    atomInfo->charge += datom->getFlucQPos();
+  //------------------------------------------------------------------------//
+
+  void DefaultAtomVisitor::visit(Atom* atom) {
+    std::shared_ptr<AtomData> atomData;
+    std::shared_ptr<AtomInfo> atomInfo;
+    AtomType* atype = atom->getAtomType();
+
+    if (isVisited(atom)) return;
+
+    atomInfo               = std::make_shared<AtomInfo>();
+    atomInfo->atomTypeName = atom->getType();
+    atomInfo->globalID     = atom->getGlobalIndex();
+    atomInfo->pos          = atom->getPos();
+    atomInfo->vel          = atom->getVel();
+    atomInfo->frc          = atom->getFrc();
+    atomInfo->vec          = V3Zero;
+    atomInfo->hasVelocity  = true;
+    atomInfo->hasForce     = true;
+    atomInfo->hasGlobalID  = true;
+
+    FixedChargeAdapter fca = FixedChargeAdapter(atype);
+    if (fca.isFixedCharge()) {
+      atomInfo->hasCharge = true;
+      atomInfo->charge    = fca.getCharge();
+    }
+
+    FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+    if (fqa.isFluctuatingCharge()) {
+      atomInfo->hasCharge = true;
+      atomInfo->charge += atom->getFlucQPos();
+    }
+
+    if ((storageLayout_ & DataStorage::dslElectricField) &&
+        (atype->isElectrostatic())) {
+      atomInfo->hasElectricField = true;
+      atomInfo->eField           = atom->getElectricField();
+    }
+
+    atomData = std::make_shared<AtomData>();
+    atomData->setID("ATOMDATA");
+    atomData->addAtomInfo(atomInfo);
+
+    atom->addProperty(atomData);
+
+    setVisited(atom);
   }
 
-  if ((storageLayout_ & DataStorage::dslElectricField) &&
-      (atype->isElectrostatic())) {
-    atomInfo->hasElectricField = true;
-    atomInfo->eField = datom->getElectricField();
+  void DefaultAtomVisitor::visit(DirectionalAtom* datom) {
+    std::shared_ptr<AtomData> atomData;
+    std::shared_ptr<AtomInfo> atomInfo;
+    AtomType* atype = datom->getAtomType();
+
+    if (isVisited(datom)) return;
+
+    atomInfo               = std::make_shared<AtomInfo>();
+    atomInfo->atomTypeName = datom->getType();
+    atomInfo->globalID     = datom->getGlobalIndex();
+    atomInfo->pos          = datom->getPos();
+    atomInfo->vel          = datom->getVel();
+    atomInfo->frc          = datom->getFrc();
+    atomInfo->hasVelocity  = true;
+    atomInfo->hasForce     = true;
+    atomInfo->hasGlobalID  = true;
+
+    FixedChargeAdapter fca = FixedChargeAdapter(atype);
+    if (fca.isFixedCharge()) {
+      atomInfo->hasCharge = true;
+      atomInfo->charge    = fca.getCharge();
+    }
+
+    FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
+    if (fqa.isFluctuatingCharge()) {
+      atomInfo->hasCharge = true;
+      atomInfo->charge += datom->getFlucQPos();
+    }
+
+    if ((storageLayout_ & DataStorage::dslElectricField) &&
+        (atype->isElectrostatic())) {
+      atomInfo->hasElectricField = true;
+      atomInfo->eField           = datom->getElectricField();
+    }
+
+    GayBerneAdapter gba = GayBerneAdapter(atype);
+    MultipoleAdapter ma = MultipoleAdapter(atype);
+
+    if (gba.isGayBerne()) {
+      atomInfo->hasVector = true;
+      atomInfo->vec       = datom->getA().transpose() * V3Z;
+    } else if (ma.isDipole()) {
+      atomInfo->hasVector = true;
+      atomInfo->vec       = datom->getDipole();
+    } else if (ma.isQuadrupole()) {
+      atomInfo->hasVector = true;
+      atomInfo->vec       = datom->getA().transpose() * V3Z;
+    }
+
+    atomData = std::make_shared<AtomData>();
+    atomData->setID("ATOMDATA");
+    atomData->addAtomInfo(atomInfo);
+
+    datom->addProperty(atomData);
+
+    setVisited(datom);
   }
 
-  GayBerneAdapter gba = GayBerneAdapter(atype);
-  MultipoleAdapter ma = MultipoleAdapter(atype);
+  const std::string DefaultAtomVisitor::toString() {
+    char buffer[65535];
+    std::string result;
 
-  if (gba.isGayBerne()) {
-    atomInfo->hasVector = true;
-    atomInfo->vec = datom->getA().transpose() * V3Z;
-  } else if (ma.isDipole()) {
-    atomInfo->hasVector = true;
-    atomInfo->vec = datom->getDipole();
-  } else if (ma.isQuadrupole()) {
-    atomInfo->hasVector = true;
-    atomInfo->vec = datom->getA().transpose() * V3Z;
+    sprintf(buffer,
+            "--------------------------------------------------------------\n");
+    result += buffer;
+
+    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    result += buffer;
+
+    sprintf(buffer,
+            "Visitor Description: copy atom infomation into atom data\n");
+    result += buffer;
+
+    sprintf(buffer,
+            "--------------------------------------------------------------\n");
+    result += buffer;
+
+    return result;
   }
-
-  atomData = std::make_shared<AtomData>();
-  atomData->setID("ATOMDATA");
-  atomData->addAtomInfo(atomInfo);
-
-  datom->addProperty(atomData);
-
-  setVisited(datom);
-}
-
-const std::string DefaultAtomVisitor::toString() {
-  char buffer[65535];
-  std::string result;
-
-  sprintf(buffer,
-          "--------------------------------------------------------------\n");
-  result += buffer;
-
-  sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
-  result += buffer;
-
-  sprintf(buffer, "Visitor Description: copy atom infomation into atom data\n");
-  result += buffer;
-
-  sprintf(buffer,
-          "--------------------------------------------------------------\n");
-  result += buffer;
-
-  return result;
-}
 }  // namespace OpenMD

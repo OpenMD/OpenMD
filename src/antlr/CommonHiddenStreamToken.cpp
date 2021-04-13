@@ -10,28 +10,29 @@
 namespace antlr {
 #endif
 
-CommonHiddenStreamToken::CommonHiddenStreamToken() : CommonToken() {}
+  CommonHiddenStreamToken::CommonHiddenStreamToken() : CommonToken() {}
 
-CommonHiddenStreamToken::CommonHiddenStreamToken(int t,
-                                                 const ANTLR_USE_NAMESPACE(std)
-                                                     string& txt)
-    : CommonToken(t, txt) {}
+  CommonHiddenStreamToken::CommonHiddenStreamToken(
+      int t, const ANTLR_USE_NAMESPACE(std) string& txt) :
+      CommonToken(t, txt) {}
 
-CommonHiddenStreamToken::CommonHiddenStreamToken(const ANTLR_USE_NAMESPACE(std)
-                                                     string& s)
-    : CommonToken(s) {}
+  CommonHiddenStreamToken::CommonHiddenStreamToken(
+      const ANTLR_USE_NAMESPACE(std) string& s) :
+      CommonToken(s) {}
 
-RefToken CommonHiddenStreamToken::getHiddenAfter() { return hiddenAfter; }
+  RefToken CommonHiddenStreamToken::getHiddenAfter() { return hiddenAfter; }
 
-RefToken CommonHiddenStreamToken::getHiddenBefore() { return hiddenBefore; }
+  RefToken CommonHiddenStreamToken::getHiddenBefore() { return hiddenBefore; }
 
-RefToken CommonHiddenStreamToken::factory() {
-  return RefToken(new CommonHiddenStreamToken);
-}
+  RefToken CommonHiddenStreamToken::factory() {
+    return RefToken(new CommonHiddenStreamToken);
+  }
 
-void CommonHiddenStreamToken::setHiddenAfter(RefToken t) { hiddenAfter = t; }
+  void CommonHiddenStreamToken::setHiddenAfter(RefToken t) { hiddenAfter = t; }
 
-void CommonHiddenStreamToken::setHiddenBefore(RefToken t) { hiddenBefore = t; }
+  void CommonHiddenStreamToken::setHiddenBefore(RefToken t) {
+    hiddenBefore = t;
+  }
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }

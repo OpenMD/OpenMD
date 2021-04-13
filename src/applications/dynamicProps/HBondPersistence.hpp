@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -54,34 +54,35 @@ namespace OpenMD {
     HBondPersistence(SimInfo* info, const std::string& filename,
                      const std::string& sele1, const std::string& sele2,
                      double OOCut, double thetaCut, double OHCut);
-    
+
   private:
     virtual void correlation();
     virtual void computeFrame(int istep);
-    
-    virtual void computeProperty1(int frame) {return;}
-    virtual void computeProperty2(int frame) {return;}
-    virtual int computeProperty1(int frame, Molecule* mol) {return -1;}
-    virtual int computeProperty1(int frame, StuntDouble* sd) {return -1;}
-    virtual int computeProperty1(int frame, Bond* bond) {return -1;}
-    virtual int computeProperty2(int frame, Molecule* mol) {return -1;}
-    virtual int computeProperty2(int frame, StuntDouble* sd) {return -1;}
-    virtual int computeProperty2(int frame, Bond* bond) {return -1;}
 
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {return 0.0;}
+    virtual void computeProperty1(int frame) { return; }
+    virtual void computeProperty2(int frame) { return; }
+    virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
+    virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
+    virtual int computeProperty1(int frame, Bond* bond) { return -1; }
+    virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
+    virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
+    virtual int computeProperty2(int frame, Bond* bond) { return -1; }
+
+    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {
+      return 0.0;
+    }
     virtual RealType calcCorrVal(int frame1, int frame2) { return 0.0; }
 
     virtual void postCorrelate();
-    
-    std::vector<std::vector<int> > GIDtoDonor_;
-    std::vector<std::vector<int> > DonorToGID_;
-    std::vector<std::vector<int> > acceptor_;
-    
+
+    std::vector<std::vector<int>> GIDtoDonor_;
+    std::vector<std::vector<int>> DonorToGID_;
+    std::vector<std::vector<int>> acceptor_;
+
     RealType OOCut_;
     RealType thetaCut_;
     RealType OHCut_;
   };
 
-}
+}  // namespace OpenMD
 #endif
-

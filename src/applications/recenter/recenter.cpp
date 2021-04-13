@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -79,11 +79,10 @@ int main(int argc, char* argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg,
-            "No input file name was specified "
-            "on the command line");
+    sprintf(painCave.errMsg, "No input file name was specified "
+                             "on the command line");
     painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
+    painCave.isFatal  = 1;
     simError();
   }
 
@@ -101,7 +100,7 @@ int main(int argc, char* argv[]) {
     sprintf(painCave.errMsg,
             "Input and Output File names should be different!");
     painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
+    painCave.isFatal  = 1;
     simError();
   }
 
@@ -110,7 +109,7 @@ int main(int argc, char* argv[]) {
   if (writer == NULL) {
     sprintf(painCave.errMsg, "error in creating DumpWriter");
     painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
+    painCave.isFatal  = 1;
     simError();
   }
 
@@ -145,7 +144,7 @@ int main(int argc, char* argv[]) {
           "A new OpenMD file called \"%s\" has been generated.\n",
           outputFileName.c_str());
   painCave.severity = OPENMD_INFO;
-  painCave.isFatal = 0;
+  painCave.isFatal  = 0;
   simError();
 
   return 0;

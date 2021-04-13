@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -58,98 +58,97 @@
 
 namespace OpenMD {
 
-RhoR::RhoR(SimInfo* info, const std::string& filename, const std::string& sele,
-           RealType len, int nrbins, RealType particleR)
-    : StaticAnalyser(info, filename, nrbins),
-      selectionScript_(sele),
-      evaluator_(info),
-      seleMan_(info),
-      len_(len) {
-  evaluator_.loadScriptString(sele);
-  if (!evaluator_.isDynamic()) {
-    seleMan_.setSelectionSet(evaluator_.evaluate());
-  }
-
-  deltaR_ = len_ / nBins_;
-
-  histogram_.resize(nBins_);
-  avgRhoR_.resize(nBins_);
-  particleR_ = particleR;
-  setOutputName(getPrefix(filename) + ".RhoR");
-}
-
-void RhoR::process() {
-  Thermo thermo(info_);
-  DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
-  nProcessed_ = nFrames / step_;
-
-  std::fill(avgRhoR_.begin(), avgRhoR_.end(), 0.0);
-  std::fill(histogram_.begin(), histogram_.end(), 0);
-
-  for (int istep = 0; istep < nFrames; istep += step_) {
-    int i;
-    StuntDouble* sd;
-    reader.readFrame(istep);
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    Vector3d CenterOfMass = thermo.getCom();
-
-    if (evaluator_.isDynamic()) {
+  RhoR::RhoR(SimInfo* info, const std::string& filename,
+             const std::string& sele, RealType len, int nrbins,
+             RealType particleR) :
+      StaticAnalyser(info, filename, nrbins),
+      selectionScript_(sele), evaluator_(info), seleMan_(info), len_(len) {
+    evaluator_.loadScriptString(sele);
+    if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
-    // determine which atom belongs to which slice
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {
-      Vector3d pos = sd->getPos();
-      Vector3d r12 = CenterOfMass - pos;
+    deltaR_ = len_ / nBins_;
 
-      RealType distance = r12.length();
+    histogram_.resize(nBins_);
+    avgRhoR_.resize(nBins_);
+    particleR_ = particleR;
+    setOutputName(getPrefix(filename) + ".RhoR");
+  }
 
-      if (distance < len_) {
-        int whichBin = int(distance / deltaR_);
-        histogram_[whichBin] += 1;
+  void RhoR::process() {
+    Thermo thermo(info_);
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
+    nProcessed_ = nFrames / step_;
+
+    std::fill(avgRhoR_.begin(), avgRhoR_.end(), 0.0);
+    std::fill(histogram_.begin(), histogram_.end(), 0);
+
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      int i;
+      StuntDouble* sd;
+      reader.readFrame(istep);
+      currentSnapshot_      = info_->getSnapshotManager()->getCurrentSnapshot();
+      Vector3d CenterOfMass = thermo.getCom();
+
+      if (evaluator_.isDynamic()) {
+        seleMan_.setSelectionSet(evaluator_.evaluate());
+      }
+
+      // determine which atom belongs to which slice
+      for (sd = seleMan_.beginSelected(i); sd != NULL;
+           sd = seleMan_.nextSelected(i)) {
+        Vector3d pos = sd->getPos();
+        Vector3d r12 = CenterOfMass - pos;
+
+        RealType distance = r12.length();
+
+        if (distance < len_) {
+          int whichBin = int(distance / deltaR_);
+          histogram_[whichBin] += 1;
+        }
       }
     }
+
+    processHistogram();
+    writeRhoR();
   }
 
-  processHistogram();
-  writeRhoR();
-}
+  void RhoR::processHistogram() {
+    RealType particleDensity = 3.0 * info_->getNGlobalMolecules() /
+                               (4.0 * Constants::PI * pow(particleR_, 3));
+    RealType pairConstant = (4.0 * Constants::PI * particleDensity) / 3.0;
 
-void RhoR::processHistogram() {
-  RealType particleDensity = 3.0 * info_->getNGlobalMolecules() /
-                             (4.0 * Constants::PI * pow(particleR_, 3));
-  RealType pairConstant = (4.0 * Constants::PI * particleDensity) / 3.0;
+    for (unsigned int i = 0; i < histogram_.size(); ++i) {
+      RealType rLower = i * deltaR_;
+      RealType rUpper = rLower + deltaR_;
+      RealType volSlice =
+          (rUpper * rUpper * rUpper) - (rLower * rLower * rLower);
+      RealType nIdeal = volSlice * pairConstant;
 
-  for (unsigned int i = 0; i < histogram_.size(); ++i) {
-    RealType rLower = i * deltaR_;
-    RealType rUpper = rLower + deltaR_;
-    RealType volSlice = (rUpper * rUpper * rUpper) - (rLower * rLower * rLower);
-    RealType nIdeal = volSlice * pairConstant;
-
-    avgRhoR_[i] += histogram_[i] / nIdeal;
+      avgRhoR_[i] += histogram_[i] / nIdeal;
+    }
   }
-}
 
-void RhoR::writeRhoR() {
-  std::ofstream rdfStream(outputFilename_.c_str());
-  if (rdfStream.is_open()) {
-    rdfStream << "#radial density function rho(r)\n";
-    rdfStream << "#r\tcorrValue\n";
-    for (unsigned int i = 0; i < avgRhoR_.size(); ++i) {
-      RealType r = deltaR_ * (i + 0.5);
-      rdfStream << r << "\t" << avgRhoR_[i] / nProcessed_ << "\n";
+  void RhoR::writeRhoR() {
+    std::ofstream rdfStream(outputFilename_.c_str());
+    if (rdfStream.is_open()) {
+      rdfStream << "#radial density function rho(r)\n";
+      rdfStream << "#r\tcorrValue\n";
+      for (unsigned int i = 0; i < avgRhoR_.size(); ++i) {
+        RealType r = deltaR_ * (i + 0.5);
+        rdfStream << r << "\t" << avgRhoR_[i] / nProcessed_ << "\n";
+      }
+
+    } else {
+      sprintf(painCave.errMsg, "RhoR: unable to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
     }
 
-  } else {
-    sprintf(painCave.errMsg, "RhoR: unable to open %s\n",
-            outputFilename_.c_str());
-    painCave.isFatal = 1;
-    simError();
+    rdfStream.close();
   }
-
-  rdfStream.close();
-}
 
 }  // namespace OpenMD

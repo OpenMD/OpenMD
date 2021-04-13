@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,20 +42,19 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file Bend.hpp
  * @author    tlin
  * @date  11/01/2004
  * @version 1.0
- */ 
-
+ */
 
 #ifndef PRIMITIVES_BEND_HPP
 #define PRIMITIVES_BEND_HPP
 
-#include "primitives/ShortRangeInteraction.hpp"
 #include "primitives/Atom.hpp"
+#include "primitives/ShortRangeInteraction.hpp"
 #include "types/BendType.hpp"
 
 namespace OpenMD {
@@ -63,89 +62,73 @@ namespace OpenMD {
     RealType angle;
     RealType potential;
   };
-  
+
   struct BendDataSet {
     RealType deltaV;
     BendData prev;
     BendData curr;
   };
-  
+
   class Bend : public ShortRangeInteraction {
   public:
-    using ShortRangeInteraction::getValue;
     using ShortRangeInteraction::getPrevValue;
-    Bend(Atom* atom1, Atom* atom2, Atom* atom3, BendType* bt)
-      : ShortRangeInteraction(), bendType_(bt) {
+    using ShortRangeInteraction::getValue;
+    Bend(Atom* atom1, Atom* atom2, Atom* atom3, BendType* bt) :
+        ShortRangeInteraction(), bendType_(bt) {
       atoms_.resize(3);
       atoms_[0] = atom1;
       atoms_[1] = atom2;
       atoms_[2] = atom3;
     }
-    
+
     virtual ~Bend() {}
     virtual void calcForce(RealType& angle, bool doParticlePot);
-    
+
     RealType getValue(int snapshotNo) {
       Vector3d pos1 = atoms_[0]->getPos(snapshotNo);
       Vector3d pos2 = atoms_[1]->getPos(snapshotNo);
       Vector3d pos3 = atoms_[2]->getPos(snapshotNo);
-      
+
       Vector3d r21 = pos1 - pos2;
       snapshotMan_->getSnapshot(snapshotNo)->wrapVector(r21);
       RealType d21 = r21.length();
-      
+
       Vector3d r23 = pos3 - pos2;
       snapshotMan_->getSnapshot(snapshotNo)->wrapVector(r23);
       RealType d23 = r23.length();
-      
+
       RealType cosTheta = dot(r21, r23) / (d21 * d23);
-      
-      //check roundoff     
+
+      // check roundoff
       if (cosTheta > 1.0) {
         cosTheta = 1.0;
       } else if (cosTheta < -1.0) {
         cosTheta = -1.0;
       }
-      
+
       return acos(cosTheta);
     }
 
+    RealType getPotential() { return potential_; }
 
-    RealType getPotential() {
-      return potential_;
-    }
-    
-    Atom* getAtomA() {
-      return atoms_[0];
-    }
-    
-    Atom* getAtomB() {
-      return atoms_[1];
-    }
-    
-    Atom* getAtomC() {
-      return atoms_[2];
-    }
-    
-    BendType * getBendType() {
-      return bendType_;
-    }
-    
-    virtual std::string getName() { return name_;}        
+    Atom* getAtomA() { return atoms_[0]; }
+
+    Atom* getAtomB() { return atoms_[1]; }
+
+    Atom* getAtomC() { return atoms_[2]; }
+
+    BendType* getBendType() { return bendType_; }
+
+    virtual std::string getName() { return name_; }
     /** Sets the name of this bend for selections */
-    virtual void setName(const std::string& name) { name_ = name;}
+    virtual void setName(const std::string& name) { name_ = name; }
 
-    void accept(BaseVisitor* v) {
-      v->visit(this);
-    }    
+    void accept(BaseVisitor* v) { v->visit(this); }
 
   protected:
-    
     RealType potential_;
     BendType* bendType_; /**< bend type */
-    std::string name_;        
-
-  };    
-} //end namespace OpenMD
-#endif //PRIMITIVES_BEND_HPP
-
+    std::string name_;
+  };
+}  // end namespace OpenMD
+#endif  // PRIMITIVES_BEND_HPP

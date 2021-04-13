@@ -28,101 +28,98 @@
 
 using namespace OpenMD;
 namespace QuantLib {
-    
-    //! Base constraint class
-    class Constraint {
-    protected:
-        //! Base class for constraint implementations
-        class Impl {
-        public:
-            virtual ~Impl() {}
-            //! Tests if params satisfy the constraint
-            virtual bool test(const DynamicVector<RealType>& params) const = 0;
-        };
-        Impl* impl_;
+
+  //! Base constraint class
+  class Constraint {
+  protected:
+    //! Base class for constraint implementations
+    class Impl {
     public:
-        bool empty() const { return !impl_; }
-        bool test(const DynamicVector<RealType>& p) const { return impl_->test(p); }
-        RealType update(DynamicVector<RealType>& p,
-                        const DynamicVector<RealType>& direction,
-                        RealType beta);
-        Constraint(Impl* impl = NULL);
-        virtual ~Constraint() { delete impl_; }
+      virtual ~Impl() {}
+      //! Tests if params satisfy the constraint
+      virtual bool test(const DynamicVector<RealType>& params) const = 0;
+    };
+    Impl* impl_;
+
+  public:
+    bool empty() const { return !impl_; }
+    bool test(const DynamicVector<RealType>& p) const { return impl_->test(p); }
+    RealType update(DynamicVector<RealType>& p,
+                    const DynamicVector<RealType>& direction, RealType beta);
+    Constraint(Impl* impl = NULL);
+    virtual ~Constraint() { delete impl_; }
+  };
+
+  //! No constraint
+  class NoConstraint : public Constraint {
+  private:
+    class Impl : public Constraint::Impl {
+    public:
+      bool test(const DynamicVector<RealType>&) const { return true; }
     };
 
-    //! No constraint
-    class NoConstraint : public Constraint {
+  public:
+    NoConstraint() : Constraint(new NoConstraint::Impl()) {}
+  };
+
+  //! %Constraint imposing positivity to all arguments
+  class PositiveConstraint : public Constraint {
+  private:
+    class Impl : public Constraint::Impl {
+    public:
+      bool test(const DynamicVector<RealType>& params) const {
+        for (size_t i = 0; i < params.size(); ++i) {
+          if (params[i] <= 0.0) return false;
+        }
+        return true;
+      }
+    };
+
+  public:
+    PositiveConstraint() : Constraint(new PositiveConstraint::Impl) {}
+  };
+
+  //! %Constraint imposing all arguments to be in [low,high]
+  class BoundaryConstraint : public Constraint {
+  private:
+    class Impl : public Constraint::Impl {
+    public:
+      Impl(RealType low, RealType high) : low_(low), high_(high) {}
+      bool test(const DynamicVector<RealType>& params) const {
+        for (size_t i = 0; i < params.size(); i++) {
+          if ((params[i] < low_) || (params[i] > high_)) return false;
+        }
+        return true;
+      }
+
     private:
-        class Impl : public Constraint::Impl {
-        public:
-            bool test(const DynamicVector<RealType>&) const {
-                return true;
-            }
-        };
-    public:
-        NoConstraint()
-            : Constraint(new NoConstraint::Impl()) {}
+      RealType low_, high_;
     };
 
-    //! %Constraint imposing positivity to all arguments
-    class PositiveConstraint : public Constraint {
+  public:
+    BoundaryConstraint(RealType low, RealType high) :
+        Constraint(new BoundaryConstraint::Impl(low, high)) {}
+  };
+
+  //! %Constraint enforcing both given sub-constraints
+  class CompositeConstraint : public Constraint {
+  private:
+    class Impl : public Constraint::Impl {
+    public:
+      Impl(const Constraint& c1, const Constraint& c2) : c1_(c1), c2_(c2) {}
+      bool test(const DynamicVector<RealType>& params) const {
+        return c1_.test(params) && c2_.test(params);
+      }
+
     private:
-        class Impl : public Constraint::Impl {
-        public:
-            bool test(const DynamicVector<RealType>& params) const {
-                for (size_t i=0; i<params.size(); ++i) {
-                    if (params[i] <= 0.0)
-                        return false;
-                }
-                return true;
-            }
-        };
-    public:
-        PositiveConstraint()
-            : Constraint(new PositiveConstraint::Impl) {}
+      Constraint c1_, c2_;
     };
 
-    //! %Constraint imposing all arguments to be in [low,high]
-    class BoundaryConstraint : public Constraint {
-    private:
-        class Impl : public Constraint::Impl {
-        public:
-            Impl(RealType low, RealType high)
-                : low_(low), high_(high) {}
-            bool test(const DynamicVector<RealType>& params) const {
-                for (size_t i=0; i<params.size(); i++) {
-                    if ((params[i] < low_) || (params[i] > high_))
-                        return false;
-                }
-                return true;
-            }
-        private:
-            RealType low_, high_;
-        };
-    public:
-        BoundaryConstraint(RealType low, RealType high)
-            : Constraint( new BoundaryConstraint::Impl(low, high)) {}
-    };
+  public:
+    CompositeConstraint(const Constraint& c1, const Constraint& c2) :
+        Constraint(new CompositeConstraint::Impl(c1, c2)) {}
+  };
 
-    //! %Constraint enforcing both given sub-constraints
-    class CompositeConstraint : public Constraint {
-    private:
-        class Impl : public Constraint::Impl {
-        public:
-            Impl(const Constraint& c1,
-                 const Constraint& c2)
-                : c1_(c1), c2_(c2) {}
-            bool test(const DynamicVector<RealType>& params) const {
-                return c1_.test(params) && c2_.test(params);
-            }
-        private:
-            Constraint c1_, c2_;
-        };
-    public:
-        CompositeConstraint(const Constraint& c1, const Constraint& c2)
-            : Constraint( new CompositeConstraint::Impl(c1,c2)) {}
-    };
-
-}
+}  // namespace QuantLib
 
 #endif

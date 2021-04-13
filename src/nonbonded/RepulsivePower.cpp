@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -56,178 +56,181 @@ using namespace std;
 
 namespace OpenMD {
 
-RepulsivePower::RepulsivePower()
-    : initialized_(false), forceField_(NULL), name_("RepulsivePower") {}
+  RepulsivePower::RepulsivePower() :
+      initialized_(false), forceField_(NULL), name_("RepulsivePower") {}
 
-void RepulsivePower::initialize() {
-  RPtypes.clear();
-  RPtids.clear();
-  MixingMap.clear();
-  RPtids.resize(forceField_->getNAtomType(), -1);
+  void RepulsivePower::initialize() {
+    RPtypes.clear();
+    RPtids.clear();
+    MixingMap.clear();
+    RPtids.resize(forceField_->getNAtomType(), -1);
 
-  ForceField::NonBondedInteractionTypeContainer* nbiTypes =
-      forceField_->getNonBondedInteractionTypes();
-  ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
-  ForceField::NonBondedInteractionTypeContainer::KeyType keys;
-  NonBondedInteractionType* nbt;
-  int rptid1, rptid2;
+    ForceField::NonBondedInteractionTypeContainer* nbiTypes =
+        forceField_->getNonBondedInteractionTypes();
+    ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
+    ForceField::NonBondedInteractionTypeContainer::KeyType keys;
+    NonBondedInteractionType* nbt;
+    int rptid1, rptid2;
 
-  for (nbt = nbiTypes->beginType(j); nbt != NULL; nbt = nbiTypes->nextType(j)) {
-    if (nbt->isRepulsivePower()) {
-      keys = nbiTypes->getKeys(j);
-      AtomType* at1 = forceField_->getAtomType(keys[0]);
-      if (at1 == NULL) {
-        sprintf(painCave.errMsg,
-                "RepulsivePower::initialize could not find AtomType %s\n"
-                "\tto for for %s - %s interaction.\n",
-                keys[0].c_str(), keys[0].c_str(), keys[1].c_str());
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
+    for (nbt = nbiTypes->beginType(j); nbt != NULL;
+         nbt = nbiTypes->nextType(j)) {
+      if (nbt->isRepulsivePower()) {
+        keys          = nbiTypes->getKeys(j);
+        AtomType* at1 = forceField_->getAtomType(keys[0]);
+        if (at1 == NULL) {
+          sprintf(painCave.errMsg,
+                  "RepulsivePower::initialize could not find AtomType %s\n"
+                  "\tto for for %s - %s interaction.\n",
+                  keys[0].c_str(), keys[0].c_str(), keys[1].c_str());
+          painCave.severity = OPENMD_ERROR;
+          painCave.isFatal  = 1;
+          simError();
+        }
+
+        AtomType* at2 = forceField_->getAtomType(keys[1]);
+        if (at2 == NULL) {
+          sprintf(painCave.errMsg,
+                  "RepulsivePower::initialize could not find AtomType %s\n"
+                  "\tfor %s - %s nonbonded interaction.\n",
+                  keys[1].c_str(), keys[0].c_str(), keys[1].c_str());
+          painCave.severity = OPENMD_ERROR;
+          painCave.isFatal  = 1;
+          simError();
+        }
+
+        int atid1 = at1->getIdent();
+        if (RPtids[atid1] == -1) {
+          rptid1 = RPtypes.size();
+          RPtypes.insert(atid1);
+          RPtids[atid1] = rptid1;
+        }
+        int atid2 = at2->getIdent();
+        if (RPtids[atid2] == -1) {
+          rptid2 = RPtypes.size();
+          RPtypes.insert(atid2);
+          RPtids[atid2] = rptid2;
+        }
+
+        RepulsivePowerInteractionType* rpit =
+            dynamic_cast<RepulsivePowerInteractionType*>(nbt);
+        if (rpit == NULL) {
+          sprintf(
+              painCave.errMsg,
+              "RepulsivePower::initialize could not convert "
+              "NonBondedInteractionType\n"
+              "\tto RepulsivePowerInteractionType for %s - %s interaction.\n",
+              at1->getName().c_str(), at2->getName().c_str());
+          painCave.severity = OPENMD_ERROR;
+          painCave.isFatal  = 1;
+          simError();
+        }
+
+        RealType sigma   = rpit->getSigma();
+        RealType epsilon = rpit->getEpsilon();
+        int nRep         = rpit->getNrep();
+
+        addExplicitInteraction(at1, at2, sigma, epsilon, nRep);
       }
+    }
+    initialized_ = true;
+  }
 
-      AtomType* at2 = forceField_->getAtomType(keys[1]);
-      if (at2 == NULL) {
-        sprintf(painCave.errMsg,
-                "RepulsivePower::initialize could not find AtomType %s\n"
-                "\tfor %s - %s nonbonded interaction.\n",
-                keys[1].c_str(), keys[0].c_str(), keys[1].c_str());
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
-      }
+  void RepulsivePower::addExplicitInteraction(AtomType* atype1,
+                                              AtomType* atype2, RealType sigma,
+                                              RealType epsilon, int nRep) {
+    RPInteractionData mixer;
+    mixer.sigma   = sigma;
+    mixer.epsilon = epsilon;
+    mixer.sigmai  = 1.0 / mixer.sigma;
+    mixer.nRep    = nRep;
 
-      int atid1 = at1->getIdent();
-      if (RPtids[atid1] == -1) {
-        rptid1 = RPtypes.size();
-        RPtypes.insert(atid1);
-        RPtids[atid1] = rptid1;
-      }
-      int atid2 = at2->getIdent();
-      if (RPtids[atid2] == -1) {
-        rptid2 = RPtypes.size();
-        RPtypes.insert(atid2);
-        RPtids[atid2] = rptid2;
-      }
+    int rptid1 = RPtids[atype1->getIdent()];
+    int rptid2 = RPtids[atype2->getIdent()];
+    int nRP    = RPtypes.size();
 
-      RepulsivePowerInteractionType* rpit =
-          dynamic_cast<RepulsivePowerInteractionType*>(nbt);
-      if (rpit == NULL) {
-        sprintf(painCave.errMsg,
-                "RepulsivePower::initialize could not convert "
-                "NonBondedInteractionType\n"
-                "\tto RepulsivePowerInteractionType for %s - %s interaction.\n",
-                at1->getName().c_str(), at2->getName().c_str());
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
-      }
+    MixingMap.resize(nRP);
+    MixingMap[rptid1].resize(nRP);
 
-      RealType sigma = rpit->getSigma();
-      RealType epsilon = rpit->getEpsilon();
-      int nRep = rpit->getNrep();
-
-      addExplicitInteraction(at1, at2, sigma, epsilon, nRep);
+    MixingMap[rptid1][rptid2] = mixer;
+    if (rptid2 != rptid1) {
+      MixingMap[rptid2].resize(nRP);
+      MixingMap[rptid2][rptid1] = mixer;
     }
   }
-  initialized_ = true;
-}
 
-void RepulsivePower::addExplicitInteraction(AtomType* atype1, AtomType* atype2,
-                                            RealType sigma, RealType epsilon,
-                                            int nRep) {
-  RPInteractionData mixer;
-  mixer.sigma = sigma;
-  mixer.epsilon = epsilon;
-  mixer.sigmai = 1.0 / mixer.sigma;
-  mixer.nRep = nRep;
+  void RepulsivePower::calcForce(InteractionData& idat) {
+    if (!initialized_) initialize();
 
-  int rptid1 = RPtids[atype1->getIdent()];
-  int rptid2 = RPtids[atype2->getIdent()];
-  int nRP = RPtypes.size();
+    RPInteractionData& mixer =
+        MixingMap[RPtids[idat.atid1]][RPtids[idat.atid2]];
+    RealType sigmai  = mixer.sigmai;
+    RealType epsilon = mixer.epsilon;
+    int nRep         = mixer.nRep;
 
-  MixingMap.resize(nRP);
-  MixingMap[rptid1].resize(nRP);
+    RealType ros;
+    RealType rcos;
+    RealType myPot    = 0.0;
+    RealType myPotC   = 0.0;
+    RealType myDeriv  = 0.0;
+    RealType myDerivC = 0.0;
 
-  MixingMap[rptid1][rptid2] = mixer;
-  if (rptid2 != rptid1) {
-    MixingMap[rptid2].resize(nRP);
-    MixingMap[rptid2][rptid1] = mixer;
-  }
-}
+    ros = idat.rij * sigmai;
 
-void RepulsivePower::calcForce(InteractionData& idat) {
-  if (!initialized_) initialize();
+    getNRepulsionFunc(ros, nRep, myPot, myDeriv);
 
-  RPInteractionData& mixer = MixingMap[RPtids[idat.atid1]][RPtids[idat.atid2]];
-  RealType sigmai = mixer.sigmai;
-  RealType epsilon = mixer.epsilon;
-  int nRep = mixer.nRep;
+    if (idat.shiftedPot) {
+      rcos = idat.rcut * sigmai;
+      getNRepulsionFunc(rcos, nRep, myPotC, myDerivC);
+      myDerivC = 0.0;
+    } else if (idat.shiftedForce) {
+      rcos = idat.rcut * sigmai;
+      getNRepulsionFunc(rcos, nRep, myPotC, myDerivC);
+      myPotC = myPotC + myDerivC * (idat.rij - idat.rcut) * sigmai;
+    } else {
+      myPotC   = 0.0;
+      myDerivC = 0.0;
+    }
 
-  RealType ros;
-  RealType rcos;
-  RealType myPot = 0.0;
-  RealType myPotC = 0.0;
-  RealType myDeriv = 0.0;
-  RealType myDerivC = 0.0;
+    RealType pot_temp = idat.vdwMult * epsilon * (myPot - myPotC);
+    idat.vpair += pot_temp;
 
-  ros = idat.rij * sigmai;
+    RealType dudr =
+        idat.sw * idat.vdwMult * epsilon * (myDeriv - myDerivC) * sigmai;
 
-  getNRepulsionFunc(ros, nRep, myPot, myDeriv);
+    idat.pot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
+    if (idat.isSelected) idat.selePot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
 
-  if (idat.shiftedPot) {
-    rcos = idat.rcut * sigmai;
-    getNRepulsionFunc(rcos, nRep, myPotC, myDerivC);
-    myDerivC = 0.0;
-  } else if (idat.shiftedForce) {
-    rcos = idat.rcut * sigmai;
-    getNRepulsionFunc(rcos, nRep, myPotC, myDerivC);
-    myPotC = myPotC + myDerivC * (idat.rij - idat.rcut) * sigmai;
-  } else {
-    myPotC = 0.0;
-    myDerivC = 0.0;
+    idat.f1 += idat.d * dudr / idat.rij;
+
+    return;
   }
 
-  RealType pot_temp = idat.vdwMult * epsilon * (myPot - myPotC);
-  idat.vpair += pot_temp;
+  void RepulsivePower::getNRepulsionFunc(const RealType& r, int& n,
+                                         RealType& pot, RealType& deriv) {
+    RealType ri   = 1.0 / r;
+    RealType rin  = pow(ri, n);
+    RealType rin1 = rin * ri;
 
-  RealType dudr =
-      idat.sw * idat.vdwMult * epsilon * (myDeriv - myDerivC) * sigmai;
+    pot   = rin;
+    deriv = -n * rin1;
 
-  idat.pot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
-  if (idat.isSelected) idat.selePot[VANDERWAALS_FAMILY] += idat.sw * pot_temp;
-
-  idat.f1 += idat.d * dudr / idat.rij;
-
-  return;
-}
-
-void RepulsivePower::getNRepulsionFunc(const RealType& r, int& n, RealType& pot,
-                                       RealType& deriv) {
-  RealType ri = 1.0 / r;
-  RealType rin = pow(ri, n);
-  RealType rin1 = rin * ri;
-
-  pot = rin;
-  deriv = -n * rin1;
-
-  return;
-}
-
-RealType RepulsivePower::getSuggestedCutoffRadius(
-    pair<AtomType*, AtomType*> atypes) {
-  if (!initialized_) initialize();
-
-  int atid1 = atypes.first->getIdent();
-  int atid2 = atypes.second->getIdent();
-  int rptid1 = RPtids[atid1];
-  int rptid2 = RPtids[atid2];
-
-  if (rptid1 == -1 || rptid2 == -1)
-    return 0.0;
-  else {
-    RPInteractionData mixer = MixingMap[rptid1][rptid2];
-    return 2.5 * mixer.sigma;
+    return;
   }
-}
+
+  RealType RepulsivePower::getSuggestedCutoffRadius(
+      pair<AtomType*, AtomType*> atypes) {
+    if (!initialized_) initialize();
+
+    int atid1  = atypes.first->getIdent();
+    int atid2  = atypes.second->getIdent();
+    int rptid1 = RPtids[atid1];
+    int rptid2 = RPtids[atid2];
+
+    if (rptid1 == -1 || rptid2 == -1)
+      return 0.0;
+    else {
+      RPInteractionData mixer = MixingMap[rptid1][rptid2];
+      return 2.5 * mixer.sigma;
+    }
+  }
 }  // namespace OpenMD

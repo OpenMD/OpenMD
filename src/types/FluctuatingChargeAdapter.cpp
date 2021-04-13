@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -54,158 +54,151 @@
 
 namespace OpenMD {
 
-bool FluctuatingChargeAdapter::isFluctuatingCharge() {
-  return at_->hasProperty(FQtypeID);
-}
-
-FluctuatingAtypeParameters
-FluctuatingChargeAdapter::getFluctuatingChargeParam() {
-  if (!isFluctuatingCharge()) {
-    sprintf(painCave.errMsg,
-            "FluctuatingChargeAdapter::getFluctuatingChargeParam was passed an "
-            "atomType "
-            "(%s)\n"
-            "\tthat does not appear to be a fluctuating charge atom.\n",
-            at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  bool FluctuatingChargeAdapter::isFluctuatingCharge() {
+    return at_->hasProperty(FQtypeID);
   }
 
-  std::shared_ptr<GenericData> data = at_->getPropertyByName(FQtypeID);
-  if (data == nullptr) {
-    sprintf(
-        painCave.errMsg,
-        "FluctuatingChargeAdapter::getFluctuatingChargeParam could not find "
-        "fluctuating charge\n"
-        "\tparameters for atomType %s.\n",
-        at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  FluctuatingAtypeParameters
+      FluctuatingChargeAdapter::getFluctuatingChargeParam() {
+    if (!isFluctuatingCharge()) {
+      sprintf(
+          painCave.errMsg,
+          "FluctuatingChargeAdapter::getFluctuatingChargeParam was passed an "
+          "atomType "
+          "(%s)\n"
+          "\tthat does not appear to be a fluctuating charge atom.\n",
+          at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(FQtypeID);
+    if (data == nullptr) {
+      sprintf(
+          painCave.errMsg,
+          "FluctuatingChargeAdapter::getFluctuatingChargeParam could not find "
+          "fluctuating charge\n"
+          "\tparameters for atomType %s.\n",
+          at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    std::shared_ptr<FluctuatingAtypeData> fqData =
+        std::dynamic_pointer_cast<FluctuatingAtypeData>(data);
+    if (fqData == nullptr) {
+      sprintf(painCave.errMsg,
+              "FluctuatingChargeAdapter::getFluctuatingChargeParam could not "
+              "convert\n"
+              "\tGenericData to FluctuatingAtypeData for atom type %s\n",
+              at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    return fqData->getData();
   }
 
-  std::shared_ptr<FluctuatingAtypeData> fqData =
-      std::dynamic_pointer_cast<FluctuatingAtypeData>(data);
-  if (fqData == nullptr) {
-    sprintf(painCave.errMsg,
-            "FluctuatingChargeAdapter::getFluctuatingChargeParam could not "
-            "convert\n"
-            "\tGenericData to FluctuatingAtypeData for atom type %s\n",
-            at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  bool FluctuatingChargeAdapter::isMetallic() {
+    FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
+    return fqParam.isMetallic;
+  }
+  bool FluctuatingChargeAdapter::usesSlaterIntramolecular() {
+    FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
+    return fqParam.usesSlaterIntramolecular;
+  }
+  RealType FluctuatingChargeAdapter::getChargeMass() {
+    FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
+    return fqParam.chargeMass;
+  }
+  RealType FluctuatingChargeAdapter::getElectronegativity() {
+    FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
+    return fqParam.electronegativity;
+  }
+  RealType FluctuatingChargeAdapter::getHardness() {
+    FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
+    return fqParam.hardness;
+  }
+  int FluctuatingChargeAdapter::getSlaterN() {
+    FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
+    return fqParam.slaterN;
+  }
+  RealType FluctuatingChargeAdapter::getNValence() {
+    FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
+    return fqParam.nValence;
+  }
+  RealType FluctuatingChargeAdapter::getNMobile() {
+    FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
+    return fqParam.nMobile;
+  }
+  RealType FluctuatingChargeAdapter::getSlaterZeta() {
+    FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
+    return fqParam.slaterZeta;
+  }
+  DoublePolynomial FluctuatingChargeAdapter::getSelfPolynomial() {
+    FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
+    return fqParam.vself;
   }
 
-  return fqData->getData();
-}
+  void FluctuatingChargeAdapter::makeFluctuatingCharge(
+      RealType chargeMass, RealType electronegativity, RealType hardness,
+      int slaterN, RealType slaterZeta) {
+    if (isFluctuatingCharge()) { at_->removeProperty(FQtypeID); }
 
-bool FluctuatingChargeAdapter::isMetallic() {
-  FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
-  return fqParam.isMetallic;
-}
-bool FluctuatingChargeAdapter::usesSlaterIntramolecular() {
-  FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
-  return fqParam.usesSlaterIntramolecular;
-}
-RealType FluctuatingChargeAdapter::getChargeMass() {
-  FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
-  return fqParam.chargeMass;
-}
-RealType FluctuatingChargeAdapter::getElectronegativity() {
-  FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
-  return fqParam.electronegativity;
-}
-RealType FluctuatingChargeAdapter::getHardness() {
-  FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
-  return fqParam.hardness;
-}
-int FluctuatingChargeAdapter::getSlaterN() {
-  FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
-  return fqParam.slaterN;
-}
-RealType FluctuatingChargeAdapter::getNValence() {
-  FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
-  return fqParam.nValence;
-}
-RealType FluctuatingChargeAdapter::getNMobile() {
-  FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
-  return fqParam.nMobile;
-}
-RealType FluctuatingChargeAdapter::getSlaterZeta() {
-  FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
-  return fqParam.slaterZeta;
-}
-DoublePolynomial FluctuatingChargeAdapter::getSelfPolynomial() {
-  FluctuatingAtypeParameters fqParam = getFluctuatingChargeParam();
-  return fqParam.vself;
-}
+    FluctuatingAtypeParameters fqParam {};
+    fqParam.chargeMass               = chargeMass;
+    fqParam.usesSlaterIntramolecular = true;
 
-void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
-                                                     RealType electronegativity,
-                                                     RealType hardness,
-                                                     int slaterN,
-                                                     RealType slaterZeta) {
-  if (isFluctuatingCharge()) {
-    at_->removeProperty(FQtypeID);
+    fqParam.electronegativity = electronegativity;
+    fqParam.hardness          = hardness;
+    fqParam.slaterN           = slaterN;
+    fqParam.slaterZeta        = slaterZeta;
+
+    fqParam.vself.setCoefficient(1, electronegativity);
+    fqParam.vself.setCoefficient(2, 0.5 * hardness);
+
+    at_->addProperty(std::make_shared<FluctuatingAtypeData>(FQtypeID, fqParam));
   }
 
-  FluctuatingAtypeParameters fqParam{};
-  fqParam.chargeMass = chargeMass;
-  fqParam.usesSlaterIntramolecular = true;
+  void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
+                                                       RealType nValence,
+                                                       DoublePolynomial vs) {
+    if (isFluctuatingCharge()) { at_->removeProperty(FQtypeID); }
 
-  fqParam.electronegativity = electronegativity;
-  fqParam.hardness = hardness;
-  fqParam.slaterN = slaterN;
-  fqParam.slaterZeta = slaterZeta;
+    FluctuatingAtypeParameters fqParam {};
 
-  fqParam.vself.setCoefficient(1, electronegativity);
-  fqParam.vself.setCoefficient(2, 0.5 * hardness);
+    fqParam.chargeMass               = chargeMass;
+    fqParam.usesSlaterIntramolecular = false;
 
-  at_->addProperty(std::make_shared<FluctuatingAtypeData>(FQtypeID, fqParam));
-}
+    // old-style EAMPoly has nV = nM
+    fqParam.isMetallic = true;
+    fqParam.nValence   = nValence;
+    fqParam.nMobile    = nValence;
 
-void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
-                                                     RealType nValence,
-                                                     DoublePolynomial vs) {
-  if (isFluctuatingCharge()) {
-    at_->removeProperty(FQtypeID);
+    fqParam.vself = vs;
+
+    at_->addProperty(std::make_shared<FluctuatingAtypeData>(FQtypeID, fqParam));
   }
 
-  FluctuatingAtypeParameters fqParam{};
+  void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
+                                                       RealType nValence,
+                                                       RealType nMobile,
+                                                       DoublePolynomial vs) {
+    if (isFluctuatingCharge()) { at_->removeProperty(FQtypeID); }
 
-  fqParam.chargeMass = chargeMass;
-  fqParam.usesSlaterIntramolecular = false;
+    FluctuatingAtypeParameters fqParam {};
 
-  // old-style EAMPoly has nV = nM
-  fqParam.isMetallic = true;
-  fqParam.nValence = nValence;
-  fqParam.nMobile = nValence;
+    fqParam.chargeMass               = chargeMass;
+    fqParam.usesSlaterIntramolecular = false;
+    fqParam.isMetallic               = true;
+    fqParam.nValence                 = nValence;
+    fqParam.nMobile                  = nMobile;
 
-  fqParam.vself = vs;
+    fqParam.vself = vs;
 
-  at_->addProperty(std::make_shared<FluctuatingAtypeData>(FQtypeID, fqParam));
-}
-
-void FluctuatingChargeAdapter::makeFluctuatingCharge(RealType chargeMass,
-                                                     RealType nValence,
-                                                     RealType nMobile,
-                                                     DoublePolynomial vs) {
-  if (isFluctuatingCharge()) {
-    at_->removeProperty(FQtypeID);
+    at_->addProperty(std::make_shared<FluctuatingAtypeData>(FQtypeID, fqParam));
   }
-
-  FluctuatingAtypeParameters fqParam{};
-
-  fqParam.chargeMass = chargeMass;
-  fqParam.usesSlaterIntramolecular = false;
-  fqParam.isMetallic = true;
-  fqParam.nValence = nValence;
-  fqParam.nMobile = nMobile;
-
-  fqParam.vself = vs;
-
-  at_->addProperty(std::make_shared<FluctuatingAtypeData>(FQtypeID, fqParam));
-}
 }  // namespace OpenMD

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -65,8 +65,8 @@ using namespace OpenMD;
 
 double calculate_circumradius(pointT* p0, pointT* p1, pointT* p2, int dim);
 
-AlphaHull::AlphaHull(double alpha)
-    : Hull(), dim_(4), alpha_(alpha), options_("qhull d QJ Tcv Pp") {}
+AlphaHull::AlphaHull(double alpha) :
+    Hull(), dim_(4), alpha_(alpha), options_("qhull d QJ Tcv Pp") {}
 
 void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
 #ifdef HAVE_QHULL_REENTRANT
@@ -91,8 +91,8 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
   int i = 0;
 
   for (SD = bodydoubles.begin(); SD != bodydoubles.end(); ++SD) {
-    Vector3d pos = (*SD)->getPos();
-    ptArray[dim_ * i] = pos.x();
+    Vector3d pos          = (*SD)->getPos();
+    ptArray[dim_ * i]     = pos.x();
     ptArray[dim_ * i + 1] = pos.y();
     ptArray[dim_ * i + 2] = pos.z();
     ptArray[dim_ * i + 3] = pos.lengthSquare();
@@ -112,7 +112,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
     qh_init_B(qh, &ptArray[0], numpoints, dim_, ismalloc);
     qh_qhull(qh);
     qh_check_output(qh);
-    exitcode = qh_ERRnone;
+    exitcode      = qh_ERRnone;
     qh->NOerrexit = True;
   } else {
     sprintf(painCave.errMsg, "AlphaHull: Qhull failed to compute convex hull");
@@ -127,7 +127,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
     qh_init_B(&ptArray[0], numpoints, dim_, ismalloc);
     qh_qhull();
     qh_check_output();
-    exitcode = qh_ERRnone;
+    exitcode     = qh_ERRnone;
     qh NOerrexit = True;
   } else {
     sprintf(painCave.errMsg, "AlphaHull: Qhull failed to compute convex hull");
@@ -192,7 +192,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
     coordsOnProc[iproc] = dim_ * hullSitesOnProc[iproc];
   }
 
-  displacements[0] = 0;
+  displacements[0]       = 0;
   vectorDisplacements[0] = 0;
 
   for (int iproc = 1; iproc < nproc; iproc++) {
@@ -245,7 +245,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
     qh_init_B(qh, &globalCoords[0], globalHullSites, dim_, ismalloc);
     qh_qhull(qh);
     qh_check_output(qh);
-    exitcode = qh_ERRnone;
+    exitcode      = qh_ERRnone;
     qh->NOerrexit = True;
   } else {
     sprintf(painCave.errMsg, "AlphaHull: Qhull failed to compute convex hull");
@@ -385,9 +385,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
             qh_setappend(qh, &set, ridge);
           }
 #else
-          if ((neighbor->visitid != qh visit_id)) {
-            qh_setappend(&set, ridge);
-          }
+          if ((neighbor->visitid != qh visit_id)) { qh_setappend(&set, ridge); }
 #endif
         }
       }
@@ -429,11 +427,11 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
         ver++;
         vertexlist.push_back(id);
 
-        vel = bodydoubles[id]->getVel();
+        vel  = bodydoubles[id]->getVel();
         mass = bodydoubles[id]->getMass();
         face.addVertexSD(bodydoubles[id]);
 
-        faceVel = faceVel + vel;
+        faceVel  = faceVel + vel;
         faceMass = faceMass + mass;
       }  // FOREACH Vertex
       facetlist.push_back(vertexlist);
@@ -444,7 +442,7 @@ void AlphaHull::computeHull(vector<StuntDouble*> bodydoubles) {
       RealType area = face.getArea();
       area_ += area;
       Vector3d normal = face.getUnitNormal();
-      RealType dist = normal[0] * interiorPoint[0] +
+      RealType dist   = normal[0] * interiorPoint[0] +
                       normal[1] * interiorPoint[1] +
                       normal[2] * interiorPoint[2];
 #ifdef HAVE_QHULL_REENTRANT
@@ -479,7 +477,7 @@ double calculate_circumradius(pointT* p0, pointT* p1, pointT* p2, int dim) {
   coordT b = qh_pointdist(p1, p2, dim);
   coordT c = qh_pointdist(p2, p0, dim);
 
-  coordT sum = (a + b + c) * 0.5;
+  coordT sum  = (a + b + c) * 0.5;
   coordT area = sum * (a + b - sum) * (a + c - sum) * (b + c - sum);
   return (double)(a * b * c) / (4 * sqrt(area));
 }

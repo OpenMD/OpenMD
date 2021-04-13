@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef VISITORS_REPLACEMENTVISITOR_HPP
 #define VISITORS_REPLACEMENTVISITOR_HPP
 
@@ -57,38 +57,40 @@ namespace OpenMD {
    * @class ReplacementVisitor
    *
    * Replaces an atomic object with a collection atomic sites.  These
-   * sites are specified with reference location to the object, as well as 
+   * sites are specified with reference location to the object, as well as
    * a name.
    */
-  class ReplacementVisitor : public BaseAtomVisitor{
+  class ReplacementVisitor : public BaseAtomVisitor {
   public:
     using BaseVisitor::visit;
     ReplacementVisitor(SimInfo* info) : BaseAtomVisitor(info) {
-      visitorName = "ReplacementVisitor";   
-      sites_ = std::make_shared<AtomData>(); 
+      visitorName = "ReplacementVisitor";
+      sites_      = std::make_shared<AtomData>();
     }
-    
+
     void visit(Atom* atom) {}
-    void visit(DirectionalAtom* datom);       
+    void visit(DirectionalAtom* datom);
     void visit(RigidBody* rb) {}
-    
+
     const std::string toString();
 
-    void addReplacedAtomName(const std::string &repName);
-    void addSite(const std::string &name, const Vector3d &refPos);
-    void addSite(const std::string &name, const Vector3d &refPos, const Vector3d &refVec);
+    void addReplacedAtomName(const std::string& repName);
+    void addSite(const std::string& name, const Vector3d& refPos);
+    void addSite(const std::string& name, const Vector3d& refPos,
+                 const Vector3d& refVec);
+
   private:
     inline bool isReplacedAtom(const std::string& atomType);
     std::set<std::string> myTypes_;
     std::shared_ptr<AtomData> sites_;
   };
-  
-  class SSDAtomVisitor : public ReplacementVisitor{
+
+  class SSDAtomVisitor : public ReplacementVisitor {
   public:
     using BaseVisitor::visit;
     SSDAtomVisitor(SimInfo* info) : ReplacementVisitor(info) {
       visitorName = "SSDAtomVisitor";
-      
+
       /// these are the atom names we can replace with a fixed structure
       addReplacedAtomName("SSD");
       addReplacedAtomName("SSD_E");
@@ -98,46 +100,45 @@ namespace OpenMD {
       addReplacedAtomName("SSDQO");
       addReplacedAtomName("TAP");
       addReplacedAtomName("TRED");
-      
+
       // this is the reference structure we'll use for the replacement:
       addSite("H", Vector3d(0.0, -0.75695, 0.5206));
-      addSite("H", Vector3d(0.0,  0.75695, 0.5206));
-      addSite("O", Vector3d(0.0,  0.0,    -0.0654));
-      addSite("X", Vector3d(0.0,  0.0,     0.0   ), Vector3d(0,0,1));
+      addSite("H", Vector3d(0.0, 0.75695, 0.5206));
+      addSite("O", Vector3d(0.0, 0.0, -0.0654));
+      addSite("X", Vector3d(0.0, 0.0, 0.0), Vector3d(0, 0, 1));
     }
   };
-  
-  class GBtailVisitor : public ReplacementVisitor{
+
+  class GBtailVisitor : public ReplacementVisitor {
   public:
     using BaseVisitor::visit;
     GBtailVisitor(SimInfo* info) : ReplacementVisitor(info) {
       visitorName = "GBtailVisitor";
-      
-      
+
       /// these are the atom names we can replace with a fixed structure
       addReplacedAtomName("GBtail");
-      
+
       // this is the reference structure we'll use for the replacement:
       addSite("C", Vector3d(0.0, 0.0, 9.0));
       addSite("C", Vector3d(0.0, 0.0, 0.0));
       addSite("C", Vector3d(0.0, 0.0, -9.0));
     }
-  };  
-  
-  class GBheadVisitor : public ReplacementVisitor{
+  };
+
+  class GBheadVisitor : public ReplacementVisitor {
   public:
     using BaseVisitor::visit;
     GBheadVisitor(SimInfo* info) : ReplacementVisitor(info) {
       visitorName = "GBheadVisitor";
-      
+
       /// these are the atom names we can replace with a fixed structure
       addReplacedAtomName("GBhead");
-      
+
       // this is the reference structure we'll use for the replacement:
       addSite("N", Vector3d(0.0, 0.0, 3.5));
       addSite("C", Vector3d(0.0, 0.0, 0.0));
       addSite("P", Vector3d(0.0, 0.0, -3.5));
     }
-  };      
-}//namespace OpenMD
+  };
+}  // namespace OpenMD
 #endif

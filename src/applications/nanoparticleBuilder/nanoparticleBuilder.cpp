@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -97,9 +97,8 @@ int main(int argc, char* argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg,
-            "No input .omd file name was specified "
-            "on the command line");
+    sprintf(painCave.errMsg, "No input .omd file name was specified "
+                             "on the command line");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
     simError();
@@ -109,8 +108,8 @@ int main(int argc, char* argv[]) {
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
 
-  latticeConstant = args_info.latticeConstant_arg;
-  particleRadius = args_info.radius_arg;
+  latticeConstant    = args_info.latticeConstant_arg;
+  particleRadius     = args_info.radius_arg;
   Globals* simParams = oldInfo->getSimParams();
 
   /* Create nanoparticle */
@@ -118,7 +117,7 @@ int main(int argc, char* argv[]) {
                                       particleRadius);
 
   /* Build a lattice and get lattice points for this lattice constant */
-  vector<Vector3d> sites = nanoParticle.getSites();
+  vector<Vector3d> sites        = nanoParticle.getSites();
   vector<Vector3d> orientations = nanoParticle.getOrientations();
 
   /* Set up the random number generator engine */
@@ -132,7 +131,8 @@ int main(int argc, char* argv[]) {
   Vector3d myLoc;
   RealType myR;
 
-  for (unsigned int i = 0; i < sites.size(); i++) isVacancy.push_back(false);
+  for (unsigned int i = 0; i < sites.size(); i++)
+    isVacancy.push_back(false);
 
   if (args_info.vacancyPercent_given) {
     if (args_info.vacancyPercent_arg < 0.0 ||
@@ -158,10 +158,8 @@ int main(int argc, char* argv[]) {
       if (vIR >= 0.0 && vOR <= particleRadius && vOR >= vIR) {
         for (std::size_t i = 0; i < sites.size(); i++) {
           myLoc = sites[i];
-          myR = myLoc.length();
-          if (myR >= vIR && myR <= vOR) {
-            vacancyTargets.push_back(i);
-          }
+          myR   = myLoc.length();
+          if (myR >= vIR && myR <= vOR) { vacancyTargets.push_back(i); }
         }
         std::shuffle(vacancyTargets.begin(), vacancyTargets.end(), gen);
 
@@ -172,7 +170,7 @@ int main(int argc, char* argv[]) {
                 "Removing %d atoms from randomly-selected\n"
                 "\tsites between %lf and %lf.",
                 (int)vacancyTargets.size(), vIR, vOR);
-        painCave.isFatal = 0;
+        painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;
         simError();
 
@@ -206,9 +204,8 @@ int main(int argc, char* argv[]) {
   nComponents = components.size();
 
   if (args_info.molFraction_given && args_info.shellRadius_given) {
-    sprintf(painCave.errMsg,
-            "Specify either molFraction or shellRadius "
-            "arguments, but not both!");
+    sprintf(painCave.errMsg, "Specify either molFraction or shellRadius "
+                             "arguments, but not both!");
     painCave.isFatal = 1;
     simError();
   }
@@ -269,16 +266,14 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < nComponents; i++) {
       if (molFractions.at(i) < 0.0) {
-        sprintf(painCave.errMsg,
-                "One of the requested molFractions was"
-                " less than zero!");
+        sprintf(painCave.errMsg, "One of the requested molFractions was"
+                                 " less than zero!");
         painCave.isFatal = 1;
         simError();
       }
       if (molFractions.at(i) > 1.0) {
-        sprintf(painCave.errMsg,
-                "One of the requested molFractions was"
-                " greater than one!");
+        sprintf(painCave.errMsg, "One of the requested molFractions was"
+                                 " greater than one!");
         painCave.isFatal = 1;
         simError();
       }
@@ -333,7 +328,7 @@ int main(int argc, char* argv[]) {
   vector<int> ids;
   if ((int)args_info.molFraction_given) {
     sprintf(painCave.errMsg, "Creating a randomized spherical nanoparticle.");
-    painCave.isFatal = 0;
+    painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
     simError();
     /* Random particle is the default case*/
@@ -345,7 +340,7 @@ int main(int argc, char* argv[]) {
 
   } else {
     sprintf(painCave.errMsg, "Creating a core-shell spherical nanoparticle.");
-    painCave.isFatal = 0;
+    painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
     simError();
 
@@ -355,15 +350,15 @@ int main(int argc, char* argv[]) {
     nMol.resize(nComponents);
 
     for (unsigned int i = 0; i < sites.size(); i++) {
-      myLoc = sites[i];
-      myR = myLoc.length();
+      myLoc         = sites[i];
+      myR           = myLoc.length();
       smallestSoFar = particleRadius;
       if (!isVacancy[i]) {
         for (int j = 0; j < nComponents; j++) {
           if (myR <= shellRadii[j]) {
             if (shellRadii[j] <= smallestSoFar) {
               smallestSoFar = shellRadii[j];
-              myComponent = j;
+              myComponent   = j;
             }
           }
         }
@@ -449,7 +444,7 @@ int main(int argc, char* argv[]) {
           "A new OpenMD file called \"%s\" has been "
           "generated.\n",
           outputFileName.c_str());
-  painCave.isFatal = 0;
+  painCave.isFatal  = 0;
   painCave.severity = OPENMD_INFO;
   simError();
   return 0;

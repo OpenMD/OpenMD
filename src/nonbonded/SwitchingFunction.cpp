@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -54,121 +54,121 @@
 using namespace std;
 namespace OpenMD {
 
-SwitchingFunction::SwitchingFunction()
-    : functionType_(cubic), haveSpline_(false), isCubic_(true), np_(150) {
-  switchSpline_ = std::make_shared<CubicSpline>();
-}
+  SwitchingFunction::SwitchingFunction() :
+      functionType_(cubic), haveSpline_(false), isCubic_(true), np_(150) {
+    switchSpline_ = std::make_shared<CubicSpline>();
+  }
 
-void SwitchingFunction::setSwitchType(SwitchingFunctionType sft) {
-  if ((sft == fifth_order_poly) || (sft == cubic)) {
-    if (haveSpline_) {
-      switchSpline_ = std::make_shared<CubicSpline>();
-      setSwitch(rin_, rout_);
+  void SwitchingFunction::setSwitchType(SwitchingFunctionType sft) {
+    if ((sft == fifth_order_poly) || (sft == cubic)) {
+      if (haveSpline_) {
+        switchSpline_ = std::make_shared<CubicSpline>();
+        setSwitch(rin_, rout_);
+      }
+    } else {
+      sprintf(
+          painCave.errMsg,
+          "SwitchingFunction::setSwitchType was given unknown function type\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
     }
-  } else {
-    sprintf(
-        painCave.errMsg,
-        "SwitchingFunction::setSwitchType was given unknown function type\n");
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
-  }
-}
-
-void SwitchingFunction::setSwitch(RealType rinner, RealType router) {
-  if (router < rinner) {
-    sprintf(painCave.errMsg,
-            "SwitchingFunction::setSwitch was given rinner (%lf) which was\n"
-            "\tlarger than router (%lf).\n",
-            rinner, router);
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
-  }
-  if (router < 0.0) {
-    sprintf(painCave.errMsg,
-            "SwitchingFunction::setSwitch was given router (%lf) which was\n"
-            "\tless than zero.\n",
-            router);
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
-  }
-  if (rinner < 0.0) {
-    sprintf(painCave.errMsg,
-            "SwitchingFunction::setSwitch was given rinner (%lf) which was\n"
-            "\tless than zero.\n",
-            router);
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
   }
 
-  rin_ = rinner;
-  rout_ = router;
-  rin2_ = rin_ * rin_;
-  rout2_ = rout_ * rout_;
+  void SwitchingFunction::setSwitch(RealType rinner, RealType router) {
+    if (router < rinner) {
+      sprintf(painCave.errMsg,
+              "SwitchingFunction::setSwitch was given rinner (%lf) which was\n"
+              "\tlarger than router (%lf).\n",
+              rinner, router);
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+    if (router < 0.0) {
+      sprintf(painCave.errMsg,
+              "SwitchingFunction::setSwitch was given router (%lf) which was\n"
+              "\tless than zero.\n",
+              router);
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+    if (rinner < 0.0) {
+      sprintf(painCave.errMsg,
+              "SwitchingFunction::setSwitch was given rinner (%lf) which was\n"
+              "\tless than zero.\n",
+              router);
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
 
-  if ((router - rinner) < 1.0e-8) {
-    // no reason to set up spline if the switching region is tiny
+    rin_   = rinner;
+    rout_  = router;
+    rin2_  = rin_ * rin_;
+    rout2_ = rout_ * rout_;
+
+    if ((router - rinner) < 1.0e-8) {
+      // no reason to set up spline if the switching region is tiny
+      return;
+    }
+
+    // setup r -> sw lookup spline
+    if (functionType_ == fifth_order_poly) {
+      isCubic_    = false;
+      RealType c0 = 1.0;
+      RealType c3 = -10.0;
+      RealType c4 = 15.0;
+      RealType c5 = -6.0;
+
+      RealType dx, r, yval, rval, rval2, rval3, rval4, rval5;
+      RealType rvaldi, rvaldi2, rvaldi3, rvaldi4, rvaldi5;
+
+      dx = (rout_ - rin_) / RealType(np_ - 1);
+
+      for (int i = 0; i < np_; i++) {
+        r       = rin_ + RealType(i) * dx;
+        rval    = (r - rin_);
+        rval2   = rval * rval;
+        rval3   = rval2 * rval;
+        rval4   = rval2 * rval2;
+        rval5   = rval3 * rval2;
+        rvaldi  = 1.0 / (rout_ - rin_);
+        rvaldi2 = rvaldi * rvaldi;
+        rvaldi3 = rvaldi2 * rvaldi;
+        rvaldi4 = rvaldi2 * rvaldi2;
+        rvaldi5 = rvaldi3 * rvaldi2;
+        yval    = c0 + c3 * rval3 * rvaldi3 + c4 * rval4 * rvaldi4 +
+               c5 * rval5 * rvaldi5;
+        switchSpline_->addPoint(r, yval);
+      }
+    } else {
+      // cubic splines only need 2 points to do a cubic switching function...
+      isCubic_ = true;
+      switchSpline_->addPoint(rin_, 1.0);
+      switchSpline_->addPoint(rout_, 0.0);
+    }
+    haveSpline_ = true;
     return;
   }
 
-  // setup r -> sw lookup spline
-  if (functionType_ == fifth_order_poly) {
-    isCubic_ = false;
-    RealType c0 = 1.0;
-    RealType c3 = -10.0;
-    RealType c4 = 15.0;
-    RealType c5 = -6.0;
+  bool SwitchingFunction::getSwitch(const RealType& r2, RealType& sw,
+                                    RealType& dswdr, RealType& r) {
+    sw    = 1.0;
+    dswdr = 0.0;
 
-    RealType dx, r, yval, rval, rval2, rval3, rval4, rval5;
-    RealType rvaldi, rvaldi2, rvaldi3, rvaldi4, rvaldi5;
+    bool in_switching_region = false;
 
-    dx = (rout_ - rin_) / RealType(np_ - 1);
-
-    for (int i = 0; i < np_; i++) {
-      r = rin_ + RealType(i) * dx;
-      rval = (r - rin_);
-      rval2 = rval * rval;
-      rval3 = rval2 * rval;
-      rval4 = rval2 * rval2;
-      rval5 = rval3 * rval2;
-      rvaldi = 1.0 / (rout_ - rin_);
-      rvaldi2 = rvaldi * rvaldi;
-      rvaldi3 = rvaldi2 * rvaldi;
-      rvaldi4 = rvaldi2 * rvaldi2;
-      rvaldi5 = rvaldi3 * rvaldi2;
-      yval = c0 + c3 * rval3 * rvaldi3 + c4 * rval4 * rvaldi4 +
-             c5 * rval5 * rvaldi5;
-      switchSpline_->addPoint(r, yval);
+    if (r2 > rin2_) {
+      if (r2 > rout2_) {
+        sw = 0.0;
+      } else {
+        in_switching_region = true;
+        r                   = sqrt(r2);
+        switchSpline_->getValueAndDerivativeAt(r, sw, dswdr);
+      }
     }
-  } else {
-    // cubic splines only need 2 points to do a cubic switching function...
-    isCubic_ = true;
-    switchSpline_->addPoint(rin_, 1.0);
-    switchSpline_->addPoint(rout_, 0.0);
+    return in_switching_region;
   }
-  haveSpline_ = true;
-  return;
-}
-
-bool SwitchingFunction::getSwitch(const RealType &r2, RealType &sw,
-                                  RealType &dswdr, RealType &r) {
-  sw = 1.0;
-  dswdr = 0.0;
-
-  bool in_switching_region = false;
-
-  if (r2 > rin2_) {
-    if (r2 > rout2_) {
-      sw = 0.0;
-    } else {
-      in_switching_region = true;
-      r = sqrt(r2);
-      switchSpline_->getValueAndDerivativeAt(r, sw, dswdr);
-    }
-  }
-  return in_switching_region;
-}
 }  // namespace OpenMD

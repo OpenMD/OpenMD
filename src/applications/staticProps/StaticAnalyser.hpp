@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -56,12 +56,7 @@
 
 namespace OpenMD {
 
-  enum OutputDataType {
-    odtReal,
-    odtVector3,
-    odtArray2d,
-    odtUnknownDataType
-  };
+  enum OutputDataType { odtReal, odtVector3, odtArray2d, odtUnknownDataType };
 
   enum OutputDataHandling {
     odhAverage,
@@ -77,7 +72,7 @@ namespace OpenMD {
     OutputDataHandling dataHandling;
     std::vector<BaseAccumulator*> accumulator;
     std::vector<std::string> columnNames;
-    std::vector< std::vector<BaseAccumulator*> > accumulatorArray2d;
+    std::vector<std::vector<BaseAccumulator*>> accumulatorArray2d;
   };
 
   class StaticAnalyser {
@@ -86,15 +81,13 @@ namespace OpenMD {
                    unsigned int nbins);
 
     virtual ~StaticAnalyser() = default;
-    virtual void process() = 0;
+    virtual void process()    = 0;
 
     void setOutputName(const std::string& filename) {
       outputFilename_ = filename;
     }
 
-    const std::string& getOutputFileName() const {
-      return outputFilename_;
-    }
+    const std::string& getOutputFileName() const { return outputFilename_; }
 
     void setStep(int step) {
       assert(step > 0);
@@ -103,13 +96,9 @@ namespace OpenMD {
 
     int getStep() const { return step_; }
 
-    const std::string& getAnalysisType() const {
-      return analysisType_;
-    }
+    const std::string& getAnalysisType() const { return analysisType_; }
 
-    void setAnalysisType(const std::string& type) {
-      analysisType_ = type;
-    }
+    void setAnalysisType(const std::string& type) { analysisType_ = type; }
 
     void setParameterString(const std::string& params) {
       paramString_ = params;
@@ -118,13 +107,19 @@ namespace OpenMD {
   protected:
     virtual void writeOutput();
     virtual void writeData(std::ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeErrorBars(std::ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeErrorBars(std::ostream& os, OutputData* dat,
+                                unsigned int bin);
     virtual void writeReal(std::ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeVector(std::ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeArray(std::ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeRealErrorBars(std::ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeVectorErrorBars(std::ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeArrayErrorBars(std::ostream& os, OutputData* dat, unsigned int bin);
+    virtual void writeVector(std::ostream& os, OutputData* dat,
+                             unsigned int bin);
+    virtual void writeArray(std::ostream& os, OutputData* dat,
+                            unsigned int bin);
+    virtual void writeRealErrorBars(std::ostream& os, OutputData* dat,
+                                    unsigned int bin);
+    virtual void writeVectorErrorBars(std::ostream& os, OutputData* dat,
+                                      unsigned int bin);
+    virtual void writeArrayErrorBars(std::ostream& os, OutputData* dat,
+                                     unsigned int bin);
 
     OutputData* beginOutputData(std::vector<OutputData*>::iterator& i);
     OutputData* nextOutputData(std::vector<OutputData*>::iterator& i);
@@ -139,6 +134,6 @@ namespace OpenMD {
     unsigned int nBins_;
     std::vector<OutputData*> data_;
   };
-}
+}  // namespace OpenMD
 
 #endif

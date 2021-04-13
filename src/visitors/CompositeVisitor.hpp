@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,38 +42,39 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef VISITORS_COMPOSITEVISITOR_HPP
 #define VISITORS_COMPOSITEVISITOR_HPP
 
 #include <list>
-#include "visitors/BaseVisitor.hpp"
-#include "primitives/StuntDouble.hpp"
 
+#include "primitives/StuntDouble.hpp"
+#include "visitors/BaseVisitor.hpp"
 
 namespace OpenMD {
-    
-  typedef  std::list<std::pair<BaseVisitor*, int> >::iterator VisitorIterator;
 
-  class CompositeVisitor: public BaseVisitor{
+  typedef std::list<std::pair<BaseVisitor*, int>>::iterator VisitorIterator;
+
+  class CompositeVisitor : public BaseVisitor {
   public:
     using BaseVisitor::visit;
-    CompositeVisitor() : BaseVisitor() { visitorName = "CompositeVisitor";}
+    CompositeVisitor() : BaseVisitor() { visitorName = "CompositeVisitor"; }
     ~CompositeVisitor();
-    
+
     virtual void visit(Atom* atom);
-    virtual void visit(DirectionalAtom* datom); 
-    virtual void visit(RigidBody* rb); 
+    virtual void visit(DirectionalAtom* datom);
+    virtual void visit(RigidBody* rb);
     virtual void update();
-    
+
     void addVisitor(BaseVisitor* v, int priority = 0);
     BaseVisitor* beginVisitor(VisitorIterator& i);
     BaseVisitor* nextVisitor(VisitorIterator& i);
 
-    const  std::string toString();
+    const std::string toString();
+
   protected:
-    std::list<std::pair<BaseVisitor*, int> > visitorList;
+    std::list<std::pair<BaseVisitor*, int>> visitorList;
   };
 
-}
-#endif //_COMPOSITEVISITOR_H_
+}  // namespace OpenMD
+#endif  //_COMPOSITEVISITOR_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file TorsionType.hpp
  * @author teng lin
  * @date  11/16/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
 #define TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
@@ -61,7 +61,7 @@
 #include "types/PolynomialInversionType.hpp"
 
 namespace OpenMD {
-  
+
   struct ImproperCosineInversionParameter {
     RealType kchi;
     int n;
@@ -70,20 +70,21 @@ namespace OpenMD {
 
   class LessThanPeriodicityFunctor {
   public:
-    bool operator()(const ImproperCosineInversionParameter& p1, 
-		    const ImproperCosineInversionParameter& p2) {
+    bool operator()(const ImproperCosineInversionParameter& p1,
+                    const ImproperCosineInversionParameter& p2) {
       return p1.n < p2.n;
     }
   };
 
   /**
-   * @class ImproperCosineInversionType ImproperCosineInversionType.hpp "types/ImproperCosineInversionType.hpp"
+   * @class ImproperCosineInversionType ImproperCosineInversionType.hpp
+   * "types/ImproperCosineInversionType.hpp"
    */
   class ImproperCosineInversionType : public PolynomialInversionType {
   public:
-    ImproperCosineInversionType(std::vector<ImproperCosineInversionParameter>& parameters);    
+    ImproperCosineInversionType(
+        std::vector<ImproperCosineInversionParameter>& parameters);
   };
-  
-} //end namespace OpenMD
-#endif //TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
 
+}  // end namespace OpenMD
+#endif  // TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP

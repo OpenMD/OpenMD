@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -54,282 +54,285 @@
 
 namespace OpenMD {
 
-void NPA::moveA() {
-  SimInfo::MoleculeIterator i;
-  Molecule::IntegrableObjectIterator j;
-  Molecule* mol;
-  StuntDouble* sd;
-  Vector3d Tb, ji;
-  RealType mass;
-  Vector3d vel;
-  Vector3d pos;
-  Vector3d frc;
-  Vector3d sc;
-  int index;
+  void NPA::moveA() {
+    SimInfo::MoleculeIterator i;
+    Molecule::IntegrableObjectIterator j;
+    Molecule* mol;
+    StuntDouble* sd;
+    Vector3d Tb, ji;
+    RealType mass;
+    Vector3d vel;
+    Vector3d pos;
+    Vector3d frc;
+    Vector3d sc;
+    int index;
 
-  loadEta();
+    loadEta();
 
-  instaTemp = thermo.getTemperature();
-  press = thermo.getPressureTensor();
-  instaPress = Constants::pressureConvert *
-               (press(0, 0) + press(1, 1) + press(2, 2)) / 3.0;
-  instaVol = thermo.getVolume();
+    instaTemp  = thermo.getTemperature();
+    press      = thermo.getPressureTensor();
+    instaPress = Constants::pressureConvert *
+                 (press(0, 0) + press(1, 1) + press(2, 2)) / 3.0;
+    instaVol = thermo.getVolume();
 
-  Vector3d COM = thermo.getCom();
+    Vector3d COM = thermo.getCom();
 
-  // evolve velocity half step
+    // evolve velocity half step
 
-  calcVelScale();
+    calcVelScale();
 
-  for (mol = info_->beginMolecule(i); mol != NULL;
-       mol = info_->nextMolecule(i)) {
-    for (sd = mol->beginIntegrableObject(j); sd != NULL;
-         sd = mol->nextIntegrableObject(j)) {
-      vel = sd->getVel();
-      frc = sd->getFrc();
-
-      mass = sd->getMass();
-
-      getVelScaleA(sc, vel);
-
-      // velocity half step  (use chi from previous step here):
-
-      vel += dt2 * Constants::energyConvert / mass * frc - dt2 * sc;
-      sd->setVel(vel);
-
-      if (sd->isDirectional()) {
-        // get and convert the torque to body frame
-
-        Tb = sd->lab2Body(sd->getTrq());
-
-        // get the angular momentum, and propagate a half step
-
-        ji = sd->getJ();
-
-        ji += dt2 * Constants::energyConvert * Tb;
-
-        rotAlgo_->rotate(sd, ji, dt);
-
-        sd->setJ(ji);
-      }
-    }
-  }
-  // evolve eta a half step
-
-  evolveEtaA();
-  flucQ_->moveA();
-
-  index = 0;
-  for (mol = info_->beginMolecule(i); mol != NULL;
-       mol = info_->nextMolecule(i)) {
-    for (sd = mol->beginIntegrableObject(j); sd != NULL;
-         sd = mol->nextIntegrableObject(j)) {
-      oldPos[index++] = sd->getPos();
-    }
-  }
-
-  // the first estimation of r(t+dt) is equal to  r(t)
-
-  for (int k = 0; k < maxIterNum_; k++) {
-    index = 0;
     for (mol = info_->beginMolecule(i); mol != NULL;
          mol = info_->nextMolecule(i)) {
       for (sd = mol->beginIntegrableObject(j); sd != NULL;
            sd = mol->nextIntegrableObject(j)) {
         vel = sd->getVel();
-        pos = sd->getPos();
+        frc = sd->getFrc();
 
-        this->getPosScale(pos, COM, index, sc);
+        mass = sd->getMass();
 
-        pos = oldPos[index] + dt * (vel + sc);
-        sd->setPos(pos);
+        getVelScaleA(sc, vel);
 
-        ++index;
+        // velocity half step  (use chi from previous step here):
+
+        vel += dt2 * Constants::energyConvert / mass * frc - dt2 * sc;
+        sd->setVel(vel);
+
+        if (sd->isDirectional()) {
+          // get and convert the torque to body frame
+
+          Tb = sd->lab2Body(sd->getTrq());
+
+          // get the angular momentum, and propagate a half step
+
+          ji = sd->getJ();
+
+          ji += dt2 * Constants::energyConvert * Tb;
+
+          rotAlgo_->rotate(sd, ji, dt);
+
+          sd->setJ(ji);
+        }
       }
     }
+    // evolve eta a half step
 
-    rattle_->constraintA();
-  }
-
-  // Scale the box after all the positions have been moved:
-
-  this->scaleSimBox();
-
-  saveEta();
-}
-
-void NPA::moveB(void) {
-  SimInfo::MoleculeIterator i;
-  Molecule::IntegrableObjectIterator j;
-  Molecule* mol;
-  StuntDouble* sd;
-  int index;
-  Vector3d Tb;
-  Vector3d ji;
-  Vector3d sc;
-  Vector3d vel;
-  Vector3d frc;
-  RealType mass;
-
-  loadEta();
-
-  // save velocity and angular momentum
-  index = 0;
-  for (mol = info_->beginMolecule(i); mol != NULL;
-       mol = info_->nextMolecule(i)) {
-    for (sd = mol->beginIntegrableObject(j); sd != NULL;
-         sd = mol->nextIntegrableObject(j)) {
-      oldVel[index] = sd->getVel();
-
-      if (sd->isDirectional()) oldJi[index] = sd->getJ();
-
-      ++index;
-    }
-  }
-
-  instaVol = thermo.getVolume();
-  for (int k = 0; k < maxIterNum_; k++) {
-    instaTemp = thermo.getTemperature();
-    instaPress = thermo.getPressure();
-
-    // evolve eta
-    this->evolveEtaB();
-    this->calcVelScale();
+    evolveEtaA();
+    flucQ_->moveA();
 
     index = 0;
     for (mol = info_->beginMolecule(i); mol != NULL;
          mol = info_->nextMolecule(i)) {
       for (sd = mol->beginIntegrableObject(j); sd != NULL;
            sd = mol->nextIntegrableObject(j)) {
-        frc = sd->getFrc();
-        mass = sd->getMass();
+        oldPos[index++] = sd->getPos();
+      }
+    }
 
-        getVelScaleB(sc, index);
+    // the first estimation of r(t+dt) is equal to  r(t)
 
-        // velocity half step
-        vel = oldVel[index] + dt2 * Constants::energyConvert / mass * frc -
-              dt2 * sc;
+    for (int k = 0; k < maxIterNum_; k++) {
+      index = 0;
+      for (mol = info_->beginMolecule(i); mol != NULL;
+           mol = info_->nextMolecule(i)) {
+        for (sd = mol->beginIntegrableObject(j); sd != NULL;
+             sd = mol->nextIntegrableObject(j)) {
+          vel = sd->getVel();
+          pos = sd->getPos();
 
-        sd->setVel(vel);
+          this->getPosScale(pos, COM, index, sc);
 
-        if (sd->isDirectional()) {
-          // get and convert the torque to body frame
-          Tb = sd->lab2Body(sd->getTrq());
+          pos = oldPos[index] + dt * (vel + sc);
+          sd->setPos(pos);
 
-          ji = oldJi[index] + dt2 * Constants::energyConvert * Tb;
-
-          sd->setJ(ji);
+          ++index;
         }
+      }
+
+      rattle_->constraintA();
+    }
+
+    // Scale the box after all the positions have been moved:
+
+    this->scaleSimBox();
+
+    saveEta();
+  }
+
+  void NPA::moveB(void) {
+    SimInfo::MoleculeIterator i;
+    Molecule::IntegrableObjectIterator j;
+    Molecule* mol;
+    StuntDouble* sd;
+    int index;
+    Vector3d Tb;
+    Vector3d ji;
+    Vector3d sc;
+    Vector3d vel;
+    Vector3d frc;
+    RealType mass;
+
+    loadEta();
+
+    // save velocity and angular momentum
+    index = 0;
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+           sd = mol->nextIntegrableObject(j)) {
+        oldVel[index] = sd->getVel();
+
+        if (sd->isDirectional()) oldJi[index] = sd->getJ();
 
         ++index;
       }
     }
 
-    rattle_->constraintB();
+    instaVol = thermo.getVolume();
+    for (int k = 0; k < maxIterNum_; k++) {
+      instaTemp  = thermo.getTemperature();
+      instaPress = thermo.getPressure();
 
-    if (this->etaConverged()) break;
-  }
+      // evolve eta
+      this->evolveEtaB();
+      this->calcVelScale();
 
-  flucQ_->moveB();
-  saveEta();
-}
+      index = 0;
+      for (mol = info_->beginMolecule(i); mol != NULL;
+           mol = info_->nextMolecule(i)) {
+        for (sd = mol->beginIntegrableObject(j); sd != NULL;
+             sd = mol->nextIntegrableObject(j)) {
+          frc  = sd->getFrc();
+          mass = sd->getMass();
 
-void NPA::evolveEtaA() {
-  eta(2, 2) += dt2 * instaVol *
-               (press(2, 2) - targetPressure / Constants::pressureConvert) /
-               (NkBT * tb2);
-  oldEta = eta;
-}
+          getVelScaleB(sc, index);
 
-void NPA::evolveEtaB() {
-  prevEta = eta;
-  eta(2, 2) = oldEta(2, 2) +
-              dt2 * instaVol *
-                  (press(2, 2) - targetPressure / Constants::pressureConvert) /
-                  (NkBT * tb2);
-}
+          // velocity half step
+          vel = oldVel[index] + dt2 * Constants::energyConvert / mass * frc -
+                dt2 * sc;
 
-void NPA::calcVelScale() {
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      vScale(i, j) = eta(i, j);
+          sd->setVel(vel);
+
+          if (sd->isDirectional()) {
+            // get and convert the torque to body frame
+            Tb = sd->lab2Body(sd->getTrq());
+
+            ji = oldJi[index] + dt2 * Constants::energyConvert * Tb;
+
+            sd->setJ(ji);
+          }
+
+          ++index;
+        }
+      }
+
+      rattle_->constraintB();
+
+      if (this->etaConverged()) break;
     }
+
+    flucQ_->moveB();
+    saveEta();
   }
-}
 
-void NPA::getVelScaleA(Vector3d& sc, const Vector3d& vel) { sc = vScale * vel; }
+  void NPA::evolveEtaA() {
+    eta(2, 2) += dt2 * instaVol *
+                 (press(2, 2) - targetPressure / Constants::pressureConvert) /
+                 (NkBT * tb2);
+    oldEta = eta;
+  }
 
-void NPA::getVelScaleB(Vector3d& sc, int index) { sc = vScale * oldVel[index]; }
+  void NPA::evolveEtaB() {
+    prevEta = eta;
+    eta(2, 2) =
+        oldEta(2, 2) +
+        dt2 * instaVol *
+            (press(2, 2) - targetPressure / Constants::pressureConvert) /
+            (NkBT * tb2);
+  }
 
-void NPA::getPosScale(const Vector3d& pos, const Vector3d& COM, int index,
-                      Vector3d& sc) {
-  Vector3d rj = (oldPos[index] + pos) / (RealType)2.0 - COM;
-  sc = eta * rj;
-}
-
-void NPA::scaleSimBox() {
-  Mat3x3d scaleMat;
-
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      scaleMat(i, j) = 0.0;
-      if (i == j) {
-        scaleMat(i, j) = 1.0;
+  void NPA::calcVelScale() {
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        vScale(i, j) = eta(i, j);
       }
     }
   }
 
-  scaleMat(2, 2) = exp(dt * eta(2, 2));
-  Mat3x3d hmat = snap->getHmat();
-  hmat = hmat * scaleMat;
-  snap->setHmat(hmat);
-}
-
-bool NPA::etaConverged() {
-  int i;
-  RealType diffEta, sumEta;
-
-  sumEta = 0;
-  for (i = 0; i < 3; i++) {
-    sumEta += pow(prevEta(i, i) - eta(i, i), 2);
+  void NPA::getVelScaleA(Vector3d& sc, const Vector3d& vel) {
+    sc = vScale * vel;
   }
 
-  diffEta = sqrt(sumEta / 3.0);
+  void NPA::getVelScaleB(Vector3d& sc, int index) {
+    sc = vScale * oldVel[index];
+  }
 
-  return (diffEta <= etaTolerance);
-}
+  void NPA::getPosScale(const Vector3d& pos, const Vector3d& COM, int index,
+                        Vector3d& sc) {
+    Vector3d rj = (oldPos[index] + pos) / (RealType)2.0 - COM;
+    sc          = eta * rj;
+  }
 
-RealType NPA::calcConservedQuantity() {
-  loadEta();
+  void NPA::scaleSimBox() {
+    Mat3x3d scaleMat;
 
-  // We need NkBT a lot, so just set it here: This is the RAW number
-  // of integrableObjects, so no subtraction or addition of constraints or
-  // orientational degrees of freedom:
-  NkBT = info_->getNGlobalIntegrableObjects() * Constants::kB * targetTemp;
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        scaleMat(i, j) = 0.0;
+        if (i == j) { scaleMat(i, j) = 1.0; }
+      }
+    }
 
-  RealType conservedQuantity;
-  RealType totalEnergy;
-  RealType barostat_kinetic;
-  RealType barostat_potential;
-  RealType trEta;
+    scaleMat(2, 2) = exp(dt * eta(2, 2));
+    Mat3x3d hmat   = snap->getHmat();
+    hmat           = hmat * scaleMat;
+    snap->setHmat(hmat);
+  }
 
-  totalEnergy = thermo.getTotalEnergy();
+  bool NPA::etaConverged() {
+    int i;
+    RealType diffEta, sumEta;
 
-  SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
-  trEta = tmp.trace();
+    sumEta = 0;
+    for (i = 0; i < 3; i++) {
+      sumEta += pow(prevEta(i, i) - eta(i, i), 2);
+    }
 
-  barostat_kinetic = NkBT * tb2 * trEta / (2.0 * Constants::energyConvert);
+    diffEta = sqrt(sumEta / 3.0);
 
-  barostat_potential =
-      (targetPressure * thermo.getVolume() / Constants::pressureConvert) /
-      Constants::energyConvert;
+    return (diffEta <= etaTolerance);
+  }
 
-  conservedQuantity = totalEnergy + barostat_kinetic + barostat_potential;
+  RealType NPA::calcConservedQuantity() {
+    loadEta();
 
-  return conservedQuantity;
-}
+    // We need NkBT a lot, so just set it here: This is the RAW number
+    // of integrableObjects, so no subtraction or addition of constraints or
+    // orientational degrees of freedom:
+    NkBT = info_->getNGlobalIntegrableObjects() * Constants::kB * targetTemp;
 
-void NPA::loadEta() { eta = snap->getBarostat(); }
+    RealType conservedQuantity;
+    RealType totalEnergy;
+    RealType barostat_kinetic;
+    RealType barostat_potential;
+    RealType trEta;
 
-void NPA::saveEta() { snap->setBarostat(eta); }
+    totalEnergy = thermo.getTotalEnergy();
+
+    SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
+    trEta                         = tmp.trace();
+
+    barostat_kinetic = NkBT * tb2 * trEta / (2.0 * Constants::energyConvert);
+
+    barostat_potential =
+        (targetPressure * thermo.getVolume() / Constants::pressureConvert) /
+        Constants::energyConvert;
+
+    conservedQuantity = totalEnergy + barostat_kinetic + barostat_potential;
+
+    return conservedQuantity;
+  }
+
+  void NPA::loadEta() { eta = snap->getBarostat(); }
+
+  void NPA::saveEta() { snap->setBarostat(eta); }
 }  // namespace OpenMD

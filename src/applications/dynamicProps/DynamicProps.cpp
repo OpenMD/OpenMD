@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -141,16 +141,16 @@ int main(int argc, char* argv[]) {
 
   int privilegedAxis;
   switch (args_info.privilegedAxis_arg) {
-    case privilegedAxis_arg_x:
-      privilegedAxis = 0;
-      break;
-    case privilegedAxis_arg_y:
-      privilegedAxis = 1;
-      break;
-    case privilegedAxis_arg_z:
-    default:
-      privilegedAxis = 2;
-      break;
+  case privilegedAxis_arg_x:
+    privilegedAxis = 0;
+    break;
+  case privilegedAxis_arg_y:
+    privilegedAxis = 1;
+    break;
+  case privilegedAxis_arg_z:
+  default:
+    privilegedAxis = 2;
+    break;
   }
 
   // use the memory string to figure out how much memory we can use:
@@ -168,7 +168,7 @@ int main(int argc, char* argv[]) {
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
 
-  std::unique_ptr<DynamicProperty> corrFunc{nullptr};
+  std::unique_ptr<DynamicProperty> corrFunc {nullptr};
 
   if (args_info.sdcorr_given) {
     corrFunc = Utils::make_unique<SystemDipoleCorrFunc>(info, dumpFileName,
@@ -241,7 +241,7 @@ int main(int argc, char* argv[]) {
     else {
       sprintf(painCave.errMsg, "--order must be set if --lcorr is set\n");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
 
@@ -254,7 +254,7 @@ int main(int argc, char* argv[]) {
     else {
       sprintf(painCave.errMsg, "--order must be set if --lcorrZ is set\n");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
 
@@ -269,7 +269,7 @@ int main(int argc, char* argv[]) {
     else {
       sprintf(painCave.errMsg, "--order must be set if --cohZ is set\n");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
 
@@ -315,9 +315,7 @@ int main(int argc, char* argv[]) {
         info, dumpFileName, sele1, sele2);
   }
 
-  if (args_info.output_given) {
-    corrFunc->setOutputName(args_info.output_arg);
-  }
+  if (args_info.output_given) { corrFunc->setOutputName(args_info.output_arg); }
 
   corrFunc->doCorrelate();
 

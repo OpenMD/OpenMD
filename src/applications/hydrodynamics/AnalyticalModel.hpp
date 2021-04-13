@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,14 +48,14 @@
 
 #include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 namespace OpenMD {
-  
+
   class AnalyticalModel : public HydrodynamicsModel {
   public:
     AnalyticalModel(StuntDouble* sd, SimInfo* info) :
-      HydrodynamicsModel(sd, info) {}
+        HydrodynamicsModel(sd, info) {}
     virtual bool calcHydroProps(Shape* shape, RealType viscosity,
                                 RealType temperature);
     virtual void writeBeads(std::ostream& os);
-  };  
-}
-#endif 
+  };
+}  // namespace OpenMD
+#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,7 +51,7 @@
 #include "types/BondType.hpp"
 namespace OpenMD {
 
-/**
+  /**
  * @class MorseBondType
  *
  * @brief MorseBondType is a more realistic bond potential.
@@ -65,40 +65,40 @@ namespace OpenMD {
  * to the force constant. \f$\beta = \sqrt{\frac{k}{2 D_e}}\f$, and
  * \f$r_0\f$ is the equilibrium bond length.
  */
-class MorseBondType : public BondType {
- public:
-  MorseBondType(RealType myR0, RealType myD, RealType myBeta)
-      : BondType(myR0), De(myD), beta(myBeta) {}
+  class MorseBondType : public BondType {
+  public:
+    MorseBondType(RealType myR0, RealType myD, RealType myBeta) :
+        BondType(myR0), De(myD), beta(myBeta) {}
 
-  void setWellDepth(RealType myD) { De = myD; }
+    void setWellDepth(RealType myD) { De = myD; }
 
-  void setBeta(RealType myBeta) { beta = myBeta; }
+    void setBeta(RealType myBeta) { beta = myBeta; }
 
-  void setWellDepthAndForceConstant(RealType myD, RealType myK) {
-    De = myD;
-    beta = sqrt(myK / (2.0 * De));
-  }
+    void setWellDepthAndForceConstant(RealType myD, RealType myK) {
+      De   = myD;
+      beta = sqrt(myK / (2.0 * De));
+    }
 
-  RealType getWellDepth() { return De; }
+    RealType getWellDepth() { return De; }
 
-  RealType getBeta() { return beta; }
+    RealType getBeta() { return beta; }
 
-  RealType getForceConstant() { return 2.0 * De * beta * beta; }
+    RealType getForceConstant() { return 2.0 * De * beta * beta; }
 
-  virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
-    RealType dr, eterm, eterm2;
+    virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
+      RealType dr, eterm, eterm2;
 
-    dr = r - r0;
-    eterm = exp(-beta * dr);
-    eterm2 = eterm * eterm;
+      dr     = r - r0;
+      eterm  = exp(-beta * dr);
+      eterm2 = eterm * eterm;
 
-    V = De * (1 - 2.0 * eterm + eterm2);
-    dVdr = 2.0 * De * beta * (eterm - eterm2);
-  }
+      V    = De * (1 - 2.0 * eterm + eterm2);
+      dVdr = 2.0 * De * beta * (eterm - eterm2);
+    }
 
- private:
-  RealType De;
-  RealType beta;
-};
+  private:
+    RealType De;
+    RealType beta;
+  };
 }  // namespace OpenMD
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,51 +45,43 @@
 
 #ifndef APPLICATIONS_STATICPROPS_DENSITYPLOT_HPP
 #define APPLICATIONS_STATICPROPS_DENSITYPLOT_HPP
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 namespace OpenMD {
 
-    class DensityPlot : public StaticAnalyser{
-        public:
-            DensityPlot(SimInfo* info, const std::string& filename, const std::string& sele, const std::string& cmSele,RealType len, int nrbins);
-            virtual void process();
+  class DensityPlot : public StaticAnalyser {
+  public:
+    DensityPlot(SimInfo* info, const std::string& filename,
+                const std::string& sele, const std::string& cmSele,
+                RealType len, int nrbins);
+    virtual void process();
 
-            int getNRBins() {
-              return nRBins_; 
-            }
-            
-            RealType getLength() {
-              return len_;
-            }
-        
+    int getNRBins() { return nRBins_; }
 
-        private:
-            Vector3d calcNewOrigin();
-            
-            void writeDensity();            
+    RealType getLength() { return len_; }
 
-            Snapshot* currentSnapshot_;
-            RealType len_;
-            RealType halfLen_;
-            int nRBins_;
-            RealType deltaR_;                
-            std::vector<int> histogram_; 
-            std::vector<RealType> density_; 
+  private:
+    Vector3d calcNewOrigin();
 
-            std::string selectionScript_;
-            SelectionManager seleMan_;
-            SelectionEvaluator evaluator_;
-            std::string cmSelectionScript_;
-            SelectionManager cmSeleMan_;
-            SelectionEvaluator cmEvaluator_;
+    void writeDensity();
 
-            
-    };
-}
+    Snapshot* currentSnapshot_;
+    RealType len_;
+    RealType halfLen_;
+    int nRBins_;
+    RealType deltaR_;
+    std::vector<int> histogram_;
+    std::vector<RealType> density_;
+
+    std::string selectionScript_;
+    SelectionManager seleMan_;
+    SelectionEvaluator evaluator_;
+    std::string cmSelectionScript_;
+    SelectionManager cmSeleMan_;
+    SelectionEvaluator cmEvaluator_;
+  };
+}  // namespace OpenMD
 
 #endif
-
-
-

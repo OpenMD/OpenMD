@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,59 +46,56 @@
 #ifndef UTILS_CASECONVERSION_HPP
 #define UTILS_CASECONVERSION_HPP
 
-#include <cctype>
-#include <locale>
 #include <algorithm>
+#include <cctype>
 #include <functional>
+#include <locale>
 namespace OpenMD {
 
-    /** tolower functor */
-    struct toLowerFunctor : public std::unary_function<char, char> {
-        toLowerFunctor( const std::locale& loc ) : loc_( loc ) {}
-        char operator()(char c) const {
-            return std::tolower(c, loc_);
-        }
-        
-        private:
-            std::locale loc_;
-    };
+  /** tolower functor */
+  struct toLowerFunctor : public std::unary_function<char, char> {
+    toLowerFunctor(const std::locale& loc) : loc_(loc) {}
+    char operator()(char c) const { return std::tolower(c, loc_); }
 
-    /** toupper functor */
-    struct toUpperFunctor : public std::unary_function<char, char> {
-        toUpperFunctor( const std::locale& loc ) : loc_( loc ) {}
-        char operator()(char c) const {
-            return std::toupper(c, loc_);
-        }
-        
-        private:
-            std::locale loc_;
-    };
+  private:
+    std::locale loc_;
+  };
 
-    template<typename Container>
-    void toLower(Container& cont,  const std::locale& loc = std::locale()){
-        std::transform(cont.begin(), cont.end(), cont.begin(), toLowerFunctor(loc));
-    }
+  /** toupper functor */
+  struct toUpperFunctor : public std::unary_function<char, char> {
+    toUpperFunctor(const std::locale& loc) : loc_(loc) {}
+    char operator()(char c) const { return std::toupper(c, loc_); }
 
-    template<typename Container>
-    Container toLowerCopy(const Container& cont, const std::locale& loc = std::locale()){
-        Container result(cont);
-        toLower(result);
-        return result;
-    }
+  private:
+    std::locale loc_;
+  };
 
-    template<typename Container>
-    void toUpper(Container& cont,  const std::locale& loc = std::locale()){
-        std::transform(cont.begin(), cont.end(), cont.begin(), toUpperFunctor(loc));
-    }
+  template<typename Container>
+  void toLower(Container& cont, const std::locale& loc = std::locale()) {
+    std::transform(cont.begin(), cont.end(), cont.begin(), toLowerFunctor(loc));
+  }
 
-    template<typename Container>
-    Container toUpperCopy(const Container& cont, const std::locale& loc = std::locale()){
-        Container result(cont);
-        toUpper(result);
-        return result;
-    }
+  template<typename Container>
+  Container toLowerCopy(const Container& cont,
+                        const std::locale& loc = std::locale()) {
+    Container result(cont);
+    toLower(result);
+    return result;
+  }
 
+  template<typename Container>
+  void toUpper(Container& cont, const std::locale& loc = std::locale()) {
+    std::transform(cont.begin(), cont.end(), cont.begin(), toUpperFunctor(loc));
+  }
 
-}
+  template<typename Container>
+  Container toUpperCopy(const Container& cont,
+                        const std::locale& loc = std::locale()) {
+    Container result(cont);
+    toUpper(result);
+    return result;
+  }
+
+}  // namespace OpenMD
 
 #endif

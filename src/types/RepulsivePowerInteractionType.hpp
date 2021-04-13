@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_REPULSIVEPOWERINTERACTIONTYPE_HPP
 #define TYPES_REPULSIVEPOWERINTERACTIONTYPE_HPP
 
@@ -50,38 +50,31 @@
 
 namespace OpenMD {
   /**
-   * @class RepulsivePowerInteractionType 
+   * @class RepulsivePowerInteractionType
    *
    * RepulsivePowerInteractionType is one of the basic interaction types.
    * \f[ V =  \epsilon \left( \sigma/r \right)^{n}\f]
    */
   class RepulsivePowerInteractionType : public NonBondedInteractionType {
-    
   public:
-    
-    RepulsivePowerInteractionType(RealType mySigma, RealType myEpsilon, int myNrep) {
-      sigma = mySigma;
+    RepulsivePowerInteractionType(RealType mySigma, RealType myEpsilon,
+                                  int myNrep) {
+      sigma   = mySigma;
       epsilon = myEpsilon;
-      nRep = myNrep;
+      nRep    = myNrep;
       setRepulsivePower();
     }
 
-    RealType getSigma() {
-      return sigma;
-    }
-    
-    RealType getEpsilon() {
-      return epsilon;
-    }
-    
-    int getNrep() {
-      return nRep;
-    }
-        
+    RealType getSigma() { return sigma; }
+
+    RealType getEpsilon() { return epsilon; }
+
+    int getNrep() { return nRep; }
+
   private:
     RealType sigma;
-    RealType epsilon;    
+    RealType epsilon;
     int nRep;
   };
-}
+}  // namespace OpenMD
 #endif

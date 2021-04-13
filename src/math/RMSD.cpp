@@ -73,8 +73,8 @@ RealType RMSD::calculate_rmsd(std::vector<Vector3d> mov, Vector3d mov_com,
   if (is_reflection) s(2) = -s(2);
 
   RealType rmsd_sq = (E0 - 2.0 * s.sum()) / (RealType)n_vec;
-  rmsd_sq = max(rmsd_sq, RealType(0.0));
-  RealType rmsd = sqrt(rmsd_sq);
+  rmsd_sq          = max(rmsd_sq, RealType(0.0));
+  RealType rmsd    = sqrt(rmsd_sq);
   return rmsd;
 }
 

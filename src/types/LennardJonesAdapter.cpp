@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,73 +52,71 @@
 
 namespace OpenMD {
 
-bool LennardJonesAdapter::isLennardJones() {
-  return at_->hasProperty(LJtypeID);
-}
-
-LJAtypeParameters LennardJonesAdapter::getLJParam() {
-  if (!isLennardJones()) {
-    sprintf(painCave.errMsg,
-            "LennardJonesAdapter::getLJParam was passed an atomType (%s)\n"
-            "\tthat does not appear to be a Lennard-Jones atom.\n",
-            at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  bool LennardJonesAdapter::isLennardJones() {
+    return at_->hasProperty(LJtypeID);
   }
 
-  std::shared_ptr<GenericData> data = at_->getPropertyByName(LJtypeID);
-  if (data == nullptr) {
-    sprintf(painCave.errMsg,
-            "LennardJonesAdapter::getLJParam could not find Lennard-Jones\n"
-            "\tparameters for atomType %s.\n",
-            at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  LJAtypeParameters LennardJonesAdapter::getLJParam() {
+    if (!isLennardJones()) {
+      sprintf(painCave.errMsg,
+              "LennardJonesAdapter::getLJParam was passed an atomType (%s)\n"
+              "\tthat does not appear to be a Lennard-Jones atom.\n",
+              at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(LJtypeID);
+    if (data == nullptr) {
+      sprintf(painCave.errMsg,
+              "LennardJonesAdapter::getLJParam could not find Lennard-Jones\n"
+              "\tparameters for atomType %s.\n",
+              at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    std::shared_ptr<LJAtypeData> ljData =
+        std::dynamic_pointer_cast<LJAtypeData>(data);
+    if (ljData == nullptr) {
+      sprintf(painCave.errMsg,
+              "LennardJonesAdapter::getLJParam could not convert\n"
+              "\tGenericData to LJAtypeData for atom type %s\n",
+              at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    return ljData->getData();
   }
 
-  std::shared_ptr<LJAtypeData> ljData =
-      std::dynamic_pointer_cast<LJAtypeData>(data);
-  if (ljData == nullptr) {
-    sprintf(painCave.errMsg,
-            "LennardJonesAdapter::getLJParam could not convert\n"
-            "\tGenericData to LJAtypeData for atom type %s\n",
-            at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  RealType LennardJonesAdapter::getSigma() {
+    LJAtypeParameters ljParam = getLJParam();
+    return ljParam.sigma;
   }
 
-  return ljData->getData();
-}
-
-RealType LennardJonesAdapter::getSigma() {
-  LJAtypeParameters ljParam = getLJParam();
-  return ljParam.sigma;
-}
-
-RealType LennardJonesAdapter::getEpsilon() {
-  LJAtypeParameters ljParam = getLJParam();
-  return ljParam.epsilon;
-}
-
-bool LennardJonesAdapter::isSoft() {
-  LJAtypeParameters ljParam = getLJParam();
-  return ljParam.isSoft;
-}
-
-void LennardJonesAdapter::makeLennardJones(RealType sigma, RealType epsilon,
-                                           bool isSoft) {
-  if (isLennardJones()) {
-    at_->removeProperty(LJtypeID);
+  RealType LennardJonesAdapter::getEpsilon() {
+    LJAtypeParameters ljParam = getLJParam();
+    return ljParam.epsilon;
   }
 
-  LJAtypeParameters ljParam{};
-  ljParam.epsilon = epsilon;
-  ljParam.sigma = sigma;
-  ljParam.isSoft = isSoft;
+  bool LennardJonesAdapter::isSoft() {
+    LJAtypeParameters ljParam = getLJParam();
+    return ljParam.isSoft;
+  }
 
-  at_->addProperty(std::make_shared<LJAtypeData>(LJtypeID, ljParam));
-}
+  void LennardJonesAdapter::makeLennardJones(RealType sigma, RealType epsilon,
+                                             bool isSoft) {
+    if (isLennardJones()) { at_->removeProperty(LJtypeID); }
+
+    LJAtypeParameters ljParam {};
+    ljParam.epsilon = epsilon;
+    ljParam.sigma   = sigma;
+    ljParam.isSoft  = isSoft;
+
+    at_->addProperty(std::make_shared<LJAtypeData>(LJtypeID, ljParam));
+  }
 }  // namespace OpenMD

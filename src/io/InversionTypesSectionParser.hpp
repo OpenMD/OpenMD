@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,24 +42,25 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_INVERSIONTYPESSECTIONPARSER_HPP
 #define IO_INVERSIONTYPESSECTIONPARSER_HPP
-#include "io/SectionParser.hpp"
 #include "io/ForceFieldOptions.hpp"
+#include "io/SectionParser.hpp"
 
 namespace OpenMD {
 
   /**
-   * @class InversionTypesSectionParser InversionTypesSectionParser.hpp "io/InversionTypesSectionParser.hpp"
+   * @class InversionTypesSectionParser InversionTypesSectionParser.hpp
+   * "io/InversionTypesSectionParser.hpp"
    */
   class InversionTypesSectionParser : public SectionParser {
-  public:            
+  public:
     InversionTypesSectionParser(ForceFieldOptions& options);
-    
+
   private:
     // Inversion types vary by force field:  In this description,
-    // I is the central atom, while J, K, and L are atoms directly 
+    // I is the central atom, while J, K, and L are atoms directly
     // bonded to I (but not to each other):
 
     // Amber uses a special bond (IL) as the hinge between the planes
@@ -74,14 +75,13 @@ namespace OpenMD {
     // MM2 and Tripos use a planarity definition of the central atom (I)
     // distance from the plane made by the other three atoms (JKL).
 
-    // The Dreiding force field uses a complicated umbrella inversion 
+    // The Dreiding force field uses a complicated umbrella inversion
     // form.
 
     void parseLine(ForceField& ff, const std::string& line, int lineNo);
     ForceFieldOptions& options_;
   };
 
+}  // namespace OpenMD
 
-} //namespace OpenMD
-
-#endif //IO_INVERSIONTYPESSECTIONPARSER_HPP
+#endif  // IO_INVERSIONTYPESSECTIONPARSER_HPP

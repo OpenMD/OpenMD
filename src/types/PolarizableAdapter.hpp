@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,35 +42,35 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_POLARIZABLEADAPTER_HPP
 #define TYPES_POLARIZABLEADAPTER_HPP
 
-#include "utils/GenericData.hpp"
 #include "types/AtomType.hpp"
+#include "utils/GenericData.hpp"
 
 using namespace std;
 namespace OpenMD {
 
   string const PolTypeID = "Polarizable";
 
-  struct PolarizableAtypeParameters{
+  struct PolarizableAtypeParameters {
     RealType polarizability;
   };
-  typedef SimpleTypeData<PolarizableAtypeParameters> PolarizableAtypeData;   
+  typedef SimpleTypeData<PolarizableAtypeParameters> PolarizableAtypeData;
 
   class PolarizableAdapter {
   public:
     PolarizableAdapter(AtomType* AT) { at_ = AT; };
 
     void makePolarizable(RealType charge);
-    
+
     bool isPolarizable();
     RealType getPolarizability();
 
   private:
     AtomType* at_;
-    PolarizableAtypeParameters getPolarizableParam();    
+    PolarizableAtypeParameters getPolarizableParam();
   };
-}
+}  // namespace OpenMD
 #endif

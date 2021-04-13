@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -99,9 +99,8 @@ int main(int argc, char* argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg,
-            "No input .omd file name was specified "
-            "on the command line");
+    sprintf(painCave.errMsg, "No input .omd file name was specified "
+                             "on the command line");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
     simError();
@@ -111,9 +110,9 @@ int main(int argc, char* argv[]) {
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
 
-  latticeConstant = args_info.latticeConstant_arg;
-  rodRadius = args_info.radius_arg;
-  rodLength = args_info.length_arg;
+  latticeConstant    = args_info.latticeConstant_arg;
+  rodRadius          = args_info.radius_arg;
+  rodLength          = args_info.length_arg;
   Globals* simParams = oldInfo->getSimParams();
 
   vector<Vector3d> sites;
@@ -122,14 +121,14 @@ int main(int argc, char* argv[]) {
   if (args_info.ellipsoid_flag) {
     shapedLatticeEllipsoid nanoEllipsoid(latticeConstant, latticeType,
                                          rodLength, rodRadius);
-    sites = nanoEllipsoid.getSites();
+    sites        = nanoEllipsoid.getSites();
     orientations = nanoEllipsoid.getOrientations();
   } else {
     /* Create nanorod */
     shapedLatticeRod nanoRod(latticeConstant, latticeType, rodRadius,
                              rodLength);
     /* Build a lattice and get lattice points for this lattice constant */
-    sites = nanoRod.getSites();
+    sites        = nanoRod.getSites();
     orientations = nanoRod.getOrientations();
   }
 
@@ -144,7 +143,8 @@ int main(int argc, char* argv[]) {
   Vector3d myLoc;
   RealType myR;
 
-  for (std::size_t i = 0; i < sites.size(); i++) isVacancy.push_back(false);
+  for (std::size_t i = 0; i < sites.size(); i++)
+    isVacancy.push_back(false);
 
   // cerr << "checking vacancyPercent" << "\n";
   if (args_info.vacancyPercent_given) {
@@ -173,10 +173,8 @@ int main(int argc, char* argv[]) {
       if (vIR >= 0.0 && vOR <= rodRadius && vOR >= vIR) {
         for (std::size_t i = 0; i < sites.size(); i++) {
           myLoc = sites[i];
-          myR = myLoc.length();
-          if (myR >= vIR && myR <= vOR) {
-            vacancyTargets.push_back(i);
-          }
+          myR   = myLoc.length();
+          if (myR >= vIR && myR <= vOR) { vacancyTargets.push_back(i); }
         }
         std::shuffle(vacancyTargets.begin(), vacancyTargets.end(), gen);
 
@@ -187,7 +185,7 @@ int main(int argc, char* argv[]) {
                 "Removing %d atoms from randomly-selected\n"
                 "\tsites between %lf and %lf.",
                 (int)vacancyTargets.size(), vIR, vOR);
-        painCave.isFatal = 0;
+        painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;
         simError();
 
@@ -226,9 +224,8 @@ int main(int argc, char* argv[]) {
   // cerr << "nComponents = " << nComponents << "\n";
 
   if (args_info.molFraction_given && args_info.shellRadius_given) {
-    sprintf(painCave.errMsg,
-            "Specify either molFraction or shellRadius "
-            "arguments, but not both!");
+    sprintf(painCave.errMsg, "Specify either molFraction or shellRadius "
+                             "arguments, but not both!");
     painCave.isFatal = 1;
     simError();
   }
@@ -289,16 +286,14 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < nComponents; i++) {
       if (molFractions.at(i) < 0.0) {
-        sprintf(painCave.errMsg,
-                "One of the requested molFractions was"
-                " less than zero!");
+        sprintf(painCave.errMsg, "One of the requested molFractions was"
+                                 " less than zero!");
         painCave.isFatal = 1;
         simError();
       }
       if (molFractions.at(i) > 1.0) {
-        sprintf(painCave.errMsg,
-                "One of the requested molFractions was"
-                " greater than one!");
+        sprintf(painCave.errMsg, "One of the requested molFractions was"
+                                 " greater than one!");
         painCave.isFatal = 1;
         simError();
       }
@@ -354,7 +349,7 @@ int main(int argc, char* argv[]) {
     //  cerr << "molFraction given 2" << "\n";
     sprintf(painCave.errMsg,
             "Creating a randomized spherically-capped nanorod.");
-    painCave.isFatal = 0;
+    painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
     simError();
     /* Random rod is the default case*/
@@ -366,7 +361,7 @@ int main(int argc, char* argv[]) {
 
   } else {
     sprintf(painCave.errMsg, "Creating an fcc nanorod.");
-    painCave.isFatal = 0;
+    painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
     simError();
 
@@ -380,7 +375,7 @@ int main(int argc, char* argv[]) {
 
     for (unsigned int i = 0; i < sites.size(); i++) {
       myLoc = sites[i];
-      myR = myLoc.length();
+      myR   = myLoc.length();
       // smallestSoFar = rodRadius;
       // cerr << "vac = " << isVacancy[i]<< "\n";
 
@@ -393,7 +388,7 @@ int main(int argc, char* argv[]) {
         //     }
         //   }
         // }
-        myComponent = 0;
+        myComponent          = 0;
         componentFromSite[i] = myComponent;
         nMol[myComponent]++;
         //	cerr << "nMol for myComp(" << myComponent<<") = " <<
@@ -482,7 +477,7 @@ int main(int argc, char* argv[]) {
           "A new OpenMD file called \"%s\" has been "
           "generated.\n",
           outputFileName.c_str());
-  painCave.isFatal = 0;
+  painCave.isFatal  = 0;
   painCave.severity = OPENMD_INFO;
   simError();
   return 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,55 +52,56 @@
 
 namespace OpenMD {
 
-GayBerneAtomTypesSectionParser::GayBerneAtomTypesSectionParser(
-    ForceFieldOptions& options)
-    : options_(options) {
-  setSectionName("GayBerneAtomTypes");
-}
+  GayBerneAtomTypesSectionParser::GayBerneAtomTypesSectionParser(
+      ForceFieldOptions& options) :
+      options_(options) {
+    setSectionName("GayBerneAtomTypes");
+  }
 
-void GayBerneAtomTypesSectionParser::parseLine(ForceField& ff,
-                                               const std::string& line,
-                                               int lineNo) {
-  StringTokenizer tokenizer(line);
-  int nTokens = tokenizer.countTokens();
-  // in GayBerneAtomTypesSection, a line at least contains 7 tokens
-  // atomTypeName   d    l    eps_X  eps_S   eps_E   dw
-  if (nTokens < 7) {
-    sprintf(painCave.errMsg,
-            "GayBerneAtomTypesSectionParser: Not enough tokens at line %d\n"
-            "\tPlease note that GB atoms now require separate specification of "
-            "epsilon\n"
-            "\tvalues for cross (X), Side-by-Side (S), and End-to-End (E) for "
-            "each\n"
-            "\tellipsoid type.\n",
-            lineNo);
-    painCave.isFatal = 1;
-    simError();
-  } else {
-    RealType eus_ = options_.getEnergyUnitScaling();
-    RealType dus_ = options_.getDistanceUnitScaling();
-    std::string atomTypeName = tokenizer.nextToken();
-    AtomType* atomType = ff.getAtomType(atomTypeName);
-    if (atomType != NULL) {
-      RealType GB_d = dus_ * tokenizer.nextTokenAsDouble();
-      RealType GB_l = dus_ * tokenizer.nextTokenAsDouble();
-      RealType GB_eps_X = eus_ * tokenizer.nextTokenAsDouble();
-      RealType GB_eps_S = eus_ * tokenizer.nextTokenAsDouble();
-      RealType GB_eps_E = eus_ * tokenizer.nextTokenAsDouble();
-      RealType GB_dw = tokenizer.nextTokenAsDouble();
-
-      GayBerneAdapter gba = GayBerneAdapter(atomType);
-      gba.makeGayBerne(GB_d, GB_l, GB_eps_X, GB_eps_S, GB_eps_E, GB_dw);
-
-    } else {
+  void GayBerneAtomTypesSectionParser::parseLine(ForceField& ff,
+                                                 const std::string& line,
+                                                 int lineNo) {
+    StringTokenizer tokenizer(line);
+    int nTokens = tokenizer.countTokens();
+    // in GayBerneAtomTypesSection, a line at least contains 7 tokens
+    // atomTypeName   d    l    eps_X  eps_S   eps_E   dw
+    if (nTokens < 7) {
       sprintf(
           painCave.errMsg,
-          "GayBerneAtomTypesSectionParser: Can not find matching AtomType %s\n"
-          "\tfor this GayBerne atom type\n",
-          atomTypeName.c_str());
+          "GayBerneAtomTypesSectionParser: Not enough tokens at line %d\n"
+          "\tPlease note that GB atoms now require separate specification of "
+          "epsilon\n"
+          "\tvalues for cross (X), Side-by-Side (S), and End-to-End (E) for "
+          "each\n"
+          "\tellipsoid type.\n",
+          lineNo);
       painCave.isFatal = 1;
       simError();
+    } else {
+      RealType eus_            = options_.getEnergyUnitScaling();
+      RealType dus_            = options_.getDistanceUnitScaling();
+      std::string atomTypeName = tokenizer.nextToken();
+      AtomType* atomType       = ff.getAtomType(atomTypeName);
+      if (atomType != NULL) {
+        RealType GB_d     = dus_ * tokenizer.nextTokenAsDouble();
+        RealType GB_l     = dus_ * tokenizer.nextTokenAsDouble();
+        RealType GB_eps_X = eus_ * tokenizer.nextTokenAsDouble();
+        RealType GB_eps_S = eus_ * tokenizer.nextTokenAsDouble();
+        RealType GB_eps_E = eus_ * tokenizer.nextTokenAsDouble();
+        RealType GB_dw    = tokenizer.nextTokenAsDouble();
+
+        GayBerneAdapter gba = GayBerneAdapter(atomType);
+        gba.makeGayBerne(GB_d, GB_l, GB_eps_X, GB_eps_S, GB_eps_E, GB_dw);
+
+      } else {
+        sprintf(painCave.errMsg,
+                "GayBerneAtomTypesSectionParser: Can not find matching "
+                "AtomType %s\n"
+                "\tfor this GayBerne atom type\n",
+                atomTypeName.c_str());
+        painCave.isFatal = 1;
+        simError();
+      }
     }
   }
-}
 }  // end namespace OpenMD

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,14 +42,15 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef RESTRAINTS_RESTRAINTFORCEMANAGER_HPP
 #define RESTRAINTS_RESTRAINTFORCEMANAGER_HPP
 
 #include <vector>
+
 #include "brains/ForceManager.hpp"
-#include "restraints/Restraint.hpp"
 #include "io/RestWriter.hpp"
+#include "restraints/Restraint.hpp"
 
 namespace OpenMD {
 
@@ -63,15 +64,14 @@ namespace OpenMD {
 
     RealType doRestraints(RealType scalingFactor);
     RealType getUnscaledPotential() { return unscaledPotential_; }
-    
 
   private:
-    std::vector<Restraint*> restraints_; 
+    std::vector<Restraint*> restraints_;
     std::vector<Molecule*> restrainedMols_;
     std::vector<StuntDouble*> restrainedObjs_;
     RealType unscaledPotential_;
 
-    std::vector<std::map<int, Restraint::RealPair> > restInfo_;
+    std::vector<std::map<int, Restraint::RealPair>> restInfo_;
     std::string restOutput_;
     RealType currRestTime_;
     RealType restTime_;
@@ -79,5 +79,5 @@ namespace OpenMD {
     Snapshot* currSnapshot_;
   };
 
-}
-#endif 
+}  // namespace OpenMD
+#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -55,15 +55,12 @@ namespace OpenMD {
   namespace Utils {
 
     struct ci_char_traits : public std::char_traits<char> {
-
-      static int compare(const char* s1_, const char* s2_, std::size_t count_) noexcept {
-
+      static int compare(const char* s1_, const char* s2_,
+                         std::size_t count_) noexcept {
         while (count_-- != 0) {
-          if (std::toupper(*s1_) < std::toupper(*s2_))
-            return -1;
+          if (std::toupper(*s1_) < std::toupper(*s2_)) return -1;
 
-          if (std::toupper(*s1_) > std::toupper(*s2_))
-            return 1;
+          if (std::toupper(*s1_) > std::toupper(*s2_)) return 1;
 
           ++s1_;
           ++s2_;
@@ -72,13 +69,12 @@ namespace OpenMD {
         return 0;
       }
 
-      static const char* find(const char* p_, std::size_t count_, const char& ch_) noexcept {
-
+      static const char* find(const char* p_, std::size_t count_,
+                              const char& ch_) noexcept {
         const auto CH {std::toupper(ch_)};
 
         while (count_-- != 0) {
-          if (std::toupper(*p_) == CH)
-            return p_;
+          if (std::toupper(*p_) == CH) return p_;
 
           ++p_;
         }
@@ -86,24 +82,30 @@ namespace OpenMD {
         return nullptr;
       }
 
-      static bool eq(char a, char b) noexcept { return std::toupper(a) == std::toupper(b); }
-      static bool lt(char a, char b) noexcept { return std::toupper(a) < std::toupper(b); }
+      static bool eq(char a, char b) noexcept {
+        return std::toupper(a) == std::toupper(b);
+      }
+      static bool lt(char a, char b) noexcept {
+        return std::toupper(a) < std::toupper(b);
+      }
     };
 
     template<class OutputTraits, class InputTraits>
-    inline std::basic_string<char, OutputTraits> traits_cast(const std::basic_string<char, InputTraits>& input) noexcept {
+    inline std::basic_string<char, OutputTraits> traits_cast(
+        const std::basic_string<char, InputTraits>& input) noexcept {
       std::basic_string<char, OutputTraits> ouput {input.data(), input.size()};
       return ouput;
     }
 
-    inline std::ostream& operator<<(std::ostream& os, const std::basic_string<char, ci_char_traits>& str) {
+    inline std::ostream& operator<<(
+        std::ostream& os, const std::basic_string<char, ci_char_traits>& str) {
       os << str.c_str();
       return os;
     }
 
     // Type alias for case-insensitive strings
     using ci_string = std::basic_string<char, ci_char_traits>;
-  }
-}
+  }  // namespace Utils
+}  // namespace OpenMD
 
 #endif

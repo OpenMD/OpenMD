@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -56,46 +56,41 @@
 
 namespace OpenMD {
 
-StuntDouble::StuntDouble(ObjectType objType, DataStoragePointer storage)
-    : objType_(objType),
-      storage_(storage),
-      snapshotMan_(NULL),
-      linear_(false),
-      linearAxis_(-1),
-      globalIndex_(-1),
-      globalIntegrableObjectIndex_(-1),
+  StuntDouble::StuntDouble(ObjectType objType, DataStoragePointer storage) :
+      objType_(objType), storage_(storage), snapshotMan_(NULL), linear_(false),
+      linearAxis_(-1), globalIndex_(-1), globalIntegrableObjectIndex_(-1),
       localIndex_(-1) {}
 
-StuntDouble::~StuntDouble() {}
+  StuntDouble::~StuntDouble() {}
 
-void StuntDouble::zeroForcesAndTorques() {
-  int sl = (snapshotMan_->getCurrentSnapshot()->*storage_).getStorageLayout();
+  void StuntDouble::zeroForcesAndTorques() {
+    int sl = (snapshotMan_->getCurrentSnapshot()->*storage_).getStorageLayout();
 
-  if (sl & DataStorage::dslForce) setFrc(V3Zero);
-  if (sl & DataStorage::dslTorque) setTrq(V3Zero);
-  if (sl & DataStorage::dslParticlePot) setParticlePot(0.0);
-  if (sl & DataStorage::dslFlucQForce) setFlucQFrc(0.0);
-  if (sl & DataStorage::dslElectricField) setElectricField(V3Zero);
-}
-void StuntDouble::addProperty(std::shared_ptr<GenericData> genData) {
-  properties_.addProperty(genData);
-}
+    if (sl & DataStorage::dslForce) setFrc(V3Zero);
+    if (sl & DataStorage::dslTorque) setTrq(V3Zero);
+    if (sl & DataStorage::dslParticlePot) setParticlePot(0.0);
+    if (sl & DataStorage::dslFlucQForce) setFlucQFrc(0.0);
+    if (sl & DataStorage::dslElectricField) setElectricField(V3Zero);
+  }
+  void StuntDouble::addProperty(std::shared_ptr<GenericData> genData) {
+    properties_.addProperty(genData);
+  }
 
-void StuntDouble::removeProperty(const std::string& propName) {
-  properties_.removeProperty(propName);
-}
+  void StuntDouble::removeProperty(const std::string& propName) {
+    properties_.removeProperty(propName);
+  }
 
-std::vector<std::string> StuntDouble::getPropertyNames() {
-  return properties_.getPropertyNames();
-}
+  std::vector<std::string> StuntDouble::getPropertyNames() {
+    return properties_.getPropertyNames();
+  }
 
-std::vector<std::shared_ptr<GenericData>> StuntDouble::getProperties() {
-  return properties_.getProperties();
-}
+  std::vector<std::shared_ptr<GenericData>> StuntDouble::getProperties() {
+    return properties_.getProperties();
+  }
 
-std::shared_ptr<GenericData> StuntDouble::getPropertyByName(
-    const std::string& propName) {
-  return properties_.getPropertyByName(propName);
-}
+  std::shared_ptr<GenericData> StuntDouble::getPropertyByName(
+      const std::string& propName) {
+    return properties_.getPropertyByName(propName);
+  }
 
 }  // namespace OpenMD

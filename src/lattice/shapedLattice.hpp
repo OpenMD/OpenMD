@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,42 +44,44 @@
  */
 
 #ifndef LATTICE_SHAPEDLATTICE_HPP
-#define LATTICE_SHAPEDLATTICE_HPP 
+#define LATTICE_SHAPEDLATTICE_HPP
 
-#include "math/Vector3.hpp"
-#include "lattice/LatticeFactory.hpp"
-#include "lattice/Lattice.hpp"
 #include "brains/Register.hpp"
+#include "lattice/Lattice.hpp"
+#include "lattice/LatticeFactory.hpp"
+#include "math/Vector3.hpp"
 
-namespace OpenMD{
-  
+namespace OpenMD {
+
   /**
-   * Returns a vector of vector3 position on a lattice truncated 
-   * 
+   * Returns a vector of vector3 position on a lattice truncated
+   *
    */
-   
-  class shapedLattice{
+
+  class shapedLattice {
   public:
     shapedLattice(RealType latticeConstant, std::string latticeType);
-    virtual ~shapedLattice(){};
+    virtual ~shapedLattice() {};
     /**
-     * setGridDimension:  
-     * 
+     * setGridDimension:
+     *
      */
     void setGridDimension(Vector3d dimension);
     void setOrigin(Vector3d origin);
-    virtual bool isInterior(Vector3d point) =0;
+    virtual bool isInterior(Vector3d point) = 0;
     std::vector<Vector3d> getSites();
     std::vector<Vector3d> getOrientations();
+
   protected:
     void findSites();
     Vector3d dimension_;
-    Vector3d origin_;  
+    Vector3d origin_;
+
   private:
     bool sitesComputed_;
     std::vector<Vector3d> sites_;
     std::vector<Vector3d> orientations_;
-    Lattice *simpleLattice_;
+    Lattice* simpleLattice_;
     RealType latticeConstant_;
     std::string latticeType_;
     int beginNx_;
@@ -88,7 +90,6 @@ namespace OpenMD{
     int endNx_;
     int endNy_;
     int endNz_;
-    
   };
-}
+}  // namespace OpenMD
 #endif /* LATTICE_SHAPEDLATTICE_HPP */

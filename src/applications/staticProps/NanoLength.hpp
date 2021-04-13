@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -47,21 +47,23 @@
 #define APPLICATIONS_STATICPROPS_NANOLENGTH_HPP
 
 #include <vector>
+
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "config.h"
 #include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 typedef std::pair<RealType, int> evIndex;
 
 namespace OpenMD {
   class NanoLength : public StaticAnalyser {
   public:
-    NanoLength(SimInfo* info, const std::string& filename, const std::string& sele);
+    NanoLength(SimInfo* info, const std::string& filename,
+               const std::string& sele);
     virtual void process();
-    
-  private:    
+
+  private:
     RealType getLength(std::vector<StuntDouble*> atoms);
 
     Snapshot* currentSnapshot_;
@@ -69,8 +71,8 @@ namespace OpenMD {
     SelectionManager seleMan_;
     SelectionEvaluator evaluator_;
     std::vector<StuntDouble*> theAtoms_;
-    int frameCounter_;    
+    int frameCounter_;
     std::ofstream osq;
   };
-}
+}  // namespace OpenMD
 #endif

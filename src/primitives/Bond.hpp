@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,30 +42,29 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file Bond.hpp
  * @author    tlin
  * @date  11/01/2004
  * @version 1.0
- */ 
-
+ */
 
 #ifndef PRIMITIVES_BOND_HPP
 #define PRIMITIVES_BOND_HPP
 
-#include "primitives/ShortRangeInteraction.hpp"
 #include "primitives/Atom.hpp"
+#include "primitives/ShortRangeInteraction.hpp"
 #include "types/BondType.hpp"
 
 namespace OpenMD {
-  
+
   class Bond : public ShortRangeInteraction {
   public:
-    using ShortRangeInteraction::getValue;
     using ShortRangeInteraction::getPrevValue;
-    Bond(Atom* atom1, Atom* atom2, BondType* bt) : ShortRangeInteraction(),
-                                                   bondType_(bt) {
+    using ShortRangeInteraction::getValue;
+    Bond(Atom* atom1, Atom* atom2, BondType* bt) :
+        ShortRangeInteraction(), bondType_(bt) {
       atoms_.resize(2);
       atoms_[0] = atom1;
       atoms_[1] = atom2;
@@ -76,12 +75,12 @@ namespace OpenMD {
       RealType dvdr;
       Vector3d r12;
       Vector3d force;
-      
+
       r12 = atoms_[1]->getPos() - atoms_[0]->getPos();
       snapshotMan_->getCurrentSnapshot()->wrapVector(r12);
-      len = r12.length();            
-      bondType_->calcForce(len,  potential_, dvdr);
-      
+      len = r12.length();
+      bondType_->calcForce(len, potential_, dvdr);
+
       force = r12 * (-dvdr / len);
 
       atoms_[0]->addFrc(-force);
@@ -91,42 +90,31 @@ namespace OpenMD {
         atoms_[1]->addParticlePot(potential_);
       }
     }
-    
+
     RealType getValue(int snap) {
       Vector3d r12 = atoms_[1]->getPos(snap) - atoms_[0]->getPos(snap);
       snapshotMan_->getSnapshot(snap)->wrapVector(r12);
-      return r12.length();            
+      return r12.length();
     }
 
-    RealType getPotential() {
-      return potential_;
-    }
-    
-    Atom* getAtomA() {
-      return atoms_[0];
-    }
-    
-    Atom* getAtomB() {
-      return atoms_[1];
-    }
-    
-    BondType* getBondType() {
-      return bondType_;
-    }
+    RealType getPotential() { return potential_; }
 
-    virtual std::string getName() { return name_;}        
+    Atom* getAtomA() { return atoms_[0]; }
+
+    Atom* getAtomB() { return atoms_[1]; }
+
+    BondType* getBondType() { return bondType_; }
+
+    virtual std::string getName() { return name_; }
     /** Sets the name of this bond for selections */
     virtual void setName(const std::string& name) { name_ = name; }
 
-    void accept(BaseVisitor* v) {
-      v->visit(this);
-    }    
-    
+    void accept(BaseVisitor* v) { v->visit(this); }
+
   private:
     RealType potential_;
     BondType* bondType_; /**< bond type */
     std::string name_;
-
-  };    
-} //end namespace OpenMD
-#endif //PRIMITIVES_BOND_HPP
+  };
+}  // end namespace OpenMD
+#endif  // PRIMITIVES_BOND_HPP

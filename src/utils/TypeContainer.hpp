@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file TypeContainer.hpp
  * @author tlin
@@ -68,7 +68,6 @@ namespace OpenMD {
   template<class ElemType, int SIZE>
   class TypeContainer {
   public:
-            
     typedef ElemType* ElemPtr;
     typedef std::vector<std::string> KeyType;
     typedef typename KeyType::iterator KeyTypeIterator;
@@ -79,57 +78,54 @@ namespace OpenMD {
     typedef typename std::vector<int> MutableValues;
 
     TypeContainer() : index_(0) {}
-            
-    ~TypeContainer() {
-      Utils::deletePointers(data_);
-    }
-            
+
+    ~TypeContainer() { Utils::deletePointers(data_); }
+
     bool add(KeyType& keys, ElemPtr elem) {
       assert(keys.size() == SIZE);
       assert(elem);
-      return data_.insert(value_type(keys, std::make_pair(index_++,elem))).second;
+      return data_.insert(value_type(keys, std::make_pair(index_++, elem)))
+          .second;
     }
 
     bool replace(KeyType& keys, ElemPtr elem) {
       assert(keys.size() == SIZE);
-      assert(elem);     
+      assert(elem);
 
       MapTypeIterator i;
       i = data_.find(keys);
-      if (i!=data_.end()) {
+      if (i != data_.end()) {
         data_[keys] = std::make_pair((i->second).first, elem);
         return true;
       } else {
-        return data_.insert(value_type(keys, std::make_pair(index_++,elem))).second;
-      }      
+        return data_.insert(value_type(keys, std::make_pair(index_++, elem)))
+            .second;
+      }
     }
 
     /** Exact Match */
     ElemPtr find(KeyType& keys) {
       assert(keys.size() == SIZE);
       MapTypeIterator i;
-                
+
       i = data_.find(keys);
-      if (i != data_.end()) {
-	return (i->second).second;
-      }
+      if (i != data_.end()) { return (i->second).second; }
 
       KeyType reversedKeys = keys;
       std::reverse(reversedKeys.begin(), reversedKeys.end());
 
       i = data_.find(reversedKeys);
       if (i != data_.end()) {
-	return (i->second).second;
+        return (i->second).second;
       } else {
-	return NULL;
+        return NULL;
       }
-                
     }
 
     ElemPtr permutedFindSkippingFirstElement(KeyType& keys) {
       assert(keys.size() == SIZE);
       MapTypeIterator i;
-                
+
       KeyType permutedKeys = keys;
 
       // skip the first element:
@@ -140,93 +136,76 @@ namespace OpenMD {
       std::sort(start, permutedKeys.end());
 
       do {
-	i = data_.find(permutedKeys);
-	if (i != data_.end()) {
-	  return (i->second).second;	  
-	}	
-      } while ( std::next_permutation(start, permutedKeys.end()) );
+        i = data_.find(permutedKeys);
+        if (i != data_.end()) { return (i->second).second; }
+      } while (std::next_permutation(start, permutedKeys.end()));
 
-      return NULL;                
+      return NULL;
     }
 
-
     /**
-     * @todo 
+     * @todo
      */
     ElemPtr find(KeyType& keys, const std::string& wildCard) {
       assert(keys.size() == SIZE);
-                
+
       std::vector<KeyTypeIterator> iterCont;
       KeyType replacedKey;
       MapTypeIterator i;
       std::vector<ValueType> foundTypes;
-                
-      while (replaceWithWildCard(iterCont, keys, replacedKey, wildCard)) {                    
-	i = data_.find(replacedKey);
-	if (i != data_.end()) {
-	  foundTypes.push_back(i->second);
-	}
+
+      while (replaceWithWildCard(iterCont, keys, replacedKey, wildCard)) {
+        i = data_.find(replacedKey);
+        if (i != data_.end()) { foundTypes.push_back(i->second); }
       }
 
-      //reverse the order of keys
+      // reverse the order of keys
       KeyType reversedKeys = keys;
       std::reverse(reversedKeys.begin(), reversedKeys.end());
 
-      //if the reversedKeys is the same as keys, just skip it
+      // if the reversedKeys is the same as keys, just skip it
       if (reversedKeys != keys) {
+        // empty the iterator container
+        iterCont.clear();
 
-                    
-	//empty the iterator container
-	iterCont.clear();
+        while (replaceWithWildCard(iterCont, reversedKeys, replacedKey,
+                                   wildCard)) {
+          i = data_.find(replacedKey);
+          if (i != data_.end()) { foundTypes.push_back(i->second); }
+        }
 
-	while (replaceWithWildCard(iterCont, reversedKeys, replacedKey, wildCard)) {
-	  i = data_.find(replacedKey);
-	  if (i != data_.end()) {
-	    foundTypes.push_back(i->second);
-	  }
-	}
-
-	//replaceWithWildCard can not generate this particular sequence, we have to 
-	//do it manually                
-	KeyType allWildCards(SIZE, wildCard);
-	i = data_.find(replacedKey);
-	if (i != data_.end()) {
-	  foundTypes.push_back(i->second);
-	}
-
+        // replaceWithWildCard can not generate this particular sequence, we
+        // have to do it manually
+        KeyType allWildCards(SIZE, wildCard);
+        i = data_.find(replacedKey);
+        if (i != data_.end()) { foundTypes.push_back(i->second); }
       }
 
-      typename std::vector<ValueType>::iterator j;                
+      typename std::vector<ValueType>::iterator j;
       j = std::min_element(foundTypes.begin(), foundTypes.end());
 
       return j == foundTypes.end() ? NULL : j->second;
     }
 
-    unsigned int size() {
-      return data_.size();
-    }
+    unsigned int size() { return data_.size(); }
 
     ElemPtr beginType(MapTypeIterator& i) {
       i = data_.begin();
-      return i  != data_.end() ? (i->second).second : NULL;
+      return i != data_.end() ? (i->second).second : NULL;
     }
 
     ElemPtr nextType(MapTypeIterator& i) {
       ++i;
-      return i  != data_.end() ? (i->second).second : NULL;
+      return i != data_.end() ? (i->second).second : NULL;
     }
 
-    KeyType getKeys(MapTypeIterator& i) {
-      return i->first;
-    }
-            
+    KeyType getKeys(MapTypeIterator& i) { return i->first; }
+
   private:
     int index_;
-    MapType data_;        
-            
+    MapType data_;
   };
 
+}  // end namespace OpenMD
 
-}//end namespace OpenMD
-
-#endif //UTILS_TYPECONTAINER_HPP
+#endif  // UTILS_TYPECONTAINER_HPP

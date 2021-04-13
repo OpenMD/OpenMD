@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,31 +42,32 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_INVERSIONTYPEPARSER_HPP
 #define TYPES_INVERSIONTYPEPARSER_HPP
 
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
+
 #include "types/InversionType.hpp"
 
 namespace OpenMD {
-  
+
   /**
-   * @class InversionTypeParser InversionTypeParser.hpp "types/InversionTypeParser.hpp"
+   * @class InversionTypeParser InversionTypeParser.hpp
+   * "types/InversionTypeParser.hpp"
    */
   class InversionTypeParser {
-  public:    
+  public:
     InversionTypeParser();
     InversionType* parseLine(const std::string& line);
-    InversionType* parseTypeAndPars(const std::string& type, std::vector<RealType> pars);
+    InversionType* parseTypeAndPars(const std::string& type,
+                                    std::vector<RealType> pars);
 
   private:
-
-
     // Inversion types vary by force field:  In this description,
-    // I is the central atom, while J, K, and L are atoms directly 
+    // I is the central atom, while J, K, and L are atoms directly
     // bonded to I (but not to each other):
 
     // Amber uses a special bond (IL) as the hinge between the planes
@@ -81,11 +82,10 @@ namespace OpenMD {
     // MM2 and Tripos use a planarity definition of the central atom (I)
     // distance from the plane made by the other three atoms (JKL).
 
-    // The Dreiding force field uses a complicated umbrella inversion 
+    // The Dreiding force field uses a complicated umbrella inversion
     // form.
 
-
-    enum InversionTypeEnum{
+    enum InversionTypeEnum {
       itImproperCosine,
       itHarmonic,
       itCentralAtomHeight,
@@ -98,6 +98,6 @@ namespace OpenMD {
     std::map<std::string, InversionTypeEnum> stringToEnumMap_;
   };
 
-}
+}  // namespace OpenMD
 
 #endif

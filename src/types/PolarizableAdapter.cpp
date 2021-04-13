@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,60 +52,61 @@
 
 namespace OpenMD {
 
-bool PolarizableAdapter::isPolarizable() { return at_->hasProperty(PolTypeID); }
-
-PolarizableAtypeParameters PolarizableAdapter::getPolarizableParam() {
-  if (!isPolarizable()) {
-    sprintf(
-        painCave.errMsg,
-        "PolarizableAdapter::getPolarizableParam was passed an atomType (%s)\n"
-        "\tthat does not appear to be a polarizable atom.\n",
-        at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  bool PolarizableAdapter::isPolarizable() {
+    return at_->hasProperty(PolTypeID);
   }
 
-  std::shared_ptr<GenericData> data = at_->getPropertyByName(PolTypeID);
-  if (data == nullptr) {
-    sprintf(
-        painCave.errMsg,
-        "PolarizableAdapter::getPolarizableParam could not find polarizable\n"
-        "\tparameters for atomType %s.\n",
-        at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  PolarizableAtypeParameters PolarizableAdapter::getPolarizableParam() {
+    if (!isPolarizable()) {
+      sprintf(painCave.errMsg,
+              "PolarizableAdapter::getPolarizableParam was passed an atomType "
+              "(%s)\n"
+              "\tthat does not appear to be a polarizable atom.\n",
+              at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    std::shared_ptr<GenericData> data = at_->getPropertyByName(PolTypeID);
+    if (data == nullptr) {
+      sprintf(
+          painCave.errMsg,
+          "PolarizableAdapter::getPolarizableParam could not find polarizable\n"
+          "\tparameters for atomType %s.\n",
+          at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    std::shared_ptr<PolarizableAtypeData> polData =
+        std::dynamic_pointer_cast<PolarizableAtypeData>(data);
+    if (polData == nullptr) {
+      sprintf(painCave.errMsg,
+              "PolarizableAdapter::getPolarizableParam could not convert\n"
+              "\tGenericData to PolarizableAtypeData for atom type %s\n",
+              at_->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    return polData->getData();
   }
 
-  std::shared_ptr<PolarizableAtypeData> polData =
-      std::dynamic_pointer_cast<PolarizableAtypeData>(data);
-  if (polData == nullptr) {
-    sprintf(painCave.errMsg,
-            "PolarizableAdapter::getPolarizableParam could not convert\n"
-            "\tGenericData to PolarizableAtypeData for atom type %s\n",
-            at_->getName().c_str());
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
+  RealType PolarizableAdapter::getPolarizability() {
+    PolarizableAtypeParameters polParam = getPolarizableParam();
+    return polParam.polarizability;
   }
 
-  return polData->getData();
-}
+  void PolarizableAdapter::makePolarizable(RealType polarizability) {
+    if (isPolarizable()) { at_->removeProperty(PolTypeID); }
 
-RealType PolarizableAdapter::getPolarizability() {
-  PolarizableAtypeParameters polParam = getPolarizableParam();
-  return polParam.polarizability;
-}
+    PolarizableAtypeParameters polParam {};
+    polParam.polarizability = polarizability;
 
-void PolarizableAdapter::makePolarizable(RealType polarizability) {
-  if (isPolarizable()) {
-    at_->removeProperty(PolTypeID);
+    at_->addProperty(
+        std::make_shared<PolarizableAtypeData>(PolTypeID, polParam));
   }
-
-  PolarizableAtypeParameters polParam{};
-  polParam.polarizability = polarizability;
-
-  at_->addProperty(std::make_shared<PolarizableAtypeData>(PolTypeID, polParam));
-}
 }  // namespace OpenMD

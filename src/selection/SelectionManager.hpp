@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,13 +46,13 @@
 #ifndef SELECTION_SELECTIONMANAGER_HPP
 #define SELECTION_SELECTIONMANAGER_HPP
 
-#include "selection/SelectionSet.hpp"
-#include "primitives/StuntDouble.hpp"
-#include "primitives/Bond.hpp"
 #include "primitives/Bend.hpp"
-#include "primitives/Torsion.hpp"
+#include "primitives/Bond.hpp"
 #include "primitives/Inversion.hpp"
 #include "primitives/Molecule.hpp"
+#include "primitives/StuntDouble.hpp"
+#include "primitives/Torsion.hpp"
+#include "selection/SelectionSet.hpp"
 
 namespace OpenMD {
 
@@ -61,7 +61,7 @@ namespace OpenMD {
   public:
     SelectionManager(SimInfo* info);
 
-    void addSelection(StuntDouble* sd) {      
+    void addSelection(StuntDouble* sd) {
       ss_.bitsets_[STUNTDOUBLE].setBitOn(sd->getGlobalIndex());
     }
     void addSelection(Bond* b) {
@@ -79,7 +79,7 @@ namespace OpenMD {
     void addSelection(Molecule* m) {
       ss_.bitsets_[MOLECULE].setBitOn(m->getGlobalIndex());
     }
-        
+
     void addSelectionSet(const SelectionSet& bs) {
       ss_.bitsets_[STUNTDOUBLE] |= bs.bitsets_[STUNTDOUBLE];
     }
@@ -100,64 +100,54 @@ namespace OpenMD {
     }
 
     bool isEmpty() {
-      return ss_.bitsets_[STUNTDOUBLE].none() && ss_.bitsets_[BOND].none() 
-        && ss_.bitsets_[BEND].none()  && ss_.bitsets_[TORSION].none() 
-        && ss_.bitsets_[INVERSION].none() && ss_.bitsets_[MOLECULE].none();
+      return ss_.bitsets_[STUNTDOUBLE].none() && ss_.bitsets_[BOND].none() &&
+             ss_.bitsets_[BEND].none() && ss_.bitsets_[TORSION].none() &&
+             ss_.bitsets_[INVERSION].none() && ss_.bitsets_[MOLECULE].none();
     }
 
     void setSelectionSet(const SelectionSet& bs) {
-      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+      for (int i = 0; i < N_SELECTIONTYPES; i++)
         ss_.bitsets_[i] = bs.bitsets_[i];
     }
 
-    //void setSelectionSet(const SelectionSet& bs) {
-    //  ss_.bitsets_[STUNTDOUBLE] = bs.bitsets_[];           
+    // void setSelectionSet(const SelectionSet& bs) {
+    //  ss_.bitsets_[STUNTDOUBLE] = bs.bitsets_[];
     //}
     void setBondSelectionSet(const SelectionSet& bs) {
-      ss_.bitsets_[BOND] = bs.bitsets_[BOND];           
+      ss_.bitsets_[BOND] = bs.bitsets_[BOND];
     }
     void setBendSelectionSet(const SelectionSet& bs) {
-      ss_.bitsets_[BEND] = bs.bitsets_[BEND];           
+      ss_.bitsets_[BEND] = bs.bitsets_[BEND];
     }
     void setTorsionSelectionSet(const SelectionSet& bs) {
-      ss_.bitsets_[TORSION] = bs.bitsets_[TORSION];           
+      ss_.bitsets_[TORSION] = bs.bitsets_[TORSION];
     }
     void setInversionSelectionSet(const SelectionSet& bs) {
-      ss_.bitsets_[INVERSION] = bs.bitsets_[INVERSION];           
+      ss_.bitsets_[INVERSION] = bs.bitsets_[INVERSION];
     }
     void setMoleculeSelectionSet(const SelectionSet& bs) {
-      ss_.bitsets_[MOLECULE] = bs.bitsets_[MOLECULE];           
+      ss_.bitsets_[MOLECULE] = bs.bitsets_[MOLECULE];
     }
 
     std::vector<int> getSelectionCounts() {
-      std::vector<int> counts(N_SELECTIONTYPES,0);
+      std::vector<int> counts(N_SELECTIONTYPES, 0);
       for (int i = 0; i < N_SELECTIONTYPES; i++) {
         counts[i] = ss_.bitsets_[i].countBits();
       }
       return counts;
     }
-    
-    int getSelectionCount() {
-      return ss_.bitsets_[STUNTDOUBLE].countBits();
-    }
-    int getBondSelectionCount() {
-      return ss_.bitsets_[BOND].countBits();
-    }
-    int getBendSelectionCount() {
-      return ss_.bitsets_[BEND].countBits();
-    }
-    int getTorsionSelectionCount() {
-      return ss_.bitsets_[TORSION].countBits();
-    }
+
+    int getSelectionCount() { return ss_.bitsets_[STUNTDOUBLE].countBits(); }
+    int getBondSelectionCount() { return ss_.bitsets_[BOND].countBits(); }
+    int getBendSelectionCount() { return ss_.bitsets_[BEND].countBits(); }
+    int getTorsionSelectionCount() { return ss_.bitsets_[TORSION].countBits(); }
     int getInversionSelectionCount() {
       return ss_.bitsets_[INVERSION].countBits();
     }
     int getMoleculeSelectionCount() {
       return ss_.bitsets_[MOLECULE].countBits();
-    }    
-    SelectionSet getSelectionSet() {
-      return ss_;
     }
+    SelectionSet getSelectionSet() { return ss_; }
     /*    SelectionSet getBondSelectionSet() {
       return ss_.bitsets_[BOND];
     }
@@ -217,17 +207,17 @@ namespace OpenMD {
     }
 
     void toggleSelection() {
-      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+      for (int i = 0; i < N_SELECTIONTYPES; i++)
         ss_.bitsets_[i].flip();
     }
-        
+
     void selectAll() {
-      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+      for (int i = 0; i < N_SELECTIONTYPES; i++)
         ss_.bitsets_[i].setAll();
     }
 
     void clearSelection() {
-      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+      for (int i = 0; i < N_SELECTIONTYPES; i++)
         ss_.bitsets_[i].clearAll();
     }
 
@@ -250,19 +240,14 @@ namespace OpenMD {
       ss_.bitsets_[MOLECULE].setBitOff(m->getGlobalIndex());
     }
 
-
     bool isGlobalIDSelected(int globalIndex) {
       return ss_.bitsets_[STUNTDOUBLE][globalIndex];
-    }      
+    }
     bool isSelected(StuntDouble* sd) {
       return ss_.bitsets_[STUNTDOUBLE][sd->getGlobalIndex()];
     }
-    bool isSelected(Bond* b) {
-      return ss_.bitsets_[BOND][b->getGlobalIndex()];
-    }
-    bool isSelected(Bend* b) {
-      return ss_.bitsets_[BEND][b->getGlobalIndex()];
-    }
+    bool isSelected(Bond* b) { return ss_.bitsets_[BOND][b->getGlobalIndex()]; }
+    bool isSelected(Bend* b) { return ss_.bitsets_[BEND][b->getGlobalIndex()]; }
     bool isSelected(Torsion* t) {
       return ss_.bitsets_[TORSION][t->getGlobalIndex()];
     }
@@ -278,7 +263,8 @@ namespace OpenMD {
      * parallel, this is the first selected StuntDouble that is the
      * responsibility of the local processor, not the first
      * StuntDouble in the global selection.
-     * @return a pointer to the StuntDouble object, returns NULL if no StuntDouble was found.
+     * @return a pointer to the StuntDouble object, returns NULL if no
+     * StuntDouble was found.
      * @param i iterator used to keep track of the selection
      */
     StuntDouble* beginSelected(int& i);
@@ -287,7 +273,8 @@ namespace OpenMD {
      * parallel, this is the next selected StuntDouble that is the
      * responsibility of the local processor, not the next
      * StuntDouble in the global selection.
-     * @return a pointer to the StuntDouble object, returns NULL if no StuntDouble was found.
+     * @return a pointer to the StuntDouble object, returns NULL if no
+     * StuntDouble was found.
      * @param i iterator used to keep track of the selection
      */
     StuntDouble* nextSelected(int& i);
@@ -296,7 +283,8 @@ namespace OpenMD {
      * parallel, this is the first unselected StuntDouble that is the
      * responsibility of the local processor, not the first
      * StuntDouble in the global unselected pool.
-     * @return a pointer to the StuntDouble object, returns NULL if no StuntDouble was found.
+     * @return a pointer to the StuntDouble object, returns NULL if no
+     * StuntDouble was found.
      * @param i iterator used to keep track of the selection
      */
     StuntDouble* beginUnselected(int& i);
@@ -305,7 +293,8 @@ namespace OpenMD {
      * parallel, this is the next unselected StuntDouble that is the
      * responsibility of the local processor, not the next
      * StuntDouble in the global unselected pool.
-     * @return a pointer to the StuntDouble object, returns NULL if no StuntDouble was found.
+     * @return a pointer to the StuntDouble object, returns NULL if no
+     * StuntDouble was found.
      * @param i iterator used to keep track of the selection
      */
     StuntDouble* nextUnselected(int& i);
@@ -381,7 +370,8 @@ namespace OpenMD {
      * this is the first selected Torsion that is the responsibility of
      * the local processor, not the first Torsion in the global
      * selection.
-     * @return a pointer to the Torsion object, returns NULL if no Torsion was found.
+     * @return a pointer to the Torsion object, returns NULL if no Torsion was
+     * found.
      * @param i iterator used to keep track of the selection
      */
     Torsion* beginSelectedTorsion(int& i);
@@ -389,7 +379,8 @@ namespace OpenMD {
      * Finds the next selected Torsion in the selection.  In parallel,
      * this is the next selected Torsion that is the responsibility of
      * the local processor, not the next Torsion in the global selection.
-     * @return a pointer to the Torsion object, returns NULL if no Torsion was found.
+     * @return a pointer to the Torsion object, returns NULL if no Torsion was
+     * found.
      * @param i iterator used to keep track of the selection
      */
     Torsion* nextSelectedTorsion(int& i);
@@ -397,7 +388,8 @@ namespace OpenMD {
      * Finds the first unselected Torsion.  In parallel, this is the
      * first unselected Torsion that is the responsibility of the local
      * processor, not the first Torsion in the global unselected pool.
-     * @return a pointer to the Torsion object, returns NULL if no Torsion was found.
+     * @return a pointer to the Torsion object, returns NULL if no Torsion was
+     * found.
      * @param i iterator used to keep track of the selection
      */
     Torsion* beginUnselectedTorsion(int& i);
@@ -405,7 +397,8 @@ namespace OpenMD {
      * Finds the next unselected Torsion.  In parallel, this is the
      * next unselected Torsion that is the responsibility of the local
      * processor, not the next Torsion in the global unselected pool.
-     * @return a pointer to the Torsion object, returns NULL if no Torsion was found.
+     * @return a pointer to the Torsion object, returns NULL if no Torsion was
+     * found.
      * @param i iterator used to keep track of the selection
      */
     Torsion* nextUnselectedTorsion(int& i);
@@ -414,7 +407,8 @@ namespace OpenMD {
      * this is the first selected Inversion that is the responsibility of
      * the local processor, not the first Inversion in the global
      * selection.
-     * @return a pointer to the Inversion object, returns NULL if no Inversion was found.
+     * @return a pointer to the Inversion object, returns NULL if no Inversion
+     * was found.
      * @param i iterator used to keep track of the selection
      */
     Inversion* beginSelectedInversion(int& i);
@@ -422,7 +416,8 @@ namespace OpenMD {
      * Finds the next selected Inversion in the selection.  In parallel,
      * this is the next selected Inversion that is the responsibility of
      * the local processor, not the next Inversion in the global selection.
-     * @return a pointer to the Inversion object, returns NULL if no Inversion was found.
+     * @return a pointer to the Inversion object, returns NULL if no Inversion
+     * was found.
      * @param i iterator used to keep track of the selection
      */
     Inversion* nextSelectedInversion(int& i);
@@ -430,7 +425,8 @@ namespace OpenMD {
      * Finds the first unselected Inversion.  In parallel, this is the
      * first unselected Inversion that is the responsibility of the local
      * processor, not the first Inversion in the global unselected pool.
-     * @return a pointer to the Inversion object, returns NULL if no Inversion was found.
+     * @return a pointer to the Inversion object, returns NULL if no Inversion
+     * was found.
      * @param i iterator used to keep track of the selection
      */
     Inversion* beginUnselectedInversion(int& i);
@@ -438,7 +434,8 @@ namespace OpenMD {
      * Finds the next unselected Inversion.  In parallel, this is the
      * next unselected Inversion that is the responsibility of the local
      * processor, not the next Inversion in the global unselected pool.
-     * @return a pointer to the Inversion object, returns NULL if no Inversion was found.
+     * @return a pointer to the Inversion object, returns NULL if no Inversion
+     * was found.
      * @param i iterator used to keep track of the selection
      */
     Inversion* nextUnselectedInversion(int& i);
@@ -447,7 +444,8 @@ namespace OpenMD {
      * this is the first selected Molecule that is the responsibility of
      * the local processor, not the first Molecule in the global
      * selection.
-     * @return a pointer to the Molecule object, returns NULL if no Molecule was found.
+     * @return a pointer to the Molecule object, returns NULL if no Molecule was
+     * found.
      * @param i iterator used to keep track of the selection
      */
     Molecule* beginSelectedMolecule(int& i);
@@ -455,7 +453,8 @@ namespace OpenMD {
      * Finds the next selected Molecule in the selection.  In parallel,
      * this is the next selected Molecule that is the responsibility of
      * the local processor, not the next Molecule in the global selection.
-     * @return a pointer to the Molecule object, returns NULL if no Molecule was found.
+     * @return a pointer to the Molecule object, returns NULL if no Molecule was
+     * found.
      * @param i iterator used to keep track of the selection
      */
     Molecule* nextSelectedMolecule(int& i);
@@ -463,7 +462,8 @@ namespace OpenMD {
      * Finds the first unselected Molecule.  In parallel, this is the
      * first unselected Molecule that is the responsibility of the local
      * processor, not the first Molecule in the global unselected pool.
-     * @return a pointer to the Molecule object, returns NULL if no Molecule was found.
+     * @return a pointer to the Molecule object, returns NULL if no Molecule was
+     * found.
      * @param i iterator used to keep track of the selection
      */
     Molecule* beginUnselectedMolecule(int& i);
@@ -471,42 +471,47 @@ namespace OpenMD {
      * Finds the next unselected Molecule.  In parallel, this is the
      * next unselected Molecule that is the responsibility of the local
      * processor, not the next Molecule in the global unselected pool.
-     * @return a pointer to the Molecule object, returns NULL if no Molecule was found.
+     * @return a pointer to the Molecule object, returns NULL if no Molecule was
+     * found.
      * @param i iterator used to keep track of the selection
      */
     Molecule* nextUnselectedMolecule(int& i);
 
     std::set<AtomType*> getSelectedAtomTypes();
 
-    SelectionManager& operator&= (const SelectionManager &sman) {
-      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+    SelectionManager& operator&=(const SelectionManager& sman) {
+      for (int i = 0; i < N_SELECTIONTYPES; i++)
         ss_.bitsets_[i] &= sman.ss_.bitsets_[i];
-      return *this; 
-    }
-        
-    SelectionManager& operator|= (const SelectionManager &sman) {
-      for (int i = 0; i < N_SELECTIONTYPES; i++) 
-        ss_.bitsets_[i] |= sman.ss_.bitsets_[i];
-      return *this; 
-    }
-        
-    SelectionManager& operator^= (const SelectionManager &sman) {
-      for (int i = 0; i < N_SELECTIONTYPES; i++) 
-        ss_.bitsets_[i] ^= sman.ss_.bitsets_[i];
-      return *this; 
+      return *this;
     }
 
-    SelectionManager& operator-= (const SelectionManager &sman) {
-      for (int i = 0; i < N_SELECTIONTYPES; i++) 
-        ss_.bitsets_[i] -= sman.ss_.bitsets_[i];
-      return *this; 
+    SelectionManager& operator|=(const SelectionManager& sman) {
+      for (int i = 0; i < N_SELECTIONTYPES; i++)
+        ss_.bitsets_[i] |= sman.ss_.bitsets_[i];
+      return *this;
     }
-        
-    friend SelectionManager operator| (const SelectionManager& sman1, const SelectionManager& sman2);
-    friend SelectionManager operator& (const SelectionManager& sman1, const SelectionManager& sman2);
-    friend SelectionManager operator^ (const SelectionManager& sman1, const SelectionManager& sman2);
-    friend SelectionManager operator-(const SelectionManager& sman1, const SelectionManager& sman2);
-        
+
+    SelectionManager& operator^=(const SelectionManager& sman) {
+      for (int i = 0; i < N_SELECTIONTYPES; i++)
+        ss_.bitsets_[i] ^= sman.ss_.bitsets_[i];
+      return *this;
+    }
+
+    SelectionManager& operator-=(const SelectionManager& sman) {
+      for (int i = 0; i < N_SELECTIONTYPES; i++)
+        ss_.bitsets_[i] -= sman.ss_.bitsets_[i];
+      return *this;
+    }
+
+    friend SelectionManager operator|(const SelectionManager& sman1,
+                                      const SelectionManager& sman2);
+    friend SelectionManager operator&(const SelectionManager& sman1,
+                                      const SelectionManager& sman2);
+    friend SelectionManager operator^(const SelectionManager& sman1,
+                                      const SelectionManager& sman2);
+    friend SelectionManager operator-(const SelectionManager& sman1,
+                                      const SelectionManager& sman2);
+
   private:
     SimInfo* info_ {nullptr};
     SelectionSet ss_;
@@ -519,5 +524,5 @@ namespace OpenMD {
     std::vector<Molecule*> molecules_;
   };
 
-}
+}  // namespace OpenMD
 #endif

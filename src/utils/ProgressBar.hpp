@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,21 +46,21 @@
 #ifndef UTILS_PROGRESSBAR_HPP
 #define UTILS_PROGRESSBAR_HPP
 
-#include "config.h"
-
 #include <ctime>
 #include <memory>
+
+#include "config.h"
 
 namespace OpenMD {
 
   class ProgressBar {
   public:
     ProgressBar();
-    
+
     void clear();
     void update();
     void setStatus(RealType value, RealType maximum);
-    
+
   private:
     RealType value_;
     RealType maximum_;
@@ -69,6 +69,6 @@ namespace OpenMD {
   };
 
   using ProgressBarPtr = std::unique_ptr<ProgressBar>;
-}
+}  // namespace OpenMD
 
 #endif

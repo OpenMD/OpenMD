@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,163 +51,160 @@
 
 namespace OpenMD {
 
-FluctuatingChargeLangevin::FluctuatingChargeLangevin(SimInfo* info)
-    : FluctuatingChargePropagator(info),
-      maxIterNum_(4),
-      forceTolerance_(1e-6),
+  FluctuatingChargeLangevin::FluctuatingChargeLangevin(SimInfo* info) :
+      FluctuatingChargePropagator(info), maxIterNum_(4), forceTolerance_(1e-6),
       snap(info->getSnapshotManager()->getCurrentSnapshot()) {}
 
-void FluctuatingChargeLangevin::initialize() {
-  FluctuatingChargePropagator::initialize();
-  if (hasFlucQ_) {
-    if (info_->getSimParams()->haveDt()) {
-      dt_ = info_->getSimParams()->getDt();
-      dt2_ = dt_ * 0.5;
-    } else {
-      sprintf(painCave.errMsg,
-              "FluctuatingChargeLangevin Error: dt is not set\n");
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    if (!fqParams_->haveTargetTemp()) {
-      sprintf(painCave.errMsg,
-              "You can't use the FluctuatingChargeLangevin "
-              "propagator without a flucQ.targetTemp!\n");
-      painCave.isFatal = 1;
-      painCave.severity = OPENMD_ERROR;
-      simError();
-    } else {
-      targetTemp_ = fqParams_->getTargetTemp();
-    }
-
-    // We must set tauThermostat.
-
-    if (!fqParams_->haveDragCoefficient()) {
-      sprintf(painCave.errMsg,
-              "If you use the FluctuatingChargeLangevin\n"
-              "\tpropagator, you must set flucQ.dragCoefficient .\n");
-
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    } else {
-      drag_ = fqParams_->getDragCoefficient();
-    }
-  }
-
-  variance_ = 2.0 * Constants::kb * targetTemp_ * drag_ / dt_;
-}
-
-void FluctuatingChargeLangevin::moveA() {
-  if (!hasFlucQ_) return;
-
-  SimInfo::MoleculeIterator i;
-  Molecule::FluctuatingChargeIterator j;
-  Molecule* mol;
-  Atom* atom;
-  RealType cvel, cpos, cfrc, cmass;
-
-  for (mol = info_->beginMolecule(i); mol != NULL;
-       mol = info_->nextMolecule(i)) {
-    for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-         atom = mol->nextFluctuatingCharge(j)) {
-      cvel = atom->getFlucQVel();
-      cpos = atom->getFlucQPos();
-      cfrc = atom->getFlucQFrc();
-      cmass = atom->getChargeMass();
-
-      // velocity half step
-      cvel += dt2_ * cfrc / cmass;
-      // position whole step
-      cpos += dt_ * cvel;
-
-      atom->setFlucQVel(cvel);
-      atom->setFlucQPos(cpos);
-    }
-  }
-}
-
-void FluctuatingChargeLangevin::applyConstraints() {
-  if (!hasFlucQ_) return;
-
-  SimInfo::MoleculeIterator i;
-  Molecule::FluctuatingChargeIterator j;
-  Molecule* mol;
-  Atom* atom;
-  RealType cvel, cfrc, cmass, randomForce, frictionForce;
-  RealType velStep, oldFF;  // used to test for convergence
-
-  for (mol = info_->beginMolecule(i); mol != NULL;
-       mol = info_->nextMolecule(i)) {
-    for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-         atom = mol->nextFluctuatingCharge(j)) {
-      randomForce = randNumGen_.randNorm(0, variance_);
-      atom->addFlucQFrc(randomForce);
-
-      // What remains contains velocity explicitly, but the velocity
-      // required is at the full step: v(t + h), while we have
-      // initially the velocity at the half step: v(t + h/2).  We
-      // need to iterate to converge the friction force vector.
-
-      // this is the velocity at the half-step:
-
-      cvel = atom->getFlucQVel();
-
-      // estimate velocity at full-step using everything but
-      // friction forces:
-
-      cfrc = atom->getFlucQFrc();
-      cmass = atom->getChargeMass();
-      velStep = cvel + dt2_ * cfrc / cmass;
-
-      frictionForce = 0.0;
-
-      // iteration starts here:
-
-      for (int k = 0; k < maxIterNum_; k++) {
-        oldFF = frictionForce;
-        frictionForce = -drag_ * velStep;
-        // re-estimate velocities at full-step using friction forces:
-
-        velStep = cvel + dt2_ * (cfrc + frictionForce) / cmass;
-
-        // check for convergence
-
-        if (fabs(frictionForce - oldFF) <= forceTolerance_)
-          break;  // iteration ends here
+  void FluctuatingChargeLangevin::initialize() {
+    FluctuatingChargePropagator::initialize();
+    if (hasFlucQ_) {
+      if (info_->getSimParams()->haveDt()) {
+        dt_  = info_->getSimParams()->getDt();
+        dt2_ = dt_ * 0.5;
+      } else {
+        sprintf(painCave.errMsg,
+                "FluctuatingChargeLangevin Error: dt is not set\n");
+        painCave.isFatal = 1;
+        simError();
       }
-      atom->addFlucQFrc(frictionForce);
+
+      if (!fqParams_->haveTargetTemp()) {
+        sprintf(painCave.errMsg, "You can't use the FluctuatingChargeLangevin "
+                                 "propagator without a flucQ.targetTemp!\n");
+        painCave.isFatal  = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
+      } else {
+        targetTemp_ = fqParams_->getTargetTemp();
+      }
+
+      // We must set tauThermostat.
+
+      if (!fqParams_->haveDragCoefficient()) {
+        sprintf(painCave.errMsg,
+                "If you use the FluctuatingChargeLangevin\n"
+                "\tpropagator, you must set flucQ.dragCoefficient .\n");
+
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal  = 1;
+        simError();
+      } else {
+        drag_ = fqParams_->getDragCoefficient();
+      }
+    }
+
+    variance_ = 2.0 * Constants::kb * targetTemp_ * drag_ / dt_;
+  }
+
+  void FluctuatingChargeLangevin::moveA() {
+    if (!hasFlucQ_) return;
+
+    SimInfo::MoleculeIterator i;
+    Molecule::FluctuatingChargeIterator j;
+    Molecule* mol;
+    Atom* atom;
+    RealType cvel, cpos, cfrc, cmass;
+
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+           atom = mol->nextFluctuatingCharge(j)) {
+        cvel  = atom->getFlucQVel();
+        cpos  = atom->getFlucQPos();
+        cfrc  = atom->getFlucQFrc();
+        cmass = atom->getChargeMass();
+
+        // velocity half step
+        cvel += dt2_ * cfrc / cmass;
+        // position whole step
+        cpos += dt_ * cvel;
+
+        atom->setFlucQVel(cvel);
+        atom->setFlucQPos(cpos);
+      }
     }
   }
-  fqConstraints_->applyConstraints();
-}
 
-void FluctuatingChargeLangevin::moveB() {
-  if (!hasFlucQ_) return;
-  SimInfo::MoleculeIterator i;
-  Molecule::FluctuatingChargeIterator j;
-  Molecule* mol;
-  Atom* atom;
-  RealType cfrc, cvel, cmass;
+  void FluctuatingChargeLangevin::applyConstraints() {
+    if (!hasFlucQ_) return;
 
-  for (mol = info_->beginMolecule(i); mol != NULL;
-       mol = info_->nextMolecule(i)) {
-    for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
-         atom = mol->nextFluctuatingCharge(j)) {
-      cvel = atom->getFlucQVel();
-      cfrc = atom->getFlucQFrc();
-      cmass = atom->getChargeMass();
+    SimInfo::MoleculeIterator i;
+    Molecule::FluctuatingChargeIterator j;
+    Molecule* mol;
+    Atom* atom;
+    RealType cvel, cfrc, cmass, randomForce, frictionForce;
+    RealType velStep, oldFF;  // used to test for convergence
 
-      // velocity half step
-      cvel += (dt2_ * cfrc) / cmass;
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+           atom = mol->nextFluctuatingCharge(j)) {
+        randomForce = randNumGen_.randNorm(0, variance_);
+        atom->addFlucQFrc(randomForce);
 
-      atom->setFlucQVel(cvel);
+        // What remains contains velocity explicitly, but the velocity
+        // required is at the full step: v(t + h), while we have
+        // initially the velocity at the half step: v(t + h/2).  We
+        // need to iterate to converge the friction force vector.
+
+        // this is the velocity at the half-step:
+
+        cvel = atom->getFlucQVel();
+
+        // estimate velocity at full-step using everything but
+        // friction forces:
+
+        cfrc    = atom->getFlucQFrc();
+        cmass   = atom->getChargeMass();
+        velStep = cvel + dt2_ * cfrc / cmass;
+
+        frictionForce = 0.0;
+
+        // iteration starts here:
+
+        for (int k = 0; k < maxIterNum_; k++) {
+          oldFF         = frictionForce;
+          frictionForce = -drag_ * velStep;
+          // re-estimate velocities at full-step using friction forces:
+
+          velStep = cvel + dt2_ * (cfrc + frictionForce) / cmass;
+
+          // check for convergence
+
+          if (fabs(frictionForce - oldFF) <= forceTolerance_)
+            break;  // iteration ends here
+        }
+        atom->addFlucQFrc(frictionForce);
+      }
+    }
+    fqConstraints_->applyConstraints();
+  }
+
+  void FluctuatingChargeLangevin::moveB() {
+    if (!hasFlucQ_) return;
+    SimInfo::MoleculeIterator i;
+    Molecule::FluctuatingChargeIterator j;
+    Molecule* mol;
+    Atom* atom;
+    RealType cfrc, cvel, cmass;
+
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
+      for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
+           atom = mol->nextFluctuatingCharge(j)) {
+        cvel  = atom->getFlucQVel();
+        cfrc  = atom->getFlucQFrc();
+        cmass = atom->getChargeMass();
+
+        // velocity half step
+        cvel += (dt2_ * cfrc) / cmass;
+
+        atom->setFlucQVel(cvel);
+      }
     }
   }
-}
 
-void FluctuatingChargeLangevin::updateSizes() {}
+  void FluctuatingChargeLangevin::updateSizes() {}
 
-RealType FluctuatingChargeLangevin::calcConservedQuantity() { return 0.0; }
+  RealType FluctuatingChargeLangevin::calcConservedQuantity() { return 0.0; }
 }  // namespace OpenMD

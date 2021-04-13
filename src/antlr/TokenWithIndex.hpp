@@ -8,77 +8,58 @@
  * $Id$
  */
 
-#include <antlr/config.hpp>
 #include <antlr/CommonToken.hpp>
 #include <antlr/String.hpp>
+#include <antlr/config.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-class ANTLR_API TokenWithIndex : public ANTLR_USE_NAMESPACE(antlr)CommonToken {
-public:
-	// static size_t count;
-	TokenWithIndex() : CommonToken(), index(0)
-	{
-		// std::cout << __PRETTY_FUNCTION__ << std::endl;
-		// count++;
-	}
-	TokenWithIndex(int t, const ANTLR_USE_NAMESPACE(std)string& txt)
-	: CommonToken(t,txt)
-	, index(0)
-	{
-		// std::cout << __PRETTY_FUNCTION__ << std::endl;
-		// count++;
-	}
-	TokenWithIndex(const ANTLR_USE_NAMESPACE(std)string& s)
-	: CommonToken(s)
-	, index(0)
-	{
-		// std::cout << __PRETTY_FUNCTION__ << std::endl;
-		// count++;
-	}
-	~TokenWithIndex()
-	{
-		// count--;
-	}
-	void setIndex( size_t idx )
-	{
-		index = idx;
-	}
-	size_t getIndex( void ) const
-	{
-		return index;
-	}
+  class ANTLR_API TokenWithIndex :
+      public ANTLR_USE_NAMESPACE(antlr) CommonToken {
+  public:
+    // static size_t count;
+    TokenWithIndex() : CommonToken(), index(0) {
+      // std::cout << __PRETTY_FUNCTION__ << std::endl;
+      // count++;
+    }
+    TokenWithIndex(int t, const ANTLR_USE_NAMESPACE(std) string& txt) :
+        CommonToken(t, txt), index(0) {
+      // std::cout << __PRETTY_FUNCTION__ << std::endl;
+      // count++;
+    }
+    TokenWithIndex(const ANTLR_USE_NAMESPACE(std) string& s) :
+        CommonToken(s), index(0) {
+      // std::cout << __PRETTY_FUNCTION__ << std::endl;
+      // count++;
+    }
+    ~TokenWithIndex() {
+      // count--;
+    }
+    void setIndex(size_t idx) { index = idx; }
+    size_t getIndex(void) const { return index; }
 
-	ANTLR_USE_NAMESPACE(std)string toString() const
-	{
-		return ANTLR_USE_NAMESPACE(std)string("[")+
-			index+
-			":\""+
-			getText()+"\",<"+
-			getType()+">,line="+
-			getLine()+",column="+
-			getColumn()+"]";
-	}
+    ANTLR_USE_NAMESPACE(std) string toString() const {
+      return ANTLR_USE_NAMESPACE(std) string("[") + index + ":\"" + getText() +
+             "\",<" + getType() + ">,line=" + getLine() +
+             ",column=" + getColumn() + "]";
+    }
 
-	static RefToken factory()
-	{
-		return RefToken(new TokenWithIndex());
-	}
+    static RefToken factory() { return RefToken(new TokenWithIndex()); }
 
-protected:
-	size_t index;
+  protected:
+    size_t index;
 
-private:
-	TokenWithIndex(const TokenWithIndex&);
-	const TokenWithIndex& operator=(const TokenWithIndex&);
-};
+  private:
+    TokenWithIndex(const TokenWithIndex&);
+    const TokenWithIndex& operator=(const TokenWithIndex&);
+  };
 
-typedef TokenRefCount<TokenWithIndex> RefTokenWithIndex;
+  typedef TokenRefCount<TokenWithIndex> RefTokenWithIndex;
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif //INC_CommonToken_hpp__
+#endif  // INC_CommonToken_hpp__

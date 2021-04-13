@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,13 +48,15 @@
 #include "types/DataHolder.hpp"
 namespace OpenMD {
   class FragmentStamp : public DataHolder {
-    DeclareParameter(Name, std::string);    
+    DeclareParameter(Name, std::string);
+
   public:
     FragmentStamp(int index);
     virtual void validate();
-    int getIndex() {return index_;}
-   private:
+    int getIndex() { return index_; }
+
+  private:
     int index_;
   };
-}
+}  // namespace OpenMD
 #endif

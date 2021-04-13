@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,36 +50,31 @@
 namespace OpenMD {
 
   class TwoDGofR : public RadialDistrFunc {
-    
   public:
-    TwoDGofR(SimInfo* info, const std::string& filename, const std::string& sele1, 
-           const std::string& sele2, RealType len, RealType dz, int nrbins);
-    
-    int getNRBins() {
-      return nRBins_; 
-    }
-    
-    RealType getLength() {
-      return len_;
-    }
-    
+    TwoDGofR(SimInfo* info, const std::string& filename,
+             const std::string& sele1, const std::string& sele2, RealType len,
+             RealType dz, int nrbins);
+
+    int getNRBins() { return nRBins_; }
+
+    RealType getLength() { return len_; }
+
   private:
-    
     virtual void preProcess();
     virtual void initializeHistogram();
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
     virtual void processHistogram();
-    
+
     virtual void writeRdf();
-    
+
     RealType len_;
     int nRBins_;
     RealType deltaR_;
     RealType deltaZ_;
-    
+
     std::vector<int> histogram_;
     std::vector<RealType> avgTwoDGofR_;
   };
 
-}
+}  // namespace OpenMD
 #endif

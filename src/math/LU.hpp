@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /*=========================================================================
 
   Program:   Visualization Toolkit
   Module:    $RCSfile: LU.hpp,v $
 
-  Copyright (c) 1993-2003 Ken Martin, Will Schroeder, Bill Lorensen 
+  Copyright (c) 1993-2003 Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  =========================================================================*/ 
+  =========================================================================*/
 #ifndef MATH_LU_HPP
 #define MATH_LU_HPP
 #include <limits>
@@ -87,7 +87,7 @@
 namespace OpenMD {
 
   /**
-   * Invert input square matrix A into matrix AI. 
+   * Invert input square matrix A into matrix AI.
    * @param A input square matrix
    * @param AI output square matrix
    * @return true if inverse is computed, otherwise return false
@@ -95,39 +95,38 @@ namespace OpenMD {
    */
   template<class MatrixType>
   bool invertMatrix(MatrixType& A, MatrixType& AI) {
-  
     typedef typename MatrixType::ElemType Real;
     if (A.getNRow() != A.getNCol() || A.getNRow() != AI.getNRow() ||
         A.getNCol() != AI.getNCol()) {
       return false;
     }
-  
-    int size = A.getNRow();
-    int *index=NULL, iScratch[10];
-    Real *column=NULL, dScratch[10];
+
+    int size     = A.getNRow();
+    int *index   = NULL, iScratch[10];
+    Real *column = NULL, dScratch[10];
 
     // Check on allocation of working vectors
     //
-    if ( size <= 10 ) {
-      index = iScratch;
+    if (size <= 10) {
+      index  = iScratch;
       column = dScratch;
     } else {
-      index = new int[size];
+      index  = new int[size];
       column = new Real[size];
     }
 
     bool retVal = invertMatrix(A, AI, size, index, column);
 
-    if ( size > 10 ) {
-      delete [] index;
-      delete [] column;
+    if (size > 10) {
+      delete[] index;
+      delete[] column;
     }
-  
+
     return retVal;
   }
 
   /**
-   * Invert input square matrix A into matrix AI (Thread safe versions). 
+   * Invert input square matrix A into matrix AI (Thread safe versions).
    * @param A input square matrix
    * @param AI output square matrix
    * @param size size of the matrix and temporary arrays
@@ -137,14 +136,14 @@ namespace OpenMD {
    * @note A is modified during the inversion.
    */
   template<class MatrixType>
-  bool invertMatrix(MatrixType& A , MatrixType& AI, unsigned int size,
-                    int *tmp1Size, 
+  bool invertMatrix(MatrixType& A, MatrixType& AI, unsigned int size,
+                    int* tmp1Size,
                     typename MatrixType::ElemPoinerType tmp2Size) {
     if (A.getNRow() != A.getNCol() || A.getNRow() != AI.getNRow() ||
         A.getNCol() != AI.getNCol() || A.getNRow() != size) {
       return false;
     }
-  
+
     unsigned int i, j;
 
     //
@@ -152,19 +151,19 @@ namespace OpenMD {
     // Note: tmp1Size returned value is used later, tmp2Size is just working
     // memory whose values are not used in LUSolveLinearSystem
     //
-    if ( LUFactorLinearSystem(A, tmp1Size, size, tmp2Size) == 0 ){
+    if (LUFactorLinearSystem(A, tmp1Size, size, tmp2Size) == 0) {
       return false;
     }
-  
-    for ( j=0; j < size; j++ ) {
-      for ( i=0; i < size; i++ ) {
+
+    for (j = 0; j < size; j++) {
+      for (i = 0; i < size; i++) {
         tmp2Size[i] = 0.0;
       }
       tmp2Size[j] = 1.0;
 
-      LUSolveLinearSystem(A,tmp1Size,tmp2Size,size);
+      LUSolveLinearSystem(A, tmp1Size, tmp2Size, size);
 
-      for ( i=0; i < size; i++ ) {
+      for (i = 0; i < size; i++) {
         AI(i, j) = tmp2Size[i];
       }
     }
@@ -174,7 +173,7 @@ namespace OpenMD {
 
   /**
    * Factor linear equations Ax = b using LU decompostion A = LU where L is
-   * lower triangular matrix and U is upper triangular matrix. 
+   * lower triangular matrix and U is upper triangular matrix.
    * @param A input square matrix
    * @param index pivot indices
    * @param size size of the matrix and temporary arrays
@@ -183,9 +182,8 @@ namespace OpenMD {
    * @note A is modified during the inversion.
    */
   template<class MatrixType>
-  int LUFactorLinearSystem(MatrixType& A, int *index, int size,
+  int LUFactorLinearSystem(MatrixType& A, int* index, int size,
                            typename MatrixType::ElemPoinerType tmpSize) {
-    
     typedef typename MatrixType::ElemType Real;
     int i, j, k;
     int maxI = 0;
@@ -194,15 +192,13 @@ namespace OpenMD {
     //
     // Loop over rows to get implicit scaling information
     //
-    for ( i = 0; i < size; i++ ) {
-      for ( largest = 0.0, j = 0; j < size; j++ ) {
-        if ( (temp2 = fabs(A(i, j))) > largest ) {
-          largest = temp2;
-        }
+    for (i = 0; i < size; i++) {
+      for (largest = 0.0, j = 0; j < size; j++) {
+        if ((temp2 = fabs(A(i, j))) > largest) { largest = temp2; }
       }
 
-      if ( largest == 0.0 ) {
-        //vtkGenericWarningMacro(<<"Unable to factor linear system");
+      if (largest == 0.0) {
+        // vtkGenericWarningMacro(<<"Unable to factor linear system");
         return 0;
       }
       tmpSize[i] = 1.0 / largest;
@@ -210,10 +206,10 @@ namespace OpenMD {
     //
     // Loop over all columns using Crout's method
     //
-    for ( j = 0; j < size; j++ ) {
+    for (j = 0; j < size; j++) {
       for (i = 0; i < j; i++) {
         sum = A(i, j);
-        for ( k = 0; k < i; k++ ) {
+        for (k = 0; k < i; k++) {
           sum -= A(i, k) * A(k, j);
         }
         A(i, j) = sum;
@@ -221,26 +217,26 @@ namespace OpenMD {
       //
       // Begin search for largest pivot element
       //
-      for ( largest = 0.0, i = j; i < size; i++ ) {
+      for (largest = 0.0, i = j; i < size; i++) {
         sum = A(i, j);
-        for ( k = 0; k < j; k++ ) {
+        for (k = 0; k < j; k++) {
           sum -= A(i, k) * A(k, j);
         }
         A(i, j) = sum;
 
-        if ( (temp1 = tmpSize[i]*fabs(sum)) >= largest ) {
+        if ((temp1 = tmpSize[i] * fabs(sum)) >= largest) {
           largest = temp1;
-          maxI = i;
+          maxI    = i;
         }
       }
       //
       // Check for row interchange
       //
-      if ( j != maxI ) {
-        for ( k = 0; k < size; k++ ) {
-          temp1 = A(maxI, k);
+      if (j != maxI) {
+        for (k = 0; k < size; k++) {
+          temp1      = A(maxI, k);
           A(maxI, k) = A(j, k);
-          A(j, k) = temp1;
+          A(j, k)    = temp1;
         }
         tmpSize[maxI] = tmpSize[j];
       }
@@ -249,14 +245,14 @@ namespace OpenMD {
       //
       index[j] = maxI;
 
-      if ( fabs(A(j, j)) <= std::numeric_limits<RealType>::epsilon() ) {
-        //vtkGenericWarningMacro(<<"Unable to factor linear system");
+      if (fabs(A(j, j)) <= std::numeric_limits<RealType>::epsilon()) {
+        // vtkGenericWarningMacro(<<"Unable to factor linear system");
         return false;
       }
 
-      if ( j != (size-1) ) {
+      if (j != (size - 1)) {
         temp1 = 1.0 / A(j, j);
-        for ( i = j + 1; i < size; i++ ) {
+        for (i = j + 1; i < size; i++) {
           A(i, j) *= temp1;
         }
       }
@@ -267,17 +263,17 @@ namespace OpenMD {
 
   /**
    * Solve linear equations Ax = b using LU decompostion A = LU where L is
-   * lower triangular matrix and U is upper triangular matrix. 
+   * lower triangular matrix and U is upper triangular matrix.
    * @param A input square matrix
    * @param index pivot indices
    * @param x vector
    * @param size size of the matrix and temporary arrays
    * @return true if inverse is computed, otherwise return false
-   * @note A=LU and index[] are generated from method LUFactorLinearSystem). 
+   * @note A=LU and index[] are generated from method LUFactorLinearSystem).
    * Also, solution vector is written directly over input load vector.
    */
   template<class MatrixType>
-  void LUSolveLinearSystem(MatrixType& A, int *index, 
+  void LUSolveLinearSystem(MatrixType& A, int* index,
                            typename MatrixType::ElemPoinerType x, int size) {
     typedef typename MatrixType::ElemType Real;
     int i, j, ii, idx;
@@ -286,14 +282,14 @@ namespace OpenMD {
     // Proceed with forward and backsubstitution for L and U
     // matrices.  First, forward substitution.
     //
-    for ( ii = -1, i = 0; i < size; i++ ) {
-      idx = index[i];
-      sum = x[idx];
+    for (ii = -1, i = 0; i < size; i++) {
+      idx    = index[i];
+      sum    = x[idx];
       x[idx] = x[i];
 
-      if ( ii >= 0 ) {
-        for ( j = ii; j <= (i-1); j++ ) {
-          sum -= A(i, j)*x[j];
+      if (ii >= 0) {
+        for (j = ii; j <= (i - 1); j++) {
+          sum -= A(i, j) * x[j];
         }
       } else if (sum) {
         ii = i;
@@ -304,14 +300,14 @@ namespace OpenMD {
     //
     // Now, back substitution
     //
-    for ( i = size-1; i >= 0; i-- ) {
+    for (i = size - 1; i >= 0; i--) {
       sum = x[i];
-      for ( j = i + 1; j < size; j++ ) {
-        sum -= A(i, j)*x[j];
+      for (j = i + 1; j < size; j++) {
+        sum -= A(i, j) * x[j];
       }
       x[i] = sum / A(i, i);
     }
   }
-}
+}  // namespace OpenMD
 
 #endif

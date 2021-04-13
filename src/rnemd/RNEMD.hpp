@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -77,24 +77,24 @@ namespace OpenMD {
 
     protected:
       enum RNEMDFluxType {
-        rnemdKE,       	// translational kinetic energy flux
-        rnemdRotKE,    	// rotational kinetic energy flux
-        rnemdFullKE,   	// full kinetic energy flux
-        rnemdPx,       	// flux of momentum along x axis
-        rnemdPy,       	// flux of momentum along y axis
-        rnemdPz,       	// flux of momentum along z axis
-        rnemdPvector,  	// flux of momentum vector
-        rnemdLx,       	// flux of angular momentum along x axis
-        rnemdLy,       	// flux of angular momentum along y axis
-        rnemdLz,       	// flux of angular momentum along z axis
-        rnemdLvector,  	// flux of angular momentum vector
-        rnemdKePx,     	// flux of translational KE and x-momentum
-        rnemdKePy,     	// flux of translational KE and y-momentum
-        rnemdKePvector, // full combo flying platter
-        rnemdKeLx,     	// flux of translational KE and x-angular momentum
-        rnemdKeLy,     	// flux of translational KE and y-angular momentum
-        rnemdKeLz,     	// flux of translational KE and z-angular momentum
-        rnemdKeLvector, // full combo spinning platter
+        rnemdKE,         // translational kinetic energy flux
+        rnemdRotKE,      // rotational kinetic energy flux
+        rnemdFullKE,     // full kinetic energy flux
+        rnemdPx,         // flux of momentum along x axis
+        rnemdPy,         // flux of momentum along y axis
+        rnemdPz,         // flux of momentum along z axis
+        rnemdPvector,    // flux of momentum vector
+        rnemdLx,         // flux of angular momentum along x axis
+        rnemdLy,         // flux of angular momentum along y axis
+        rnemdLz,         // flux of angular momentum along z axis
+        rnemdLvector,    // flux of angular momentum vector
+        rnemdKePx,       // flux of translational KE and x-momentum
+        rnemdKePy,       // flux of translational KE and y-momentum
+        rnemdKePvector,  // full combo flying platter
+        rnemdKeLx,       // flux of translational KE and x-angular momentum
+        rnemdKeLy,       // flux of translational KE and y-angular momentum
+        rnemdKeLz,       // flux of translational KE and z-angular momentum
+        rnemdKeLvector,  // full combo spinning platter
         rnemdUnknownFluxType
       };
 
@@ -110,26 +110,34 @@ namespace OpenMD {
 
       Vector3d coordinateOrigin_;
 
-      RealType kineticTarget_ {0.0};     					// target or desired one-time exchange energy
-      Vector3d momentumTarget_ {V3Zero};    			// target or desired one-time exchange momentum
-      Vector3d angularMomentumTarget_ {V3Zero}; 	// target or desired one-time exchange angular momentum
+      RealType kineticTarget_ {
+          0.0};  // target or desired one-time exchange energy
+      Vector3d momentumTarget_ {
+          V3Zero};  // target or desired one-time exchange momentum
+      Vector3d angularMomentumTarget_ {
+          V3Zero};  // target or desired one-time exchange angular momentum
 
-      RealType kineticExchange_ {0.0};    				// actual exchange energy (running total)
-      Vector3d momentumExchange_ {V3Zero};   			// actual exchange momentum (running total)
-      Vector3d angularMomentumExchange_ {V3Zero}; // actual exchange momentum (running total)
+      RealType kineticExchange_ {
+          0.0};  // actual exchange energy (running total)
+      Vector3d momentumExchange_ {
+          V3Zero};  // actual exchange momentum (running total)
+      Vector3d angularMomentumExchange_ {
+          V3Zero};  // actual exchange momentum (running total)
 
       unsigned int trialCount_ {0};
       unsigned int failTrialCount_ {0};
       unsigned int failRootCount_ {0};
 
       void setKineticFlux(RealType kineticFlux);
-      void setMomentumFluxVector(const std::vector<RealType>& momentumFluxVector);
-      void setAngularMomentumFluxVector(const std::vector<RealType>& angularMomentumFluxVector);
+      void setMomentumFluxVector(
+          const std::vector<RealType>& momentumFluxVector);
+      void setAngularMomentumFluxVector(
+          const std::vector<RealType>& angularMomentumFluxVector);
 
     private:
       enum OutputFields {
         BEGININDEX = 0,
-        Z = BEGININDEX,
+        Z          = BEGININDEX,
         R,
         TEMPERATURE,
         VELOCITY,
@@ -141,21 +149,17 @@ namespace OpenMD {
         ENDINDEX
       };
 
-      enum RNEMDPrivilegedAxis {
-        rnemdX = 0,
-        rnemdY = 1,
-        rnemdZ = 2
-      };
+      enum RNEMDPrivilegedAxis { rnemdX = 0, rnemdY = 1, rnemdZ = 2 };
 
       struct OutputData {
         std::string title;
         std::string units;
         std::string dataType;
         std::vector<BaseAccumulator*> accumulator;
-        std::vector< std::vector<BaseAccumulator*> > accumulatorArray2d;
+        std::vector<std::vector<BaseAccumulator*>> accumulatorArray2d;
       };
 
-      using OutputBitSet  = std::bitset<ENDINDEX-BEGININDEX>;
+      using OutputBitSet  = std::bitset<ENDINDEX - BEGININDEX>;
       using OutputMapType = std::map<std::string, OutputFields>;
 
       SimInfo* info_ {nullptr};
@@ -205,9 +209,9 @@ namespace OpenMD {
 
       RealType dividingArea_;
 
-      RealType kineticFlux_ {0.0};        				  // target or desired *flux*
-      Vector3d momentumFluxVector_ {V3Zero}; 				// target or desired *flux*
-      Vector3d angularMomentumFluxVector_ {V3Zero}; // target or desired *flux*
+      RealType kineticFlux_ {0.0};                   // target or desired *flux*
+      Vector3d momentumFluxVector_ {V3Zero};         // target or desired *flux*
+      Vector3d angularMomentumFluxVector_ {V3Zero};  // target or desired *flux*
 
       RealType exchangeTime_ {}, runTime_ {}, statusTime_ {};
 
@@ -232,9 +236,10 @@ namespace OpenMD {
       void writeVectorErrorBars(int index, unsigned int bin);
       void writeArrayErrorBars(int index, unsigned int bin);
 
-      virtual void doRNEMDImpl(SelectionManager& smanA, SelectionManager& smanB) = 0;
+      virtual void doRNEMDImpl(SelectionManager& smanA,
+                               SelectionManager& smanB) = 0;
     };
-  }
-}
+  }  // namespace RNEMD
+}  // namespace OpenMD
 
-#endif // OPENMD_RNEMD_RNEMD_HPP
+#endif  // OPENMD_RNEMD_RNEMD_HPP

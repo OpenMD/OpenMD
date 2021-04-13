@@ -28,10 +28,10 @@ FOR A PARTICULAR PURPOSE.  See the license for more details.
 
 namespace QuantLib {
 
-DynamicVector<RealType> ConjugateGradient::getUpdatedDirection(
-    const Problem& P, RealType gold2, const DynamicVector<RealType>&) {
-  return -lineSearch_->lastGradient() +
-         (P.gradientNormValue() / gold2) * lineSearch_->searchDirection();
-}
+  DynamicVector<RealType> ConjugateGradient::getUpdatedDirection(
+      const Problem& P, RealType gold2, const DynamicVector<RealType>&) {
+    return -lineSearch_->lastGradient() +
+           (P.gradientNormValue() / gold2) * lineSearch_->searchDirection();
+  }
 
 }  // namespace QuantLib

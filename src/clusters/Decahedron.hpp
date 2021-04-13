@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -54,44 +54,44 @@ Copyright (c) 2009, Richard Brown
 Copyright (c) 2011, Evgeny Pr
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without 
-modification, are permitted provided that the following conditions are 
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
 met:
 
-    * Redistributions of source code must retain the above copyright 
+    * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright 
-      notice, this list of conditions and the following disclaimer in 
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in
       the documentation and/or other materials provided with the distribution
-      
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
-LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 */
-
 
 #ifndef CLUSTERS_DECAHEDRON_HPP
 #define CLUSTERS_DECAHEDRON_HPP
 
 #include <vector>
+
 #include "math/Vector3.hpp"
 
 using namespace std;
-namespace OpenMD{
+namespace OpenMD {
 
-    //! Creates the regular decahedron, Ino decahedron, or truncated
-    //! (Marks) decahedron structures (depending on the parameters).
-    /*!
-        (Heavily modified from Matlab code from: 
+  //! Creates the regular decahedron, Ino decahedron, or truncated
+  //! (Marks) decahedron structures (depending on the parameters).
+  /*!
+        (Heavily modified from Matlab code from:
         Dmitry, Richard Brown, and Evgeny Pr)
 
     */
@@ -100,41 +100,43 @@ namespace OpenMD{
     //! Default constructor
     Decahedron(int columnAtoms, int shells, int twinAtoms);
     virtual ~Decahedron() = default;
-    
+
     //! Get the generated points in the cluster.
     virtual vector<Vector3d> getPoints();
-    
+
   protected:
     //! Generate the rings of the Decahedron.
-    vector<Vector3d> truncatedRing( int n, int k );
-    
-    int N_; // number of atoms in the central atomic column
-    int M_; // number of {002} shells
-    int K_; // number of atomic columns along twin boundary
+    vector<Vector3d> truncatedRing(int n, int k);
+
+    int N_;  // number of atoms in the central atomic column
+    int M_;  // number of {002} shells
+    int K_;  // number of atomic columns along twin boundary
 
     vector<Vector3d> Points;
-    vector<Vector3d> Basis; // Basis vectors of the Decahedron
+    vector<Vector3d> Basis;  // Basis vectors of the Decahedron
   };
 
   class RegularDecahedron : public Decahedron {
   public:
-    RegularDecahedron(int shells) : Decahedron(shells-1, shells, shells) {}
+    RegularDecahedron(int shells) : Decahedron(shells - 1, shells, shells) {}
   };
 
   class InoDecahedron : public Decahedron {
   public:
-    InoDecahedron(int columnAtoms, int shells) : 
-      Decahedron(columnAtoms, shells, columnAtoms) {}
+    InoDecahedron(int columnAtoms, int shells) :
+        Decahedron(columnAtoms, shells, columnAtoms) {}
   };
 
   class CurlingStoneDecahedron : public Decahedron {
   public:
-    CurlingStoneDecahedron(int columnAtoms, int shells, int twinAtoms, int truncatedPlanes);
+    CurlingStoneDecahedron(int columnAtoms, int shells, int twinAtoms,
+                           int truncatedPlanes);
     vector<Vector3d> getPoints();
+
   private:
-    int T_; // number of truncated planes snipped from top and bottom
+    int T_;  // number of truncated planes snipped from top and bottom
   };
-    
-}
+
+}  // namespace OpenMD
 
 #endif

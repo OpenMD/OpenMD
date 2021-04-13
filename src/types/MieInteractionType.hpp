@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_MIEINTERACTIONTYPE_HPP
 #define TYPES_MIEINTERACTIONTYPE_HPP
 
@@ -50,43 +50,36 @@
 
 namespace OpenMD {
   /**
-   * @class MieInteractionType 
+   * @class MieInteractionType
    *
    * MieInteractionType is one of the basic interaction types.
-   * \f[ V =  \left(\frac{n}{n-m}\right) \left(\frac{n}{m}\right)^{m/(n-m)} \epsilon \left[\left( \frac{\sigma}{r} \right)^{n} - \left( \frac{\sigma}{r} \right)^{m}\right] \f]
+   * \f[ V =  \left(\frac{n}{n-m}\right) \left(\frac{n}{m}\right)^{m/(n-m)}
+   * \epsilon \left[\left( \frac{\sigma}{r} \right)^{n} - \left(
+   * \frac{\sigma}{r} \right)^{m}\right] \f]
    */
   class MieInteractionType : public NonBondedInteractionType {
-    
   public:
-    
-    MieInteractionType(RealType mySigma, RealType myEpsilon, int myNrep, int myMatt) {
-      sigma = mySigma;
+    MieInteractionType(RealType mySigma, RealType myEpsilon, int myNrep,
+                       int myMatt) {
+      sigma   = mySigma;
       epsilon = myEpsilon;
-      nRep = myNrep;
-      mAtt = myMatt;
+      nRep    = myNrep;
+      mAtt    = myMatt;
       setMie();
     }
 
-    RealType getSigma() {
-      return sigma;
-    }
-    
-    RealType getEpsilon() {
-      return epsilon;
-    }
-    
-    int getNrep() {
-      return nRep;
-    }
-    int getMatt() {
-      return mAtt;
-    }
-        
+    RealType getSigma() { return sigma; }
+
+    RealType getEpsilon() { return epsilon; }
+
+    int getNrep() { return nRep; }
+    int getMatt() { return mAtt; }
+
   private:
     RealType sigma;
-    RealType epsilon;    
+    RealType epsilon;
     int nRep;
     int mAtt;
   };
-}
+}  // namespace OpenMD
 #endif

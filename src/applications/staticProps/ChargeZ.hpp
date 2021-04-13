@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,28 +44,28 @@
  */
 
 /*
-* Computes the current density for the selected atom
-* Created by Cody R. Drisko on 06/14/14.
-*/
+ * Computes the current density for the selected atom
+ * Created by Cody R. Drisko on 06/14/14.
+ */
 
 #ifndef APPLICATIONS_STATICPROPS_CHARGEZ_HPP
 #define APPLICATIONS_STATICPROPS_CHARGEZ_HPP
 
 #include <string>
 #include <vector>
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
+
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
 
 namespace OpenMD {
 
   class ChargeZ : public StaticAnalyser {
-
   public:
-    ChargeZ(SimInfo* info, const std::string& filename,
-                   const std::string& sele, int nzbins, int axis=2);
+    ChargeZ(SimInfo* info, const std::string& filename, const std::string& sele,
+            int nzbins, int axis = 2);
 
     virtual void process();
 
@@ -79,13 +79,13 @@ namespace OpenMD {
     SelectionManager seleMan_;
     Thermo thermo_;
 
-    std::vector<std::vector<StuntDouble*> > sliceSDLists_;
-		std::vector<RealType> sliceSDCount_;
+    std::vector<std::vector<StuntDouble*>> sliceSDLists_;
+    std::vector<RealType> sliceSDCount_;
     std::vector<RealType> zBox_;
     std::vector<RealType> chargeZ_;
     int axis_;
     std::string axisLabel_;
   };
 
-}
+}  // namespace OpenMD
 #endif

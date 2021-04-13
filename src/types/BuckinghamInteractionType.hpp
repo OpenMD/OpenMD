@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_BUCKINGHAMINTERACTIONTYPE_HPP
 #define TYPES_BUCKINGHAMINTERACTIONTYPE_HPP
 
@@ -50,7 +50,7 @@
 
 namespace OpenMD {
   /**
-   * @class BuckinghamInteractionType 
+   * @class BuckinghamInteractionType
    *
    * BuckinghamInteractionType is one of the basic non-bonded
    * interactions for representing the non-Coulombic contribution in
@@ -65,24 +65,20 @@ namespace OpenMD {
    *
    * Modified:
    *
-   * \f[ V = A \exp( -B r) - \frac{C}{r^6} + 4 \epsilon \left( \left( \frac{\sigma}{r} \right)^{30} - \left( \frac{\sigma}{r} \right)^6 \right)  \f]
+   * \f[ V = A \exp( -B r) - \frac{C}{r^6} + 4 \epsilon \left( \left(
+   * \frac{\sigma}{r} \right)^{30} - \left( \frac{\sigma}{r} \right)^6 \right)
+   * \f]
    */
 
-  enum BuckinghamType{
-    btTraditional,
-    btModified,
-    btUnknown
-  };
-  
+  enum BuckinghamType { btTraditional, btModified, btUnknown };
+
   class BuckinghamInteractionType : public NonBondedInteractionType {
-    
   public:
-    
     BuckinghamInteractionType(RealType myA, RealType myB, RealType myC,
                               BuckinghamType myType) {
-      A = myA;
-      B = myB;
-      C = myC;
+      A               = myA;
+      B               = myB;
+      C               = myC;
       interactionType = myType;
       setBuckingham();
     }
@@ -90,48 +86,34 @@ namespace OpenMD {
     BuckinghamInteractionType(RealType myA, RealType myB, RealType myC,
                               RealType mySigma, RealType myEpsilon,
                               BuckinghamType myType) {
-      A = myA;
-      B = myB;
-      C = myC;
-      sigma = mySigma;
-      epsilon = myEpsilon;
+      A               = myA;
+      B               = myB;
+      C               = myC;
+      sigma           = mySigma;
+      epsilon         = myEpsilon;
       interactionType = myType;
       setBuckingham();
     }
 
+    RealType getA() { return A; }
 
-    RealType getA() {
-      return A;
-    }
-    
-    RealType getB() {
-      return B;
-    }
+    RealType getB() { return B; }
 
-    RealType getC() {
-      return C;
-    }
+    RealType getC() { return C; }
 
-    RealType getSigma() {
-      return sigma;
-    }
+    RealType getSigma() { return sigma; }
 
-    RealType getEpsilon() {
-      return epsilon;
-    }
-    
-    BuckinghamType getInteractionType() {
-      return interactionType;
-    }
+    RealType getEpsilon() { return epsilon; }
 
-  private:   
+    BuckinghamType getInteractionType() { return interactionType; }
+
+  private:
     RealType A;
     RealType B;
     RealType C;
     RealType sigma;
     RealType epsilon;
     BuckinghamType interactionType;
-
   };
-}
+}  // namespace OpenMD
 #endif

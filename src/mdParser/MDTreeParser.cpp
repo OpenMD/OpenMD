@@ -13,9 +13,9 @@ MDTreeParser::MDTreeParser() : ANTLR_USE_NAMESPACE(antlr) TreeParser() {}
 
 void MDTreeParser::mdfile(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
-  RefAST mdfile_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-                             ? ANTLR_USE_NAMESPACE(antlr) nullAST
-                             : _t;
+  RefAST mdfile_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+                             ANTLR_USE_NAMESPACE(antlr) nullAST :
+                             _t;
 
   try {  // for error handling
     {    // ( ... )*
@@ -43,56 +43,56 @@ void MDTreeParser::mdfile(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 
 void MDTreeParser::statement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
-  RefAST statement_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-                                ? ANTLR_USE_NAMESPACE(antlr) nullAST
-                                : _t;
+  RefAST statement_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+                                ANTLR_USE_NAMESPACE(antlr) nullAST :
+                                _t;
 
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case ASSIGNEQUAL: {
-        assignment(_t);
-        _t = _retTree;
-        break;
-      }
-      case COMPONENT: {
-        componentblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case MOLECULE: {
-        moleculeblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case ZCONSTRAINT: {
-        zconstraintblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case RESTRAINT: {
-        restraintblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case FLUCQ: {
-        flucqblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case RNEMD: {
-        rnemdblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case MINIMIZER: {
-        minimizerblock(_t);
-        _t = _retTree;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+    case ASSIGNEQUAL: {
+      assignment(_t);
+      _t = _retTree;
+      break;
+    }
+    case COMPONENT: {
+      componentblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case MOLECULE: {
+      moleculeblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case ZCONSTRAINT: {
+      zconstraintblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case RESTRAINT: {
+      restraintblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case FLUCQ: {
+      flucqblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case RNEMD: {
+      rnemdblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case MINIMIZER: {
+      minimizerblock(_t);
+      _t = _retTree;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -103,13 +103,14 @@ void MDTreeParser::statement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 
 void MDTreeParser::assignment(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
-  RefAST assignment_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-                                 ? ANTLR_USE_NAMESPACE(antlr) nullAST
-                                 : _t;
+  RefAST assignment_AST_in =
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
   ANTLR_USE_NAMESPACE(antlr) RefAST id = ANTLR_USE_NAMESPACE(antlr) nullAST;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t6 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t6        = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp1_AST_in = _t;
     match(_t, ASSIGNEQUAL);
     _t = _t->getFirstChild();
@@ -130,12 +131,12 @@ void MDTreeParser::assignment(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::componentblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST componentblock_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t10 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t10       = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp2_AST_in = _t;
     match(_t, COMPONENT);
     _t = _t->getFirstChild();
@@ -175,12 +176,12 @@ void MDTreeParser::componentblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::moleculeblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST moleculeblock_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t34 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t34       = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp4_AST_in = _t;
     match(_t, MOLECULE);
     _t = _t->getFirstChild();
@@ -220,12 +221,12 @@ void MDTreeParser::moleculeblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::zconstraintblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST zconstraintblock_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t14 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t14       = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp6_AST_in = _t;
     match(_t, ZCONSTRAINT);
     _t = _t->getFirstChild();
@@ -265,12 +266,12 @@ void MDTreeParser::zconstraintblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::restraintblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST restraintblock_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t18 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t18       = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp8_AST_in = _t;
     match(_t, RESTRAINT);
     _t = _t->getFirstChild();
@@ -309,12 +310,13 @@ void MDTreeParser::restraintblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 
 void MDTreeParser::flucqblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
-  RefAST flucqblock_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-                                 ? ANTLR_USE_NAMESPACE(antlr) nullAST
-                                 : _t;
+  RefAST flucqblock_AST_in =
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t22 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t22        = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp10_AST_in = _t;
     match(_t, FLUCQ);
     _t = _t->getFirstChild();
@@ -353,12 +355,13 @@ void MDTreeParser::flucqblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 
 void MDTreeParser::rnemdblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
-  RefAST rnemdblock_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-                                 ? ANTLR_USE_NAMESPACE(antlr) nullAST
-                                 : _t;
+  RefAST rnemdblock_AST_in =
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t26 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t26        = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp12_AST_in = _t;
     match(_t, RNEMD);
     _t = _t->getFirstChild();
@@ -398,12 +401,12 @@ void MDTreeParser::rnemdblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::minimizerblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST minimizerblock_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t30 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t30        = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp14_AST_in = _t;
     match(_t, MINIMIZER);
     _t = _t->getFirstChild();
@@ -443,9 +446,9 @@ void MDTreeParser::minimizerblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::constant(ANTLR_USE_NAMESPACE(antlr) RefAST _t,
                             ANTLR_USE_NAMESPACE(antlr) RefAST id) {
   ANTLR_USE_NAMESPACE(antlr)
-  RefAST constant_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-                               ? ANTLR_USE_NAMESPACE(antlr) nullAST
-                               : _t;
+  RefAST constant_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+                               ANTLR_USE_NAMESPACE(antlr) nullAST :
+                               _t;
   ANTLR_USE_NAMESPACE(antlr) RefAST str1 = ANTLR_USE_NAMESPACE(antlr) nullAST;
   ANTLR_USE_NAMESPACE(antlr) RefAST str2 = ANTLR_USE_NAMESPACE(antlr) nullAST;
 #line 50 "MDTreeParser.g"
@@ -459,67 +462,67 @@ void MDTreeParser::constant(ANTLR_USE_NAMESPACE(antlr) RefAST _t,
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case NUM_INT:
-      case NUM_LONG: {
-        ival = intConst(_t);
-        _t = _retTree;
+    case NUM_INT:
+    case NUM_LONG: {
+      ival = intConst(_t);
+      _t   = _retTree;
 #line 56 "MDTreeParser.g"
-        blockStack.top()->assign(id->getText(), ival);
+      blockStack.top()->assign(id->getText(), ival);
 #line 467 "MDTreeParser.cpp"
-        break;
-      }
-      case NUM_FLOAT:
-      case NUM_DOUBLE: {
-        dval = floatConst(_t);
-        _t = _retTree;
+      break;
+    }
+    case NUM_FLOAT:
+    case NUM_DOUBLE: {
+      dval = floatConst(_t);
+      _t   = _retTree;
 #line 57 "MDTreeParser.g"
-        blockStack.top()->assign(id->getText(), dval);
+      blockStack.top()->assign(id->getText(), dval);
 #line 477 "MDTreeParser.cpp"
-        break;
-      }
-      case ID: {
-        str1 = _t;
-        match(_t, ID);
-        _t = _t->getNextSibling();
+      break;
+    }
+    case ID: {
+      str1 = _t;
+      match(_t, ID);
+      _t = _t->getNextSibling();
 #line 58 "MDTreeParser.g"
-        blockStack.top()->assign(id->getText(), str1->getText());
+      blockStack.top()->assign(id->getText(), str1->getText());
 #line 487 "MDTreeParser.cpp"
-        break;
-      }
-      case StringLiteral: {
-        str2 = _t;
-        match(_t, StringLiteral);
-        _t = _t->getNextSibling();
+      break;
+    }
+    case StringLiteral: {
+      str2 = _t;
+      match(_t, StringLiteral);
+      _t = _t->getNextSibling();
 #line 59 "MDTreeParser.g"
-        std::string s = str2->getText();
-        s = s.substr(1, s.length() - 2);
-        blockStack.top()->assign(id->getText(), s);
+      std::string s = str2->getText();
+      s             = s.substr(1, s.length() - 2);
+      blockStack.top()->assign(id->getText(), s);
 
 #line 500 "MDTreeParser.cpp"
-        break;
-      }
-      case LPAREN: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t8 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp16_AST_in = _t;
-        match(_t, LPAREN);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp17_AST_in = _t;
-        match(_t, RPAREN);
-        _t = _t->getNextSibling();
-        _t = __t8;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case LPAREN: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t8         = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp16_AST_in = _t;
+      match(_t, LPAREN);
+      _t                                             = _t->getFirstChild();
+      dvec                                           = doubleNumberTuple(_t);
+      _t                                             = _retTree;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp17_AST_in = _t;
+      match(_t, RPAREN);
+      _t = _t->getNextSibling();
+      _t = __t8;
+      _t = _t->getNextSibling();
 #line 64 "MDTreeParser.g"
 
-        blockStack.top()->assign(id->getText(), dvec);
+      blockStack.top()->assign(id->getText(), dvec);
 
 #line 520 "MDTreeParser.cpp"
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -533,36 +536,36 @@ int MDTreeParser::intConst(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   int ival(0);
 #line 540 "MDTreeParser.cpp"
   ANTLR_USE_NAMESPACE(antlr)
-  RefAST intConst_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-                               ? ANTLR_USE_NAMESPACE(antlr) nullAST
-                               : _t;
+  RefAST intConst_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+                               ANTLR_USE_NAMESPACE(antlr) nullAST :
+                               _t;
   ANTLR_USE_NAMESPACE(antlr) RefAST i1 = ANTLR_USE_NAMESPACE(antlr) nullAST;
   ANTLR_USE_NAMESPACE(antlr) RefAST i2 = ANTLR_USE_NAMESPACE(antlr) nullAST;
 
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case NUM_INT: {
-        i1 = _t;
-        match(_t, NUM_INT);
-        _t = _t->getNextSibling();
+    case NUM_INT: {
+      i1 = _t;
+      match(_t, NUM_INT);
+      _t = _t->getNextSibling();
 #line 350 "MDTreeParser.g"
-        ival = lexi_cast<int>(i1->getText());
+      ival = lexi_cast<int>(i1->getText());
 #line 556 "MDTreeParser.cpp"
-        break;
-      }
-      case NUM_LONG: {
-        i2 = _t;
-        match(_t, NUM_LONG);
-        _t = _t->getNextSibling();
+      break;
+    }
+    case NUM_LONG: {
+      i2 = _t;
+      match(_t, NUM_LONG);
+      _t = _t->getNextSibling();
 #line 351 "MDTreeParser.g"
-        ival = lexi_cast<int>(i2->getText());
+      ival = lexi_cast<int>(i2->getText());
 #line 566 "MDTreeParser.cpp"
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -577,36 +580,37 @@ RealType MDTreeParser::floatConst(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   RealType dval(0.0);
 #line 587 "MDTreeParser.cpp"
   ANTLR_USE_NAMESPACE(antlr)
-  RefAST floatConst_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-                                 ? ANTLR_USE_NAMESPACE(antlr) nullAST
-                                 : _t;
+  RefAST floatConst_AST_in =
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
   ANTLR_USE_NAMESPACE(antlr) RefAST d1 = ANTLR_USE_NAMESPACE(antlr) nullAST;
   ANTLR_USE_NAMESPACE(antlr) RefAST d2 = ANTLR_USE_NAMESPACE(antlr) nullAST;
 
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case NUM_FLOAT: {
-        d1 = _t;
-        match(_t, NUM_FLOAT);
-        _t = _t->getNextSibling();
+    case NUM_FLOAT: {
+      d1 = _t;
+      match(_t, NUM_FLOAT);
+      _t = _t->getNextSibling();
 #line 362 "MDTreeParser.g"
-        dval = lexi_cast<RealType>(d1->getText());
+      dval = lexi_cast<RealType>(d1->getText());
 #line 603 "MDTreeParser.cpp"
-        break;
-      }
-      case NUM_DOUBLE: {
-        d2 = _t;
-        match(_t, NUM_DOUBLE);
-        _t = _t->getNextSibling();
+      break;
+    }
+    case NUM_DOUBLE: {
+      d2 = _t;
+      match(_t, NUM_DOUBLE);
+      _t = _t->getNextSibling();
 #line 363 "MDTreeParser.g"
-        dval = lexi_cast<RealType>(d2->getText());
+      dval = lexi_cast<RealType>(d2->getText());
 #line 613 "MDTreeParser.cpp"
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -623,9 +627,9 @@ vector<RealType> MDTreeParser::doubleNumberTuple(ANTLR_USE_NAMESPACE(antlr)
 #line 634 "MDTreeParser.cpp"
   ANTLR_USE_NAMESPACE(antlr)
   RefAST doubleNumberTuple_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 #line 333 "MDTreeParser.g"
 
   RealType dval;
@@ -639,7 +643,7 @@ vector<RealType> MDTreeParser::doubleNumberTuple(ANTLR_USE_NAMESPACE(antlr)
         if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
         if (((_t->getType() >= NUM_INT && _t->getType() <= NUM_DOUBLE))) {
           dval = doubleNumber(_t);
-          _t = _retTree;
+          _t   = _retTree;
 #line 337 "MDTreeParser.g"
           dvec.push_back(dval);
 #line 653 "MDTreeParser.cpp"
@@ -666,66 +670,66 @@ vector<RealType> MDTreeParser::doubleNumberTuple(ANTLR_USE_NAMESPACE(antlr)
 void MDTreeParser::moleculestatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST moleculestatement_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case ASSIGNEQUAL: {
-        assignment(_t);
-        _t = _retTree;
-        break;
-      }
-      case ATOM: {
-        atomblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case BOND: {
-        bondblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case BEND: {
-        bendblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case TORSION: {
-        torsionblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case INVERSION: {
-        inversionblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case RIGIDBODY: {
-        rigidbodyblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case CUTOFFGROUP: {
-        cutoffgroupblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case FRAGMENT: {
-        fragmentblock(_t);
-        _t = _retTree;
-        break;
-      }
-      case CONSTRAINT: {
-        constraintblock(_t);
-        _t = _retTree;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+    case ASSIGNEQUAL: {
+      assignment(_t);
+      _t = _retTree;
+      break;
+    }
+    case ATOM: {
+      atomblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case BOND: {
+      bondblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case BEND: {
+      bendblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case TORSION: {
+      torsionblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case INVERSION: {
+      inversionblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case RIGIDBODY: {
+      rigidbodyblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case CUTOFFGROUP: {
+      cutoffgroupblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case FRAGMENT: {
+      fragmentblock(_t);
+      _t = _retTree;
+      break;
+    }
+    case CONSTRAINT: {
+      constraintblock(_t);
+      _t = _retTree;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -736,9 +740,9 @@ void MDTreeParser::moleculestatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 
 void MDTreeParser::atomblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
-  RefAST atomblock_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-                                ? ANTLR_USE_NAMESPACE(antlr) nullAST
-                                : _t;
+  RefAST atomblock_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+                                ANTLR_USE_NAMESPACE(antlr) nullAST :
+                                _t;
 #line 118 "MDTreeParser.g"
 
   int index;
@@ -746,12 +750,12 @@ void MDTreeParser::atomblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 #line 760 "MDTreeParser.cpp"
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t39 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t39        = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp18_AST_in = _t;
     match(_t, ATOM);
-    _t = _t->getFirstChild();
+    _t    = _t->getFirstChild();
     index = intConst(_t);
-    _t = _retTree;
+    _t    = _retTree;
 #line 122 "MDTreeParser.g"
     AtomStamp* currAtomStamp = new AtomStamp(index);
     blockStack.push(currAtomStamp);
@@ -791,12 +795,12 @@ void MDTreeParser::atomblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 
 void MDTreeParser::bondblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
-  RefAST bondblock_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-                                ? ANTLR_USE_NAMESPACE(antlr) nullAST
-                                : _t;
+  RefAST bondblock_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+                                ANTLR_USE_NAMESPACE(antlr) nullAST :
+                                _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t47 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t47        = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp20_AST_in = _t;
     match(_t, BOND);
     _t = _t->getFirstChild();
@@ -839,12 +843,12 @@ void MDTreeParser::bondblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 
 void MDTreeParser::bendblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
-  RefAST bendblock_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-                                ? ANTLR_USE_NAMESPACE(antlr) nullAST
-                                : _t;
+  RefAST bendblock_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+                                ANTLR_USE_NAMESPACE(antlr) nullAST :
+                                _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t59 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t59        = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp22_AST_in = _t;
     match(_t, BEND);
     _t = _t->getFirstChild();
@@ -888,12 +892,12 @@ void MDTreeParser::bendblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::torsionblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST torsionblock_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t72 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t72        = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp24_AST_in = _t;
     match(_t, TORSION);
     _t = _t->getFirstChild();
@@ -937,12 +941,12 @@ void MDTreeParser::torsionblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::inversionblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST inversionblock_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t86 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t86        = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp26_AST_in = _t;
     match(_t, INVERSION);
     _t = _t->getFirstChild();
@@ -986,9 +990,9 @@ void MDTreeParser::inversionblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::rigidbodyblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST rigidbodyblock_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 #line 258 "MDTreeParser.g"
 
   int index;
@@ -996,12 +1000,12 @@ void MDTreeParser::rigidbodyblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 #line 1007 "MDTreeParser.cpp"
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t98 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t98        = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp28_AST_in = _t;
     match(_t, RIGIDBODY);
-    _t = _t->getFirstChild();
+    _t    = _t->getFirstChild();
     index = intConst(_t);
-    _t = _retTree;
+    _t    = _retTree;
 #line 262 "MDTreeParser.g"
     RigidBodyStamp* currRigidBodyStamp = new RigidBodyStamp(index);
     blockStack.push(currRigidBodyStamp);
@@ -1042,12 +1046,12 @@ void MDTreeParser::rigidbodyblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::cutoffgroupblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST cutoffgroupblock_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t104 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t104       = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp30_AST_in = _t;
     match(_t, CUTOFFGROUP);
     _t = _t->getFirstChild();
@@ -1091,20 +1095,20 @@ void MDTreeParser::cutoffgroupblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::fragmentblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST fragmentblock_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 #line 300 "MDTreeParser.g"
   int ival;
 #line 1108 "MDTreeParser.cpp"
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t110 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t110       = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp32_AST_in = _t;
     match(_t, FRAGMENT);
-    _t = _t->getFirstChild();
+    _t   = _t->getFirstChild();
     ival = intConst(_t);
-    _t = _retTree;
+    _t   = _retTree;
 #line 301 "MDTreeParser.g"
     FragmentStamp* currFragmentStamp = new FragmentStamp(ival);
     blockStack.push(currFragmentStamp);
@@ -1145,12 +1149,12 @@ void MDTreeParser::fragmentblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::constraintblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST constraintblock_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
-    ANTLR_USE_NAMESPACE(antlr) RefAST __t115 = _t;
+    ANTLR_USE_NAMESPACE(antlr) RefAST __t115       = _t;
     ANTLR_USE_NAMESPACE(antlr) RefAST tmp34_AST_in = _t;
     match(_t, CONSTRAINT);
     _t = _t->getFirstChild();
@@ -1193,9 +1197,9 @@ void MDTreeParser::constraintblock(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::atomstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST atomstatement_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 #line 132 "MDTreeParser.g"
 
   vector<RealType> dvec;
@@ -1207,56 +1211,56 @@ void MDTreeParser::atomstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case ASSIGNEQUAL: {
-        assignment(_t);
-        _t = _retTree;
-        break;
-      }
-      case POSITION: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t43 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp36_AST_in = _t;
-        match(_t, POSITION);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t43;
-        _t = _t->getNextSibling();
+    case ASSIGNEQUAL: {
+      assignment(_t);
+      _t = _retTree;
+      break;
+    }
+    case POSITION: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t43        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp36_AST_in = _t;
+      match(_t, POSITION);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t43;
+      _t   = _t->getNextSibling();
 #line 140 "MDTreeParser.g"
-        currAtomStamp->setPosition(dvec);
+      currAtomStamp->setPosition(dvec);
 #line 1237 "MDTreeParser.cpp"
-        break;
-      }
-      case ORIENTATION: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t44 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp37_AST_in = _t;
-        match(_t, ORIENTATION);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t44;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case ORIENTATION: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t44        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp37_AST_in = _t;
+      match(_t, ORIENTATION);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t44;
+      _t   = _t->getNextSibling();
 #line 141 "MDTreeParser.g"
-        currAtomStamp->setOrientation(dvec);
+      currAtomStamp->setOrientation(dvec);
 #line 1252 "MDTreeParser.cpp"
-        break;
-      }
-      case CHARGE: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t45 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp38_AST_in = _t;
-        match(_t, CHARGE);
-        _t = _t->getFirstChild();
-        rval = doubleNumber(_t);
-        _t = _retTree;
-        _t = __t45;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case CHARGE: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t45        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp38_AST_in = _t;
+      match(_t, CHARGE);
+      _t   = _t->getFirstChild();
+      rval = doubleNumber(_t);
+      _t   = _retTree;
+      _t   = __t45;
+      _t   = _t->getNextSibling();
 #line 142 "MDTreeParser.g"
-        currAtomStamp->overrideCharge(rval);
+      currAtomStamp->overrideCharge(rval);
 #line 1267 "MDTreeParser.cpp"
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1271,38 +1275,38 @@ RealType MDTreeParser::doubleNumber(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 #line 1287 "MDTreeParser.cpp"
   ANTLR_USE_NAMESPACE(antlr)
   RefAST doubleNumber_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
   ANTLR_USE_NAMESPACE(antlr) RefAST ic = ANTLR_USE_NAMESPACE(antlr) nullAST;
   ANTLR_USE_NAMESPACE(antlr) RefAST fc = ANTLR_USE_NAMESPACE(antlr) nullAST;
 
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case NUM_INT:
-      case NUM_LONG: {
-        ic = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr) nullAST : _t;
-        intConst(_t);
-        _t = _retTree;
+    case NUM_INT:
+    case NUM_LONG: {
+      ic = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr) nullAST : _t;
+      intConst(_t);
+      _t = _retTree;
 #line 356 "MDTreeParser.g"
-        dval = lexi_cast<RealType>(ic->getText());
+      dval = lexi_cast<RealType>(ic->getText());
 #line 1304 "MDTreeParser.cpp"
-        break;
-      }
-      case NUM_FLOAT:
-      case NUM_DOUBLE: {
-        fc = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr) nullAST : _t;
-        floatConst(_t);
-        _t = _retTree;
+      break;
+    }
+    case NUM_FLOAT:
+    case NUM_DOUBLE: {
+      fc = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr) nullAST : _t;
+      floatConst(_t);
+      _t = _retTree;
 #line 357 "MDTreeParser.g"
-        dval = lexi_cast<RealType>(fc->getText());
+      dval = lexi_cast<RealType>(fc->getText());
 #line 1315 "MDTreeParser.cpp"
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1315,9 +1319,9 @@ RealType MDTreeParser::doubleNumber(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::bondstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST bondstatement_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 #line 157 "MDTreeParser.g"
 
   vector<int> ivec;
@@ -1330,112 +1334,112 @@ void MDTreeParser::bondstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case ASSIGNEQUAL: {
-        assignment(_t);
-        _t = _retTree;
-        break;
-      }
-      case MEMBERS: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t51 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp39_AST_in = _t;
-        match(_t, MEMBERS);
-        _t = _t->getFirstChild();
-        ivec = inttuple(_t);
-        _t = _retTree;
-        _t = __t51;
-        _t = _t->getNextSibling();
+    case ASSIGNEQUAL: {
+      assignment(_t);
+      _t = _retTree;
+      break;
+    }
+    case MEMBERS: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t51        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp39_AST_in = _t;
+      match(_t, MEMBERS);
+      _t   = _t->getFirstChild();
+      ivec = inttuple(_t);
+      _t   = _retTree;
+      _t   = __t51;
+      _t   = _t->getNextSibling();
 #line 165 "MDTreeParser.g"
-        currBondStamp->setMembers(ivec);
+      currBondStamp->setMembers(ivec);
 #line 1366 "MDTreeParser.cpp"
-        break;
-      }
-      case FIXED: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t52 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp40_AST_in = _t;
-        match(_t, FIXED);
-        _t = _t->getFirstChild();
-        rval = doubleNumber(_t);
-        _t = _retTree;
-        _t = __t52;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case FIXED: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t52        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp40_AST_in = _t;
+      match(_t, FIXED);
+      _t   = _t->getFirstChild();
+      rval = doubleNumber(_t);
+      _t   = _retTree;
+      _t   = __t52;
+      _t   = _t->getNextSibling();
 #line 166 "MDTreeParser.g"
-        currBondStamp->overrideType("Fixed", rval);
+      currBondStamp->overrideType("Fixed", rval);
 #line 1381 "MDTreeParser.cpp"
-        break;
-      }
-      case HARMONIC: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t53 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp41_AST_in = _t;
-        match(_t, HARMONIC);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t53;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case HARMONIC: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t53        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp41_AST_in = _t;
+      match(_t, HARMONIC);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t53;
+      _t   = _t->getNextSibling();
 #line 167 "MDTreeParser.g"
-        currBondStamp->overrideType("Harmonic", dvec);
+      currBondStamp->overrideType("Harmonic", dvec);
 #line 1396 "MDTreeParser.cpp"
-        break;
-      }
-      case CUBIC: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t54 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp42_AST_in = _t;
-        match(_t, CUBIC);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t54;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case CUBIC: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t54        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp42_AST_in = _t;
+      match(_t, CUBIC);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t54;
+      _t   = _t->getNextSibling();
 #line 168 "MDTreeParser.g"
-        currBondStamp->overrideType("Cubic", dvec);
+      currBondStamp->overrideType("Cubic", dvec);
 #line 1411 "MDTreeParser.cpp"
-        break;
-      }
-      case QUARTIC: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t55 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp43_AST_in = _t;
-        match(_t, QUARTIC);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t55;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case QUARTIC: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t55        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp43_AST_in = _t;
+      match(_t, QUARTIC);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t55;
+      _t   = _t->getNextSibling();
 #line 169 "MDTreeParser.g"
-        currBondStamp->overrideType("Quartic", dvec);
+      currBondStamp->overrideType("Quartic", dvec);
 #line 1426 "MDTreeParser.cpp"
-        break;
-      }
-      case POLYNOMIAL: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t56 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp44_AST_in = _t;
-        match(_t, POLYNOMIAL);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t56;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case POLYNOMIAL: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t56        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp44_AST_in = _t;
+      match(_t, POLYNOMIAL);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t56;
+      _t   = _t->getNextSibling();
 #line 170 "MDTreeParser.g"
-        currBondStamp->overrideType("Polynomial", dvec);
+      currBondStamp->overrideType("Polynomial", dvec);
 #line 1441 "MDTreeParser.cpp"
-        break;
-      }
-      case MORSE: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t57 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp45_AST_in = _t;
-        match(_t, MORSE);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t57;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case MORSE: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t57        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp45_AST_in = _t;
+      match(_t, MORSE);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t57;
+      _t   = _t->getNextSibling();
 #line 171 "MDTreeParser.g"
-        currBondStamp->overrideType("Morse", dvec);
+      currBondStamp->overrideType("Morse", dvec);
 #line 1456 "MDTreeParser.cpp"
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1449,9 +1453,9 @@ vector<int> MDTreeParser::inttuple(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   vector<int> ivec;
 #line 1476 "MDTreeParser.cpp"
   ANTLR_USE_NAMESPACE(antlr)
-  RefAST inttuple_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-                               ? ANTLR_USE_NAMESPACE(antlr) nullAST
-                               : _t;
+  RefAST inttuple_AST_in = (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+                               ANTLR_USE_NAMESPACE(antlr) nullAST :
+                               _t;
 #line 341 "MDTreeParser.g"
 
   int ival;
@@ -1465,7 +1469,7 @@ vector<int> MDTreeParser::inttuple(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
         if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
         if ((_t->getType() == NUM_INT || _t->getType() == NUM_LONG)) {
           ival = intConst(_t);
-          _t = _retTree;
+          _t   = _retTree;
 #line 345 "MDTreeParser.g"
           ivec.push_back(ival);
 #line 1495 "MDTreeParser.cpp"
@@ -1492,9 +1496,9 @@ vector<int> MDTreeParser::inttuple(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::bendstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST bendstatement_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 #line 184 "MDTreeParser.g"
 
   vector<int> ivec;
@@ -1506,126 +1510,126 @@ void MDTreeParser::bendstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case ASSIGNEQUAL: {
-        assignment(_t);
-        _t = _retTree;
-        break;
-      }
-      case MEMBERS: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t63 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp46_AST_in = _t;
-        match(_t, MEMBERS);
-        _t = _t->getFirstChild();
-        ivec = inttuple(_t);
-        _t = _retTree;
-        _t = __t63;
-        _t = _t->getNextSibling();
+    case ASSIGNEQUAL: {
+      assignment(_t);
+      _t = _retTree;
+      break;
+    }
+    case MEMBERS: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t63        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp46_AST_in = _t;
+      match(_t, MEMBERS);
+      _t   = _t->getFirstChild();
+      ivec = inttuple(_t);
+      _t   = _retTree;
+      _t   = __t63;
+      _t   = _t->getNextSibling();
 #line 191 "MDTreeParser.g"
-        currBendStamp->setMembers(ivec);
+      currBendStamp->setMembers(ivec);
 #line 1547 "MDTreeParser.cpp"
-        break;
-      }
-      case HARMONIC: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t64 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp47_AST_in = _t;
-        match(_t, HARMONIC);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t64;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case HARMONIC: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t64        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp47_AST_in = _t;
+      match(_t, HARMONIC);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t64;
+      _t   = _t->getNextSibling();
 #line 192 "MDTreeParser.g"
-        currBendStamp->overrideType("Harmonic", dvec);
+      currBendStamp->overrideType("Harmonic", dvec);
 #line 1562 "MDTreeParser.cpp"
-        break;
-      }
-      case GHOSTBEND: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t65 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp48_AST_in = _t;
-        match(_t, GHOSTBEND);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t65;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case GHOSTBEND: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t65        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp48_AST_in = _t;
+      match(_t, GHOSTBEND);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t65;
+      _t   = _t->getNextSibling();
 #line 193 "MDTreeParser.g"
-        currBendStamp->overrideType("GhostBend", dvec);
+      currBendStamp->overrideType("GhostBend", dvec);
 #line 1577 "MDTreeParser.cpp"
-        break;
-      }
-      case UREYBRADLEY: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t66 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp49_AST_in = _t;
-        match(_t, UREYBRADLEY);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t66;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case UREYBRADLEY: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t66        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp49_AST_in = _t;
+      match(_t, UREYBRADLEY);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t66;
+      _t   = _t->getNextSibling();
 #line 194 "MDTreeParser.g"
-        currBendStamp->overrideType("UreyBradley", dvec);
+      currBendStamp->overrideType("UreyBradley", dvec);
 #line 1592 "MDTreeParser.cpp"
-        break;
-      }
-      case CUBIC: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t67 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp50_AST_in = _t;
-        match(_t, CUBIC);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t67;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case CUBIC: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t67        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp50_AST_in = _t;
+      match(_t, CUBIC);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t67;
+      _t   = _t->getNextSibling();
 #line 195 "MDTreeParser.g"
-        currBendStamp->overrideType("Cubic", dvec);
+      currBendStamp->overrideType("Cubic", dvec);
 #line 1607 "MDTreeParser.cpp"
-        break;
-      }
-      case QUARTIC: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t68 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp51_AST_in = _t;
-        match(_t, QUARTIC);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t68;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case QUARTIC: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t68        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp51_AST_in = _t;
+      match(_t, QUARTIC);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t68;
+      _t   = _t->getNextSibling();
 #line 196 "MDTreeParser.g"
-        currBendStamp->overrideType("Quartic", dvec);
+      currBendStamp->overrideType("Quartic", dvec);
 #line 1622 "MDTreeParser.cpp"
-        break;
-      }
-      case POLYNOMIAL: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t69 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp52_AST_in = _t;
-        match(_t, POLYNOMIAL);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t69;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case POLYNOMIAL: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t69        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp52_AST_in = _t;
+      match(_t, POLYNOMIAL);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t69;
+      _t   = _t->getNextSibling();
 #line 197 "MDTreeParser.g"
-        currBendStamp->overrideType("Polynomial", dvec);
+      currBendStamp->overrideType("Polynomial", dvec);
 #line 1637 "MDTreeParser.cpp"
-        break;
-      }
-      case COSINE: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t70 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp53_AST_in = _t;
-        match(_t, COSINE);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t70;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case COSINE: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t70        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp53_AST_in = _t;
+      match(_t, COSINE);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t70;
+      _t   = _t->getNextSibling();
 #line 198 "MDTreeParser.g"
-        currBendStamp->overrideType("Cosine", dvec);
+      currBendStamp->overrideType("Cosine", dvec);
 #line 1652 "MDTreeParser.cpp"
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1637,9 +1641,9 @@ void MDTreeParser::bendstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::torsionstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST torsionstatement_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 #line 211 "MDTreeParser.g"
 
   vector<int> ivec;
@@ -1651,140 +1655,140 @@ void MDTreeParser::torsionstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case ASSIGNEQUAL: {
-        assignment(_t);
-        _t = _retTree;
-        break;
-      }
-      case MEMBERS: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t76 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp54_AST_in = _t;
-        match(_t, MEMBERS);
-        _t = _t->getFirstChild();
-        ivec = inttuple(_t);
-        _t = _retTree;
-        _t = __t76;
-        _t = _t->getNextSibling();
+    case ASSIGNEQUAL: {
+      assignment(_t);
+      _t = _retTree;
+      break;
+    }
+    case MEMBERS: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t76        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp54_AST_in = _t;
+      match(_t, MEMBERS);
+      _t   = _t->getFirstChild();
+      ivec = inttuple(_t);
+      _t   = _retTree;
+      _t   = __t76;
+      _t   = _t->getNextSibling();
 #line 218 "MDTreeParser.g"
-        currTorsionStamp->setMembers(ivec);
+      currTorsionStamp->setMembers(ivec);
 #line 1701 "MDTreeParser.cpp"
-        break;
-      }
-      case GHOSTTORSION: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t77 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp55_AST_in = _t;
-        match(_t, GHOSTTORSION);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t77;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case GHOSTTORSION: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t77        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp55_AST_in = _t;
+      match(_t, GHOSTTORSION);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t77;
+      _t   = _t->getNextSibling();
 #line 219 "MDTreeParser.g"
-        currTorsionStamp->overrideType("GhostTorsion", dvec);
+      currTorsionStamp->overrideType("GhostTorsion", dvec);
 #line 1716 "MDTreeParser.cpp"
-        break;
-      }
-      case CUBIC: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t78 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp56_AST_in = _t;
-        match(_t, CUBIC);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t78;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case CUBIC: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t78        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp56_AST_in = _t;
+      match(_t, CUBIC);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t78;
+      _t   = _t->getNextSibling();
 #line 220 "MDTreeParser.g"
-        currTorsionStamp->overrideType("Cubic", dvec);
+      currTorsionStamp->overrideType("Cubic", dvec);
 #line 1731 "MDTreeParser.cpp"
-        break;
-      }
-      case QUARTIC: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t79 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp57_AST_in = _t;
-        match(_t, QUARTIC);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t79;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case QUARTIC: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t79        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp57_AST_in = _t;
+      match(_t, QUARTIC);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t79;
+      _t   = _t->getNextSibling();
 #line 221 "MDTreeParser.g"
-        currTorsionStamp->overrideType("Quartic", dvec);
+      currTorsionStamp->overrideType("Quartic", dvec);
 #line 1746 "MDTreeParser.cpp"
-        break;
-      }
-      case POLYNOMIAL: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t80 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp58_AST_in = _t;
-        match(_t, POLYNOMIAL);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t80;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case POLYNOMIAL: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t80        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp58_AST_in = _t;
+      match(_t, POLYNOMIAL);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t80;
+      _t   = _t->getNextSibling();
 #line 222 "MDTreeParser.g"
-        currTorsionStamp->overrideType("Polynomial", dvec);
+      currTorsionStamp->overrideType("Polynomial", dvec);
 #line 1761 "MDTreeParser.cpp"
-        break;
-      }
-      case CHARMM: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t81 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp59_AST_in = _t;
-        match(_t, CHARMM);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t81;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case CHARMM: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t81        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp59_AST_in = _t;
+      match(_t, CHARMM);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t81;
+      _t   = _t->getNextSibling();
 #line 223 "MDTreeParser.g"
-        currTorsionStamp->overrideType("Charmm", dvec);
+      currTorsionStamp->overrideType("Charmm", dvec);
 #line 1776 "MDTreeParser.cpp"
-        break;
-      }
-      case OPLS: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t82 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp60_AST_in = _t;
-        match(_t, OPLS);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t82;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case OPLS: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t82        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp60_AST_in = _t;
+      match(_t, OPLS);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t82;
+      _t   = _t->getNextSibling();
 #line 224 "MDTreeParser.g"
-        currTorsionStamp->overrideType("Opls", dvec);
+      currTorsionStamp->overrideType("Opls", dvec);
 #line 1791 "MDTreeParser.cpp"
-        break;
-      }
-      case TRAPPE: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t83 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp61_AST_in = _t;
-        match(_t, TRAPPE);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t83;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case TRAPPE: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t83        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp61_AST_in = _t;
+      match(_t, TRAPPE);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t83;
+      _t   = _t->getNextSibling();
 #line 225 "MDTreeParser.g"
-        currTorsionStamp->overrideType("Trappe", dvec);
+      currTorsionStamp->overrideType("Trappe", dvec);
 #line 1806 "MDTreeParser.cpp"
-        break;
-      }
-      case HARMONIC: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t84 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp62_AST_in = _t;
-        match(_t, HARMONIC);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t84;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case HARMONIC: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t84        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp62_AST_in = _t;
+      match(_t, HARMONIC);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t84;
+      _t   = _t->getNextSibling();
 #line 226 "MDTreeParser.g"
-        currTorsionStamp->overrideType("Harmonic", dvec);
+      currTorsionStamp->overrideType("Harmonic", dvec);
 #line 1821 "MDTreeParser.cpp"
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1796,9 +1800,9 @@ void MDTreeParser::torsionstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::inversionstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST inversionstatement_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 #line 240 "MDTreeParser.g"
 
   int icent;
@@ -1812,112 +1816,112 @@ void MDTreeParser::inversionstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case ASSIGNEQUAL: {
-        assignment(_t);
-        _t = _retTree;
-        break;
-      }
-      case CENTER: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t90 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp63_AST_in = _t;
-        match(_t, CENTER);
-        _t = _t->getFirstChild();
-        icent = intConst(_t);
-        _t = _retTree;
-        _t = __t90;
-        _t = _t->getNextSibling();
+    case ASSIGNEQUAL: {
+      assignment(_t);
+      _t = _retTree;
+      break;
+    }
+    case CENTER: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t90        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp63_AST_in = _t;
+      match(_t, CENTER);
+      _t    = _t->getFirstChild();
+      icent = intConst(_t);
+      _t    = _retTree;
+      _t    = __t90;
+      _t    = _t->getNextSibling();
 #line 248 "MDTreeParser.g"
-        currInversionStamp->setCenter(icent);
+      currInversionStamp->setCenter(icent);
 #line 1871 "MDTreeParser.cpp"
-        break;
-      }
-      case SATELLITES: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t91 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp64_AST_in = _t;
-        match(_t, SATELLITES);
-        _t = _t->getFirstChild();
-        ivec = inttuple(_t);
-        _t = _retTree;
-        _t = __t91;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case SATELLITES: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t91        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp64_AST_in = _t;
+      match(_t, SATELLITES);
+      _t   = _t->getFirstChild();
+      ivec = inttuple(_t);
+      _t   = _retTree;
+      _t   = __t91;
+      _t   = _t->getNextSibling();
 #line 249 "MDTreeParser.g"
-        currInversionStamp->setSatellites(ivec);
+      currInversionStamp->setSatellites(ivec);
 #line 1886 "MDTreeParser.cpp"
-        break;
-      }
-      case AMBERIMPROPER: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t92 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp65_AST_in = _t;
-        match(_t, AMBERIMPROPER);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t92;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case AMBERIMPROPER: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t92        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp65_AST_in = _t;
+      match(_t, AMBERIMPROPER);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t92;
+      _t   = _t->getNextSibling();
 #line 250 "MDTreeParser.g"
-        currInversionStamp->overrideType("AmberImproper", dvec);
+      currInversionStamp->overrideType("AmberImproper", dvec);
 #line 1901 "MDTreeParser.cpp"
-        break;
-      }
-      case IMPROPERCOSINE: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t93 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp66_AST_in = _t;
-        match(_t, IMPROPERCOSINE);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t93;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case IMPROPERCOSINE: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t93        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp66_AST_in = _t;
+      match(_t, IMPROPERCOSINE);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t93;
+      _t   = _t->getNextSibling();
 #line 251 "MDTreeParser.g"
-        currInversionStamp->overrideType("ImproperCosine", dvec);
+      currInversionStamp->overrideType("ImproperCosine", dvec);
 #line 1916 "MDTreeParser.cpp"
-        break;
-      }
-      case HARMONIC: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t94 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp67_AST_in = _t;
-        match(_t, HARMONIC);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t94;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case HARMONIC: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t94        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp67_AST_in = _t;
+      match(_t, HARMONIC);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t94;
+      _t   = _t->getNextSibling();
 #line 252 "MDTreeParser.g"
-        currInversionStamp->overrideType("Harmonic", dvec);
+      currInversionStamp->overrideType("Harmonic", dvec);
 #line 1931 "MDTreeParser.cpp"
-        break;
-      }
-      case CENTRALATOMHEIGHT: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t95 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp68_AST_in = _t;
-        match(_t, CENTRALATOMHEIGHT);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t95;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case CENTRALATOMHEIGHT: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t95        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp68_AST_in = _t;
+      match(_t, CENTRALATOMHEIGHT);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t95;
+      _t   = _t->getNextSibling();
 #line 253 "MDTreeParser.g"
-        currInversionStamp->overrideType("CentralAtomHeight", dvec);
+      currInversionStamp->overrideType("CentralAtomHeight", dvec);
 #line 1946 "MDTreeParser.cpp"
-        break;
-      }
-      case DREIDING: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t96 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp69_AST_in = _t;
-        match(_t, DREIDING);
-        _t = _t->getFirstChild();
-        dvec = doubleNumberTuple(_t);
-        _t = _retTree;
-        _t = __t96;
-        _t = _t->getNextSibling();
+      break;
+    }
+    case DREIDING: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t96        = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp69_AST_in = _t;
+      match(_t, DREIDING);
+      _t   = _t->getFirstChild();
+      dvec = doubleNumberTuple(_t);
+      _t   = _retTree;
+      _t   = __t96;
+      _t   = _t->getNextSibling();
 #line 254 "MDTreeParser.g"
-        currInversionStamp->overrideType("Dreiding", dvec);
+      currInversionStamp->overrideType("Dreiding", dvec);
 #line 1961 "MDTreeParser.cpp"
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1929,9 +1933,9 @@ void MDTreeParser::inversionstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::rigidbodystatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST rigidbodystatement_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 #line 272 "MDTreeParser.g"
 
   vector<int> ivec;
@@ -1943,28 +1947,28 @@ void MDTreeParser::rigidbodystatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case ASSIGNEQUAL: {
-        assignment(_t);
-        _t = _retTree;
-        break;
-      }
-      case MEMBERS: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t102 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp70_AST_in = _t;
-        match(_t, MEMBERS);
-        _t = _t->getFirstChild();
-        ivec = inttuple(_t);
-        _t = _retTree;
-        _t = __t102;
-        _t = _t->getNextSibling();
+    case ASSIGNEQUAL: {
+      assignment(_t);
+      _t = _retTree;
+      break;
+    }
+    case MEMBERS: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t102       = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp70_AST_in = _t;
+      match(_t, MEMBERS);
+      _t   = _t->getFirstChild();
+      ivec = inttuple(_t);
+      _t   = _retTree;
+      _t   = __t102;
+      _t   = _t->getNextSibling();
 #line 278 "MDTreeParser.g"
-        currRigidBodyStamp->setMembers(ivec);
+      currRigidBodyStamp->setMembers(ivec);
 #line 2009 "MDTreeParser.cpp"
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1976,9 +1980,9 @@ void MDTreeParser::rigidbodystatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::cutoffgroupstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST cutoffgroupstatement_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 #line 291 "MDTreeParser.g"
 
   vector<int> ivec;
@@ -1990,28 +1994,28 @@ void MDTreeParser::cutoffgroupstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case ASSIGNEQUAL: {
-        assignment(_t);
-        _t = _retTree;
-        break;
-      }
-      case MEMBERS: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t108 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp71_AST_in = _t;
-        match(_t, MEMBERS);
-        _t = _t->getFirstChild();
-        ivec = inttuple(_t);
-        _t = _retTree;
-        _t = __t108;
-        _t = _t->getNextSibling();
+    case ASSIGNEQUAL: {
+      assignment(_t);
+      _t = _retTree;
+      break;
+    }
+    case MEMBERS: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t108       = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp71_AST_in = _t;
+      match(_t, MEMBERS);
+      _t   = _t->getFirstChild();
+      ivec = inttuple(_t);
+      _t   = _retTree;
+      _t   = __t108;
+      _t   = _t->getNextSibling();
 #line 297 "MDTreeParser.g"
-        currCutoffGroupStamp->setMembers(ivec);
+      currCutoffGroupStamp->setMembers(ivec);
 #line 2057 "MDTreeParser.cpp"
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -2023,9 +2027,9 @@ void MDTreeParser::cutoffgroupstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::fragmentstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST fragmentstatement_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 
   try {  // for error handling
     assignment(_t);
@@ -2040,9 +2044,9 @@ void MDTreeParser::fragmentstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
 void MDTreeParser::constraintstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   ANTLR_USE_NAMESPACE(antlr)
   RefAST constraintstatement_AST_in =
-      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL))
-          ? ANTLR_USE_NAMESPACE(antlr) nullAST
-          : _t;
+      (_t == ANTLR_USE_NAMESPACE(antlr) RefAST(ASTNULL)) ?
+          ANTLR_USE_NAMESPACE(antlr) nullAST :
+          _t;
 #line 323 "MDTreeParser.g"
 
   vector<int> ivec;
@@ -2054,28 +2058,28 @@ void MDTreeParser::constraintstatement(ANTLR_USE_NAMESPACE(antlr) RefAST _t) {
   try {  // for error handling
     if (_t == ANTLR_USE_NAMESPACE(antlr) nullAST) _t = ASTNULL;
     switch (_t->getType()) {
-      case ASSIGNEQUAL: {
-        assignment(_t);
-        _t = _retTree;
-        break;
-      }
-      case MEMBERS: {
-        ANTLR_USE_NAMESPACE(antlr) RefAST __t119 = _t;
-        ANTLR_USE_NAMESPACE(antlr) RefAST tmp72_AST_in = _t;
-        match(_t, MEMBERS);
-        _t = _t->getFirstChild();
-        ivec = inttuple(_t);
-        _t = _retTree;
-        _t = __t119;
-        _t = _t->getNextSibling();
+    case ASSIGNEQUAL: {
+      assignment(_t);
+      _t = _retTree;
+      break;
+    }
+    case MEMBERS: {
+      ANTLR_USE_NAMESPACE(antlr) RefAST __t119       = _t;
+      ANTLR_USE_NAMESPACE(antlr) RefAST tmp72_AST_in = _t;
+      match(_t, MEMBERS);
+      _t   = _t->getFirstChild();
+      ivec = inttuple(_t);
+      _t   = _retTree;
+      _t   = __t119;
+      _t   = _t->getNextSibling();
 #line 329 "MDTreeParser.g"
-        currConstraintStamp->setMembers(ivec);
+      currConstraintStamp->setMembers(ivec);
 #line 2120 "MDTreeParser.cpp"
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
-      }
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr) NoViableAltException(_t);
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);

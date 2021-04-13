@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,23 +49,24 @@
 
 #ifndef APPLICATIONS_STATICPROPS_POTDIFF_HPP
 #define APPLICATIONS_STATICPROPS_POTDIFF_HPP
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 #include "utils/Accumulator.hpp"
 
 namespace OpenMD {
 
   //! Potential Energy differences with charges turned off.
-  /*!  
+  /*!
    */
-  class PotDiff : public StaticAnalyser{
+  class PotDiff : public StaticAnalyser {
   public:
     //! Default constructor
-    PotDiff(SimInfo* info, const std::string& filename, const std::string& sele);
+    PotDiff(SimInfo* info, const std::string& filename,
+            const std::string& sele);
     //! Process the data
     virtual void process();
-    
+
   private:
     //! Write the data
     void writeDiff();
@@ -84,9 +85,6 @@ namespace OpenMD {
     SelectionEvaluator evaluator_;
     std::vector<bool> selectionWasFlucQ_;
   };
-}
+}  // namespace OpenMD
 
 #endif
-
-
-

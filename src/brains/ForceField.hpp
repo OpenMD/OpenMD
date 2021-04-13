@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,140 +42,133 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file ForceField.hpp
  * @author tlin
  * @date 11/04/2004
  * @version 1.0
  */
-  
+
 #ifndef USETHEFORCE_FORCEFIELD_HPP
 #define USETHEFORCE_FORCEFIELD_HPP
 
-#include "config.h"
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "io/ifstrstream.hpp"
+#include "config.h"
 #include "io/ForceFieldOptions.hpp"
 #include "io/SectionParserManager.hpp"
-#include "utils/TypeContainer.hpp"
-#include "utils/Tuple.hpp"
+#include "io/ifstrstream.hpp"
 #include "types/AtomType.hpp"
-#include "types/BondType.hpp"
 #include "types/BendType.hpp"
-#include "types/TorsionType.hpp"
+#include "types/BondType.hpp"
 #include "types/InversionType.hpp"
 #include "types/NonBondedInteractionType.hpp"
+#include "types/TorsionType.hpp"
+#include "utils/Tuple.hpp"
+#include "utils/TypeContainer.hpp"
 
 namespace OpenMD {
 
-  class ForceField{
-
+  class ForceField {
   public:
     typedef TypeContainer<AtomType, 1> AtomTypeContainer;
     typedef TypeContainer<BondType, 2> BondTypeContainer;
     typedef TypeContainer<BendType, 3> BendTypeContainer;
     typedef TypeContainer<TorsionType, 4> TorsionTypeContainer;
     typedef TypeContainer<InversionType, 4> InversionTypeContainer;
-    typedef TypeContainer<NonBondedInteractionType, 2> NonBondedInteractionTypeContainer;
-    
+    typedef TypeContainer<NonBondedInteractionType, 2>
+        NonBondedInteractionTypeContainer;
+
     ForceField(std::string ffName);
-    
+
     virtual ~ForceField() = default;
 
-    std::string getForceFieldFileName() {
-      return forceFieldFileName_;
-    }
+    std::string getForceFieldFileName() { return forceFieldFileName_; }
 
     void setForceFieldFileName(const std::string& filename) {
       forceFieldFileName_ = filename;
     }
-        
-    virtual void parse(const std::string& filename);  
 
-    AtomType* getAtomType(const std::string &at);
+    virtual void parse(const std::string& filename);
+
+    AtomType* getAtomType(const std::string& at);
     AtomType* getAtomType(int ident);
-    BondType* getBondType(const std::string &at1, const std::string &at2);
-    BendType* getBendType(const std::string &at1, const std::string &at2,
-                          const std::string &at3);
-    TorsionType* getTorsionType(const std::string &at1, const std::string &at2,
-                                const std::string &at3, const std::string &at4);
-    InversionType* getInversionType(const std::string &at1, 
-				    const std::string &at2,
-				    const std::string &at3, 
-				    const std::string &at4);
-    NonBondedInteractionType* getNonBondedInteractionType(const std::string &at1, const std::string &at2);
-    
-    BondType* getExactBondType(const std::string &at1, const std::string &at2);
-    BendType* getExactBendType(const std::string &at1, const std::string &at2,
-                               const std::string &at3);
-    TorsionType* getExactTorsionType(const std::string &at1, 
-                                     const std::string &at2,
-                                     const std::string &at3, 
-                                     const std::string &at4);
-    InversionType* getExactInversionType(const std::string &at1, 
-					 const std::string &at2,
-					 const std::string &at3, 
-					 const std::string &at4);
-    NonBondedInteractionType* getExactNonBondedInteractionType(const std::string &at1, const std::string &at2);
-    
-    
-    //avoid make virtual function public
-    //Herb Sutter and Andrei Alexandrescu, C++ coding Standards, Addision-Wesley
+    BondType* getBondType(const std::string& at1, const std::string& at2);
+    BendType* getBendType(const std::string& at1, const std::string& at2,
+                          const std::string& at3);
+    TorsionType* getTorsionType(const std::string& at1, const std::string& at2,
+                                const std::string& at3, const std::string& at4);
+    InversionType* getInversionType(const std::string& at1,
+                                    const std::string& at2,
+                                    const std::string& at3,
+                                    const std::string& at4);
+    NonBondedInteractionType* getNonBondedInteractionType(
+        const std::string& at1, const std::string& at2);
+
+    BondType* getExactBondType(const std::string& at1, const std::string& at2);
+    BendType* getExactBendType(const std::string& at1, const std::string& at2,
+                               const std::string& at3);
+    TorsionType* getExactTorsionType(const std::string& at1,
+                                     const std::string& at2,
+                                     const std::string& at3,
+                                     const std::string& at4);
+    InversionType* getExactInversionType(const std::string& at1,
+                                         const std::string& at2,
+                                         const std::string& at3,
+                                         const std::string& at4);
+    NonBondedInteractionType* getExactNonBondedInteractionType(
+        const std::string& at1, const std::string& at2);
+
+    // avoid make virtual function public
+    // Herb Sutter and Andrei Alexandrescu, C++ coding Standards,
+    // Addision-Wesley
     virtual RealType getRcutFromAtomType(AtomType* at);
-    
-    std::string getWildCard() {
-      return wildCardAtomTypeName_;
-    }
-    
+
+    std::string getWildCard() { return wildCardAtomTypeName_; }
+
     void setWildCard(const std::string& wildCard) {
       wildCardAtomTypeName_ = wildCard;
     }
-    
-    unsigned int getNAtomType() {
-      return atomTypeCont_.size();
-    }
 
-    AtomTypeContainer* getAtomTypes() {
-      return &atomTypeCont_;
-    }
-    
+    unsigned int getNAtomType() { return atomTypeCont_.size(); }
+
+    AtomTypeContainer* getAtomTypes() { return &atomTypeCont_; }
+
     NonBondedInteractionTypeContainer* getNonBondedInteractionTypes() {
       return &nonBondedInteractionTypeCont_;
     }
-        
-    bool addAtomType(const std::string &at, AtomType* atomType);
 
-    bool replaceAtomType(const std::string &at, AtomType* atomType);
+    bool addAtomType(const std::string& at, AtomType* atomType);
 
-    bool addBondType(const std::string &at1, const std::string &at2, 
+    bool replaceAtomType(const std::string& at, AtomType* atomType);
+
+    bool addBondType(const std::string& at1, const std::string& at2,
                      BondType* bondType);
 
-    bool addBendType(const std::string &at1, const std::string &at2,
-		     const std::string &at3, BendType* bendType);
+    bool addBendType(const std::string& at1, const std::string& at2,
+                     const std::string& at3, BendType* bendType);
 
-    bool addTorsionType(const std::string &at1, const std::string &at2,
-			const std::string &at3, const std::string &at4, 
-			TorsionType* torsionType);
+    bool addTorsionType(const std::string& at1, const std::string& at2,
+                        const std::string& at3, const std::string& at4,
+                        TorsionType* torsionType);
 
-    bool addInversionType(const std::string &at1, const std::string &at2,
-			  const std::string &at3, const std::string &at4,
-			  InversionType* inversionType);
-    
-    bool addNonBondedInteractionType(const std::string &at1, 
-				     const std::string &at2, 
-				     NonBondedInteractionType* nbiType);
-    
+    bool addInversionType(const std::string& at1, const std::string& at2,
+                          const std::string& at3, const std::string& at4,
+                          InversionType* inversionType);
+
+    bool addNonBondedInteractionType(const std::string& at1,
+                                     const std::string& at2,
+                                     NonBondedInteractionType* nbiType);
+
     ifstrstream* openForceFieldFile(const std::string& filename);
-    
-    ForceFieldOptions& getForceFieldOptions() {return forceFieldOptions_;}
+
+    ForceFieldOptions& getForceFieldOptions() { return forceFieldOptions_; }
 
   protected:
-
-    AtomTypeContainer atomTypeCont_;    
+    AtomTypeContainer atomTypeCont_;
     BondTypeContainer bondTypeCont_;
     BendTypeContainer bendTypeCont_;
     TorsionTypeContainer torsionTypeCont_;
@@ -185,13 +178,10 @@ namespace OpenMD {
     std::map<int, std::string> atypeIdentToName;
     SectionParserManager spMan_;
 
-    
-  private:  
-    std::string ffPath_;    
-    std::string wildCardAtomTypeName_;    
-    std::string forceFieldFileName_;    
-    
+  private:
+    std::string ffPath_;
+    std::string wildCardAtomTypeName_;
+    std::string forceFieldFileName_;
   };
-}//end namespace OpenMD
+}  // end namespace OpenMD
 #endif
-

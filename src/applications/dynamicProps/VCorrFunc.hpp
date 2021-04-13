@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,36 +51,36 @@ namespace OpenMD {
 
   class VCorrFunc : public ObjectACF<RealType> {
   public:
-    VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
-        
+    VCorrFunc(SimInfo* info, const std::string& filename,
+              const std::string& sele1, const std::string& sele2);
+
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
-    std::vector<std::vector<Vector3d> > velocities_;
+    std::vector<std::vector<Vector3d>> velocities_;
   };
 
   class VCorrFuncZ : public ObjectACF<RealType> {
   public:
-    VCorrFuncZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
-        
+    VCorrFuncZ(SimInfo* info, const std::string& filename,
+               const std::string& sele1, const std::string& sele2);
+
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
-    std::vector<std::vector<RealType> > velocities_;
-         
+    std::vector<std::vector<RealType>> velocities_;
   };
 
   class VCorrFuncR : public ObjectACF<RealType> {
   public:
-    VCorrFuncR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
-        
+    VCorrFuncR(SimInfo* info, const std::string& filename,
+               const std::string& sele1, const std::string& sele2);
+
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
-    std::vector<std::vector<RealType> > velocities_;
-    
+    std::vector<std::vector<RealType>> velocities_;
   };
 
-
-}
+}  // namespace OpenMD
 #endif

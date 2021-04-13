@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,23 +46,21 @@
 #ifndef APPLICATIONS_STATICPROPS_FIELD_HPP
 #define APPLICATIONS_STATICPROPS_FIELD_HPP
 
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
 
 namespace OpenMD {
 
-
   template<class T>
-  class Field : public StaticAnalyser{
-    
+  class Field : public StaticAnalyser {
   public:
-    Field(SimInfo* info, const std::string& filename, 
-	  const std::string& sele, RealType voxelSize);
-    
+    Field(SimInfo* info, const std::string& filename, const std::string& sele,
+          RealType voxelSize);
+
     virtual ~Field() = default;
-    
+
     virtual void process();
     virtual void processFrame(int frame);
     virtual void postProcess();
@@ -70,10 +68,10 @@ namespace OpenMD {
     virtual void writeField();
     virtual std::string writeValue(T v);
     virtual void writeVisualizationScript();
-    
+
   protected:
     RealType getDensity(RealType dist, RealType sigma, RealType rcut);
-    
+
     Snapshot* snap_;
     int nProcessed_;
     string selectionScript_;
@@ -82,46 +80,42 @@ namespace OpenMD {
     bool usePeriodicBoundaryConditions_;
     RealType rcut_;
     RealType reffective_;
-    
+
     RealType voxelSize_;
     Vector3i nBins_;
-    
-    std::vector<std::vector<std::vector<RealType> > > dens_;
-    std::vector<std::vector<std::vector<T > > > field_;
+
+    std::vector<std::vector<std::vector<RealType>>> dens_;
+    std::vector<std::vector<std::vector<T>>> field_;
   };
 
   class DensityField : public Field<RealType> {
   public:
     DensityField(SimInfo* info, const std::string& filename,
                  const std::string& sele1, RealType voxelSize);
-    
+
     virtual RealType getValue(StuntDouble* sd);
   };
-  
-  
+
   class ChargeField : public Field<RealType> {
   public:
     ChargeField(SimInfo* info, const std::string& filename,
-                       const std::string& sele1, RealType voxelSize);
+                const std::string& sele1, RealType voxelSize);
     virtual RealType getValue(StuntDouble* sd);
   };
-  
-  
+
   class VelocityField : public Field<Vector3d> {
   public:
     VelocityField(SimInfo* info, const std::string& filename,
-			const std::string& sele1, RealType voxelSize);
+                  const std::string& sele1, RealType voxelSize);
     virtual Vector3d getValue(StuntDouble* sd);
   };
-  
-  
+
   class DipoleField : public Field<Vector3d> {
   public:
     DipoleField(SimInfo* info, const std::string& filename,
                 const std::string& sele1, RealType voxelSize);
     virtual Vector3d getValue(StuntDouble* sd);
   };
-  
-}
-#endif
 
+}  // namespace OpenMD
+#endif

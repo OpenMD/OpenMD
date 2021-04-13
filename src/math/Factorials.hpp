@@ -13,9 +13,8 @@
  *   along with this program; if not, see <http://www.gnu.org/licenses/>.  *
  ***************************************************************************/
 #include "config.h"
-const int maxFact = 151; // Largest factorial computed
-const RealType fact[maxFact] =
-  {
+const int maxFact            = 151;  // Largest factorial computed
+const RealType fact[maxFact] = {
     1.0,
     1.0,
     2.0,
@@ -166,5 +165,4 @@ const RealType fact[maxFact] =
     1.7272458904546376e256,
     2.5563239178728637e258,
     3.8089226376305671e260,
-    5.7133839564458505e262
-  };  //  array of precomputed factorials
+    5.7133839564458505e262};  //  array of precomputed factorials

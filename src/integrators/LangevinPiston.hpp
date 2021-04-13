@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -53,7 +53,7 @@ namespace OpenMD {
 
   /**
    * @class LangevinPiston
-   * Constant pressure and temperature integrator  
+   * Constant pressure and temperature integrator
    *
    * The Langevin Piston Nosé-Hoover method in OpenMD combines the
    * Nosé-Hoover constant pressure method as described in
@@ -65,13 +65,12 @@ namespace OpenMD {
    * molecular dynamics simulation: The Langevin piston method",
    * J. Chem. Phys. 103, 4613 (1995); https://doi.org/10.1063/1.47064
    */
-  
-  class LangevinPiston : public NPT{
+
+  class LangevinPiston : public NPT {
   public:
     LangevinPiston(SimInfo* info);
 
   private:
-
     /* We need to implement moveA and moveB separately to leave out
      * the extended system thermostatting. Temperature control is
      * supplied in Langevin methods by connecting friction and random
@@ -87,12 +86,12 @@ namespace OpenMD {
     virtual bool etaConverged();
 
     virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel);
-    virtual void getVelScaleB(Vector3d& sc, int index );
+    virtual void getVelScaleB(Vector3d& sc, int index);
     virtual void getPosScale(const Vector3d& pos, const Vector3d& COM,
-			     int index, Vector3d& sc);
+                             int index, Vector3d& sc);
 
     virtual void calcVelScale();
-        
+
     virtual void scaleSimBox();
     virtual RealType calcConservedQuantity();
 
@@ -104,14 +103,13 @@ namespace OpenMD {
     RealType oldEta;
     RealType prevEta;
     RealType vScale;
-    
+
     SeqRandNumGen randNumGen_;
     RealType W_;
     RealType gamma_;
     RealType variance_;
     RealType randomForce_;
-
   };
-}//end namespace OpenMD
+}  // end namespace OpenMD
 
-#endif //INTEGRATORS_LANGEVINPISTON_HPP
+#endif  // INTEGRATORS_LANGEVINPISTON_HPP

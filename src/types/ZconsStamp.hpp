@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_ZCONSTAMP_HPP
 #define TYPES_ZCONSTAMP_HPP
 
@@ -53,10 +53,11 @@ namespace OpenMD {
     DeclareParameter(Zpos, RealType);
     DeclareParameter(Kratio, RealType);
     DeclareParameter(CantVel, RealType);
+
   public:
     ZConsStamp();
     virtual ~ZConsStamp();
     virtual void validate();
   };
-}
-#endif // __ZCONSTAMP_H__
+}  // namespace OpenMD
+#endif  // __ZCONSTAMP_H__

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -64,7 +64,8 @@ namespace OpenMD {
   //! Frequency Fluctuation Correlation Function
   /*! See <http://dx.doi.org/10.1021/jp010798o>
 
-    Williams, Loring, and Fayer, J. Phys. Chem. B 2001, 105, 4068-4071 for details
+    Williams, Loring, and Fayer, J. Phys. Chem. B 2001, 105, 4068-4071 for
+    details
 
     Makes an assumption that the frequency depends on the
     orientation of the dipole relative to the local Electric
@@ -82,9 +83,9 @@ namespace OpenMD {
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
     virtual void validateSelection(SelectionManager& seleMan);
 
-    std::vector< std::vector<RealType> > ue_;
+    std::vector<std::vector<RealType>> ue_;
     Utils::RealAccumulator ueStats_ {};
   };
-}
+}  // namespace OpenMD
 
 #endif

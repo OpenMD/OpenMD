@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,24 +42,24 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_FORCEFIELDOPTIONS_HPP
 #define IO_FORCEFIELDOPTIONS_HPP
-#include "utils/simError.h"
+#include "io/ParamConstraint.hpp"
 #include "types/DataHolder.hpp"
 #include "utils/ParameterManager.hpp"
 #include "utils/StringUtils.hpp"
-#include "io/ParamConstraint.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
-  
+
   class ForceFieldOptions : public DataHolder {
     DeclareParameter(Name, std::string);
     DeclareParameter(vdWtype, std::string);
     DeclareParameter(DistanceMixingRule, std::string);
     DeclareParameter(DistanceType, std::string);
     DeclareParameter(EnergyMixingRule, std::string);
-    DeclareParameter(EnergyUnitScaling, RealType);   
+    DeclareParameter(EnergyUnitScaling, RealType);
     DeclareParameter(MetallicEnergyUnitScaling, RealType);
     DeclareParameter(FluctuatingChargeEnergyUnitScaling, RealType);
     DeclareParameter(DistanceUnitScaling, RealType);
@@ -79,71 +79,69 @@ namespace OpenMD {
     DeclareParameter(GayBerneNu, RealType);
     DeclareParameter(EAMMixingMethod, std::string);
     DeclareParameter(DelayedParameterCalculation, bool);
-    
+
   public:
     ForceFieldOptions();
     ForceFieldOptions(const ForceFieldOptions&);
-    ForceFieldOptions& operator = (const ForceFieldOptions&);
-    
+    ForceFieldOptions& operator=(const ForceFieldOptions&);
+
     void validateOptions() {
       CheckParameter(vdWtype, isEqualIgnoreCase(std::string("Lennard-Jones")));
       CheckParameter(DistanceMixingRule,
                      isEqualIgnoreCase(std::string("arithmetic")) ||
-                     isEqualIgnoreCase(std::string("geometric")) ||
-                     isEqualIgnoreCase(std::string("cubic")));
-      CheckParameter(DistanceType,
-                     isEqualIgnoreCase(std::string("sigma")) ||
-                     isEqualIgnoreCase(std::string("Rmin")));
+                         isEqualIgnoreCase(std::string("geometric")) ||
+                         isEqualIgnoreCase(std::string("cubic")));
+      CheckParameter(DistanceType, isEqualIgnoreCase(std::string("sigma")) ||
+                                       isEqualIgnoreCase(std::string("Rmin")));
       CheckParameter(EnergyMixingRule,
                      isEqualIgnoreCase(std::string("arithmetic")) ||
-                     isEqualIgnoreCase(std::string("geometric")) ||
-                     isEqualIgnoreCase(std::string("hhg")));
+                         isEqualIgnoreCase(std::string("geometric")) ||
+                         isEqualIgnoreCase(std::string("hhg")));
       CheckParameter(TorsionAngleConvention,
                      isEqualIgnoreCase(std::string("180_is_trans")) ||
-                     isEqualIgnoreCase(std::string("0_is_trans")));
+                         isEqualIgnoreCase(std::string("0_is_trans")));
       CheckParameter(EAMMixingMethod,
                      isEqualIgnoreCase(std::string("Johnson")) ||
-                     isEqualIgnoreCase(std::string("Daw")) ||
-                     isEqualIgnoreCase(std::string("DREAM1")) ||
-                     isEqualIgnoreCase(std::string("DREAM2")) );
-   }
-    
+                         isEqualIgnoreCase(std::string("Daw")) ||
+                         isEqualIgnoreCase(std::string("DREAM1")) ||
+                         isEqualIgnoreCase(std::string("DREAM2")));
+    }
+
     bool setData(const std::string& keyword, const std::string& value) {
       bool result(false);
-      ParamMap::iterator i =parameters_.find(keyword);
+      ParamMap::iterator i = parameters_.find(keyword);
       if (i != parameters_.end()) {
-        if(isInteger(value)){
+        if (isInteger(value)) {
           int ival = lexi_cast<int>(value);
-          result = i->second->setData(ival);
-        }      
-        else if (isType<RealType>(value)){
+          result   = i->second->setData(ival);
+        } else if (isType<RealType>(value)) {
           RealType dval = lexi_cast<RealType>(value);
-          result = i->second->setData(dval);
-        } else{
+          result        = i->second->setData(dval);
+        } else {
           result = i->second->setData(value);
         }
 
         if (!result) {
-          sprintf(painCave.errMsg,  
+          sprintf(painCave.errMsg,
                   "Unrecognized data type for keyword: %s = %s\n",
-                  keyword.c_str(), value.c_str() );
+                  keyword.c_str(), value.c_str());
           painCave.isFatal = 1;
-          simError();                  
+          simError();
         }
       } else {
-        sprintf(painCave.errMsg,  "%s is an unrecognized keyword\n",
-                keyword.c_str() );
+        sprintf(painCave.errMsg, "%s is an unrecognized keyword\n",
+                keyword.c_str());
         painCave.isFatal = 0;
-        simError();        
+        simError();
       }
-      
+
       return result;
     }
 
   private:
     typedef std::map<std::string, ParameterBase*> ParamMap;
-    ParamMap parameters_;                  
+    ParamMap parameters_;
   };
-  
-}
+
+}  // namespace OpenMD
 #endif

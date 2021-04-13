@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -186,7 +186,7 @@ int main(int argc, char* argv[]) {
   SimCreator creator;
   SimInfo* info = creator.createSim(argv[1]);
 
-  Globals* simParams = info->getSimParams();
+  Globals* simParams            = info->getSimParams();
   MinimizerParameters* miniPars = simParams->getMinimizerParameters();
 
   if (miniPars->getUseMinimizer() && simParams->haveEnsemble()) {
@@ -216,16 +216,16 @@ int main(int argc, char* argv[]) {
     fman->initialize();
 
     PotentialEnergyObjectiveFunction potObjf(info, fman);
-    NoConstraint noConstraint{};
+    NoConstraint noConstraint {};
     DumpStatusFunction dsf(info);
     DynamicVector<RealType> initCoords = potObjf.setInitialCoords();
     Problem problem(potObjf, noConstraint, dsf, initCoords);
 
-    int maxIter = miniPars->getMaxIterations();
-    int mssIter = miniPars->getMaxStationaryStateIterations();
-    RealType rEps = miniPars->getRootEpsilon();
-    RealType fEps = miniPars->getFunctionEpsilon();
-    RealType gnEps = miniPars->getGradientNormEpsilon();
+    int maxIter              = miniPars->getMaxIterations();
+    int mssIter              = miniPars->getMaxStationaryStateIterations();
+    RealType rEps            = miniPars->getRootEpsilon();
+    RealType fEps            = miniPars->getFunctionEpsilon();
+    RealType gnEps           = miniPars->getGradientNormEpsilon();
     RealType initialStepSize = miniPars->getInitialStepSize();
 
     EndCriteria endCriteria(maxIter, mssIter, rEps, fEps, gnEps);

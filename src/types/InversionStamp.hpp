@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_INVERSIONSTAMP_HPP
 #define TYPES_INVERSIONSTAMP_HPP
 #include "types/DataHolder.hpp"
@@ -50,15 +50,15 @@
 namespace OpenMD {
   class InversionStamp : public DataHolder {
     DeclareParameter(GhostVectorSource, int);
+
   public:
-    
     InversionStamp();
     virtual ~InversionStamp();
-    
-    int getCenter() {return center_;}
-    int getSatelliteAt( int index ) {return satellites_.at(index);}
-    int getNSatellites() {return satellites_.size();}
-    std::vector<int> getSatellites() {return satellites_;}
+
+    int getCenter() { return center_; }
+    int getSatelliteAt(int index) { return satellites_.at(index); }
+    int getNSatellites() { return satellites_.size(); }
+    std::vector<int> getSatellites() { return satellites_; }
     void setCenter(int center) { center_ = center; }
     void addSatellite(int sat) {
       if (satellites_.size() > 3) {
@@ -66,44 +66,39 @@ namespace OpenMD {
         oss << "Too many satellites in inversion to add another!" << std::endl;
         throw OpenMDException(oss.str());
       } else {
-	satellites_.push_back(sat);
+        satellites_.push_back(sat);
       }
     }
-    void setSatellites(const std::vector<int> &sats) {
+    void setSatellites(const std::vector<int>& sats) {
       if (sats.size() == 3) {
-	satellites_.push_back(sats.at(0));
-	satellites_.push_back(sats.at(1));
-	satellites_.push_back(sats.at(2));
+        satellites_.push_back(sats.at(0));
+        satellites_.push_back(sats.at(1));
+        satellites_.push_back(sats.at(2));
       } else {
         std::ostringstream oss;
-        oss << "Incorrect number of satellites to add to inversion!" << std::endl;
+        oss << "Incorrect number of satellites to add to inversion!"
+            << std::endl;
         throw OpenMDException(oss.str());
       }
     }
     void overrideType(std::string type, std::vector<RealType> pars) {
-      orType_ = type;
-      orPars_ = pars;
+      orType_      = type;
+      orPars_      = pars;
       hasOverride_ = true;
     }
 
     virtual void validate();
     bool hasOverride() { return hasOverride_; }
-    std::string getOverrideType() {
-      return orType_;
-    }
+    std::string getOverrideType() { return orType_; }
 
-    std::vector<RealType> getOverridePars() {
-      return orPars_;
-    }        
+    std::vector<RealType> getOverridePars() { return orPars_; }
 
-    
   private:
     int center_;
     std::vector<int> satellites_;
     bool hasOverride_;
     std::string orType_;
     std::vector<RealType> orPars_;
-
   };
-}
+}  // namespace OpenMD
 #endif

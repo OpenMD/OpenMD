@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,14 +42,14 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef VISITORS_BASEATOMVISITOR_HPP
 #define VISITORS_BASEATOMVISITOR_HPP
 
 #include <set>
 
-#include "visitors/BaseVisitor.hpp"
 #include "visitors/AtomData.hpp"
+#include "visitors/BaseVisitor.hpp"
 
 namespace OpenMD {
 
@@ -57,7 +57,7 @@ namespace OpenMD {
    * @class BaseAtomVisitor
    * @todo document
    */
-  class BaseAtomVisitor : public BaseVisitor{
+  class BaseAtomVisitor : public BaseVisitor {
   public:
     using BaseVisitor::visit;
     virtual void visit(Atom* atom) {}
@@ -65,25 +65,26 @@ namespace OpenMD {
     virtual void visit(RigidBody* rb);
     void setVisited(Atom* atom);
     bool isVisited(Atom* atom);
-    
+
   protected:
     BaseAtomVisitor(SimInfo* info);
     SimInfo* info {nullptr};
     int storageLayout_;
   };
 
-  class DefaultAtomVisitor : public BaseAtomVisitor{
+  class DefaultAtomVisitor : public BaseAtomVisitor {
   public:
     using BaseVisitor::visit;
-    DefaultAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) { visitorName = "DefaultAtomVisitor";}
-    
-    virtual void visit(Atom* atom);   
-    virtual void visit(DirectionalAtom* datom);    
+    DefaultAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
+      visitorName = "DefaultAtomVisitor";
+    }
+
+    virtual void visit(Atom* atom);
+    virtual void visit(DirectionalAtom* datom);
     virtual void visit(RigidBody* rb) {}
-    
+
     virtual const std::string toString();
-    
   };
 
-}//namespace OpenMD
+}  // namespace OpenMD
 #endif

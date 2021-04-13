@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -73,9 +73,7 @@ int main(int argc, char* argv[]) {
   string outFileName;
 
   // parse the command line option
-  if (cmdline_parser(argc, argv, &args_info) != 0) {
-    exit(1);
-  }
+  if (cmdline_parser(argc, argv, &args_info) != 0) { exit(1); }
 
   // get the dumpfile name and meta-data file name
   if (args_info.input_given) {
@@ -95,9 +93,9 @@ int main(int argc, char* argv[]) {
   }
 
   // convert the input angles to radians for computation
-  double phi = args_info.rotatePhi_arg * (Constants::PI / 180.0);
+  double phi   = args_info.rotatePhi_arg * (Constants::PI / 180.0);
   double theta = args_info.rotateTheta_arg * (Constants::PI / 180.0);
-  double psi = args_info.rotatePsi_arg * (Constants::PI / 180.0);
+  double psi   = args_info.rotatePsi_arg * (Constants::PI / 180.0);
 
   Mat3x3d rotMatrix = Mat3x3d(0.0);
 
@@ -107,9 +105,9 @@ int main(int argc, char* argv[]) {
                              args_info.repeatZ_arg);
 
   Mat3x3d repeatD = Mat3x3d(0.0);
-  repeatD(0, 0) = repeat.x();
-  repeatD(1, 1) = repeat.y();
-  repeatD(2, 2) = repeat.z();
+  repeatD(0, 0)   = repeat.x();
+  repeatD(1, 1)   = repeat.y();
+  repeatD(2, 2)   = repeat.z();
 
   Vector3d translate =
       Vector3d(args_info.translateX_arg, args_info.translateY_arg,
@@ -118,7 +116,7 @@ int main(int argc, char* argv[]) {
   // parse md file and set up the system
 
   SimCreator oldCreator;
-  SimInfo* oldInfo = oldCreator.createSim(dumpFileName, false);
+  SimInfo* oldInfo   = oldCreator.createSim(dumpFileName, false);
   Globals* simParams = oldInfo->getSimParams();
   std::vector<Component*> components = simParams->getComponents();
   std::vector<int> nMol;
@@ -135,7 +133,7 @@ int main(int argc, char* argv[]) {
   SimInfo* newInfo = newCreator.createSim(outFileName, false);
 
   DumpReader* dumpReader = new DumpReader(oldInfo, dumpFileName);
-  int nframes = dumpReader->getNFrames();
+  int nframes            = dumpReader->getNFrames();
 
   DumpWriter* writer = new DumpWriter(newInfo, outFileName);
   if (writer == NULL) {
@@ -186,9 +184,7 @@ int main(int argc, char* argv[]) {
     int newIndex = 0;
     for (mol = oldInfo->beginMolecule(miter); mol != NULL;
          mol = oldInfo->nextMolecule(miter)) {
-      if (args_info.repairMolecules_arg == 1) {
-        molCOM = mol->getCom();
-      }
+      if (args_info.repairMolecules_arg == 1) { molCOM = mol->getCom(); }
 
       for (int ii = 0; ii < repeat.x(); ii++) {
         for (int jj = 0; jj < repeat.y(); jj++) {
@@ -208,13 +204,13 @@ int main(int argc, char* argv[]) {
               }
 
               newPos = rotMatrix * oldPos + trans * oldHmat;
-              sdNew = newInfo->getIOIndexToIntegrableObject(newIndex);
+              sdNew  = newInfo->getIOIndexToIntegrableObject(newIndex);
               sdNew->setPos(newPos);
               sdNew->setVel(rotMatrix * sd->getVel());
 
               if (sd->isDirectional()) {
                 Mat3x3d bodyRotMat = sd->getA();
-                bodyRotMat = bodyRotMat * rotMatrix.inverse();
+                bodyRotMat         = bodyRotMat * rotMatrix.inverse();
                 sdNew->setA(bodyRotMat);
 
                 sdNew->setJ(rotMatrix * sd->getJ());
@@ -289,9 +285,8 @@ void createMdFile(const std::string& oldMdFileName,
   newMdFile.close();
 
   if (i != nMol.size()) {
-    sprintf(painCave.errMsg,
-            "Couldn't replace the correct number of nMol\n"
-            "\tstatements in component blocks.");
+    sprintf(painCave.errMsg, "Couldn't replace the correct number of nMol\n"
+                             "\tstatements in component blocks.");
     painCave.isFatal = 1;
     simError();
   }

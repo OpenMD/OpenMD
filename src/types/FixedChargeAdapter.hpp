@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,12 +42,12 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_FIXEDCHARGEADAPTER_HPP
 #define TYPES_FIXEDCHARGEADAPTER_HPP
 
-#include "utils/GenericData.hpp"
 #include "types/AtomType.hpp"
+#include "utils/GenericData.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -57,20 +57,20 @@ namespace OpenMD {
   struct FixedChargeAtypeParameters {
     RealType charge;
   };
-  typedef SimpleTypeData<FixedChargeAtypeParameters> FixedChargeAtypeData;   
+  typedef SimpleTypeData<FixedChargeAtypeParameters> FixedChargeAtypeData;
 
   class FixedChargeAdapter {
   public:
     FixedChargeAdapter(AtomType* AT) { at_ = AT; };
 
     void makeFixedCharge(RealType charge);
-    
+
     bool isFixedCharge();
     RealType getCharge();
 
   private:
     AtomType* at_;
-    FixedChargeAtypeParameters getFixedChargeParam();    
+    FixedChargeAtypeParameters getFixedChargeParam();
   };
-}
+}  // namespace OpenMD
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,19 +52,20 @@
 #include "types/ShapeAtomType.hpp"
 namespace OpenMD {
 
-/**
- * @class ShapeAtomTypesSectionParser
- */
-class ShapeAtomTypesSectionParser : public SectionParser {
- public:
-  ShapeAtomTypesSectionParser(ForceFieldOptions& options);
+  /**
+   * @class ShapeAtomTypesSectionParser
+   */
+  class ShapeAtomTypesSectionParser : public SectionParser {
+  public:
+    ShapeAtomTypesSectionParser(ForceFieldOptions& options);
 
- private:
-  virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
+  private:
+    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
 
-  void parseShapeFile(ForceField& ff, std::string& shapeFileName, AtomType* at);
-  ForceFieldOptions& options_;
-};
+    void parseShapeFile(ForceField& ff, std::string& shapeFileName,
+                        AtomType* at);
+    ForceFieldOptions& options_;
+  };
 
 }  // namespace OpenMD
 

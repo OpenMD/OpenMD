@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,109 +52,134 @@ namespace OpenMD {
 
   /**
    * @class OpenMDBitSet OpenMDBitSet.hpp "OpenMDBitSet.hpp"
-   * @brief OpenMDBitSet is a wrapper class of std::vector<bool> to act as a growable std::bitset 
+   * @brief OpenMDBitSet is a wrapper class of std::vector<bool> to act as a
+   * growable std::bitset
    */
   class OpenMDBitSet {
   public:
     /** */
     OpenMDBitSet() {}
     /** */
-    OpenMDBitSet(int nbits) : bitset_(nbits) {clearAll(); }
+    OpenMDBitSet(int nbits) : bitset_(nbits) { clearAll(); }
 
     /** Returns the number of bits set to true in this OpenMDBitSet.  */
     int countBits();
 
-    /** Sets the bit at the specified index to to the complement of its current value. */
-    void flip(int bitIndex) {  bitset_[bitIndex] = !bitset_[bitIndex];  }
- 
-    /** Sets each bit from the specified fromIndex(inclusive) to the specified toIndex(exclusive) to the complement of its current value. */
-    void flip(int fromIndex, int toIndex); 
+    /** Sets the bit at the specified index to to the complement of its current
+     * value. */
+    void flip(int bitIndex) { bitset_[bitIndex] = !bitset_[bitIndex]; }
+
+    /** Sets each bit from the specified fromIndex(inclusive) to the specified
+     * toIndex(exclusive) to the complement of its current value. */
+    void flip(int fromIndex, int toIndex);
 
     /** Sets each bit to the complement of its current value. */
     void flip() { flip(0, size()); }
-        
+
     /** Returns the value of the bit with the specified index. */
-    bool get(int bitIndex) {  return bitset_[bitIndex];  }
-        
-    /** Returns a new OpenMDBitSet composed of bits from this OpenMDBitSet from fromIndex(inclusive) to toIndex(exclusive). */
-    OpenMDBitSet get(int fromIndex, int toIndex); 
-        
+    bool get(int bitIndex) { return bitset_[bitIndex]; }
+
+    /** Returns a new OpenMDBitSet composed of bits from this OpenMDBitSet from
+     * fromIndex(inclusive) to toIndex(exclusive). */
+    OpenMDBitSet get(int fromIndex, int toIndex);
+
     /** Returns true if any bits are set to true */
-    bool any() {return !none(); }
+    bool any() { return !none(); }
 
     /** Returns true if no bits are set to true */
     bool none();
 
     int firstOffBit() const { return !bitset_[0] ? 0 : nextOffBit(0); }
-        
-    /** Returns the index of the first bit that is set to false that occurs on or after the specified starting index.*/
-    int nextOffBit(int fromIndex) const; 
+
+    /** Returns the index of the first bit that is set to false that occurs on
+     * or after the specified starting index.*/
+    int nextOffBit(int fromIndex) const;
 
     int firstOnBit() const { return bitset_[0] ? 0 : nextOnBit(0); }
-        
-    /** Returns the index of the first bit that is set to true that occurs on or after the specified starting index. */
-    int nextOnBit(int fromIndex) const; 
-        
-    /** Performs a logical AND of this target bit set with the argument bit set. */
-    void andOperator (const OpenMDBitSet& bs);
-       
+
+    /** Returns the index of the first bit that is set to true that occurs on or
+     * after the specified starting index. */
+    int nextOnBit(int fromIndex) const;
+
+    /** Performs a logical AND of this target bit set with the argument bit set.
+     */
+    void andOperator(const OpenMDBitSet& bs);
+
     /** Performs a logical OR of this bit set with the bit set argument. */
-    void orOperator (const OpenMDBitSet& bs); 
-        
+    void orOperator(const OpenMDBitSet& bs);
+
     /** Performs a logical XOR of this bit set with the bit set argument. */
-    void xorOperator (const OpenMDBitSet& bs);        
-               
-    void setBitOn(int bitIndex) {  setBit(bitIndex, true);  }
+    void xorOperator(const OpenMDBitSet& bs);
 
-    void setBitOff(int bitIndex) {  setBit(bitIndex, false);  }
+    void setBitOn(int bitIndex) { setBit(bitIndex, true); }
 
-    void setRangeOn(int fromIndex, int toIndex) {  setBits(fromIndex, toIndex, true);  }
+    void setBitOff(int bitIndex) { setBit(bitIndex, false); }
 
-    void setRangeOff(int fromIndex, int toIndex) {  setBits(fromIndex, toIndex, false);  }        
+    void setRangeOn(int fromIndex, int toIndex) {
+      setBits(fromIndex, toIndex, true);
+    }
+
+    void setRangeOff(int fromIndex, int toIndex) {
+      setBits(fromIndex, toIndex, false);
+    }
 
     /** Sets all of the bits in this OpenMDBitSet to false. */
-    void clearAll() {  setRangeOff(0, size());  }         
+    void clearAll() { setRangeOff(0, size()); }
 
-    void setAll() {  setRangeOn(0, size());  }        
-        
-    /** Returns the number of bits of space actually in use by this OpenMDBitSet to represent bit values. */
-    int size() const {  return bitset_.size();  }
+    void setAll() { setRangeOn(0, size()); }
+
+    /** Returns the number of bits of space actually in use by this OpenMDBitSet
+     * to represent bit values. */
+    int size() const { return bitset_.size(); }
 
     /** Changes the size of OpenMDBitSet*/
     void resize(int nbits);
-        
-    OpenMDBitSet& operator&= (const OpenMDBitSet &bs) {  andOperator (bs); return *this; }
-    OpenMDBitSet& operator|= (const OpenMDBitSet &bs) { orOperator (bs); return *this; }
-    OpenMDBitSet& operator^= (const OpenMDBitSet &bs) { xorOperator (bs); return *this; }
-    OpenMDBitSet& operator-= (const OpenMDBitSet &bs) { 
+
+    OpenMDBitSet& operator&=(const OpenMDBitSet& bs) {
+      andOperator(bs);
+      return *this;
+    }
+    OpenMDBitSet& operator|=(const OpenMDBitSet& bs) {
+      orOperator(bs);
+      return *this;
+    }
+    OpenMDBitSet& operator^=(const OpenMDBitSet& bs) {
+      xorOperator(bs);
+      return *this;
+    }
+    OpenMDBitSet& operator-=(const OpenMDBitSet& bs) {
       OpenMDBitSet tmp = *this ^ bs;
       *this &= tmp;
       return *this;
     }
 
     OpenMDBitSet parallelReduce();
-        
-    bool operator[] (int bitIndex)  const {  return bitset_[bitIndex];  }
-    friend OpenMDBitSet operator| (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2);
-    friend OpenMDBitSet operator& (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2);
-    friend OpenMDBitSet operator^ (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2);
-    friend OpenMDBitSet operator- (const OpenMDBitSet& bs1, const OpenMDBitSet& bs2);
-        
-    friend bool operator== (const OpenMDBitSet & bs1, const OpenMDBitSet &bs2);
 
-    //friend std::istream& operator>> ( std::istream&, const OpenMDBitSet& bs);
-    friend std::ostream& operator<< ( std::ostream&, const OpenMDBitSet& bs) ;
+    bool operator[](int bitIndex) const { return bitset_[bitIndex]; }
+    friend OpenMDBitSet operator|(const OpenMDBitSet& bs1,
+                                  const OpenMDBitSet& bs2);
+    friend OpenMDBitSet operator&(const OpenMDBitSet& bs1,
+                                  const OpenMDBitSet& bs2);
+    friend OpenMDBitSet operator^(const OpenMDBitSet& bs1,
+                                  const OpenMDBitSet& bs2);
+    friend OpenMDBitSet operator-(const OpenMDBitSet& bs1,
+                                  const OpenMDBitSet& bs2);
+
+    friend bool operator==(const OpenMDBitSet& bs1, const OpenMDBitSet& bs2);
+
+    // friend std::istream& operator>> ( std::istream&, const OpenMDBitSet& bs);
+    friend std::ostream& operator<<(std::ostream&, const OpenMDBitSet& bs);
 
   private:
-
     /** Sets the bit at the specified index to the specified value. */
     void setBit(int bitIndex, bool value) { bitset_[bitIndex] = value; }
-        
-    /** Sets the bits from the specified fromIndex(inclusive) to the specified toIndex(exclusive) to the specified value. */
-    void setBits(int fromIndex, int toIndex, bool value);
-        
-    std::vector<bool> bitset_;
-  }; 
 
-}
+    /** Sets the bits from the specified fromIndex(inclusive) to the specified
+     * toIndex(exclusive) to the specified value. */
+    void setBits(int fromIndex, int toIndex, bool value);
+
+    std::vector<bool> bitset_;
+  };
+
+}  // namespace OpenMD
 #endif

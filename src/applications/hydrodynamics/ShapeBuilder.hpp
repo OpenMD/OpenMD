@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -43,8 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP 
-#define APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP 
+#ifndef APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP
+#define APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP
 #include "hydrodynamics/Shape.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/ElementsTable.hpp"
@@ -52,15 +52,14 @@
 namespace OpenMD {
 
   class ShapeBuilder {
-  public:    
+  public:
     static Shape* createShape(StuntDouble* sd);
-    
+
   private:
-    static Shape* internalCreateShape(Atom* atom);        
+    static Shape* internalCreateShape(Atom* atom);
     static Shape* internalCreateShape(DirectionalAtom* datom);
     static Shape* internalCreateShape(RigidBody* rb);
-        
   };
 
-}
+}  // namespace OpenMD
 #endif

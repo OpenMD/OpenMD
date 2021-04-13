@@ -24,34 +24,34 @@
 #ifndef quantlib_optimization_bfgs_hpp
 #define quantlib_optimization_bfgs_hpp
 
-#include "optimization/LineSearchBasedMethod.hpp"
 #include "math/DynamicRectMatrix.hpp"
+#include "optimization/LineSearchBasedMethod.hpp"
 
 using namespace OpenMD;
 namespace QuantLib {
 
-    //! Broyden-Fletcher-Goldfarb-Shanno algorithm
-    /*! See <http://en.wikipedia.org/wiki/BFGS_method>.
+  //! Broyden-Fletcher-Goldfarb-Shanno algorithm
+  /*! See <http://en.wikipedia.org/wiki/BFGS_method>.
 
         Adapted from Numerical Recipes in C, 2nd edition.
 
         User has to provide line-search method and optimization end criteria.
     */
-    class BFGS: public LineSearchBasedMethod {
-      public:
-        BFGS(LineSearch* lineSearch = NULL)
-        : LineSearchBasedMethod(lineSearch) {}
-      private:
-        //! \name LineSearchBasedMethod interface
-        //@{
-        DynamicVector<RealType> getUpdatedDirection(const Problem &P,
-                                                    RealType gold2,
-                                                    const DynamicVector<RealType>& oldGradient);
-        //@}
-        //! inverse of hessian matrix
-        DynamicRectMatrix<RealType> inverseHessian_;
-    };
+  class BFGS : public LineSearchBasedMethod {
+  public:
+    BFGS(LineSearch* lineSearch = NULL) : LineSearchBasedMethod(lineSearch) {}
 
-}
+  private:
+    //! \name LineSearchBasedMethod interface
+    //@{
+    DynamicVector<RealType> getUpdatedDirection(
+        const Problem& P, RealType gold2,
+        const DynamicVector<RealType>& oldGradient);
+    //@}
+    //! inverse of hessian matrix
+    DynamicRectMatrix<RealType> inverseHessian_;
+  };
+
+}  // namespace QuantLib
 
 #endif

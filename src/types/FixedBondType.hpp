@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,39 +42,36 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file FixedBondType.hpp
  * @author    tlin
  * @date  11/18/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_FIXEDBONDTYPE_HPP
 #define TYPES_FIXEDBONDTYPE_HPP
 
-
 #include "types/BondType.hpp"
 
 namespace OpenMD {
-  
+
   /**
    * @class FixedBondType FixedBondType.hpp "types/FixedBondType.hpp"
    * FixedBondType class is responsible for calculating the force and
    * energy of the bond
    */
-  class FixedBondType  : public BondType{
+  class FixedBondType : public BondType {
   public:
     FixedBondType(RealType r0) : BondType(r0) {}
     virtual ~FixedBondType() {}
-    
+
     virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
-      V = 0.0;
+      V    = 0.0;
       dVdr = 0.0;
     }
-    
-  };    
-  
-  
-} //end namespace OpenMD
-#endif //TYPES_FIXEDBONDTYPE_HPP    
+  };
+
+}  // end namespace OpenMD
+#endif  // TYPES_FIXEDBONDTYPE_HPP

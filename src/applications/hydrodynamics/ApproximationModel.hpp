@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -47,18 +47,18 @@
 #define APPLICATION_HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
 
 #include <vector>
-#include "math/Vector3.hpp"
-#include "math/SquareMatrix3.hpp"
+
+#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 #include "math/DynamicRectMatrix.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/any.hpp"
-#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 
 namespace OpenMD {
 
   class Shape;
-  class ApproximationModel :  public HydrodynamicsModel {
-
+  class ApproximationModel : public HydrodynamicsModel {
   public:
     ApproximationModel(StuntDouble* sd, SimInfo* info);
 
@@ -70,10 +70,12 @@ namespace OpenMD {
   private:
     virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
 
-    bool calcHydroPropsAtCRandAtCDandAtCOM(std::vector<BeadParam>& beads, RealType viscosity,
-                            RealType temperature, HydroProp* cr, HydroProp* cd, HydroProp* coM);
+    bool calcHydroPropsAtCRandAtCDandAtCOM(std::vector<BeadParam>& beads,
+                                           RealType viscosity,
+                                           RealType temperature, HydroProp* cr,
+                                           HydroProp* cd, HydroProp* coM);
     std::vector<BeadParam> beads_;
   };
-}
+}  // namespace OpenMD
 
 #endif

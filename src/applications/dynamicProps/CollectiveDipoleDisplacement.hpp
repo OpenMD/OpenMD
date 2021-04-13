@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -57,49 +57,54 @@ namespace OpenMD {
       equivalent to Green-Kubo expressions using a related flux.  In
       this case, the flux,
 
-      \f[ \mathbf{J}(t) = \sum_{i=1}^{N} q_i \mathbf{v}_{\mathrm{cm},i}(t) \f] 
+      \f[ \mathbf{J}(t) = \sum_{i=1}^{N} q_i \mathbf{v}_{\mathrm{cm},i}(t) \f]
 
-      is normally used to calculate an ionic conductivity, 
+      is normally used to calculate an ionic conductivity,
 
-      \f[ \sigma = \frac{1}{3V k_b T} \int_0^\infty \left< \mathbf{J}(0) \cdot \mathbf{J}(t) \right> dt \f]
+      \f[ \sigma = \frac{1}{3V k_b T} \int_0^\infty \left< \mathbf{J}(0) \cdot
+     \mathbf{J}(t) \right> dt \f]
 
       The cm subscript denotes center of mass locations for all molecules.
 
       This class computes the collective translational dipole moment,
 
-      \f[ \mathbf{M}_\mathrm{trans}(t) = \sum_{i=1}^{N} q_i \mathbf{r}_{\mathrm{cm},i}(t) \f]
+      \f[ \mathbf{M}_\mathrm{trans}(t) = \sum_{i=1}^{N} q_i
+     \mathbf{r}_{\mathrm{cm},i}(t) \f]
 
       as well as total contributions to the system's net dipole moment
 
-      \f[ \mathbf{M}_\mathrm{tot}(t) =  \sum_{i=1}^{N} \sum_{a} q_{ia} \mathbf{r}_{ia}(t) = \sum_{i=1}^{N} q_i \mathbf{r}_{\mathrm{cq},i}(t) \f]
+      \f[ \mathbf{M}_\mathrm{tot}(t) =  \sum_{i=1}^{N} \sum_{a} q_{ia}
+     \mathbf{r}_{ia}(t) = \sum_{i=1}^{N} q_i \mathbf{r}_{\mathrm{cq},i}(t) \f]
 
       where cq denotes the molecular center of charge.  It also
       calculates the rotational contribution,
 
-      \f[ \mathbf{M}_\mathrm{rot}(t) = \sum_{i=1}^{N} q_i \left[ \mathbf{r}_{\mathrm{cq},i}(t) - \mathbf{r}_{\mathrm{cm},i}(t) \right] \f]
+      \f[ \mathbf{M}_\mathrm{rot}(t) = \sum_{i=1}^{N} q_i \left[
+     \mathbf{r}_{\mathrm{cq},i}(t) - \mathbf{r}_{\mathrm{cm},i}(t) \right] \f]
 
       The correlation functions are the displacements of these terms
       from their values at an earlier time,
 
-      \f[ \left< \left| \mathbf{M}_\mathrm{trans}(t) - \mathbf{M}_\mathrm{trans}(0) \right|^2 \right> \f]
+      \f[ \left< \left| \mathbf{M}_\mathrm{trans}(t) -
+     \mathbf{M}_\mathrm{trans}(0) \right|^2 \right> \f]
 
       and identical quantities for the total and rotational contributions.
-  */ 
+  */
   class CollectiveDipoleDisplacement : public SystemACF<Vector3d> {
   public:
     CollectiveDipoleDisplacement(SimInfo* info, const std::string& filename,
                                  const std::string& sele1,
                                  const std::string& sele2);
-    
+
   private:
     virtual void computeProperty1(int frame);
     virtual Vector3d calcCorrVal(int frame1, int frame2);
-    
+
     Thermo* thermo_;
-    
+
     std::vector<Vector3d> CRcm_;
     std::vector<Vector3d> CRtot_;
     std::vector<Vector3d> CRrot_;
   };
-}
+}  // namespace OpenMD
 #endif

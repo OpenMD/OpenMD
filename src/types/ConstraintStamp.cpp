@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,17 +49,17 @@
 #include <cstring>
 namespace OpenMD {
 
-ConstraintStamp::ConstraintStamp() {
-  DefineParameter(ConstrainedDistance, "constrainedDistance");
-  DefineOptionalParameterWithDefaultValue(PrintConstraintForce,
-                                          "printConstraintForce", false);
-}
+  ConstraintStamp::ConstraintStamp() {
+    DefineParameter(ConstrainedDistance, "constrainedDistance");
+    DefineOptionalParameterWithDefaultValue(PrintConstraintForce,
+                                            "printConstraintForce", false);
+  }
 
-ConstraintStamp::~ConstraintStamp() {}
+  ConstraintStamp::~ConstraintStamp() {}
 
-void ConstraintStamp::validate() {
-  DataHolder::validate();
-  CheckParameter(ConstrainedDistance, isNonNegative());
-}
+  void ConstraintStamp::validate() {
+    DataHolder::validate();
+    CheckParameter(ConstrainedDistance, isNonNegative());
+  }
 
 }  // namespace OpenMD

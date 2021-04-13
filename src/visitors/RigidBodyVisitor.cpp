@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,150 +51,150 @@
 
 namespace OpenMD {
 
-void LipidHeadVisitor::visit(RigidBody* rb) {
-  int globalID;
-  Vector3d pos;
-  Vector3d u(0, 0, 1);
-  Vector3d newVec;
-  std::shared_ptr<GenericData> data;
-  std::shared_ptr<AtomData> atomData;
-  std::shared_ptr<AtomInfo> atomInfo;
-  bool haveAtomData;
-  RotMat3x3d rotMatrix;
+  void LipidHeadVisitor::visit(RigidBody* rb) {
+    int globalID;
+    Vector3d pos;
+    Vector3d u(0, 0, 1);
+    Vector3d newVec;
+    std::shared_ptr<GenericData> data;
+    std::shared_ptr<AtomData> atomData;
+    std::shared_ptr<AtomInfo> atomInfo;
+    bool haveAtomData;
+    RotMat3x3d rotMatrix;
 
-  if (!canVisit(rb->getType())) return;
+    if (!canVisit(rb->getType())) return;
 
-  globalID = rb->getGlobalIndex();
-  pos = rb->getPos();
-  rotMatrix = rb->getA();
-  // matVecMul3(rotMatrix, u, newVec);
-  newVec = rotMatrix * u;
+    globalID  = rb->getGlobalIndex();
+    pos       = rb->getPos();
+    rotMatrix = rb->getA();
+    // matVecMul3(rotMatrix, u, newVec);
+    newVec = rotMatrix * u;
 
-  data = rb->getPropertyByName("ATOMDATA");
+    data = rb->getPropertyByName("ATOMDATA");
 
-  if (data != nullptr) {
-    atomData = std::dynamic_pointer_cast<AtomData>(data);
+    if (data != nullptr) {
+      atomData = std::dynamic_pointer_cast<AtomData>(data);
 
-    if (atomData == nullptr) {
-      std::cerr << "can not get Atom Data from " << rb->getType() << std::endl;
+      if (atomData == nullptr) {
+        std::cerr << "can not get Atom Data from " << rb->getType()
+                  << std::endl;
 
-      atomData = std::make_shared<AtomData>();
+        atomData     = std::make_shared<AtomData>();
+        haveAtomData = false;
+
+      } else
+        haveAtomData = true;
+
+    } else {
+      atomData     = std::make_shared<AtomData>();
       haveAtomData = false;
+    }
 
-    } else
-      haveAtomData = true;
+    atomInfo               = std::make_shared<AtomInfo>();
+    atomInfo->atomTypeName = "X";
+    atomInfo->globalID     = globalID;
+    atomInfo->pos[0]       = pos[0];
+    atomInfo->pos[1]       = pos[1];
+    atomInfo->pos[2]       = pos[2];
+    atomInfo->vec[0]       = newVec[0];
+    atomInfo->vec[1]       = newVec[1];
+    atomInfo->vec[2]       = newVec[2];
 
-  } else {
-    atomData = std::make_shared<AtomData>();
-    haveAtomData = false;
+    atomData->addAtomInfo(atomInfo);
+
+    if (!haveAtomData) {
+      atomData->setID("ATOMDATA");
+      rb->addProperty(atomData);
+    }
   }
 
-  atomInfo = std::make_shared<AtomInfo>();
-  atomInfo->atomTypeName = "X";
-  atomInfo->globalID = globalID;
-  atomInfo->pos[0] = pos[0];
-  atomInfo->pos[1] = pos[1];
-  atomInfo->pos[2] = pos[2];
-  atomInfo->vec[0] = newVec[0];
-  atomInfo->vec[1] = newVec[1];
-  atomInfo->vec[2] = newVec[2];
+  void LipidHeadVisitor::addLipidHeadName(const std::string& name) {
+    lipidHeadName.insert(name);
+  }
 
-  atomData->addAtomInfo(atomInfo);
+  bool LipidHeadVisitor::canVisit(const std::string& name) {
+    return lipidHeadName.find(name) != lipidHeadName.end() ? true : false;
+  }
 
-  if (!haveAtomData) {
+  const std::string LipidHeadVisitor::toString() {
+    char buffer[65535];
+    std::string result;
+    std::set<std::string>::iterator i;
+
+    sprintf(
+        buffer,
+        "------------------------------------------------------------------\n");
+    result += buffer;
+
+    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    result += buffer;
+
+    // print the ignore type list
+    sprintf(buffer, "lipidHeadName list contains below types:\n");
+    result += buffer;
+
+    for (i = lipidHeadName.begin(); i != lipidHeadName.end(); ++i) {
+      sprintf(buffer, "%s\t", i->c_str());
+      result += buffer;
+    }
+
+    sprintf(buffer, "\n");
+    result += buffer;
+
+    sprintf(
+        buffer,
+        "------------------------------------------------------------------\n");
+    result += buffer;
+
+    return result;
+  }
+
+  void RBCOMVisitor::visit(RigidBody* rb) {
+    std::shared_ptr<AtomData> atomData;
+    std::shared_ptr<AtomInfo> atomInfo;
+    Vector3d pos;
+    pos = rb->getPos();
+
+    atomInfo               = std::make_shared<AtomInfo>();
+    atomInfo->atomTypeName = "X";
+    atomInfo->pos[0]       = pos[0];
+    atomInfo->pos[1]       = pos[1];
+    atomInfo->pos[2]       = pos[2];
+    atomInfo->vec[0]       = 0;
+    atomInfo->vec[1]       = 0;
+    atomInfo->vec[2]       = 0;
+
+    atomData = std::make_shared<AtomData>();
     atomData->setID("ATOMDATA");
+    atomData->addAtomInfo(atomInfo);
+
     rb->addProperty(atomData);
   }
-}
 
-void LipidHeadVisitor::addLipidHeadName(const std::string& name) {
-  lipidHeadName.insert(name);
-}
+  const std::string RBCOMVisitor::toString() {
+    char buffer[65535];
+    std::string result;
 
-bool LipidHeadVisitor::canVisit(const std::string& name) {
-  return lipidHeadName.find(name) != lipidHeadName.end() ? true : false;
-}
-
-const std::string LipidHeadVisitor::toString() {
-  char buffer[65535];
-  std::string result;
-  std::set<std::string>::iterator i;
-
-  sprintf(
-      buffer,
-      "------------------------------------------------------------------\n");
-  result += buffer;
-
-  sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
-  result += buffer;
-
-  // print the ignore type list
-  sprintf(buffer, "lipidHeadName list contains below types:\n");
-  result += buffer;
-
-  for (i = lipidHeadName.begin(); i != lipidHeadName.end(); ++i) {
-    sprintf(buffer, "%s\t", i->c_str());
+    sprintf(
+        buffer,
+        "------------------------------------------------------------------\n");
     result += buffer;
+
+    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    result += buffer;
+
+    // print the ignore type list
+    sprintf(buffer, "Visitor Description: add a pseudo atom at the center of "
+                    "the mass of the "
+                    "rigidbody\n");
+    result += buffer;
+
+    sprintf(
+        buffer,
+        "------------------------------------------------------------------\n");
+    result += buffer;
+
+    return result;
   }
-
-  sprintf(buffer, "\n");
-  result += buffer;
-
-  sprintf(
-      buffer,
-      "------------------------------------------------------------------\n");
-  result += buffer;
-
-  return result;
-}
-
-void RBCOMVisitor::visit(RigidBody* rb) {
-  std::shared_ptr<AtomData> atomData;
-  std::shared_ptr<AtomInfo> atomInfo;
-  Vector3d pos;
-  pos = rb->getPos();
-
-  atomInfo = std::make_shared<AtomInfo>();
-  atomInfo->atomTypeName = "X";
-  atomInfo->pos[0] = pos[0];
-  atomInfo->pos[1] = pos[1];
-  atomInfo->pos[2] = pos[2];
-  atomInfo->vec[0] = 0;
-  atomInfo->vec[1] = 0;
-  atomInfo->vec[2] = 0;
-
-  atomData = std::make_shared<AtomData>();
-  atomData->setID("ATOMDATA");
-  atomData->addAtomInfo(atomInfo);
-
-  rb->addProperty(atomData);
-}
-
-const std::string RBCOMVisitor::toString() {
-  char buffer[65535];
-  std::string result;
-
-  sprintf(
-      buffer,
-      "------------------------------------------------------------------\n");
-  result += buffer;
-
-  sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
-  result += buffer;
-
-  // print the ignore type list
-  sprintf(
-      buffer,
-      "Visitor Description: add a pseudo atom at the center of the mass of the "
-      "rigidbody\n");
-  result += buffer;
-
-  sprintf(
-      buffer,
-      "------------------------------------------------------------------\n");
-  result += buffer;
-
-  return result;
-}
 
 }  // namespace OpenMD

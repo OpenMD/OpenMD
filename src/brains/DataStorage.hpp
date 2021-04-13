@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file Vector.hpp
  * @author Teng Lin
@@ -54,40 +54,40 @@
 #define BRAINS_DATASTORAGE_HPP
 
 #include <vector>
-#include <math/Vector3.hpp>
+
 #include <math/SquareMatrix3.hpp>
+#include <math/Vector3.hpp>
 
 using namespace std;
 namespace OpenMD {
   /**
    * @class DataStorage
-   * @warning do not try to insert element into (or ease element from) private member data 
-   * of DataStorage directly.
-   * @todo DataStorage may need refactoring. Every vector can inherit from the same base class
-   * which will make it easy to maintain
+   * @warning do not try to insert element into (or ease element from) private
+   * member data of DataStorage directly.
+   * @todo DataStorage may need refactoring. Every vector can inherit from the
+   * same base class which will make it easy to maintain
    */
   class DataStorage {
   public:
-
-    enum{
-      dslPosition = 1,
-      dslVelocity = 2,
-      dslForce = 4, 
-      dslAmat = 8, 
-      dslAngularMomentum = 16,
-      dslTorque = 32,
-      dslParticlePot = 64,
-      dslDensity = 128,
-      dslFunctional = 256,
+    enum {
+      dslPosition             = 1,
+      dslVelocity             = 2,
+      dslForce                = 4,
+      dslAmat                 = 8,
+      dslAngularMomentum      = 16,
+      dslTorque               = 32,
+      dslParticlePot          = 64,
+      dslDensity              = 128,
+      dslFunctional           = 256,
       dslFunctionalDerivative = 512,
-      dslDipole = 1024,
-      dslQuadrupole = 2048,
-      dslElectricField = 4096,
-      dslSkippedCharge = 8192,
-      dslFlucQPosition = 16384,
-      dslFlucQVelocity = 32768,
-      dslFlucQForce = 65536,
-      dslSitePotential = 131072
+      dslDipole               = 1024,
+      dslQuadrupole           = 2048,
+      dslElectricField        = 4096,
+      dslSkippedCharge        = 8192,
+      dslFlucQPosition        = 16384,
+      dslFlucQVelocity        = 32768,
+      dslFlucQForce           = 65536,
+      dslSitePotential        = 131072
     };
 
     DataStorage();
@@ -100,7 +100,7 @@ namespace OpenMD {
      */
     void resize(std::size_t newSize);
     /**
-     * Reallocates memory manually. 
+     * Reallocates memory manually.
      *
      * The main reason for using reserve() is efficiency if you know
      * the capacity to which your vector must eventually grow,
@@ -115,7 +115,7 @@ namespace OpenMD {
      * DataStorage class.  One Precondition of copy is that
      * target is not within the range [source, soruce + num]
      *
-     * @param source 
+     * @param source
      * @param num number of element to be moved
      * @param target
      */
@@ -125,7 +125,7 @@ namespace OpenMD {
     /** Sets the storage layout  */
     void setStorageLayout(int layout);
     /** Returns the pointer of internal array */
-    RealType *getArrayPointer(int whichArray);
+    RealType* getArrayPointer(int whichArray);
 
     vector<Vector3d> position;        /** position array */
     vector<Vector3d> velocity;        /** velocity array */
@@ -137,33 +137,33 @@ namespace OpenMD {
     vector<RealType> density;         /** electron density */
     vector<RealType> functional;      /** density functional */
     vector<RealType> functionalDerivative; /** derivative of functional */
-    vector<Vector3d> dipole;          /** space-frame dipole vector */
-    vector<Mat3x3d>  quadrupole;      /** space-frame quadrupole tensor */
-    vector<Vector3d> electricField;   /** local electric field */
-    vector<RealType> skippedCharge;   /** charge skipped during normal pairwise calculation */
-    vector<RealType> flucQPos;        /** fluctuating charges */
-    vector<RealType> flucQVel;        /** fluctuating charge velocities */
-    vector<RealType> flucQFrc;        /** fluctuating charge forces */
-    vector<RealType> sitePotential;   /** electrostatic site potentials */
+    vector<Vector3d> dipole;               /** space-frame dipole vector */
+    vector<Mat3x3d> quadrupole;            /** space-frame quadrupole tensor */
+    vector<Vector3d> electricField;        /** local electric field */
+    vector<RealType>
+        skippedCharge; /** charge skipped during normal pairwise calculation */
+    vector<RealType> flucQPos;      /** fluctuating charges */
+    vector<RealType> flucQVel;      /** fluctuating charge velocities */
+    vector<RealType> flucQFrc;      /** fluctuating charge forces */
+    vector<RealType> sitePotential; /** electrostatic site potentials */
 
     static std::size_t getBytesPerStuntDouble(int layout);
 
   private:
-
     RealType* internalGetArrayPointer(vector<Vector3d>& v);
     RealType* internalGetArrayPointer(vector<Mat3x3d>& v);
     RealType* internalGetArrayPointer(vector<RealType>& v);
-            
+
     template<typename T>
     void internalResize(std::vector<T>& v, std::size_t newSize);
 
     template<typename T>
-    void internalCopy(std::vector<T>& v, int source, std::size_t num, std::size_t target);
-            
+    void internalCopy(std::vector<T>& v, int source, std::size_t num,
+                      std::size_t target);
+
     std::size_t size_;
     int storageLayout_;
-
   };
 
-}
-#endif //BRAINS_DATASTORAGE_HPP
+}  // namespace OpenMD
+#endif  // BRAINS_DATASTORAGE_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -53,19 +53,20 @@ namespace OpenMD {
   class VelocityAutoOutProductCorrFunc : public ObjectACF<Mat3x3d> {
   public:
     VelocityAutoOutProductCorrFunc(SimInfo* info, const std::string& filename,
-                      const std::string& sele1, const std::string& sele2);
+                                   const std::string& sele1,
+                                   const std::string& sele2);
 
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual Mat3x3d calcCorrVal(int frame1, int frame2, int id1, int id2);
     virtual void postCorrelate();
 
-    std::vector<std::vector<Vector3d> > velocity_;
+    std::vector<std::vector<Vector3d>> velocity_;
 
     Vector3d sumVelocity_;
     int velocityCount_;
 
     Vector3d propertyTemp;
   };
-}
+}  // namespace OpenMD
 #endif

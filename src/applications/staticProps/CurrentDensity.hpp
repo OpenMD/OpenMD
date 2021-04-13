@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -54,19 +54,18 @@
 #include <string>
 #include <vector>
 
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
 
 namespace OpenMD {
 
   class CurrentDensity : public StaticAnalyser {
-
   public:
     CurrentDensity(SimInfo* info, const std::string& filename,
-                   const std::string& sele, int nbins, int axis=2);
+                   const std::string& sele, int nbins, int axis = 2);
 
     virtual void process();
 
@@ -80,12 +79,12 @@ namespace OpenMD {
     SelectionManager seleMan_;
     Thermo thermo_;
 
-    std::vector< std::vector<StuntDouble*> > sliceSDLists_;
+    std::vector<std::vector<StuntDouble*>> sliceSDLists_;
     std::vector<RealType> zBox_;
     std::vector<RealType> currentDensity_;
     RealType overallCurrentDensity_;
     int axis_;
     std::string axisLabel_;
   };
-}
+}  // namespace OpenMD
 #endif

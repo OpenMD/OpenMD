@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
       sprintf(painCave.errMsg,
               "No input file name was specified on the command line");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   }
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
     sprintf(painCave.errMsg,
             "Input and Output File names should be different!");
     painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
+    painCave.isFatal  = 1;
     simError();
   }
 
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
   Thermo thermo(info);
 
   // Remove in favor of std::make_unique<> when we switch to C++14 and above
-  std::unique_ptr<Velocitizer> veloSet{Utils::make_unique<Velocitizer>(info)};
+  std::unique_ptr<Velocitizer> veloSet {Utils::make_unique<Velocitizer>(info)};
 
   ForceManager* forceMan = new ForceManager(info);
 
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
   if (writer == NULL) {
     sprintf(painCave.errMsg, "error in creating DumpWriter");
     painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
+    painCave.isFatal  = 1;
     simError();
   }
 
@@ -144,7 +144,7 @@ int main(int argc, char* argv[]) {
     if (temperature < 0.0) {
       sprintf(painCave.errMsg, "Temperatures must be positive numbers.");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
 
@@ -159,7 +159,7 @@ int main(int argc, char* argv[]) {
     if (charge_temperature < 0.0) {
       sprintf(painCave.errMsg, "Temperatures must be positive numbers.");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
 
@@ -168,15 +168,15 @@ int main(int argc, char* argv[]) {
 
   // If scaling total energy, scale only the kinetic:
   if (args_info.energy_given) {
-    RealType energy = args_info.energy_arg;
+    RealType energy  = args_info.energy_arg;
     RealType epsilon = 1e-6;
-    RealType lambda = 0.0;
+    RealType lambda  = 0.0;
 
     if (energy < instPE) {
       sprintf(painCave.errMsg,
               "Energy must be larger than current potential energy.");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     } else {
       if (instKE >= epsilon) {
@@ -202,7 +202,7 @@ int main(int argc, char* argv[]) {
   sprintf(painCave.errMsg,
           "A new OpenMD file called \"%s\" has been generated.\n",
           outputFileName.c_str());
-  painCave.isFatal = 0;
+  painCave.isFatal  = 0;
   painCave.severity = OPENMD_INFO;
   simError();
   return 0;

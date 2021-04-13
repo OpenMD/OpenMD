@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,63 +42,64 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef VISITORS_RIGIDBODYVISITOR_HPP
 #define VISITORS_RIGIDBODYVISITOR_HPP
 #include <iostream>
 #include <set>
 #include <string>
-#include "visitors/BaseVisitor.hpp"
+
 #include "visitors/AtomData.hpp"
-
-
+#include "visitors/BaseVisitor.hpp"
 
 namespace OpenMD {
-    
-  class BaseRigidBodyVisitor: public BaseVisitor{
+
+  class BaseRigidBodyVisitor : public BaseVisitor {
   public:
     using BaseVisitor::visit;
 
   protected:
-    BaseRigidBodyVisitor(SimInfo* info) : BaseVisitor(){ this->info = info;}
+    BaseRigidBodyVisitor(SimInfo* info) : BaseVisitor() { this->info = info; }
 
     SimInfo* info {nullptr};
   };
 
-
-  //LipidHeadVisitor  adds a pesudo atom into rigidbody which holds a dipole moment
-  class LipidHeadVisitor : public BaseRigidBodyVisitor{
+  // LipidHeadVisitor  adds a pesudo atom into rigidbody which holds a dipole
+  // moment
+  class LipidHeadVisitor : public BaseRigidBodyVisitor {
   public:
     using BaseVisitor::visit;
-    LipidHeadVisitor(SimInfo* info) : BaseRigidBodyVisitor(info){ 
+    LipidHeadVisitor(SimInfo* info) : BaseRigidBodyVisitor(info) {
       visitorName = "LipidHeadVisitor";
     }
 
     virtual void visit(Atom* atom) {}
     virtual void visit(DirectionalAtom* datom) {}
     virtual void visit(RigidBody* rb);
-    
+
     void addLipidHeadName(const std::string& name);
-    virtual const  std::string toString();
-    
+    virtual const std::string toString();
+
   protected:
     bool canVisit(const std::string& name);
 
     std::set<std::string> lipidHeadName;
   };
 
-  class RBCOMVisitor : public BaseRigidBodyVisitor{
+  class RBCOMVisitor : public BaseRigidBodyVisitor {
   public:
     using BaseVisitor::visit;
-    RBCOMVisitor(SimInfo* info) : BaseRigidBodyVisitor(info){ visitorName = "RBCOMVisitor";}
+    RBCOMVisitor(SimInfo* info) : BaseRigidBodyVisitor(info) {
+      visitorName = "RBCOMVisitor";
+    }
 
     virtual void visit(Atom* atom) {}
     virtual void visit(DirectionalAtom* datom) {}
     virtual void visit(RigidBody* rb);
 
-    virtual const  std::string toString();
+    virtual const std::string toString();
   };
 
-}//namespace OpenMD
+}  // namespace OpenMD
 
 #endif

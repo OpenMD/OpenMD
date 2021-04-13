@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef NONBONDED_SWITCHINGFUNCTION_HPP
 #define NONBONDED_SWITCHINGFUNCTION_HPP
 
@@ -57,13 +57,13 @@ namespace OpenMD {
   };
 
   class SwitchingFunction {
-    
-  public:    
+  public:
     SwitchingFunction();
     void setSwitchType(SwitchingFunctionType sft);
     void setSwitch(RealType rinner, RealType router);
-    bool getSwitch(const RealType &r2, RealType &sw, RealType &dswdr, RealType &r);
-    
+    bool getSwitch(const RealType& r2, RealType& sw, RealType& dswdr,
+                   RealType& r);
+
   private:
     RealType rin_;
     RealType rout_;
@@ -73,7 +73,7 @@ namespace OpenMD {
     bool haveSpline_;
     bool isCubic_;
     int np_;
-    CubicSplinePtr switchSpline_;   
+    CubicSplinePtr switchSpline_;
   };
-}                  
+}  // namespace OpenMD
 #endif

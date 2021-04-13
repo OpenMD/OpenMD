@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,42 +46,46 @@
 #ifndef OPTIMIZATION_FLUCTUATINGCHARGEOBJECTIVEFUNCTION_HPP
 #define OPTIMIZATION_FLUCTUATINGCHARGEOBJECTIVEFUNCTION_HPP
 
-#include "optimization/ObjectiveFunction.hpp"
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
 #include "flucq/FluctuatingChargeConstraints.hpp"
+#include "optimization/ObjectiveFunction.hpp"
 
 using namespace QuantLib;
 namespace OpenMD {
   class FluctuatingChargeObjectiveFunction : public ObjectiveFunction {
-    
   public:
-    FluctuatingChargeObjectiveFunction(SimInfo* info, ForceManager* forceMan, FluctuatingChargeConstraints* fqConstraints);
+    FluctuatingChargeObjectiveFunction(
+        SimInfo* info, ForceManager* forceMan,
+        FluctuatingChargeConstraints* fqConstraints);
 
-    virtual RealType value(const DynamicVector<RealType>& x);   
-    virtual void gradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x);
-    virtual RealType valueAndGradient(DynamicVector<RealType>& grad, const DynamicVector<RealType>& x);
+    virtual RealType value(const DynamicVector<RealType>& x);
+    virtual void gradient(DynamicVector<RealType>& grad,
+                          const DynamicVector<RealType>& x);
+    virtual RealType valueAndGradient(DynamicVector<RealType>& grad,
+                                      const DynamicVector<RealType>& x);
 
     DynamicVector<RealType> setInitialCoords();
+
   private:
     // transform minimization coordinates into cartesian and
     // rotational coordinates
-    void setCoor(const DynamicVector<RealType> &x) const;
+    void setCoor(const DynamicVector<RealType>& x) const;
     // transform cartesian and rotational coordinates into minimization
-    // coordinates 
-    void getGrad(DynamicVector<RealType> &grad);
+    // coordinates
+    void getGrad(DynamicVector<RealType>& grad);
 
     SimInfo* info_ {nullptr};
     ForceManager* forceMan_;
     FluctuatingChargeConstraints* fqConstraints_;
     Thermo thermo;
     int nFlucQ_;
-    
+
 #ifdef IS_MPI
     int nproc_;
     int myrank_;
     std::vector<int> displacements_;
 #endif
   };
-}
+}  // namespace OpenMD
 #endif

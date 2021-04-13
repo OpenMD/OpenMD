@@ -8,34 +8,27 @@
  * $Id$
  */
 
-#include <antlr/config.hpp>
 #include <antlr/ANTLRException.hpp>
+#include <antlr/config.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-/** Baseclass for exceptions thrown by classes implementing the TokenStream
- * interface.
- * @see TokenStream
- */
-class ANTLR_API TokenStreamException : public ANTLRException {
-public:
-	TokenStreamException() 
-	: ANTLRException()	
-	{
-	}
-	TokenStreamException(const ANTLR_USE_NAMESPACE(std)string& s)
-	: ANTLRException(s)
-	{
-	}
-	virtual ~TokenStreamException() throw()
-	{
-	}
-};
+  /** Baseclass for exceptions thrown by classes implementing the TokenStream
+   * interface.
+   * @see TokenStream
+   */
+  class ANTLR_API TokenStreamException : public ANTLRException {
+  public:
+    TokenStreamException() : ANTLRException() {}
+    TokenStreamException(const ANTLR_USE_NAMESPACE(std) string& s) :
+        ANTLRException(s) {}
+    virtual ~TokenStreamException() throw() {}
+  };
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif //INC_TokenStreamException_hpp__
+#endif  // INC_TokenStreamException_hpp__

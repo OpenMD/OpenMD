@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -98,9 +98,7 @@ int main(int argc, char* argv[]) {
 
   // get lattice type
   latticeType = "FCC";
-  if (args_info.lattice_given) {
-    latticeType = args_info.lattice_arg;
-  }
+  if (args_info.lattice_given) { latticeType = args_info.lattice_arg; }
 
   simpleLat = LatticeFactory::getInstance().createLattice(latticeType);
 
@@ -117,9 +115,8 @@ int main(int argc, char* argv[]) {
   nx = args_info.nx_arg;
 
   if (nx <= 0) {
-    sprintf(painCave.errMsg,
-            "The number of unit cells in the x direction "
-            "must be greater than 0.");
+    sprintf(painCave.errMsg, "The number of unit cells in the x direction "
+                             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
   }
@@ -127,9 +124,8 @@ int main(int argc, char* argv[]) {
   ny = args_info.ny_arg;
 
   if (ny <= 0) {
-    sprintf(painCave.errMsg,
-            "The number of unit cells in the y direction "
-            "must be greater than 0.");
+    sprintf(painCave.errMsg, "The number of unit cells in the y direction "
+                             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
   }
@@ -137,9 +133,8 @@ int main(int argc, char* argv[]) {
   nz = args_info.nz_arg;
 
   if (nz <= 0) {
-    sprintf(painCave.errMsg,
-            "The number of unit cells in the z direction "
-            "must be greater than 0.");
+    sprintf(painCave.errMsg, "The number of unit cells in the z direction "
+                             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
   }
@@ -150,9 +145,8 @@ int main(int argc, char* argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg,
-            "No input .omd file name was specified "
-            "on the command line");
+    sprintf(painCave.errMsg, "No input .omd file name was specified "
+                             "on the command line");
     painCave.isFatal = 1;
     simError();
   }
@@ -160,7 +154,7 @@ int main(int argc, char* argv[]) {
   // parse md file and set up the system
 
   SimCreator oldCreator;
-  SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
+  SimInfo* oldInfo   = oldCreator.createSim(inputFileName, false);
   Globals* simParams = oldInfo->getSimParams();
 
   // Calculate lattice constant (in Angstroms)
@@ -200,16 +194,14 @@ int main(int argc, char* argv[]) {
 
   for (std::size_t i = 0; i < nComponents; i++) {
     if (molFractions.at(i) < 0.0) {
-      sprintf(painCave.errMsg,
-              "One of the requested molFractions was"
-              " less than zero!");
+      sprintf(painCave.errMsg, "One of the requested molFractions was"
+                               " less than zero!");
       painCave.isFatal = 1;
       simError();
     }
     if (molFractions.at(i) > 1.0) {
-      sprintf(painCave.errMsg,
-              "One of the requested molFractions was"
-              " greater than one!");
+      sprintf(painCave.errMsg, "One of the requested molFractions was"
+                               " greater than one!");
       painCave.isFatal = 1;
       simError();
     }
@@ -243,9 +235,8 @@ int main(int argc, char* argv[]) {
   RealType avgMass = totalMass / (RealType)totalMolecules;
 
   if (totalMolecules != nSites) {
-    sprintf(painCave.errMsg,
-            "Computed total number of molecules is not equal "
-            "to the number of lattice sites!");
+    sprintf(painCave.errMsg, "Computed total number of molecules is not equal "
+                             "to the number of lattice sites!");
     painCave.isFatal = 1;
     simError();
   }
@@ -319,7 +310,8 @@ int main(int argc, char* argv[]) {
   // Randomize a vector of ints:
 
   vector<int> ids;
-  for (std::size_t i = 0; i < sites.size(); i++) ids.push_back(i);
+  for (std::size_t i = 0; i < sites.size(); i++)
+    ids.push_back(i);
 
   /* Set up the random number generator engine */
   std::random_device rd;   // Non-deterministic, uniformly-distributed integer
@@ -360,7 +352,7 @@ int main(int argc, char* argv[]) {
           "A new OpenMD file called \"%s\" has been "
           "generated.\n",
           outputFileName.c_str());
-  painCave.isFatal = 0;
+  painCave.isFatal  = 0;
   painCave.severity = OPENMD_INFO;
   simError();
   return 0;

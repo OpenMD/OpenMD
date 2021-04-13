@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -58,115 +58,114 @@
 
 namespace OpenMD {
 
-DipoleOrientation::DipoleOrientation(SimInfo* info, const std::string& filename,
-                                     const std::string& sele,
-                                     const RealType dipoleX,
-                                     const RealType dipoleY,
-                                     const RealType dipoleZ, int nzbins,
-                                     int axis)
-    : SlabStatistics(info, filename, sele, nzbins, axis), axis_(axis) {
-  switch (axis_) {
+  DipoleOrientation::DipoleOrientation(
+      SimInfo* info, const std::string& filename, const std::string& sele,
+      const RealType dipoleX, const RealType dipoleY, const RealType dipoleZ,
+      int nzbins, int axis) :
+      SlabStatistics(info, filename, sele, nzbins, axis),
+      axis_(axis) {
+    switch (axis_) {
     case 0:
       axisLabel_ = "x";
-      refAxis_ = Vector3d(1, 0, 0);
+      refAxis_   = Vector3d(1, 0, 0);
       break;
     case 1:
       axisLabel_ = "y";
-      refAxis_ = Vector3d(0, 1, 0);
+      refAxis_   = Vector3d(0, 1, 0);
       break;
     case 2:
     default:
       axisLabel_ = "z";
-      refAxis_ = Vector3d(0, 0, 1);
+      refAxis_   = Vector3d(0, 0, 1);
       break;
-  }
-  setOutputName(getPrefix(filename) + ".Sz");
+    }
+    setOutputName(getPrefix(filename) + ".Sz");
 
-  dipoleVector_ = Vector3d(dipoleX, dipoleY, dipoleZ);
-  dipoleVector_.normalize();
+    dipoleVector_ = Vector3d(dipoleX, dipoleY, dipoleZ);
+    dipoleVector_.normalize();
 
-  orderS_ = new OutputData;
-  orderS_->units = "";
-  orderS_->title = "Orientational Order parameter";
-  orderS_->dataType = odtReal;
-  orderS_->dataHandling = odhAverage;
-  orderS_->accumulator.reserve(nBins_);
-  for (unsigned int i = 0; i < nBins_; i++)
-    orderS_->accumulator.push_back(new Accumulator());
-  data_.push_back(orderS_);
+    orderS_               = new OutputData;
+    orderS_->units        = "";
+    orderS_->title        = "Orientational Order parameter";
+    orderS_->dataType     = odtReal;
+    orderS_->dataHandling = odhAverage;
+    orderS_->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++)
+      orderS_->accumulator.push_back(new Accumulator());
+    data_.push_back(orderS_);
 
-  orderSCos_ = new OutputData;
-  orderSCos_->units = "";
-  orderSCos_->title = "Orientational Order parameter cosine Theta";
-  orderSCos_->dataType = odtReal;
-  orderSCos_->dataHandling = odhAverage;
-  orderSCos_->accumulator.reserve(nBins_);
-  for (unsigned int i = 0; i < nBins_; i++)
-    orderSCos_->accumulator.push_back(new Accumulator());
-  data_.push_back(orderSCos_);
-}
-
-void DipoleOrientation::processFrame(int istep) {
-  RealType z;
-
-  hmat_ = currentSnapshot_->getHmat();
-
-  for (unsigned int i = 0; i < nBins_; i++) {
-    z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_, axis_);
-    dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
+    orderSCos_               = new OutputData;
+    orderSCos_->units        = "";
+    orderSCos_->title        = "Orientational Order parameter cosine Theta";
+    orderSCos_->dataType     = odtReal;
+    orderSCos_->dataHandling = odhAverage;
+    orderSCos_->accumulator.reserve(nBins_);
+    for (unsigned int i = 0; i < nBins_; i++)
+      orderSCos_->accumulator.push_back(new Accumulator());
+    data_.push_back(orderSCos_);
   }
 
-  volume_ = currentSnapshot_->getVolume();
+  void DipoleOrientation::processFrame(int istep) {
+    RealType z;
 
-  StuntDouble* sd;
-  int i;
+    hmat_ = currentSnapshot_->getHmat();
 
-  std::vector<RealType> binS(nBins_, 0.0);
-  std::vector<RealType> binSCos(nBins_, 0.0);
+    for (unsigned int i = 0; i < nBins_; i++) {
+      z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_, axis_);
+      dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
+    }
 
-  std::vector<int> count(nBins_, 0.0);
+    volume_ = currentSnapshot_->getVolume();
 
-  if (evaluator_.isDynamic()) {
-    seleMan_.setSelectionSet(evaluator_.evaluate());
-  }
+    StuntDouble* sd;
+    int i;
 
-  // loop over the selected atoms:
-  SquareMatrix3<RealType> rotMat;
-  Vector3d rotatedDipoleVector;
-  RealType ctheta;
-  RealType orderParameter;
+    std::vector<RealType> binS(nBins_, 0.0);
+    std::vector<RealType> binSCos(nBins_, 0.0);
 
-  for (sd = seleMan_.beginSelected(i); sd != NULL;
-       sd = seleMan_.nextSelected(i)) {
-    // figure out where that object is:
-    Vector3d pos = sd->getPos();
+    std::vector<int> count(nBins_, 0.0);
 
-    int bin = getBin(pos);
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
 
-    if (sd->isDirectional() || sd->isRigidBody()) {
-      rotMat = sd->getA();
-      rotatedDipoleVector = rotMat * dipoleVector_;
-      rotatedDipoleVector.normalize();
-      ctheta = dot(rotatedDipoleVector, refAxis_);
+    // loop over the selected atoms:
+    SquareMatrix3<RealType> rotMat;
+    Vector3d rotatedDipoleVector;
+    RealType ctheta;
+    RealType orderParameter;
 
-      orderParameter = (3 * (ctheta * ctheta) - 1) / 2;
+    for (sd = seleMan_.beginSelected(i); sd != NULL;
+         sd = seleMan_.nextSelected(i)) {
+      // figure out where that object is:
+      Vector3d pos = sd->getPos();
 
-      binS[bin] += orderParameter;
-      binSCos[bin] += ctheta;
+      int bin = getBin(pos);
 
-      count[bin] += 1;
+      if (sd->isDirectional() || sd->isRigidBody()) {
+        rotMat              = sd->getA();
+        rotatedDipoleVector = rotMat * dipoleVector_;
+        rotatedDipoleVector.normalize();
+        ctheta = dot(rotatedDipoleVector, refAxis_);
+
+        orderParameter = (3 * (ctheta * ctheta) - 1) / 2;
+
+        binS[bin] += orderParameter;
+        binSCos[bin] += ctheta;
+
+        count[bin] += 1;
+      }
+    }
+
+    for (unsigned int i = 0; i < nBins_; i++) {
+      count[i] != 0 ?
+          dynamic_cast<Accumulator*>(orderS_->accumulator[i])
+              ->add(binS[i] / count[i]) :
+          dynamic_cast<Accumulator*>(orderS_->accumulator[i])->add(binS[i]);
+      count[i] != 0 ? dynamic_cast<Accumulator*>(orderSCos_->accumulator[i])
+                          ->add(binSCos[i] / count[i]) :
+                      dynamic_cast<Accumulator*>(orderSCos_->accumulator[i])
+                          ->add(binSCos[i]);
     }
   }
-
-  for (unsigned int i = 0; i < nBins_; i++) {
-    count[i] != 0
-        ? dynamic_cast<Accumulator*>(orderS_->accumulator[i])
-              ->add(binS[i] / count[i])
-        : dynamic_cast<Accumulator*>(orderS_->accumulator[i])->add(binS[i]);
-    count[i] != 0 ? dynamic_cast<Accumulator*>(orderSCos_->accumulator[i])
-                        ->add(binSCos[i] / count[i])
-                  : dynamic_cast<Accumulator*>(orderSCos_->accumulator[i])
-                        ->add(binSCos[i]);
-  }
-}
 }  // namespace OpenMD

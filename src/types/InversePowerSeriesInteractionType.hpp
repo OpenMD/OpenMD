@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_INVERSEPOWERSERIESINTERACTIONTYPE_HPP
 #define TYPES_INVERSEPOWERSERIESINTERACTIONTYPE_HPP
 
@@ -50,36 +50,34 @@
 
 namespace OpenMD {
   /**
-   * @class InversePowerSeriesInteractionType 
+   * @class InversePowerSeriesInteractionType
    *
    * InversePowerSeriesInteractionType is a sum of powers in the inverse of r:
    * \f[ V = \sum_n  c_n / r^{n} \f]
    */
   class InversePowerSeriesInteractionType : public NonBondedInteractionType {
-    
   public:
-    
-    InversePowerSeriesInteractionType(std::vector<std::pair<int, RealType> > series) {
-
+    InversePowerSeriesInteractionType(
+        std::vector<std::pair<int, RealType>> series) {
       powers.clear();
       coefficients.clear();
-      
-      std::vector<std::pair<int, RealType> >::iterator it;
 
-      for (it = series.begin(); it != series.end(); ++it)  {
+      std::vector<std::pair<int, RealType>>::iterator it;
+
+      for (it = series.begin(); it != series.end(); ++it) {
         powers.push_back((*it).first);
         coefficients.push_back((*it).second);
       }
-      
+
       setInversePowerSeries();
     }
 
     std::vector<int> getPowers() { return powers; }
     std::vector<RealType> getCoefficients() { return coefficients; }
-            
+
   private:
     std::vector<int> powers;
     std::vector<RealType> coefficients;
   };
-}
+}  // namespace OpenMD
 #endif

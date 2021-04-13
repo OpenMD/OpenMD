@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef INTEGRATORS_DLM_HPP
 #define INTEGRATORS_DLM_HPP
 
@@ -52,15 +52,16 @@ namespace OpenMD {
 
   /**
    * @class DLM
-   * @brief 
+   * @brief
    * @todo document
    */
   class DLM : public RotationAlgorithm {
   private:
-    virtual void doRotate(StuntDouble* sd, Vector3d& ji, RealType dt); 
-    void rotateStep(int axes1, int axes2, RealType angle, Vector3d& ji, RotMat3x3d& A);            
+    virtual void doRotate(StuntDouble* sd, Vector3d& ji, RealType dt);
+    void rotateStep(int axes1, int axes2, RealType angle, Vector3d& ji,
+                    RotMat3x3d& A);
   };
 
-}
+}  // namespace OpenMD
 
-#endif //INTEGRATORS_DLM_HPP
+#endif  // INTEGRATORS_DLM_HPP

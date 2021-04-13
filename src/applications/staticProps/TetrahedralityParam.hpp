@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,10 +45,10 @@
 
 #ifndef APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAM_HPP
 #define APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAM_HPP
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
 
 namespace OpenMD {
 
@@ -58,7 +58,7 @@ namespace OpenMD {
    *
    * Computes local tetrahedral order parameter Q as introduced in:
    *
-   *   "A new order parameter for tetrahedral configurations," by P.-L. Chau and 
+   *   "A new order parameter for tetrahedral configurations," by P.-L. Chau and
    *    A.J. Hardwick, Mol. Phys. 93, pp. 511-518 (1998).
    *
    *
@@ -67,39 +67,40 @@ namespace OpenMD {
    * of 1 and an ideal gas configuration has a Q value of 0. This rescaled
    * version of the tetrahedrality parameter was first introduced in:
    *
-   *   "Relationship between structural order and the anomalies of liquid water,"
-   *    by J.R. Errington and P.G. Debenedetti, Nature 409, pp. 318-321 (2001).
-   * 
+   *   "Relationship between structural order and the anomalies of liquid
+   * water," by J.R. Errington and P.G. Debenedetti, Nature 409, pp. 318-321
+   * (2001).
    *
-   * Characterization of the spatial correlations of the the local order parameter Q
-   * are done according to the procedure outlined in:
+   *
+   * Characterization of the spatial correlations of the the local order
+   * parameter Q are done according to the procedure outlined in:
    *
    *   "Space-time correlations in the orientational order parameter and the
-   *    orientational entropy of water," by P. Kumar, S.V. Buldyrev, and H.E. Stanley,
-   *    arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
+   *    orientational entropy of water," by P. Kumar, S.V. Buldyrev, and H.E.
+   * Stanley, arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
    *
    */
-  class TetrahedralityParam : public StaticAnalyser{
+  class TetrahedralityParam : public StaticAnalyser {
   public:
-    TetrahedralityParam(SimInfo* info, const std::string& filename, 
-			const std::string& sele, double rCut, int nbins);
-    
+    TetrahedralityParam(SimInfo* info, const std::string& filename,
+                        const std::string& sele, double rCut, int nbins);
+
     virtual void process();
-    
+
   private:
     virtual void initializeHistogram();
-    virtual void collectHistogram(RealType Qk);    
+    virtual void collectHistogram(RealType Qk);
     void writeOrderParameter();
 
     Snapshot* currentSnapshot_;
     std::string selectionScript_;
-    SelectionManager seleMan_;    
-    SelectionEvaluator evaluator_;           
-            
+    SelectionManager seleMan_;
+    SelectionEvaluator evaluator_;
+
     RealType rCut_;
     int frameCounter_;
     int nBins_;
-   
+
     RealType MinQ_;
     RealType MaxQ_;
     RealType deltaQ_;
@@ -107,7 +108,6 @@ namespace OpenMD {
     std::vector<StuntDouble*> Distorted_;
     std::vector<StuntDouble*> Tetrahedral_;
   };
-}
+}  // namespace OpenMD
 
 #endif
-

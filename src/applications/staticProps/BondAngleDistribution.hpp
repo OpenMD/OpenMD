@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,10 +45,9 @@
 
 #ifndef APPLICATIONS_STATICPROPS_BONDANGLEDISTRIBUTION_HPP
 #define APPLICATIONS_STATICPROPS_BONDANGLEDISTRIBUTION_HPP
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
-
 
 namespace OpenMD {
 
@@ -59,33 +58,32 @@ namespace OpenMD {
    *  Comptes bond angle distribution for nearest neighbors.
    *BondAngleDistribution
    */
-  class BondAngleDistribution : public StaticAnalyser{
+  class BondAngleDistribution : public StaticAnalyser {
   public:
-    BondAngleDistribution(SimInfo* info, const std::string& filename, 
-                       const std::string& sele, double rCut, int nbins);
-    
+    BondAngleDistribution(SimInfo* info, const std::string& filename,
+                          const std::string& sele, double rCut, int nbins);
+
     virtual void process();
-    
+
   private:
     virtual void initializeHistogram();
-       
+
     void writeBondAngleDistribution();
 
     Snapshot* currentSnapshot_;
     std::string selectionScript_;
-    SelectionManager seleMan_;    
-    SelectionEvaluator evaluator_;           
-            
+    SelectionManager seleMan_;
+    SelectionEvaluator evaluator_;
+
     RealType rCut_;
     int frameCounter_;
     int nBins_;
-    
+
     RealType deltaTheta_;
     std::vector<int> ThetaCount_;
     std::vector<int> histogram_;
     int nTotBonds_;
   };
-}
+}  // namespace OpenMD
 
 #endif
-

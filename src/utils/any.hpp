@@ -1,6 +1,6 @@
 /*
  * Boost Software License - Version 1.0 - August 17th, 2003
- * 
+ *
  * Permission is hereby granted, free of charge, to any person or organization
  * obtaining a copy of the software and accompanying documentation covered by
  * this license (the "Software") to use, reproduce, display, distribute,
@@ -39,119 +39,77 @@
 #include <algorithm>
 #include <typeinfo>
 
-namespace boost
-{
+namespace boost {
 
-  template<class E> inline void throw_exception(E const & e) {
+  template<class E>
+  inline void throw_exception(E const& e) {
     throw e;
   }
 
-  class any
-  {
-  public: // structors
-
-    any()
-      : content(0)
-    {
-    }
+  class any {
+  public:  // structors
+    any() : content(0) {}
 
     template<typename ValueType>
-    any(const ValueType & value)
-      : content(new holder<ValueType>(value))
-    {
-    }
+    any(const ValueType& value) : content(new holder<ValueType>(value)) {}
 
-    any(const any & other)
-      : content(other.content ? other.content->clone() : 0)
-    {
-    }
+    any(const any& other) :
+        content(other.content ? other.content->clone() : 0) {}
 
-    ~any()
-    {
-      delete content;
-    }
+    ~any() { delete content; }
 
-  public: // modifiers
-
-    any & swap(any & rhs)
-    {
+  public:  // modifiers
+    any& swap(any& rhs) {
       std::swap(content, rhs.content);
       return *this;
     }
 
     template<typename ValueType>
-    any & operator=(const ValueType & rhs)
-    {
+    any& operator=(const ValueType& rhs) {
       any(rhs).swap(*this);
       return *this;
     }
 
-    any & operator=(const any & rhs)
-    {
+    any& operator=(const any& rhs) {
       any(rhs).swap(*this);
       return *this;
     }
 
-  public: // queries
+  public:  // queries
+    bool empty() const { return !content; }
 
-    bool empty() const
-    {
-      return !content;
-    }
-
-    const std::type_info & type() const
-    {
+    const std::type_info& type() const {
       return content ? content->type() : typeid(void);
     }
 
     //#ifndef BOOST_NO_MEMBER_TEMPLATE_FRIENDS
     //    private: // types
     //#else
-  public: // types (public so any_cast can be non-friend)
+  public:  // types (public so any_cast can be non-friend)
     //#endif
 
-    class placeholder
-    {
-    public: // structors
-    
-      virtual ~placeholder()
-      {
-      }
+    class placeholder {
+    public:  // structors
+      virtual ~placeholder() {}
 
-    public: // queries
+    public:  // queries
+      virtual const std::type_info& type() const = 0;
 
-      virtual const std::type_info & type() const = 0;
-
-      virtual placeholder * clone() const = 0;
-    
+      virtual placeholder* clone() const = 0;
     };
 
     template<typename ValueType>
-    class holder : public placeholder
-    {
-    public: // structors
+    class holder : public placeholder {
+    public:  // structors
+      holder(const ValueType& value) : held(value) {}
 
-      holder(const ValueType & value)
-	: held(value)
-      {
-      }
+    public:  // queries
+      virtual const std::type_info& type() const { return typeid(ValueType); }
 
-    public: // queries
+      virtual placeholder* clone() const { return new holder(held); }
 
-      virtual const std::type_info & type() const
-      {
-	return typeid(ValueType);
-      }
-
-      virtual placeholder * clone() const
-      {
-	return new holder(held);
-      }
-
-    public: // representation
-
+    public:  // representation
       ValueType held;
-
     };
 
     //#ifndef BOOST_NO_MEMBER_TEMPLATE_FRIENDS
@@ -163,54 +121,46 @@ namespace boost
     //
     //#else
     //
-  public: // representation (public so any_cast can be non-friend)
+  public:  // representation (public so any_cast can be non-friend)
     //
     //#endif
 
-    placeholder * content;
-
+    placeholder* content;
   };
 
-  class bad_any_cast : public std::bad_cast
-  {
+  class bad_any_cast : public std::bad_cast {
   public:
-    virtual const char * what() const throw()
-    {
+    virtual const char* what() const throw() {
       return "boost::bad_any_cast: "
-	"failed conversion using boost::any_cast";
+             "failed conversion using boost::any_cast";
     }
   };
 
   template<typename ValueType>
-  ValueType * any_cast(any * operand)
-  {
-    return operand && operand->type() == typeid(ValueType)
-      ? &static_cast<any::holder<ValueType> *>(operand->content)->held
-      : 0;
+  ValueType* any_cast(any* operand) {
+    return operand && operand->type() == typeid(ValueType) ?
+               &static_cast<any::holder<ValueType>*>(operand->content)->held :
+               0;
   }
 
   template<typename ValueType>
-  const ValueType * any_cast(const any * operand)
-  {
-    return any_cast<ValueType>(const_cast<any *>(operand));
+  const ValueType* any_cast(const any* operand) {
+    return any_cast<ValueType>(const_cast<any*>(operand));
   }
 
   template<typename ValueType>
-  ValueType any_cast(const any & operand)
-  {
-    const ValueType * result = any_cast<ValueType>(&operand);
-    if(!result)
-      boost::throw_exception(bad_any_cast());
+  ValueType any_cast(const any& operand) {
+    const ValueType* result = any_cast<ValueType>(&operand);
+    if (!result) boost::throw_exception(bad_any_cast());
     return *result;
   }
 
+  //  template<typename T>
+  //  bool equal_any_type(const any& operand) {
+  //
+  //  }
 
-//  template<typename T> 
-//  bool equal_any_type(const any& operand) {
-//
-//  }
-
-}
+}  // namespace boost
 
 // Copyright Kevlin Henney, 2000, 2001, 2002. All rights reserved.
 //

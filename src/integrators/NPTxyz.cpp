@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -64,110 +64,106 @@
 
 namespace OpenMD {
 
-RealType NPTxyz::calcConservedQuantity() {
-  thermostat = snap->getThermostat();
-  loadEta();
+  RealType NPTxyz::calcConservedQuantity() {
+    thermostat = snap->getThermostat();
+    loadEta();
 
-  // We need NkBT a lot, so just set it here: This is the RAW number
-  // of integrableObjects, so no subtraction or addition of constraints or
-  // orientational degrees of freedom:
-  NkBT = info_->getNGlobalIntegrableObjects() * Constants::kB * targetTemp;
+    // We need NkBT a lot, so just set it here: This is the RAW number
+    // of integrableObjects, so no subtraction or addition of constraints or
+    // orientational degrees of freedom:
+    NkBT = info_->getNGlobalIntegrableObjects() * Constants::kB * targetTemp;
 
-  // fkBT is used because the thermostat operates on more degrees of freedom
-  // than the barostat (when there are particles with orientational degrees
-  // of freedom).
-  fkBT = info_->getNdf() * Constants::kB * targetTemp;
+    // fkBT is used because the thermostat operates on more degrees of freedom
+    // than the barostat (when there are particles with orientational degrees
+    // of freedom).
+    fkBT = info_->getNdf() * Constants::kB * targetTemp;
 
-  RealType conservedQuantity;
-  RealType totalEnergy;
-  RealType thermostat_kinetic;
-  RealType thermostat_potential;
-  RealType barostat_kinetic;
-  RealType barostat_potential;
-  RealType trEta;
+    RealType conservedQuantity;
+    RealType totalEnergy;
+    RealType thermostat_kinetic;
+    RealType thermostat_potential;
+    RealType barostat_kinetic;
+    RealType barostat_potential;
+    RealType trEta;
 
-  totalEnergy = thermo.getTotalEnergy();
+    totalEnergy = thermo.getTotalEnergy();
 
-  thermostat_kinetic = fkBT * tt2 * thermostat.first * thermostat.first /
-                       (2.0 * Constants::energyConvert);
+    thermostat_kinetic = fkBT * tt2 * thermostat.first * thermostat.first /
+                         (2.0 * Constants::energyConvert);
 
-  thermostat_potential = fkBT * thermostat.second / Constants::energyConvert;
+    thermostat_potential = fkBT * thermostat.second / Constants::energyConvert;
 
-  SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
-  trEta = tmp.trace();
+    SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
+    trEta                         = tmp.trace();
 
-  barostat_kinetic = NkBT * tb2 * trEta / (2.0 * Constants::energyConvert);
+    barostat_kinetic = NkBT * tb2 * trEta / (2.0 * Constants::energyConvert);
 
-  barostat_potential =
-      (targetPressure * thermo.getVolume() / Constants::pressureConvert) /
-      Constants::energyConvert;
+    barostat_potential =
+        (targetPressure * thermo.getVolume() / Constants::pressureConvert) /
+        Constants::energyConvert;
 
-  conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
-                      barostat_kinetic + barostat_potential;
+    conservedQuantity = totalEnergy + thermostat_kinetic +
+                        thermostat_potential + barostat_kinetic +
+                        barostat_potential;
 
-  return conservedQuantity;
-}
+    return conservedQuantity;
+  }
 
-void NPTxyz::scaleSimBox() {
-  int i, j;
-  Mat3x3d scaleMat;
-  RealType scaleFactor;
-  RealType bigScale, smallScale;
-  Mat3x3d hm;
-  Mat3x3d hmnew;
+  void NPTxyz::scaleSimBox() {
+    int i, j;
+    Mat3x3d scaleMat;
+    RealType scaleFactor;
+    RealType bigScale, smallScale;
+    Mat3x3d hm;
+    Mat3x3d hmnew;
 
-  // Scale the box after all the positions have been moved:
+    // Scale the box after all the positions have been moved:
 
-  // Use a taylor expansion for eta products:  Hmat = Hmat . exp(dt * etaMat)
-  //  Hmat = Hmat . ( Ident + dt * etaMat  + dt^2 * etaMat*etaMat / 2)
+    // Use a taylor expansion for eta products:  Hmat = Hmat . exp(dt * etaMat)
+    //  Hmat = Hmat . ( Ident + dt * etaMat  + dt^2 * etaMat*etaMat / 2)
 
-  bigScale = 1.0;
-  smallScale = 1.0;
+    bigScale   = 1.0;
+    smallScale = 1.0;
 
-  for (i = 0; i < 3; i++) {
-    for (j = 0; j < 3; j++) {
-      scaleMat(i, j) = 0.0;
-      if (i == j) {
-        scaleMat(i, j) = 1.0;
+    for (i = 0; i < 3; i++) {
+      for (j = 0; j < 3; j++) {
+        scaleMat(i, j) = 0.0;
+        if (i == j) { scaleMat(i, j) = 1.0; }
       }
     }
-  }
 
-  for (i = 0; i < 3; i++) {
-    // calculate the scaleFactors
+    for (i = 0; i < 3; i++) {
+      // calculate the scaleFactors
 
-    scaleFactor = exp(dt * eta(i, i));
+      scaleFactor = exp(dt * eta(i, i));
 
-    scaleMat(i, i) = scaleFactor;
+      scaleMat(i, i) = scaleFactor;
 
-    if (scaleMat(i, i) > bigScale) {
-      bigScale = scaleMat(i, i);
+      if (scaleMat(i, i) > bigScale) { bigScale = scaleMat(i, i); }
+
+      if (scaleMat(i, i) < smallScale) { smallScale = scaleMat(i, i); }
     }
 
-    if (scaleMat(i, i) < smallScale) {
-      smallScale = scaleMat(i, i);
+    if ((bigScale > 1.1) || (smallScale < 0.9)) {
+      sprintf(
+          painCave.errMsg,
+          "NPTxyz error: Attempting a Box scaling of more than 10 percent.\n"
+          " Check your tauBarostat, as it is probably too small!\n\n"
+          " scaleMat = [%lf\t%lf\t%lf]\n"
+          "            [%lf\t%lf\t%lf]\n"
+          "            [%lf\t%lf\t%lf]\n",
+          scaleMat(0, 0), scaleMat(0, 1), scaleMat(0, 2), scaleMat(1, 0),
+          scaleMat(1, 1), scaleMat(1, 2), scaleMat(2, 0), scaleMat(2, 1),
+          scaleMat(2, 2));
+      painCave.isFatal = 1;
+      simError();
+    } else {
+      Mat3x3d hmat = snap->getHmat();
+      hmat         = hmat * scaleMat;
+      snap->setHmat(hmat);
     }
   }
 
-  if ((bigScale > 1.1) || (smallScale < 0.9)) {
-    sprintf(painCave.errMsg,
-            "NPTxyz error: Attempting a Box scaling of more than 10 percent.\n"
-            " Check your tauBarostat, as it is probably too small!\n\n"
-            " scaleMat = [%lf\t%lf\t%lf]\n"
-            "            [%lf\t%lf\t%lf]\n"
-            "            [%lf\t%lf\t%lf]\n",
-            scaleMat(0, 0), scaleMat(0, 1), scaleMat(0, 2), scaleMat(1, 0),
-            scaleMat(1, 1), scaleMat(1, 2), scaleMat(2, 0), scaleMat(2, 1),
-            scaleMat(2, 2));
-    painCave.isFatal = 1;
-    simError();
-  } else {
-    Mat3x3d hmat = snap->getHmat();
-    hmat = hmat * scaleMat;
-    snap->setHmat(hmat);
-  }
-}
-
-void NPTxyz::loadEta() { eta = snap->getBarostat(); }
+  void NPTxyz::loadEta() { eta = snap->getBarostat(); }
 
 }  // namespace OpenMD

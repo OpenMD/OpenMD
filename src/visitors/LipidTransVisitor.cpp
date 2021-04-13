@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,128 +51,125 @@
 #include "utils/simError.h"
 
 namespace OpenMD {
-LipidTransVisitor::LipidTransVisitor(SimInfo* info,
-                                     const std::string& originSeleScript,
-                                     const std::string& refSeleScript)
-    : BaseVisitor(),
-      info_(info),
-      originEvaluator_(info),
-      originSeleMan_(info),
-      refEvaluator_(info),
-      refSeleMan_(info),
-      refSd_(NULL) {
-  visitorName = "LipidTransVisitor";
+  LipidTransVisitor::LipidTransVisitor(SimInfo* info,
+                                       const std::string& originSeleScript,
+                                       const std::string& refSeleScript) :
+      BaseVisitor(),
+      info_(info), originEvaluator_(info), originSeleMan_(info),
+      refEvaluator_(info), refSeleMan_(info), refSd_(NULL) {
+    visitorName = "LipidTransVisitor";
 
-  originEvaluator_.loadScriptString(originSeleScript);
-  if (!originEvaluator_.isDynamic()) {
-    originSeleMan_.setSelectionSet(originEvaluator_.evaluate());
-    if (originSeleMan_.getSelectionCount() == 1) {
-      int i;
-      originDatom_ =
-          dynamic_cast<DirectionalAtom*>(originSeleMan_.beginSelected(i));
-      if (originDatom_ == NULL) {
-        sprintf(painCave.errMsg,
-                "LipidTransVisitor: origin selection must select an "
-                "directional atom");
+    originEvaluator_.loadScriptString(originSeleScript);
+    if (!originEvaluator_.isDynamic()) {
+      originSeleMan_.setSelectionSet(originEvaluator_.evaluate());
+      if (originSeleMan_.getSelectionCount() == 1) {
+        int i;
+        originDatom_ =
+            dynamic_cast<DirectionalAtom*>(originSeleMan_.beginSelected(i));
+        if (originDatom_ == NULL) {
+          sprintf(painCave.errMsg,
+                  "LipidTransVisitor: origin selection must select an "
+                  "directional atom");
+          painCave.isFatal = 1;
+          simError();
+        }
+      } else {
+        sprintf(
+            painCave.errMsg,
+            "LipidTransVisitor: origin selection must select an directional "
+            "atom");
         painCave.isFatal = 1;
         simError();
       }
-    } else {
-      sprintf(painCave.errMsg,
-              "LipidTransVisitor: origin selection must select an directional "
-              "atom");
-      painCave.isFatal = 1;
-      simError();
+    }
+
+    refEvaluator_.loadScriptString(refSeleScript);
+    if (!refEvaluator_.isDynamic()) {
+      refSeleMan_.setSelectionSet(refEvaluator_.evaluate());
+      if (refSeleMan_.getSelectionCount() == 1) {
+        int i;
+        refSd_ = refSeleMan_.beginSelected(i);
+
+      } else {
+        // error
+      }
     }
   }
 
-  refEvaluator_.loadScriptString(refSeleScript);
-  if (!refEvaluator_.isDynamic()) {
-    refSeleMan_.setSelectionSet(refEvaluator_.evaluate());
-    if (refSeleMan_.getSelectionCount() == 1) {
-      int i;
-      refSd_ = refSeleMan_.beginSelected(i);
+  void LipidTransVisitor::update() {
+    Vector3d ref = refSd_->getPos();
+    origin_      = originDatom_->getPos();
+    Vector3d v1  = ref - origin_;
+    info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(v1);
 
+    MultipoleAdapter ma = MultipoleAdapter(originDatom_->getAtomType());
+    Vector3d zaxis;
+    if (ma.isDipole()) {
+      zaxis = originDatom_->getDipole();
     } else {
-      // error
+      zaxis = originDatom_->getA().transpose() * V3Z;
+    }
+
+    Vector3d xaxis = cross(v1, zaxis);
+    Vector3d yaxis = cross(zaxis, xaxis);
+
+    xaxis.normalize();
+    yaxis.normalize();
+    zaxis.normalize();
+
+    rotMat_.setRow(0, xaxis);
+    rotMat_.setRow(1, yaxis);
+    rotMat_.setRow(2, zaxis);
+  }
+
+  void LipidTransVisitor::internalVisit(StuntDouble* sd) {
+    std::shared_ptr<GenericData> data;
+    std::shared_ptr<AtomData> atomData;
+    std::shared_ptr<AtomInfo> atomInfo;
+    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
+
+    data = sd->getPropertyByName("ATOMDATA");
+
+    if (data != nullptr) {
+      atomData = std::dynamic_pointer_cast<AtomData>(data);
+
+      if (atomData == nullptr) return;
+    } else
+      return;
+
+    Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    for (atomInfo = atomData->beginAtomInfo(i); atomInfo;
+         atomInfo = atomData->nextAtomInfo(i)) {
+      Vector3d tmp = atomInfo->pos - origin_;
+      currSnapshot->wrapVector(tmp);
+      atomInfo->pos = rotMat_ * tmp;
+      ;
+      atomInfo->vec = rotMat_ * atomInfo->vec;
     }
   }
-}
 
-void LipidTransVisitor::update() {
-  Vector3d ref = refSd_->getPos();
-  origin_ = originDatom_->getPos();
-  Vector3d v1 = ref - origin_;
-  info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(v1);
+  const std::string LipidTransVisitor::toString() {
+    char buffer[65535];
+    std::string result;
 
-  MultipoleAdapter ma = MultipoleAdapter(originDatom_->getAtomType());
-  Vector3d zaxis;
-  if (ma.isDipole()) {
-    zaxis = originDatom_->getDipole();
-  } else {
-    zaxis = originDatom_->getA().transpose() * V3Z;
+    sprintf(
+        buffer,
+        "------------------------------------------------------------------\n");
+    result += buffer;
+
+    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    result += buffer;
+
+    sprintf(buffer, "Visitor Description: rotate the whole system\n");
+    result += buffer;
+
+    sprintf(
+        buffer,
+        "------------------------------------------------------------------\n");
+    result += buffer;
+
+    return result;
   }
-
-  Vector3d xaxis = cross(v1, zaxis);
-  Vector3d yaxis = cross(zaxis, xaxis);
-
-  xaxis.normalize();
-  yaxis.normalize();
-  zaxis.normalize();
-
-  rotMat_.setRow(0, xaxis);
-  rotMat_.setRow(1, yaxis);
-  rotMat_.setRow(2, zaxis);
-}
-
-void LipidTransVisitor::internalVisit(StuntDouble* sd) {
-  std::shared_ptr<GenericData> data;
-  std::shared_ptr<AtomData> atomData;
-  std::shared_ptr<AtomInfo> atomInfo;
-  std::vector<std::shared_ptr<AtomInfo>>::iterator i;
-
-  data = sd->getPropertyByName("ATOMDATA");
-
-  if (data != nullptr) {
-    atomData = std::dynamic_pointer_cast<AtomData>(data);
-
-    if (atomData == nullptr) return;
-  } else
-    return;
-
-  Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-
-  for (atomInfo = atomData->beginAtomInfo(i); atomInfo;
-       atomInfo = atomData->nextAtomInfo(i)) {
-    Vector3d tmp = atomInfo->pos - origin_;
-    currSnapshot->wrapVector(tmp);
-    atomInfo->pos = rotMat_ * tmp;
-    ;
-    atomInfo->vec = rotMat_ * atomInfo->vec;
-  }
-}
-
-const std::string LipidTransVisitor::toString() {
-  char buffer[65535];
-  std::string result;
-
-  sprintf(
-      buffer,
-      "------------------------------------------------------------------\n");
-  result += buffer;
-
-  sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
-  result += buffer;
-
-  sprintf(buffer, "Visitor Description: rotate the whole system\n");
-  result += buffer;
-
-  sprintf(
-      buffer,
-      "------------------------------------------------------------------\n");
-  result += buffer;
-
-  return result;
-}
 
 }  // namespace OpenMD

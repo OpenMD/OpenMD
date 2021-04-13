@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,20 +42,20 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file BendType.hpp
  * @author    teng lin
  * @date  11/16/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_BENDTYPE_HPP
 #define TYPES_BENDTYPE_HPP
 #include "config.h"
 
 namespace OpenMD {
-  
+
   /**
    * @class BendType BendType.hpp "types/BendType.hpp"
    */
@@ -63,20 +63,16 @@ namespace OpenMD {
   public:
     BendType(RealType theta) : theta0_(theta) {}
     virtual ~BendType() {}
-    
-    virtual void calcForce(RealType theta, RealType& V, RealType& dVdTheta) = 0;   
-    
-    RealType getTheta() {
-      return theta0_;
-    }
-    
-    void setTheta(RealType theta) {
-      theta0_ = theta;
-    }
-    
+
+    virtual void calcForce(RealType theta, RealType& V, RealType& dVdTheta) = 0;
+
+    RealType getTheta() { return theta0_; }
+
+    void setTheta(RealType theta) { theta0_ = theta; }
+
   protected:
-    RealType theta0_;        
+    RealType theta0_;
   };
-  
-} //end namespace OpenMD
-#endif //TYPES_BENDTYPE_HPP
+
+}  // end namespace OpenMD
+#endif  // TYPES_BENDTYPE_HPP

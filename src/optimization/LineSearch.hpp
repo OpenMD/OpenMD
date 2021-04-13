@@ -31,54 +31,54 @@
 using namespace OpenMD;
 namespace QuantLib {
 
-    class Problem;
-    class Constraint;
-    class EndCriteria;
+  class Problem;
+  class Constraint;
+  class EndCriteria;
 
-    //! Base class for line search
-    class LineSearch {
-    public:
-        //! Default constructor
-        explicit LineSearch(RealType = 0.0)
-            : qt_(0.0), qpt_(0.0), succeed_(true) {}
-        //! Destructor
-        virtual ~LineSearch() {}
+  //! Base class for line search
+  class LineSearch {
+  public:
+    //! Default constructor
+    explicit LineSearch(RealType = 0.0) : qt_(0.0), qpt_(0.0), succeed_(true) {}
+    //! Destructor
+    virtual ~LineSearch() {}
 
-        //! return last x value
-        const DynamicVector<RealType>& lastX() { return xtd_; }
-        //! return last objective function value
-        RealType lastFunctionValue() { return qt_; }
-        //! return last gradient
-        const DynamicVector<RealType>& lastGradient() { return gradient_; }
-        //! return square norm of last gradient
-        RealType lastGradientNorm2() { return qpt_;}
+    //! return last x value
+    const DynamicVector<RealType>& lastX() { return xtd_; }
+    //! return last objective function value
+    RealType lastFunctionValue() { return qt_; }
+    //! return last gradient
+    const DynamicVector<RealType>& lastGradient() { return gradient_; }
+    //! return square norm of last gradient
+    RealType lastGradientNorm2() { return qpt_; }
 
-        bool succeed() { return succeed_; }
+    bool succeed() { return succeed_; }
 
-        //! Perform line search
-        virtual RealType operator()(Problem& P, // Optimization problem
-                                    EndCriteria::Type& ecType,
-                                    const EndCriteria&,
-                                    const RealType t_ini) = 0;  // initial value of line-search step
-        RealType update(DynamicVector<RealType>& params,
-                        const DynamicVector<RealType>& direction,
-                        RealType beta,
-                        const Constraint& constraint);
+    //! Perform line search
+    virtual RealType operator()(
+        Problem& P,  // Optimization problem
+        EndCriteria::Type& ecType, const EndCriteria&,
+        const RealType t_ini) = 0;  // initial value of line-search step
+    RealType update(DynamicVector<RealType>& params,
+                    const DynamicVector<RealType>& direction, RealType beta,
+                    const Constraint& constraint);
 
-        //! current value of the search direction
-        const DynamicVector<RealType>& searchDirection() const { return searchDirection_; }
-        DynamicVector<RealType>& searchDirection() { return searchDirection_; }
-    protected:
-        //! current values of the search direction
-        DynamicVector<RealType> searchDirection_;
-        //! new x and its gradient
-        DynamicVector<RealType> xtd_, gradient_;
-        //! objective function value and gradient norm corresponding to xtd_
-        RealType qt_, qpt_;
-        //! flag to know if linesearch succeed
-        bool succeed_;
-        
-    };
-}
+    //! current value of the search direction
+    const DynamicVector<RealType>& searchDirection() const {
+      return searchDirection_;
+    }
+    DynamicVector<RealType>& searchDirection() { return searchDirection_; }
+
+  protected:
+    //! current values of the search direction
+    DynamicVector<RealType> searchDirection_;
+    //! new x and its gradient
+    DynamicVector<RealType> xtd_, gradient_;
+    //! objective function value and gradient norm corresponding to xtd_
+    RealType qt_, qpt_;
+    //! flag to know if linesearch succeed
+    bool succeed_;
+  };
+}  // namespace QuantLib
 
 #endif

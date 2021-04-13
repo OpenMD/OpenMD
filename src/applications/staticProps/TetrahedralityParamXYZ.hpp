@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,10 +45,10 @@
 
 #ifndef APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAMXYZ_HPP
 #define APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAMXYZ_HPP
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
 
 namespace OpenMD {
 
@@ -58,7 +58,7 @@ namespace OpenMD {
    *
    * Computes local tetrahedral order parameter Q as introduced in:
    *
-   *  "A new order parameter for tetrahedral configurations," by P.-L. Chau and 
+   *  "A new order parameter for tetrahedral configurations," by P.-L. Chau and
    *    A.J. Hardwick, Mol. Phys. 93, pp. 511-518 (1998).
    *
    *
@@ -69,25 +69,26 @@ namespace OpenMD {
    *
    *  "Relationship between structural order and the anomalies of liquid water,"
    *    by J.R. Errington and P.G. Debenedetti, Nature 409, pp. 318-321 (2001).
-   * 
+   *
    *
    * Characterization of the spatial correlations of the the local
    * order parameter Q are done according to the procedure outlined
    * in:
    *
    *   "Space-time correlations in the orientational order parameter and the
-   *    orientational entropy of water," by P. Kumar, S.V. Buldyrev, and 
+   *    orientational entropy of water," by P. Kumar, S.V. Buldyrev, and
    *    H.E. Stanley, arXiv:0807.4699v1 [cond-mat.soft] 29 Jul 2008.
    *
    */
-  class TetrahedralityParamXYZ : public StaticAnalyser{
+  class TetrahedralityParamXYZ : public StaticAnalyser {
   public:
-    TetrahedralityParamXYZ(SimInfo* info, const std::string& filename, 
-                           const std::string& sele1, const std::string& sele2, 
-                           RealType rCut, RealType voxelSize, RealType gaussWidth);
+    TetrahedralityParamXYZ(SimInfo* info, const std::string& filename,
+                           const std::string& sele1, const std::string& sele2,
+                           RealType rCut, RealType voxelSize,
+                           RealType gaussWidth);
 
     virtual void process();
-    
+
   private:
     void writeQxyz();
 
@@ -104,10 +105,8 @@ namespace OpenMD {
     RealType gaussWidth_;
 
     Vector3i nBins_;
-    std::vector<std::vector<std::vector<RealType> > > count_;
-    std::vector<std::vector<std::vector<RealType> > > hist_;
-
+    std::vector<std::vector<std::vector<RealType>>> count_;
+    std::vector<std::vector<std::vector<RealType>>> hist_;
   };
-}
+}  // namespace OpenMD
 #endif
-

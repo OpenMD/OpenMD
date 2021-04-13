@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,34 +45,36 @@
 
 #ifndef VISITORS_ATOMNAMEVISITOR_HPP
 #define VISITORS_ATOMNAMEVISITOR_HPP
-#include "visitors/BaseVisitor.hpp"
-#include "visitors/AtomData.hpp"
-#include <string>
 #include <map>
-#include "visitors/AtomVisitor.hpp"
+#include <string>
+
+#include "brains/ForceField.hpp"
 #include "primitives/DirectionalAtom.hpp"
 #include "primitives/RigidBody.hpp"
-#include "brains/ForceField.hpp"
+#include "visitors/AtomData.hpp"
+#include "visitors/AtomVisitor.hpp"
+#include "visitors/BaseVisitor.hpp"
 
 namespace OpenMD {
-  
-  
+
   class AtomNameVisitor : public BaseVisitor {
   public:
     using BaseVisitor::visit;
-    AtomNameVisitor(SimInfo* info);  
-    
-    virtual void visit(Atom* atom) {visitAtom(atom);}
-    virtual void visit(DirectionalAtom* datom) {visitAtom(static_cast<Atom*>(datom));}
+    AtomNameVisitor(SimInfo* info);
+
+    virtual void visit(Atom* atom) { visitAtom(atom); }
+    virtual void visit(DirectionalAtom* datom) {
+      visitAtom(static_cast<Atom*>(datom));
+    }
     virtual void visit(RigidBody* rb);
-    
-    virtual const std::string toString();    
+
+    virtual const std::string toString();
+
   private:
     void visitAtom(Atom* atom);
     SimInfo* info_ {nullptr};
     ForceField* ff_;
   };
-}
+}  // namespace OpenMD
 
 #endif
-

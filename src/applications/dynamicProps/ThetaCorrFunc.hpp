@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,17 +49,17 @@
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace OpenMD {
-  
+
   class ThetaCorrFunc : public ObjectACF<RealType> {
   public:
     ThetaCorrFunc(SimInfo* info, const std::string& filename,
-                  const std::string& sele1, const std::string& sele2);   
+                  const std::string& sele1, const std::string& sele2);
+
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
-    std::vector<std::vector<Vector3d> > coords_;
+    std::vector<std::vector<Vector3d>> coords_;
   };
 
-}
+}  // namespace OpenMD
 #endif
-

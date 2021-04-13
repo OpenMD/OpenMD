@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -67,28 +67,28 @@
 using namespace std;
 using namespace OpenMD;
 
-void createMdFile(const std::string &oldMdFileName,
-                  const std::string &newMdFileName, int nMol);
+void createMdFile(const std::string& oldMdFileName,
+                  const std::string& newMdFileName, int nMol);
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   registerLattice();
 
   gengetopt_args_info args_info;
   std::string latticeType;
   std::string inputFileName;
   std::string outputFileName;
-  Lattice *simpleLat;
+  Lattice* simpleLat;
   RealType latticeConstant;
   std::vector<RealType> lc;
   const RealType rhoConvertConst = 1.66053886;
   RealType density;
   int nx, ny, nz;
   Mat3x3d hmat;
-  MoLocator *locator;
+  MoLocator* locator;
   std::vector<Vector3d> latticePos;
   std::vector<Vector3d> latticeOrt;
   int nMolPerCell;
-  DumpWriter *writer;
+  DumpWriter* writer;
 
   // parse command line arguments
   if (cmdline_parser(argc, argv, &args_info) != 0) exit(1);
@@ -97,9 +97,7 @@ int main(int argc, char *argv[]) {
 
   // get lattice type
   latticeType = "FCC";
-  if (args_info.lattice_given) {
-    latticeType = args_info.lattice_arg;
-  }
+  if (args_info.lattice_given) { latticeType = args_info.lattice_arg; }
 
   simpleLat = LatticeFactory::getInstance().createLattice(latticeType);
 
@@ -116,9 +114,8 @@ int main(int argc, char *argv[]) {
   nx = args_info.nx_arg;
 
   if (nx <= 0) {
-    sprintf(painCave.errMsg,
-            "The number of unit cells in the x direction "
-            "must be greater than 0.");
+    sprintf(painCave.errMsg, "The number of unit cells in the x direction "
+                             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
   }
@@ -126,9 +123,8 @@ int main(int argc, char *argv[]) {
   ny = args_info.ny_arg;
 
   if (ny <= 0) {
-    sprintf(painCave.errMsg,
-            "The number of unit cells in the y direction "
-            "must be greater than 0.");
+    sprintf(painCave.errMsg, "The number of unit cells in the y direction "
+                             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
   }
@@ -136,9 +132,8 @@ int main(int argc, char *argv[]) {
   nz = args_info.nz_arg;
 
   if (nz <= 0) {
-    sprintf(painCave.errMsg,
-            "The number of unit cells in the z direction "
-            "must be greater than 0.");
+    sprintf(painCave.errMsg, "The number of unit cells in the z direction "
+                             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
   }
@@ -149,9 +144,8 @@ int main(int argc, char *argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg,
-            "No input .omd file name was specified "
-            "on the command line");
+    sprintf(painCave.errMsg, "No input .omd file name was specified "
+                             "on the command line");
     painCave.isFatal = 1;
     simError();
   }
@@ -159,7 +153,7 @@ int main(int argc, char *argv[]) {
   // parse md file and set up the system
 
   SimCreator oldCreator;
-  SimInfo *oldInfo = oldCreator.createSim(inputFileName, false);
+  SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
 
   // Calculate lattice constant (in Angstroms)
 
@@ -210,7 +204,7 @@ int main(int argc, char *argv[]) {
   // md file and set up the system
 
   SimCreator newCreator;
-  SimInfo *newInfo = newCreator.createSim(outputFileName, false);
+  SimInfo* newInfo = newCreator.createSim(outputFileName, false);
 
   // fill Hmat
 
@@ -232,7 +226,7 @@ int main(int argc, char *argv[]) {
 
   // place the molecules
 
-  Molecule *mol;
+  Molecule* mol;
   locator =
       new MoLocator(newInfo->getMoleculeStamp(0), newInfo->getForceField());
   for (int n = 0; n < nSites; n++) {
@@ -259,14 +253,14 @@ int main(int argc, char *argv[]) {
   sprintf(painCave.errMsg,
           "A new OpenMD file called \"%s\" has been generated.\n",
           outputFileName.c_str());
-  painCave.isFatal = 0;
+  painCave.isFatal  = 0;
   painCave.severity = OPENMD_INFO;
   simError();
   return 0;
 }
 
-void createMdFile(const std::string &oldMdFileName,
-                  const std::string &newMdFileName, int nMol) {
+void createMdFile(const std::string& oldMdFileName,
+                  const std::string& newMdFileName, int nMol) {
   ifstream oldMdFile;
   ofstream newMdFile;
   const int MAXLEN = 65535;

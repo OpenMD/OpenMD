@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -64,122 +64,118 @@
 
 namespace OpenMD {
 
-OrderParameterProbZ::OrderParameterProbZ(
-    SimInfo* info, const std::string& filename, const std::string& sele,
-    const RealType dipoleX, const RealType dipoleY, const RealType dipoleZ,
-    int nbins, int axis)
-    : StaticAnalyser(info, filename, nbins),
-      selectionScript_(sele),
-      evaluator_(info),
-      seleMan_(info),
-      thermo_(info),
-      nbins_(nbins),
-      axis_(axis) {
-  evaluator_.loadScriptString(sele);
-  if (!evaluator_.isDynamic()) {
-    seleMan_.setSelectionSet(evaluator_.evaluate());
-  }
+  OrderParameterProbZ::OrderParameterProbZ(
+      SimInfo* info, const std::string& filename, const std::string& sele,
+      const RealType dipoleX, const RealType dipoleY, const RealType dipoleZ,
+      int nbins, int axis) :
+      StaticAnalyser(info, filename, nbins),
+      selectionScript_(sele), evaluator_(info), seleMan_(info), thermo_(info),
+      nbins_(nbins), axis_(axis) {
+    evaluator_.loadScriptString(sele);
+    if (!evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
 
-  // fixed number of bins
-  Count_.resize(nbins);
-  std::fill(Count_.begin(), Count_.end(), 0);
+    // fixed number of bins
+    Count_.resize(nbins);
+    std::fill(Count_.begin(), Count_.end(), 0);
 
-  switch (axis_) {
+    switch (axis_) {
     case 0:
       axisLabel_ = "x";
-      refAxis_ = Vector3d(1, 0, 0);
+      refAxis_   = Vector3d(1, 0, 0);
       break;
     case 1:
       axisLabel_ = "y";
-      refAxis_ = Vector3d(0, 1, 0);
+      refAxis_   = Vector3d(0, 1, 0);
       break;
     case 2:
     default:
       axisLabel_ = "z";
-      refAxis_ = Vector3d(0, 0, 1);
+      refAxis_   = Vector3d(0, 0, 1);
       break;
+    }
+
+    dipoleVector_ = Vector3d(dipoleX, dipoleY, dipoleZ);
+    dipoleVector_.normalize();
+
+    setOutputName(getPrefix(filename) + ".OrderProb");
   }
 
-  dipoleVector_ = Vector3d(dipoleX, dipoleY, dipoleZ);
-  dipoleVector_.normalize();
+  void OrderParameterProbZ::process() {
+    StuntDouble* sd;
+    int ii;
+    RealType orderMin   = -1.0;
+    RealType orderMax   = 1.0;
+    RealType deltaOrder = (orderMax - orderMin) / nbins_;
 
-  setOutputName(getPrefix(filename) + ".OrderProb");
-}
+    bool usePeriodicBoundaryConditions_ =
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-void OrderParameterProbZ::process() {
-  StuntDouble* sd;
-  int ii;
-  RealType orderMin = -1.0;
-  RealType orderMax = 1.0;
-  RealType deltaOrder = (orderMax - orderMin) / nbins_;
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
+    totalCount_ = 0;
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-  bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+      if (evaluator_.isDynamic()) {
+        seleMan_.setSelectionSet(evaluator_.evaluate());
+      }
 
-  DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
-  totalCount_ = 0;
-  for (int istep = 0; istep < nFrames; istep += step_) {
-    reader.readFrame(istep);
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      // wrap the stuntdoubles into a cell and find order parameter
 
-    if (evaluator_.isDynamic()) {
-      seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
-
-    // wrap the stuntdoubles into a cell and find order parameter
-
-    for (sd = seleMan_.beginSelected(ii); sd != NULL;
-         sd = seleMan_.nextSelected(ii)) {
-      Vector3d pos = sd->getPos();
-      if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(pos);
-      sd->setPos(pos);
-    }
-    SquareMatrix3<RealType> rotMat;
-    Vector3d rotatedDipoleVector;
-    RealType ctheta;
-    for (sd = seleMan_.beginSelected(ii); sd != NULL;
-         sd = seleMan_.nextSelected(ii)) {
-      if (sd->isDirectional() || sd->isRigidBody()) {
-        rotMat = sd->getA();
-        rotatedDipoleVector = rotMat * dipoleVector_;
-        rotatedDipoleVector.normalize();
-        ctheta = dot(rotatedDipoleVector, refAxis_);
-        int index = int((ctheta - orderMin) / deltaOrder);
-        Count_[index]++;
-        totalCount_++;
+      for (sd = seleMan_.beginSelected(ii); sd != NULL;
+           sd = seleMan_.nextSelected(ii)) {
+        Vector3d pos = sd->getPos();
+        if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(pos);
+        sd->setPos(pos);
+      }
+      SquareMatrix3<RealType> rotMat;
+      Vector3d rotatedDipoleVector;
+      RealType ctheta;
+      for (sd = seleMan_.beginSelected(ii); sd != NULL;
+           sd = seleMan_.nextSelected(ii)) {
+        if (sd->isDirectional() || sd->isRigidBody()) {
+          rotMat              = sd->getA();
+          rotatedDipoleVector = rotMat * dipoleVector_;
+          rotatedDipoleVector.normalize();
+          ctheta    = dot(rotatedDipoleVector, refAxis_);
+          int index = int((ctheta - orderMin) / deltaOrder);
+          Count_[index]++;
+          totalCount_++;
+        }
       }
     }
+
+    writeOrderCount();
   }
 
-  writeOrderCount();
-}
+  void OrderParameterProbZ::writeOrderCount() {
+    std::ofstream rdfStream(outputFilename_.c_str());
+    if (rdfStream.is_open()) {
+      rdfStream << "#Order count probablity "
+                << "\n";
+      rdfStream << "#selection: (" << selectionScript_ << ")\n";
+      rdfStream << "# Prefered Axis:" << axisLabel_
+                << "\n##Order\tProbOrderCount\n";
+      for (unsigned int i = 0; i < Count_.size(); ++i) {
+        RealType order = i * (2.0 / Count_.size());
+        RealType prop;
+        if (totalCount_ == 0)
+          prop = Count_[i];
+        else
+          prop = Count_[i] / totalCount_;
+        rdfStream << order << "\t" << prop << "\n";
+      }
 
-void OrderParameterProbZ::writeOrderCount() {
-  std::ofstream rdfStream(outputFilename_.c_str());
-  if (rdfStream.is_open()) {
-    rdfStream << "#Order count probablity "
-              << "\n";
-    rdfStream << "#selection: (" << selectionScript_ << ")\n";
-    rdfStream << "# Prefered Axis:" << axisLabel_
-              << "\n##Order\tProbOrderCount\n";
-    for (unsigned int i = 0; i < Count_.size(); ++i) {
-      RealType order = i * (2.0 / Count_.size());
-      RealType prop;
-      if (totalCount_ == 0)
-        prop = Count_[i];
-      else
-        prop = Count_[i] / totalCount_;
-      rdfStream << order << "\t" << prop << "\n";
+    } else {
+      sprintf(painCave.errMsg, "OrderProb: unable to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
     }
 
-  } else {
-    sprintf(painCave.errMsg, "OrderProb: unable to open %s\n",
-            outputFilename_.c_str());
-    painCave.isFatal = 1;
-    simError();
+    rdfStream.close();
   }
-
-  rdfStream.close();
-}
 }  // namespace OpenMD

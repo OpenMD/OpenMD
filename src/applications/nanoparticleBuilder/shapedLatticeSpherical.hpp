@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,26 +44,24 @@
  */
 
 #ifndef NANOPARTICLEBUILDER_SHAPEDLATTICESPHERICAL_HPP
-#define NANOPARTICLEBUILDER_SHAPEDLATTICESPHERICAL_HPP 
+#define NANOPARTICLEBUILDER_SHAPEDLATTICESPHERICAL_HPP
 
 #include "lattice/shapedLattice.hpp"
 #include "math/Vector3.hpp"
-namespace OpenMD{
+namespace OpenMD {
   /**
    * Implements a spherical lattice
    *
    */
-  class shapedLatticeSpherical: public shapedLattice{
+  class shapedLatticeSpherical : public shapedLattice {
   public:
-    shapedLatticeSpherical(RealType latticeConstant, std::string latticeType, RealType radius);
+    shapedLatticeSpherical(RealType latticeConstant, std::string latticeType,
+                           RealType radius);
     virtual bool isInterior(Vector3d point);
+
   private:
     RealType sphereRadius_;
   };
-}
+}  // namespace OpenMD
 
 #endif /* NANOPARTICLEBUILDER_SHAPEDLATTICESPHERICAL_HPP */
-
-
-
-

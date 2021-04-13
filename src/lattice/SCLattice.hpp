@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,22 +42,21 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef LATTICE_SCLATTICE_HPP
 #define LATTICE_SCLATTICE_HPP
-#include "lattice/CubicLattice.hpp"
 #include <string>
 #include <vector>
 
+#include "lattice/CubicLattice.hpp"
+
 namespace OpenMD {
 
-  class SCLattice : public CubicLattice{
+  class SCLattice : public CubicLattice {
   public:
     SCLattice();
     virtual void update();
-    
   };
 
-}
+}  // namespace OpenMD
 #endif
-

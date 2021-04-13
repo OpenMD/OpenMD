@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_COMPONENT_HPP
 #define TYPES_COMPONENT_HPP
 #include "types/DataHolder.hpp"
@@ -52,15 +52,17 @@ namespace OpenMD {
     DeclareParameter(Type, std::string);
     DeclareParameter(NMol, int);
     DeclareParameter(Region, int);
-    
+
   public:
     Component();
     virtual ~Component();
     virtual void validate();
-    MoleculeStamp* getMoleculeStamp() { return moleculeStamp_;}
-    bool findMoleculeStamp(const std::map<std::string, MoleculeStamp*>& molStamps); 
+    MoleculeStamp* getMoleculeStamp() { return moleculeStamp_; }
+    bool findMoleculeStamp(
+        const std::map<std::string, MoleculeStamp*>& molStamps);
+
   private:
     MoleculeStamp* moleculeStamp_;
   };
-}
+}  // namespace OpenMD
 #endif

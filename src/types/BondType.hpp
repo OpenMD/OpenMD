@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,21 +42,20 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file BondType.hpp
  * @author    tlin
  * @date  11/01/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_BONDTYPE_HPP
 #define TYPES_BONDTYPE_HPP
 #include "config.h"
 
-
 namespace OpenMD {
-  
+
   /**
    * @class BondType BondType.hpp "types/BondType.hpp"
    * BondType class is responsible for calculating the force and
@@ -66,15 +65,14 @@ namespace OpenMD {
   public:
     BondType(RealType myR0) : r0(myR0) {}
     virtual ~BondType() {}
-    
+
     virtual void calcForce(RealType r, RealType& V, RealType& dVdr) = 0;
-    RealType getEquilibriumBondLength() {return r0;}
+    RealType getEquilibriumBondLength() { return r0; }
     void setEquilibriumBondLength(RealType myR0) { r0 = myR0; }
-    
-  protected:        
+
+  protected:
     RealType r0; /**equilibrium bond length< */
-  };    
-  
-  
-} //end namespace OpenMD
-#endif //TYPES_BONDTYPE_HPP    
+  };
+
+}  // end namespace OpenMD
+#endif  // TYPES_BONDTYPE_HPP

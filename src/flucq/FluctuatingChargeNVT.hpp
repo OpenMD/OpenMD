@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,12 +42,12 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef INTEGRATORS_FLUCTUATINGCHARGENVT_HPP
 #define INTEGRATORS_FLUCTUATINGCHARGENVT_HPP
 
-#include "flucq/FluctuatingChargePropagator.hpp"
 #include "brains/Thermo.hpp"
+#include "flucq/FluctuatingChargePropagator.hpp"
 
 namespace OpenMD {
 
@@ -55,37 +55,21 @@ namespace OpenMD {
   public:
     FluctuatingChargeNVT(SimInfo* info);
 
-    int getMaxIterationNumber() {
-      return maxIterNum_;
-    }
-    
-    void setMaxIterationNumber(int maxIter) {
-      maxIterNum_ = maxIter;
-    }
-    
-    RealType getTauThermostat() {
-      return tauThermostat_;
-    }
+    int getMaxIterationNumber() { return maxIterNum_; }
 
-    void setTauThermostat(RealType tt) {
-      tauThermostat_ = tt;
-    }
+    void setMaxIterationNumber(int maxIter) { maxIterNum_ = maxIter; }
 
-    RealType getTargetTemp() {
-      return targetTemp_;
-    }
+    RealType getTauThermostat() { return tauThermostat_; }
 
-    void setTargetTemp(RealType tt) {
-      targetTemp_ = tt;
-    }
+    void setTauThermostat(RealType tt) { tauThermostat_ = tt; }
 
-    RealType getChiTolerance() {
-      return chiTolerance_;
-    }
+    RealType getTargetTemp() { return targetTemp_; }
 
-    void setChiTolerance(RealType tol) {
-      chiTolerance_ = tol;
-    }
+    void setTargetTemp(RealType tt) { targetTemp_ = tt; }
+
+    RealType getChiTolerance() { return chiTolerance_; }
+
+    void setChiTolerance(RealType tol) { chiTolerance_ = tol; }
 
   private:
     virtual void initialize();
@@ -102,12 +86,11 @@ namespace OpenMD {
     RealType chiTolerance_;
     RealType dt2_;
     RealType dt_;
-    
+
     Snapshot* snap {nullptr};
     Thermo thermo;
-
   };
 
-}
+}  // namespace OpenMD
 
-#endif 
+#endif

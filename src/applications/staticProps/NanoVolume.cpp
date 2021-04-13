@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -55,11 +55,9 @@
 using namespace OpenMD;
 
 NanoVolume::NanoVolume(SimInfo* info, const std::string& filename,
-                       const std::string& sele)
-    : StaticAnalyser(info, filename, 1),
-      selectionScript_(sele),
-      seleMan_(info),
-      evaluator_(info) {
+                       const std::string& sele) :
+    StaticAnalyser(info, filename, 1),
+    selectionScript_(sele), seleMan_(info), evaluator_(info) {
   setOutputName(getPrefix(filename) + ".avol");
 
   osq.open(getOutputFileName().c_str());
@@ -82,7 +80,7 @@ void NanoVolume::process() {
   ConvexHull* thishull = new ConvexHull();
 
   DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
+  int nFrames   = reader.getNFrames();
   frameCounter_ = 0;
 
   theAtoms_.reserve(info_->getNGlobalAtoms());
@@ -91,7 +89,7 @@ void NanoVolume::process() {
     reader.readFrame(istep);
     frameCounter_++;
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    RealType time = currentSnapshot_->getTime();
+    RealType time    = currentSnapshot_->getTime();
 
     // Clear pos vector between each frame.
     theAtoms_.clear();
@@ -119,7 +117,7 @@ void NanoVolume::process() {
 
     // Generate convex hull for this frame.
     thishull->computeHull(theAtoms_);
-    RealType volume = thishull->getVolume();
+    RealType volume      = thishull->getVolume();
     RealType surfaceArea = thishull->getArea();
 
     osq.precision(7);

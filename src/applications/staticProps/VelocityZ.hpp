@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,25 +48,25 @@
 
 #include <string>
 #include <vector>
+
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 namespace OpenMD {
-  
+
   class VelocityZ : public StaticAnalyser {
-    
   public:
     VelocityZ(SimInfo* info, const std::string& filename,
-	      const std::string& sele, int nbins1, int nbins2,
-	      int axis1 = 2, int axis2 = 0);
-    
+              const std::string& sele, int nbins1, int nbins2, int axis1 = 2,
+              int axis2 = 0);
+
     virtual void process();
-    
+
   private:
     virtual void writeVelocity();
     Snapshot* currentSnapshot_;
-    
+
     int nProcessed_;
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
@@ -79,9 +79,9 @@ namespace OpenMD {
     int axis3_;
 
     std::vector<RealType> zBox_;
-    std::vector<std::vector<RealType> > velocity_;
-    std::vector<std::vector<std::vector<StuntDouble*> > > sliceSDLists_;
+    std::vector<std::vector<RealType>> velocity_;
+    std::vector<std::vector<std::vector<StuntDouble*>>> sliceSDLists_;
   };
-}
+}  // namespace OpenMD
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,54 +51,54 @@
 using namespace std;
 namespace OpenMD {
 
-StickyAtomTypesSectionParser::StickyAtomTypesSectionParser(
-    ForceFieldOptions& options)
-    : options_(options) {
-  setSectionName("StickyAtomTypes");
-}
+  StickyAtomTypesSectionParser::StickyAtomTypesSectionParser(
+      ForceFieldOptions& options) :
+      options_(options) {
+    setSectionName("StickyAtomTypes");
+  }
 
-void StickyAtomTypesSectionParser::parseLine(ForceField& ff, const string& line,
-                                             int lineNo) {
-  StringTokenizer tokenizer(line);
-  int nTokens = tokenizer.countTokens();
-  RealType dus = options_.getDistanceUnitScaling();
-  RealType eus = options_.getEnergyUnitScaling();
+  void StickyAtomTypesSectionParser::parseLine(ForceField& ff,
+                                               const string& line, int lineNo) {
+    StringTokenizer tokenizer(line);
+    int nTokens  = tokenizer.countTokens();
+    RealType dus = options_.getDistanceUnitScaling();
+    RealType eus = options_.getEnergyUnitScaling();
 
-  // in AtomTypeSection, a line at least contains 8 tokens
-  // atomTypeName and 7 different sticky parameters
-  if (nTokens < 8) {
-    sprintf(painCave.errMsg,
-            "StickyAtomTypesSectionParser Error: Not enough "
-            "tokens at line %d\n",
-            lineNo);
-    painCave.isFatal = 1;
-    simError();
-  } else {
-    string atomTypeName = tokenizer.nextToken();
-    AtomType* atomType = ff.getAtomType(atomTypeName);
-
-    if (atomType != NULL) {
-      StickyAdapter sa = StickyAdapter(atomType);
-
-      RealType w0 = tokenizer.nextTokenAsDouble();
-      RealType v0 = eus * tokenizer.nextTokenAsDouble();
-      RealType v0p = eus * tokenizer.nextTokenAsDouble();
-      RealType rl = dus * tokenizer.nextTokenAsDouble();
-      RealType ru = dus * tokenizer.nextTokenAsDouble();
-      RealType rlp = dus * tokenizer.nextTokenAsDouble();
-      RealType rup = dus * tokenizer.nextTokenAsDouble();
-      bool isPower = false;
-
-      sa.makeSticky(w0, v0, v0p, rl, ru, rlp, rup, isPower);
-
-    } else {
+    // in AtomTypeSection, a line at least contains 8 tokens
+    // atomTypeName and 7 different sticky parameters
+    if (nTokens < 8) {
       sprintf(painCave.errMsg,
-              "StickyAtomTypesSectionParser Error: "
-              "Can not find matching AtomType %s\n",
-              atomTypeName.c_str());
+              "StickyAtomTypesSectionParser Error: Not enough "
+              "tokens at line %d\n",
+              lineNo);
       painCave.isFatal = 1;
       simError();
+    } else {
+      string atomTypeName = tokenizer.nextToken();
+      AtomType* atomType  = ff.getAtomType(atomTypeName);
+
+      if (atomType != NULL) {
+        StickyAdapter sa = StickyAdapter(atomType);
+
+        RealType w0  = tokenizer.nextTokenAsDouble();
+        RealType v0  = eus * tokenizer.nextTokenAsDouble();
+        RealType v0p = eus * tokenizer.nextTokenAsDouble();
+        RealType rl  = dus * tokenizer.nextTokenAsDouble();
+        RealType ru  = dus * tokenizer.nextTokenAsDouble();
+        RealType rlp = dus * tokenizer.nextTokenAsDouble();
+        RealType rup = dus * tokenizer.nextTokenAsDouble();
+        bool isPower = false;
+
+        sa.makeSticky(w0, v0, v0p, rl, ru, rlp, rup, isPower);
+
+      } else {
+        sprintf(painCave.errMsg,
+                "StickyAtomTypesSectionParser Error: "
+                "Can not find matching AtomType %s\n",
+                atomTypeName.c_str());
+        painCave.isFatal = 1;
+        simError();
+      }
     }
   }
-}
 }  // end namespace OpenMD

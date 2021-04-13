@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,12 +42,12 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef INTEGRATORS_FLUCTUATINGCHARGEPROPAGATOR_HPP
 #define INTEGRATORS_FLUCTUATINGCHARGEPROPAGATOR_HPP
 
-#include "brains/SimInfo.hpp"
 #include "brains/ForceManager.hpp"
+#include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
 #include "flucq/FluctuatingChargeConstraints.hpp"
 
@@ -63,13 +63,13 @@ namespace OpenMD {
     virtual ~FluctuatingChargePropagator();
     virtual void initialize();
     virtual void updateSizes() = 0;
-    virtual void moveA() = 0;
+    virtual void moveA()       = 0;
     virtual void applyConstraints();
     virtual void moveB() = 0;
 
-    virtual void PositionStep(RealType dt){}
-    virtual void VelocityStep(RealType dt){}
-    
+    virtual void PositionStep(RealType dt) {}
+    virtual void VelocityStep(RealType dt) {}
+
     virtual void setForceManager(ForceManager* forceMan);
 
   protected:
@@ -80,6 +80,6 @@ namespace OpenMD {
     bool hasFlucQ_;
     bool initialized_;
   };
-}
+}  // namespace OpenMD
 
 #endif

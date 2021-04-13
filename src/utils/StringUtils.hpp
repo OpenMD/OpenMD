@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file StringUtils.hpp
  * @author Dan Gezelter
@@ -52,14 +52,14 @@
 
 #ifndef UTILS_STRINGUTILS_HPP
 #define UTILS_STRINGUTILS_HPP
-#include <string>
 #include <cstring>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <string>
 
 namespace OpenMD {
- 
+
   /**
    * Converts a string to UPPER CASE
    * @param S
@@ -79,7 +79,7 @@ namespace OpenMD {
    *
    * @return  char* to the trimed string
    */
-  char* trimSpaces(char *str);
+  char* trimSpaces(char* str);
 
   /**
    * Finds the location of the string "begin <startText>" in an input stream.
@@ -88,29 +88,28 @@ namespace OpenMD {
    *
    * @return the line number of the block within the theStream
    */
-  int findBegin(std::istream &theStream, const char* startText );
+  int findBegin(std::istream& theStream, const char* startText);
 
   /**
-   * Counts the number of tokens on line which are delimited by the characters 
+   * Counts the number of tokens on line which are delimited by the characters
    * listed in delimiters
    * @param line
    * @param delimiters
    */
-  int countTokens(char *line, char *delimiters);
+  int countTokens(char* line, char* delimiters);
 
   /**
    * discovers whether or not the line contains the "end" token
    *
    * @param line  The line to test
-   * 
+   *
    * @return int  (==1 if the line has "end", ==0 if not).
    */
-  int isEndLine(char *line);
+  int isEndLine(char* line);
 
   bool CaseInsensitiveEquals(char ch1, char ch2);
 
   size_t CaseInsensitiveFind(const std::string& str1, const std::string& str2);
-
 
   /**
    * Convert a variable to a string
@@ -120,52 +119,44 @@ namespace OpenMD {
    */
   template<typename T>
   std::string toString(const T& v) {
-    std::ostringstream oss;        
-    if (!(oss << v)) {
-      std::cerr << "toString Error" << std::endl;
-    }
+    std::ostringstream oss;
+    if (!(oss << v)) { std::cerr << "toString Error" << std::endl; }
     return oss.str();
   }
-  
+
   template<typename T>
   T lexi_cast(const std::string& str) {
     T result;
-    std::istringstream iss(str);        
-    if (!(iss >> result)) {
-      std::cerr << "lexi_cast Error" << std::endl;
-    }
+    std::istringstream iss(str);
+    if (!(iss >> result)) { std::cerr << "lexi_cast Error" << std::endl; }
     return result;
   }
-
 
   template<typename T>
   bool isType(const std::string& str) {
     T result;
-    std::istringstream iss(str);        
+    std::istringstream iss(str);
     bool ret = true;
-    if (!(iss >> result)) {
-      ret = false;
-    }
+    if (!(iss >> result)) { ret = false; }
     return ret;
   }
 
-  template <typename T>
+  template<typename T>
   std::string to_string(T value) {
-    std::ostringstream os ;
-    os << value ;
-    return os.str() ;
+    std::ostringstream os;
+    os << value;
+    return os.str();
   }
 
   bool isInteger(const std::string& str);
-  
+
   std::string OpenMD_itoa(int value, unsigned int base = 10);
-  
+
   /**@todo need implementation */
   std::string getPrefix(const std::string& str);
-  
+
   /**@todo need implementation */
   std::string getSuffix(const std::string& str);
-  
 
   template<class ContainerType>
   std::string containerToString(const ContainerType& cont) {
@@ -176,13 +167,13 @@ namespace OpenMD {
       oss << *i;
       ++i;
     }
-    for (; i != cont.end();++i) {
+    for (; i != cont.end(); ++i) {
       oss << ", ";
       oss << *i;
     }
     oss << ")";
     return oss.str();
-  }  
-  unsigned long long memparse (char *ptr,  char **retptr); 
-}  
+  }
+  unsigned long long memparse(char* ptr, char** retptr);
+}  // namespace OpenMD
 #endif

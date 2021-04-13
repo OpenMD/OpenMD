@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -43,12 +43,11 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
- 
 #ifndef TYPES_UFFADAPTER_HPP
 #define TYPES_UFFADAPTER_HPP
 
-#include "utils/GenericData.hpp"
 #include "types/AtomType.hpp"
+#include "utils/GenericData.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -56,28 +55,28 @@ namespace OpenMD {
   string const UFFtypeID = "UFF";
 
   struct UFFAtypeParameters {
-    RealType r1;    
+    RealType r1;
     RealType theta0;
-    RealType x1;    
-    RealType D1;    
-    RealType zeta;  
-    RealType Z1;    
-    RealType Vi;    
-    RealType Uj;    
-    RealType Xi;    
-    RealType Hard;  
+    RealType x1;
+    RealType D1;
+    RealType zeta;
+    RealType Z1;
+    RealType Vi;
+    RealType Uj;
+    RealType Xi;
+    RealType Hard;
     RealType Radius;
   };
-  typedef SimpleTypeData<UFFAtypeParameters> UFFAtypeData;   
-  
+  typedef SimpleTypeData<UFFAtypeParameters> UFFAtypeData;
+
   class UFFAdapter {
   public:
     UFFAdapter(AtomType* AT) { at_ = AT; };
-    
+
     void makeUFF(RealType r1, RealType theta0, RealType x1, RealType D1,
                  RealType zeta, RealType Z1, RealType Vi, RealType Uj,
                  RealType Xi, RealType Hard, RealType Radius);
-    
+
     bool isUFF();
     RealType getR1();
     RealType getTheta0();
@@ -93,7 +92,7 @@ namespace OpenMD {
 
   private:
     AtomType* at_;
-    UFFAtypeParameters  getUFFParam();
+    UFFAtypeParameters getUFFParam();
   };
-}
+}  // namespace OpenMD
 #endif

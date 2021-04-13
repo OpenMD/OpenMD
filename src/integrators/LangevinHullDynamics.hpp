@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -47,18 +47,19 @@
 #define INTEGRATOR_LANGEVINHULLDYNAMICS_HPP
 #include <map>
 #include <vector>
+
 #include "integrators/VelocityVerletIntegrator.hpp"
 
 namespace OpenMD {
-  class LangevinHullDynamics: public VelocityVerletIntegrator {
+  class LangevinHullDynamics : public VelocityVerletIntegrator {
   public:
     LangevinHullDynamics(SimInfo* info);
-    
-  private:    
+
+  private:
     virtual void moveA();
     virtual void moveB();
     virtual RealType calcConservedQuantity();
-};
+  };
 
-}
+}  // namespace OpenMD
 #endif

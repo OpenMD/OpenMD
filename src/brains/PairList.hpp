@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef BRAINS_PAIRLIST_HPP
 
 #define BRAINS_PAIRLIST_HPP
@@ -58,28 +58,28 @@ namespace OpenMD {
    * @class PairList PairList.hpp "brains/PairList.hpp"
    * @brief PairList class maintains a general purpose list of atom
    * pairs using the global indices of the atoms.  This structure is
-   * the general form for exclude lists as well as 1-4, 1-3, and 1-2 
+   * the general form for exclude lists as well as 1-4, 1-3, and 1-2
    * lists.
    */
   class PairList {
   public:
-
     PairList() : modified_(false) {}
-
 
     /** Adds a pair into this PairList class */
     void addPair(int i, int j);
 
     void addPairs(std::set<int>& set1, std::set<int>& set2);
     template<typename IterType1, typename IterType2>
-    void addPairs(IterType1 iter1_first, IterType1 iter1_last, IterType2 iter2_first, IterType2 iter2_last);
+    void addPairs(IterType1 iter1_first, IterType1 iter1_last,
+                  IterType2 iter2_first, IterType2 iter2_last);
 
     /** Remove a pair from PairList class */
     void removePair(int i, int j);
 
     void removePairs(std::set<int>& set1, std::set<int>& set2);
     template<typename IterType1, typename IterType2>
-    void removePairs(IterType1 iter1_first, IterType1 iter1_last, IterType2 iter2_first, IterType2 iter2_last);
+    void removePairs(IterType1 iter1_first, IterType1 iter1_last,
+                     IterType2 iter2_first, IterType2 iter2_last);
 
     /** Checks whether pair (i, j) is in this PairList class */
     bool hasPair(int i, int j);
@@ -91,18 +91,17 @@ namespace OpenMD {
     int getSizeOfPairList();
 
     /** Returns the pairs in a plain array*/
-    int *getPairList();
+    int* getPairList();
 
     /** write out the exclusion list to an ostream */
-    friend std::ostream& operator <<(std::ostream& o, PairList& e);
+    friend std::ostream& operator<<(std::ostream& o, PairList& e);
 
   private:
-
-    std::set < std::pair<int, int> > pairSet_;
-    std::vector <int> pairList_;
+    std::set<std::pair<int, int>> pairSet_;
+    std::vector<int> pairList_;
     bool modified_;
   };
 
-}      //end namespace OpenMD
+}  // end namespace OpenMD
 
-#endif // __PAIRLIST_H__
+#endif  // __PAIRLIST_H__

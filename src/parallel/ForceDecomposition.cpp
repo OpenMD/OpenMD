@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -53,157 +53,157 @@
 using namespace std;
 namespace OpenMD {
 
-ForceDecomposition::ForceDecomposition(SimInfo *info, InteractionManager *iMan)
-    : info_(info), interactionMan_(iMan), needVelocities_(false) {
-  sman_ = info_->getSnapshotManager();
-  storageLayout_ = sman_->getStorageLayout();
-  ff_ = info_->getForceField();
+  ForceDecomposition::ForceDecomposition(SimInfo* info,
+                                         InteractionManager* iMan) :
+      info_(info),
+      interactionMan_(iMan), needVelocities_(false) {
+    sman_          = info_->getSnapshotManager();
+    storageLayout_ = sman_->getStorageLayout();
+    ff_            = info_->getForceField();
 
-  usePeriodicBoundaryConditions_ =
-      info->getSimParams()->getUsePeriodicBoundaryConditions();
+    usePeriodicBoundaryConditions_ =
+        info->getSimParams()->getUsePeriodicBoundaryConditions();
 
-  Globals *simParams_ = info_->getSimParams();
-  if (simParams_->havePrintHeatFlux()) {
-    if (simParams_->getPrintHeatFlux()) {
-      needVelocities_ = true;
+    Globals* simParams_ = info_->getSimParams();
+    if (simParams_->havePrintHeatFlux()) {
+      if (simParams_->getPrintHeatFlux()) { needVelocities_ = true; }
+    }
+
+    if (simParams_->haveSkinThickness()) {
+      skinThickness_ = simParams_->getSkinThickness();
+    } else {
+      skinThickness_ = 1.0;
+      sprintf(painCave.errMsg,
+              "ForceDecomposition: No value was set for the skinThickness.\n"
+              "\tOpenMD will use a default value of %f Angstroms\n"
+              "\tfor this simulation\n",
+              skinThickness_);
+      painCave.severity = OPENMD_INFO;
+      painCave.isFatal  = 0;
+      simError();
+    }
+
+    // cellOffsets are the partial space for the cell lists used in
+    // constructing the neighbor lists
+    cellOffsets_.clear();
+    cellOffsets_.push_back(Vector3i(0, 0, 0));
+    cellOffsets_.push_back(Vector3i(1, 0, 0));
+    cellOffsets_.push_back(Vector3i(1, 1, 0));
+    cellOffsets_.push_back(Vector3i(0, 1, 0));
+    cellOffsets_.push_back(Vector3i(-1, 1, 0));
+    cellOffsets_.push_back(Vector3i(0, 0, 1));
+    cellOffsets_.push_back(Vector3i(1, 0, 1));
+    cellOffsets_.push_back(Vector3i(1, 1, 1));
+    cellOffsets_.push_back(Vector3i(0, 1, 1));
+    cellOffsets_.push_back(Vector3i(-1, 1, 1));
+    cellOffsets_.push_back(Vector3i(-1, 0, 1));
+    cellOffsets_.push_back(Vector3i(-1, -1, 1));
+    cellOffsets_.push_back(Vector3i(0, -1, 1));
+    cellOffsets_.push_back(Vector3i(1, -1, 1));
+  }
+
+  void ForceDecomposition::setCutoffRadius(RealType rcut) {
+    rCut_    = rcut;
+    rList_   = rCut_ + skinThickness_;
+    rListSq_ = rList_ * rList_;
+  }
+
+  void ForceDecomposition::fillPreForceData(SelfData& sdat, int atom) {
+    sdat.atid    = idents[atom];
+    sdat.selfPot = selfPot;
+    sdat.selePot = selectedSelfPot;
+
+    if (storageLayout_ & DataStorage::dslDensity) {
+      sdat.rho = snap_->atomData.density[atom];
+    }
+
+    if (storageLayout_ & DataStorage::dslParticlePot) {
+      sdat.particlePot = snap_->atomData.particlePot[atom];
     }
   }
 
-  if (simParams_->haveSkinThickness()) {
-    skinThickness_ = simParams_->getSkinThickness();
-  } else {
-    skinThickness_ = 1.0;
-    sprintf(painCave.errMsg,
-            "ForceDecomposition: No value was set for the skinThickness.\n"
-            "\tOpenMD will use a default value of %f Angstroms\n"
-            "\tfor this simulation\n",
-            skinThickness_);
-    painCave.severity = OPENMD_INFO;
-    painCave.isFatal = 0;
-    simError();
+  void ForceDecomposition::fillSelfData(SelfData& sdat, int atom) {
+    sdat.atid    = idents[atom];
+    sdat.selfPot = selfPot;
+    sdat.selePot = selectedSelfPot;
+
+    if (storageLayout_ & DataStorage::dslSkippedCharge) {
+      sdat.skippedCharge = snap_->atomData.skippedCharge[atom];
+    }
+
+    if (storageLayout_ & DataStorage::dslParticlePot) {
+      sdat.particlePot = snap_->atomData.particlePot[atom];
+    }
+
+    if (storageLayout_ & DataStorage::dslFlucQPosition) {
+      sdat.flucQ = snap_->atomData.flucQPos[atom];
+    }
+
+    if (storageLayout_ & DataStorage::dslFlucQForce) {
+      sdat.flucQfrc = snap_->atomData.flucQFrc[atom];
+    }
   }
 
-  // cellOffsets are the partial space for the cell lists used in
-  // constructing the neighbor lists
-  cellOffsets_.clear();
-  cellOffsets_.push_back(Vector3i(0, 0, 0));
-  cellOffsets_.push_back(Vector3i(1, 0, 0));
-  cellOffsets_.push_back(Vector3i(1, 1, 0));
-  cellOffsets_.push_back(Vector3i(0, 1, 0));
-  cellOffsets_.push_back(Vector3i(-1, 1, 0));
-  cellOffsets_.push_back(Vector3i(0, 0, 1));
-  cellOffsets_.push_back(Vector3i(1, 0, 1));
-  cellOffsets_.push_back(Vector3i(1, 1, 1));
-  cellOffsets_.push_back(Vector3i(0, 1, 1));
-  cellOffsets_.push_back(Vector3i(-1, 1, 1));
-  cellOffsets_.push_back(Vector3i(-1, 0, 1));
-  cellOffsets_.push_back(Vector3i(-1, -1, 1));
-  cellOffsets_.push_back(Vector3i(0, -1, 1));
-  cellOffsets_.push_back(Vector3i(1, -1, 1));
-}
+  void ForceDecomposition::unpackPreForceData(SelfData& sdat, int atom) {
+    selfPot         = sdat.selfPot;
+    selectedSelfPot = sdat.selePot;
 
-void ForceDecomposition::setCutoffRadius(RealType rcut) {
-  rCut_ = rcut;
-  rList_ = rCut_ + skinThickness_;
-  rListSq_ = rList_ * rList_;
-}
+    if (storageLayout_ & DataStorage::dslFunctional) {
+      snap_->atomData.functional[atom] += sdat.frho;
+    }
 
-void ForceDecomposition::fillPreForceData(SelfData &sdat, int atom) {
-  sdat.atid = idents[atom];
-  sdat.selfPot = selfPot;
-  sdat.selePot = selectedSelfPot;
+    if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+      snap_->atomData.functionalDerivative[atom] += sdat.dfrhodrho;
+    }
 
-  if (storageLayout_ & DataStorage::dslDensity) {
-    sdat.rho = snap_->atomData.density[atom];
+    if (sdat.doParticlePot && (storageLayout_ & DataStorage::dslParticlePot)) {
+      snap_->atomData.particlePot[atom] = sdat.particlePot;
+    }
   }
 
-  if (storageLayout_ & DataStorage::dslParticlePot) {
-    sdat.particlePot = snap_->atomData.particlePot[atom];
-  }
-}
+  void ForceDecomposition::unpackSelfData(SelfData& sdat, int atom) {
+    selfPot         = sdat.selfPot;
+    selectedSelfPot = sdat.selePot;
 
-void ForceDecomposition::fillSelfData(SelfData &sdat, int atom) {
-  sdat.atid = idents[atom];
-  sdat.selfPot = selfPot;
-  sdat.selePot = selectedSelfPot;
-
-  if (storageLayout_ & DataStorage::dslSkippedCharge) {
-    sdat.skippedCharge = snap_->atomData.skippedCharge[atom];
+    if (storageLayout_ & DataStorage::dslFlucQForce) {
+      snap_->atomData.flucQFrc[atom] = sdat.flucQfrc;
+    }
   }
 
-  if (storageLayout_ & DataStorage::dslParticlePot) {
-    sdat.particlePot = snap_->atomData.particlePot[atom];
-  }
+  bool ForceDecomposition::checkNeighborList() {
+    RealType st2        = pow(skinThickness_ / 2.0, 2);
+    std::size_t nGroups = snap_->cgData.position.size();
+    if (needVelocities_)
+      snap_->cgData.setStorageLayout(DataStorage::dslPosition |
+                                     DataStorage::dslVelocity);
 
-  if (storageLayout_ & DataStorage::dslFlucQPosition) {
-    sdat.flucQ = snap_->atomData.flucQPos[atom];
-  }
+    // if we have changed the group identities or haven't set up the
+    // saved positions we automatically will need a neighbor list update:
 
-  if (storageLayout_ & DataStorage::dslFlucQForce) {
-    sdat.flucQfrc = snap_->atomData.flucQFrc[atom];
-  }
-}
+    if (saved_CG_positions_.size() != nGroups) return true;
 
-void ForceDecomposition::unpackPreForceData(SelfData &sdat, int atom) {
-  selfPot = sdat.selfPot;
-  selectedSelfPot = sdat.selePot;
+    RealType dispmax = 0.0;
+    Vector3d disp;
 
-  if (storageLayout_ & DataStorage::dslFunctional) {
-    snap_->atomData.functional[atom] += sdat.frho;
-  }
-
-  if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
-    snap_->atomData.functionalDerivative[atom] += sdat.dfrhodrho;
-  }
-
-  if (sdat.doParticlePot && (storageLayout_ & DataStorage::dslParticlePot)) {
-    snap_->atomData.particlePot[atom] = sdat.particlePot;
-  }
-}
-
-void ForceDecomposition::unpackSelfData(SelfData &sdat, int atom) {
-  selfPot = sdat.selfPot;
-  selectedSelfPot = sdat.selePot;
-
-  if (storageLayout_ & DataStorage::dslFlucQForce) {
-    snap_->atomData.flucQFrc[atom] = sdat.flucQfrc;
-  }
-}
-
-bool ForceDecomposition::checkNeighborList() {
-  RealType st2 = pow(skinThickness_ / 2.0, 2);
-  std::size_t nGroups = snap_->cgData.position.size();
-  if (needVelocities_)
-    snap_->cgData.setStorageLayout(DataStorage::dslPosition |
-                                   DataStorage::dslVelocity);
-
-  // if we have changed the group identities or haven't set up the
-  // saved positions we automatically will need a neighbor list update:
-
-  if (saved_CG_positions_.size() != nGroups) return true;
-
-  RealType dispmax = 0.0;
-  Vector3d disp;
-
-  for (std::size_t i = 0; i < nGroups; i++) {
-    disp = snap_->cgData.position[i] - saved_CG_positions_[i];
-    dispmax = max(dispmax, disp.lengthSquare());
-  }
+    for (std::size_t i = 0; i < nGroups; i++) {
+      disp    = snap_->cgData.position[i] - saved_CG_positions_[i];
+      dispmax = max(dispmax, disp.lengthSquare());
+    }
 
 #ifdef IS_MPI
-  MPI_Allreduce(MPI_IN_PLACE, &dispmax, 1, MPI_REALTYPE, MPI_MAX,
-                MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &dispmax, 1, MPI_REALTYPE, MPI_MAX,
+                  MPI_COMM_WORLD);
 #endif
 
-  return (dispmax > st2) ? true : false;
-}
+    return (dispmax > st2) ? true : false;
+  }
 
-void ForceDecomposition::addToHeatFlux(Vector3d hf) {
-  Vector3d chf = snap_->getConductiveHeatFlux();
-  chf += hf;
-  snap_->setConductiveHeatFlux(chf);
-}
-void ForceDecomposition::setHeatFlux(Vector3d hf) {
-  snap_->setConductiveHeatFlux(hf);
-}
+  void ForceDecomposition::addToHeatFlux(Vector3d hf) {
+    Vector3d chf = snap_->getConductiveHeatFlux();
+    chf += hf;
+    snap_->setConductiveHeatFlux(chf);
+  }
+  void ForceDecomposition::setHeatFlux(Vector3d hf) {
+    snap_->setConductiveHeatFlux(hf);
+  }
 }  // namespace OpenMD

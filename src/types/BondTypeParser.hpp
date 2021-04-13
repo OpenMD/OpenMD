@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,14 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_BONDTYPEPARSER_HPP
 #define TYPES_BONDTYPEPARSER_HPP
 
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
+
 #include "types/BondType.hpp"
 
 namespace OpenMD {
@@ -62,10 +63,9 @@ namespace OpenMD {
     BondType* parseLine(const std::string& line, RealType kScale);
     BondType* parseTypeAndPars(const std::string& type,
                                std::vector<RealType> pars);
-            
-  private:
 
-    enum BondTypeEnum{
+  private:
+    enum BondTypeEnum {
       btFixed,
       btHarmonic,
       btCubic,
@@ -75,12 +75,10 @@ namespace OpenMD {
       btShiftedMie,
       btUnknown
     };
-            
-    BondTypeEnum getBondTypeEnum(const std::string& str);  
-    std::map<std::string, BondTypeEnum> stringToEnumMap_;   
+
+    BondTypeEnum getBondTypeEnum(const std::string& str);
+    std::map<std::string, BondTypeEnum> stringToEnumMap_;
   };
-} 
+}  // namespace OpenMD
 
 #endif
-
-

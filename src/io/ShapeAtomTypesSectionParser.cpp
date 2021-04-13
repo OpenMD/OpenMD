@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -59,261 +59,261 @@
 
 namespace OpenMD {
 
-ShapeAtomTypesSectionParser::ShapeAtomTypesSectionParser(
-    ForceFieldOptions& options)
-    : options_(options) {
-  setSectionName("ShapeAtomTypes");
-}
-
-void ShapeAtomTypesSectionParser::parseLine(ForceField& ff,
-                                            const std::string& line,
-                                            int lineNo) {
-  StringTokenizer tokenizer(line);
-
-  if (tokenizer.countTokens() >= 2) {
-    std::string shapeTypeName = tokenizer.nextToken();
-    std::string shapeFile = tokenizer.nextToken();
-
-    AtomType* atomType = ff.getAtomType(shapeTypeName);
-    if (atomType == NULL) {
-      atomType = new AtomType();
-      int ident = ff.getNAtomType() + 1;
-      atomType->setIdent(ident);
-      atomType->setName(shapeTypeName);
-      ff.addAtomType(shapeTypeName, atomType);
-    }
-
-    parseShapeFile(ff, shapeFile, atomType);
-
-  } else {
-    sprintf(painCave.errMsg,
-            "ShapesAtomTypesSectionParser Error: "
-            "Not enough tokens at line %d\n",
-            lineNo);
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal = 1;
-    simError();
-  }
-}
-
-void ShapeAtomTypesSectionParser::parseShapeFile(ForceField& ff,
-                                                 std::string& shapeFileName,
-                                                 AtomType* at) {
-  const int bufferSize = 65535;
-  char buffer[bufferSize];
-  std::string token;
-
-  Mat3x3d momInert;
-  RealSphericalHarmonic* rsh;
-  std::vector<RealSphericalHarmonic*> functionVector;
-  ifstrstream shapeStream;
-  std::string tempString;
-  std::string ffPath;
-  char* tempPath;
-
-  tempPath = getenv("FORCE_PARAM_PATH");
-
-  if (tempPath == NULL) {
-    // convert a macro from compiler to a string in c++
-    STR_DEFINE(ffPath, FRC_PATH);
-  } else {
-    ffPath = tempPath;
+  ShapeAtomTypesSectionParser::ShapeAtomTypesSectionParser(
+      ForceFieldOptions& options) :
+      options_(options) {
+    setSectionName("ShapeAtomTypes");
   }
 
-  shapeStream.open(shapeFileName.c_str());
+  void ShapeAtomTypesSectionParser::parseLine(ForceField& ff,
+                                              const std::string& line,
+                                              int lineNo) {
+    StringTokenizer tokenizer(line);
 
-  if (!shapeStream.is_open()) {
-    tempString = ffPath;
-    tempString += "/";
-    tempString += shapeFileName;
-    shapeFileName = tempString;
+    if (tokenizer.countTokens() >= 2) {
+      std::string shapeTypeName = tokenizer.nextToken();
+      std::string shapeFile     = tokenizer.nextToken();
 
-    shapeStream.open(shapeFileName.c_str());
+      AtomType* atomType = ff.getAtomType(shapeTypeName);
+      if (atomType == NULL) {
+        atomType  = new AtomType();
+        int ident = ff.getNAtomType() + 1;
+        atomType->setIdent(ident);
+        atomType->setName(shapeTypeName);
+        ff.addAtomType(shapeTypeName, atomType);
+      }
 
-    if (!shapeStream.is_open()) {
+      parseShapeFile(ff, shapeFile, atomType);
+
+    } else {
       sprintf(painCave.errMsg,
-              "Error opening the shape file:\n"
-              "\t%s\n"
-              "\tHave you tried setting the FORCE_PARAM_PATH environment "
-              "variable?\n",
-              shapeFileName.c_str());
+              "ShapesAtomTypesSectionParser Error: "
+              "Not enough tokens at line %d\n",
+              lineNo);
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   }
 
-  ShapeAtomType* st = new ShapeAtomType();
+  void ShapeAtomTypesSectionParser::parseShapeFile(ForceField& ff,
+                                                   std::string& shapeFileName,
+                                                   AtomType* at) {
+    const int bufferSize = 65535;
+    char buffer[bufferSize];
+    std::string token;
 
-  // first parse the info. in the ShapeInfo section
-  findBegin(shapeStream, "ShapeInfo");
-  shapeStream.getline(buffer, bufferSize);
+    Mat3x3d momInert;
+    RealSphericalHarmonic* rsh;
+    std::vector<RealSphericalHarmonic*> functionVector;
+    ifstrstream shapeStream;
+    std::string tempString;
+    std::string ffPath;
+    char* tempPath;
 
-  // loop over the interior of the ShapeInfo section
-  while (!shapeStream.eof()) {
-    // toss comment lines
-    if (buffer[0] != '!' && buffer[0] != '#') {
-      // end marks section completion
-      if (isEndLine(buffer)) break;
-      StringTokenizer tokenInfo(buffer);
-      // blank lines are ignored
-      if (tokenInfo.countTokens() != 0) {
-        if (tokenInfo.countTokens() < 5) {
-          sprintf(painCave.errMsg,
-                  "ShapesAtomTypesSectionParser Error: Not enough "
-                  "information on a ShapeInfo line in file: %s\n",
-                  shapeFileName.c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();
-        } else {
-          tokenInfo.skipToken();
-          at->setMass(tokenInfo.nextTokenAsDouble());
-          DirectionalAdapter da = DirectionalAdapter(at);
-          Mat3x3d I;
-          I(0, 0) = tokenInfo.nextTokenAsDouble();
-          I(1, 1) = tokenInfo.nextTokenAsDouble();
-          I(2, 2) = tokenInfo.nextTokenAsDouble();
-          da.makeDirectional(I);
-        }
+    tempPath = getenv("FORCE_PARAM_PATH");
+
+    if (tempPath == NULL) {
+      // convert a macro from compiler to a string in c++
+      STR_DEFINE(ffPath, FRC_PATH);
+    } else {
+      ffPath = tempPath;
+    }
+
+    shapeStream.open(shapeFileName.c_str());
+
+    if (!shapeStream.is_open()) {
+      tempString = ffPath;
+      tempString += "/";
+      tempString += shapeFileName;
+      shapeFileName = tempString;
+
+      shapeStream.open(shapeFileName.c_str());
+
+      if (!shapeStream.is_open()) {
+        sprintf(painCave.errMsg,
+                "Error opening the shape file:\n"
+                "\t%s\n"
+                "\tHave you tried setting the FORCE_PARAM_PATH environment "
+                "variable?\n",
+                shapeFileName.c_str());
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal  = 1;
+        simError();
       }
     }
+
+    ShapeAtomType* st = new ShapeAtomType();
+
+    // first parse the info. in the ShapeInfo section
+    findBegin(shapeStream, "ShapeInfo");
     shapeStream.getline(buffer, bufferSize);
-  }
 
-  // now grab the contact functions
-  findBegin(shapeStream, "ContactFunctions");
-  functionVector.clear();
-
-  shapeStream.getline(buffer, bufferSize);
-  while (!shapeStream.eof()) {
-    // toss comment lines
-    if (buffer[0] != '!' && buffer[0] != '#') {
-      // end marks section completion
-      if (isEndLine(buffer)) break;
-      StringTokenizer tokenInfo1(buffer);
-      // blank lines are ignored
-      if (tokenInfo1.countTokens() != 0) {
-        if (tokenInfo1.countTokens() < 4) {
-          sprintf(painCave.errMsg,
-                  "ShapesAtomTypesSectionParser Error: Not enough "
-                  "information on a ContactFunctions line in file: %s\n",
-                  shapeFileName.c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();
-        } else {
-          // read in a spherical harmonic function
-          rsh = new RealSphericalHarmonic();
-          rsh->setL(tokenInfo1.nextTokenAsInt());
-          rsh->setM(tokenInfo1.nextTokenAsInt());
-          token = tokenInfo1.nextToken();
-          toLower(token);
-          if (token == "sin")
-            rsh->makeSinFunction();
-          else
-            rsh->makeCosFunction();
-          rsh->setCoefficient(tokenInfo1.nextTokenAsDouble());
-
-          functionVector.push_back(rsh);
+    // loop over the interior of the ShapeInfo section
+    while (!shapeStream.eof()) {
+      // toss comment lines
+      if (buffer[0] != '!' && buffer[0] != '#') {
+        // end marks section completion
+        if (isEndLine(buffer)) break;
+        StringTokenizer tokenInfo(buffer);
+        // blank lines are ignored
+        if (tokenInfo.countTokens() != 0) {
+          if (tokenInfo.countTokens() < 5) {
+            sprintf(painCave.errMsg,
+                    "ShapesAtomTypesSectionParser Error: Not enough "
+                    "information on a ShapeInfo line in file: %s\n",
+                    shapeFileName.c_str());
+            painCave.severity = OPENMD_ERROR;
+            painCave.isFatal  = 1;
+            simError();
+          } else {
+            tokenInfo.skipToken();
+            at->setMass(tokenInfo.nextTokenAsDouble());
+            DirectionalAdapter da = DirectionalAdapter(at);
+            Mat3x3d I;
+            I(0, 0) = tokenInfo.nextTokenAsDouble();
+            I(1, 1) = tokenInfo.nextTokenAsDouble();
+            I(2, 2) = tokenInfo.nextTokenAsDouble();
+            da.makeDirectional(I);
+          }
         }
       }
+      shapeStream.getline(buffer, bufferSize);
     }
+
+    // now grab the contact functions
+    findBegin(shapeStream, "ContactFunctions");
+    functionVector.clear();
+
     shapeStream.getline(buffer, bufferSize);
-  }
+    while (!shapeStream.eof()) {
+      // toss comment lines
+      if (buffer[0] != '!' && buffer[0] != '#') {
+        // end marks section completion
+        if (isEndLine(buffer)) break;
+        StringTokenizer tokenInfo1(buffer);
+        // blank lines are ignored
+        if (tokenInfo1.countTokens() != 0) {
+          if (tokenInfo1.countTokens() < 4) {
+            sprintf(painCave.errMsg,
+                    "ShapesAtomTypesSectionParser Error: Not enough "
+                    "information on a ContactFunctions line in file: %s\n",
+                    shapeFileName.c_str());
+            painCave.severity = OPENMD_ERROR;
+            painCave.isFatal  = 1;
+            simError();
+          } else {
+            // read in a spherical harmonic function
+            rsh = new RealSphericalHarmonic();
+            rsh->setL(tokenInfo1.nextTokenAsInt());
+            rsh->setM(tokenInfo1.nextTokenAsInt());
+            token = tokenInfo1.nextToken();
+            toLower(token);
+            if (token == "sin")
+              rsh->makeSinFunction();
+            else
+              rsh->makeCosFunction();
+            rsh->setCoefficient(tokenInfo1.nextTokenAsDouble());
 
-  // pass contact functions to ShapeType
-  st->setContactFuncs(functionVector);
-
-  // now grab the range functions
-  findBegin(shapeStream, "RangeFunctions");
-  functionVector.clear();
-
-  shapeStream.getline(buffer, bufferSize);
-  while (!shapeStream.eof()) {
-    // toss comment lines
-    if (buffer[0] != '!' && buffer[0] != '#') {
-      // end marks section completion
-      if (isEndLine(buffer)) break;
-      StringTokenizer tokenInfo2(buffer);
-      // blank lines are ignored
-      if (tokenInfo2.countTokens() != 0) {
-        if (tokenInfo2.countTokens() < 4) {
-          sprintf(painCave.errMsg,
-                  "ShapesAtomTypesSectionParser Error: Not enough "
-                  "information on a RangeFunctions line in file: %s\n",
-                  shapeFileName.c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();
-        } else {
-          // read in a spherical harmonic function
-          rsh = new RealSphericalHarmonic();
-          rsh->setL(tokenInfo2.nextTokenAsInt());
-          rsh->setM(tokenInfo2.nextTokenAsInt());
-          token = tokenInfo2.nextToken();
-          toLower(token);
-          if (token == "sin")
-            rsh->makeSinFunction();
-          else
-            rsh->makeCosFunction();
-          rsh->setCoefficient(tokenInfo2.nextTokenAsDouble());
-
-          functionVector.push_back(rsh);
+            functionVector.push_back(rsh);
+          }
         }
       }
+      shapeStream.getline(buffer, bufferSize);
     }
+
+    // pass contact functions to ShapeType
+    st->setContactFuncs(functionVector);
+
+    // now grab the range functions
+    findBegin(shapeStream, "RangeFunctions");
+    functionVector.clear();
+
     shapeStream.getline(buffer, bufferSize);
-  }
+    while (!shapeStream.eof()) {
+      // toss comment lines
+      if (buffer[0] != '!' && buffer[0] != '#') {
+        // end marks section completion
+        if (isEndLine(buffer)) break;
+        StringTokenizer tokenInfo2(buffer);
+        // blank lines are ignored
+        if (tokenInfo2.countTokens() != 0) {
+          if (tokenInfo2.countTokens() < 4) {
+            sprintf(painCave.errMsg,
+                    "ShapesAtomTypesSectionParser Error: Not enough "
+                    "information on a RangeFunctions line in file: %s\n",
+                    shapeFileName.c_str());
+            painCave.severity = OPENMD_ERROR;
+            painCave.isFatal  = 1;
+            simError();
+          } else {
+            // read in a spherical harmonic function
+            rsh = new RealSphericalHarmonic();
+            rsh->setL(tokenInfo2.nextTokenAsInt());
+            rsh->setM(tokenInfo2.nextTokenAsInt());
+            token = tokenInfo2.nextToken();
+            toLower(token);
+            if (token == "sin")
+              rsh->makeSinFunction();
+            else
+              rsh->makeCosFunction();
+            rsh->setCoefficient(tokenInfo2.nextTokenAsDouble());
 
-  // pass range functions to ShapeType
-  st->setRangeFuncs(functionVector);
-
-  // finally grab the strength functions
-  findBegin(shapeStream, "StrengthFunctions");
-  functionVector.clear();
-
-  shapeStream.getline(buffer, bufferSize);
-  while (!shapeStream.eof()) {
-    // toss comment lines
-    if (buffer[0] != '!' && buffer[0] != '#') {
-      // end marks section completion
-      if (isEndLine(buffer)) break;
-      StringTokenizer tokenInfo3(buffer);
-      // blank lines are ignored
-      if (tokenInfo3.countTokens() != 0) {
-        if (tokenInfo3.countTokens() < 4) {
-          sprintf(painCave.errMsg,
-                  "ShapesAtomTypesSectionParser Error: Not enough "
-                  "information on a StrengthFunctions line in file: %s\n",
-                  shapeFileName.c_str());
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();
-        } else {
-          // read in a spherical harmonic function
-          rsh = new RealSphericalHarmonic();
-          rsh->setL(tokenInfo3.nextTokenAsInt());
-          rsh->setM(tokenInfo3.nextTokenAsInt());
-          token = tokenInfo3.nextToken();
-          toLower(token);
-          if (token == "sin")
-            rsh->makeSinFunction();
-          else
-            rsh->makeCosFunction();
-          rsh->setCoefficient(tokenInfo3.nextTokenAsDouble());
-
-          functionVector.push_back(rsh);
+            functionVector.push_back(rsh);
+          }
         }
       }
+      shapeStream.getline(buffer, bufferSize);
     }
-    shapeStream.getline(buffer, bufferSize);
-  }
 
-  // pass strength functions to ShapeType
-  st->setStrengthFuncs(functionVector);
-  at->addProperty(
-      std::shared_ptr<GenericData>(new ShapeAtypeData("Shape", st)));
-  //  delete shapeStream;
-}
+    // pass range functions to ShapeType
+    st->setRangeFuncs(functionVector);
+
+    // finally grab the strength functions
+    findBegin(shapeStream, "StrengthFunctions");
+    functionVector.clear();
+
+    shapeStream.getline(buffer, bufferSize);
+    while (!shapeStream.eof()) {
+      // toss comment lines
+      if (buffer[0] != '!' && buffer[0] != '#') {
+        // end marks section completion
+        if (isEndLine(buffer)) break;
+        StringTokenizer tokenInfo3(buffer);
+        // blank lines are ignored
+        if (tokenInfo3.countTokens() != 0) {
+          if (tokenInfo3.countTokens() < 4) {
+            sprintf(painCave.errMsg,
+                    "ShapesAtomTypesSectionParser Error: Not enough "
+                    "information on a StrengthFunctions line in file: %s\n",
+                    shapeFileName.c_str());
+            painCave.severity = OPENMD_ERROR;
+            painCave.isFatal  = 1;
+            simError();
+          } else {
+            // read in a spherical harmonic function
+            rsh = new RealSphericalHarmonic();
+            rsh->setL(tokenInfo3.nextTokenAsInt());
+            rsh->setM(tokenInfo3.nextTokenAsInt());
+            token = tokenInfo3.nextToken();
+            toLower(token);
+            if (token == "sin")
+              rsh->makeSinFunction();
+            else
+              rsh->makeCosFunction();
+            rsh->setCoefficient(tokenInfo3.nextTokenAsDouble());
+
+            functionVector.push_back(rsh);
+          }
+        }
+      }
+      shapeStream.getline(buffer, bufferSize);
+    }
+
+    // pass strength functions to ShapeType
+    st->setStrengthFuncs(functionVector);
+    at->addProperty(
+        std::shared_ptr<GenericData>(new ShapeAtypeData("Shape", st)));
+    //  delete shapeStream;
+  }
 }  // end namespace OpenMD

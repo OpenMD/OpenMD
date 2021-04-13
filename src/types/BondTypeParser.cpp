@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -58,48 +58,49 @@
 
 namespace OpenMD {
 
-BondTypeParser::BondTypeParser() {
-  stringToEnumMap_["Fixed"] = btFixed;
-  stringToEnumMap_["Harmonic"] = btHarmonic;
-  stringToEnumMap_["Cubic"] = btCubic;
-  stringToEnumMap_["Quartic"] = btQuartic;
-  stringToEnumMap_["Polynomial"] = btPolynomial;
-  stringToEnumMap_["Morse"] = btMorse;
-  stringToEnumMap_["ShiftedMie"] = btShiftedMie;
-}
-
-BondType* BondTypeParser::parseTypeAndPars(const std::string& type,
-                                           std::vector<RealType> pars) {
-  std::string line(type);
-
-  std::vector<RealType>::iterator it;
-  for (it = pars.begin(); it != pars.end(); ++it) {
-    line.append("\t");
-    line.append(OpenMD::to_string(*it));
-  }
-  // assume all overrides know about our functional forms:
-  return parseLine(line, 1.0);
-}
-
-BondType* BondTypeParser::parseLine(const std::string& line, RealType kScale) {
-  StringTokenizer tokenizer(line);
-  BondType* bondType = NULL;
-  int nTokens = tokenizer.countTokens();
-
-  if (nTokens < 1) {
-    throw OpenMDException("BondTypeParser: Not enough tokens");
+  BondTypeParser::BondTypeParser() {
+    stringToEnumMap_["Fixed"]      = btFixed;
+    stringToEnumMap_["Harmonic"]   = btHarmonic;
+    stringToEnumMap_["Cubic"]      = btCubic;
+    stringToEnumMap_["Quartic"]    = btQuartic;
+    stringToEnumMap_["Polynomial"] = btPolynomial;
+    stringToEnumMap_["Morse"]      = btMorse;
+    stringToEnumMap_["ShiftedMie"] = btShiftedMie;
   }
 
-  BondTypeEnum bt = getBondTypeEnum(tokenizer.nextToken());
-  nTokens -= 1;
+  BondType* BondTypeParser::parseTypeAndPars(const std::string& type,
+                                             std::vector<RealType> pars) {
+    std::string line(type);
 
-  switch (bt) {
+    std::vector<RealType>::iterator it;
+    for (it = pars.begin(); it != pars.end(); ++it) {
+      line.append("\t");
+      line.append(OpenMD::to_string(*it));
+    }
+    // assume all overrides know about our functional forms:
+    return parseLine(line, 1.0);
+  }
+
+  BondType* BondTypeParser::parseLine(const std::string& line,
+                                      RealType kScale) {
+    StringTokenizer tokenizer(line);
+    BondType* bondType = NULL;
+    int nTokens        = tokenizer.countTokens();
+
+    if (nTokens < 1) {
+      throw OpenMDException("BondTypeParser: Not enough tokens");
+    }
+
+    BondTypeEnum bt = getBondTypeEnum(tokenizer.nextToken());
+    nTokens -= 1;
+
+    switch (bt) {
     case btFixed:
       if (nTokens < 1) {
         throw OpenMDException("BondTypeParser: Not enough tokens");
       } else {
         RealType b0 = tokenizer.nextTokenAsDouble();
-        bondType = new FixedBondType(b0);
+        bondType    = new FixedBondType(b0);
       }
       break;
 
@@ -157,7 +158,7 @@ BondType* BondTypeParser::parseLine(const std::string& line, RealType kScale) {
         PolynomialBondType* pbt = new PolynomialBondType(b0);
 
         for (int i = 0; i < nPairs; ++i) {
-          power = tokenizer.nextTokenAsInt();
+          power       = tokenizer.nextTokenAsInt();
           coefficient = tokenizer.nextTokenAsDouble();
           pbt->setCoefficient(power, coefficient);
         }
@@ -169,10 +170,10 @@ BondType* BondTypeParser::parseLine(const std::string& line, RealType kScale) {
       if (nTokens < 3) {
         throw OpenMDException("BondTypeParser: Not enough tokens");
       } else {
-        RealType b0 = tokenizer.nextTokenAsDouble();
-        RealType D = tokenizer.nextTokenAsDouble();
+        RealType b0   = tokenizer.nextTokenAsDouble();
+        RealType D    = tokenizer.nextTokenAsDouble();
         RealType beta = tokenizer.nextTokenAsDouble();
-        bondType = new MorseBondType(b0, D, beta);
+        bondType      = new MorseBondType(b0, D, beta);
       }
       break;
 
@@ -180,10 +181,10 @@ BondType* BondTypeParser::parseLine(const std::string& line, RealType kScale) {
       if (nTokens < 4) {
         throw OpenMDException("BondTypeParser: Not enough tokens");
       } else {
-        RealType sigma = tokenizer.nextTokenAsDouble();
+        RealType sigma   = tokenizer.nextTokenAsDouble();
         RealType epsilon = tokenizer.nextTokenAsDouble();
-        int nRep = tokenizer.nextTokenAsInt();
-        int mAtt = tokenizer.nextTokenAsInt();
+        int nRep         = tokenizer.nextTokenAsInt();
+        int mAtt         = tokenizer.nextTokenAsInt();
 
         bondType = new ShiftedMieBondType(sigma, epsilon, nRep, mAtt);
       }
@@ -192,17 +193,17 @@ BondType* BondTypeParser::parseLine(const std::string& line, RealType kScale) {
     case btUnknown:
     default:
       throw OpenMDException("BondTypeParser: Unknown Bond Type");
+    }
+
+    return bondType;
   }
 
-  return bondType;
-}
+  BondTypeParser::BondTypeEnum BondTypeParser::getBondTypeEnum(
+      const std::string& str) {
+    std::map<std::string, BondTypeEnum>::iterator i;
+    i = stringToEnumMap_.find(str);
 
-BondTypeParser::BondTypeEnum BondTypeParser::getBondTypeEnum(
-    const std::string& str) {
-  std::map<std::string, BondTypeEnum>::iterator i;
-  i = stringToEnumMap_.find(str);
-
-  return i == stringToEnumMap_.end() ? btUnknown : i->second;
-}
+    return i == stringToEnumMap_.end() ? btUnknown : i->second;
+  }
 
 }  // namespace OpenMD

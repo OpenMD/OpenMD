@@ -14,47 +14,40 @@
 namespace antlr {
 #endif
 
-MismatchedCharException::MismatchedCharException()
-    : RecognitionException("Mismatched char") {}
+  MismatchedCharException::MismatchedCharException() :
+      RecognitionException("Mismatched char") {}
 
-// Expected range / not range
-MismatchedCharException::MismatchedCharException(int c, int lower, int upper_,
-                                                 bool matchNot,
-                                                 CharScanner* scanner_)
-    : RecognitionException("Mismatched char", scanner_->getFilename(),
+  // Expected range / not range
+  MismatchedCharException::MismatchedCharException(int c, int lower, int upper_,
+                                                   bool matchNot,
+                                                   CharScanner* scanner_) :
+      RecognitionException("Mismatched char", scanner_->getFilename(),
                            scanner_->getLine(), scanner_->getColumn()),
-      mismatchType(matchNot ? NOT_RANGE : RANGE),
-      foundChar(c),
-      expecting(lower),
-      upper(upper_),
+      mismatchType(matchNot ? NOT_RANGE : RANGE), foundChar(c),
+      expecting(lower), upper(upper_), scanner(scanner_) {}
+
+  // Expected token / not token
+  MismatchedCharException::MismatchedCharException(int c, int expecting_,
+                                                   bool matchNot,
+                                                   CharScanner* scanner_) :
+      RecognitionException("Mismatched char", scanner_->getFilename(),
+                           scanner_->getLine(), scanner_->getColumn()),
+      mismatchType(matchNot ? NOT_CHAR : CHAR), foundChar(c),
+      expecting(expecting_), scanner(scanner_) {}
+
+  // Expected BitSet / not BitSet
+  MismatchedCharException::MismatchedCharException(int c, BitSet set_,
+                                                   bool matchNot,
+                                                   CharScanner* scanner_) :
+      RecognitionException("Mismatched char", scanner_->getFilename(),
+                           scanner_->getLine(), scanner_->getColumn()),
+      mismatchType(matchNot ? NOT_SET : SET), foundChar(c), set(set_),
       scanner(scanner_) {}
 
-// Expected token / not token
-MismatchedCharException::MismatchedCharException(int c, int expecting_,
-                                                 bool matchNot,
-                                                 CharScanner* scanner_)
-    : RecognitionException("Mismatched char", scanner_->getFilename(),
-                           scanner_->getLine(), scanner_->getColumn()),
-      mismatchType(matchNot ? NOT_CHAR : CHAR),
-      foundChar(c),
-      expecting(expecting_),
-      scanner(scanner_) {}
+  ANTLR_USE_NAMESPACE(std) string MismatchedCharException::getMessage() const {
+    ANTLR_USE_NAMESPACE(std) string s;
 
-// Expected BitSet / not BitSet
-MismatchedCharException::MismatchedCharException(int c, BitSet set_,
-                                                 bool matchNot,
-                                                 CharScanner* scanner_)
-    : RecognitionException("Mismatched char", scanner_->getFilename(),
-                           scanner_->getLine(), scanner_->getColumn()),
-      mismatchType(matchNot ? NOT_SET : SET),
-      foundChar(c),
-      set(set_),
-      scanner(scanner_) {}
-
-ANTLR_USE_NAMESPACE(std) string MismatchedCharException::getMessage() const {
-  ANTLR_USE_NAMESPACE(std) string s;
-
-  switch (mismatchType) {
+    switch (mismatchType) {
     case CHAR:
       s += "expecting '" + charName(expecting) + "', found '" +
            charName(foundChar) + "'";
@@ -86,18 +79,18 @@ ANTLR_USE_NAMESPACE(std) string MismatchedCharException::getMessage() const {
     default:
       s += RecognitionException::getMessage();
       break;
+    }
+
+    return s;
   }
 
-  return s;
-}
-
 #ifndef NO_STATIC_CONSTS
-const int MismatchedCharException::CHAR;
-const int MismatchedCharException::NOT_CHAR;
-const int MismatchedCharException::RANGE;
-const int MismatchedCharException::NOT_RANGE;
-const int MismatchedCharException::SET;
-const int MismatchedCharException::NOT_SET;
+  const int MismatchedCharException::CHAR;
+  const int MismatchedCharException::NOT_CHAR;
+  const int MismatchedCharException::RANGE;
+  const int MismatchedCharException::NOT_RANGE;
+  const int MismatchedCharException::SET;
+  const int MismatchedCharException::NOT_SET;
 #endif
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE

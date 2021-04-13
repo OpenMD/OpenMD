@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -43,40 +43,36 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
- /* 
-  * Calculates the momentum  profile for selected atom.
-  * Created by Hemanta Bhattarai on 04/30/19.
-  * @author  Hemanta Bhattarai
-  */
+/*
+ * Calculates the momentum  profile for selected atom.
+ * Created by Hemanta Bhattarai on 04/30/19.
+ * @author  Hemanta Bhattarai
+ */
 
 #ifndef APPLICATIONS_STATICPROPS_MOMENTUMHISTOGRAM_HPP
 #define APPLICATIONS_STATICPROPS_MOMENTUMHISTOGRAM_HPP
 
 #include <string>
 #include <vector>
+
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 namespace OpenMD {
 
   class MomentumHistogram : public StaticAnalyser {
-
   public:
     MomentumHistogram(SimInfo* info, const std::string& filename,
-                      const std::string& sele, int nbins,
-                      int momentum_type, int momentum_component);
+                      const std::string& sele, int nbins, int momentum_type,
+                      int momentum_component);
 
-    int getNBins() {
-      return nBins_;
-    }
+    int getNBins() { return nBins_; }
 
     virtual void process();
 
   private:
-
     virtual void write();
-
 
     Snapshot* currentSnapshot_;
 
@@ -90,11 +86,10 @@ namespace OpenMD {
     std::string momentumLabel_;
     int mom_comp_;
     std::string componentLabel_;
-    
+
     std::vector<RealType> bincenter_;
     std::vector<RealType> histList_;
-
   };
 
-}
+}  // namespace OpenMD
 #endif

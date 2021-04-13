@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,148 +52,144 @@
 
 namespace OpenMD {
 
-RadialDistrFunc::RadialDistrFunc(SimInfo* info, const std::string& filename,
-                                 const std::string& sele1,
-                                 const std::string& sele2, unsigned int nbins)
-    : StaticAnalyser(info, filename, nbins),
-      selectionScript1_(sele1),
-      selectionScript2_(sele2),
-      evaluator1_(info),
-      evaluator2_(info),
-      seleMan1_(info),
-      seleMan2_(info),
-      sele1_minus_common_(info),
-      sele2_minus_common_(info),
-      common_(info) {
-  evaluator1_.loadScriptString(sele1);
-  evaluator2_.loadScriptString(sele2);
+  RadialDistrFunc::RadialDistrFunc(SimInfo* info, const std::string& filename,
+                                   const std::string& sele1,
+                                   const std::string& sele2,
+                                   unsigned int nbins) :
+      StaticAnalyser(info, filename, nbins),
+      selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info),
+      evaluator2_(info), seleMan1_(info), seleMan2_(info),
+      sele1_minus_common_(info), sele2_minus_common_(info), common_(info) {
+    evaluator1_.loadScriptString(sele1);
+    evaluator2_.loadScriptString(sele2);
 
-  if (!evaluator1_.isDynamic()) {
-    seleMan1_.setSelectionSet(evaluator1_.evaluate());
-    validateSelection1(seleMan1_);
-  }
-  if (!evaluator2_.isDynamic()) {
-    seleMan2_.setSelectionSet(evaluator2_.evaluate());
-    validateSelection2(seleMan2_);
-  }
-
-  if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
-    // If all selections are static, we can precompute the number
-    // of real pairs.
-    common_ = seleMan1_ & seleMan2_;
-    sele1_minus_common_ = seleMan1_ - common_;
-    sele2_minus_common_ = seleMan2_ - common_;
-
-    nSelected1_ = seleMan1_.getSelectionCount();
-    nSelected2_ = seleMan2_.getSelectionCount();
-    int nIntersect = common_.getSelectionCount();
-
-    nPairs_ = nSelected1_ * nSelected2_ - (nIntersect + 1) * nIntersect / 2;
-  }
-}
-
-void RadialDistrFunc::process() {
-  preProcess();
-
-  DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
-  nProcessed_ = nFrames / step_;
-
-  for (int i = 0; i < nFrames; i += step_) {
-    reader.readFrame(i);
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
-    if (evaluator1_.isDynamic()) {
+    if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
       validateSelection1(seleMan1_);
     }
-    if (evaluator2_.isDynamic()) {
+    if (!evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
       validateSelection2(seleMan2_);
     }
 
-    initializeHistogram();
-
-    // Selections may overlap, and we need a bit of logic to deal
-    // with this.
-    //
-    // |     s1    |
-    // | s1 -c | c |
-    //         | c | s2 - c |
-    //         |    s2      |
-    //
-    // s1 : Set of StuntDoubles in selection1
-    // s2 : Set of StuntDoubles in selection2
-    // c  : Intersection of selection1 and selection2
-    //
-    // When we loop over the pairs, we can divide the looping into 3
-    // stages:
-    //
-    // Stage 1 :     [s1-c]      [s2]
-    // Stage 2 :     [c]         [s2 - c]
-    // Stage 3 :     [c]         [c]
-    // Stages 1 and 2 are completely non-overlapping.
-    // Stage 3 is completely overlapping.
-
-    if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) {
-      common_ = seleMan1_ & seleMan2_;
+    if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
+      // If all selections are static, we can precompute the number
+      // of real pairs.
+      common_             = seleMan1_ & seleMan2_;
       sele1_minus_common_ = seleMan1_ - common_;
       sele2_minus_common_ = seleMan2_ - common_;
-      nSelected1_ = seleMan1_.getSelectionCount();
-      nSelected2_ = seleMan2_.getSelectionCount();
+
+      nSelected1_    = seleMan1_.getSelectionCount();
+      nSelected2_    = seleMan2_.getSelectionCount();
       int nIntersect = common_.getSelectionCount();
 
       nPairs_ = nSelected1_ * nSelected2_ - (nIntersect + 1) * nIntersect / 2;
     }
-
-    processNonOverlapping(sele1_minus_common_, seleMan2_);
-    processNonOverlapping(common_, sele2_minus_common_);
-    processOverlapping(common_);
-
-    processHistogram();
   }
 
-  postProcess();
+  void RadialDistrFunc::process() {
+    preProcess();
 
-  writeRdf();
-}
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
+    nProcessed_ = nFrames / step_;
 
-void RadialDistrFunc::processNonOverlapping(SelectionManager& sman1,
-                                            SelectionManager& sman2) {
-  StuntDouble* sd1;
-  StuntDouble* sd2;
-  int i;
-  int j;
+    for (int i = 0; i < nFrames; i += step_) {
+      reader.readFrame(i);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-  // This is the same as a non-overlapping pairwise loop structure:
-  // for (int i = 0;  i < ni ; ++i ) {
-  //   for (int j = 0; j < nj; ++j) {}
-  // }
+      if (evaluator1_.isDynamic()) {
+        seleMan1_.setSelectionSet(evaluator1_.evaluate());
+        validateSelection1(seleMan1_);
+      }
+      if (evaluator2_.isDynamic()) {
+        seleMan2_.setSelectionSet(evaluator2_.evaluate());
+        validateSelection2(seleMan2_);
+      }
 
-  for (sd1 = sman1.beginSelected(i); sd1 != NULL; sd1 = sman1.nextSelected(i)) {
-    for (sd2 = sman2.beginSelected(j); sd2 != NULL;
-         sd2 = sman2.nextSelected(j)) {
-      collectHistogram(sd1, sd2);
+      initializeHistogram();
+
+      // Selections may overlap, and we need a bit of logic to deal
+      // with this.
+      //
+      // |     s1    |
+      // | s1 -c | c |
+      //         | c | s2 - c |
+      //         |    s2      |
+      //
+      // s1 : Set of StuntDoubles in selection1
+      // s2 : Set of StuntDoubles in selection2
+      // c  : Intersection of selection1 and selection2
+      //
+      // When we loop over the pairs, we can divide the looping into 3
+      // stages:
+      //
+      // Stage 1 :     [s1-c]      [s2]
+      // Stage 2 :     [c]         [s2 - c]
+      // Stage 3 :     [c]         [c]
+      // Stages 1 and 2 are completely non-overlapping.
+      // Stage 3 is completely overlapping.
+
+      if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) {
+        common_             = seleMan1_ & seleMan2_;
+        sele1_minus_common_ = seleMan1_ - common_;
+        sele2_minus_common_ = seleMan2_ - common_;
+        nSelected1_         = seleMan1_.getSelectionCount();
+        nSelected2_         = seleMan2_.getSelectionCount();
+        int nIntersect      = common_.getSelectionCount();
+
+        nPairs_ = nSelected1_ * nSelected2_ - (nIntersect + 1) * nIntersect / 2;
+      }
+
+      processNonOverlapping(sele1_minus_common_, seleMan2_);
+      processNonOverlapping(common_, sele2_minus_common_);
+      processOverlapping(common_);
+
+      processHistogram();
+    }
+
+    postProcess();
+
+    writeRdf();
+  }
+
+  void RadialDistrFunc::processNonOverlapping(SelectionManager& sman1,
+                                              SelectionManager& sman2) {
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    int i;
+    int j;
+
+    // This is the same as a non-overlapping pairwise loop structure:
+    // for (int i = 0;  i < ni ; ++i ) {
+    //   for (int j = 0; j < nj; ++j) {}
+    // }
+
+    for (sd1 = sman1.beginSelected(i); sd1 != NULL;
+         sd1 = sman1.nextSelected(i)) {
+      for (sd2 = sman2.beginSelected(j); sd2 != NULL;
+           sd2 = sman2.nextSelected(j)) {
+        collectHistogram(sd1, sd2);
+      }
     }
   }
-}
 
-void RadialDistrFunc::processOverlapping(SelectionManager& sman) {
-  StuntDouble* sd1;
-  StuntDouble* sd2;
-  int i;
-  int j;
+  void RadialDistrFunc::processOverlapping(SelectionManager& sman) {
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    int i;
+    int j;
 
-  // This is the same as a pairwise loop structure:
-  // for (int i = 0;  i < n-1 ; ++i ) {
-  //   for (int j = i + 1; j < n; ++j) {}
-  // }
+    // This is the same as a pairwise loop structure:
+    // for (int i = 0;  i < n-1 ; ++i ) {
+    //   for (int j = i + 1; j < n; ++j) {}
+    // }
 
-  for (sd1 = sman.beginSelected(i); sd1 != NULL; sd1 = sman.nextSelected(i)) {
-    for (j = i, sd2 = sman.nextSelected(j); sd2 != NULL;
-         sd2 = sman.nextSelected(j)) {
-      collectHistogram(sd1, sd2);
+    for (sd1 = sman.beginSelected(i); sd1 != NULL; sd1 = sman.nextSelected(i)) {
+      for (j = i, sd2 = sman.nextSelected(j); sd2 != NULL;
+           sd2 = sman.nextSelected(j)) {
+        collectHistogram(sd1, sd2);
+      }
     }
   }
-}
 }  // namespace OpenMD

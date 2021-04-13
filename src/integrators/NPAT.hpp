@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file NPAT.hpp
  * @author tlin
@@ -61,40 +61,38 @@ namespace OpenMD {
    * Constant normal pressure and lateral surface area integrator
    * @note Ikeguchi M.,J. Comput Chem, 25:529-542, 2004
    */
-  class NPAT : public NPT{
+  class NPAT : public NPT {
   public:
+    NPAT(SimInfo* info);
 
-    NPAT ( SimInfo* info);
   protected:
-
     Mat3x3d eta;
 
   private:
-
     virtual void evolveEtaA();
     virtual void evolveEtaB();
 
     virtual bool etaConverged();
 
     virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel);
-    virtual void getVelScaleB(Vector3d& sc, int index );
-    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM,  int index, Vector3d& sc);
+    virtual void getVelScaleB(Vector3d& sc, int index);
+    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM,
+                             int index, Vector3d& sc);
 
     virtual void calcVelScale();
-        
+
     virtual void scaleSimBox();
     virtual RealType calcConservedQuantity();
 
     virtual void loadEta();
     virtual void saveEta();
-            
+
     Mat3x3d oldEta_;
     Mat3x3d prevEta_;
     Mat3x3d vScale_;
     unsigned int axis_;
   };
 
+}  // end namespace OpenMD
 
-}//end namespace OpenMD
-
-#endif //INTEGRATORS_NPTF_HPP
+#endif  // INTEGRATORS_NPTF_HPP

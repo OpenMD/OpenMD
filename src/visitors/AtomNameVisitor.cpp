@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -53,70 +53,70 @@
 #include "utils/Trim.hpp"
 
 namespace OpenMD {
-AtomNameVisitor::AtomNameVisitor(SimInfo* info) : BaseVisitor(), info_(info) {
-  visitorName = "AtomNameVisitor";
-  ff_ = info_->getForceField();
-}
+  AtomNameVisitor::AtomNameVisitor(SimInfo* info) : BaseVisitor(), info_(info) {
+    visitorName = "AtomNameVisitor";
+    ff_         = info_->getForceField();
+  }
 
-void AtomNameVisitor::visitAtom(Atom* atom) {
-  std::shared_ptr<AtomData> atomData;
-  std::shared_ptr<GenericData> data = atom->getPropertyByName("ATOMDATA");
+  void AtomNameVisitor::visitAtom(Atom* atom) {
+    std::shared_ptr<AtomData> atomData;
+    std::shared_ptr<GenericData> data = atom->getPropertyByName("ATOMDATA");
 
-  if (data != nullptr) {
-    atomData = std::dynamic_pointer_cast<AtomData>(data);
-    if (atomData == nullptr) {
-      std::cerr << "can not get Atom Data from " << atom->getType()
-                << std::endl;
+    if (data != nullptr) {
+      atomData = std::dynamic_pointer_cast<AtomData>(data);
+      if (atomData == nullptr) {
+        std::cerr << "can not get Atom Data from " << atom->getType()
+                  << std::endl;
+        atomData = std::make_shared<AtomData>();
+      }
+    } else {
       atomData = std::make_shared<AtomData>();
     }
-  } else {
-    atomData = std::make_shared<AtomData>();
+
+    std::vector<std::shared_ptr<AtomInfo>>::iterator i;
+    for (std::shared_ptr<AtomInfo> atomInfo = atomData->beginAtomInfo(i);
+         atomInfo != nullptr; atomInfo      = atomData->nextAtomInfo(i)) {
+      // query the force field for the AtomType associated with this
+      // atomTypeName:
+      AtomType* at = ff_->getAtomType(atomInfo->atomTypeName);
+      // get the chain of base types for this atom type:
+      std::vector<AtomType*> ayb = at->allYourBase();
+      // use the last type in the chain of base types for the name:
+      std::string bn = ayb[ayb.size() - 1]->getName();
+
+      atomInfo->atomTypeName = bn;
+    }
   }
 
-  std::vector<std::shared_ptr<AtomInfo>>::iterator i;
-  for (std::shared_ptr<AtomInfo> atomInfo = atomData->beginAtomInfo(i);
-       atomInfo != nullptr; atomInfo = atomData->nextAtomInfo(i)) {
-    // query the force field for the AtomType associated with this
-    // atomTypeName:
-    AtomType* at = ff_->getAtomType(atomInfo->atomTypeName);
-    // get the chain of base types for this atom type:
-    std::vector<AtomType*> ayb = at->allYourBase();
-    // use the last type in the chain of base types for the name:
-    std::string bn = ayb[ayb.size() - 1]->getName();
+  void AtomNameVisitor::visit(RigidBody* rb) {
+    std::vector<Atom*>::iterator i;
 
-    atomInfo->atomTypeName = bn;
+    for (Atom* atom = rb->beginAtom(i); atom != NULL; atom = rb->nextAtom(i)) {
+      visit(atom);
+    }
   }
-}
 
-void AtomNameVisitor::visit(RigidBody* rb) {
-  std::vector<Atom*>::iterator i;
+  const std::string AtomNameVisitor::toString() {
+    char buffer[65535];
+    std::string result;
 
-  for (Atom* atom = rb->beginAtom(i); atom != NULL; atom = rb->nextAtom(i)) {
-    visit(atom);
+    sprintf(
+        buffer,
+        "------------------------------------------------------------------\n");
+    result += buffer;
+
+    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    result += buffer;
+
+    sprintf(buffer, "Visitor Description: print base atom types\n");
+    result += buffer;
+
+    sprintf(
+        buffer,
+        "------------------------------------------------------------------\n");
+    result += buffer;
+
+    return result;
   }
-}
-
-const std::string AtomNameVisitor::toString() {
-  char buffer[65535];
-  std::string result;
-
-  sprintf(
-      buffer,
-      "------------------------------------------------------------------\n");
-  result += buffer;
-
-  sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
-  result += buffer;
-
-  sprintf(buffer, "Visitor Description: print base atom types\n");
-  result += buffer;
-
-  sprintf(
-      buffer,
-      "------------------------------------------------------------------\n");
-  result += buffer;
-
-  return result;
-}
 
 }  // namespace OpenMD

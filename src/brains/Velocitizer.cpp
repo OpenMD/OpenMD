@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -61,252 +61,252 @@
 
 namespace OpenMD {
 
-Velocitizer::Velocitizer(SimInfo* info) : info_(info), thermo_(info) {
-  globals_ = info->getSimParams();
+  Velocitizer::Velocitizer(SimInfo* info) : info_(info), thermo_(info) {
+    globals_ = info->getSimParams();
 
 #ifndef IS_MPI
-  if (globals_->haveSeed()) {
-    int seedValue = globals_->getSeed();
-    randNumGen_ = new SeqRandNumGen(seedValue);
-  } else {
-    randNumGen_ = new SeqRandNumGen();
-  }
+    if (globals_->haveSeed()) {
+      int seedValue = globals_->getSeed();
+      randNumGen_   = new SeqRandNumGen(seedValue);
+    } else {
+      randNumGen_ = new SeqRandNumGen();
+    }
 #else
-  if (globals_->haveSeed()) {
-    int seedValue = globals_->getSeed();
-    randNumGen_ = new ParallelRandNumGen(seedValue);
-  } else {
-    randNumGen_ = new ParallelRandNumGen();
-  }
+    if (globals_->haveSeed()) {
+      int seedValue = globals_->getSeed();
+      randNumGen_   = new ParallelRandNumGen(seedValue);
+    } else {
+      randNumGen_ = new ParallelRandNumGen();
+    }
 #endif
-}
-
-Velocitizer::~Velocitizer() { delete randNumGen_; }
-
-void Velocitizer::scale(RealType lambda) {
-  SimInfo::MoleculeIterator mi;
-  Molecule::IntegrableObjectIterator ioi;
-  Molecule* mol;
-  StuntDouble* sd;
-  Vector3d v, j;
-
-  for (mol = info_->beginMolecule(mi); mol != NULL;
-       mol = info_->nextMolecule(mi)) {
-    for (sd = mol->beginIntegrableObject(ioi); sd != NULL;
-         sd = mol->nextIntegrableObject(ioi)) {
-      v = sd->getVel();
-      v *= lambda;
-      sd->setVel(v);
-
-      if (sd->isDirectional()) {
-        j = sd->getJ();
-        j *= lambda;
-        sd->setJ(j);
-      }
-    }
   }
 
-  removeComDrift();
+  Velocitizer::~Velocitizer() { delete randNumGen_; }
 
-  // Remove angular drift if we are not using periodic boundary
-  // conditions:
+  void Velocitizer::scale(RealType lambda) {
+    SimInfo::MoleculeIterator mi;
+    Molecule::IntegrableObjectIterator ioi;
+    Molecule* mol;
+    StuntDouble* sd;
+    Vector3d v, j;
 
-  if (!globals_->getUsePeriodicBoundaryConditions()) removeAngularDrift();
-}
+    for (mol = info_->beginMolecule(mi); mol != NULL;
+         mol = info_->nextMolecule(mi)) {
+      for (sd = mol->beginIntegrableObject(ioi); sd != NULL;
+           sd = mol->nextIntegrableObject(ioi)) {
+        v = sd->getVel();
+        v *= lambda;
+        sd->setVel(v);
 
-void Velocitizer::randomize(RealType temperature) {
-  Vector3d v;
-  Vector3d j;
-  Mat3x3d I;
-  int l, m, n;
-  Vector3d vdrift;
-  RealType vbar;
-  RealType jbar;
-  RealType av2;
-  RealType kebar;
-
-  SimInfo::MoleculeIterator mi;
-  Molecule::IntegrableObjectIterator ioi;
-  Molecule* mol;
-  StuntDouble* sd;
-
-  kebar = Constants::kB * temperature * info_->getNdfRaw() /
-          (2.0 * info_->getNdf());
-  for (mol = info_->beginMolecule(mi); mol != NULL;
-       mol = info_->nextMolecule(mi)) {
-    for (sd = mol->beginIntegrableObject(ioi); sd != NULL;
-         sd = mol->nextIntegrableObject(ioi)) {
-      // uses equipartition theory to solve for vbar in angstrom/fs
-
-      av2 = 2.0 * kebar / sd->getMass();
-      vbar = sqrt(av2);
-
-      // picks random velocities from a gaussian distribution
-      // centered on vbar
-
-      for (int k = 0; k < 3; k++) {
-        v[k] = vbar * randNumGen_->randNorm(0.0, 1.0);
+        if (sd->isDirectional()) {
+          j = sd->getJ();
+          j *= lambda;
+          sd->setJ(j);
+        }
       }
-      sd->setVel(v);
+    }
 
-      if (sd->isDirectional()) {
-        I = sd->getI();
+    removeComDrift();
 
-        if (sd->isLinear()) {
-          l = sd->linearAxis();
-          m = (l + 1) % 3;
-          n = (l + 2) % 3;
+    // Remove angular drift if we are not using periodic boundary
+    // conditions:
 
-          j[l] = 0.0;
-          jbar = sqrt(2.0 * kebar * I(m, m));
-          j[m] = jbar * randNumGen_->randNorm(0.0, 1.0);
-          jbar = sqrt(2.0 * kebar * I(n, n));
-          j[n] = jbar * randNumGen_->randNorm(0.0, 1.0);
-        } else {
-          for (int k = 0; k < 3; k++) {
-            jbar = sqrt(2.0 * kebar * I(k, k));
-            j[k] = jbar * randNumGen_->randNorm(0.0, 1.0);
+    if (!globals_->getUsePeriodicBoundaryConditions()) removeAngularDrift();
+  }
+
+  void Velocitizer::randomize(RealType temperature) {
+    Vector3d v;
+    Vector3d j;
+    Mat3x3d I;
+    int l, m, n;
+    Vector3d vdrift;
+    RealType vbar;
+    RealType jbar;
+    RealType av2;
+    RealType kebar;
+
+    SimInfo::MoleculeIterator mi;
+    Molecule::IntegrableObjectIterator ioi;
+    Molecule* mol;
+    StuntDouble* sd;
+
+    kebar = Constants::kB * temperature * info_->getNdfRaw() /
+            (2.0 * info_->getNdf());
+    for (mol = info_->beginMolecule(mi); mol != NULL;
+         mol = info_->nextMolecule(mi)) {
+      for (sd = mol->beginIntegrableObject(ioi); sd != NULL;
+           sd = mol->nextIntegrableObject(ioi)) {
+        // uses equipartition theory to solve for vbar in angstrom/fs
+
+        av2  = 2.0 * kebar / sd->getMass();
+        vbar = sqrt(av2);
+
+        // picks random velocities from a gaussian distribution
+        // centered on vbar
+
+        for (int k = 0; k < 3; k++) {
+          v[k] = vbar * randNumGen_->randNorm(0.0, 1.0);
+        }
+        sd->setVel(v);
+
+        if (sd->isDirectional()) {
+          I = sd->getI();
+
+          if (sd->isLinear()) {
+            l = sd->linearAxis();
+            m = (l + 1) % 3;
+            n = (l + 2) % 3;
+
+            j[l] = 0.0;
+            jbar = sqrt(2.0 * kebar * I(m, m));
+            j[m] = jbar * randNumGen_->randNorm(0.0, 1.0);
+            jbar = sqrt(2.0 * kebar * I(n, n));
+            j[n] = jbar * randNumGen_->randNorm(0.0, 1.0);
+          } else {
+            for (int k = 0; k < 3; k++) {
+              jbar = sqrt(2.0 * kebar * I(k, k));
+              j[k] = jbar * randNumGen_->randNorm(0.0, 1.0);
+            }
           }
-        }
 
-        sd->setJ(j);
+          sd->setJ(j);
+        }
       }
     }
+
+    removeComDrift();
+
+    // Remove angular drift if we are not using periodic boundary
+    // conditions:
+
+    if (!globals_->getUsePeriodicBoundaryConditions()) removeAngularDrift();
   }
 
-  removeComDrift();
+  void Velocitizer::randomizeChargeVelocity(RealType temperature) {
+    RealType aw2;
+    RealType kebar;
+    RealType wbar;
 
-  // Remove angular drift if we are not using periodic boundary
-  // conditions:
+    SimInfo::MoleculeIterator mi;
+    Molecule::IntegrableObjectIterator ioi;
+    Molecule* mol;
+    StuntDouble* sd;
+    FluctuatingChargeParameters* fqParams;
+    FluctuatingChargeConstraints* fqConstraints;
 
-  if (!globals_->getUsePeriodicBoundaryConditions()) removeAngularDrift();
-}
+    Globals* simParams = info_->getSimParams();
+    fqParams           = simParams->getFluctuatingChargeParameters();
 
-void Velocitizer::randomizeChargeVelocity(RealType temperature) {
-  RealType aw2;
-  RealType kebar;
-  RealType wbar;
+    fqConstraints = new FluctuatingChargeConstraints(info_);
+    fqConstraints->setConstrainRegions(fqParams->getConstrainRegions());
 
-  SimInfo::MoleculeIterator mi;
-  Molecule::IntegrableObjectIterator ioi;
-  Molecule* mol;
-  StuntDouble* sd;
-  FluctuatingChargeParameters* fqParams;
-  FluctuatingChargeConstraints* fqConstraints;
+    int nConstrain =
+        fqConstraints
+            ->getNumberOfFlucQConstraints();  // no of constraints in charge
+    int dfRaw = fqConstraints->getNumberOfFlucQAtoms();  // no of FlucQ freedom
+    int dfActual = dfRaw - nConstrain;
+    kebar        = dfRaw * Constants::kb * temperature / (2 * dfActual);
 
-  Globals* simParams = info_->getSimParams();
-  fqParams = simParams->getFluctuatingChargeParameters();
-
-  fqConstraints = new FluctuatingChargeConstraints(info_);
-  fqConstraints->setConstrainRegions(fqParams->getConstrainRegions());
-
-  int nConstrain =
-      fqConstraints
-          ->getNumberOfFlucQConstraints();  // no of constraints in charge
-  int dfRaw = fqConstraints->getNumberOfFlucQAtoms();  // no of FlucQ freedom
-  int dfActual = dfRaw - nConstrain;
-  kebar = dfRaw * Constants::kb * temperature / (2 * dfActual);
-
-  for (mol = info_->beginMolecule(mi); mol != NULL;
-       mol = info_->nextMolecule(mi)) {
-    for (sd = mol->beginIntegrableObject(ioi); sd != NULL;
-         sd = mol->nextIntegrableObject(ioi)) {
-      if (sd->isAtom()) {
-        Atom* atom = static_cast<Atom*>(sd);
-        AtomType* atomType = atom->getAtomType();
-        FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
-        if (fqa.isFluctuatingCharge()) {
-          // uses equipartition theory to solve for vbar in angstrom/fs
-
-          aw2 = 2.0 * kebar / atom->getChargeMass();
-          wbar = sqrt(aw2);
-
-          // picks random velocities from a gaussian distribution
-          // centered on vbar
-          atom->setFlucQVel(wbar * randNumGen_->randNorm(0.0, 1.0));
-        }
-      }
-
-      // randomization of the charge velocities for atoms in the rigidbody
-
-      if (sd->isRigidBody()) {
-        RigidBody* rigidbody = static_cast<RigidBody*>(sd);
-        vector<Atom*> atomList;
-        atomList = rigidbody->getAtoms();
-        vector<Atom*>::iterator atom_iterator;
-        for (size_t i = 0; i < atomList.size(); ++i) {
-          Atom* atom = atomList[i];
-          AtomType* atomType = atom->getAtomType();
+    for (mol = info_->beginMolecule(mi); mol != NULL;
+         mol = info_->nextMolecule(mi)) {
+      for (sd = mol->beginIntegrableObject(ioi); sd != NULL;
+           sd = mol->nextIntegrableObject(ioi)) {
+        if (sd->isAtom()) {
+          Atom* atom                   = static_cast<Atom*>(sd);
+          AtomType* atomType           = atom->getAtomType();
           FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
           if (fqa.isFluctuatingCharge()) {
             // uses equipartition theory to solve for vbar in angstrom/fs
-            aw2 = 2.0 * kebar / atom->getChargeMass();
+
+            aw2  = 2.0 * kebar / atom->getChargeMass();
             wbar = sqrt(aw2);
+
             // picks random velocities from a gaussian distribution
             // centered on vbar
             atom->setFlucQVel(wbar * randNumGen_->randNorm(0.0, 1.0));
           }
         }
+
+        // randomization of the charge velocities for atoms in the rigidbody
+
+        if (sd->isRigidBody()) {
+          RigidBody* rigidbody = static_cast<RigidBody*>(sd);
+          vector<Atom*> atomList;
+          atomList = rigidbody->getAtoms();
+          vector<Atom*>::iterator atom_iterator;
+          for (size_t i = 0; i < atomList.size(); ++i) {
+            Atom* atom                   = atomList[i];
+            AtomType* atomType           = atom->getAtomType();
+            FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+            if (fqa.isFluctuatingCharge()) {
+              // uses equipartition theory to solve for vbar in angstrom/fs
+              aw2  = 2.0 * kebar / atom->getChargeMass();
+              wbar = sqrt(aw2);
+              // picks random velocities from a gaussian distribution
+              // centered on vbar
+              atom->setFlucQVel(wbar * randNumGen_->randNorm(0.0, 1.0));
+            }
+          }
+        }
+      }
+    }
+    fqConstraints->applyConstraintsOnChargeVelocities();
+  }
+
+  void Velocitizer::removeComDrift() {
+    // Get the Center of Mass drift velocity.
+    Vector3d vdrift = thermo_.getComVel();
+
+    SimInfo::MoleculeIterator mi;
+    Molecule::IntegrableObjectIterator ioi;
+    Molecule* mol;
+    StuntDouble* sd;
+
+    //  Corrects for the center of mass drift.
+    // sums all the momentum and divides by total mass.
+    for (mol = info_->beginMolecule(mi); mol != NULL;
+         mol = info_->nextMolecule(mi)) {
+      for (sd = mol->beginIntegrableObject(ioi); sd != NULL;
+           sd = mol->nextIntegrableObject(ioi)) {
+        sd->setVel(sd->getVel() - vdrift);
       }
     }
   }
-  fqConstraints->applyConstraintsOnChargeVelocities();
-}
 
-void Velocitizer::removeComDrift() {
-  // Get the Center of Mass drift velocity.
-  Vector3d vdrift = thermo_.getComVel();
+  void Velocitizer::removeAngularDrift() {
+    // Get the Center of Mass drift velocity.
 
-  SimInfo::MoleculeIterator mi;
-  Molecule::IntegrableObjectIterator ioi;
-  Molecule* mol;
-  StuntDouble* sd;
+    Vector3d vdrift;
+    Vector3d com;
 
-  //  Corrects for the center of mass drift.
-  // sums all the momentum and divides by total mass.
-  for (mol = info_->beginMolecule(mi); mol != NULL;
-       mol = info_->nextMolecule(mi)) {
-    for (sd = mol->beginIntegrableObject(ioi); sd != NULL;
-         sd = mol->nextIntegrableObject(ioi)) {
-      sd->setVel(sd->getVel() - vdrift);
+    thermo_.getComAll(com, vdrift);
+
+    Mat3x3d inertiaTensor;
+    Vector3d angularMomentum;
+    Vector3d omega;
+
+    thermo_.getInertiaTensor(inertiaTensor, angularMomentum);
+
+    // We now need the inverse of the inertia tensor.
+    inertiaTensor = inertiaTensor.inverse();
+    omega         = inertiaTensor * angularMomentum;
+
+    SimInfo::MoleculeIterator mi;
+    Molecule::IntegrableObjectIterator ioi;
+    Molecule* mol;
+    StuntDouble* sd;
+    Vector3d tempComPos;
+
+    // Corrects for the center of mass angular drift by summing all
+    // the angular momentum and dividing by the total mass.
+
+    for (mol = info_->beginMolecule(mi); mol != NULL;
+         mol = info_->nextMolecule(mi)) {
+      for (sd = mol->beginIntegrableObject(ioi); sd != NULL;
+           sd = mol->nextIntegrableObject(ioi)) {
+        tempComPos = sd->getPos() - com;
+        sd->setVel((sd->getVel() - vdrift) - cross(omega, tempComPos));
+      }
     }
   }
-}
-
-void Velocitizer::removeAngularDrift() {
-  // Get the Center of Mass drift velocity.
-
-  Vector3d vdrift;
-  Vector3d com;
-
-  thermo_.getComAll(com, vdrift);
-
-  Mat3x3d inertiaTensor;
-  Vector3d angularMomentum;
-  Vector3d omega;
-
-  thermo_.getInertiaTensor(inertiaTensor, angularMomentum);
-
-  // We now need the inverse of the inertia tensor.
-  inertiaTensor = inertiaTensor.inverse();
-  omega = inertiaTensor * angularMomentum;
-
-  SimInfo::MoleculeIterator mi;
-  Molecule::IntegrableObjectIterator ioi;
-  Molecule* mol;
-  StuntDouble* sd;
-  Vector3d tempComPos;
-
-  // Corrects for the center of mass angular drift by summing all
-  // the angular momentum and dividing by the total mass.
-
-  for (mol = info_->beginMolecule(mi); mol != NULL;
-       mol = info_->nextMolecule(mi)) {
-    for (sd = mol->beginIntegrableObject(ioi); sd != NULL;
-         sd = mol->nextIntegrableObject(ioi)) {
-      tempComPos = sd->getPos() - com;
-      sd->setVel((sd->getVel() - vdrift) - cross(omega, tempComPos));
-    }
-  }
-}
 }  // namespace OpenMD

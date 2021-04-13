@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,17 +46,15 @@
 #ifndef OPTIMIZATION_BOXOBJECTIVEFUNCTION_HPP
 #define OPTIMIZATION_BOXOBJECTIVEFUNCTION_HPP
 
-#include "optimization/ObjectiveFunction.hpp"
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
 #include "constraints/Shake.hpp"
 #include "flucq/FluctuatingChargeConstraints.hpp"
-
+#include "optimization/ObjectiveFunction.hpp"
 
 using namespace QuantLib;
 namespace OpenMD {
   class BoxObjectiveFunction : public ObjectiveFunction {
-    
   public:
     BoxObjectiveFunction(SimInfo* info, ForceManager* forceMan);
 
@@ -71,10 +69,10 @@ namespace OpenMD {
   private:
     // Transform a set of 6 special Green-Lagrange Strains into box
     // and molecular deformations
-    int setCoor(const DynamicVector<RealType> &x);
+    int setCoor(const DynamicVector<RealType>& x);
     // Transform computed stress tensor into a set of 6 special
     // Second-Piola-Kirchhoff Stresses
-    void getGrad(DynamicVector<RealType> &grad);
+    void getGrad(DynamicVector<RealType>& grad);
 
     SimInfo* info_ {nullptr};
     ForceManager* forceMan_;
@@ -87,5 +85,5 @@ namespace OpenMD {
     Mat3x3d refHmat_;
     std::vector<Vector3d> refPos_;
   };
-}
+}  // namespace OpenMD
 #endif

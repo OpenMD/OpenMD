@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -108,8 +108,8 @@ void CubicSpline::generate() {
 
   if (!sorted) {
     vector<int> p = sort_permutation(x_);
-    x_ = apply_permutation(x_, p);
-    y_ = apply_permutation(y_, p);
+    x_            = apply_permutation(x_, p);
+    y_            = apply_permutation(y_, p);
   }
 
   // Calculate coefficients for the tridiagonal system: store
@@ -124,13 +124,13 @@ void CubicSpline::generate() {
     // the two points.  In that case, the b coefficients below would be
     // (y_[1] - y_[0]) / (x_[1] - x_[0])
     // and the c and d coefficients would both be zero.
-    b[0] = 0.0;
-    c[0] = -3.0 * pow((y_[1] - y_[0]) / (x_[1] - x_[0]), 2);
-    d[0] = -2.0 * pow((y_[1] - y_[0]) / (x_[1] - x_[0]), 3);
-    b[1] = b[0];
-    c[1] = 0.0;
-    d[1] = 0.0;
-    dx = 1.0 / (x_[1] - x_[0]);
+    b[0]      = 0.0;
+    c[0]      = -3.0 * pow((y_[1] - y_[0]) / (x_[1] - x_[0]), 2);
+    d[0]      = -2.0 * pow((y_[1] - y_[0]) / (x_[1] - x_[0]), 3);
+    b[1]      = b[0];
+    c[1]      = 0.0;
+    d[1]      = 0.0;
+    dx        = 1.0 / (x_[1] - x_[0]);
     isUniform = true;
     generated = true;
     return;
@@ -168,25 +168,27 @@ void CubicSpline::generate() {
   // Calculate the right hand side and store it in C.
 
   c[n - 1] = 3.0 * (fpn - c[n - 2]);
-  for (int i = n - 2; i > 0; i--) c[i] = 3.0 * (c[i] - c[i - 1]);
+  for (int i = n - 2; i > 0; i--)
+    c[i] = 3.0 * (c[i] - c[i - 1]);
   c[0] = 3.0 * (c[0] - fp1);
 
   // Solve the tridiagonal system.
 
   for (int k = 1; k < n; k++) {
-    p = b[k - 1] / d[k - 1];
+    p    = b[k - 1] / d[k - 1];
     d[k] = d[k] - p * b[k - 1];
     c[k] = c[k] - p * c[k - 1];
   }
 
   c[n - 1] = c[n - 1] / d[n - 1];
 
-  for (int k = n - 2; k >= 0; k--) c[k] = (c[k] - b[k] * c[k + 1]) / d[k];
+  for (int k = n - 2; k >= 0; k--)
+    c[k] = (c[k] - b[k] * c[k + 1]) / d[k];
 
   // Calculate the coefficients defining the spline.
 
   for (int i = 0; i < n - 1; i++) {
-    h = x_[i + 1] - x_[i];
+    h    = x_[i + 1] - x_[i];
     d[i] = (c[i + 1] - c[i]) / (3.0 * h);
     b[i] = (y_[i + 1] - y_[i]) / h - h * (c[i] + h * d[i]);
   }
@@ -268,7 +270,7 @@ void CubicSpline::getValueAt(const RealType& t, RealType& v) {
   //  Evaluate the cubic polynomial.
 
   dt = t - x_[j];
-  v = y_[j] + dt * (b[j] + dt * (c[j] + dt * d[j]));
+  v  = y_[j] + dt * (b[j] + dt * (c[j] + dt * d[j]));
 }
 
 pair<RealType, RealType> CubicSpline::getLimits() {
@@ -318,7 +320,7 @@ void CubicSpline::getValueAndDerivativeAt(const RealType& t, RealType& v,
 
   dt = t - x_[j];
 
-  v = y_[j] + dt * (b[j] + dt * (c[j] + dt * d[j]));
+  v  = y_[j] + dt * (b[j] + dt * (c[j] + dt * d[j]));
   dv = b[j] + dt * (2.0 * c[j] + 3.0 * dt * d[j]);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_HARMONICBONDTYPE_HPP
 #define TYPES_HARMONICBONDTYPE_HPP
 
@@ -50,36 +50,30 @@
 
 namespace OpenMD {
   /**
-   * @class HarmonicBondType 
+   * @class HarmonicBondType
    *
    * HarmonicBondType is the basic OpenMD bond type.
    * \f[ V = 0.5* k(r -r_0)^2  \f]
    */
   class HarmonicBondType : public BondType {
-    
   public:
-    
-    HarmonicBondType(RealType myR0, RealType myK) : BondType(myR0) {
-      k = myK;
-    }
-    
-    void setForceConstant(RealType myK) {k = myK; }
-    
-    RealType getForceConstant() {return k;}
-    
+    HarmonicBondType(RealType myR0, RealType myK) : BondType(myR0) { k = myK; }
+
+    void setForceConstant(RealType myK) { k = myK; }
+
+    RealType getForceConstant() { return k; }
+
     virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
       RealType dr;
-      
+
       dr = r - r0;
-      
-      V = 0.5 * k * dr * dr;
+
+      V    = 0.5 * k * dr * dr;
       dVdr = k * dr;
     }
-                
+
   private:
-    
     RealType k;
-    
   };
-}
+}  // namespace OpenMD
 #endif

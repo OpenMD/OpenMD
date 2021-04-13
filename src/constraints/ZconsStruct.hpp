@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,16 +42,16 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef CONSTRAINTS_ZCONSSTRUCT_HPP
 #define CONSTRAINTS_ZCONSSTRUCT_HPP
 #include "primitives/Molecule.hpp"
 namespace OpenMD {
 
   struct ZconstraintParam {
-    RealType zTargetPos;   /**< target zconstraint position */
-    RealType kz;                  /**< force constant */
-    RealType cantVel;         /**< The velocity of cantilever */
+    RealType zTargetPos; /**< target zconstraint position */
+    RealType kz;         /**< force constant */
+    RealType cantVel;    /**< The velocity of cantilever */
   };
 
   struct ZconstraintMol {
@@ -59,18 +59,17 @@ namespace OpenMD {
     ZconstraintParam param;
     RealType fz;
     RealType zpos;
-    RealType cantPos;         /**< current position of cantilever */
-    RealType endFixingTime;    
+    RealType cantPos; /**< current position of cantilever */
+    RealType endFixingTime;
   };
 
-
-  struct ZconsData{
+  struct ZconsData {
     int zmolIndex;
     RealType zforce;
     RealType zpos;
     RealType zconsPos;
   };
 
-}
+}  // namespace OpenMD
 
-#endif 
+#endif

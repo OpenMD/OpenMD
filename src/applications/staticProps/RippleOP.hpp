@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,41 +45,41 @@
 
 #ifndef APPLICATIONS_STATICPROPS_RIPPLEOP_HPP
 #define APPLICATIONS_STATICPROPS_RIPPLEOP_HPP
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 namespace OpenMD {
 
-  class RippleOP : public StaticAnalyser{
-
+  class RippleOP : public StaticAnalyser {
   public:
-
-    RippleOP(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
+    RippleOP(SimInfo* info, const std::string& filename,
+             const std::string& sele1, const std::string& sele2);
     virtual void process();
-    
+
   private:
-    
-    struct OrderParam{
+    struct OrderParam {
       RealType p2;
       Vector3d director;
-    };            
+    };
     void writeP2();
-    
+
     Snapshot* currentSnapshot_;
-    
+
     std::string selectionScript1_;
     std::string selectionScript2_;
     SelectionManager seleMan1_;
-    SelectionManager seleMan2_;       
+    SelectionManager seleMan2_;
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
-    std::vector<std::pair<StuntDouble*, StuntDouble*> > sdPairs_;  /**< each pair is used to define a vector, vector = first - second */
-    std::vector<OrderParam> orderParamsHeadUpper_, orderParamsHeadLower_, orderParamsTail_;
-    OrderParam avgOPHeadUpper, avgOPHeadLower, errOPHeadUpper, errOPHeadLower, avgOPTail, errOPTail;
-    
+    std::vector<std::pair<StuntDouble*, StuntDouble*>>
+        sdPairs_; /**< each pair is used to define a vector, vector = first -
+                     second */
+    std::vector<OrderParam> orderParamsHeadUpper_, orderParamsHeadLower_,
+        orderParamsTail_;
+    OrderParam avgOPHeadUpper, avgOPHeadLower, errOPHeadUpper, errOPHeadLower,
+        avgOPTail, errOPTail;
   };
-}
+}  // namespace OpenMD
 
 #endif
-

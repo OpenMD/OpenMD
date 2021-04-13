@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,7 +51,8 @@ namespace OpenMD {
 
   /**
    * @class basic_teebuf basic_teebuf.hpp "utils/basic_teebuf.hpp"
-   * @brief As a subclass of basic_streambuf,  basic_teebuf can operate on multiple stream simultaneously.
+   * @brief As a subclass of basic_streambuf,  basic_teebuf can operate on
+   * multiple stream simultaneously.
    * @code
    *    std::ofstream file1("file1");
    *    std::ofstream file2("file22");
@@ -64,60 +65,55 @@ namespace OpenMD {
    * @endcode
    */
 
-  template <class CharT, class Traits = std::char_traits<CharT> > 
-  class basic_teebuf: public std::basic_streambuf<CharT, Traits> { 
-  public: 
-    typedef std::basic_streambuf<CharT, Traits> streambuf_type; 
-    typedef Traits traits_type; 
-    typedef CharT char_type; 
-    typedef typename traits_type::int_type int_type; 
+  template<class CharT, class Traits = std::char_traits<CharT>>
+  class basic_teebuf : public std::basic_streambuf<CharT, Traits> {
+  public:
+    typedef std::basic_streambuf<CharT, Traits> streambuf_type;
+    typedef Traits traits_type;
+    typedef CharT char_type;
+    typedef typename traits_type::int_type int_type;
 
-    template <typename ForwardIterator>
-    basic_teebuf(ForwardIterator begin, ForwardIterator end) : buffers_(begin, end){
-
-    }
+    template<typename ForwardIterator>
+    basic_teebuf(ForwardIterator begin, ForwardIterator end) :
+        buffers_(begin, end) {}
 
   protected:
     int_type overflow(int_type c = traits_type::eof()) {
+      // avoid writing eof to stream
+      if (c == traits_type::eof()) { return traits_type::eof(); }
 
-      //avoid writing eof to stream
-      if (c == traits_type::eof()) {
-	return traits_type::eof();
-      }
-            
-      typename std::vector<streambuf_type*>::iterator iter; //typename is needed since it's a dependant name
+      typename std::vector<streambuf_type*>::iterator
+          iter;  // typename is needed since it's a dependant name
       for (iter = buffers_.begin(); iter != buffers_.end(); ++iter) {
-	if ((*iter)->sputc(c) ==  traits_type::eof()) {
-	  return  traits_type::eof();
-	}
+        if ((*iter)->sputc(c) == traits_type::eof()) {
+          return traits_type::eof();
+        }
       }
 
-      return traits_type::not_eof(c); 
+      return traits_type::not_eof(c);
     }
 
-    int sync() { 
+    int sync() {
+      // flush buffer, checking return for eof.
+      if (traits_type::eq_int_type(overflow(traits_type::eof()),
+                                   traits_type::eof())) {
+        return -1;
+      }
 
-      //flush buffer, checking return for eof. 
-      if (traits_type::eq_int_type(overflow(traits_type::eof()), traits_type::eof())) { 
-	return -1; 
-      } 
-
-      //flush streams
+      // flush streams
       typename std::vector<streambuf_type*>::iterator iter;
       for (iter = buffers_.begin(); iter != buffers_.end(); ++iter) {
-	if ((*iter)->pubsync() == -1) {
-	  return -1;
-	}
+        if ((*iter)->pubsync() == -1) { return -1; }
       }
-            
-      return 0; 
-    } 
-   
+
+      return 0;
+    }
+
   private:
     std::vector<streambuf_type*> buffers_;
   };
 
-  typedef basic_teebuf<char> TeeBuf; 
+  typedef basic_teebuf<char> TeeBuf;
 
-}
+}  // namespace OpenMD
 #endif

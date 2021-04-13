@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -55,63 +55,58 @@ namespace OpenMD {
   template<class Elem>
   class Grid3D {
   public:
-    Grid3D(unsigned int dim1, unsigned int dim2, unsigned int dim3) : dim1_(dim1), dim2_(dim2), dim3_(dim3) {
-      data_.resize(dim1_*dim2_*dim3_);
+    Grid3D(unsigned int dim1, unsigned int dim2, unsigned int dim3) :
+        dim1_(dim1), dim2_(dim2), dim3_(dim3) {
+      data_.resize(dim1_ * dim2_ * dim3_);
     }
-    Elem& operator ()(unsigned int i, unsigned int j, unsigned int k) {
-      int index = isValidGrid(i, j , k);
+    Elem& operator()(unsigned int i, unsigned int j, unsigned int k) {
+      int index = isValidGrid(i, j, k);
       assert(index != -1);
       return data_[index];
     }
-    
-    const Elem& operator () (unsigned int i, unsigned int j, unsigned int k) const {
-      int index = isValidGrid(i, j , k);
+
+    const Elem& operator()(unsigned int i, unsigned int j,
+                           unsigned int k) const {
+      int index = isValidGrid(i, j, k);
       assert(index != -1);
       return data_[index];
     }
-    
-    vector<Elem> getAllNeighbors(unsigned int i, unsigned int j, unsigned int k) {
+
+    vector<Elem> getAllNeighbors(unsigned int i, unsigned int j,
+                                 unsigned int k) {
       vector<Elem> result;
       int index;
-      index = isValidGrid(i-1, j, k);
-      if (index != -1)
-        result.push_back(data_[index]);
-      
-      index = isValidGrid(i+1, j, k);
-      if (index != -1)
-        result.push_back(data_[index]);
-      
-      index = isValidGrid(i, j-1, k);
-      if (index != -1)
-        result.push_back(data_[index]);
-      
-      index = isValidGrid(i, j+1, k);
-      if (index != -1)
-        result.push_back(data_[index]);
-      
-      index = isValidGrid(i, j, k-1);
-      if (index != -1)
-        result.push_back(data_[index]);
-      
-      index = isValidGrid(i, j, k+1);
-      if (index != -1)
-        result.push_back(data_[index]);
-      
+      index = isValidGrid(i - 1, j, k);
+      if (index != -1) result.push_back(data_[index]);
+
+      index = isValidGrid(i + 1, j, k);
+      if (index != -1) result.push_back(data_[index]);
+
+      index = isValidGrid(i, j - 1, k);
+      if (index != -1) result.push_back(data_[index]);
+
+      index = isValidGrid(i, j + 1, k);
+      if (index != -1) result.push_back(data_[index]);
+
+      index = isValidGrid(i, j, k - 1);
+      if (index != -1) result.push_back(data_[index]);
+
+      index = isValidGrid(i, j, k + 1);
+      if (index != -1) result.push_back(data_[index]);
+
       return result;
     }
 
   private:
-    
     int isValidGrid(unsigned int i, unsigned int j, unsigned int k) const {
-      unsigned int index = i * dim2_*dim3_ + j * dim3_ + k;
+      unsigned int index = i * dim2_ * dim3_ + j * dim3_ + k;
       return index < data_.size() ? int(index) : -1;
     };
-    
+
     unsigned int dim1_;
     unsigned int dim2_;
     unsigned int dim3_;
     vector<Elem> data_;
-    
   };
-}
+}  // namespace OpenMD
 #endif

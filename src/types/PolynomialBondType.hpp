@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,17 +42,16 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file PolynomialBondType.hpp
  * @author    teng lin
  * @date  11/16/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_POLYNOMIALBONDTYPE_HPP
 #define TYPES_POLYNOMIALBONDTYPE_HPP
-
 
 #include "math/Polynomial.hpp"
 #include "types/BondType.hpp"
@@ -60,66 +59,64 @@
 namespace OpenMD {
 
   /**
-   * @class PolynomialBondType PolynomialBondType.hpp "types/PolynomialBondType.hpp"
+   * @class PolynomialBondType PolynomialBondType.hpp
+   * "types/PolynomialBondType.hpp"
    * @todo documentation
    */
-  class PolynomialBondType : public BondType{
-    
+  class PolynomialBondType : public BondType {
   public:
     PolynomialBondType(RealType r0) : BondType(r0) {}
-    
+
     void setCoefficient(int power, RealType coefficient) {
       polynomial_.setCoefficient(power, coefficient);
     }
-    
+
     RealType getCoefficient(int power) {
       return polynomial_.getCoefficient(power);
     }
-    
-    void calcForce(RealType r, RealType & V, RealType & dVdr) {
+
+    void calcForce(RealType r, RealType& V, RealType& dVdr) {
       RealType delta = r - r0;
-      V = polynomial_.evaluate(delta);
-      dVdr = polynomial_.evaluateDerivative(delta);
-      
+      V              = polynomial_.evaluate(delta);
+      dVdr           = polynomial_.evaluateDerivative(delta);
     }
 
-    friend std::ostream& operator <<(std::ostream& os, PolynomialBondType& pbt);
-    
+    friend std::ostream& operator<<(std::ostream& os, PolynomialBondType& pbt);
+
   private:
-    
     DoublePolynomial polynomial_;
   };
-  
-  std::ostream& operator <<(std::ostream& os, PolynomialBondType& pbt) {
+
+  std::ostream& operator<<(std::ostream& os, PolynomialBondType& pbt) {
     DoublePolynomial::const_iterator i;
-    
+
     i = pbt.polynomial_.begin();
-    
+
     if (i == pbt.polynomial_.end()) {
       os << "This PolynomialBondType contains nothing" << std::endl;
       return os;
     }
-    
-    os << "This PolynomialBondType contains below terms:" << std::endl;    
-    
-    while(true){
-      os << i->second << "*" << "(r - " << pbt.getEquilibriumBondLength() << 
-        ")" << "^" << i->first;
-      
+
+    os << "This PolynomialBondType contains below terms:" << std::endl;
+
+    while (true) {
+      os << i->second << "*"
+         << "(r - " << pbt.getEquilibriumBondLength() << ")"
+         << "^" << i->first;
+
       if (++i == pbt.polynomial_.end()) {
-	// If we reach the end of the polynomial pair, write out a
-	// newline and then escape the loop        
-	os << std::endl;
-	break;
+        // If we reach the end of the polynomial pair, write out a
+        // newline and then escape the loop
+        os << std::endl;
+        break;
       } else {
-	// otherwise, write out a "+"
-	os << " + ";
+        // otherwise, write out a "+"
+        os << " + ";
       }
     }
-    
+
     return os;
   }
 
-
-} //end namespace OpenMD
-#endif //TYPES_POLYNOMIALBONDTYPE_HPP
+}  // end namespace OpenMD
+#endif  // TYPES_POLYNOMIALBONDTYPE_HPP

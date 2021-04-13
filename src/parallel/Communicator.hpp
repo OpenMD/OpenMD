@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,83 +48,83 @@
 
 #include <config.h>
 #include <mpi.h>
+
 #include "math/SquareMatrix3.hpp"
 
 using namespace std;
-namespace OpenMD{
-  
+namespace OpenMD {
+
 #ifdef IS_MPI
 
-  enum communicatorType {
-    Global = 0,
-    Row = 1,
-    Column = 2
-  };
-    
+  enum communicatorType { Global = 0, Row = 1, Column = 2 };
+
   template<class T>
   class MPITraits {
   public:
     static MPI_Datatype Type();
     static int Length() { return 1; };
   };
-  
-  template<> inline MPI_Datatype MPITraits<int>::Type() { return MPI_INT; }
-  template<> inline MPI_Datatype MPITraits<RealType>::Type() { return MPI_REALTYPE; }
+
+  template<>
+  inline MPI_Datatype MPITraits<int>::Type() {
+    return MPI_INT;
+  }
+  template<>
+  inline MPI_Datatype MPITraits<RealType>::Type() {
+    return MPI_REALTYPE;
+  }
 
   template<class T, unsigned int Dim>
-  class MPITraits< Vector<T, Dim> > {
+  class MPITraits<Vector<T, Dim>> {
   public:
     static MPI_Datatype Type() { return MPITraits<T>::Type(); }
-    static int Length() {return Dim;}
+    static int Length() { return Dim; }
   };
 
   template<class T>
-  class MPITraits< Vector3<T> > {
+  class MPITraits<Vector3<T>> {
   public:
     static MPI_Datatype Type() { return MPITraits<T>::Type(); }
-    static int Length() {return 3;}
+    static int Length() { return 3; }
   };
 
   template<class T, unsigned int R, unsigned int C>
-  class MPITraits< RectMatrix<T, R, C> > {
+  class MPITraits<RectMatrix<T, R, C>> {
   public:
     static MPI_Datatype Type() { return MPITraits<T>::Type(); }
-    static int Length() {return R * C;}
+    static int Length() { return R * C; }
   };
 
   template<class T>
-  class MPITraits< SquareMatrix3<T> > {
+  class MPITraits<SquareMatrix3<T>> {
   public:
     static MPI_Datatype Type() { return MPITraits<T>::Type(); }
-    static int Length() {return 9;}
+    static int Length() { return 9; }
   };
-  
-  
+
   template<communicatorType D>
-  class Communicator { 
-  public: 
-    
+  class Communicator {
+  public:
     Communicator<D>() {
-      
       int nProc;
       int myRank;
 
-      MPI_Comm_size( MPI_COMM_WORLD, &nProc );
-      MPI_Comm_rank( MPI_COMM_WORLD, &myRank );
-      
-      int nColumnsMax = (int) sqrt(RealType(nProc));
+      MPI_Comm_size(MPI_COMM_WORLD, &nProc);
+      MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+
+      int nColumnsMax = (int)sqrt(RealType(nProc));
 
       int nColumns(0);
       for (int i = 1; i < nColumnsMax + 1; i++) {
-        if (nProc % i == 0) nColumns = i;        
+        if (nProc % i == 0) nColumns = i;
       }
-        
+
       // int nRows = nProc / nColumns;
-      rowIndex_ = myRank / nColumns;      
+      rowIndex_    = myRank / nColumns;
       columnIndex_ = myRank % nColumns;
 
-      switch(D) {
-      case Row :
+      switch (D) {
+      case Row:
         MPI_Comm_split(MPI_COMM_WORLD, rowIndex_, 0, &myComm);
         break;
       case Column:
@@ -133,37 +133,33 @@ namespace OpenMD{
       case Global:
         MPI_Comm_split(MPI_COMM_WORLD, myRank, 0, &myComm);
       }
-
     }
-    
+
     MPI_Comm getComm() { return myComm; }
-    
+
   private:
     int rowIndex_;
     int columnIndex_;
     MPI_Comm myComm;
   };
-  
 
   template<typename T>
   class Plan {
   public:
-    
     Plan<T>(MPI_Comm comm, int nObjects) : myComm(comm) {
-
       int nCommProcs;
-      MPI_Comm_size( myComm, &nCommProcs );
-      
+      MPI_Comm_size(myComm, &nCommProcs);
+
       counts.resize(nCommProcs, 0);
       displacements.resize(nCommProcs, 0);
-      
-      planSize_ = MPITraits<T>::Length() * nObjects; 
-      
+
+      planSize_ = MPITraits<T>::Length() * nObjects;
+
       MPI_Allgather(&planSize_, 1, MPI_INT, &counts[0], 1, MPI_INT, myComm);
-      
+
       displacements[0] = 0;
       for (int i = 1; i < nCommProcs; i++) {
-        displacements[i] = displacements[i-1] + counts[i-1];
+        displacements[i] = displacements[i - 1] + counts[i - 1];
       }
 
       size_ = 0;
@@ -172,44 +168,33 @@ namespace OpenMD{
       }
     }
 
-    
     void gather(vector<T>& v1, vector<T>& v2) {
-      
       // an assert would be helpful here to make sure the vectors are the
       // correct geometry
-      
-      MPI_Allgatherv(&v1[0], 
-                     planSize_, 
-                     MPITraits<T>::Type(), 
-                     &v2[0], 
-                     &counts[0], 
-                     &displacements[0], 
-                     MPITraits<T>::Type(),
+
+      MPI_Allgatherv(&v1[0], planSize_, MPITraits<T>::Type(), &v2[0],
+                     &counts[0], &displacements[0], MPITraits<T>::Type(),
                      myComm);
-    }       
-    
+    }
+
     void scatter(vector<T>& v1, vector<T>& v2) {
       // an assert would be helpful here to make sure the vectors are the
       // correct geometry
-            
-      MPI_Reduce_scatter(&v1[0], &v2[0], &counts[0], 
-                         MPITraits<T>::Type(), MPI_SUM, myComm);
+
+      MPI_Reduce_scatter(&v1[0], &v2[0], &counts[0], MPITraits<T>::Type(),
+                         MPI_SUM, myComm);
     }
-    
-    int getSize() {
-      return size_;
-    }
-    
+
+    int getSize() { return size_; }
+
   private:
-    int planSize_;     ///< how many are on local proc
+    int planSize_;  ///< how many are on local proc
     int size_;
     vector<int> counts;
     vector<int> displacements;
     MPI_Comm myComm;
-  }; 
+  };
 
 #endif
-}
+}  // namespace OpenMD
 #endif
-
-

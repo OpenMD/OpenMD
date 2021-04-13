@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,53 +52,54 @@
 #include "utils/simError.h"
 namespace OpenMD {
 
-BaseAtomTypesSectionParser::BaseAtomTypesSectionParser() {
-  setSectionName("BaseAtomTypes");
-}
+  BaseAtomTypesSectionParser::BaseAtomTypesSectionParser() {
+    setSectionName("BaseAtomTypes");
+  }
 
-void BaseAtomTypesSectionParser::parseLine(ForceField& ff,
-                                           const std::string& line,
-                                           int lineNo) {
-  StringTokenizer tokenizer(line);
-  int nTokens = tokenizer.countTokens();
+  void BaseAtomTypesSectionParser::parseLine(ForceField& ff,
+                                             const std::string& line,
+                                             int lineNo) {
+    StringTokenizer tokenizer(line);
+    int nTokens = tokenizer.countTokens();
 
-  // in BaseAtomTypeSection, a line at least contains 2 tokens
-  // atomTypeName and mass
-  if (nTokens < 2) {
-    sprintf(painCave.errMsg,
-            "BaseAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-            lineNo);
-    painCave.isFatal = 1;
-    simError();
+    // in BaseAtomTypeSection, a line at least contains 2 tokens
+    // atomTypeName and mass
+    if (nTokens < 2) {
+      sprintf(
+          painCave.errMsg,
+          "BaseAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+          lineNo);
+      painCave.isFatal = 1;
+      simError();
 
-  } else {
-    std::string baseAtomTypeName = tokenizer.nextToken();
-    AtomType* baseAtomType = ff.getAtomType(baseAtomTypeName);
+    } else {
+      std::string baseAtomTypeName = tokenizer.nextToken();
+      AtomType* baseAtomType       = ff.getAtomType(baseAtomTypeName);
 
-    if (baseAtomType == NULL) {
-      baseAtomType = new AtomType();
-      int ident = ff.getNAtomType();
-      baseAtomType->setIdent(ident);
-      baseAtomType->setName(baseAtomTypeName);
-      ff.addAtomType(baseAtomTypeName, baseAtomType);
-    }
+      if (baseAtomType == NULL) {
+        baseAtomType = new AtomType();
+        int ident    = ff.getNAtomType();
+        baseAtomType->setIdent(ident);
+        baseAtomType->setName(baseAtomTypeName);
+        ff.addAtomType(baseAtomTypeName, baseAtomType);
+      }
 
-    //    else {
-    //         sprintf(painCave.errMsg, "BaseAtomTypesSectionParser Error:
-    //         Duplicate BaseAtomType at line %d\n",
-    //                 lineNo);
-    //         painCave.isFatal = 1;
-    //         simError();
-    //       }
+      //    else {
+      //         sprintf(painCave.errMsg, "BaseAtomTypesSectionParser Error:
+      //         Duplicate BaseAtomType at line %d\n",
+      //                 lineNo);
+      //         painCave.isFatal = 1;
+      //         simError();
+      //       }
 
-    RealType mass = tokenizer.nextTokenAsDouble();
-    baseAtomType->setMass(mass);
-    if (tokenizer.hasMoreTokens()) {
-      RealType nelectron = tokenizer.nextTokenAsDouble();
-      baseAtomType->addProperty(std::shared_ptr<GenericData>(
-          new DoubleGenericData("nelectron", nelectron)));
+      RealType mass = tokenizer.nextTokenAsDouble();
+      baseAtomType->setMass(mass);
+      if (tokenizer.hasMoreTokens()) {
+        RealType nelectron = tokenizer.nextTokenAsDouble();
+        baseAtomType->addProperty(std::shared_ptr<GenericData>(
+            new DoubleGenericData("nelectron", nelectron)));
+      }
     }
   }
-}
 
 }  // end namespace OpenMD

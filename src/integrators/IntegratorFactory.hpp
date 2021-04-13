@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file IntegratorFactory.hpp
  * @author Teng Lin
@@ -53,36 +53,35 @@
 #ifndef INTEGRATORS_INTEGRATORFACTORY_HPP
 #define INTEGRATORS_INTEGRATORFACTORY_HPP
 #include <cassert>
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
-#include <iostream>
 namespace OpenMD {
 
-  //forward declaration
+  // forward declaration
   class Integrator;
   class IntegratorCreator;
   class SimInfo;
   /**
    * @class IntegratorFactory
-   * Factory pattern and Singleton Pattern are used to define an interface for creating an Integrator.
+   * Factory pattern and Singleton Pattern are used to define an interface for
+   * creating an Integrator.
    */
   class IntegratorFactory {
   public:
-                
     typedef std::map<std::string, IntegratorCreator*> CreatorMapType;
     typedef std::vector<std::string> IdentVectorType;
     typedef std::vector<std::string>::iterator IdentVectorIterator;
 
-    ~IntegratorFactory();                    
+    ~IntegratorFactory();
 
     /**
      * Returns an instance of Integrator factory
      * @return an instance of Integrator factory
-     */        
+     */
 
     static IntegratorFactory& getInstance() {
-
       static IntegratorFactory instance {};
       return instance;
     }
@@ -90,34 +89,35 @@ namespace OpenMD {
     /**
      * Registers a creator with a type identifier
      * @return true if registration is successful, otherwise return false
-     * @param creator the object responsible for creating the concrete object 
+     * @param creator the object responsible for creating the concrete object
      */
     bool registerIntegrator(IntegratorCreator* creator);
 
     /**
-     * Unregisters the creator for the given type identifier. If the type identifier 
-     * was previously registered, the function returns true.
-     * @return truethe type identifier was previously registered and the creator is removed,
-     * otherwise return false
+     * Unregisters the creator for the given type identifier. If the type
+     * identifier was previously registered, the function returns true.
+     * @return truethe type identifier was previously registered and the creator
+     * is removed, otherwise return false
      * @param id the identification of the concrete object
      */
     bool unregisterIntegrator(const std::string& id);
     /**
-     * Looks up the type identifier in the internal map. If it is found, it invokes the
-     * corresponding creator for the type identifier and returns its result. 
-     * @return a pointer of the concrete object, return NULL if no creator is registed for 
-     * creating this concrete object
+     * Looks up the type identifier in the internal map. If it is found, it
+     * invokes the corresponding creator for the type identifier and returns its
+     * result.
+     * @return a pointer of the concrete object, return NULL if no creator is
+     * registed for creating this concrete object
      * @param id the identification string of the concrete object
      * @param info pointer to the concrete SimInfo object
      */
     Integrator* createIntegrator(const std::string& id, SimInfo* info);
 
-    /** 
+    /**
      *  Returns all of the registed  type identifiers
      * @return all of the registed  type identifiers
      */
     IdentVectorType getIdents();
-        
+
   private:
     IntegratorFactory() = default;
 
@@ -125,8 +125,7 @@ namespace OpenMD {
   };
 
   /** write out all of the type identifiers to an output stream */
-  std::ostream& operator <<(std::ostream& o, IntegratorFactory& factory);
+  std::ostream& operator<<(std::ostream& o, IntegratorFactory& factory);
 
-}//namespace OpenMD
-#endif //INTEGRATORS_INTEGRATORFACTORY_HPP
-
+}  // namespace OpenMD
+#endif  // INTEGRATORS_INTEGRATORFACTORY_HPP

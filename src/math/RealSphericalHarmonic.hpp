@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file RealSphericalHarmonic.hpp
  * @author Dan Gezelter
@@ -54,47 +54,45 @@
 #define MATH_REALSPHERICALHARMONIC_HPP
 
 #include <cstring>
+
 #include "config.h"
-#define RSH_SIN  0
-#define RSH_COS  1
+#define RSH_SIN 0
+#define RSH_COS 1
 
 namespace OpenMD {
   class RealSphericalHarmonic {
   public:
-    
     RealSphericalHarmonic();
-    virtual ~RealSphericalHarmonic() {} 
-    
+    virtual ~RealSphericalHarmonic() {}
+
     void setL(int theL) { L = theL; };
     int getL() { return L; }
-    
+
     void setM(int theM) { M = theM; };
     int getM() { return M; }
-    
-    void setCoefficient(RealType co) {coefficient = co;}
-    RealType getCoefficient() {return coefficient;}
 
-    void setFunctionType(short int theType) {functionType = theType;}
+    void setCoefficient(RealType co) { coefficient = co; }
+    RealType getCoefficient() { return coefficient; }
+
+    void setFunctionType(short int theType) { functionType = theType; }
     short int getFunctionType() { return functionType; }
 
-    void makeSinFunction() {functionType = RSH_SIN;}
-    void makeCosFunction() {functionType = RSH_COS;}
+    void makeSinFunction() { functionType = RSH_SIN; }
+    void makeCosFunction() { functionType = RSH_COS; }
 
-    bool isSinFunction() { return functionType == RSH_SIN ? true : false;}
-    bool isCosFunction() { return functionType == RSH_COS ? true : false;}
-    
+    bool isSinFunction() { return functionType == RSH_SIN ? true : false; }
+    bool isCosFunction() { return functionType == RSH_COS ? true : false; }
+
     RealType getValueAt(RealType costheta, RealType phi);
-    
+
   protected:
-    
-    RealType LegendreP (int l, int m, RealType x);
-    
+    RealType LegendreP(int l, int m, RealType x);
+
     int L;
     int M;
     short int functionType;
     RealType coefficient;
-    
   };
-}
+}  // namespace OpenMD
 
 #endif

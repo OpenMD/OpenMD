@@ -34,58 +34,77 @@ extern "C" {
 #define CMDLINE_PARSER_VERSION ""
 #endif
 
-enum enum_model { model__NULL = -1, model_arg_BeadModel = 0, model_arg_RoughShell };
+enum enum_model {
+  model__NULL         = -1,
+  model_arg_BeadModel = 0,
+  model_arg_RoughShell
+};
 
 /** @brief Where the command line options are stored */
-struct gengetopt_args_info
-{
-  const char *help_help; /**< @brief Print help and exit help description.  */
-  const char *version_help; /**< @brief Print version and exit help description.  */
-  char * input_arg;	/**< @brief input MetaData (omd) file.  */
-  char * input_orig;	/**< @brief input MetaData (omd) file original value given at command line.  */
-  const char *input_help; /**< @brief input MetaData (omd) file help description.  */
-  char * output_arg;	/**< @brief output file prefix (default='hydro').  */
-  char * output_orig;	/**< @brief output file prefix original value given at command line.  */
-  const char *output_help; /**< @brief output file prefix help description.  */
-  enum enum_model model_arg;	/**< @brief hydrodynamics model (default='RoughShell').  */
-  char * model_orig;	/**< @brief hydrodynamics model original value given at command line.  */
-  const char *model_help; /**< @brief hydrodynamics model help description.  */
-  double beadSize_arg;	/**< @brief bead size for RoughShell model (in angstroms) (default='0.2').  */
-  char * beadSize_orig;	/**< @brief bead size for RoughShell model (in angstroms) original value given at command line.  */
-  const char *beadSize_help; /**< @brief bead size for RoughShell model (in angstroms) help description.  */
-  int beads_flag;	/**< @brief generate the beads only, hydrodynamics will not be performed (default=off).  */
-  const char *beads_help; /**< @brief generate the beads only, hydrodynamics will not be performed help description.  */
-  
-  unsigned int help_given ;	/**< @brief Whether help was given.  */
-  unsigned int version_given ;	/**< @brief Whether version was given.  */
-  unsigned int input_given ;	/**< @brief Whether input was given.  */
-  unsigned int output_given ;	/**< @brief Whether output was given.  */
-  unsigned int model_given ;	/**< @brief Whether model was given.  */
-  unsigned int beadSize_given ;	/**< @brief Whether beadSize was given.  */
-  unsigned int beads_given ;	/**< @brief Whether beads was given.  */
+struct gengetopt_args_info {
+  const char* help_help; /**< @brief Print help and exit help description.  */
+  const char*
+      version_help; /**< @brief Print version and exit help description.  */
+  char* input_arg;  /**< @brief input MetaData (omd) file.  */
+  char* input_orig; /**< @brief input MetaData (omd) file original value given
+                       at command line.  */
+  const char*
+      input_help;    /**< @brief input MetaData (omd) file help description.  */
+  char* output_arg;  /**< @brief output file prefix (default='hydro').  */
+  char* output_orig; /**< @brief output file prefix original value given at
+                        command line.  */
+  const char* output_help; /**< @brief output file prefix help description.  */
+  enum enum_model
+      model_arg;    /**< @brief hydrodynamics model (default='RoughShell').  */
+  char* model_orig; /**< @brief hydrodynamics model original value given at
+                       command line.  */
+  const char* model_help; /**< @brief hydrodynamics model help description.  */
+  double beadSize_arg; /**< @brief bead size for RoughShell model (in angstroms)
+                          (default='0.2').  */
+  char* beadSize_orig; /**< @brief bead size for RoughShell model (in angstroms)
+                          original value given at command line.  */
+  const char* beadSize_help; /**< @brief bead size for RoughShell model (in
+                                angstroms) help description.  */
+  int beads_flag; /**< @brief generate the beads only, hydrodynamics will not be
+                     performed (default=off).  */
+  const char* beads_help; /**< @brief generate the beads only, hydrodynamics
+                             will not be performed help description.  */
 
-  char **inputs ; /**< @brief unamed options (options without names) */
-  unsigned inputs_num ; /**< @brief unamed options number */
-} ;
+  unsigned int help_given;     /**< @brief Whether help was given.  */
+  unsigned int version_given;  /**< @brief Whether version was given.  */
+  unsigned int input_given;    /**< @brief Whether input was given.  */
+  unsigned int output_given;   /**< @brief Whether output was given.  */
+  unsigned int model_given;    /**< @brief Whether model was given.  */
+  unsigned int beadSize_given; /**< @brief Whether beadSize was given.  */
+  unsigned int beads_given;    /**< @brief Whether beads was given.  */
+
+  char** inputs;       /**< @brief unamed options (options without names) */
+  unsigned inputs_num; /**< @brief unamed options number */
+};
 
 /** @brief The additional parameters to pass to parser functions */
-struct cmdline_parser_params
-{
-  int override; /**< @brief whether to override possibly already present options (default 0) */
-  int initialize; /**< @brief whether to initialize the option structure gengetopt_args_info (default 1) */
-  int check_required; /**< @brief whether to check that all required options were provided (default 1) */
-  int check_ambiguity; /**< @brief whether to check for options already specified in the option structure gengetopt_args_info (default 0) */
-  int print_errors; /**< @brief whether getopt_long should print an error message for a bad option (default 1) */
-} ;
+struct cmdline_parser_params {
+  int override; /**< @brief whether to override possibly already present options
+                   (default 0) */
+  int initialize;      /**< @brief whether to initialize the option structure
+                          gengetopt_args_info (default 1) */
+  int check_required;  /**< @brief whether to check that all required options
+                          were provided (default 1) */
+  int check_ambiguity; /**< @brief whether to check for options already
+                          specified in the option structure gengetopt_args_info
+                          (default 0) */
+  int print_errors;    /**< @brief whether getopt_long should print an error
+                          message for a bad option (default 1) */
+};
 
 /** @brief the purpose string of the program */
-extern const char *gengetopt_args_info_purpose;
+extern const char* gengetopt_args_info_purpose;
 /** @brief the usage string of the program */
-extern const char *gengetopt_args_info_usage;
+extern const char* gengetopt_args_info_usage;
 /** @brief the description string of the program */
-extern const char *gengetopt_args_info_description;
+extern const char* gengetopt_args_info_description;
 /** @brief all the lines making the help output */
-extern const char *gengetopt_args_info_help[];
+extern const char* gengetopt_args_info_help[];
 
 /**
  * The command line parser
@@ -94,8 +113,8 @@ extern const char *gengetopt_args_info_help[];
  * @param args_info the structure where option information will be stored
  * @return 0 if everything went fine, NON 0 if an error took place
  */
-int cmdline_parser (int argc, char **argv,
-  struct gengetopt_args_info *args_info);
+int cmdline_parser(int argc, char** argv,
+                   struct gengetopt_args_info* args_info);
 
 /**
  * The command line parser (version with additional parameters - deprecated)
@@ -104,13 +123,14 @@ int cmdline_parser (int argc, char **argv,
  * @param args_info the structure where option information will be stored
  * @param override whether to override possibly already present options
  * @param initialize whether to initialize the option structure my_args_info
- * @param check_required whether to check that all required options were provided
+ * @param check_required whether to check that all required options were
+ * provided
  * @return 0 if everything went fine, NON 0 if an error took place
  * @deprecated use cmdline_parser_ext() instead
  */
-int cmdline_parser2 (int argc, char **argv,
-  struct gengetopt_args_info *args_info,
-  int override, int initialize, int check_required);
+int cmdline_parser2(int argc, char** argv,
+                    struct gengetopt_args_info* args_info, int override,
+                    int initialize, int check_required);
 
 /**
  * The command line parser (version with additional parameters)
@@ -120,9 +140,9 @@ int cmdline_parser2 (int argc, char **argv,
  * @param params additional parameters for the parser
  * @return 0 if everything went fine, NON 0 if an error took place
  */
-int cmdline_parser_ext (int argc, char **argv,
-  struct gengetopt_args_info *args_info,
-  struct cmdline_parser_params *params);
+int cmdline_parser_ext(int argc, char** argv,
+                       struct gengetopt_args_info* args_info,
+                       struct cmdline_parser_params* params);
 
 /**
  * Save the contents of the option struct into an already open FILE stream.
@@ -130,8 +150,7 @@ int cmdline_parser_ext (int argc, char **argv,
  * @param args_info the option struct to dump
  * @return 0 if everything went fine, NON 0 if an error took place
  */
-int cmdline_parser_dump(FILE *outfile,
-  struct gengetopt_args_info *args_info);
+int cmdline_parser_dump(FILE* outfile, struct gengetopt_args_info* args_info);
 
 /**
  * Save the contents of the option struct into a (text) file.
@@ -140,8 +159,8 @@ int cmdline_parser_dump(FILE *outfile,
  * @param args_info the option struct to save
  * @return 0 if everything went fine, NON 0 if an error took place
  */
-int cmdline_parser_file_save(const char *filename,
-  struct gengetopt_args_info *args_info);
+int cmdline_parser_file_save(const char* filename,
+                             struct gengetopt_args_info* args_info);
 
 /**
  * Print the help
@@ -153,31 +172,31 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure 
+ * Initializes all the fields a cmdline_parser_params structure
  * to their default values
  * @param params the structure to initialize
  */
-void cmdline_parser_params_init(struct cmdline_parser_params *params);
+void cmdline_parser_params_init(struct cmdline_parser_params* params);
 
 /**
  * Allocates dynamically a cmdline_parser_params structure and initializes
  * all its fields to their default values
  * @return the created and initialized cmdline_parser_params structure
  */
-struct cmdline_parser_params *cmdline_parser_params_create(void);
+struct cmdline_parser_params* cmdline_parser_params_create(void);
 
 /**
  * Initializes the passed gengetopt_args_info structure's fields
  * (also set default values for options that have a default)
  * @param args_info the structure to initialize
  */
-void cmdline_parser_init (struct gengetopt_args_info *args_info);
+void cmdline_parser_init(struct gengetopt_args_info* args_info);
 /**
  * Deallocates the string fields of the gengetopt_args_info structure
  * (but does not deallocate the structure itself)
  * @param args_info the structure to deallocate
  */
-void cmdline_parser_free (struct gengetopt_args_info *args_info);
+void cmdline_parser_free(struct gengetopt_args_info* args_info);
 
 /**
  * Checks that all the required options were specified
@@ -186,11 +205,11 @@ void cmdline_parser_free (struct gengetopt_args_info *args_info);
  *   possible errors
  * @return
  */
-int cmdline_parser_required (struct gengetopt_args_info *args_info,
-  const char *prog_name);
+int cmdline_parser_required(struct gengetopt_args_info* args_info,
+                            const char* prog_name);
 
-extern const char *cmdline_parser_model_values[];  /**< @brief Possible values for model. */
-
+extern const char*
+    cmdline_parser_model_values[]; /**< @brief Possible values for model. */
 
 #ifdef __cplusplus
 }

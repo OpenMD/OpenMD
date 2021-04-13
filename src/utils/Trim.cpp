@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -47,22 +47,22 @@
 
 namespace OpenMD {
 
-void trimLeft(std::string& str) { trimLeftIf(str, isSpace()); }
+  void trimLeft(std::string& str) { trimLeftIf(str, isSpace()); }
 
-void trimRight(std::string& str) { trimRightIf(str, isSpace()); }
+  void trimRight(std::string& str) { trimRightIf(str, isSpace()); }
 
-void trim(std::string& str) { trimIf(str, isSpace()); }
+  void trim(std::string& str) { trimIf(str, isSpace()); }
 
-std::string trimLeftCopy(const std::string& input) {
-  return trimLeftCopyIf(input, isSpace());
-}
+  std::string trimLeftCopy(const std::string& input) {
+    return trimLeftCopyIf(input, isSpace());
+  }
 
-std::string trimRightCopy(const std::string& input) {
-  return trimRightCopyIf(input, isSpace());
-}
+  std::string trimRightCopy(const std::string& input) {
+    return trimRightCopyIf(input, isSpace());
+  }
 
-std::string trimCopy(const std::string& input) {
-  return trimCopyIf(input, isSpace());
-}
+  std::string trimCopy(const std::string& input) {
+    return trimCopyIf(input, isSpace());
+  }
 
 }  // namespace OpenMD

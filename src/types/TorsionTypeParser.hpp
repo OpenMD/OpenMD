@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,31 +42,32 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_TORSIONTYPEPARSER_HPP
 #define TYPES_TORSIONTYPEPARSER_HPP
 #include <map>
-#include <vector>
 #include <string>
-#include "types/TorsionType.hpp"
+#include <vector>
 
+#include "types/TorsionType.hpp"
 
 namespace OpenMD {
 
   /**
-   * @class TorsionTypeParser TorsionTypeParser.hpp "types/TorsionTypeParser.hpp"
+   * @class TorsionTypeParser TorsionTypeParser.hpp
+   * "types/TorsionTypeParser.hpp"
    */
   class TorsionTypeParser {
-  public:            
+  public:
     TorsionTypeParser();
-    void Trans180() {trans180_ = true;}
-    void Cis180() {trans180_ = false;}
+    void Trans180() { trans180_ = true; }
+    void Cis180() { trans180_ = false; }
     TorsionType* parseLine(const std::string& line);
-    TorsionType* parseTypeAndPars(const std::string& type, std::vector<RealType> pars);
+    TorsionType* parseTypeAndPars(const std::string& type,
+                                  std::vector<RealType> pars);
 
   private:
-
-    enum TorsionTypeEnum{
+    enum TorsionTypeEnum {
       ttGhostTorsion,
       ttCubic,
       ttQuartic,
@@ -78,11 +79,11 @@ namespace OpenMD {
       ttUnknown
     };
 
-    TorsionTypeEnum getTorsionTypeEnum(const std::string& str);     
-            
+    TorsionTypeEnum getTorsionTypeEnum(const std::string& str);
+
     std::map<std::string, TorsionTypeEnum> stringToEnumMap_;
     bool trans180_;
   };
-}
+}  // namespace OpenMD
 
 #endif

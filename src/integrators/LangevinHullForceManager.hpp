@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,21 +42,21 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef INTEGRATOR_LANGEVINHULLFORCEMANAGER_HPP
 #define INTEGRATOR_LANGEVINHULLFORCEMANAGER_HPP
 
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
 #include "brains/Velocitizer.hpp"
-#include "primitives/Molecule.hpp"
 #include "math/Hull.hpp"
-#include "math/Triangle.hpp"
 #include "math/SeqRandNumGen.hpp"
+#include "math/Triangle.hpp"
+#include "primitives/Molecule.hpp"
 
 using namespace std;
 namespace OpenMD {
-   
+
   /**
    * @class LangevinHullForceManager
    * Force manager for NPT Langevin Hull Dynamics applying friction
@@ -65,45 +65,39 @@ namespace OpenMD {
    * See: Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011),
    *      and Kohanoff et al. CHEMPHYSCHEM 6, 1848-1852 (2005).
    */
-  class LangevinHullForceManager : public ForceManager{
-    
+  class LangevinHullForceManager : public ForceManager {
   public:
-    LangevinHullForceManager(SimInfo * info);
+    LangevinHullForceManager(SimInfo* info);
     virtual ~LangevinHullForceManager();
-    
+
   protected:
     virtual void postCalculation();
-    
+
   private:
     vector<Vector3d> genTriangleForces(int nTriangles, RealType variance);
-    
+
     Globals* simParams;
-    SeqRandNumGen randNumGen_;    
+    SeqRandNumGen randNumGen_;
     std::unique_ptr<Velocitizer> veloMunge {nullptr};
-    
+
     RealType dt_;
     RealType targetTemp_;
-    RealType targetPressure_; 
+    RealType targetPressure_;
     RealType viscosity_;
-    
+
     RealType variance_;
-    
-    enum HullTypeEnum {
-      hullConvex,
-      hullAlphaShape,
-      hullUnknown
-    };
-    
+
+    enum HullTypeEnum { hullConvex, hullAlphaShape, hullUnknown };
+
     map<string, HullTypeEnum> stringToEnumMap_;
     HullTypeEnum hullType_;
-    
+
     bool doThermalCoupling_;
     bool doPressureCoupling_;
-    
+
     Hull* surfaceMesh_;
     vector<StuntDouble*> localSites_;
   };
-  
-} //end namespace OpenMD
-#endif //LANGEVINHULL_FORCEMANAGER
 
+}  // end namespace OpenMD
+#endif  // LANGEVINHULL_FORCEMANAGER

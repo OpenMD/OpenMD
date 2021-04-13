@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_CUTOFFGROUPSTAMP_HPP
 #define TYPES_CUTOFFGROUPSTAMP_HPP
 #include "types/DataHolder.hpp"
@@ -50,16 +50,17 @@ namespace OpenMD {
   class CutoffGroupStamp : public DataHolder {
   public:
     CutoffGroupStamp();
-    int getMemberAt(int index) {return members_[index];}
-    int getNMembers() {return members_.size();}
-    std::vector<int> getMembers() {return members_;}
+    int getMemberAt(int index) { return members_[index]; }
+    int getNMembers() { return members_.size(); }
+    std::vector<int> getMembers() { return members_; }
     bool setMembers(const std::vector<int>& members) {
       members_ = members;
       return true;
     }
     virtual void validate();
+
   private:
     std::vector<int> members_;
   };
-}
+}  // namespace OpenMD
 #endif

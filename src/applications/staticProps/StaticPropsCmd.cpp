@@ -24,7 +24,7 @@
 
 #include "StaticPropsCmd.hpp"
 
-const char *gengetopt_args_info_purpose =
+const char* gengetopt_args_info_purpose =
     "Computes properties which are averaged over some or all of "
     "the\nconfigurations that "
     "are contained within a dump file. The most common\nexample of a static "
@@ -37,14 +37,14 @@ const char *gengetopt_args_info_purpose =
     "oxygen-oxygen pair distribution function,\ngOO(r), from a file named "
     "tp4.dump";
 
-const char *gengetopt_args_info_usage =
+const char* gengetopt_args_info_usage =
     "Usage: StaticProps [OPTION]... [FILE]...";
 
-const char *gengetopt_args_info_versiontext = "";
+const char* gengetopt_args_info_versiontext = "";
 
-const char *gengetopt_args_info_description = "";
+const char* gengetopt_args_info_description = "";
 
-const char *gengetopt_args_info_help[] = {
+const char* gengetopt_args_info_help[] = {
     "  -h, --help                    Print help and exit",
     "  -V, --version                 Print version and exit",
     "  -i, --input=filename          input dump file (mandatory)",
@@ -282,304 +282,304 @@ typedef enum {
   ARG_ENUM
 } cmdline_parser_arg_type;
 
-static void clear_given(struct gengetopt_args_info *args_info);
-static void clear_args(struct gengetopt_args_info *args_info);
+static void clear_given(struct gengetopt_args_info* args_info);
+static void clear_args(struct gengetopt_args_info* args_info);
 
-static int cmdline_parser_internal(int argc, char **argv,
-                                   struct gengetopt_args_info *args_info,
-                                   struct cmdline_parser_params *params,
-                                   const char *additional_error);
+static int cmdline_parser_internal(int argc, char** argv,
+                                   struct gengetopt_args_info* args_info,
+                                   struct cmdline_parser_params* params,
+                                   const char* additional_error);
 
-static int cmdline_parser_required2(struct gengetopt_args_info *args_info,
-                                    const char *prog_name,
-                                    const char *additional_error);
+static int cmdline_parser_required2(struct gengetopt_args_info* args_info,
+                                    const char* prog_name,
+                                    const char* additional_error);
 
-const char *cmdline_parser_privilegedAxis_values[] = {
+const char* cmdline_parser_privilegedAxis_values[] = {
     "x", "y", "z", 0}; /*< Possible values for privilegedAxis. */
-const char *cmdline_parser_privilegedAxis2_values[] = {
+const char* cmdline_parser_privilegedAxis2_values[] = {
     "x", "y", "z", 0}; /*< Possible values for privilegedAxis2. */
-const char *cmdline_parser_momentum_values[] = {
+const char* cmdline_parser_momentum_values[] = {
     "P", "J", 0}; /*< Possible values for momentum. */
-const char *cmdline_parser_component_values[] = {
+const char* cmdline_parser_component_values[] = {
     "x", "y", "z", 0}; /*< Possible values for component. */
 
-static char *gengetopt_strdup(const char *s);
+static char* gengetopt_strdup(const char* s);
 
-static void clear_given(struct gengetopt_args_info *args_info) {
-  args_info->help_given = 0;
-  args_info->version_given = 0;
-  args_info->input_given = 0;
-  args_info->output_given = 0;
-  args_info->step_given = 0;
-  args_info->nbins_given = 0;
-  args_info->nbins_x_given = 0;
-  args_info->nbins_y_given = 0;
-  args_info->nbins_z_given = 0;
-  args_info->nrbins_given = 0;
-  args_info->nanglebins_given = 0;
-  args_info->rcut_given = 0;
-  args_info->OOcut_given = 0;
-  args_info->thetacut_given = 0;
-  args_info->OHcut_given = 0;
-  args_info->dz_given = 0;
-  args_info->length_given = 0;
-  args_info->zlength_given = 0;
-  args_info->zoffset_given = 0;
-  args_info->sele1_given = 0;
-  args_info->sele2_given = 0;
-  args_info->sele3_given = 0;
-  args_info->refsele_given = 0;
-  args_info->comsele_given = 0;
-  args_info->seleoffset_given = 0;
-  args_info->seleoffset2_given = 0;
-  args_info->molname_given = 0;
-  args_info->begin_given = 0;
-  args_info->end_given = 0;
-  args_info->radius_given = 0;
-  args_info->voxelSize_given = 0;
-  args_info->gaussWidth_given = 0;
-  args_info->privilegedAxis_given = 0;
-  args_info->privilegedAxis2_given = 0;
-  args_info->momentum_given = 0;
-  args_info->component_given = 0;
-  args_info->dipoleX_given = 0;
-  args_info->dipoleY_given = 0;
-  args_info->dipoleZ_given = 0;
-  args_info->v_radius_given = 0;
-  args_info->gen_xyz_given = 0;
-  args_info->atom_name_given = 0;
-  args_info->bo_given = 0;
-  args_info->ior_given = 0;
-  args_info->for_given = 0;
-  args_info->bad_given = 0;
-  args_info->count_given = 0;
-  args_info->gofr_given = 0;
-  args_info->gofz_given = 0;
-  args_info->r_theta_given = 0;
-  args_info->r_omega_given = 0;
-  args_info->r_z_given = 0;
-  args_info->theta_omega_given = 0;
-  args_info->r_theta_omega_given = 0;
-  args_info->gxyz_given = 0;
-  args_info->twodgofr_given = 0;
-  args_info->p2_given = 0;
-  args_info->rp2_given = 0;
-  args_info->scd_given = 0;
-  args_info->density_given = 0;
-  args_info->slab_density_given = 0;
-  args_info->pipe_density_given = 0;
-  args_info->p_angle_given = 0;
-  args_info->hxy_given = 0;
-  args_info->rho_r_given = 0;
-  args_info->angle_r_given = 0;
-  args_info->hullvol_given = 0;
-  args_info->rodlength_given = 0;
-  args_info->tet_param_given = 0;
-  args_info->tet_param_z_given = 0;
-  args_info->tet_param_dens_given = 0;
-  args_info->tet_param_xyz_given = 0;
-  args_info->rnemdz_given = 0;
-  args_info->rnemdr_given = 0;
-  args_info->rnemdrt_given = 0;
-  args_info->nitrile_given = 0;
-  args_info->multipole_given = 0;
-  args_info->surfDiffusion_given = 0;
-  args_info->cn_given = 0;
-  args_info->scn_given = 0;
-  args_info->gcn_given = 0;
-  args_info->hbond_given = 0;
-  args_info->potDiff_given = 0;
-  args_info->tet_hb_given = 0;
-  args_info->kirkwood_given = 0;
-  args_info->kirkwoodQ_given = 0;
-  args_info->densityfield_given = 0;
-  args_info->velocityfield_given = 0;
-  args_info->velocityZ_given = 0;
-  args_info->eam_density_given = 0;
-  args_info->net_charge_given = 0;
-  args_info->current_density_given = 0;
-  args_info->chargez_given = 0;
-  args_info->charge_density_z_given = 0;
-  args_info->countz_given = 0;
+static void clear_given(struct gengetopt_args_info* args_info) {
+  args_info->help_given                  = 0;
+  args_info->version_given               = 0;
+  args_info->input_given                 = 0;
+  args_info->output_given                = 0;
+  args_info->step_given                  = 0;
+  args_info->nbins_given                 = 0;
+  args_info->nbins_x_given               = 0;
+  args_info->nbins_y_given               = 0;
+  args_info->nbins_z_given               = 0;
+  args_info->nrbins_given                = 0;
+  args_info->nanglebins_given            = 0;
+  args_info->rcut_given                  = 0;
+  args_info->OOcut_given                 = 0;
+  args_info->thetacut_given              = 0;
+  args_info->OHcut_given                 = 0;
+  args_info->dz_given                    = 0;
+  args_info->length_given                = 0;
+  args_info->zlength_given               = 0;
+  args_info->zoffset_given               = 0;
+  args_info->sele1_given                 = 0;
+  args_info->sele2_given                 = 0;
+  args_info->sele3_given                 = 0;
+  args_info->refsele_given               = 0;
+  args_info->comsele_given               = 0;
+  args_info->seleoffset_given            = 0;
+  args_info->seleoffset2_given           = 0;
+  args_info->molname_given               = 0;
+  args_info->begin_given                 = 0;
+  args_info->end_given                   = 0;
+  args_info->radius_given                = 0;
+  args_info->voxelSize_given             = 0;
+  args_info->gaussWidth_given            = 0;
+  args_info->privilegedAxis_given        = 0;
+  args_info->privilegedAxis2_given       = 0;
+  args_info->momentum_given              = 0;
+  args_info->component_given             = 0;
+  args_info->dipoleX_given               = 0;
+  args_info->dipoleY_given               = 0;
+  args_info->dipoleZ_given               = 0;
+  args_info->v_radius_given              = 0;
+  args_info->gen_xyz_given               = 0;
+  args_info->atom_name_given             = 0;
+  args_info->bo_given                    = 0;
+  args_info->ior_given                   = 0;
+  args_info->for_given                   = 0;
+  args_info->bad_given                   = 0;
+  args_info->count_given                 = 0;
+  args_info->gofr_given                  = 0;
+  args_info->gofz_given                  = 0;
+  args_info->r_theta_given               = 0;
+  args_info->r_omega_given               = 0;
+  args_info->r_z_given                   = 0;
+  args_info->theta_omega_given           = 0;
+  args_info->r_theta_omega_given         = 0;
+  args_info->gxyz_given                  = 0;
+  args_info->twodgofr_given              = 0;
+  args_info->p2_given                    = 0;
+  args_info->rp2_given                   = 0;
+  args_info->scd_given                   = 0;
+  args_info->density_given               = 0;
+  args_info->slab_density_given          = 0;
+  args_info->pipe_density_given          = 0;
+  args_info->p_angle_given               = 0;
+  args_info->hxy_given                   = 0;
+  args_info->rho_r_given                 = 0;
+  args_info->angle_r_given               = 0;
+  args_info->hullvol_given               = 0;
+  args_info->rodlength_given             = 0;
+  args_info->tet_param_given             = 0;
+  args_info->tet_param_z_given           = 0;
+  args_info->tet_param_dens_given        = 0;
+  args_info->tet_param_xyz_given         = 0;
+  args_info->rnemdz_given                = 0;
+  args_info->rnemdr_given                = 0;
+  args_info->rnemdrt_given               = 0;
+  args_info->nitrile_given               = 0;
+  args_info->multipole_given             = 0;
+  args_info->surfDiffusion_given         = 0;
+  args_info->cn_given                    = 0;
+  args_info->scn_given                   = 0;
+  args_info->gcn_given                   = 0;
+  args_info->hbond_given                 = 0;
+  args_info->potDiff_given               = 0;
+  args_info->tet_hb_given                = 0;
+  args_info->kirkwood_given              = 0;
+  args_info->kirkwoodQ_given             = 0;
+  args_info->densityfield_given          = 0;
+  args_info->velocityfield_given         = 0;
+  args_info->velocityZ_given             = 0;
+  args_info->eam_density_given           = 0;
+  args_info->net_charge_given            = 0;
+  args_info->current_density_given       = 0;
+  args_info->chargez_given               = 0;
+  args_info->charge_density_z_given      = 0;
+  args_info->countz_given                = 0;
   args_info->momentum_distribution_given = 0;
-  args_info->dipole_orientation_given = 0;
-  args_info->order_prob_given = 0;
-  args_info->staticProps_group_counter = 0;
+  args_info->dipole_orientation_given    = 0;
+  args_info->order_prob_given            = 0;
+  args_info->staticProps_group_counter   = 0;
 }
 
-static void clear_args(struct gengetopt_args_info *args_info) {
+static void clear_args(struct gengetopt_args_info* args_info) {
   FIX_UNUSED(args_info);
-  args_info->input_arg = NULL;
-  args_info->input_orig = NULL;
-  args_info->output_arg = NULL;
-  args_info->output_orig = NULL;
-  args_info->step_arg = 1;
-  args_info->step_orig = NULL;
-  args_info->nbins_arg = 100;
-  args_info->nbins_orig = NULL;
-  args_info->nbins_x_arg = 100;
-  args_info->nbins_x_orig = NULL;
-  args_info->nbins_y_arg = 100;
-  args_info->nbins_y_orig = NULL;
-  args_info->nbins_z_arg = 100;
-  args_info->nbins_z_orig = NULL;
-  args_info->nrbins_arg = 100;
-  args_info->nrbins_orig = NULL;
-  args_info->nanglebins_arg = 50;
-  args_info->nanglebins_orig = NULL;
-  args_info->rcut_orig = NULL;
-  args_info->OOcut_arg = 3.5;
-  args_info->OOcut_orig = NULL;
-  args_info->thetacut_arg = 30;
-  args_info->thetacut_orig = NULL;
-  args_info->OHcut_arg = 2.45;
-  args_info->OHcut_orig = NULL;
-  args_info->dz_orig = NULL;
-  args_info->length_orig = NULL;
-  args_info->zlength_orig = NULL;
-  args_info->zoffset_arg = 0;
-  args_info->zoffset_orig = NULL;
-  args_info->sele1_arg = NULL;
-  args_info->sele1_orig = NULL;
-  args_info->sele2_arg = NULL;
-  args_info->sele2_orig = NULL;
-  args_info->sele3_arg = NULL;
-  args_info->sele3_orig = NULL;
-  args_info->refsele_arg = NULL;
-  args_info->refsele_orig = NULL;
-  args_info->comsele_arg = NULL;
-  args_info->comsele_orig = NULL;
-  args_info->seleoffset_orig = NULL;
-  args_info->seleoffset2_orig = NULL;
-  args_info->molname_arg = NULL;
-  args_info->molname_orig = NULL;
-  args_info->begin_orig = NULL;
-  args_info->end_orig = NULL;
-  args_info->radius_orig = NULL;
-  args_info->voxelSize_orig = NULL;
-  args_info->gaussWidth_orig = NULL;
-  args_info->privilegedAxis_arg = privilegedAxis_arg_z;
-  args_info->privilegedAxis_orig = NULL;
-  args_info->privilegedAxis2_arg = privilegedAxis2_arg_x;
+  args_info->input_arg            = NULL;
+  args_info->input_orig           = NULL;
+  args_info->output_arg           = NULL;
+  args_info->output_orig          = NULL;
+  args_info->step_arg             = 1;
+  args_info->step_orig            = NULL;
+  args_info->nbins_arg            = 100;
+  args_info->nbins_orig           = NULL;
+  args_info->nbins_x_arg          = 100;
+  args_info->nbins_x_orig         = NULL;
+  args_info->nbins_y_arg          = 100;
+  args_info->nbins_y_orig         = NULL;
+  args_info->nbins_z_arg          = 100;
+  args_info->nbins_z_orig         = NULL;
+  args_info->nrbins_arg           = 100;
+  args_info->nrbins_orig          = NULL;
+  args_info->nanglebins_arg       = 50;
+  args_info->nanglebins_orig      = NULL;
+  args_info->rcut_orig            = NULL;
+  args_info->OOcut_arg            = 3.5;
+  args_info->OOcut_orig           = NULL;
+  args_info->thetacut_arg         = 30;
+  args_info->thetacut_orig        = NULL;
+  args_info->OHcut_arg            = 2.45;
+  args_info->OHcut_orig           = NULL;
+  args_info->dz_orig              = NULL;
+  args_info->length_orig          = NULL;
+  args_info->zlength_orig         = NULL;
+  args_info->zoffset_arg          = 0;
+  args_info->zoffset_orig         = NULL;
+  args_info->sele1_arg            = NULL;
+  args_info->sele1_orig           = NULL;
+  args_info->sele2_arg            = NULL;
+  args_info->sele2_orig           = NULL;
+  args_info->sele3_arg            = NULL;
+  args_info->sele3_orig           = NULL;
+  args_info->refsele_arg          = NULL;
+  args_info->refsele_orig         = NULL;
+  args_info->comsele_arg          = NULL;
+  args_info->comsele_orig         = NULL;
+  args_info->seleoffset_orig      = NULL;
+  args_info->seleoffset2_orig     = NULL;
+  args_info->molname_arg          = NULL;
+  args_info->molname_orig         = NULL;
+  args_info->begin_orig           = NULL;
+  args_info->end_orig             = NULL;
+  args_info->radius_orig          = NULL;
+  args_info->voxelSize_orig       = NULL;
+  args_info->gaussWidth_orig      = NULL;
+  args_info->privilegedAxis_arg   = privilegedAxis_arg_z;
+  args_info->privilegedAxis_orig  = NULL;
+  args_info->privilegedAxis2_arg  = privilegedAxis2_arg_x;
   args_info->privilegedAxis2_orig = NULL;
-  args_info->momentum_arg = momentum_arg_P;
-  args_info->momentum_orig = NULL;
-  args_info->component_arg = component_arg_z;
-  args_info->component_orig = NULL;
-  args_info->dipoleX_orig = NULL;
-  args_info->dipoleY_orig = NULL;
-  args_info->dipoleZ_orig = NULL;
-  args_info->v_radius_orig = NULL;
-  args_info->gen_xyz_flag = 0;
-  args_info->atom_name_arg = NULL;
-  args_info->atom_name_orig = NULL;
+  args_info->momentum_arg         = momentum_arg_P;
+  args_info->momentum_orig        = NULL;
+  args_info->component_arg        = component_arg_z;
+  args_info->component_orig       = NULL;
+  args_info->dipoleX_orig         = NULL;
+  args_info->dipoleY_orig         = NULL;
+  args_info->dipoleZ_orig         = NULL;
+  args_info->v_radius_orig        = NULL;
+  args_info->gen_xyz_flag         = 0;
+  args_info->atom_name_arg        = NULL;
+  args_info->atom_name_orig       = NULL;
 }
 
-static void init_args_info(struct gengetopt_args_info *args_info) {
-  args_info->help_help = gengetopt_args_info_help[0];
-  args_info->version_help = gengetopt_args_info_help[1];
-  args_info->input_help = gengetopt_args_info_help[2];
-  args_info->output_help = gengetopt_args_info_help[3];
-  args_info->step_help = gengetopt_args_info_help[4];
-  args_info->nbins_help = gengetopt_args_info_help[5];
-  args_info->nbins_x_help = gengetopt_args_info_help[6];
-  args_info->nbins_y_help = gengetopt_args_info_help[7];
-  args_info->nbins_z_help = gengetopt_args_info_help[8];
-  args_info->nrbins_help = gengetopt_args_info_help[9];
-  args_info->nanglebins_help = gengetopt_args_info_help[10];
-  args_info->rcut_help = gengetopt_args_info_help[11];
-  args_info->OOcut_help = gengetopt_args_info_help[12];
-  args_info->thetacut_help = gengetopt_args_info_help[13];
-  args_info->OHcut_help = gengetopt_args_info_help[14];
-  args_info->dz_help = gengetopt_args_info_help[15];
-  args_info->length_help = gengetopt_args_info_help[16];
-  args_info->zlength_help = gengetopt_args_info_help[17];
-  args_info->zoffset_help = gengetopt_args_info_help[18];
-  args_info->sele1_help = gengetopt_args_info_help[19];
-  args_info->sele2_help = gengetopt_args_info_help[20];
-  args_info->sele3_help = gengetopt_args_info_help[21];
-  args_info->refsele_help = gengetopt_args_info_help[22];
-  args_info->comsele_help = gengetopt_args_info_help[23];
-  args_info->seleoffset_help = gengetopt_args_info_help[24];
-  args_info->seleoffset2_help = gengetopt_args_info_help[25];
-  args_info->molname_help = gengetopt_args_info_help[26];
-  args_info->begin_help = gengetopt_args_info_help[27];
-  args_info->end_help = gengetopt_args_info_help[28];
-  args_info->radius_help = gengetopt_args_info_help[29];
-  args_info->voxelSize_help = gengetopt_args_info_help[30];
-  args_info->gaussWidth_help = gengetopt_args_info_help[31];
-  args_info->privilegedAxis_help = gengetopt_args_info_help[32];
-  args_info->privilegedAxis2_help = gengetopt_args_info_help[33];
-  args_info->momentum_help = gengetopt_args_info_help[34];
-  args_info->component_help = gengetopt_args_info_help[35];
-  args_info->dipoleX_help = gengetopt_args_info_help[36];
-  args_info->dipoleY_help = gengetopt_args_info_help[37];
-  args_info->dipoleZ_help = gengetopt_args_info_help[38];
-  args_info->v_radius_help = gengetopt_args_info_help[39];
-  args_info->gen_xyz_help = gengetopt_args_info_help[40];
-  args_info->atom_name_help = gengetopt_args_info_help[41];
-  args_info->bo_help = gengetopt_args_info_help[43];
-  args_info->ior_help = gengetopt_args_info_help[44];
-  args_info->for_help = gengetopt_args_info_help[45];
-  args_info->bad_help = gengetopt_args_info_help[46];
-  args_info->count_help = gengetopt_args_info_help[47];
-  args_info->gofr_help = gengetopt_args_info_help[48];
-  args_info->gofz_help = gengetopt_args_info_help[49];
-  args_info->r_theta_help = gengetopt_args_info_help[50];
-  args_info->r_omega_help = gengetopt_args_info_help[51];
-  args_info->r_z_help = gengetopt_args_info_help[52];
-  args_info->theta_omega_help = gengetopt_args_info_help[53];
-  args_info->r_theta_omega_help = gengetopt_args_info_help[54];
-  args_info->gxyz_help = gengetopt_args_info_help[55];
-  args_info->twodgofr_help = gengetopt_args_info_help[56];
-  args_info->p2_help = gengetopt_args_info_help[57];
-  args_info->rp2_help = gengetopt_args_info_help[58];
-  args_info->scd_help = gengetopt_args_info_help[59];
-  args_info->density_help = gengetopt_args_info_help[60];
-  args_info->slab_density_help = gengetopt_args_info_help[61];
-  args_info->pipe_density_help = gengetopt_args_info_help[62];
-  args_info->p_angle_help = gengetopt_args_info_help[63];
-  args_info->hxy_help = gengetopt_args_info_help[64];
-  args_info->rho_r_help = gengetopt_args_info_help[65];
-  args_info->angle_r_help = gengetopt_args_info_help[66];
-  args_info->hullvol_help = gengetopt_args_info_help[67];
-  args_info->rodlength_help = gengetopt_args_info_help[68];
-  args_info->tet_param_help = gengetopt_args_info_help[69];
-  args_info->tet_param_z_help = gengetopt_args_info_help[70];
-  args_info->tet_param_dens_help = gengetopt_args_info_help[71];
-  args_info->tet_param_xyz_help = gengetopt_args_info_help[72];
-  args_info->rnemdz_help = gengetopt_args_info_help[73];
-  args_info->rnemdr_help = gengetopt_args_info_help[74];
-  args_info->rnemdrt_help = gengetopt_args_info_help[75];
-  args_info->nitrile_help = gengetopt_args_info_help[76];
-  args_info->multipole_help = gengetopt_args_info_help[77];
-  args_info->surfDiffusion_help = gengetopt_args_info_help[78];
-  args_info->cn_help = gengetopt_args_info_help[79];
-  args_info->scn_help = gengetopt_args_info_help[80];
-  args_info->gcn_help = gengetopt_args_info_help[81];
-  args_info->hbond_help = gengetopt_args_info_help[82];
-  args_info->potDiff_help = gengetopt_args_info_help[83];
-  args_info->tet_hb_help = gengetopt_args_info_help[84];
-  args_info->kirkwood_help = gengetopt_args_info_help[85];
-  args_info->kirkwoodQ_help = gengetopt_args_info_help[86];
-  args_info->densityfield_help = gengetopt_args_info_help[87];
-  args_info->velocityfield_help = gengetopt_args_info_help[88];
-  args_info->velocityZ_help = gengetopt_args_info_help[89];
-  args_info->eam_density_help = gengetopt_args_info_help[90];
-  args_info->net_charge_help = gengetopt_args_info_help[91];
-  args_info->current_density_help = gengetopt_args_info_help[92];
-  args_info->chargez_help = gengetopt_args_info_help[93];
-  args_info->charge_density_z_help = gengetopt_args_info_help[94];
-  args_info->countz_help = gengetopt_args_info_help[95];
+static void init_args_info(struct gengetopt_args_info* args_info) {
+  args_info->help_help                  = gengetopt_args_info_help[0];
+  args_info->version_help               = gengetopt_args_info_help[1];
+  args_info->input_help                 = gengetopt_args_info_help[2];
+  args_info->output_help                = gengetopt_args_info_help[3];
+  args_info->step_help                  = gengetopt_args_info_help[4];
+  args_info->nbins_help                 = gengetopt_args_info_help[5];
+  args_info->nbins_x_help               = gengetopt_args_info_help[6];
+  args_info->nbins_y_help               = gengetopt_args_info_help[7];
+  args_info->nbins_z_help               = gengetopt_args_info_help[8];
+  args_info->nrbins_help                = gengetopt_args_info_help[9];
+  args_info->nanglebins_help            = gengetopt_args_info_help[10];
+  args_info->rcut_help                  = gengetopt_args_info_help[11];
+  args_info->OOcut_help                 = gengetopt_args_info_help[12];
+  args_info->thetacut_help              = gengetopt_args_info_help[13];
+  args_info->OHcut_help                 = gengetopt_args_info_help[14];
+  args_info->dz_help                    = gengetopt_args_info_help[15];
+  args_info->length_help                = gengetopt_args_info_help[16];
+  args_info->zlength_help               = gengetopt_args_info_help[17];
+  args_info->zoffset_help               = gengetopt_args_info_help[18];
+  args_info->sele1_help                 = gengetopt_args_info_help[19];
+  args_info->sele2_help                 = gengetopt_args_info_help[20];
+  args_info->sele3_help                 = gengetopt_args_info_help[21];
+  args_info->refsele_help               = gengetopt_args_info_help[22];
+  args_info->comsele_help               = gengetopt_args_info_help[23];
+  args_info->seleoffset_help            = gengetopt_args_info_help[24];
+  args_info->seleoffset2_help           = gengetopt_args_info_help[25];
+  args_info->molname_help               = gengetopt_args_info_help[26];
+  args_info->begin_help                 = gengetopt_args_info_help[27];
+  args_info->end_help                   = gengetopt_args_info_help[28];
+  args_info->radius_help                = gengetopt_args_info_help[29];
+  args_info->voxelSize_help             = gengetopt_args_info_help[30];
+  args_info->gaussWidth_help            = gengetopt_args_info_help[31];
+  args_info->privilegedAxis_help        = gengetopt_args_info_help[32];
+  args_info->privilegedAxis2_help       = gengetopt_args_info_help[33];
+  args_info->momentum_help              = gengetopt_args_info_help[34];
+  args_info->component_help             = gengetopt_args_info_help[35];
+  args_info->dipoleX_help               = gengetopt_args_info_help[36];
+  args_info->dipoleY_help               = gengetopt_args_info_help[37];
+  args_info->dipoleZ_help               = gengetopt_args_info_help[38];
+  args_info->v_radius_help              = gengetopt_args_info_help[39];
+  args_info->gen_xyz_help               = gengetopt_args_info_help[40];
+  args_info->atom_name_help             = gengetopt_args_info_help[41];
+  args_info->bo_help                    = gengetopt_args_info_help[43];
+  args_info->ior_help                   = gengetopt_args_info_help[44];
+  args_info->for_help                   = gengetopt_args_info_help[45];
+  args_info->bad_help                   = gengetopt_args_info_help[46];
+  args_info->count_help                 = gengetopt_args_info_help[47];
+  args_info->gofr_help                  = gengetopt_args_info_help[48];
+  args_info->gofz_help                  = gengetopt_args_info_help[49];
+  args_info->r_theta_help               = gengetopt_args_info_help[50];
+  args_info->r_omega_help               = gengetopt_args_info_help[51];
+  args_info->r_z_help                   = gengetopt_args_info_help[52];
+  args_info->theta_omega_help           = gengetopt_args_info_help[53];
+  args_info->r_theta_omega_help         = gengetopt_args_info_help[54];
+  args_info->gxyz_help                  = gengetopt_args_info_help[55];
+  args_info->twodgofr_help              = gengetopt_args_info_help[56];
+  args_info->p2_help                    = gengetopt_args_info_help[57];
+  args_info->rp2_help                   = gengetopt_args_info_help[58];
+  args_info->scd_help                   = gengetopt_args_info_help[59];
+  args_info->density_help               = gengetopt_args_info_help[60];
+  args_info->slab_density_help          = gengetopt_args_info_help[61];
+  args_info->pipe_density_help          = gengetopt_args_info_help[62];
+  args_info->p_angle_help               = gengetopt_args_info_help[63];
+  args_info->hxy_help                   = gengetopt_args_info_help[64];
+  args_info->rho_r_help                 = gengetopt_args_info_help[65];
+  args_info->angle_r_help               = gengetopt_args_info_help[66];
+  args_info->hullvol_help               = gengetopt_args_info_help[67];
+  args_info->rodlength_help             = gengetopt_args_info_help[68];
+  args_info->tet_param_help             = gengetopt_args_info_help[69];
+  args_info->tet_param_z_help           = gengetopt_args_info_help[70];
+  args_info->tet_param_dens_help        = gengetopt_args_info_help[71];
+  args_info->tet_param_xyz_help         = gengetopt_args_info_help[72];
+  args_info->rnemdz_help                = gengetopt_args_info_help[73];
+  args_info->rnemdr_help                = gengetopt_args_info_help[74];
+  args_info->rnemdrt_help               = gengetopt_args_info_help[75];
+  args_info->nitrile_help               = gengetopt_args_info_help[76];
+  args_info->multipole_help             = gengetopt_args_info_help[77];
+  args_info->surfDiffusion_help         = gengetopt_args_info_help[78];
+  args_info->cn_help                    = gengetopt_args_info_help[79];
+  args_info->scn_help                   = gengetopt_args_info_help[80];
+  args_info->gcn_help                   = gengetopt_args_info_help[81];
+  args_info->hbond_help                 = gengetopt_args_info_help[82];
+  args_info->potDiff_help               = gengetopt_args_info_help[83];
+  args_info->tet_hb_help                = gengetopt_args_info_help[84];
+  args_info->kirkwood_help              = gengetopt_args_info_help[85];
+  args_info->kirkwoodQ_help             = gengetopt_args_info_help[86];
+  args_info->densityfield_help          = gengetopt_args_info_help[87];
+  args_info->velocityfield_help         = gengetopt_args_info_help[88];
+  args_info->velocityZ_help             = gengetopt_args_info_help[89];
+  args_info->eam_density_help           = gengetopt_args_info_help[90];
+  args_info->net_charge_help            = gengetopt_args_info_help[91];
+  args_info->current_density_help       = gengetopt_args_info_help[92];
+  args_info->chargez_help               = gengetopt_args_info_help[93];
+  args_info->charge_density_z_help      = gengetopt_args_info_help[94];
+  args_info->countz_help                = gengetopt_args_info_help[95];
   args_info->momentum_distribution_help = gengetopt_args_info_help[96];
-  args_info->dipole_orientation_help = gengetopt_args_info_help[97];
-  args_info->order_prob_help = gengetopt_args_info_help[98];
+  args_info->dipole_orientation_help    = gengetopt_args_info_help[97];
+  args_info->order_prob_help            = gengetopt_args_info_help[98];
 }
 
 void cmdline_parser_print_version(void) {
   printf("%s %s\n",
-         (strlen(CMDLINE_PARSER_PACKAGE_NAME) ? CMDLINE_PARSER_PACKAGE_NAME
-                                              : CMDLINE_PARSER_PACKAGE),
+         (strlen(CMDLINE_PARSER_PACKAGE_NAME) ? CMDLINE_PARSER_PACKAGE_NAME :
+                                                CMDLINE_PARSER_PACKAGE),
          CMDLINE_PARSER_VERSION);
 
   if (strlen(gengetopt_args_info_versiontext) > 0)
@@ -588,18 +588,12 @@ void cmdline_parser_print_version(void) {
 
 static void print_help_common(void) {
   size_t len_purpose = strlen(gengetopt_args_info_purpose);
-  size_t len_usage = strlen(gengetopt_args_info_usage);
+  size_t len_usage   = strlen(gengetopt_args_info_usage);
 
-  if (len_usage > 0) {
-    printf("%s\n", gengetopt_args_info_usage);
-  }
-  if (len_purpose > 0) {
-    printf("%s\n", gengetopt_args_info_purpose);
-  }
+  if (len_usage > 0) { printf("%s\n", gengetopt_args_info_usage); }
+  if (len_purpose > 0) { printf("%s\n", gengetopt_args_info_purpose); }
 
-  if (len_usage || len_purpose) {
-    printf("\n");
-  }
+  if (len_usage || len_purpose) { printf("\n"); }
 
   if (strlen(gengetopt_args_info_description) > 0) {
     printf("%s\n\n", gengetopt_args_info_description);
@@ -613,40 +607,40 @@ void cmdline_parser_print_help(void) {
     printf("%s\n", gengetopt_args_info_help[i++]);
 }
 
-void cmdline_parser_init(struct gengetopt_args_info *args_info) {
+void cmdline_parser_init(struct gengetopt_args_info* args_info) {
   clear_given(args_info);
   clear_args(args_info);
   init_args_info(args_info);
 
-  args_info->inputs = 0;
+  args_info->inputs     = 0;
   args_info->inputs_num = 0;
 }
 
-void cmdline_parser_params_init(struct cmdline_parser_params *params) {
+void cmdline_parser_params_init(struct cmdline_parser_params* params) {
   if (params) {
-    params->override = 0;
-    params->initialize = 1;
-    params->check_required = 1;
+    params->override        = 0;
+    params->initialize      = 1;
+    params->check_required  = 1;
     params->check_ambiguity = 0;
-    params->print_errors = 1;
+    params->print_errors    = 1;
   }
 }
 
-struct cmdline_parser_params *cmdline_parser_params_create(void) {
-  struct cmdline_parser_params *params = (struct cmdline_parser_params *)malloc(
+struct cmdline_parser_params* cmdline_parser_params_create(void) {
+  struct cmdline_parser_params* params = (struct cmdline_parser_params*)malloc(
       sizeof(struct cmdline_parser_params));
   cmdline_parser_params_init(params);
   return params;
 }
 
-static void free_string_field(char **s) {
+static void free_string_field(char** s) {
   if (*s) {
     free(*s);
     *s = 0;
   }
 }
 
-static void cmdline_parser_release(struct gengetopt_args_info *args_info) {
+static void cmdline_parser_release(struct gengetopt_args_info* args_info) {
   unsigned int i;
   free_string_field(&(args_info->input_arg));
   free_string_field(&(args_info->input_orig));
@@ -697,7 +691,8 @@ static void cmdline_parser_release(struct gengetopt_args_info *args_info) {
   free_string_field(&(args_info->atom_name_arg));
   free_string_field(&(args_info->atom_name_orig));
 
-  for (i = 0; i < args_info->inputs_num; ++i) free(args_info->inputs[i]);
+  for (i = 0; i < args_info->inputs_num; ++i)
+    free(args_info->inputs[i]);
 
   if (args_info->inputs_num) free(args_info->inputs);
 
@@ -711,7 +706,7 @@ static void cmdline_parser_release(struct gengetopt_args_info *args_info) {
  * -1 if no value matched,
  * -2 if more than one value has matched
  */
-static int check_possible_values(const char *val, const char *values[]) {
+static int check_possible_values(const char* val, const char* values[]) {
   int i, found, last;
   size_t len;
 
@@ -735,13 +730,11 @@ static int check_possible_values(const char *val, const char *values[]) {
   return (found ? -2 : -1); /* return many values or none matched */
 }
 
-static void write_into_file(FILE *outfile, const char *opt, const char *arg,
-                            const char *values[]) {
+static void write_into_file(FILE* outfile, const char* opt, const char* arg,
+                            const char* values[]) {
   int found = -1;
   if (arg) {
-    if (values) {
-      found = check_possible_values(arg, values);
-    }
+    if (values) { found = check_possible_values(arg, values); }
     if (found >= 0)
       fprintf(outfile, "%s=\"%s\" # %s\n", opt, arg, values[found]);
     else
@@ -751,7 +744,7 @@ static void write_into_file(FILE *outfile, const char *opt, const char *arg,
   }
 }
 
-int cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info) {
+int cmdline_parser_dump(FILE* outfile, struct gengetopt_args_info* args_info) {
   int i = 0;
 
   if (!outfile) {
@@ -921,9 +914,9 @@ int cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info) {
   return i;
 }
 
-int cmdline_parser_file_save(const char *filename,
-                             struct gengetopt_args_info *args_info) {
-  FILE *outfile;
+int cmdline_parser_file_save(const char* filename,
+                             struct gengetopt_args_info* args_info) {
+  FILE* outfile;
   int i = 0;
 
   outfile = fopen(filename, "w");
@@ -940,117 +933,117 @@ int cmdline_parser_file_save(const char *filename,
   return i;
 }
 
-void cmdline_parser_free(struct gengetopt_args_info *args_info) {
+void cmdline_parser_free(struct gengetopt_args_info* args_info) {
   cmdline_parser_release(args_info);
 }
 
 /** @brief replacement of strdup, which is not standard */
-char *gengetopt_strdup(const char *s) {
-  char *result = 0;
+char* gengetopt_strdup(const char* s) {
+  char* result = 0;
   if (!s) return result;
 
-  result = (char *)malloc(strlen(s) + 1);
-  if (result == (char *)0) return (char *)0;
+  result = (char*)malloc(strlen(s) + 1);
+  if (result == (char*)0) return (char*)0;
   strcpy(result, s);
   return result;
 }
 
-static void reset_group_staticProps(struct gengetopt_args_info *args_info) {
+static void reset_group_staticProps(struct gengetopt_args_info* args_info) {
   if (!args_info->staticProps_group_counter) return;
 
-  args_info->bo_given = 0;
-  args_info->ior_given = 0;
-  args_info->for_given = 0;
-  args_info->bad_given = 0;
-  args_info->count_given = 0;
-  args_info->gofr_given = 0;
-  args_info->gofz_given = 0;
-  args_info->r_theta_given = 0;
-  args_info->r_omega_given = 0;
-  args_info->r_z_given = 0;
-  args_info->theta_omega_given = 0;
-  args_info->r_theta_omega_given = 0;
-  args_info->gxyz_given = 0;
-  args_info->twodgofr_given = 0;
-  args_info->p2_given = 0;
-  args_info->rp2_given = 0;
-  args_info->scd_given = 0;
-  args_info->density_given = 0;
-  args_info->slab_density_given = 0;
-  args_info->pipe_density_given = 0;
-  args_info->p_angle_given = 0;
-  args_info->hxy_given = 0;
-  args_info->rho_r_given = 0;
-  args_info->angle_r_given = 0;
-  args_info->hullvol_given = 0;
-  args_info->rodlength_given = 0;
-  args_info->tet_param_given = 0;
-  args_info->tet_param_z_given = 0;
-  args_info->tet_param_dens_given = 0;
-  args_info->tet_param_xyz_given = 0;
-  args_info->rnemdz_given = 0;
-  args_info->rnemdr_given = 0;
-  args_info->rnemdrt_given = 0;
-  args_info->nitrile_given = 0;
-  args_info->multipole_given = 0;
-  args_info->surfDiffusion_given = 0;
-  args_info->cn_given = 0;
-  args_info->scn_given = 0;
-  args_info->gcn_given = 0;
-  args_info->hbond_given = 0;
-  args_info->potDiff_given = 0;
-  args_info->tet_hb_given = 0;
-  args_info->kirkwood_given = 0;
-  args_info->kirkwoodQ_given = 0;
-  args_info->densityfield_given = 0;
-  args_info->velocityfield_given = 0;
-  args_info->velocityZ_given = 0;
-  args_info->eam_density_given = 0;
-  args_info->net_charge_given = 0;
-  args_info->current_density_given = 0;
-  args_info->chargez_given = 0;
-  args_info->charge_density_z_given = 0;
-  args_info->countz_given = 0;
+  args_info->bo_given                    = 0;
+  args_info->ior_given                   = 0;
+  args_info->for_given                   = 0;
+  args_info->bad_given                   = 0;
+  args_info->count_given                 = 0;
+  args_info->gofr_given                  = 0;
+  args_info->gofz_given                  = 0;
+  args_info->r_theta_given               = 0;
+  args_info->r_omega_given               = 0;
+  args_info->r_z_given                   = 0;
+  args_info->theta_omega_given           = 0;
+  args_info->r_theta_omega_given         = 0;
+  args_info->gxyz_given                  = 0;
+  args_info->twodgofr_given              = 0;
+  args_info->p2_given                    = 0;
+  args_info->rp2_given                   = 0;
+  args_info->scd_given                   = 0;
+  args_info->density_given               = 0;
+  args_info->slab_density_given          = 0;
+  args_info->pipe_density_given          = 0;
+  args_info->p_angle_given               = 0;
+  args_info->hxy_given                   = 0;
+  args_info->rho_r_given                 = 0;
+  args_info->angle_r_given               = 0;
+  args_info->hullvol_given               = 0;
+  args_info->rodlength_given             = 0;
+  args_info->tet_param_given             = 0;
+  args_info->tet_param_z_given           = 0;
+  args_info->tet_param_dens_given        = 0;
+  args_info->tet_param_xyz_given         = 0;
+  args_info->rnemdz_given                = 0;
+  args_info->rnemdr_given                = 0;
+  args_info->rnemdrt_given               = 0;
+  args_info->nitrile_given               = 0;
+  args_info->multipole_given             = 0;
+  args_info->surfDiffusion_given         = 0;
+  args_info->cn_given                    = 0;
+  args_info->scn_given                   = 0;
+  args_info->gcn_given                   = 0;
+  args_info->hbond_given                 = 0;
+  args_info->potDiff_given               = 0;
+  args_info->tet_hb_given                = 0;
+  args_info->kirkwood_given              = 0;
+  args_info->kirkwoodQ_given             = 0;
+  args_info->densityfield_given          = 0;
+  args_info->velocityfield_given         = 0;
+  args_info->velocityZ_given             = 0;
+  args_info->eam_density_given           = 0;
+  args_info->net_charge_given            = 0;
+  args_info->current_density_given       = 0;
+  args_info->chargez_given               = 0;
+  args_info->charge_density_z_given      = 0;
+  args_info->countz_given                = 0;
   args_info->momentum_distribution_given = 0;
-  args_info->dipole_orientation_given = 0;
-  args_info->order_prob_given = 0;
+  args_info->dipole_orientation_given    = 0;
+  args_info->order_prob_given            = 0;
 
   args_info->staticProps_group_counter = 0;
 }
 
-int cmdline_parser(int argc, char **argv,
-                   struct gengetopt_args_info *args_info) {
+int cmdline_parser(int argc, char** argv,
+                   struct gengetopt_args_info* args_info) {
   return cmdline_parser2(argc, argv, args_info, 0, 1, 1);
 }
 
-int cmdline_parser_ext(int argc, char **argv,
-                       struct gengetopt_args_info *args_info,
-                       struct cmdline_parser_params *params) {
+int cmdline_parser_ext(int argc, char** argv,
+                       struct gengetopt_args_info* args_info,
+                       struct cmdline_parser_params* params) {
   int result;
   result = cmdline_parser_internal(argc, argv, args_info, params, 0);
 
   return result;
 }
 
-int cmdline_parser2(int argc, char **argv,
-                    struct gengetopt_args_info *args_info, int override,
+int cmdline_parser2(int argc, char** argv,
+                    struct gengetopt_args_info* args_info, int override,
                     int initialize, int check_required) {
   int result;
   struct cmdline_parser_params params;
 
-  params.override = override;
-  params.initialize = initialize;
-  params.check_required = check_required;
+  params.override        = override;
+  params.initialize      = initialize;
+  params.check_required  = check_required;
   params.check_ambiguity = 0;
-  params.print_errors = 1;
+  params.print_errors    = 1;
 
   result = cmdline_parser_internal(argc, argv, args_info, &params, 0);
 
   return result;
 }
 
-int cmdline_parser_required(struct gengetopt_args_info *args_info,
-                            const char *prog_name) {
+int cmdline_parser_required(struct gengetopt_args_info* args_info,
+                            const char* prog_name) {
   int result = EXIT_SUCCESS;
 
   if (cmdline_parser_required2(args_info, prog_name, 0) > 0)
@@ -1059,9 +1052,9 @@ int cmdline_parser_required(struct gengetopt_args_info *args_info,
   return result;
 }
 
-int cmdline_parser_required2(struct gengetopt_args_info *args_info,
-                             const char *prog_name,
-                             const char *additional_error) {
+int cmdline_parser_required2(struct gengetopt_args_info* args_info,
+                             const char* prog_name,
+                             const char* additional_error) {
   int error_occurred = 0;
   FIX_UNUSED(additional_error);
 
@@ -1107,11 +1100,11 @@ int cmdline_parser_required2(struct gengetopt_args_info *args_info,
  */
 
 struct option {
-  const char *name;
+  const char* name;
   /* has_arg can't be an enum because some compilers complain about
      type mismatches in all the code that assumes it is an int.  */
   int has_arg;
-  int *flag;
+  int* flag;
   int val;
 };
 
@@ -1156,7 +1149,7 @@ struct custom_getopt_data {
   int custom_optind;
   int custom_opterr;
   int custom_optopt;
-  char *custom_optarg;
+  char* custom_optarg;
 
   /* True if the internal members have been initialized.  */
   int initialized;
@@ -1167,7 +1160,7 @@ struct custom_getopt_data {
    * we left off.  If this is zero, or a null string, it means resume the scan
    * by advancing to the next ARGV-element.
    */
-  char *nextchar;
+  char* nextchar;
 
   /*
    * Describe the part of ARGV that contains non-options that have been skipped.
@@ -1190,7 +1183,7 @@ struct custom_getopt_data {
  * For communication from `custom_getopt' to the caller.  When `custom_getopt'
  * finds an option that takes an argument, the argument value is returned here.
  */
-static char *custom_optarg;
+static char* custom_optarg;
 
 /*
  * Index in ARGV of the next element to be scanned.  This is used for
@@ -1229,11 +1222,11 @@ static int custom_optopt = '?';
  * `first_nonopt' and `last_nonopt' are relocated so that they describe the new
  * indices of the non-options in ARGV after they are moved.
  */
-static void exchange(char **argv, struct custom_getopt_data *d) {
+static void exchange(char** argv, struct custom_getopt_data* d) {
   int bottom = d->first_nonopt;
   int middle = d->last_nonopt;
-  int top = d->custom_optind;
-  char *tem;
+  int top    = d->custom_optind;
+  char* tem;
 
   /*
    * Exchange the shorter segment with the far end of the longer segment.
@@ -1249,8 +1242,8 @@ static void exchange(char **argv, struct custom_getopt_data *d) {
 
       /* Swap it with the top part of the top segment.  */
       for (i = 0; i < len; i++) {
-        tem = argv[bottom + i];
-        argv[bottom + i] = argv[top - (middle - bottom) + i];
+        tem                               = argv[bottom + i];
+        argv[bottom + i]                  = argv[top - (middle - bottom) + i];
         argv[top - (middle - bottom) + i] = tem;
       }
       /* Exclude the moved bottom segment from further swapping.  */
@@ -1262,7 +1255,7 @@ static void exchange(char **argv, struct custom_getopt_data *d) {
 
       /* Swap it with the bottom part of the bottom segment.  */
       for (i = 0; i < len; i++) {
-        tem = argv[bottom + i];
+        tem              = argv[bottom + i];
         argv[bottom + i] = argv[middle + i];
         argv[middle + i] = tem;
       }
@@ -1276,24 +1269,24 @@ static void exchange(char **argv, struct custom_getopt_data *d) {
 }
 
 /* Initialize the internal data when the first call is made.  */
-static void custom_getopt_initialize(struct custom_getopt_data *d) {
+static void custom_getopt_initialize(struct custom_getopt_data* d) {
   /*
    * Start processing options with ARGV-element 1 (since ARGV-element 0
    * is the program name); the sequence of previously skipped non-option
    * ARGV-elements is empty.
    */
   d->first_nonopt = d->last_nonopt = d->custom_optind;
-  d->nextchar = NULL;
-  d->initialized = 1;
+  d->nextchar                      = NULL;
+  d->initialized                   = 1;
 }
 
 #define NONOPTION_P \
   (argv[d->custom_optind][0] != '-' || argv[d->custom_optind][1] == '\0')
 
 /* return: zero: continue, nonzero: return given value to user */
-static int shuffle_argv(int argc, char *const *argv,
-                        const struct option *longopts,
-                        struct custom_getopt_data *d) {
+static int shuffle_argv(int argc, char* const* argv,
+                        const struct option* longopts,
+                        struct custom_getopt_data* d) {
   /*
    * Give FIRST_NONOPT & LAST_NONOPT rational values if CUSTOM_OPTIND has been
    * moved back by the user (who may also have changed the arguments).
@@ -1305,14 +1298,15 @@ static int shuffle_argv(int argc, char *const *argv,
    * non-options, exchange them so that the options come first.
    */
   if (d->first_nonopt != d->last_nonopt && d->last_nonopt != d->custom_optind)
-    exchange((char **)argv, d);
+    exchange((char**)argv, d);
   else if (d->last_nonopt != d->custom_optind)
     d->first_nonopt = d->custom_optind;
   /*
    * Skip any additional non-options and extend the range of
    * non-options previously skipped.
    */
-  while (d->custom_optind < argc && NONOPTION_P) d->custom_optind++;
+  while (d->custom_optind < argc && NONOPTION_P)
+    d->custom_optind++;
   d->last_nonopt = d->custom_optind;
   /*
    * The special ARGV-element `--' means premature end of options.  Skip
@@ -1322,10 +1316,10 @@ static int shuffle_argv(int argc, char *const *argv,
   if (d->custom_optind != argc && !strcmp(argv[d->custom_optind], "--")) {
     d->custom_optind++;
     if (d->first_nonopt != d->last_nonopt && d->last_nonopt != d->custom_optind)
-      exchange((char **)argv, d);
+      exchange((char**)argv, d);
     else if (d->first_nonopt == d->last_nonopt)
       d->first_nonopt = d->custom_optind;
-    d->last_nonopt = argc;
+    d->last_nonopt   = argc;
     d->custom_optind = argc;
   }
   /*
@@ -1367,15 +1361,15 @@ static int shuffle_argv(int argc, char *const *argv,
  * This distinction seems to be the most useful approach.
  *
  */
-static int check_long_opt(int argc, char *const *argv, const char *optstring,
-                          const struct option *longopts, int *longind,
-                          int print_errors, struct custom_getopt_data *d) {
-  char *nameend;
-  const struct option *p;
-  const struct option *pfound = NULL;
-  int exact = 0;
-  int ambig = 0;
-  int indfound = -1;
+static int check_long_opt(int argc, char* const* argv, const char* optstring,
+                          const struct option* longopts, int* longind,
+                          int print_errors, struct custom_getopt_data* d) {
+  char* nameend;
+  const struct option* p;
+  const struct option* pfound = NULL;
+  int exact                   = 0;
+  int ambig                   = 0;
+  int indfound                = -1;
   int option_index;
 
   for (nameend = d->nextchar; *nameend && *nameend != '=';
@@ -1388,13 +1382,13 @@ static int check_long_opt(int argc, char *const *argv, const char *optstring,
       if ((unsigned int)(nameend - d->nextchar) ==
           (unsigned int)strlen(p->name)) {
         /* Exact match found.  */
-        pfound = p;
+        pfound   = p;
         indfound = option_index;
-        exact = 1;
+        exact    = 1;
         break;
       } else if (pfound == NULL) {
         /* First nonexact match found.  */
-        pfound = p;
+        pfound   = p;
         indfound = option_index;
       } else if (pfound->has_arg != p->has_arg || pfound->flag != p->flag ||
                  pfound->val != p->val)
@@ -1469,16 +1463,16 @@ static int check_long_opt(int argc, char *const *argv, const char *optstring,
               argv[d->custom_optind][0], d->nextchar);
     }
   }
-  d->nextchar = (char *)"";
+  d->nextchar = (char*)"";
   d->custom_optind++;
   d->custom_optopt = 0;
   return '?';
 }
 
-static int check_short_opt(int argc, char *const *argv, const char *optstring,
-                           int print_errors, struct custom_getopt_data *d) {
-  char c = *d->nextchar++;
-  const char *temp = strchr(optstring, c);
+static int check_short_opt(int argc, char* const* argv, const char* optstring,
+                           int print_errors, struct custom_getopt_data* d) {
+  char c           = *d->nextchar++;
+  const char* temp = strchr(optstring, c);
 
   /* Increment `custom_optind' when we start to process its last character.  */
   if (*d->nextchar == '\0') ++d->custom_optind;
@@ -1600,9 +1594,9 @@ static int check_short_opt(int argc, char *const *argv, const char *optstring,
  * '\0'.  This behavior is specific to the GNU `getopt'.
  */
 
-static int getopt_internal_r(int argc, char *const *argv, const char *optstring,
-                             const struct option *longopts, int *longind,
-                             struct custom_getopt_data *d) {
+static int getopt_internal_r(int argc, char* const* argv, const char* optstring,
+                             const struct option* longopts, int* longind,
+                             struct custom_getopt_data* d) {
   int ret, print_errors = d->custom_opterr;
 
   if (optstring[0] == ':') print_errors = 0;
@@ -1628,9 +1622,9 @@ static int getopt_internal_r(int argc, char *const *argv, const char *optstring,
   return check_short_opt(argc, argv, optstring, print_errors, d);
 }
 
-static int custom_getopt_internal(int argc, char *const *argv,
-                                  const char *optstring,
-                                  const struct option *longopts, int *longind) {
+static int custom_getopt_internal(int argc, char* const* argv,
+                                  const char* optstring,
+                                  const struct option* longopts, int* longind) {
   int result;
   /* Keep a global copy of all internal members of d */
   static struct custom_getopt_data d;
@@ -1644,13 +1638,13 @@ static int custom_getopt_internal(int argc, char *const *argv,
   return result;
 }
 
-static int custom_getopt_long(int argc, char *const *argv, const char *options,
-                              const struct option *long_options,
-                              int *opt_index) {
+static int custom_getopt_long(int argc, char* const* argv, const char* options,
+                              const struct option* long_options,
+                              int* opt_index) {
   return custom_getopt_internal(argc, argv, options, long_options, opt_index);
 }
 
-static char *package_name = 0;
+static char* package_name = 0;
 
 /**
  * @brief updates an option
@@ -1671,21 +1665,21 @@ static char *package_name = 0;
  * @param short_opt the corresponding short option (or '-' if none)
  * @param additional_error possible further error specification
  */
-static int update_arg(void *field, char **orig_field, unsigned int *field_given,
-                      unsigned int *prev_given, char *value,
-                      const char *possible_values[], const char *default_value,
+static int update_arg(void* field, char** orig_field, unsigned int* field_given,
+                      unsigned int* prev_given, char* value,
+                      const char* possible_values[], const char* default_value,
                       cmdline_parser_arg_type arg_type, int check_ambiguity,
                       int override, int no_free, int multiple_option,
-                      const char *long_opt, char short_opt,
-                      const char *additional_error) {
-  char *stop_char = 0;
-  const char *val = value;
+                      const char* long_opt, char short_opt,
+                      const char* additional_error) {
+  char* stop_char = 0;
+  const char* val = value;
   int found;
-  char **string_field;
+  char** string_field;
   FIX_UNUSED(field);
 
   stop_char = 0;
-  found = 0;
+  found     = 0;
 
   if (!multiple_option && prev_given &&
       (*prev_given || (check_ambiguity && *field_given))) {
@@ -1720,65 +1714,65 @@ static int update_arg(void *field, char **orig_field, unsigned int *field_given,
   if (possible_values) val = possible_values[found];
 
   switch (arg_type) {
-    case ARG_FLAG:
-      *((int *)field) = !*((int *)field);
-      break;
-    case ARG_INT:
-      if (val) *((int *)field) = strtol(val, &stop_char, 0);
-      break;
-    case ARG_DOUBLE:
-      if (val) *((double *)field) = strtod(val, &stop_char);
-      break;
-    case ARG_ENUM:
-      if (val) *((int *)field) = found;
-      break;
-    case ARG_STRING:
-      if (val) {
-        string_field = (char **)field;
-        if (!no_free && *string_field)
-          free(*string_field); /* free previous string */
-        *string_field = gengetopt_strdup(val);
-      }
-      break;
-    default:
-      break;
+  case ARG_FLAG:
+    *((int*)field) = !*((int*)field);
+    break;
+  case ARG_INT:
+    if (val) *((int*)field) = strtol(val, &stop_char, 0);
+    break;
+  case ARG_DOUBLE:
+    if (val) *((double*)field) = strtod(val, &stop_char);
+    break;
+  case ARG_ENUM:
+    if (val) *((int*)field) = found;
+    break;
+  case ARG_STRING:
+    if (val) {
+      string_field = (char**)field;
+      if (!no_free && *string_field)
+        free(*string_field); /* free previous string */
+      *string_field = gengetopt_strdup(val);
+    }
+    break;
+  default:
+    break;
   };
 
   /* check numeric conversion */
   switch (arg_type) {
-    case ARG_INT:
-    case ARG_DOUBLE:
-      if (val && !(stop_char && *stop_char == '\0')) {
-        fprintf(stderr, "%s: invalid numeric value: %s\n", package_name, val);
-        return 1; /* failure */
-      }
-      break;
-    default:;
+  case ARG_INT:
+  case ARG_DOUBLE:
+    if (val && !(stop_char && *stop_char == '\0')) {
+      fprintf(stderr, "%s: invalid numeric value: %s\n", package_name, val);
+      return 1; /* failure */
+    }
+    break;
+  default:;
   };
 
   /* store the original value */
   switch (arg_type) {
-    case ARG_NO:
-    case ARG_FLAG:
-      break;
-    default:
-      if (value && orig_field) {
-        if (no_free) {
-          *orig_field = value;
-        } else {
-          if (*orig_field) free(*orig_field); /* free previous string */
-          *orig_field = gengetopt_strdup(value);
-        }
+  case ARG_NO:
+  case ARG_FLAG:
+    break;
+  default:
+    if (value && orig_field) {
+      if (no_free) {
+        *orig_field = value;
+      } else {
+        if (*orig_field) free(*orig_field); /* free previous string */
+        *orig_field = gengetopt_strdup(value);
       }
+    }
   };
 
   return 0; /* OK */
 }
 
-int cmdline_parser_internal(int argc, char **argv,
-                            struct gengetopt_args_info *args_info,
-                            struct cmdline_parser_params *params,
-                            const char *additional_error) {
+int cmdline_parser_internal(int argc, char** argv,
+                            struct gengetopt_args_info* args_info,
+                            struct cmdline_parser_params* params,
+                            const char* additional_error) {
   int c; /* Character of the parsed option.  */
 
   int error_occurred = 0;
@@ -1789,7 +1783,7 @@ int cmdline_parser_internal(int argc, char **argv,
   int check_required;
   int check_ambiguity;
 
-  char *optarg;
+  char* optarg;
   int optind;
   int opterr;
   int optopt;
@@ -1800,7 +1794,7 @@ int cmdline_parser_internal(int argc, char **argv,
   override = params->override;
   FIX_UNUSED(override);
 
-  initialize = params->initialize;
+  initialize     = params->initialize;
   check_required = params->check_required;
 
   /* TODO: Why is this here? It is not used anywhere. */
@@ -1936,1200 +1930,1186 @@ int cmdline_parser_internal(int argc, char **argv,
     if (c == -1) break; /* Exit from `while (1)' loop.  */
 
     switch (c) {
-      case 'h': /* Print help and exit.  */
-        cmdline_parser_print_help();
-        cmdline_parser_free(&local_args_info);
-        exit(EXIT_SUCCESS);
+    case 'h': /* Print help and exit.  */
+      cmdline_parser_print_help();
+      cmdline_parser_free(&local_args_info);
+      exit(EXIT_SUCCESS);
 
-      case 'V': /* Print version and exit.  */
-        cmdline_parser_print_version();
-        cmdline_parser_free(&local_args_info);
-        exit(EXIT_SUCCESS);
+    case 'V': /* Print version and exit.  */
+      cmdline_parser_print_version();
+      cmdline_parser_free(&local_args_info);
+      exit(EXIT_SUCCESS);
 
-      case 'i': /* input dump file.  */
+    case 'i': /* input dump file.  */
 
-        if (update_arg((void *)&(args_info->input_arg),
-                       &(args_info->input_orig), &(args_info->input_given),
-                       &(local_args_info.input_given), optarg, 0, 0, ARG_STRING,
-                       check_ambiguity, override, 0, 0, "input", 'i',
-                       additional_error))
-          goto failure;
+      if (update_arg((void*)&(args_info->input_arg), &(args_info->input_orig),
+                     &(args_info->input_given), &(local_args_info.input_given),
+                     optarg, 0, 0, ARG_STRING, check_ambiguity, override, 0, 0,
+                     "input", 'i', additional_error))
+        goto failure;
 
-        break;
-      case 'o': /* output file name.  */
+      break;
+    case 'o': /* output file name.  */
 
-        if (update_arg((void *)&(args_info->output_arg),
-                       &(args_info->output_orig), &(args_info->output_given),
-                       &(local_args_info.output_given), optarg, 0, 0,
-                       ARG_STRING, check_ambiguity, override, 0, 0, "output",
-                       'o', additional_error))
-          goto failure;
+      if (update_arg((void*)&(args_info->output_arg), &(args_info->output_orig),
+                     &(args_info->output_given),
+                     &(local_args_info.output_given), optarg, 0, 0, ARG_STRING,
+                     check_ambiguity, override, 0, 0, "output", 'o',
+                     additional_error))
+        goto failure;
 
-        break;
-      case 'n': /* process every n frame.  */
+      break;
+    case 'n': /* process every n frame.  */
 
-        if (update_arg((void *)&(args_info->step_arg), &(args_info->step_orig),
-                       &(args_info->step_given), &(local_args_info.step_given),
-                       optarg, 0, "1", ARG_INT, check_ambiguity, override, 0, 0,
-                       "step", 'n', additional_error))
-          goto failure;
+      if (update_arg((void*)&(args_info->step_arg), &(args_info->step_orig),
+                     &(args_info->step_given), &(local_args_info.step_given),
+                     optarg, 0, "1", ARG_INT, check_ambiguity, override, 0, 0,
+                     "step", 'n', additional_error))
+        goto failure;
 
-        break;
-      case 'b': /* number of bins (general purpose).  */
+      break;
+    case 'b': /* number of bins (general purpose).  */
 
-        if (update_arg((void *)&(args_info->nbins_arg),
-                       &(args_info->nbins_orig), &(args_info->nbins_given),
-                       &(local_args_info.nbins_given), optarg, 0, "100",
-                       ARG_INT, check_ambiguity, override, 0, 0, "nbins", 'b',
-                       additional_error))
-          goto failure;
+      if (update_arg((void*)&(args_info->nbins_arg), &(args_info->nbins_orig),
+                     &(args_info->nbins_given), &(local_args_info.nbins_given),
+                     optarg, 0, "100", ARG_INT, check_ambiguity, override, 0, 0,
+                     "nbins", 'b', additional_error))
+        goto failure;
 
-        break;
-      case 'x': /* number of bins in x axis.  */
+      break;
+    case 'x': /* number of bins in x axis.  */
 
-        if (update_arg((void *)&(args_info->nbins_x_arg),
-                       &(args_info->nbins_x_orig), &(args_info->nbins_x_given),
-                       &(local_args_info.nbins_x_given), optarg, 0, "100",
-                       ARG_INT, check_ambiguity, override, 0, 0, "nbins_x", 'x',
-                       additional_error))
-          goto failure;
+      if (update_arg((void*)&(args_info->nbins_x_arg),
+                     &(args_info->nbins_x_orig), &(args_info->nbins_x_given),
+                     &(local_args_info.nbins_x_given), optarg, 0, "100",
+                     ARG_INT, check_ambiguity, override, 0, 0, "nbins_x", 'x',
+                     additional_error))
+        goto failure;
 
-        break;
-      case 'y': /* number of bins in y axis.  */
+      break;
+    case 'y': /* number of bins in y axis.  */
 
-        if (update_arg((void *)&(args_info->nbins_y_arg),
-                       &(args_info->nbins_y_orig), &(args_info->nbins_y_given),
-                       &(local_args_info.nbins_y_given), optarg, 0, "100",
-                       ARG_INT, check_ambiguity, override, 0, 0, "nbins_y", 'y',
-                       additional_error))
-          goto failure;
+      if (update_arg((void*)&(args_info->nbins_y_arg),
+                     &(args_info->nbins_y_orig), &(args_info->nbins_y_given),
+                     &(local_args_info.nbins_y_given), optarg, 0, "100",
+                     ARG_INT, check_ambiguity, override, 0, 0, "nbins_y", 'y',
+                     additional_error))
+        goto failure;
 
-        break;
-      case 'r': /* number of radial bins (usually duplicates functionality of
+      break;
+    case 'r': /* number of radial bins (usually duplicates functionality of
                    nbins).  */
 
-        if (update_arg((void *)&(args_info->nrbins_arg),
-                       &(args_info->nrbins_orig), &(args_info->nrbins_given),
-                       &(local_args_info.nrbins_given), optarg, 0, "100",
-                       ARG_INT, check_ambiguity, override, 0, 0, "nrbins", 'r',
-                       additional_error))
-          goto failure;
+      if (update_arg((void*)&(args_info->nrbins_arg), &(args_info->nrbins_orig),
+                     &(args_info->nrbins_given),
+                     &(local_args_info.nrbins_given), optarg, 0, "100", ARG_INT,
+                     check_ambiguity, override, 0, 0, "nrbins", 'r',
+                     additional_error))
+        goto failure;
 
-        break;
-      case 'a': /* number of bins for cos(angle).  */
+      break;
+    case 'a': /* number of bins for cos(angle).  */
 
-        if (update_arg((void *)&(args_info->nanglebins_arg),
-                       &(args_info->nanglebins_orig),
-                       &(args_info->nanglebins_given),
-                       &(local_args_info.nanglebins_given), optarg, 0, "50",
-                       ARG_INT, check_ambiguity, override, 0, 0, "nanglebins",
-                       'a', additional_error))
-          goto failure;
+      if (update_arg((void*)&(args_info->nanglebins_arg),
+                     &(args_info->nanglebins_orig),
+                     &(args_info->nanglebins_given),
+                     &(local_args_info.nanglebins_given), optarg, 0, "50",
+                     ARG_INT, check_ambiguity, override, 0, 0, "nanglebins",
+                     'a', additional_error))
+        goto failure;
 
-        break;
-      case 'c': /* cutoff radius (rcut).  */
+      break;
+    case 'c': /* cutoff radius (rcut).  */
 
-        if (update_arg((void *)&(args_info->rcut_arg), &(args_info->rcut_orig),
-                       &(args_info->rcut_given), &(local_args_info.rcut_given),
-                       optarg, 0, 0, ARG_DOUBLE, check_ambiguity, override, 0,
-                       0, "rcut", 'c', additional_error))
-          goto failure;
+      if (update_arg((void*)&(args_info->rcut_arg), &(args_info->rcut_orig),
+                     &(args_info->rcut_given), &(local_args_info.rcut_given),
+                     optarg, 0, 0, ARG_DOUBLE, check_ambiguity, override, 0, 0,
+                     "rcut", 'c', additional_error))
+        goto failure;
 
-        break;
-      case 'z': /* Where to set the zero for the slab_density calculation.  */
+      break;
+    case 'z': /* Where to set the zero for the slab_density calculation.  */
 
-        if (update_arg((void *)&(args_info->zoffset_arg),
-                       &(args_info->zoffset_orig), &(args_info->zoffset_given),
-                       &(local_args_info.zoffset_given), optarg, 0, "0",
-                       ARG_DOUBLE, check_ambiguity, override, 0, 0, "zoffset",
-                       'z', additional_error))
-          goto failure;
+      if (update_arg((void*)&(args_info->zoffset_arg),
+                     &(args_info->zoffset_orig), &(args_info->zoffset_given),
+                     &(local_args_info.zoffset_given), optarg, 0, "0",
+                     ARG_DOUBLE, check_ambiguity, override, 0, 0, "zoffset",
+                     'z', additional_error))
+        goto failure;
 
-        break;
-      case 'v': /* voxel size (angstroms).  */
+      break;
+    case 'v': /* voxel size (angstroms).  */
 
-        if (update_arg((void *)&(args_info->voxelSize_arg),
-                       &(args_info->voxelSize_orig),
-                       &(args_info->voxelSize_given),
-                       &(local_args_info.voxelSize_given), optarg, 0, 0,
-                       ARG_DOUBLE, check_ambiguity, override, 0, 0, "voxelSize",
-                       'v', additional_error))
-          goto failure;
+      if (update_arg(
+              (void*)&(args_info->voxelSize_arg), &(args_info->voxelSize_orig),
+              &(args_info->voxelSize_given), &(local_args_info.voxelSize_given),
+              optarg, 0, 0, ARG_DOUBLE, check_ambiguity, override, 0, 0,
+              "voxelSize", 'v', additional_error))
+        goto failure;
 
-        break;
-      case 'g': /* g(r).  */
+      break;
+    case 'g': /* g(r).  */
 
-        if (args_info->staticProps_group_counter && override)
-          reset_group_staticProps(args_info);
-        args_info->staticProps_group_counter += 1;
+      if (args_info->staticProps_group_counter && override)
+        reset_group_staticProps(args_info);
+      args_info->staticProps_group_counter += 1;
 
-        if (update_arg(0, 0, &(args_info->gofr_given),
-                       &(local_args_info.gofr_given), optarg, 0, 0, ARG_NO,
-                       check_ambiguity, override, 0, 0, "gofr", 'g',
-                       additional_error))
-          goto failure;
+      if (update_arg(0, 0, &(args_info->gofr_given),
+                     &(local_args_info.gofr_given), optarg, 0, 0, ARG_NO,
+                     check_ambiguity, override, 0, 0, "gofr", 'g',
+                     additional_error))
+        goto failure;
 
-        break;
-      case 'p': /* p2 order parameter (--sele1 must be specified, --sele2 is
+      break;
+    case 'p': /* p2 order parameter (--sele1 must be specified, --sele2 is
                    optional). */
 
-        if (args_info->staticProps_group_counter && override)
-          reset_group_staticProps(args_info);
-        args_info->staticProps_group_counter += 1;
+      if (args_info->staticProps_group_counter && override)
+        reset_group_staticProps(args_info);
+      args_info->staticProps_group_counter += 1;
 
-        if (update_arg(0, 0, &(args_info->p2_given),
-                       &(local_args_info.p2_given), optarg, 0, 0, ARG_NO,
-                       check_ambiguity, override, 0, 0, "p2", 'p',
-                       additional_error))
-          goto failure;
+      if (update_arg(0, 0, &(args_info->p2_given), &(local_args_info.p2_given),
+                     optarg, 0, 0, ARG_NO, check_ambiguity, override, 0, 0,
+                     "p2", 'p', additional_error))
+        goto failure;
 
-        break;
-      case 's': /* scd order parameter (either --sele1, --sele2, --sele3 are
+      break;
+    case 's': /* scd order parameter (either --sele1, --sele2, --sele3 are
                    specified or
                    --molname, --begin, --end are specified).  */
 
-        if (args_info->staticProps_group_counter && override)
-          reset_group_staticProps(args_info);
-        args_info->staticProps_group_counter += 1;
-
-        if (update_arg(0, 0, &(args_info->scd_given),
-                       &(local_args_info.scd_given), optarg, 0, 0, ARG_NO,
-                       check_ambiguity, override, 0, 0, "scd", 's',
-                       additional_error))
-          goto failure;
-
-        break;
-      case 'd': /* density plot.  */
-
-        if (args_info->staticProps_group_counter && override)
-          reset_group_staticProps(args_info);
-        args_info->staticProps_group_counter += 1;
-
-        if (update_arg(0, 0, &(args_info->density_given),
-                       &(local_args_info.density_given), optarg, 0, 0, ARG_NO,
-                       check_ambiguity, override, 0, 0, "density", 'd',
-                       additional_error))
-          goto failure;
-
-        break;
-      case 'Q': /* tetrahedrality order parameter (Qk).  */
-
-        if (args_info->staticProps_group_counter && override)
-          reset_group_staticProps(args_info);
-        args_info->staticProps_group_counter += 1;
-
-        if (update_arg(0, 0, &(args_info->tet_param_given),
-                       &(local_args_info.tet_param_given), optarg, 0, 0, ARG_NO,
-                       check_ambiguity, override, 0, 0, "tet_param", 'Q',
-                       additional_error))
-          goto failure;
-
-        break;
-      case 'm': /* average multipole moments contained within cutoff spheres as
-                   a function of radius.  */
-
-        if (args_info->staticProps_group_counter && override)
-          reset_group_staticProps(args_info);
-        args_info->staticProps_group_counter += 1;
-
-        if (update_arg(0, 0, &(args_info->multipole_given),
-                       &(local_args_info.multipole_given), optarg, 0, 0, ARG_NO,
-                       check_ambiguity, override, 0, 0, "multipole", 'm',
-                       additional_error))
-          goto failure;
-
-        break;
-      case 'k': /* distance-dependent Kirkwood factor.  */
-
-        if (args_info->staticProps_group_counter && override)
-          reset_group_staticProps(args_info);
-        args_info->staticProps_group_counter += 1;
-
-        if (update_arg(0, 0, &(args_info->kirkwood_given),
-                       &(local_args_info.kirkwood_given), optarg, 0, 0, ARG_NO,
-                       check_ambiguity, override, 0, 0, "kirkwood", 'k',
-                       additional_error))
-          goto failure;
-
-        break;
-      case 'D': /* computes an average eam density profile of the selected atom.
-                 */
-
-        if (args_info->staticProps_group_counter && override)
-          reset_group_staticProps(args_info);
-        args_info->staticProps_group_counter += 1;
-
-        if (update_arg(0, 0, &(args_info->eam_density_given),
-                       &(local_args_info.eam_density_given), optarg, 0, 0,
-                       ARG_NO, check_ambiguity, override, 0, 0, "eam_density",
-                       'D', additional_error))
-          goto failure;
-
-        break;
-      case 'q': /* computes an average charge profile of the selected atom.  */
-
-        if (args_info->staticProps_group_counter && override)
-          reset_group_staticProps(args_info);
-        args_info->staticProps_group_counter += 1;
-
-        if (update_arg(0, 0, &(args_info->net_charge_given),
-                       &(local_args_info.net_charge_given), optarg, 0, 0,
-                       ARG_NO, check_ambiguity, override, 0, 0, "net_charge",
-                       'q', additional_error))
-          goto failure;
-
-        break;
-      case 'J': /* computes the current density for the selected atom.  */
-
-        if (args_info->staticProps_group_counter && override)
-          reset_group_staticProps(args_info);
-        args_info->staticProps_group_counter += 1;
-
-        if (update_arg(0, 0, &(args_info->current_density_given),
-                       &(local_args_info.current_density_given), optarg, 0, 0,
-                       ARG_NO, check_ambiguity, override, 0, 0,
-                       "current_density", 'J', additional_error))
-          goto failure;
-
-        break;
-      case 'M': /* computes the momentum distribution for the selected atom.  */
-
-        if (args_info->staticProps_group_counter && override)
-          reset_group_staticProps(args_info);
-        args_info->staticProps_group_counter += 1;
-
-        if (update_arg(0, 0, &(args_info->momentum_distribution_given),
-                       &(local_args_info.momentum_distribution_given), optarg,
-                       0, 0, ARG_NO, check_ambiguity, override, 0, 0,
-                       "momentum_distribution", 'M', additional_error))
-          goto failure;
-
-        break;
-      case 'S': /* spatially-resolved dipole order parameter S(z), S = (3
-                   Cos^2\\theta - 1)/2.  */
-
-        if (args_info->staticProps_group_counter && override)
-          reset_group_staticProps(args_info);
-        args_info->staticProps_group_counter += 1;
-
-        if (update_arg(0, 0, &(args_info->dipole_orientation_given),
-                       &(local_args_info.dipole_orientation_given), optarg, 0,
-                       0, ARG_NO, check_ambiguity, override, 0, 0,
-                       "dipole_orientation", 'S', additional_error))
-          goto failure;
-
-        break;
-
-      case 0: /* Long option with no short option */
-        /* number of bins in z axis.  */
-        if (strcmp(long_options[option_index].name, "nbins_z") == 0) {
-          if (update_arg(
-                  (void *)&(args_info->nbins_z_arg), &(args_info->nbins_z_orig),
-                  &(args_info->nbins_z_given), &(local_args_info.nbins_z_given),
-                  optarg, 0, "100", ARG_INT, check_ambiguity, override, 0, 0,
-                  "nbins_z", '-', additional_error))
-            goto failure;
-
-        }
-        /* Oxygen-Oxygen cutoff radius (angstroms).  */
-        else if (strcmp(long_options[option_index].name, "OOcut") == 0) {
-          if (update_arg((void *)&(args_info->OOcut_arg),
-                         &(args_info->OOcut_orig), &(args_info->OOcut_given),
-                         &(local_args_info.OOcut_given), optarg, 0, "3.5",
-                         ARG_DOUBLE, check_ambiguity, override, 0, 0, "OOcut",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* HOO cutoff angle (degrees).  */
-        else if (strcmp(long_options[option_index].name, "thetacut") == 0) {
-          if (update_arg((void *)&(args_info->thetacut_arg),
-                         &(args_info->thetacut_orig),
-                         &(args_info->thetacut_given),
-                         &(local_args_info.thetacut_given), optarg, 0, "30",
-                         ARG_DOUBLE, check_ambiguity, override, 0, 0,
-                         "thetacut", '-', additional_error))
-            goto failure;
-
-        }
-        /* Oxygen-Hydrogen cutoff radius (angstroms).  */
-        else if (strcmp(long_options[option_index].name, "OHcut") == 0) {
-          if (update_arg((void *)&(args_info->OHcut_arg),
-                         &(args_info->OHcut_orig), &(args_info->OHcut_given),
-                         &(local_args_info.OHcut_given), optarg, 0, "2.45",
-                         ARG_DOUBLE, check_ambiguity, override, 0, 0, "OHcut",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* slab width (dz).  */
-        else if (strcmp(long_options[option_index].name, "dz") == 0) {
-          if (update_arg((void *)&(args_info->dz_arg), &(args_info->dz_orig),
-                         &(args_info->dz_given), &(local_args_info.dz_given),
-                         optarg, 0, 0, ARG_DOUBLE, check_ambiguity, override, 0,
-                         0, "dz", '-', additional_error))
-            goto failure;
-
-        }
-        /* maximum length (Defaults to 1/2 smallest length of first frame).  */
-        else if (strcmp(long_options[option_index].name, "length") == 0) {
-          if (update_arg((void *)&(args_info->length_arg),
-                         &(args_info->length_orig), &(args_info->length_given),
-                         &(local_args_info.length_given), optarg, 0, 0,
-                         ARG_DOUBLE, check_ambiguity, override, 0, 0, "length",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* maximum length (Defaults to 1/2 smallest length of first frame).  */
-        else if (strcmp(long_options[option_index].name, "zlength") == 0) {
-          if (update_arg(
-                  (void *)&(args_info->zlength_arg), &(args_info->zlength_orig),
-                  &(args_info->zlength_given), &(local_args_info.zlength_given),
-                  optarg, 0, 0, ARG_DOUBLE, check_ambiguity, override, 0, 0,
-                  "zlength", '-', additional_error))
-            goto failure;
-
-        }
-        /* select the first stuntdouble set.  */
-        else if (strcmp(long_options[option_index].name, "sele1") == 0) {
-          if (update_arg((void *)&(args_info->sele1_arg),
-                         &(args_info->sele1_orig), &(args_info->sele1_given),
-                         &(local_args_info.sele1_given), optarg, 0, 0,
-                         ARG_STRING, check_ambiguity, override, 0, 0, "sele1",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* select the second stuntdouble set.  */
-        else if (strcmp(long_options[option_index].name, "sele2") == 0) {
-          if (update_arg((void *)&(args_info->sele2_arg),
-                         &(args_info->sele2_orig), &(args_info->sele2_given),
-                         &(local_args_info.sele2_given), optarg, 0, 0,
-                         ARG_STRING, check_ambiguity, override, 0, 0, "sele2",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* select the third stuntdouble set.  */
-        else if (strcmp(long_options[option_index].name, "sele3") == 0) {
-          if (update_arg((void *)&(args_info->sele3_arg),
-                         &(args_info->sele3_orig), &(args_info->sele3_given),
-                         &(local_args_info.sele3_given), optarg, 0, 0,
-                         ARG_STRING, check_ambiguity, override, 0, 0, "sele3",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* select reference (use and only use with --gxyz).  */
-        else if (strcmp(long_options[option_index].name, "refsele") == 0) {
-          if (update_arg(
-                  (void *)&(args_info->refsele_arg), &(args_info->refsele_orig),
-                  &(args_info->refsele_given), &(local_args_info.refsele_given),
-                  optarg, 0, 0, ARG_STRING, check_ambiguity, override, 0, 0,
-                  "refsele", '-', additional_error))
-            goto failure;
-
-        }
-        /* select stunt doubles for center-of-mass reference point.  */
-        else if (strcmp(long_options[option_index].name, "comsele") == 0) {
-          if (update_arg(
-                  (void *)&(args_info->comsele_arg), &(args_info->comsele_orig),
-                  &(args_info->comsele_given), &(local_args_info.comsele_given),
-                  optarg, 0, 0, ARG_STRING, check_ambiguity, override, 0, 0,
-                  "comsele", '-', additional_error))
-            goto failure;
-
-        }
-        /* global index offset for a second object (used to define a vector
-           between sites in molecule).  */
-        else if (strcmp(long_options[option_index].name, "seleoffset") == 0) {
-          if (update_arg((void *)&(args_info->seleoffset_arg),
-                         &(args_info->seleoffset_orig),
-                         &(args_info->seleoffset_given),
-                         &(local_args_info.seleoffset_given), optarg, 0, 0,
-                         ARG_INT, check_ambiguity, override, 0, 0, "seleoffset",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* global index offset for a third object (used to define a vector
-           between sites in molecule).  */
-        else if (strcmp(long_options[option_index].name, "seleoffset2") == 0) {
-          if (update_arg((void *)&(args_info->seleoffset2_arg),
-                         &(args_info->seleoffset2_orig),
-                         &(args_info->seleoffset2_given),
-                         &(local_args_info.seleoffset2_given), optarg, 0, 0,
-                         ARG_INT, check_ambiguity, override, 0, 0,
-                         "seleoffset2", '-', additional_error))
-            goto failure;
-
-        }
-        /* molecule name.  */
-        else if (strcmp(long_options[option_index].name, "molname") == 0) {
-          if (update_arg(
-                  (void *)&(args_info->molname_arg), &(args_info->molname_orig),
-                  &(args_info->molname_given), &(local_args_info.molname_given),
-                  optarg, 0, 0, ARG_STRING, check_ambiguity, override, 0, 0,
-                  "molname", '-', additional_error))
-            goto failure;
-
-        }
-        /* begin internal index.  */
-        else if (strcmp(long_options[option_index].name, "begin") == 0) {
-          if (update_arg((void *)&(args_info->begin_arg),
-                         &(args_info->begin_orig), &(args_info->begin_given),
-                         &(local_args_info.begin_given), optarg, 0, 0, ARG_INT,
-                         check_ambiguity, override, 0, 0, "begin", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* end internal index.  */
-        else if (strcmp(long_options[option_index].name, "end") == 0) {
-          if (update_arg((void *)&(args_info->end_arg), &(args_info->end_orig),
-                         &(args_info->end_given), &(local_args_info.end_given),
-                         optarg, 0, 0, ARG_INT, check_ambiguity, override, 0, 0,
-                         "end", '-', additional_error))
-            goto failure;
-
-        }
-        /* nanoparticle radius.  */
-        else if (strcmp(long_options[option_index].name, "radius") == 0) {
-          if (update_arg((void *)&(args_info->radius_arg),
-                         &(args_info->radius_orig), &(args_info->radius_given),
-                         &(local_args_info.radius_given), optarg, 0, 0,
-                         ARG_DOUBLE, check_ambiguity, override, 0, 0, "radius",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* Gaussian width (angstroms).  */
-        else if (strcmp(long_options[option_index].name, "gaussWidth") == 0) {
-          if (update_arg((void *)&(args_info->gaussWidth_arg),
-                         &(args_info->gaussWidth_orig),
-                         &(args_info->gaussWidth_given),
-                         &(local_args_info.gaussWidth_given), optarg, 0, 0,
-                         ARG_DOUBLE, check_ambiguity, override, 0, 0,
-                         "gaussWidth", '-', additional_error))
-            goto failure;
-
-        }
-        /* which axis is special for spatial analysis (default = z axis).  */
-        else if (strcmp(long_options[option_index].name, "privilegedAxis") ==
-                 0) {
-          if (update_arg((void *)&(args_info->privilegedAxis_arg),
-                         &(args_info->privilegedAxis_orig),
-                         &(args_info->privilegedAxis_given),
-                         &(local_args_info.privilegedAxis_given), optarg,
-                         cmdline_parser_privilegedAxis_values, "z", ARG_ENUM,
-                         check_ambiguity, override, 0, 0, "privilegedAxis", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* which axis is special for spatial analysis (default = x axis).  */
-        else if (strcmp(long_options[option_index].name, "privilegedAxis2") ==
-                 0) {
-          if (update_arg((void *)&(args_info->privilegedAxis2_arg),
-                         &(args_info->privilegedAxis2_orig),
-                         &(args_info->privilegedAxis2_given),
-                         &(local_args_info.privilegedAxis2_given), optarg,
-                         cmdline_parser_privilegedAxis2_values, "x", ARG_ENUM,
-                         check_ambiguity, override, 0, 0, "privilegedAxis2",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* Type of momentum whose distribtution is required (default = Liner
-           Momentum). */
-        else if (strcmp(long_options[option_index].name, "momentum") == 0) {
-          if (update_arg((void *)&(args_info->momentum_arg),
-                         &(args_info->momentum_orig),
-                         &(args_info->momentum_given),
-                         &(local_args_info.momentum_given), optarg,
-                         cmdline_parser_momentum_values, "P", ARG_ENUM,
-                         check_ambiguity, override, 0, 0, "momentum", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* component of momentum for the momemtum distribution (default = z
-           axis).  */
-        else if (strcmp(long_options[option_index].name, "component") == 0) {
-          if (update_arg((void *)&(args_info->component_arg),
-                         &(args_info->component_orig),
-                         &(args_info->component_given),
-                         &(local_args_info.component_given), optarg,
-                         cmdline_parser_component_values, "z", ARG_ENUM,
-                         check_ambiguity, override, 0, 0, "component", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* X-component of the dipole with respect to body frame.  */
-        else if (strcmp(long_options[option_index].name, "dipoleX") == 0) {
-          if (update_arg(
-                  (void *)&(args_info->dipoleX_arg), &(args_info->dipoleX_orig),
-                  &(args_info->dipoleX_given), &(local_args_info.dipoleX_given),
-                  optarg, 0, 0, ARG_DOUBLE, check_ambiguity, override, 0, 0,
-                  "dipoleX", '-', additional_error))
-            goto failure;
-
-        }
-        /* Y-component of the dipole with respect to body frame.  */
-        else if (strcmp(long_options[option_index].name, "dipoleY") == 0) {
-          if (update_arg(
-                  (void *)&(args_info->dipoleY_arg), &(args_info->dipoleY_orig),
-                  &(args_info->dipoleY_given), &(local_args_info.dipoleY_given),
-                  optarg, 0, 0, ARG_DOUBLE, check_ambiguity, override, 0, 0,
-                  "dipoleY", '-', additional_error))
-            goto failure;
-
-        }
-        /* Z-component of the dipole with respect to body frame.  */
-        else if (strcmp(long_options[option_index].name, "dipoleZ") == 0) {
-          if (update_arg(
-                  (void *)&(args_info->dipoleZ_arg), &(args_info->dipoleZ_orig),
-                  &(args_info->dipoleZ_given), &(local_args_info.dipoleZ_given),
-                  optarg, 0, 0, ARG_DOUBLE, check_ambiguity, override, 0, 0,
-                  "dipoleZ", '-', additional_error))
-            goto failure;
-
-        }
-        /* VanderWaals radiius for fictious atoms used in model eg. M site in
-           TIP4P-FQ water model.  */
-        else if (strcmp(long_options[option_index].name, "v_radius") == 0) {
-          if (update_arg((void *)&(args_info->v_radius_arg),
-                         &(args_info->v_radius_orig),
-                         &(args_info->v_radius_given),
-                         &(local_args_info.v_radius_given), optarg, 0, 0,
-                         ARG_DOUBLE, check_ambiguity, override, 0, 0,
-                         "v_radius", '-', additional_error))
-            goto failure;
-
-        }
-        /* generats xyz file.  */
-        else if (strcmp(long_options[option_index].name, "gen_xyz") == 0) {
-          if (update_arg((void *)&(args_info->gen_xyz_flag), 0,
-                         &(args_info->gen_xyz_given),
-                         &(local_args_info.gen_xyz_given), optarg, 0, 0,
-                         ARG_FLAG, check_ambiguity, override, 1, 0, "gen_xyz",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* name of atom for with average charge to be generated.  */
-        else if (strcmp(long_options[option_index].name, "atom_name") == 0) {
-          if (update_arg((void *)&(args_info->atom_name_arg),
-                         &(args_info->atom_name_orig),
-                         &(args_info->atom_name_given),
-                         &(local_args_info.atom_name_given), optarg, 0, 0,
-                         ARG_STRING, check_ambiguity, override, 0, 0,
-                         "atom_name", '-', additional_error))
-            goto failure;
-
-        }
-        /* bond order parameter (--rcut must be specified).  */
-        else if (strcmp(long_options[option_index].name, "bo") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->bo_given),
-                         &(local_args_info.bo_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "bo", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* icosahedral bond order parameter as a function of radius (--rcut must
-           be specified).  */
-        else if (strcmp(long_options[option_index].name, "ior") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->ior_given),
-                         &(local_args_info.ior_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "ior", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* FCC bond order parameter as a function of radius (--rcut must be
-           specified). */
-        else if (strcmp(long_options[option_index].name, "for") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->for_given),
-                         &(local_args_info.for_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "for", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* N(theta) bond angle density within (--rcut must be specified).  */
-        else if (strcmp(long_options[option_index].name, "bad") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->bad_given),
-                         &(local_args_info.bad_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "bad", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* count of molecules matching selection criteria (and associated
-           statistics).  */
-        else if (strcmp(long_options[option_index].name, "count") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->count_given),
-                         &(local_args_info.count_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "count", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* g(z).  */
-        else if (strcmp(long_options[option_index].name, "gofz") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->gofz_given),
-                         &(local_args_info.gofz_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "gofz", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* g(r, cos(theta)).  */
-        else if (strcmp(long_options[option_index].name, "r_theta") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->r_theta_given),
-                         &(local_args_info.r_theta_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "r_theta", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* g(r, cos(omega)).  */
-        else if (strcmp(long_options[option_index].name, "r_omega") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->r_omega_given),
-                         &(local_args_info.r_omega_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "r_omega", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* g(r, z).  */
-        else if (strcmp(long_options[option_index].name, "r_z") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->r_z_given),
-                         &(local_args_info.r_z_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "r_z", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* g(cos(theta), cos(omega)).  */
-        else if (strcmp(long_options[option_index].name, "theta_omega") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->theta_omega_given),
-                         &(local_args_info.theta_omega_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0, "theta_omega",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* g(r, cos(theta), cos(omega)).  */
-        else if (strcmp(long_options[option_index].name, "r_theta_omega") ==
-                 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->r_theta_omega_given),
-                         &(local_args_info.r_theta_omega_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0,
-                         "r_theta_omega", '-', additional_error))
-            goto failure;
-
-        }
-        /* g(x, y, z).  */
-        else if (strcmp(long_options[option_index].name, "gxyz") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->gxyz_given),
-                         &(local_args_info.gxyz_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "gxyz", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* 2D g(r) (Slab width --dz must be specified).  */
-        else if (strcmp(long_options[option_index].name, "twodgofr") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->twodgofr_given),
-                         &(local_args_info.twodgofr_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0, "twodgofr",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* rp2 order parameter (--sele1 and --sele2 must be specified).  */
-        else if (strcmp(long_options[option_index].name, "rp2") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->rp2_given),
-                         &(local_args_info.rp2_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "rp2", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* slab density, rho(z).  */
-        else if (strcmp(long_options[option_index].name, "slab_density") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->slab_density_given),
-                         &(local_args_info.slab_density_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0,
-                         "slab_density", '-', additional_error))
-            goto failure;
-
-        }
-        /* pipe density, rho(axis1, axis2).  */
-        else if (strcmp(long_options[option_index].name, "pipe_density") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->pipe_density_given),
-                         &(local_args_info.pipe_density_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0,
-                         "pipe_density", '-', additional_error))
-            goto failure;
-
-        }
-        /* p(cos(theta)) (--sele1 must be specified, --sele2 is optional).  */
-        else if (strcmp(long_options[option_index].name, "p_angle") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->p_angle_given),
-                         &(local_args_info.p_angle_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "p_angle", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* hxy.  */
-        else if (strcmp(long_options[option_index].name, "hxy") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->hxy_given),
-                         &(local_args_info.hxy_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "hxy", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* rho(R).  */
-        else if (strcmp(long_options[option_index].name, "rho_r") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->rho_r_given),
-                         &(local_args_info.rho_r_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "rho_r", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* angle of R.  */
-        else if (strcmp(long_options[option_index].name, "angle_r") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->angle_r_given),
-                         &(local_args_info.angle_r_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "angle_r", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* hull volume of nanoparticle.  */
-        else if (strcmp(long_options[option_index].name, "hullvol") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->hullvol_given),
-                         &(local_args_info.hullvol_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "hullvol", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* length of nanorod.  */
-        else if (strcmp(long_options[option_index].name, "rodlength") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->rodlength_given),
-                         &(local_args_info.rodlength_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0, "rodlength",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* spatially-resolved tetrahedrality order parameter Qk(z).  */
-        else if (strcmp(long_options[option_index].name, "tet_param_z") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->tet_param_z_given),
-                         &(local_args_info.tet_param_z_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0, "tet_param_z",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* computes density of the tetrahedrality order parameter Qk.  */
-        else if (strcmp(long_options[option_index].name, "tet_param_dens") ==
-                 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->tet_param_dens_given),
-                         &(local_args_info.tet_param_dens_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0,
-                         "tet_param_dens", '-', additional_error))
-            goto failure;
-
-        }
-        /* volume-resolved tetrahedrality order parameter Qk(x,y,z). (voxelSize,
-           rcut, and gaussWidth must be specified).  */
-        else if (strcmp(long_options[option_index].name, "tet_param_xyz") ==
-                 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->tet_param_xyz_given),
-                         &(local_args_info.tet_param_xyz_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0,
-                         "tet_param_xyz", '-', additional_error))
-            goto failure;
-
-        }
-        /* slab-resolved RNEMD statistics (temperature, density, velocity).  */
-        else if (strcmp(long_options[option_index].name, "rnemdz") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->rnemdz_given),
-                         &(local_args_info.rnemdz_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "rnemdz", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* shell-resolved RNEMD statistics (temperature, density, angular
-           velocity).  */
-        else if (strcmp(long_options[option_index].name, "rnemdr") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->rnemdr_given),
-                         &(local_args_info.rnemdr_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "rnemdr", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* shell and angle-resolved RNEMD statistics (temperature, density,
-           angular velocity).  */
-        else if (strcmp(long_options[option_index].name, "rnemdrt") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->rnemdrt_given),
-                         &(local_args_info.rnemdrt_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "rnemdrt", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* electrostatic potential to frequency map based on the Cho nitrile
-           fits.  */
-        else if (strcmp(long_options[option_index].name, "nitrile") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->nitrile_given),
-                         &(local_args_info.nitrile_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "nitrile", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* X, Y, and R (surface diffusion if Z exposed and bulk immobile)
-           diffusion.  */
-        else if (strcmp(long_options[option_index].name, "surfDiffusion") ==
-                 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->surfDiffusion_given),
-                         &(local_args_info.surfDiffusion_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0,
-                         "surfDiffusion", '-', additional_error))
-            goto failure;
-
-        }
-        /* Coordination Number Distribution.  */
-        else if (strcmp(long_options[option_index].name, "cn") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->cn_given),
-                         &(local_args_info.cn_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "cn", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* Secondary Coordination Number Distribution.  */
-        else if (strcmp(long_options[option_index].name, "scn") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->scn_given),
-                         &(local_args_info.scn_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "scn", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* Generalized Coordination Number Distribution.  */
-        else if (strcmp(long_options[option_index].name, "gcn") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->gcn_given),
-                         &(local_args_info.gcn_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "gcn", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* Hydrogen Bonding statistics using geometric criteria (rcut and
-           thetacut must be specified).  */
-        else if (strcmp(long_options[option_index].name, "hbond") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->hbond_given),
-                         &(local_args_info.hbond_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "hbond", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* potential energy difference when charge on selection is set to zero.
-         */
-        else if (strcmp(long_options[option_index].name, "potDiff") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->potDiff_given),
-                         &(local_args_info.potDiff_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "potDiff", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* hydrogen bond statistics binned by tetrahedrality of donor and
-           acceptor molecules.  */
-        else if (strcmp(long_options[option_index].name, "tet_hb") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->tet_hb_given),
-                         &(local_args_info.tet_hb_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "tet_hb", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* distance-dependent Kirkwood factor for quadrupoles.  */
-        else if (strcmp(long_options[option_index].name, "kirkwoodQ") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->kirkwoodQ_given),
-                         &(local_args_info.kirkwoodQ_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0, "kirkwoodQ",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* computes an average density field.  */
-        else if (strcmp(long_options[option_index].name, "densityfield") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->densityfield_given),
-                         &(local_args_info.densityfield_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0,
-                         "densityfield", '-', additional_error))
-            goto failure;
-
-        }
-        /* computes an average velocity field.  */
-        else if (strcmp(long_options[option_index].name, "velocityfield") ==
-                 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->velocityfield_given),
-                         &(local_args_info.velocityfield_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0,
-                         "velocityfield", '-', additional_error))
-            goto failure;
-
-        }
-        /* computes an average two-dimensional velocity map.  */
-        else if (strcmp(long_options[option_index].name, "velocityZ") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->velocityZ_given),
-                         &(local_args_info.velocityZ_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0, "velocityZ",
-                         '-', additional_error))
-            goto failure;
-
-        }
-        /* computes the charge distribution along selected axis and selected
-           atom.  */
-        else if (strcmp(long_options[option_index].name, "chargez") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->chargez_given),
-                         &(local_args_info.chargez_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "chargez", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* computes the continuous charge distribution along selected axis and
-           selected atom.  */
-        else if (strcmp(long_options[option_index].name, "charge_density_z") ==
-                 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->charge_density_z_given),
-                         &(local_args_info.charge_density_z_given), optarg, 0,
-                         0, ARG_NO, check_ambiguity, override, 0, 0,
-                         "charge_density_z", '-', additional_error))
-            goto failure;
-
-        }
-        /* computes the number of selected atoms  along selected axis.  */
-        else if (strcmp(long_options[option_index].name, "countz") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->countz_given),
-                         &(local_args_info.countz_given), optarg, 0, 0, ARG_NO,
-                         check_ambiguity, override, 0, 0, "countz", '-',
-                         additional_error))
-            goto failure;
-
-        }
-        /* probability of order parameter for given selection.  */
-        else if (strcmp(long_options[option_index].name, "order_prob") == 0) {
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps(args_info);
-          args_info->staticProps_group_counter += 1;
-
-          if (update_arg(0, 0, &(args_info->order_prob_given),
-                         &(local_args_info.order_prob_given), optarg, 0, 0,
-                         ARG_NO, check_ambiguity, override, 0, 0, "order_prob",
-                         '-', additional_error))
-            goto failure;
-        }
-
-        break;
-      case '?': /* Invalid option.  */
-        /* `getopt_long' already printed an error message.  */
+      if (args_info->staticProps_group_counter && override)
+        reset_group_staticProps(args_info);
+      args_info->staticProps_group_counter += 1;
+
+      if (update_arg(0, 0, &(args_info->scd_given),
+                     &(local_args_info.scd_given), optarg, 0, 0, ARG_NO,
+                     check_ambiguity, override, 0, 0, "scd", 's',
+                     additional_error))
         goto failure;
 
-      default: /* bug: option not considered.  */
-        fprintf(stderr, "%s: option unknown: %c%s\n", CMDLINE_PARSER_PACKAGE, c,
-                (additional_error ? additional_error : ""));
-        abort();
+      break;
+    case 'd': /* density plot.  */
+
+      if (args_info->staticProps_group_counter && override)
+        reset_group_staticProps(args_info);
+      args_info->staticProps_group_counter += 1;
+
+      if (update_arg(0, 0, &(args_info->density_given),
+                     &(local_args_info.density_given), optarg, 0, 0, ARG_NO,
+                     check_ambiguity, override, 0, 0, "density", 'd',
+                     additional_error))
+        goto failure;
+
+      break;
+    case 'Q': /* tetrahedrality order parameter (Qk).  */
+
+      if (args_info->staticProps_group_counter && override)
+        reset_group_staticProps(args_info);
+      args_info->staticProps_group_counter += 1;
+
+      if (update_arg(0, 0, &(args_info->tet_param_given),
+                     &(local_args_info.tet_param_given), optarg, 0, 0, ARG_NO,
+                     check_ambiguity, override, 0, 0, "tet_param", 'Q',
+                     additional_error))
+        goto failure;
+
+      break;
+    case 'm': /* average multipole moments contained within cutoff spheres as
+                   a function of radius.  */
+
+      if (args_info->staticProps_group_counter && override)
+        reset_group_staticProps(args_info);
+      args_info->staticProps_group_counter += 1;
+
+      if (update_arg(0, 0, &(args_info->multipole_given),
+                     &(local_args_info.multipole_given), optarg, 0, 0, ARG_NO,
+                     check_ambiguity, override, 0, 0, "multipole", 'm',
+                     additional_error))
+        goto failure;
+
+      break;
+    case 'k': /* distance-dependent Kirkwood factor.  */
+
+      if (args_info->staticProps_group_counter && override)
+        reset_group_staticProps(args_info);
+      args_info->staticProps_group_counter += 1;
+
+      if (update_arg(0, 0, &(args_info->kirkwood_given),
+                     &(local_args_info.kirkwood_given), optarg, 0, 0, ARG_NO,
+                     check_ambiguity, override, 0, 0, "kirkwood", 'k',
+                     additional_error))
+        goto failure;
+
+      break;
+    case 'D': /* computes an average eam density profile of the selected atom.
+               */
+
+      if (args_info->staticProps_group_counter && override)
+        reset_group_staticProps(args_info);
+      args_info->staticProps_group_counter += 1;
+
+      if (update_arg(0, 0, &(args_info->eam_density_given),
+                     &(local_args_info.eam_density_given), optarg, 0, 0, ARG_NO,
+                     check_ambiguity, override, 0, 0, "eam_density", 'D',
+                     additional_error))
+        goto failure;
+
+      break;
+    case 'q': /* computes an average charge profile of the selected atom.  */
+
+      if (args_info->staticProps_group_counter && override)
+        reset_group_staticProps(args_info);
+      args_info->staticProps_group_counter += 1;
+
+      if (update_arg(0, 0, &(args_info->net_charge_given),
+                     &(local_args_info.net_charge_given), optarg, 0, 0, ARG_NO,
+                     check_ambiguity, override, 0, 0, "net_charge", 'q',
+                     additional_error))
+        goto failure;
+
+      break;
+    case 'J': /* computes the current density for the selected atom.  */
+
+      if (args_info->staticProps_group_counter && override)
+        reset_group_staticProps(args_info);
+      args_info->staticProps_group_counter += 1;
+
+      if (update_arg(0, 0, &(args_info->current_density_given),
+                     &(local_args_info.current_density_given), optarg, 0, 0,
+                     ARG_NO, check_ambiguity, override, 0, 0, "current_density",
+                     'J', additional_error))
+        goto failure;
+
+      break;
+    case 'M': /* computes the momentum distribution for the selected atom.  */
+
+      if (args_info->staticProps_group_counter && override)
+        reset_group_staticProps(args_info);
+      args_info->staticProps_group_counter += 1;
+
+      if (update_arg(0, 0, &(args_info->momentum_distribution_given),
+                     &(local_args_info.momentum_distribution_given), optarg, 0,
+                     0, ARG_NO, check_ambiguity, override, 0, 0,
+                     "momentum_distribution", 'M', additional_error))
+        goto failure;
+
+      break;
+    case 'S': /* spatially-resolved dipole order parameter S(z), S = (3
+                   Cos^2\\theta - 1)/2.  */
+
+      if (args_info->staticProps_group_counter && override)
+        reset_group_staticProps(args_info);
+      args_info->staticProps_group_counter += 1;
+
+      if (update_arg(0, 0, &(args_info->dipole_orientation_given),
+                     &(local_args_info.dipole_orientation_given), optarg, 0, 0,
+                     ARG_NO, check_ambiguity, override, 0, 0,
+                     "dipole_orientation", 'S', additional_error))
+        goto failure;
+
+      break;
+
+    case 0: /* Long option with no short option */
+      /* number of bins in z axis.  */
+      if (strcmp(long_options[option_index].name, "nbins_z") == 0) {
+        if (update_arg((void*)&(args_info->nbins_z_arg),
+                       &(args_info->nbins_z_orig), &(args_info->nbins_z_given),
+                       &(local_args_info.nbins_z_given), optarg, 0, "100",
+                       ARG_INT, check_ambiguity, override, 0, 0, "nbins_z", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* Oxygen-Oxygen cutoff radius (angstroms).  */
+      else if (strcmp(long_options[option_index].name, "OOcut") == 0) {
+        if (update_arg((void*)&(args_info->OOcut_arg), &(args_info->OOcut_orig),
+                       &(args_info->OOcut_given),
+                       &(local_args_info.OOcut_given), optarg, 0, "3.5",
+                       ARG_DOUBLE, check_ambiguity, override, 0, 0, "OOcut",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* HOO cutoff angle (degrees).  */
+      else if (strcmp(long_options[option_index].name, "thetacut") == 0) {
+        if (update_arg(
+                (void*)&(args_info->thetacut_arg), &(args_info->thetacut_orig),
+                &(args_info->thetacut_given), &(local_args_info.thetacut_given),
+                optarg, 0, "30", ARG_DOUBLE, check_ambiguity, override, 0, 0,
+                "thetacut", '-', additional_error))
+          goto failure;
+
+      }
+      /* Oxygen-Hydrogen cutoff radius (angstroms).  */
+      else if (strcmp(long_options[option_index].name, "OHcut") == 0) {
+        if (update_arg((void*)&(args_info->OHcut_arg), &(args_info->OHcut_orig),
+                       &(args_info->OHcut_given),
+                       &(local_args_info.OHcut_given), optarg, 0, "2.45",
+                       ARG_DOUBLE, check_ambiguity, override, 0, 0, "OHcut",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* slab width (dz).  */
+      else if (strcmp(long_options[option_index].name, "dz") == 0) {
+        if (update_arg((void*)&(args_info->dz_arg), &(args_info->dz_orig),
+                       &(args_info->dz_given), &(local_args_info.dz_given),
+                       optarg, 0, 0, ARG_DOUBLE, check_ambiguity, override, 0,
+                       0, "dz", '-', additional_error))
+          goto failure;
+
+      }
+      /* maximum length (Defaults to 1/2 smallest length of first frame).  */
+      else if (strcmp(long_options[option_index].name, "length") == 0) {
+        if (update_arg((void*)&(args_info->length_arg),
+                       &(args_info->length_orig), &(args_info->length_given),
+                       &(local_args_info.length_given), optarg, 0, 0,
+                       ARG_DOUBLE, check_ambiguity, override, 0, 0, "length",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* maximum length (Defaults to 1/2 smallest length of first frame).  */
+      else if (strcmp(long_options[option_index].name, "zlength") == 0) {
+        if (update_arg((void*)&(args_info->zlength_arg),
+                       &(args_info->zlength_orig), &(args_info->zlength_given),
+                       &(local_args_info.zlength_given), optarg, 0, 0,
+                       ARG_DOUBLE, check_ambiguity, override, 0, 0, "zlength",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* select the first stuntdouble set.  */
+      else if (strcmp(long_options[option_index].name, "sele1") == 0) {
+        if (update_arg((void*)&(args_info->sele1_arg), &(args_info->sele1_orig),
+                       &(args_info->sele1_given),
+                       &(local_args_info.sele1_given), optarg, 0, 0, ARG_STRING,
+                       check_ambiguity, override, 0, 0, "sele1", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* select the second stuntdouble set.  */
+      else if (strcmp(long_options[option_index].name, "sele2") == 0) {
+        if (update_arg((void*)&(args_info->sele2_arg), &(args_info->sele2_orig),
+                       &(args_info->sele2_given),
+                       &(local_args_info.sele2_given), optarg, 0, 0, ARG_STRING,
+                       check_ambiguity, override, 0, 0, "sele2", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* select the third stuntdouble set.  */
+      else if (strcmp(long_options[option_index].name, "sele3") == 0) {
+        if (update_arg((void*)&(args_info->sele3_arg), &(args_info->sele3_orig),
+                       &(args_info->sele3_given),
+                       &(local_args_info.sele3_given), optarg, 0, 0, ARG_STRING,
+                       check_ambiguity, override, 0, 0, "sele3", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* select reference (use and only use with --gxyz).  */
+      else if (strcmp(long_options[option_index].name, "refsele") == 0) {
+        if (update_arg((void*)&(args_info->refsele_arg),
+                       &(args_info->refsele_orig), &(args_info->refsele_given),
+                       &(local_args_info.refsele_given), optarg, 0, 0,
+                       ARG_STRING, check_ambiguity, override, 0, 0, "refsele",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* select stunt doubles for center-of-mass reference point.  */
+      else if (strcmp(long_options[option_index].name, "comsele") == 0) {
+        if (update_arg((void*)&(args_info->comsele_arg),
+                       &(args_info->comsele_orig), &(args_info->comsele_given),
+                       &(local_args_info.comsele_given), optarg, 0, 0,
+                       ARG_STRING, check_ambiguity, override, 0, 0, "comsele",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* global index offset for a second object (used to define a vector
+           between sites in molecule).  */
+      else if (strcmp(long_options[option_index].name, "seleoffset") == 0) {
+        if (update_arg((void*)&(args_info->seleoffset_arg),
+                       &(args_info->seleoffset_orig),
+                       &(args_info->seleoffset_given),
+                       &(local_args_info.seleoffset_given), optarg, 0, 0,
+                       ARG_INT, check_ambiguity, override, 0, 0, "seleoffset",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* global index offset for a third object (used to define a vector
+           between sites in molecule).  */
+      else if (strcmp(long_options[option_index].name, "seleoffset2") == 0) {
+        if (update_arg((void*)&(args_info->seleoffset2_arg),
+                       &(args_info->seleoffset2_orig),
+                       &(args_info->seleoffset2_given),
+                       &(local_args_info.seleoffset2_given), optarg, 0, 0,
+                       ARG_INT, check_ambiguity, override, 0, 0, "seleoffset2",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* molecule name.  */
+      else if (strcmp(long_options[option_index].name, "molname") == 0) {
+        if (update_arg((void*)&(args_info->molname_arg),
+                       &(args_info->molname_orig), &(args_info->molname_given),
+                       &(local_args_info.molname_given), optarg, 0, 0,
+                       ARG_STRING, check_ambiguity, override, 0, 0, "molname",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* begin internal index.  */
+      else if (strcmp(long_options[option_index].name, "begin") == 0) {
+        if (update_arg((void*)&(args_info->begin_arg), &(args_info->begin_orig),
+                       &(args_info->begin_given),
+                       &(local_args_info.begin_given), optarg, 0, 0, ARG_INT,
+                       check_ambiguity, override, 0, 0, "begin", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* end internal index.  */
+      else if (strcmp(long_options[option_index].name, "end") == 0) {
+        if (update_arg((void*)&(args_info->end_arg), &(args_info->end_orig),
+                       &(args_info->end_given), &(local_args_info.end_given),
+                       optarg, 0, 0, ARG_INT, check_ambiguity, override, 0, 0,
+                       "end", '-', additional_error))
+          goto failure;
+
+      }
+      /* nanoparticle radius.  */
+      else if (strcmp(long_options[option_index].name, "radius") == 0) {
+        if (update_arg((void*)&(args_info->radius_arg),
+                       &(args_info->radius_orig), &(args_info->radius_given),
+                       &(local_args_info.radius_given), optarg, 0, 0,
+                       ARG_DOUBLE, check_ambiguity, override, 0, 0, "radius",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* Gaussian width (angstroms).  */
+      else if (strcmp(long_options[option_index].name, "gaussWidth") == 0) {
+        if (update_arg((void*)&(args_info->gaussWidth_arg),
+                       &(args_info->gaussWidth_orig),
+                       &(args_info->gaussWidth_given),
+                       &(local_args_info.gaussWidth_given), optarg, 0, 0,
+                       ARG_DOUBLE, check_ambiguity, override, 0, 0,
+                       "gaussWidth", '-', additional_error))
+          goto failure;
+
+      }
+      /* which axis is special for spatial analysis (default = z axis).  */
+      else if (strcmp(long_options[option_index].name, "privilegedAxis") == 0) {
+        if (update_arg((void*)&(args_info->privilegedAxis_arg),
+                       &(args_info->privilegedAxis_orig),
+                       &(args_info->privilegedAxis_given),
+                       &(local_args_info.privilegedAxis_given), optarg,
+                       cmdline_parser_privilegedAxis_values, "z", ARG_ENUM,
+                       check_ambiguity, override, 0, 0, "privilegedAxis", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* which axis is special for spatial analysis (default = x axis).  */
+      else if (strcmp(long_options[option_index].name, "privilegedAxis2") ==
+               0) {
+        if (update_arg((void*)&(args_info->privilegedAxis2_arg),
+                       &(args_info->privilegedAxis2_orig),
+                       &(args_info->privilegedAxis2_given),
+                       &(local_args_info.privilegedAxis2_given), optarg,
+                       cmdline_parser_privilegedAxis2_values, "x", ARG_ENUM,
+                       check_ambiguity, override, 0, 0, "privilegedAxis2", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* Type of momentum whose distribtution is required (default = Liner
+           Momentum). */
+      else if (strcmp(long_options[option_index].name, "momentum") == 0) {
+        if (update_arg(
+                (void*)&(args_info->momentum_arg), &(args_info->momentum_orig),
+                &(args_info->momentum_given), &(local_args_info.momentum_given),
+                optarg, cmdline_parser_momentum_values, "P", ARG_ENUM,
+                check_ambiguity, override, 0, 0, "momentum", '-',
+                additional_error))
+          goto failure;
+
+      }
+      /* component of momentum for the momemtum distribution (default = z
+           axis).  */
+      else if (strcmp(long_options[option_index].name, "component") == 0) {
+        if (update_arg(
+                (void*)&(args_info->component_arg),
+                &(args_info->component_orig), &(args_info->component_given),
+                &(local_args_info.component_given), optarg,
+                cmdline_parser_component_values, "z", ARG_ENUM, check_ambiguity,
+                override, 0, 0, "component", '-', additional_error))
+          goto failure;
+
+      }
+      /* X-component of the dipole with respect to body frame.  */
+      else if (strcmp(long_options[option_index].name, "dipoleX") == 0) {
+        if (update_arg((void*)&(args_info->dipoleX_arg),
+                       &(args_info->dipoleX_orig), &(args_info->dipoleX_given),
+                       &(local_args_info.dipoleX_given), optarg, 0, 0,
+                       ARG_DOUBLE, check_ambiguity, override, 0, 0, "dipoleX",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* Y-component of the dipole with respect to body frame.  */
+      else if (strcmp(long_options[option_index].name, "dipoleY") == 0) {
+        if (update_arg((void*)&(args_info->dipoleY_arg),
+                       &(args_info->dipoleY_orig), &(args_info->dipoleY_given),
+                       &(local_args_info.dipoleY_given), optarg, 0, 0,
+                       ARG_DOUBLE, check_ambiguity, override, 0, 0, "dipoleY",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* Z-component of the dipole with respect to body frame.  */
+      else if (strcmp(long_options[option_index].name, "dipoleZ") == 0) {
+        if (update_arg((void*)&(args_info->dipoleZ_arg),
+                       &(args_info->dipoleZ_orig), &(args_info->dipoleZ_given),
+                       &(local_args_info.dipoleZ_given), optarg, 0, 0,
+                       ARG_DOUBLE, check_ambiguity, override, 0, 0, "dipoleZ",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* VanderWaals radiius for fictious atoms used in model eg. M site in
+           TIP4P-FQ water model.  */
+      else if (strcmp(long_options[option_index].name, "v_radius") == 0) {
+        if (update_arg(
+                (void*)&(args_info->v_radius_arg), &(args_info->v_radius_orig),
+                &(args_info->v_radius_given), &(local_args_info.v_radius_given),
+                optarg, 0, 0, ARG_DOUBLE, check_ambiguity, override, 0, 0,
+                "v_radius", '-', additional_error))
+          goto failure;
+
+      }
+      /* generats xyz file.  */
+      else if (strcmp(long_options[option_index].name, "gen_xyz") == 0) {
+        if (update_arg((void*)&(args_info->gen_xyz_flag), 0,
+                       &(args_info->gen_xyz_given),
+                       &(local_args_info.gen_xyz_given), optarg, 0, 0, ARG_FLAG,
+                       check_ambiguity, override, 1, 0, "gen_xyz", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* name of atom for with average charge to be generated.  */
+      else if (strcmp(long_options[option_index].name, "atom_name") == 0) {
+        if (update_arg((void*)&(args_info->atom_name_arg),
+                       &(args_info->atom_name_orig),
+                       &(args_info->atom_name_given),
+                       &(local_args_info.atom_name_given), optarg, 0, 0,
+                       ARG_STRING, check_ambiguity, override, 0, 0, "atom_name",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* bond order parameter (--rcut must be specified).  */
+      else if (strcmp(long_options[option_index].name, "bo") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->bo_given),
+                       &(local_args_info.bo_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "bo", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* icosahedral bond order parameter as a function of radius (--rcut must
+           be specified).  */
+      else if (strcmp(long_options[option_index].name, "ior") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->ior_given),
+                       &(local_args_info.ior_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "ior", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* FCC bond order parameter as a function of radius (--rcut must be
+           specified). */
+      else if (strcmp(long_options[option_index].name, "for") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->for_given),
+                       &(local_args_info.for_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "for", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* N(theta) bond angle density within (--rcut must be specified).  */
+      else if (strcmp(long_options[option_index].name, "bad") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->bad_given),
+                       &(local_args_info.bad_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "bad", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* count of molecules matching selection criteria (and associated
+           statistics).  */
+      else if (strcmp(long_options[option_index].name, "count") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->count_given),
+                       &(local_args_info.count_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "count", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* g(z).  */
+      else if (strcmp(long_options[option_index].name, "gofz") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->gofz_given),
+                       &(local_args_info.gofz_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "gofz", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* g(r, cos(theta)).  */
+      else if (strcmp(long_options[option_index].name, "r_theta") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->r_theta_given),
+                       &(local_args_info.r_theta_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "r_theta", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* g(r, cos(omega)).  */
+      else if (strcmp(long_options[option_index].name, "r_omega") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->r_omega_given),
+                       &(local_args_info.r_omega_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "r_omega", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* g(r, z).  */
+      else if (strcmp(long_options[option_index].name, "r_z") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->r_z_given),
+                       &(local_args_info.r_z_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "r_z", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* g(cos(theta), cos(omega)).  */
+      else if (strcmp(long_options[option_index].name, "theta_omega") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->theta_omega_given),
+                       &(local_args_info.theta_omega_given), optarg, 0, 0,
+                       ARG_NO, check_ambiguity, override, 0, 0, "theta_omega",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* g(r, cos(theta), cos(omega)).  */
+      else if (strcmp(long_options[option_index].name, "r_theta_omega") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->r_theta_omega_given),
+                       &(local_args_info.r_theta_omega_given), optarg, 0, 0,
+                       ARG_NO, check_ambiguity, override, 0, 0, "r_theta_omega",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* g(x, y, z).  */
+      else if (strcmp(long_options[option_index].name, "gxyz") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->gxyz_given),
+                       &(local_args_info.gxyz_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "gxyz", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* 2D g(r) (Slab width --dz must be specified).  */
+      else if (strcmp(long_options[option_index].name, "twodgofr") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->twodgofr_given),
+                       &(local_args_info.twodgofr_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "twodgofr", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* rp2 order parameter (--sele1 and --sele2 must be specified).  */
+      else if (strcmp(long_options[option_index].name, "rp2") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->rp2_given),
+                       &(local_args_info.rp2_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "rp2", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* slab density, rho(z).  */
+      else if (strcmp(long_options[option_index].name, "slab_density") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->slab_density_given),
+                       &(local_args_info.slab_density_given), optarg, 0, 0,
+                       ARG_NO, check_ambiguity, override, 0, 0, "slab_density",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* pipe density, rho(axis1, axis2).  */
+      else if (strcmp(long_options[option_index].name, "pipe_density") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->pipe_density_given),
+                       &(local_args_info.pipe_density_given), optarg, 0, 0,
+                       ARG_NO, check_ambiguity, override, 0, 0, "pipe_density",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* p(cos(theta)) (--sele1 must be specified, --sele2 is optional).  */
+      else if (strcmp(long_options[option_index].name, "p_angle") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->p_angle_given),
+                       &(local_args_info.p_angle_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "p_angle", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* hxy.  */
+      else if (strcmp(long_options[option_index].name, "hxy") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->hxy_given),
+                       &(local_args_info.hxy_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "hxy", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* rho(R).  */
+      else if (strcmp(long_options[option_index].name, "rho_r") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->rho_r_given),
+                       &(local_args_info.rho_r_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "rho_r", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* angle of R.  */
+      else if (strcmp(long_options[option_index].name, "angle_r") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->angle_r_given),
+                       &(local_args_info.angle_r_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "angle_r", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* hull volume of nanoparticle.  */
+      else if (strcmp(long_options[option_index].name, "hullvol") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->hullvol_given),
+                       &(local_args_info.hullvol_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "hullvol", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* length of nanorod.  */
+      else if (strcmp(long_options[option_index].name, "rodlength") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->rodlength_given),
+                       &(local_args_info.rodlength_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "rodlength", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* spatially-resolved tetrahedrality order parameter Qk(z).  */
+      else if (strcmp(long_options[option_index].name, "tet_param_z") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->tet_param_z_given),
+                       &(local_args_info.tet_param_z_given), optarg, 0, 0,
+                       ARG_NO, check_ambiguity, override, 0, 0, "tet_param_z",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* computes density of the tetrahedrality order parameter Qk.  */
+      else if (strcmp(long_options[option_index].name, "tet_param_dens") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->tet_param_dens_given),
+                       &(local_args_info.tet_param_dens_given), optarg, 0, 0,
+                       ARG_NO, check_ambiguity, override, 0, 0,
+                       "tet_param_dens", '-', additional_error))
+          goto failure;
+
+      }
+      /* volume-resolved tetrahedrality order parameter Qk(x,y,z). (voxelSize,
+           rcut, and gaussWidth must be specified).  */
+      else if (strcmp(long_options[option_index].name, "tet_param_xyz") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->tet_param_xyz_given),
+                       &(local_args_info.tet_param_xyz_given), optarg, 0, 0,
+                       ARG_NO, check_ambiguity, override, 0, 0, "tet_param_xyz",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* slab-resolved RNEMD statistics (temperature, density, velocity).  */
+      else if (strcmp(long_options[option_index].name, "rnemdz") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->rnemdz_given),
+                       &(local_args_info.rnemdz_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "rnemdz", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* shell-resolved RNEMD statistics (temperature, density, angular
+           velocity).  */
+      else if (strcmp(long_options[option_index].name, "rnemdr") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->rnemdr_given),
+                       &(local_args_info.rnemdr_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "rnemdr", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* shell and angle-resolved RNEMD statistics (temperature, density,
+           angular velocity).  */
+      else if (strcmp(long_options[option_index].name, "rnemdrt") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->rnemdrt_given),
+                       &(local_args_info.rnemdrt_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "rnemdrt", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* electrostatic potential to frequency map based on the Cho nitrile
+           fits.  */
+      else if (strcmp(long_options[option_index].name, "nitrile") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->nitrile_given),
+                       &(local_args_info.nitrile_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "nitrile", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* X, Y, and R (surface diffusion if Z exposed and bulk immobile)
+           diffusion.  */
+      else if (strcmp(long_options[option_index].name, "surfDiffusion") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->surfDiffusion_given),
+                       &(local_args_info.surfDiffusion_given), optarg, 0, 0,
+                       ARG_NO, check_ambiguity, override, 0, 0, "surfDiffusion",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* Coordination Number Distribution.  */
+      else if (strcmp(long_options[option_index].name, "cn") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->cn_given),
+                       &(local_args_info.cn_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "cn", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* Secondary Coordination Number Distribution.  */
+      else if (strcmp(long_options[option_index].name, "scn") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->scn_given),
+                       &(local_args_info.scn_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "scn", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* Generalized Coordination Number Distribution.  */
+      else if (strcmp(long_options[option_index].name, "gcn") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->gcn_given),
+                       &(local_args_info.gcn_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "gcn", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* Hydrogen Bonding statistics using geometric criteria (rcut and
+           thetacut must be specified).  */
+      else if (strcmp(long_options[option_index].name, "hbond") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->hbond_given),
+                       &(local_args_info.hbond_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "hbond", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* potential energy difference when charge on selection is set to zero.
+       */
+      else if (strcmp(long_options[option_index].name, "potDiff") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->potDiff_given),
+                       &(local_args_info.potDiff_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "potDiff", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* hydrogen bond statistics binned by tetrahedrality of donor and
+           acceptor molecules.  */
+      else if (strcmp(long_options[option_index].name, "tet_hb") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->tet_hb_given),
+                       &(local_args_info.tet_hb_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "tet_hb", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* distance-dependent Kirkwood factor for quadrupoles.  */
+      else if (strcmp(long_options[option_index].name, "kirkwoodQ") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->kirkwoodQ_given),
+                       &(local_args_info.kirkwoodQ_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "kirkwoodQ", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* computes an average density field.  */
+      else if (strcmp(long_options[option_index].name, "densityfield") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->densityfield_given),
+                       &(local_args_info.densityfield_given), optarg, 0, 0,
+                       ARG_NO, check_ambiguity, override, 0, 0, "densityfield",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* computes an average velocity field.  */
+      else if (strcmp(long_options[option_index].name, "velocityfield") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->velocityfield_given),
+                       &(local_args_info.velocityfield_given), optarg, 0, 0,
+                       ARG_NO, check_ambiguity, override, 0, 0, "velocityfield",
+                       '-', additional_error))
+          goto failure;
+
+      }
+      /* computes an average two-dimensional velocity map.  */
+      else if (strcmp(long_options[option_index].name, "velocityZ") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->velocityZ_given),
+                       &(local_args_info.velocityZ_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "velocityZ", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* computes the charge distribution along selected axis and selected
+           atom.  */
+      else if (strcmp(long_options[option_index].name, "chargez") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->chargez_given),
+                       &(local_args_info.chargez_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "chargez", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* computes the continuous charge distribution along selected axis and
+           selected atom.  */
+      else if (strcmp(long_options[option_index].name, "charge_density_z") ==
+               0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->charge_density_z_given),
+                       &(local_args_info.charge_density_z_given), optarg, 0, 0,
+                       ARG_NO, check_ambiguity, override, 0, 0,
+                       "charge_density_z", '-', additional_error))
+          goto failure;
+
+      }
+      /* computes the number of selected atoms  along selected axis.  */
+      else if (strcmp(long_options[option_index].name, "countz") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->countz_given),
+                       &(local_args_info.countz_given), optarg, 0, 0, ARG_NO,
+                       check_ambiguity, override, 0, 0, "countz", '-',
+                       additional_error))
+          goto failure;
+
+      }
+      /* probability of order parameter for given selection.  */
+      else if (strcmp(long_options[option_index].name, "order_prob") == 0) {
+        if (args_info->staticProps_group_counter && override)
+          reset_group_staticProps(args_info);
+        args_info->staticProps_group_counter += 1;
+
+        if (update_arg(0, 0, &(args_info->order_prob_given),
+                       &(local_args_info.order_prob_given), optarg, 0, 0,
+                       ARG_NO, check_ambiguity, override, 0, 0, "order_prob",
+                       '-', additional_error))
+          goto failure;
+      }
+
+      break;
+    case '?': /* Invalid option.  */
+      /* `getopt_long' already printed an error message.  */
+      goto failure;
+
+    default: /* bug: option not considered.  */
+      fprintf(stderr, "%s: option unknown: %c%s\n", CMDLINE_PARSER_PACKAGE, c,
+              (additional_error ? additional_error : ""));
+      abort();
     } /* switch */
   }   /* while */
 
@@ -3152,7 +3132,7 @@ int cmdline_parser_internal(int argc, char **argv,
   if (error_occurred) return (EXIT_FAILURE);
 
   if (optind < argc) {
-    int i = 0;
+    int i               = 0;
     int found_prog_name = 0;
     /* whether program name, i.e., argv[0], is in the remaining args
        (this may happen with some implementations of getopt,
@@ -3160,7 +3140,7 @@ int cmdline_parser_internal(int argc, char **argv,
 
     args_info->inputs_num = argc - optind - found_prog_name;
     args_info->inputs =
-        (char **)(malloc((args_info->inputs_num) * sizeof(char *)));
+        (char**)(malloc((args_info->inputs_num) * sizeof(char*)));
     while (optind < argc)
       args_info->inputs[i++] = gengetopt_strdup(argv[optind++]);
   }

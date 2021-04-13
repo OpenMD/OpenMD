@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,165 +51,165 @@
 
 namespace OpenMD {
 
-MultipoleAtomTypesSectionParser::MultipoleAtomTypesSectionParser(
-    ForceFieldOptions& options)
-    : options_(options) {
-  setSectionName("MultipoleAtomTypes");
-}
+  MultipoleAtomTypesSectionParser::MultipoleAtomTypesSectionParser(
+      ForceFieldOptions& options) :
+      options_(options) {
+    setSectionName("MultipoleAtomTypes");
+  }
 
-void MultipoleAtomTypesSectionParser::parseLine(ForceField& ff,
-                                                const std::string& line,
-                                                int lineNo) {
-  StringTokenizer tokenizer(line);
-  int nTokens = tokenizer.countTokens();
+  void MultipoleAtomTypesSectionParser::parseLine(ForceField& ff,
+                                                  const std::string& line,
+                                                  int lineNo) {
+    StringTokenizer tokenizer(line);
+    int nTokens = tokenizer.countTokens();
 
-  // name multipole_type theta phi psi
-  // "name" must match the name in the AtomTypes section
-  //
-  // avaliable multipole types are:
-  // d  (dipole)
-  // q  (quadrupole)
-  // dq (dipole plus quadrupole)
-  //
-  // Directionality for dipoles and quadrupoles is given by three
-  // euler angles (phi, theta, psi), because the body-fixed
-  // reference frame for directional atoms is determined by the
-  // *mass* distribution and not by the charge distribution.
-  //
-  // Dipoles are given in units of Debye
-  // Quadrupoles are given in units of esu centibarn
-  //
-  // Examples:
-  //
-  // name d phi theta psi dipole_moment
-  // name q phi theta psi Qxx Qyy Qzz
-  // name dq phi theta psi dipole_moment Qxx Qyy Qzz
+    // name multipole_type theta phi psi
+    // "name" must match the name in the AtomTypes section
+    //
+    // avaliable multipole types are:
+    // d  (dipole)
+    // q  (quadrupole)
+    // dq (dipole plus quadrupole)
+    //
+    // Directionality for dipoles and quadrupoles is given by three
+    // euler angles (phi, theta, psi), because the body-fixed
+    // reference frame for directional atoms is determined by the
+    // *mass* distribution and not by the charge distribution.
+    //
+    // Dipoles are given in units of Debye
+    // Quadrupoles are given in units of esu centibarn
+    //
+    // Examples:
+    //
+    // name d phi theta psi dipole_moment
+    // name q phi theta psi Qxx Qyy Qzz
+    // name dq phi theta psi dipole_moment Qxx Qyy Qzz
 
-  if (nTokens < 5) {
-    sprintf(
-        painCave.errMsg,
-        "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-        lineNo);
-    painCave.isFatal = 1;
-    simError();
-  } else {
-    std::string atomTypeName = tokenizer.nextToken();
-    std::string multipoleType = tokenizer.nextToken();
-    RealType phi = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
-    RealType theta = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
-    RealType psi = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
-
-    AtomType* atomType = ff.getAtomType(atomTypeName);
-    if (atomType == NULL) {
+    if (nTokens < 5) {
       sprintf(painCave.errMsg,
-              "MultipoleAtomTypesSectionParser Error: Can not find matched "
-              "AtomType[%s] "
-              "at line %d\n",
-              atomTypeName.c_str(), lineNo);
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    MultipoleAdapter ma = MultipoleAdapter(atomType);
-
-    RotMat3x3d eFrame(0.0);
-
-    eFrame.setupRotMat(phi, theta, psi);
-
-    RealType dipoleMoment(0);
-    Vector3d dipole(V3Zero);
-    Vector3d quadrupoleMoments(V3Zero);
-    Mat3x3d quadrupole(0.0);
-
-    bool isDipole(false);
-    bool isQuadrupole(false);
-
-    if (multipoleType == "d") {
-      parseDipole(tokenizer, dipoleMoment, lineNo);
-      isDipole = true;
-    } else if (multipoleType == "s") {
-      sprintf(painCave.errMsg,
-              "MultipoleAtomTypesSectionParser Error: \n"
-              "\tsplit dipoles (type s) have been deprecated (line: %d)\n",
-              lineNo);
-      painCave.isFatal = 1;
-      simError();
-    } else if (multipoleType == "q") {
-      parseQuadrupole(tokenizer, quadrupoleMoments, lineNo);
-      isQuadrupole = true;
-    } else if (multipoleType == "dq") {
-      parseDipole(tokenizer, dipoleMoment, lineNo);
-      isDipole = true;
-      parseQuadrupole(tokenizer, quadrupoleMoments, lineNo);
-      isQuadrupole = true;
-    } else if (multipoleType == "sq") {
-      sprintf(painCave.errMsg,
-              "MultipoleAtomTypesSectionParser Error: \n"
-              "\tsplit dipole quadrupoles (type sq) have been deprecated "
-              "(line: %d)\n",
+              "MultipoleAtomTypesSectionParser Error: Not enough tokens at "
+              "line %d\n",
               lineNo);
       painCave.isFatal = 1;
       simError();
     } else {
+      std::string atomTypeName  = tokenizer.nextToken();
+      std::string multipoleType = tokenizer.nextToken();
+      RealType phi   = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
+      RealType theta = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
+      RealType psi   = tokenizer.nextTokenAsDouble() * Constants::PI / 180.0;
+
+      AtomType* atomType = ff.getAtomType(atomTypeName);
+      if (atomType == NULL) {
+        sprintf(painCave.errMsg,
+                "MultipoleAtomTypesSectionParser Error: Can not find matched "
+                "AtomType[%s] "
+                "at line %d\n",
+                atomTypeName.c_str(), lineNo);
+        painCave.isFatal = 1;
+        simError();
+      }
+
+      MultipoleAdapter ma = MultipoleAdapter(atomType);
+
+      RotMat3x3d eFrame(0.0);
+
+      eFrame.setupRotMat(phi, theta, psi);
+
+      RealType dipoleMoment(0);
+      Vector3d dipole(V3Zero);
+      Vector3d quadrupoleMoments(V3Zero);
+      Mat3x3d quadrupole(0.0);
+
+      bool isDipole(false);
+      bool isQuadrupole(false);
+
+      if (multipoleType == "d") {
+        parseDipole(tokenizer, dipoleMoment, lineNo);
+        isDipole = true;
+      } else if (multipoleType == "s") {
+        sprintf(painCave.errMsg,
+                "MultipoleAtomTypesSectionParser Error: \n"
+                "\tsplit dipoles (type s) have been deprecated (line: %d)\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else if (multipoleType == "q") {
+        parseQuadrupole(tokenizer, quadrupoleMoments, lineNo);
+        isQuadrupole = true;
+      } else if (multipoleType == "dq") {
+        parseDipole(tokenizer, dipoleMoment, lineNo);
+        isDipole = true;
+        parseQuadrupole(tokenizer, quadrupoleMoments, lineNo);
+        isQuadrupole = true;
+      } else if (multipoleType == "sq") {
+        sprintf(painCave.errMsg,
+                "MultipoleAtomTypesSectionParser Error: \n"
+                "\tsplit dipole quadrupoles (type sq) have been deprecated "
+                "(line: %d)\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        sprintf(painCave.errMsg,
+                "MultipoleAtomTypesSectionParser Error: unrecognized multiple "
+                "type at line "
+                "%d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      }
+      if (isDipole) dipole = dipoleMoment * eFrame.transpose() * V3Z;
+      if (isQuadrupole) {
+        quadrupole(0, 0) = quadrupoleMoments(0);
+        quadrupole(1, 1) = quadrupoleMoments(1);
+        quadrupole(2, 2) = quadrupoleMoments(2);
+        quadrupole       = eFrame.transpose() * quadrupole * eFrame;
+      }
+
+      ma.makeMultipole(dipole, quadrupole, isDipole, isQuadrupole);
+    }
+  }
+
+  void MultipoleAtomTypesSectionParser::parseDipole(StringTokenizer& tokenizer,
+                                                    RealType& dipoleMoment,
+                                                    int lineNo) {
+    if (tokenizer.hasMoreTokens()) {
+      dipoleMoment = tokenizer.nextTokenAsDouble();
+    } else {
       sprintf(painCave.errMsg,
-              "MultipoleAtomTypesSectionParser Error: unrecognized multiple "
-              "type at line "
-              "%d\n",
+              "MultipoleAtomTypesSectionParser Error: Not enough tokens at "
+              "line %d\n",
               lineNo);
       painCave.isFatal = 1;
       simError();
     }
-    if (isDipole) dipole = dipoleMoment * eFrame.transpose() * V3Z;
-    if (isQuadrupole) {
-      quadrupole(0, 0) = quadrupoleMoments(0);
-      quadrupole(1, 1) = quadrupoleMoments(1);
-      quadrupole(2, 2) = quadrupoleMoments(2);
-      quadrupole = eFrame.transpose() * quadrupole * eFrame;
+  }
+
+  void MultipoleAtomTypesSectionParser::parseQuadrupole(
+      StringTokenizer& tokenizer, Vector3d& quadrupoleMoments, int lineNo) {
+    int nTokens = tokenizer.countTokens();
+    if (nTokens >= 3) {
+      quadrupoleMoments[0] = tokenizer.nextTokenAsDouble();
+      quadrupoleMoments[1] = tokenizer.nextTokenAsDouble();
+      quadrupoleMoments[2] = tokenizer.nextTokenAsDouble();
+
+      // RealType trace =  quadrupoleMoments.sum();
+      //
+      // if (fabs(trace) > OpenMD::epsilon) {
+      //   sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: the
+      //   trace of quadrupole moments is not zero at line %d\n", 	lineNo);
+      //   painCave.isFatal = 1; simError();
+      // }
+
+    } else {
+      sprintf(painCave.errMsg,
+              "MultipoleAtomTypesSectionParser Error: Not enough tokens at "
+              "line %d\n",
+              lineNo);
+      painCave.isFatal = 1;
+      simError();
     }
-
-    ma.makeMultipole(dipole, quadrupole, isDipole, isQuadrupole);
   }
-}
-
-void MultipoleAtomTypesSectionParser::parseDipole(StringTokenizer& tokenizer,
-                                                  RealType& dipoleMoment,
-                                                  int lineNo) {
-  if (tokenizer.hasMoreTokens()) {
-    dipoleMoment = tokenizer.nextTokenAsDouble();
-  } else {
-    sprintf(
-        painCave.errMsg,
-        "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-        lineNo);
-    painCave.isFatal = 1;
-    simError();
-  }
-}
-
-void MultipoleAtomTypesSectionParser::parseQuadrupole(
-    StringTokenizer& tokenizer, Vector3d& quadrupoleMoments, int lineNo) {
-  int nTokens = tokenizer.countTokens();
-  if (nTokens >= 3) {
-    quadrupoleMoments[0] = tokenizer.nextTokenAsDouble();
-    quadrupoleMoments[1] = tokenizer.nextTokenAsDouble();
-    quadrupoleMoments[2] = tokenizer.nextTokenAsDouble();
-
-    // RealType trace =  quadrupoleMoments.sum();
-    //
-    // if (fabs(trace) > OpenMD::epsilon) {
-    //   sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: the
-    //   trace of quadrupole moments is not zero at line %d\n", 	lineNo);
-    //   painCave.isFatal = 1; simError();
-    // }
-
-  } else {
-    sprintf(
-        painCave.errMsg,
-        "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-        lineNo);
-    painCave.isFatal = 1;
-    simError();
-  }
-}
 
 }  // end namespace OpenMD

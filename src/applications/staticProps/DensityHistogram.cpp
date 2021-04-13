@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -61,114 +61,111 @@
 
 namespace OpenMD {
 
-DensityHistogram::DensityHistogram(SimInfo* info, const std::string& filename,
-                                   const std::string& sele, int nbins)
-    : StaticAnalyser(info, filename, nbins),
-      selectionScript_(sele),
-      evaluator_(info),
-      seleMan_(info),
-      nBins_(nbins) {
-  evaluator_.loadScriptString(sele);
-  if (!evaluator_.isDynamic()) {
-    seleMan_.setSelectionSet(evaluator_.evaluate());
-  }
-
-  setOutputName(getPrefix(filename) + ".EAMDensity");
-}
-
-void DensityHistogram::process() {
-  StuntDouble* sd;
-  int ii;
-
-  if (evaluator_.isDynamic()) {
-    seleMan_.setSelectionSet(evaluator_.evaluate());
-  }
-
-  DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
-  nProcessed_ = nFrames / step_;
-  vector<RealType> density;
-
-  nProcessed_ = nFrames / step_;
-
-  for (int istep = 0; istep < nFrames; istep += step_) {
-    reader.readFrame(istep);
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
-    for (sd = seleMan_.beginSelected(ii); sd != NULL;
-         sd = seleMan_.nextSelected(ii)) {
-      if (sd->getDensity()) density.push_back(sd->getDensity());
+  DensityHistogram::DensityHistogram(SimInfo* info, const std::string& filename,
+                                     const std::string& sele, int nbins) :
+      StaticAnalyser(info, filename, nbins),
+      selectionScript_(sele), evaluator_(info), seleMan_(info), nBins_(nbins) {
+    evaluator_.loadScriptString(sele);
+    if (!evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
     }
+
+    setOutputName(getPrefix(filename) + ".EAMDensity");
   }
 
-  if (density.empty()) {
-    sprintf(painCave.errMsg, "Density for selected atom not found.\n");
-    painCave.isFatal = 1;
-    simError();
-  }
+  void DensityHistogram::process() {
+    StuntDouble* sd;
+    int ii;
 
-  std::sort(density.begin(), density.end());
-
-  RealType min = density.front();
-  RealType max = density.back();
-
-  RealType delta_density = (max - min) / (nBins_);
-  averageDensity_ = 0;
-  if (delta_density == 0) {
-    bincenter_.push_back(min);
-    histList_.push_back(density.size());
-    averageDensity_ = min;
-  } else {
-    // fill the center for histogram
-    for (int j = 0; j < nBins_ + 3; ++j) {
-      bincenter_.push_back(min + (j - 1) * delta_density);
-      histList_.push_back(0);
+    if (evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
     }
-    // filling up the histogram whith the densities
-    int bin_center_pos = 0;
-    vector<RealType>::iterator index;
-    RealType density_length = static_cast<RealType>(density.size());
 
-    bool hist_update;
-    for (index = density.begin(); index < density.end(); index++) {
-      hist_update = true;
-      while (hist_update) {
-        if (*index >= bincenter_[bin_center_pos] &&
-            *index < bincenter_[bin_center_pos + 1]) {
-          histList_[bin_center_pos] += 1.0 / density_length;
-          hist_update = false;
-        } else {
-          averageDensity_ +=
-              histList_[bin_center_pos] * bincenter_[bin_center_pos];
-          bin_center_pos++;
-          hist_update = true;
-        }
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
+    nProcessed_ = nFrames / step_;
+    vector<RealType> density;
+
+    nProcessed_ = nFrames / step_;
+
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+
+      for (sd = seleMan_.beginSelected(ii); sd != NULL;
+           sd = seleMan_.nextSelected(ii)) {
+        if (sd->getDensity()) density.push_back(sd->getDensity());
       }
     }
-    averageDensity_ += histList_[bin_center_pos] * bincenter_[bin_center_pos];
-  }
-  writeDensity();
-}
 
-void DensityHistogram::writeDensity() {
-  std::ofstream rdfStream(outputFilename_.c_str());
-  if (rdfStream.is_open()) {
-    rdfStream << "#EAMDensity\n";
-    rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
-    rdfStream << "#selection: (" << selectionScript_ << ")\n";
-    rdfStream << "#Average EAM density: " << averageDensity_ << "\n";
-    rdfStream << "#"
-              << "Bin_center"
-              << "\tcount\n";
-    for (unsigned int i = 0; i < histList_.size(); ++i) {
-      rdfStream << bincenter_[i] << "\t" << histList_[i] << "\n";
+    if (density.empty()) {
+      sprintf(painCave.errMsg, "Density for selected atom not found.\n");
+      painCave.isFatal = 1;
+      simError();
     }
-  } else {
-    sprintf(painCave.errMsg, "EAMDensity: unable to open %s\n",
-            outputFilename_.c_str());
-    painCave.isFatal = 1;
-    simError();
+
+    std::sort(density.begin(), density.end());
+
+    RealType min = density.front();
+    RealType max = density.back();
+
+    RealType delta_density = (max - min) / (nBins_);
+    averageDensity_        = 0;
+    if (delta_density == 0) {
+      bincenter_.push_back(min);
+      histList_.push_back(density.size());
+      averageDensity_ = min;
+    } else {
+      // fill the center for histogram
+      for (int j = 0; j < nBins_ + 3; ++j) {
+        bincenter_.push_back(min + (j - 1) * delta_density);
+        histList_.push_back(0);
+      }
+      // filling up the histogram whith the densities
+      int bin_center_pos = 0;
+      vector<RealType>::iterator index;
+      RealType density_length = static_cast<RealType>(density.size());
+
+      bool hist_update;
+      for (index = density.begin(); index < density.end(); index++) {
+        hist_update = true;
+        while (hist_update) {
+          if (*index >= bincenter_[bin_center_pos] &&
+              *index < bincenter_[bin_center_pos + 1]) {
+            histList_[bin_center_pos] += 1.0 / density_length;
+            hist_update = false;
+          } else {
+            averageDensity_ +=
+                histList_[bin_center_pos] * bincenter_[bin_center_pos];
+            bin_center_pos++;
+            hist_update = true;
+          }
+        }
+      }
+      averageDensity_ += histList_[bin_center_pos] * bincenter_[bin_center_pos];
+    }
+    writeDensity();
   }
-  rdfStream.close();
-}
+
+  void DensityHistogram::writeDensity() {
+    std::ofstream rdfStream(outputFilename_.c_str());
+    if (rdfStream.is_open()) {
+      rdfStream << "#EAMDensity\n";
+      rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
+      rdfStream << "#selection: (" << selectionScript_ << ")\n";
+      rdfStream << "#Average EAM density: " << averageDensity_ << "\n";
+      rdfStream << "#"
+                << "Bin_center"
+                << "\tcount\n";
+      for (unsigned int i = 0; i < histList_.size(); ++i) {
+        rdfStream << bincenter_[i] << "\t" << histList_[i] << "\n";
+      }
+    } else {
+      sprintf(painCave.errMsg, "EAMDensity: unable to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+    rdfStream.close();
+  }
 }  // namespace OpenMD

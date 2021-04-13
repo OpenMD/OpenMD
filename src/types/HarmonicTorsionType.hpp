@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_HARMONICTORSIONTYPE_HPP
 #define TYPES_HARMONICTORSIONTYPE_HPP
 
@@ -65,60 +65,49 @@ namespace OpenMD {
    *    http://pubs.acs.org/doi/abs/10.1021/jp001044x
    *
    * This torsion potential has the form:
-   * 
-   *  \f[ 
+   *
+   *  \f[
          V_{tors} = \frac{d_0}{2} \left(\phi - \phi_0\right)^2
        \f]
    *
    */
   class HarmonicTorsionType : public TorsionType {
-    
   public:
-    
-    HarmonicTorsionType(RealType d0, RealType phi0) :  
-      TorsionType(), d0_(d0), phi0_(phi0) {}
-
+    HarmonicTorsionType(RealType d0, RealType phi0) :
+        TorsionType(), d0_(d0), phi0_(phi0) {}
 
     virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) {
-      //check roundoff     
+      // check roundoff
       if (cosPhi > 1.0) {
         cosPhi = 1.0;
       } else if (cosPhi < -1.0) {
         cosPhi = -1.0;
       }
 
-      RealType phi = acos(cosPhi);
+      RealType phi    = acos(cosPhi);
       RealType sinPhi = sqrt(1.0 - cosPhi * cosPhi);
 
       // trick to avoid divergence in angles near 0 and pi:
 
-      if (fabs(sinPhi) < 1.0E-6) {
-        sinPhi = copysign(1.0E-6, sinPhi);
-      }
+      if (fabs(sinPhi) < 1.0E-6) { sinPhi = copysign(1.0E-6, sinPhi); }
 
       V = 0.5 * d0_ * pow((phi - phi0_), 2);
 
       dVdCosPhi = -d0_ * (phi - phi0_) / sinPhi;
     }
 
-    
-    friend std::ostream& operator <<(std::ostream& os, HarmonicTorsionType& ttt);
-    
+    friend std::ostream& operator<<(std::ostream& os, HarmonicTorsionType& ttt);
+
   private:
-    
     RealType d0_;
     RealType phi0_;
-   
   };
-  
-  std::ostream& operator <<(std::ostream& os, HarmonicTorsionType& htt) {
-    
+
+  std::ostream& operator<<(std::ostream& os, HarmonicTorsionType& htt) {
     os << "This HarmonicTorsionType has below form:" << std::endl;
-    os << htt.d0_ << "*(phi - " << htt.phi0_ << ")/2" << std::endl; 
+    os << htt.d0_ << "*(phi - " << htt.phi0_ << ")/2" << std::endl;
     return os;
   }
-  
-} //end namespace OpenMD
-#endif //TYPES_HARMONICTORSIONTYPE_HPP
 
-
+}  // end namespace OpenMD
+#endif  // TYPES_HARMONICTORSIONTYPE_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -59,8 +59,8 @@
 
 namespace OpenMD {
 
-
-  //! Computes a correlation function by scanning a trajectory once to precompute quantities to be correlated
+  //! Computes a correlation function by scanning a trajectory once to
+  //! precompute quantities to be correlated
 
   template<typename T>
   class TimeCorrFunc : public DynamicProperty {
@@ -68,27 +68,20 @@ namespace OpenMD {
     TimeCorrFunc(SimInfo* info, const std::string& filename,
                  const std::string& sele1, const std::string& sele2,
                  int storageLayout);
-    
+
     virtual ~TimeCorrFunc() = default;
     virtual void doCorrelate();
-    
-    const std::string& getCorrFuncType() const {
-      return corrFuncType_;
-    }
-    
-    void setCorrFuncType(const std::string& type) {
-      corrFuncType_ = type;
-    }
-    
+
+    const std::string& getCorrFuncType() const { return corrFuncType_; }
+
+    void setCorrFuncType(const std::string& type) { corrFuncType_ = type; }
+
     void setParameterString(const std::string& params) {
       paramString_ = params;
     }
 
-    void setLabelString(const std::string& label) {
-      labelString_ = label;
-    }
+    void setLabelString(const std::string& label) { labelString_ = label; }
 
-    
   protected:
     virtual void preCorrelate();
     virtual void correlation();
@@ -99,10 +92,10 @@ namespace OpenMD {
     virtual void writeCorrelate();
 
     // The pure virtual functions that must be implemented.
-    
+
     // For System Properties:
-    virtual void computeProperty1(int frame) = 0;
-    virtual void computeProperty2(int frame) = 0;
+    virtual void computeProperty1(int frame)      = 0;
+    virtual void computeProperty2(int frame)      = 0;
     virtual T calcCorrVal(int frame1, int frame2) = 0;
     // For Molecular Properties
     virtual int computeProperty1(int frame, Molecule* mol) = 0;
@@ -124,7 +117,7 @@ namespace OpenMD {
     std::vector<T> histogram_;
     std::vector<int> count_;
     std::vector<RealType> times_;
-   
+
     SimInfo* info_ {nullptr};
     DumpReader* reader_;
     std::string dumpFilename_;
@@ -151,11 +144,10 @@ namespace OpenMD {
     std::string paramString_;
     std::string labelString_;
 
-    std::vector<std::vector<int> > sele1ToIndex_;
-    std::vector<std::vector<int> > sele2ToIndex_;
+    std::vector<std::vector<int>> sele1ToIndex_;
+    std::vector<std::vector<int>> sele2ToIndex_;
 
     ProgressBarPtr progressBar_;
-
   };
 
   template<typename T>
@@ -164,36 +156,35 @@ namespace OpenMD {
     AutoCorrFunc(SimInfo* info, const std::string& filename,
                  const std::string& sele1, const std::string& sele2,
                  int storageLayout);
-    
+
   protected:
-    virtual void computeProperty1(int frame) = 0;
-    virtual int computeProperty1(int frame, Molecule* mol) = 0;
+    virtual void computeProperty1(int frame)                 = 0;
+    virtual int computeProperty1(int frame, Molecule* mol)   = 0;
     virtual int computeProperty1(int frame, StuntDouble* sd) = 0;
-    virtual int computeProperty1(int frame, Bond* bond) = 0;
-    
+    virtual int computeProperty1(int frame, Bond* bond)      = 0;
+
     virtual void computeProperty2(int frame) {}
     virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
     virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
     virtual int computeProperty2(int frame, Bond* bond) { return -1; }
-
   };
 
   template<typename T>
   class CrossCorrFunc : public TimeCorrFunc<T> {
   public:
-     CrossCorrFunc(SimInfo* info, const std::string& filename,
-                   const std::string& sele1, const std::string& sele2,
-                   int storageLayout);
+    CrossCorrFunc(SimInfo* info, const std::string& filename,
+                  const std::string& sele1, const std::string& sele2,
+                  int storageLayout);
 
   protected:
-    virtual void computeProperty1(int frame) = 0;
-    virtual int computeProperty1(int frame, Molecule* mol) = 0;
+    virtual void computeProperty1(int frame)                 = 0;
+    virtual int computeProperty1(int frame, Molecule* mol)   = 0;
     virtual int computeProperty1(int frame, StuntDouble* sd) = 0;
-    virtual int computeProperty1(int frame, Bond* bond) = 0;
-    virtual void computeProperty2(int frame) = 0;
-    virtual int computeProperty2(int frame, Molecule* mol) = 0;
+    virtual int computeProperty1(int frame, Bond* bond)      = 0;
+    virtual void computeProperty2(int frame)                 = 0;
+    virtual int computeProperty2(int frame, Molecule* mol)   = 0;
     virtual int computeProperty2(int frame, StuntDouble* sd) = 0;
-    virtual int computeProperty2(int frame, Bond* bond) = 0;
+    virtual int computeProperty2(int frame, Bond* bond)      = 0;
   };
 
   template<typename T>
@@ -202,8 +193,9 @@ namespace OpenMD {
     SystemACF(SimInfo* info, const std::string& filename,
               const std::string& sele1, const std::string& sele2,
               int storageLayout);
+
   protected:
-    virtual void computeProperty1(int frame) = 0;
+    virtual void computeProperty1(int frame)      = 0;
     virtual T calcCorrVal(int frame1, int frame2) = 0;
 
     virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
@@ -214,9 +206,8 @@ namespace OpenMD {
     virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
     virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
     virtual int computeProperty2(int frame, Bond* bond) { return -1; }
-    
-    T calcCorrVal(int frame1, int frame2, int id1, int id2) { return T(0.0); }
 
+    T calcCorrVal(int frame1, int frame2, int id1, int id2) { return T(0.0); }
   };
 
   template<typename T>
@@ -225,9 +216,10 @@ namespace OpenMD {
     SystemCCF(SimInfo* info, const std::string& filename,
               const std::string& sele1, const std::string& sele2,
               int storageLayout);
+
   protected:
-    virtual void computeProperty1(int frame) = 0;
-    virtual void computeProperty2(int frame) = 0;
+    virtual void computeProperty1(int frame)      = 0;
+    virtual void computeProperty2(int frame)      = 0;
     virtual T calcCorrVal(int frame1, int frame2) = 0;
 
     virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
@@ -237,21 +229,21 @@ namespace OpenMD {
     virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
     virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
     virtual int computeProperty2(int frame, Bond* bond) { return -1; }
-    
-    T calcCorrVal(int frame1, int frame2, int id1, int id2) { return T(0.0); }
 
+    T calcCorrVal(int frame1, int frame2, int id1, int id2) { return T(0.0); }
   };
-  
+
   template<typename T>
   class ObjectACF : public AutoCorrFunc<T> {
   public:
     ObjectACF(SimInfo* info, const std::string& filename,
               const std::string& sele1, const std::string& sele2,
               int storageLayout);
+
   protected:
-    virtual int computeProperty1(int frame, StuntDouble* sd) = 0;
+    virtual int computeProperty1(int frame, StuntDouble* sd)        = 0;
     virtual T calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
-    
+
     virtual void computeProperty1(int frame) { return; }
     virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
     virtual int computeProperty1(int frame, Bond* bond) { return -1; }
@@ -260,8 +252,8 @@ namespace OpenMD {
     virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
     virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
     virtual int computeProperty2(int frame, Bond* bond) { return -1; }
-    
-    virtual T calcCorrVal(int frame1, int frame2) {return T(0.0);}
+
+    virtual T calcCorrVal(int frame1, int frame2) { return T(0.0); }
   };
 
   template<typename T>
@@ -270,68 +262,68 @@ namespace OpenMD {
     ObjectCCF(SimInfo* info, const std::string& filename,
               const std::string& sele1, const std::string& sele2,
               int storageLayout);
+
   protected:
-    virtual int computeProperty1(int frame, StuntDouble* sd) = 0;
-    virtual int computeProperty2(int frame, StuntDouble* sd) = 0;
+    virtual int computeProperty1(int frame, StuntDouble* sd)        = 0;
+    virtual int computeProperty2(int frame, StuntDouble* sd)        = 0;
     virtual T calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
-    
-    virtual void computeProperty1(int frame) {return;}
+
+    virtual void computeProperty1(int frame) { return; }
     virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
     virtual int computeProperty1(int frame, Bond* bond) { return -1; }
 
     virtual void computeProperty2(int frame) {}
     virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
     virtual int computeProperty2(int frame, Bond* bond) { return -1; }
-    
-    virtual T calcCorrVal(int frame1, int frame2) {return T(0.0);}
-    
+
+    virtual T calcCorrVal(int frame1, int frame2) { return T(0.0); }
   };
-  
+
   template<typename T>
   class MoleculeACF : public AutoCorrFunc<T> {
   public:
     MoleculeACF(SimInfo* info, const std::string& filename,
                 const std::string& sele1, const std::string& sele2,
                 int storageLayout);
+
   protected:
-    virtual int computeProperty1(int frame, Molecule* mol) = 0;
+    virtual int computeProperty1(int frame, Molecule* mol)          = 0;
     virtual T calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
-    
+
     virtual void computeProperty1(int frame) { return; }
     virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
     virtual int computeProperty1(int frame, Bond* bond) { return -1; }
-    
+
     virtual void computeProperty2(int frame) { return; }
     virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
     virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
     virtual int computeProperty2(int frame, Bond* bond) { return -1; }
-    
-    virtual T calcCorrVal(int frame1, int frame2) {return T(0.0);}
+
+    virtual T calcCorrVal(int frame1, int frame2) { return T(0.0); }
   };
-  
+
   template<typename T>
   class MoleculeCCF : public CrossCorrFunc<T> {
   public:
     MoleculeCCF(SimInfo* info, const std::string& filename,
                 const std::string& sele1, const std::string& sele2,
                 int storageLayout);
+
   protected:
-    virtual int computeProperty1(int frame, Molecule* mol) = 0;
-    virtual int computeProperty2(int frame, Molecule* mol) = 0;
+    virtual int computeProperty1(int frame, Molecule* mol)          = 0;
+    virtual int computeProperty2(int frame, Molecule* mol)          = 0;
     virtual T calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
-    
-    virtual void computeProperty1(int frame) {return;}
+
+    virtual void computeProperty1(int frame) { return; }
     virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
     virtual int computeProperty1(int frame, Bond* bond) { return -1; }
-    
+
     virtual void computeProperty2(int frame) {}
     virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
     virtual int computeProperty2(int frame, Bond* bond) { return -1; }
-    
-    virtual T calcCorrVal(int frame1, int frame2) {return T(0.0);}
-    
+
+    virtual T calcCorrVal(int frame1, int frame2) { return T(0.0); }
   };
-  
-  
-}
+
+}  // namespace OpenMD
 #endif

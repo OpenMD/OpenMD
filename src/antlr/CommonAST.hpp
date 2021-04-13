@@ -8,103 +8,72 @@
  * $Id$
  */
 
-#include <antlr/config.hpp>
 #include <antlr/BaseAST.hpp>
+#include <antlr/config.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-class ANTLR_API CommonAST : public BaseAST {
-public:
-	CommonAST()
-	: BaseAST()
-	, ttype( Token::INVALID_TYPE )
-	, text()
-	{
-	}
+  class ANTLR_API CommonAST : public BaseAST {
+  public:
+    CommonAST() : BaseAST(), ttype(Token::INVALID_TYPE), text() {}
 
-	CommonAST( RefToken t )
-	: BaseAST()
-	, ttype( t->getType() )
-	, text( t->getText() )
-	{
-	}
+    CommonAST(RefToken t) :
+        BaseAST(), ttype(t->getType()), text(t->getText()) {}
 
-	CommonAST( const CommonAST& other )
-	: BaseAST(other)
-	, ttype(other.ttype)
-	, text(other.text)
-	{
-	}
+    CommonAST(const CommonAST& other) :
+        BaseAST(other), ttype(other.ttype), text(other.text) {}
 
-	virtual ~CommonAST()
-	{
-	}
+    virtual ~CommonAST() {}
 
-	virtual const char* typeName( void ) const
-	{
-		return CommonAST::TYPE_NAME;
-	}
+    virtual const char* typeName(void) const { return CommonAST::TYPE_NAME; }
 
-	/// Clone this AST node.
-	virtual RefAST clone( void ) const
-	{
-		CommonAST *ast = new CommonAST( *this );
-		return RefAST(ast);
-	}
+    /// Clone this AST node.
+    virtual RefAST clone(void) const {
+      CommonAST* ast = new CommonAST(*this);
+      return RefAST(ast);
+    }
 
-	virtual ANTLR_USE_NAMESPACE(std)string getText() const
-	{
-		return text;
-	}
-	virtual int getType() const
-	{
-		return ttype;
-	}
+    virtual ANTLR_USE_NAMESPACE(std) string getText() const { return text; }
+    virtual int getType() const { return ttype; }
 
-	virtual void initialize( int t, const ANTLR_USE_NAMESPACE(std)string& txt )
-	{
-		setType(t);
-		setText(txt);
-	}
+    virtual void initialize(int t, const ANTLR_USE_NAMESPACE(std) string& txt) {
+      setType(t);
+      setText(txt);
+    }
 
-	virtual void initialize( RefAST t )
-	{
-		setType(t->getType());
-		setText(t->getText());
-	}
-	virtual void initialize( RefToken t )
-	{
-		setType(t->getType());
-		setText(t->getText());
-	}
+    virtual void initialize(RefAST t) {
+      setType(t->getType());
+      setText(t->getText());
+    }
+    virtual void initialize(RefToken t) {
+      setType(t->getType());
+      setText(t->getText());
+    }
 
 #ifdef ANTLR_SUPPORT_XML
-	virtual void initialize( ANTLR_USE_NAMESPACE(std)istream& in );
+    virtual void initialize(ANTLR_USE_NAMESPACE(std) istream& in);
 #endif
 
-	virtual void setText( const ANTLR_USE_NAMESPACE(std)string& txt )
-	{
-		text = txt;
-	}
-	virtual void setType( int type )
-	{
-		ttype = type;
-	}
+    virtual void setText(const ANTLR_USE_NAMESPACE(std) string& txt) {
+      text = txt;
+    }
+    virtual void setType(int type) { ttype = type; }
 
-	static RefAST factory();
+    static RefAST factory();
 
-	static const char* const TYPE_NAME;
-protected:
-	int ttype;
-	ANTLR_USE_NAMESPACE(std)string text;
-};
+    static const char* const TYPE_NAME;
 
-typedef ASTRefCount<CommonAST> RefCommonAST;
+  protected:
+    int ttype;
+    ANTLR_USE_NAMESPACE(std) string text;
+  };
+
+  typedef ASTRefCount<CommonAST> RefCommonAST;
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif //INC_CommonAST_hpp__
+#endif  // INC_CommonAST_hpp__

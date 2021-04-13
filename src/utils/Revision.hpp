@@ -3,9 +3,9 @@
 #include <string>
 
 extern "C" {
-  extern const char version[];
-  extern const char revision[];
-  extern const char build_date[];
+extern const char version[];
+extern const char revision[];
+extern const char build_date[];
 }
 
 namespace OpenMD {
@@ -17,6 +17,6 @@ namespace OpenMD {
     std::string getFullRevision();
     std::string getBuildDate();
   };
-}
+}  // namespace OpenMD
 
 #endif

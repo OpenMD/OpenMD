@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -59,49 +59,39 @@ namespace OpenMD {
    * @class BlockSnapshotManager
    * @todo document
    */
-  class BlockSnapshotManager : public SnapshotManager{
-
+  class BlockSnapshotManager : public SnapshotManager {
   public:
     BlockSnapshotManager(SimInfo* info, const std::string& filename,
                          int storageLayout, long long int memSize,
                          int blockCapacity = 2);
     ~BlockSnapshotManager();
-        
+
     virtual Snapshot* getSnapshot(int id);
 
-
     /** Returns number of snapshot blocks in this BlockSnapshotManager*/
-    int getNBlocks() {
-      return blocks_.size();
-    }
+    int getNBlocks() { return blocks_.size(); }
 
-    SnapshotBlock getSnapshotBlock(int block) {
-      return blocks_.at(block);
-    }
-        
+    SnapshotBlock getSnapshotBlock(int block) { return blocks_.at(block); }
+
     int getNActiveBlocks();
 
     void needCOMprops(bool ncp);
 
-
     bool isBlockActive(int block) {
-      return  findActiveBlock(block) != activeBlocks_.end() ? true : false;
-    }        
+      return findActiveBlock(block) != activeBlocks_.end() ? true : false;
+    }
 
     bool loadBlock(int block);
-        
+
     bool unloadBlock(int block);
 
     std::vector<int> getActiveBlocks();
 
-    int getBlockCapacity() {
-      return blockCapacity_;                
-    }
+    int getBlockCapacity() { return blockCapacity_; }
 
     int getNFrames();
-        
-  private:
 
+  private:
     std::vector<int>::iterator findActiveBlock(int block) {
       return std::find(activeBlocks_.begin(), activeBlocks_.end(), block);
     }
@@ -113,26 +103,25 @@ namespace OpenMD {
     void internalLoad(int block);
     void internalUnload(int block);
     Snapshot* loadFrame(int frame);
-        
+
     int blockCapacity_;
     long long int memSize_;
 
     std::vector<Snapshot*> snapshots_;
-    std::vector<SnapshotBlock> blocks_;        
+    std::vector<SnapshotBlock> blocks_;
     std::vector<int> activeBlocks_;
     std::vector<int> activeRefCount_;
-        
+
     int nAtoms_;
     int nRigidBodies_;
     int nCutoffGroups_;
     bool usePBC_;
-    
+
     DumpReader* reader_;
     int nframes_;
     int nSnapshotPerBlock_;
-
   };
 
-}
+}  // namespace OpenMD
 
 #endif

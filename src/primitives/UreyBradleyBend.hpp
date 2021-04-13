@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,20 +42,19 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file UreyBradleyBend.hpp
  * @author    tlin
  * @date  11/01/2004
  * @version 1.0
- */ 
-
+ */
 
 #ifndef PRIMITIVES_UREYBRADLEYBEND_HPP
 #define PRIMITIVES_UREYBRADLEYBEND_HPP
 
-#include "primitives/Bond.hpp"
 #include "primitives/Bend.hpp"
+#include "primitives/Bond.hpp"
 #include "types/UreyBradleyBendType.hpp"
 
 namespace OpenMD {
@@ -69,13 +68,13 @@ namespace OpenMD {
 
   protected:
     virtual UreyBradleyBendType* getUreyBradleyBendType() {
-      return static_cast<UreyBradleyBendType*> (bendType_);
+      return static_cast<UreyBradleyBendType*>(bendType_);
     }
-        
+
   private:
     Bond* bond_;
   };
 
-} //end namespace OpenMD
+}  // end namespace OpenMD
 
-#endif //PRIMITIVES_UREYBRADLEYBEND_HPP
+#endif  // PRIMITIVES_UREYBRADLEYBEND_HPP

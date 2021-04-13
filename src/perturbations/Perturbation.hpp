@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,19 +42,19 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef PERTURBATIONS_PERTURBATION_HPP
 #define PERTURBATIONS_PERTURBATION_HPP
 
 namespace OpenMD {
-    
-    //! Abstract class for external perturbation classes
-    class Perturbation {
-      public:
-        virtual ~Perturbation() {}
-        virtual void applyPerturbation() = 0;
-    };
 
-}
+  //! Abstract class for external perturbation classes
+  class Perturbation {
+  public:
+    virtual ~Perturbation() {}
+    virtual void applyPerturbation() = 0;
+  };
+
+}  // namespace OpenMD
 
 #endif

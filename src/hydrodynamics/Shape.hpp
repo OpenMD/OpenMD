@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,19 +46,21 @@
 #ifndef HYDRODYNAMICS_SHAPE_HPP
 #define HYDRODYNAMICS_SHAPE_HPP
 #include <utility>
-#include "math/Vector3.hpp"
+
 #include "hydrodynamics/HydroProp.hpp"
+#include "math/Vector3.hpp"
 
 namespace OpenMD {
-  
+
   /** @class Shape*/
   class Shape {
   public:
-    virtual ~Shape() = default;
-    virtual bool isInterior(Vector3d pos) = 0;
+    virtual ~Shape()                                       = default;
+    virtual bool isInterior(Vector3d pos)                  = 0;
     virtual std::pair<Vector3d, Vector3d> getBoundingBox() = 0;
-    virtual bool hasAnalyticalSolution() = 0;
-    virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature) = 0;
-  };  
-}
+    virtual bool hasAnalyticalSolution()                   = 0;
+    virtual HydroProp* getHydroProp(RealType viscosity,
+                                    RealType temperature)  = 0;
+  };
+}  // namespace OpenMD
 #endif

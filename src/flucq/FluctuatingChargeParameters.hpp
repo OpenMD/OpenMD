@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef FLUCQ_FLUCTUATINGCHARGEPARAMETERS_HPP
 #define FLUCQ_FLUCTUATINGCHARGEPARAMETERS_HPP
 
@@ -53,19 +53,19 @@ namespace OpenMD {
     DeclareParameter(Propagator, std::string);
     DeclareParameter(DoInitialOptimization, bool);
     DeclareParameter(ChargeOptimizationMethod, std::string);
-    DeclareParameter(Friction, RealType);    
-    DeclareParameter(Tolerance, RealType);    
-    DeclareParameter(MaxIterations, int);    
+    DeclareParameter(Friction, RealType);
+    DeclareParameter(Tolerance, RealType);
+    DeclareParameter(MaxIterations, int);
     DeclareParameter(TargetTemp, RealType);
     DeclareParameter(TauThermostat, RealType);
     DeclareParameter(DragCoefficient, RealType);
     DeclareParameter(ConstrainRegions, bool);
     DeclareParameter(InitialStepSize, RealType);
-    
+
   public:
     FluctuatingChargeParameters();
     virtual void validate();
   };
-}
+}  // namespace OpenMD
 
 #endif

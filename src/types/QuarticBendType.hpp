@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file QuarticBendType.hpp
  * @author    tlin
  * @date  11/01/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_QUARTICBENDTYPE_HPP
 #define TYPES_QUARTICBENDTYPE_HPP
@@ -57,19 +57,17 @@
 
 namespace OpenMD {
   /**
-   * @class QuarticBendType 
+   * @class QuarticBendType
    * @todo document
    */
   class QuarticBendType : public BendType {
-
   public:
-        
-    QuarticBendType(RealType r0, RealType k4, RealType k3, RealType k2, 
-                    RealType k1, RealType k0) : BendType(r0), k4_(k4), k3_(k3),
-                                                k2_(k2),  k1_(k1), k0_(k0){
-    }
-    
-    void setForceConstant(RealType k4, RealType k3, RealType k2, RealType k1, 
+    QuarticBendType(RealType r0, RealType k4, RealType k3, RealType k2,
+                    RealType k1, RealType k0) :
+        BendType(r0),
+        k4_(k4), k3_(k3), k2_(k2), k1_(k1), k0_(k0) {}
+
+    void setForceConstant(RealType k4, RealType k3, RealType k2, RealType k1,
                           RealType k0) {
       k4_ = k4;
       k3_ = k3;
@@ -78,7 +76,7 @@ namespace OpenMD {
       k0_ = k0;
     }
 
-    void getForceConstant(RealType& k4, RealType& k3, RealType& k2, 
+    void getForceConstant(RealType& k4, RealType& k3, RealType& k2,
                           RealType& k1, RealType& k0) {
       k4 = k4_;
       k3 = k3_;
@@ -88,15 +86,16 @@ namespace OpenMD {
     }
 
     virtual void calcForce(RealType theta, RealType& V, RealType& dVdTheta) {
-      RealType delta =  theta- theta0_;
+      RealType delta  = theta - theta0_;
       RealType delta2 = delta * delta;
       RealType delta3 = delta2 * delta;
       RealType delta4 = delta3 * delta;
-            
-      V =k0_ + k1_ * delta + k2_*delta2 + k3_*delta3 + k4_*delta4;
-      dVdTheta = k1_ + 2.0*k2_ * delta + 3.0 * k3_*delta2 + 4.0*k4_*delta3;
-    }     
-        
+
+      V = k0_ + k1_ * delta + k2_ * delta2 + k3_ * delta3 + k4_ * delta4;
+      dVdTheta =
+          k1_ + 2.0 * k2_ * delta + 3.0 * k3_ * delta2 + 4.0 * k4_ * delta3;
+    }
+
   private:
     RealType k4_;
     RealType k3_;
@@ -104,5 +103,5 @@ namespace OpenMD {
     RealType k1_;
     RealType k0_;
   };
-}//end namespace OpenMD
-#endif //TYPES_QUARTICBENDTYPE_HPP
+}  // end namespace OpenMD
+#endif  // TYPES_QUARTICBENDTYPE_HPP

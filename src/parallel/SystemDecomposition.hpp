@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,17 +42,15 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef PARALLEL_SYSTEMDECOMPOSITION_HPP
 #define PARALLEL_SYSTEMDECOMPOSITION_HPP
 
-
-
 using namespace std;
 namespace OpenMD {
-  
+
   /**
-   * @class SystemDecomposition 
+   * @class SystemDecomposition
    *
    * SystemDecomposition is an interface for passing out and
    * collecting information from many processors for use during
@@ -64,13 +62,11 @@ namespace OpenMD {
    */
   class SystemDecomposition {
   public:
-
     SystemDecomposition(SimInfo* info) : info_(info) {}
     virtual ~SystemDecomposition() {}
-    
-    virtual void distributeObjects() = 0;    
+
+    virtual void distributeObjects()             = 0;
     virtual Molecule* getMoleculeByGlobalIndex() = 0;
-    
-  };    
-}
+  };
+}  // namespace OpenMD
 #endif

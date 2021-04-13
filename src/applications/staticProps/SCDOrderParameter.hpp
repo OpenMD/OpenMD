@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,39 +45,39 @@
 
 #ifndef APPLICATIONS_STATICPROPS_SCDRDERPARAMETER_HPP
 #define APPLICATIONS_STATICPROPS_SCDRDERPARAMETER_HPP
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 #include "utils/Tuple.hpp"
 namespace OpenMD {
   class SCDElem {
   public:
-    SCDElem(SimInfo* info, const std::string& sele1, const std::string& sele2, const std::string& sele3);
-    
-    std::string getSelection1() const {return sele1_;}
-    std::string getSelection2() const {return sele2_;}
-    std::string getSelection3() const {return sele3_;}
+    SCDElem(SimInfo* info, const std::string& sele1, const std::string& sele2,
+            const std::string& sele3);
+
+    std::string getSelection1() const { return sele1_; }
+    std::string getSelection2() const { return sele2_; }
+    std::string getSelection3() const { return sele3_; }
     RealType calcSCD(Snapshot* snapshot);
-            
+
   private:
-            
-    std::string sele1_;                
+    std::string sele1_;
     std::string sele2_;
     std::string sele3_;
     bool usePeriodicBoundaryConditions_;
-      
+
     typedef tuple3<StuntDouble*, StuntDouble*, StuntDouble*> SDTuple3;
-        
+
     std::vector<SDTuple3> tuples_;
   };
 
-
-  class SCDOrderParameter : public StaticAnalyser{
+  class SCDOrderParameter : public StaticAnalyser {
   public:
-    SCDOrderParameter(SimInfo* info, const std::string& filename, 
-                      const std::string& sele1, const std::string& sele2, const std::string& sele3);
+    SCDOrderParameter(SimInfo* info, const std::string& filename,
+                      const std::string& sele1, const std::string& sele2,
+                      const std::string& sele3);
 
-    SCDOrderParameter(SimInfo* info, const std::string& filename, 
+    SCDOrderParameter(SimInfo* info, const std::string& filename,
                       const std::string& molname, int beginIndex, int endIndex);
     virtual void process();
 
@@ -86,13 +86,9 @@ namespace OpenMD {
 
     std::vector<SCDElem> scdElems_;
     std::vector<RealType> scdParam_;
-            
-    Snapshot* currentSnapshot_;
 
-            
+    Snapshot* currentSnapshot_;
   };
-}
+}  // namespace OpenMD
 
 #endif
-
-

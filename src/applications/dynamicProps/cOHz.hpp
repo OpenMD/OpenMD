@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,24 +46,24 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_COHZ_HPP
 #define APPLICATIONS_DYNAMICPROPS_COHZ_HPP
 
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "math/Polynomial.hpp"
 #include "math/Vector3.hpp"
-#include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 using namespace std;
 namespace OpenMD {
 
-  class COHZ : public MoleculeACF<Vector<RealType, 4> > {
+  class COHZ : public MoleculeACF<Vector<RealType, 4>> {
   public:
     COHZ(SimInfo* info, const std::string& filename, const std::string& sele1,
-         const std::string& sele2, int order, int nZbins, int axis=2);   
+         const std::string& sele2, int order, int nZbins, int axis = 2);
 
   private:
     virtual void validateSelection(SelectionManager& seleMan);
     virtual void computeFrame(int frame);
     virtual int computeProperty1(int frame, Molecule* mol);
-    virtual Vector<RealType, 4> calcCorrVal(int frame1, int frame2,
-                                            int id1, int id2);
+    virtual Vector<RealType, 4> calcCorrVal(int frame1, int frame2, int id1,
+                                            int id2);
     virtual void correlateFrames(int frame1, int frame2, int timeBin);
     virtual void postCorrelate();
     virtual void writeCorrelate();
@@ -73,14 +73,14 @@ namespace OpenMD {
     RealType boxZ_, halfBoxZ_;
     int axis_;
     int xaxis_;
-    int yaxis_; 
+    int yaxis_;
     std::string axisLabel_;
-    
-    std::vector<std::vector<RotMat3x3d> > rotMats_;
-    std::vector<std::vector<Vector<RealType, 4> > > histogram_;
-    std::vector<std::vector<int> > counts_;
-    std::vector<std::vector<int> > zbin_;
+
+    std::vector<std::vector<RotMat3x3d>> rotMats_;
+    std::vector<std::vector<Vector<RealType, 4>>> histogram_;
+    std::vector<std::vector<int>> counts_;
+    std::vector<std::vector<int>> zbin_;
   };
 
-}
+}  // namespace OpenMD
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -53,51 +53,51 @@
 using namespace std;
 namespace OpenMD {
 
-shapedLatticePentRod::shapedLatticePentRod(RealType latticeConstant,
-                                           std::string latticeType,
-                                           RealType radius, RealType length)
-    : shapedLattice(latticeConstant, latticeType) {
-  rodRadius_ = radius;
-  rodLength_ = length;
-  Vector3d dimension;
-  dimension[0] = 2.0 * length;
-  dimension[1] = 2.0 * length;
-  dimension[2] = 2.0 * length;
-  setGridDimension(dimension);
-  Vector3d origin;
-  origin[0] = 0;
-  origin[1] = 0;
-  origin[2] = 2.04;
-  setOrigin(origin);
-}
+  shapedLatticePentRod::shapedLatticePentRod(RealType latticeConstant,
+                                             std::string latticeType,
+                                             RealType radius, RealType length) :
+      shapedLattice(latticeConstant, latticeType) {
+    rodRadius_ = radius;
+    rodLength_ = length;
+    Vector3d dimension;
+    dimension[0] = 2.0 * length;
+    dimension[1] = 2.0 * length;
+    dimension[2] = 2.0 * length;
+    setGridDimension(dimension);
+    Vector3d origin;
+    origin[0] = 0;
+    origin[1] = 0;
+    origin[2] = 2.04;
+    setOrigin(origin);
+  }
 
-/**
- * Creates a wedge for pentagonal nanorods
- *
- */
+  /**
+   * Creates a wedge for pentagonal nanorods
+   *
+   */
 
-bool shapedLatticePentRod::isInterior(Vector3d point) {
-  RealType x, y, z, new_x, new_y, left_newx, right_newx;
-  // int z_int;
+  bool shapedLatticePentRod::isInterior(Vector3d point) {
+    RealType x, y, z, new_x, new_y, left_newx, right_newx;
+    // int z_int;
 
-  bool isIT = false;
+    bool isIT = false;
 
-  x = point[0];
-  y = point[1];
-  z = point[2];
+    x = point[0];
+    y = point[1];
+    z = point[2];
 
-  // z_int = int(z/2.04);
+    // z_int = int(z/2.04);
 
-  // Rotate by 45 degrees around z-axis so length of rod lies along y axis
-  new_x = (sqrt(2.0) / 2) * (x - y);
-  new_y = (sqrt(2.0) / 2) * (x + y);
+    // Rotate by 45 degrees around z-axis so length of rod lies along y axis
+    new_x = (sqrt(2.0) / 2) * (x - y);
+    new_y = (sqrt(2.0) / 2) * (x + y);
 
-  left_newx = (z - 1.44) * (0.577350269 / 0.816496581);
-  right_newx = (z + 1.44) * (-0.577350269 / 0.816496581);
+    left_newx  = (z - 1.44) * (0.577350269 / 0.816496581);
+    right_newx = (z + 1.44) * (-0.577350269 / 0.816496581);
 
-  // Make center spine of nanorod down new_y axis
-  // This is now done directly in nanorod_pentBuilder.cpp
-  /*if ( (new_x == 0) && (z == 0) ) {
+    // Make center spine of nanorod down new_y axis
+    // This is now done directly in nanorod_pentBuilder.cpp
+    /*if ( (new_x == 0) && (z == 0) ) {
 
     if ( abs(new_y) <= 0.5*rodLength_ + 0.5773502692*rodRadius_ ) {
 
@@ -106,15 +106,13 @@ bool shapedLatticePentRod::isInterior(Vector3d point) {
     }
     }*/
 
-  // Make one wedge
-  if ((z < 0) && (z >= -0.816496581 * rodRadius_ - 1.44)) {
-    if (abs(new_y) <=
-        1.44 * (z / 2.04) + 0.5 * rodLength_ + 0.5773502692 * rodRadius_) {
-      if ((new_x >= left_newx) && (new_x <= right_newx)) {
-        isIT = true;
+    // Make one wedge
+    if ((z < 0) && (z >= -0.816496581 * rodRadius_ - 1.44)) {
+      if (abs(new_y) <=
+          1.44 * (z / 2.04) + 0.5 * rodLength_ + 0.5773502692 * rodRadius_) {
+        if ((new_x >= left_newx) && (new_x <= right_newx)) { isIT = true; }
       }
     }
+    return isIT;
   }
-  return isIT;
-}
 }  // namespace OpenMD

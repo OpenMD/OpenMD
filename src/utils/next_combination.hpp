@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,32 +42,33 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file next_combination.hpp
  * @author    tlin
  * @date  10/27/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef UTILS_NEXT_COMBINATION_HPP
 #define UTILS_NEXT_COMBINATION_HPP
 
-#include <vector>
-#include <iterator>
 #include <iostream>
+#include <iterator>
+#include <vector>
 namespace OpenMD {
 
   /**
    * @brief STL next_permuation-like combination sequence generator.
-   * Given the first and last iterator of a sequence, next_combination iteratively generates all 
-   * possible combinations.
+   * Given the first and last iterator of a sequence, next_combination
+   * iteratively generates all possible combinations.
    * @return if more combination is availiable, otherwise return false
    * @param iterContainer iterator container
    * @param first the first iterator
    * @param last the last iterator
-   * @note first and last must be random access iterators and iterContainer must be the container of  
-   * random access iterators . And all of the iteratos in iterContainer must be within the range [first, last)
+   * @note first and last must be random access iterators and iterContainer must
+   * be the container of random access iterators . And all of the iteratos in
+   * iterContainer must be within the range [first, last)
    *
    * @code
    * std::vector<int> iv;
@@ -87,69 +88,71 @@ namespace OpenMD {
    * @endcode
    */
   template<class RandomAccessIterator>
-  bool next_combination(std::vector<RandomAccessIterator>& iterContainer, RandomAccessIterator first, RandomAccessIterator last) {
-    if (first == last) {
-      return false;
-    }
-    
+  bool next_combination(std::vector<RandomAccessIterator>& iterContainer,
+                        RandomAccessIterator first, RandomAccessIterator last) {
+    if (first == last) { return false; }
+
     RandomAccessIterator endIter = --last;
-    typename std::vector<RandomAccessIterator>::iterator i = iterContainer.end();
-    
+    typename std::vector<RandomAccessIterator>::iterator i =
+        iterContainer.end();
+
     if (iterContainer.empty()) {
-      //if sequence is empty, we insert the first iterator
+      // if sequence is empty, we insert the first iterator
       iterContainer.insert(iterContainer.end(), first);
       return true;
-    } else if (*(--i) != endIter){
-      //if the last iterator in iterContainer does not reaches the end, just increase its iterator by 1 
+    } else if (*(--i) != endIter) {
+      // if the last iterator in iterContainer does not reaches the end, just
+      // increase its iterator by 1
       ++(*i);
       return true;
-    } else {// the last iterator in iterContainer does not reaches the end
+    } else {  // the last iterator in iterContainer does not reaches the end
 
-      //starts at the end of the sequence and works its way towards the front, looking for two 
-      //consecutive members of the sequence where the difference between them is greater 
-      //than one. For example , if the sequence contains 1, 5, 8, 9 (total number is 10, first is 0
-      //and the last is 10 (due to STL's half open range)). At the end of while
-      //loop, j will point to 5, and i will point to 8, next combination should be 1, 6, 7, 8.
-      //If j is less than zero, it means it already reaches the last combination of current size.
-      //For instance, sequence may contain 6, 7, 8, 9 at this time, we need to increase the size
-      // of combination to 5
+      // starts at the end of the sequence and works its way towards the front,
+      // looking for two consecutive members of the sequence where the
+      // difference between them is greater than one. For example , if the
+      // sequence contains 1, 5, 8, 9 (total number is 10, first is 0 and the
+      // last is 10 (due to STL's half open range)). At the end of while loop, j
+      // will point to 5, and i will point to 8, next combination should be 1,
+      // 6, 7, 8. If j is less than zero, it means it already reaches the last
+      // combination of current size. For instance, sequence may contain 6, 7,
+      // 8, 9 at this time, we need to increase the size of combination to 5
       typename std::vector<RandomAccessIterator>::iterator j = i;
       --j;
-      while( j >= iterContainer.begin() && *i == *j + 1){
-	--i;
-	--j;
+      while (j >= iterContainer.begin() && *i == *j + 1) {
+        --i;
+        --j;
       };
 
       RandomAccessIterator raIter;
-      if (j - iterContainer.begin() < 0) { //reaches the last combination of current size
-	//half open range
-	if (last  - first + 1  == int(iterContainer.size())) {
-	  //if the current size equals to total number, done
-	  return false;
-	} else {
+      if (j - iterContainer.begin() <
+          0) {  // reaches the last combination of current size
+        // half open range
+        if (last - first + 1 == int(iterContainer.size())) {
+          // if the current size equals to total number, done
+          return false;
+        } else {
+          // push the first currentSize+1 element into sequence
 
-	  //push the first currentSize+1 element into sequence 
-                
-	  for(i = iterContainer.begin(), raIter= first; i  != iterContainer.end(); ++i, ++raIter) {
-	    *i = raIter;
-	  }    
-	  iterContainer.insert(iterContainer.end(), raIter);
-                
-	  return true; 
-	}
-            
+          for (i = iterContainer.begin(), raIter = first;
+               i != iterContainer.end(); ++i, ++raIter) {
+            *i = raIter;
+          }
+          iterContainer.insert(iterContainer.end(), raIter);
+
+          return true;
+        }
+
       } else {
-	++(*j);
-	raIter = *j;
-	for(; i != iterContainer.end(); ++i) {
-	  ++raIter;
-	  *i = raIter;
-	}
-	return true;
+        ++(*j);
+        raIter = *j;
+        for (; i != iterContainer.end(); ++i) {
+          ++raIter;
+          *i = raIter;
+        }
+        return true;
       }
     }
-  } //end next_combination
+  }  // end next_combination
 
-} //end namespace OpenMD
-#endif //UTILS_NEXT_COMBINATION_HPP
-
+}  // end namespace OpenMD
+#endif  // UTILS_NEXT_COMBINATION_HPP

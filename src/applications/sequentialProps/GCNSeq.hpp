@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,6 +48,7 @@
 
 #include <string>
 #include <vector>
+
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 
 namespace OpenMD {
@@ -64,34 +65,33 @@ namespace OpenMD {
    *    Science 350(6257) pp. 185-189 (2015).
    *    http://dx.doi.org/10.1126/science.aab3501
    *
-   * Note that extra parameters mussed be declared: 
+   * Note that extra parameters mussed be declared:
    *
    *   rCut = cutoff radius for finding lists of nearest neighbors
    *   sele1 = selection of StuntDoubles used for the GCN distribution
    *   sele2 = selection of StuntDoubles used for nearest neighbor computation
    */
   class GCNSeq : public SequentialAnalyzer {
-    
   public:
     GCNSeq(SimInfo* info, const std::string& filename, const std::string& sele1,
            const std::string& sele2, RealType rCut, int bins);
 
     virtual void doFrame(int istep);
     virtual void writeSequence();
-    
+
   private:
-    RealType rCut_;    
+    RealType rCut_;
     int bins_;
-    
-    bool usePBC_;    
+
+    bool usePBC_;
     int nnMax_;
     RealType delta_;
     int selectionCount1_;
     int selectionCount2_;
-    
+
     std::vector<int> count_;
-    std::vector<std::vector<RealType> >  histogram_;
+    std::vector<std::vector<RealType>> histogram_;
   };
 
-}
+}  // namespace OpenMD
 #endif

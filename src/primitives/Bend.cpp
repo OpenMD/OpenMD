@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,66 +52,64 @@
 
 namespace OpenMD {
 
-/**@todo still a lot left to improve*/
-void Bend::calcForce(RealType& angle, bool doParticlePot) {
-  Vector3d pos1 = atoms_[0]->getPos();
-  Vector3d pos2 = atoms_[1]->getPos();
-  Vector3d pos3 = atoms_[2]->getPos();
+  /**@todo still a lot left to improve*/
+  void Bend::calcForce(RealType& angle, bool doParticlePot) {
+    Vector3d pos1 = atoms_[0]->getPos();
+    Vector3d pos2 = atoms_[1]->getPos();
+    Vector3d pos3 = atoms_[2]->getPos();
 
-  Vector3d r21 = pos1 - pos2;
-  snapshotMan_->getCurrentSnapshot()->wrapVector(r21);
-  RealType d21 = r21.length();
+    Vector3d r21 = pos1 - pos2;
+    snapshotMan_->getCurrentSnapshot()->wrapVector(r21);
+    RealType d21 = r21.length();
 
-  RealType d21inv = 1.0 / d21;
+    RealType d21inv = 1.0 / d21;
 
-  Vector3d r23 = pos3 - pos2;
-  snapshotMan_->getCurrentSnapshot()->wrapVector(r23);
-  RealType d23 = r23.length();
+    Vector3d r23 = pos3 - pos2;
+    snapshotMan_->getCurrentSnapshot()->wrapVector(r23);
+    RealType d23 = r23.length();
 
-  RealType d23inv = 1.0 / d23;
+    RealType d23inv = 1.0 / d23;
 
-  RealType cosTheta = dot(r21, r23) / (d21 * d23);
+    RealType cosTheta = dot(r21, r23) / (d21 * d23);
 
-  // check roundoff
-  if (cosTheta > 1.0) {
-    cosTheta = 1.0;
-  } else if (cosTheta < -1.0) {
-    cosTheta = -1.0;
+    // check roundoff
+    if (cosTheta > 1.0) {
+      cosTheta = 1.0;
+    } else if (cosTheta < -1.0) {
+      cosTheta = -1.0;
+    }
+
+    RealType theta = acos(cosTheta);
+
+    RealType dVdTheta;
+
+    bendType_->calcForce(theta, potential_, dVdTheta);
+
+    RealType sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+    if (fabs(sinTheta) < 1.0E-6) { sinTheta = 1.0E-6; }
+
+    RealType commonFactor1 = dVdTheta / sinTheta * d21inv;
+    RealType commonFactor2 = dVdTheta / sinTheta * d23inv;
+
+    Vector3d force1 = commonFactor1 * (r23 * d23inv - r21 * d21inv * cosTheta);
+    Vector3d force3 = commonFactor2 * (r21 * d21inv - r23 * d23inv * cosTheta);
+
+    // Total force in current bend is zero
+    Vector3d force2 = force1 + force3;
+    force2 *= -1.0;
+
+    atoms_[0]->addFrc(force1);
+    atoms_[1]->addFrc(force2);
+    atoms_[2]->addFrc(force3);
+
+    if (doParticlePot) {
+      atoms_[0]->addParticlePot(potential_);
+      atoms_[1]->addParticlePot(potential_);
+      atoms_[2]->addParticlePot(potential_);
+    }
+
+    angle = theta / Constants::PI * 180.0;
   }
-
-  RealType theta = acos(cosTheta);
-
-  RealType dVdTheta;
-
-  bendType_->calcForce(theta, potential_, dVdTheta);
-
-  RealType sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-
-  if (fabs(sinTheta) < 1.0E-6) {
-    sinTheta = 1.0E-6;
-  }
-
-  RealType commonFactor1 = dVdTheta / sinTheta * d21inv;
-  RealType commonFactor2 = dVdTheta / sinTheta * d23inv;
-
-  Vector3d force1 = commonFactor1 * (r23 * d23inv - r21 * d21inv * cosTheta);
-  Vector3d force3 = commonFactor2 * (r21 * d21inv - r23 * d23inv * cosTheta);
-
-  // Total force in current bend is zero
-  Vector3d force2 = force1 + force3;
-  force2 *= -1.0;
-
-  atoms_[0]->addFrc(force1);
-  atoms_[1]->addFrc(force2);
-  atoms_[2]->addFrc(force3);
-
-  if (doParticlePot) {
-    atoms_[0]->addParticlePot(potential_);
-    atoms_[1]->addParticlePot(potential_);
-    atoms_[2]->addParticlePot(potential_);
-  }
-
-  angle = theta / Constants::PI * 180.0;
-}
 
 }  // end namespace OpenMD

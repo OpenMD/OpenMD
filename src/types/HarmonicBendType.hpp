@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,14 +42,14 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file HarmonicBendType.hpp
  * @author    tlin
  * @date  11/01/2004
  * @version 1.0
- */ 
- 
+ */
+
 #ifndef TYPES_HARMONICBENDTYPE_HPP
 #define TYPES_HARMONICBENDTYPE_HPP
 
@@ -57,33 +57,28 @@
 
 namespace OpenMD {
   /**
-   * @class HarmonicBendType 
+   * @class HarmonicBendType
    *
    * @todo documentation
    */
   class HarmonicBendType : public BendType {
-    
   public:
-    
-    HarmonicBendType(RealType theta, RealType k) : BendType(theta), k_(k) {
-    }
-    
-    void setForceConstant(RealType k) {k_ = k; }
-    
-    RealType getForceConstant() {return k_;}
-    
+    HarmonicBendType(RealType theta, RealType k) : BendType(theta), k_(k) {}
+
+    void setForceConstant(RealType k) { k_ = k; }
+
+    RealType getForceConstant() { return k_; }
+
     void calcForce(RealType theta, RealType& V, RealType& dVdr) {
       RealType delta = theta - theta0_;
-      
-      V = 0.5 * k_ * delta * delta;
+
+      V    = 0.5 * k_ * delta * delta;
       dVdr = k_ * delta;
     }
-    
+
   private:
     RealType k_;
-    
   };
-  
-}//end namespace OpenMD
-#endif //TYPES_HARMONICBENDTYPE_HPP
 
+}  // end namespace OpenMD
+#endif  // TYPES_HARMONICBENDTYPE_HPP

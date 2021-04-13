@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,58 +42,51 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef RESTRAINTS_OBJECTRESTRAINT_HPP
 #define RESTRAINTS_OBJECTRESTRAINT_HPP
 
-#include "restraints/Restraint.hpp"
-#include "math/Vector3.hpp"
 #include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
+#include "restraints/Restraint.hpp"
 
 namespace OpenMD {
   /**
-   * @class ObjectRestraint 
+   * @class ObjectRestraint
    *
-   * ObjectRestraint is the basic harmonic restraint for the 
-   * degrees of freedom of a StuntDouble 
+   * ObjectRestraint is the basic harmonic restraint for the
+   * degrees of freedom of a StuntDouble
    *
    * In the ideal structure:
-   * 
-   * k_[twist,swing] are the two spring constants of the restraining 
+   *
+   * k_[twist,swing] are the two spring constants of the restraining
    * potential
    */
   class ObjectRestraint : public Restraint {
-    
   public:
-    
-    ObjectRestraint() : Restraint() { }
+    ObjectRestraint() : Restraint() {}
 
-    void setReferenceStructure(Vector3d refPos) {
-      refPos_ = refPos;
-    }
-  
+    void setReferenceStructure(Vector3d refPos) { refPos_ = refPos; }
+
     void setReferenceStructure(Vector3d refPos, RotMat3x3d refA) {
       refPos_ = refPos;
-      refA_ = refA;
+      refA_   = refA;
     }
 
-    Vector3d getReferenceStructure(){
-      return refPos_;
-    }
+    Vector3d getReferenceStructure() { return refPos_; }
 
-    
     void calcForce(Vector3d struc);
-    void calcForce(Vector3d struc, RotMat3x3d A);    
+    void calcForce(Vector3d struc, RotMat3x3d A);
 
     Vector3d getRestraintForce() { return force_; }
     Vector3d getRestraintTorque() { return torque_; }
-                    
-  private:    
+
+  private:
     Vector3d refPos_;
     RotMat3x3d refA_;
 
     Vector3d force_;
     Vector3d torque_;
   };
-}
+}  // namespace OpenMD
 #endif

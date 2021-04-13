@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,82 +42,82 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-  
-/** 
- * @file RestReader.hpp 
- */ 
- 
-#ifndef IO_RESTREADER_HPP 
-#define IO_RESTREADER_HPP 
- 
+
+/**
+ * @file RestReader.hpp
+ */
+
+#ifndef IO_RESTREADER_HPP
+#define IO_RESTREADER_HPP
+
 #include <cstdio>
 #include <string>
+
 #include "brains/SimInfo.hpp"
 #include "primitives/StuntDouble.hpp"
 
-namespace OpenMD { 
- 
-  /** 
-   * @class RestReader RestReader.hpp "io/RestReader.hpp" 
-   */ 
-  class RestReader { 
-  public: 
-    RestReader(SimInfo* info, const std::string &filename, 
-                           std::vector<int> stuntDoubleIndex) 
-      : info_(info), stuntDoubleIndex_(stuntDoubleIndex), filename_(filename) {
-#ifdef IS_MPI 
-      
-      if (worldRank == 0) { 
-#endif 
-        
+namespace OpenMD {
+
+  /**
+   * @class RestReader RestReader.hpp "io/RestReader.hpp"
+   */
+  class RestReader {
+  public:
+    RestReader(SimInfo* info, const std::string& filename,
+               std::vector<int> stuntDoubleIndex) :
+        info_(info),
+        stuntDoubleIndex_(stuntDoubleIndex), filename_(filename) {
+#ifdef IS_MPI
+
+      if (worldRank == 0) {
+#endif
+
         inFile_ = new std::ifstream(filename_.c_str(),
-                                    ifstream::in | ifstream::binary); 
-        
-        if (inFile_->fail()) { 
-          sprintf(painCave.errMsg, 
-                  "RestReader: Cannot open file: %s\n", 
-                  filename_.c_str()); 
-          painCave.isFatal = 1; 
-          simError(); 
-        } 
-        
-#ifdef IS_MPI 
-        
-      } 
-      
-      strcpy(checkPointMsg, "Reference file opened for reading successfully."); 
-      errorCheckPoint(); 
-      
-#endif 
-      
+                                    ifstream::in | ifstream::binary);
+
+        if (inFile_->fail()) {
+          sprintf(painCave.errMsg, "RestReader: Cannot open file: %s\n",
+                  filename_.c_str());
+          painCave.isFatal = 1;
+          simError();
+        }
+
+#ifdef IS_MPI
+      }
+
+      strcpy(checkPointMsg, "Reference file opened for reading successfully.");
+      errorCheckPoint();
+
+#endif
+
       return;
     }
 
     void readReferenceStructure(void);
 
-    ~RestReader(){
+    ~RestReader() {
 #ifdef IS_MPI
-      if (worldRank == 0){
-#endif 
-        
+      if (worldRank == 0) {
+#endif
+
         delete inFile_;
-        
-#ifdef IS_MPI       
-      } 
-      
-      strcpy(checkPointMsg, "Reference file closed successfully."); 
+
+#ifdef IS_MPI
+      }
+
+      strcpy(checkPointMsg, "Reference file closed successfully.");
       errorCheckPoint();
 #endif
     }
-    
-  protected: 
+
+  protected:
     void parseDumpLine(const std::string& line);
     void readStuntDoubles(std::istream& inpuStream);
     void readFrameProperties(std::istream& inputStream);
     void scanFile(void);
     void readSet(void);
-  private: 
 
+  private:
     SimInfo* info_ {nullptr};
 
     std::vector<Vector3d> all_pos_;
@@ -131,7 +131,7 @@ namespace OpenMD {
     const static int bufferSize = 4096;
     char buffer[bufferSize];
   };
- 
-}      //end namespace OpenMD 
- 
-#endif //IO_RESTREADER_HPP 
+
+}  // end namespace OpenMD
+
+#endif  // IO_RESTREADER_HPP

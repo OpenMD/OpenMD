@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef CONSTRAINTS_RATTLE_HPP
 #define CONSTRAINTS_RATTLE_HPP
 
@@ -52,28 +52,29 @@
 
 namespace OpenMD {
 
-  /** 
+  /**
    * @class Rattle Rattle.hpp "constraints/Rattle.hpp"
    * Velocity Verlet Constraint Algorithm
-   */ 
+   */
   class Rattle {
   public:
-    enum ConsStatus{
-      consFail = -1,   //Constraint Fail
-      consSuccess = 0, //constrain the pair by moving two elements
-      consAlready = 1  //current pair is already constrained, do not need to move the elements
-    }; 
-  
+    enum ConsStatus {
+      consFail    = -1,  // Constraint Fail
+      consSuccess = 0,   // constrain the pair by moving two elements
+      consAlready = 1    // current pair is already constrained, do not need to
+                         // move the elements
+    };
+
     Rattle(SimInfo* info);
     ~Rattle();
     void constraintA();
     void constraintB();
-        
+
     int getMaxConsIteration() { return maxConsIteration_; }
     void setMaxConsIteration(int iteration) { maxConsIteration_ = iteration; }
 
-    RealType getConsTolerance() { return consTolerance_; } 
-    void setConsTolerance(RealType tolerance) { consTolerance_ = tolerance;}        
+    RealType getConsTolerance() { return consTolerance_; }
+    void setConsTolerance(RealType tolerance) { consTolerance_ = tolerance; }
 
   private:
     typedef int (Rattle::*ConstraintPairFuncPtr)(ConstraintPair*);
@@ -82,15 +83,15 @@ namespace OpenMD {
     int constraintPairB(ConstraintPair* consPair);
 
     SimInfo* info_ {nullptr};
-    int maxConsIteration_;        
+    int maxConsIteration_;
     RealType consTolerance_;
     RealType dt_;
-    Snapshot* currentSnapshot_ {nullptr};   
+    Snapshot* currentSnapshot_ {nullptr};
     bool doRattle_ {false};
     std::string constraintOutputFile_;
     ConstraintWriter* constraintWriter_ {nullptr};
     RealType constraintTime_;
     RealType currConstraintTime_;
   };
-}
+}  // namespace OpenMD
 #endif

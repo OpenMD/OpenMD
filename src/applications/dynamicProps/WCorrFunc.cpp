@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,47 +49,47 @@
 #include "types/FluctuatingChargeAdapter.hpp"
 
 namespace OpenMD {
-WCorrFunc::WCorrFunc(SimInfo* info, const std::string& filename,
-                     const std::string& sele1, const std::string& sele2)
-    : ObjectACF<RealType>(info, filename, sele1, sele2,
+  WCorrFunc::WCorrFunc(SimInfo* info, const std::string& filename,
+                       const std::string& sele1, const std::string& sele2) :
+      ObjectACF<RealType>(info, filename, sele1, sele2,
                           DataStorage::dslFlucQVelocity) {
-  setCorrFuncType(" Charge Velocity Correlation Function");
-  setOutputName(getPrefix(dumpFilename_) + ".wcorr");
-  setLabelString("<w(0)w(t)>");
-  charge_velocities_.resize(nFrames_);
-}
+    setCorrFuncType(" Charge Velocity Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".wcorr");
+    setLabelString("<w(0)w(t)>");
+    charge_velocities_.resize(nFrames_);
+  }
 
-int WCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-  charge_velocities_[frame].push_back(sd->getFlucQVel());
-  return charge_velocities_[frame].size() - 1;
-}
+  int WCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    charge_velocities_[frame].push_back(sd->getFlucQVel());
+    return charge_velocities_[frame].size() - 1;
+  }
 
-RealType WCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
-  RealType v2 =
-      charge_velocities_[frame1][id1] * charge_velocities_[frame2][id2];
-  return v2;
-}
+  RealType WCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
+    RealType v2 =
+        charge_velocities_[frame1][id1] * charge_velocities_[frame2][id2];
+    return v2;
+  }
 
-void WCorrFunc::validateSelection(SelectionManager& seleMan) {
-  StuntDouble* sd;
-  int i;
+  void WCorrFunc::validateSelection(SelectionManager& seleMan) {
+    StuntDouble* sd;
+    int i;
 
-  for (sd = seleMan.beginSelected(i); sd != NULL;
-       sd = seleMan.nextSelected(i)) {
-    Atom* atom = static_cast<Atom*>(sd);
-    AtomType* atomType = atom->getAtomType();
-    FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
+    for (sd = seleMan.beginSelected(i); sd != NULL;
+         sd = seleMan.nextSelected(i)) {
+      Atom* atom                   = static_cast<Atom*>(sd);
+      AtomType* atomType           = atom->getAtomType();
+      FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
 
-    if (!fqa.isFluctuatingCharge()) {
-      sprintf(painCave.errMsg,
-              "WCorrFunc::validateSelection Error: selection "
-              "%d (%s)\n"
-              "\t is not a fluq object\n",
-              sd->getGlobalIndex(), sd->getType().c_str());
-      painCave.isFatal = 1;
-      simError();
+      if (!fqa.isFluctuatingCharge()) {
+        sprintf(painCave.errMsg,
+                "WCorrFunc::validateSelection Error: selection "
+                "%d (%s)\n"
+                "\t is not a fluq object\n",
+                sd->getGlobalIndex(), sd->getType().c_str());
+        painCave.isFatal = 1;
+        simError();
+      }
     }
   }
-}
 
 }  // namespace OpenMD

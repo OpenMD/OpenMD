@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -66,9 +66,7 @@ int main(int argc, char* argv[]) {
   gengetopt_args_info args_info;
 
   // parse the command line option
-  if (cmdline_parser(argc, argv, &args_info) != 0) {
-    exit(1);
-  }
+  if (cmdline_parser(argc, argv, &args_info) != 0) { exit(1); }
 
   // get the dumpfile name and meta-data file name
   std::string dumpFileName = args_info.input_arg;
@@ -126,7 +124,7 @@ int main(int argc, char* argv[]) {
               "A cutoff radius (rcut) must be specified when calculating\n"
               "\tGeneralized Coordinate Number");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.ca1_given) {
@@ -136,7 +134,7 @@ int main(int argc, char* argv[]) {
     else {
       sprintf(painCave.errMsg, "--referenceZ must be set if --ca1 is used\n");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
     RealType dropletR(0.0);
@@ -145,7 +143,7 @@ int main(int argc, char* argv[]) {
     else {
       sprintf(painCave.errMsg, "--dropletR must be set if --ca1 is used\n");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
 
@@ -158,7 +156,7 @@ int main(int argc, char* argv[]) {
     else {
       sprintf(painCave.errMsg, "--referenceZ must be set if --ca2 is used\n");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
     RealType centroidX(0.0);
@@ -167,7 +165,7 @@ int main(int argc, char* argv[]) {
     else {
       sprintf(painCave.errMsg, "--centroidX must be set if --ca2 is used\n");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
     RealType centroidY(0.0);
@@ -176,7 +174,7 @@ int main(int argc, char* argv[]) {
     else {
       sprintf(painCave.errMsg, "--centroidY must be set if --ca2 is used\n");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
     RealType threshDens(0.0);
@@ -185,7 +183,7 @@ int main(int argc, char* argv[]) {
     else {
       sprintf(painCave.errMsg, "--threshDens must be set if --ca2 is used\n");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
     RealType bufferLength(0.0);
@@ -194,7 +192,7 @@ int main(int argc, char* argv[]) {
     else {
       sprintf(painCave.errMsg, "--bufferLength must be set if --ca2 is used\n");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
 
@@ -203,9 +201,7 @@ int main(int argc, char* argv[]) {
                                  args_info.nbins_arg, args_info.nbins_z_arg);
   }
 
-  if (args_info.output_given) {
-    analyzer->setOutputName(args_info.output_arg);
-  }
+  if (args_info.output_given) { analyzer->setOutputName(args_info.output_arg); }
 
   analyzer->doSequence();
 

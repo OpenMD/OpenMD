@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,10 +49,10 @@
 #include <map>
 #include <string>
 #include <utility>
+
 #include "utils/any.hpp"
 
 namespace OpenMD {
-
 
   /**
    * @class Token
@@ -60,92 +60,86 @@ namespace OpenMD {
    * @note translate from jmol
    */
   class Token {
-
   public:
-
-
     int tok {};
     boost::any value {};
     int intValue {};
 
-    Token() { tok = unknown;}
+    Token() { tok = unknown; }
 
-    Token(const Token& token) {
-      *this = token;
-    }
-        
+    Token(const Token& token) { *this = token; }
+
     Token(int MyTok, int myIntValue, const boost::any& myValue) {
-      this->tok = MyTok;
+      this->tok      = MyTok;
       this->intValue = myIntValue;
-      this->value = myValue;
+      this->value    = myValue;
     }
 
     Token(int myTok, int myIntValue) {
-      this->tok = myTok;
+      this->tok      = myTok;
       this->intValue = myIntValue;
     }
 
-    Token(int myTok) {
-      this->tok = myTok;
-    }
+    Token(int myTok) { this->tok = myTok; }
 
-    Token(int myTok,  const boost::any& myValue) {
-      this->tok = myTok;
+    Token(int myTok, const boost::any& myValue) {
+      this->tok   = myTok;
       this->value = myValue;
     }
-        
-    const static int nada              =  0;
-    const static int identifier        =  1;
-    const static int integer           =  2;
-    const static int decimal           =  3;
-    const static int string            =  4;
-    const static int unknown           =  5;
-    const static int keyword           =  6;
-    const static int whitespace        =  7;
-    const static int comment           =  8;
-    const static int endofline         = 9;
-    const static int endofstatement    = 10;
 
-    const static int command           = (1 <<  8);
-    const static int expressionCommand = (1 <<  9); // expression command
-    const static int expression        = (1 << 10); /// expression term
+    const static int nada           = 0;
+    const static int identifier     = 1;
+    const static int integer        = 2;
+    const static int decimal        = 3;
+    const static int string         = 4;
+    const static int unknown        = 5;
+    const static int keyword        = 6;
+    const static int whitespace     = 7;
+    const static int comment        = 8;
+    const static int endofline      = 9;
+    const static int endofstatement = 10;
+
+    const static int command           = (1 << 8);
+    const static int expressionCommand = (1 << 9);   // expression command
+    const static int expression        = (1 << 10);  /// expression term
 
     // generally, the minus sign is used to denote atom ranges
     // this property is used for the few commands which allow negative integers
-    const static int negnums      = (1 << 11);
+    const static int negnums = (1 << 11);
 
-    //expression involves coordinates which will change every frame, such as withins
-    const static int dynamic        = (1 << 12);
+    // expression involves coordinates which will change every frame, such as
+    // withins
+    const static int dynamic = (1 << 12);
 
     // every property is also valid in an expression context
-    const static int atomproperty      = (1 << 12) | expression | negnums;
+    const static int atomproperty = (1 << 12) | expression | negnums;
     // every predefined is also valid in an expression context
-    const static int comparator        = (1 << 13) | expression;
-    const static int predefinedset     = (1 << 14) | expression;
-    const  static int embeddedExpression= (1 << 15); // embedded expression
-    const static int index = (1 << 16) | expression;
+    const static int comparator         = (1 << 13) | expression;
+    const static int predefinedset      = (1 << 14) | expression;
+    const static int embeddedExpression = (1 << 15);  // embedded expression
+    const static int index              = (1 << 16) | expression;
     // rasmol commands
-    const static int define       = command | expressionCommand | 1;
-    const static int select       = command | expressionCommand | 2 ;
+    const static int define = command | expressionCommand | 1;
+    const static int select = command | expressionCommand | 2;
 
-    //predefine
-    //const static int selected    = predefinedset |0;
+    // predefine
+    // const static int selected    = predefinedset |0;
 
     // atom expression operators
-    const static int leftparen    = expression |  0;
-    const static int rightparen   = expression |  1;
-    const static int to           = expression |  2;
-    const static int opAnd        = expression |  3;
-    const static int opOr         = expression |  4;
-    const static int opNot        = expression |  5;
-    const static int within       = expression | dynamic | 6;
-    const static int asterisk     = expression |  7;
-    const static int dot          = expression | 8;
-    const static int all          = expression | 9 ; 
-    const static int none         = expression | 10;
-    const static int name         = expression | 11;
-    const static int hull         = expression | dynamic | 12;
-    const static int alphahull    = expression | dynamic | 13;
+    const static int leftparen  = expression | 0;
+    const static int rightparen = expression | 1;
+    const static int to         = expression | 2;
+    const static int opAnd      = expression | 3;
+    const static int opOr       = expression | 4;
+    const static int opNot      = expression | 5;
+    const static int within     = expression | dynamic | 6;
+    const static int asterisk   = expression | 7;
+    const static int dot        = expression | 8;
+    const static int all        = expression | 9;
+    const static int none       = expression | 10;
+    const static int name       = expression | 11;
+    const static int hull       = expression | dynamic | 12;
+    const static int alphahull  = expression | dynamic | 13;
 
     // miguel 2005 01 01
     // these are used to demark the beginning and end of expressions
@@ -154,30 +148,28 @@ namespace OpenMD {
     const static int expressionBegin = expression | 100;
     const static int expressionEnd   = expression | 101;
 
-    const static int mass         = atomproperty | 0;
-    const static int charge       = atomproperty | dynamic | 1;
-    const static int x            = atomproperty | dynamic | 2;
-    const static int y            = atomproperty | dynamic | 3;
-    const static int z            = atomproperty | dynamic | 4;
-    const static int r            = atomproperty | dynamic | 5;
-    const static int wrappedX     = atomproperty | dynamic | 6;
-    const static int wrappedY     = atomproperty | dynamic | 7;
-    const static int wrappedZ     = atomproperty | dynamic | 8;
-    const static int atomno       = atomproperty | 9;
-        
-    const static int opGT         = comparator |  dynamic | 0;
-    const static int opGE         = comparator |  dynamic | 1;
-    const static int opLE         = comparator |  dynamic | 2;
-    const static int opLT         = comparator |  dynamic | 3;
-    const static int opEQ         = comparator |  dynamic | 4;
-    const static int opNE         = comparator |  dynamic | 5;
- 
+    const static int mass     = atomproperty | 0;
+    const static int charge   = atomproperty | dynamic | 1;
+    const static int x        = atomproperty | dynamic | 2;
+    const static int y        = atomproperty | dynamic | 3;
+    const static int z        = atomproperty | dynamic | 4;
+    const static int r        = atomproperty | dynamic | 5;
+    const static int wrappedX = atomproperty | dynamic | 6;
+    const static int wrappedY = atomproperty | dynamic | 7;
+    const static int wrappedZ = atomproperty | dynamic | 8;
+    const static int atomno   = atomproperty | 9;
+
+    const static int opGT = comparator | dynamic | 0;
+    const static int opGE = comparator | dynamic | 1;
+    const static int opLE = comparator | dynamic | 2;
+    const static int opLT = comparator | dynamic | 3;
+    const static int opEQ = comparator | dynamic | 4;
+    const static int opNE = comparator | dynamic | 5;
+
     static Token tokenExpressionBegin;
     static Token tokenExpressionEnd;
-
   };
 
+}  // namespace OpenMD
 
-}
-
-#endif 
+#endif

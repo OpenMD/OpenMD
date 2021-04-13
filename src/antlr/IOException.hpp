@@ -8,38 +8,32 @@
  * $Id$
  */
 
-#include <antlr/config.hpp>
-#include <antlr/ANTLRException.hpp>
 #include <exception>
+
+#include <antlr/ANTLRException.hpp>
+#include <antlr/config.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-/** Generic IOException used inside support code. (thrown by XML I/O routs)
- * basically this is something I'm using since a lot of compilers don't
- * support ios_base::failure.
- */
-class ANTLR_API IOException : public ANTLRException
-{
-public:
-	ANTLR_USE_NAMESPACE(std)exception io;
+  /** Generic IOException used inside support code. (thrown by XML I/O routs)
+   * basically this is something I'm using since a lot of compilers don't
+   * support ios_base::failure.
+   */
+  class ANTLR_API IOException : public ANTLRException {
+  public:
+    ANTLR_USE_NAMESPACE(std) exception io;
 
-	IOException( ANTLR_USE_NAMESPACE(std)exception& e )
-		: ANTLRException(e.what())
-	{
-	}
-	IOException( const ANTLR_USE_NAMESPACE(std)string& mesg )
-		: ANTLRException(mesg)
-	{
-	}
-	virtual ~IOException() throw()
-	{
-	}
-};
+    IOException(ANTLR_USE_NAMESPACE(std) exception& e) :
+        ANTLRException(e.what()) {}
+    IOException(const ANTLR_USE_NAMESPACE(std) string& mesg) :
+        ANTLRException(mesg) {}
+    virtual ~IOException() throw() {}
+  };
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif //INC_IOException_hpp__
+#endif  // INC_IOException_hpp__

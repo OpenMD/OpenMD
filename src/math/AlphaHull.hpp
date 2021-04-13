@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,19 +46,19 @@
 #ifndef MATH_ALPHAHULL_HPP_
 #define MATH_ALPHAHULL_HPP_
 
-#include "math/Vector3.hpp"
+#include <cassert>
+#include <string>
+#include <vector>
+
 #include "config.h"
 #include "math/Hull.hpp"
 #include "math/Triangle.hpp"
-
-#include <cassert>
-#include <vector>
-#include <string>
+#include "math/Vector3.hpp"
 
 namespace OpenMD {
 
   /**
-   * @class AlphaHull 
+   * @class AlphaHull
    * @brief Compute alpha complex or alpha shape
    *
    * Builds the alpha shape (H. Edelsbrunner and P.Mucke,
@@ -78,25 +78,24 @@ namespace OpenMD {
    */
   class AlphaHull : public Hull {
   public:
-    
-    AlphaHull(RealType alpha);    
-    virtual ~AlphaHull(){};
-    
-    void computeHull( std::vector<StuntDouble*> bodydoubles );
-    
+    AlphaHull(RealType alpha);
+    virtual ~AlphaHull() {};
+
+    void computeHull(std::vector<StuntDouble*> bodydoubles);
+
     /* Total area of Hull*/
-    RealType getArea(){ return area_; }
-    
+    RealType getArea() { return area_; }
+
     /* Total Volume enclosed by Hull */
-    RealType getVolume(){ return volume_; } 
-    
-    vector<Triangle> getMesh(){ return Triangles_; }
-    
+    RealType getVolume() { return volume_; }
+
+    vector<Triangle> getMesh() { return Triangles_; }
+
   protected:
     int dim_;
     RealType alpha_;
     const std::string options_;
-    
+
   private:
     // These variables are private so that each new hull returns
     // information about itself.
@@ -104,5 +103,5 @@ namespace OpenMD {
     RealType area_;
     std::vector<Triangle> Triangles_;
   };
-}
+}  // namespace OpenMD
 #endif

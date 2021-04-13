@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,152 +50,148 @@
 #include "utils/simError.h"
 namespace OpenMD {
 
-DirectionalAtom::DirectionalAtom(AtomType* dAtomType) : Atom(dAtomType) {
-  objType_ = otDAtom;
+  DirectionalAtom::DirectionalAtom(AtomType* dAtomType) : Atom(dAtomType) {
+    objType_ = otDAtom;
 
-  DirectionalAdapter da = DirectionalAdapter(dAtomType);
-  I_ = da.getI();
+    DirectionalAdapter da = DirectionalAdapter(dAtomType);
+    I_                    = da.getI();
 
-  MultipoleAdapter ma = MultipoleAdapter(dAtomType);
-  if (ma.isDipole()) {
-    dipole_ = ma.getDipole();
-  }
-  if (ma.isQuadrupole()) {
-    quadrupole_ = ma.getQuadrupole();
-  }
+    MultipoleAdapter ma = MultipoleAdapter(dAtomType);
+    if (ma.isDipole()) { dipole_ = ma.getDipole(); }
+    if (ma.isQuadrupole()) { quadrupole_ = ma.getQuadrupole(); }
 
-  // Check if one of the diagonal inertia tensor of this directional
-  // atom is zero:
-  int nLinearAxis = 0;
-  Mat3x3d inertiaTensor = getI();
-  for (int i = 0; i < 3; i++) {
-    if (fabs(inertiaTensor(i, i)) < OpenMD::epsilon) {
-      linear_ = true;
-      linearAxis_ = i;
-      ++nLinearAxis;
+    // Check if one of the diagonal inertia tensor of this directional
+    // atom is zero:
+    int nLinearAxis       = 0;
+    Mat3x3d inertiaTensor = getI();
+    for (int i = 0; i < 3; i++) {
+      if (fabs(inertiaTensor(i, i)) < OpenMD::epsilon) {
+        linear_     = true;
+        linearAxis_ = i;
+        ++nLinearAxis;
+      }
+    }
+
+    if (nLinearAxis > 1) {
+      sprintf(
+          painCave.errMsg,
+          "Directional Atom warning.\n"
+          "\tOpenMD found more than one axis in this directional atom with a "
+          "vanishing \n"
+          "\tmoment of inertia.");
+      painCave.isFatal = 0;
+      simError();
     }
   }
 
-  if (nLinearAxis > 1) {
-    sprintf(painCave.errMsg,
-            "Directional Atom warning.\n"
-            "\tOpenMD found more than one axis in this directional atom with a "
-            "vanishing \n"
-            "\tmoment of inertia.");
-    painCave.isFatal = 0;
-    simError();
-  }
-}
+  Mat3x3d DirectionalAtom::getI() { return I_; }
 
-Mat3x3d DirectionalAtom::getI() { return I_; }
+  void DirectionalAtom::setPrevA(const RotMat3x3d& a) {
+    ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
 
-void DirectionalAtom::setPrevA(const RotMat3x3d& a) {
-  ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
+    if (atomType_->isMultipole()) {
+      RotMat3x3d atrans = a.transpose();
 
-  if (atomType_->isMultipole()) {
-    RotMat3x3d atrans = a.transpose();
+      if (atomType_->isDipole()) {
+        ((snapshotMan_->getPrevSnapshot())->*storage_).dipole[localIndex_] =
+            atrans * dipole_;
+      }
 
-    if (atomType_->isDipole()) {
-      ((snapshotMan_->getPrevSnapshot())->*storage_).dipole[localIndex_] =
-          atrans * dipole_;
-    }
-
-    if (atomType_->isQuadrupole()) {
-      ((snapshotMan_->getPrevSnapshot())->*storage_).quadrupole[localIndex_] =
-          atrans * quadrupole_ * a;
+      if (atomType_->isQuadrupole()) {
+        ((snapshotMan_->getPrevSnapshot())->*storage_).quadrupole[localIndex_] =
+            atrans * quadrupole_ * a;
+      }
     }
   }
-}
 
-void DirectionalAtom::setA(const RotMat3x3d& a) {
-  ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
+  void DirectionalAtom::setA(const RotMat3x3d& a) {
+    ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
 
-  if (atomType_->isMultipole()) {
-    RotMat3x3d atrans = a.transpose();
+    if (atomType_->isMultipole()) {
+      RotMat3x3d atrans = a.transpose();
 
-    if (atomType_->isDipole()) {
-      ((snapshotMan_->getCurrentSnapshot())->*storage_).dipole[localIndex_] =
-          atrans * dipole_;
-    }
+      if (atomType_->isDipole()) {
+        ((snapshotMan_->getCurrentSnapshot())->*storage_).dipole[localIndex_] =
+            atrans * dipole_;
+      }
 
-    if (atomType_->isQuadrupole()) {
-      ((snapshotMan_->getCurrentSnapshot())->*storage_)
-          .quadrupole[localIndex_] = atrans * quadrupole_ * a;
-    }
-  }
-}
-
-void DirectionalAtom::setA(const RotMat3x3d& a, int snapshotNo) {
-  ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
-
-  if (atomType_->isMultipole()) {
-    RotMat3x3d atrans = a.transpose();
-
-    if (atomType_->isDipole()) {
-      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).dipole[localIndex_] =
-          atrans * dipole_;
-    }
-
-    if (atomType_->isQuadrupole()) {
-      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_)
-          .quadrupole[localIndex_] = atrans * quadrupole_ * a;
+      if (atomType_->isQuadrupole()) {
+        ((snapshotMan_->getCurrentSnapshot())->*storage_)
+            .quadrupole[localIndex_] = atrans * quadrupole_ * a;
+      }
     }
   }
-}
 
-void DirectionalAtom::rotateBy(const RotMat3x3d& m) { setA(m * getA()); }
+  void DirectionalAtom::setA(const RotMat3x3d& a, int snapshotNo) {
+    ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
 
-std::vector<RealType> DirectionalAtom::getGrad() {
-  std::vector<RealType> grad(6, 0.0);
-  Vector3d force;
-  Vector3d torque;
-  Vector3d myEuler;
-  RealType phi, theta;
-  RealType cphi, sphi, ctheta, stheta;
-  Vector3d ephi;
-  Vector3d etheta;
-  Vector3d epsi;
+    if (atomType_->isMultipole()) {
+      RotMat3x3d atrans = a.transpose();
 
-  force = getFrc();
-  torque = getTrq();
+      if (atomType_->isDipole()) {
+        ((snapshotMan_->getSnapshot(snapshotNo))->*storage_)
+            .dipole[localIndex_] = atrans * dipole_;
+      }
 
-  myEuler = getA().toEulerAngles();
-
-  phi = myEuler[0];
-  theta = myEuler[1];
-
-  cphi = cos(phi);
-  sphi = sin(phi);
-  ctheta = cos(theta);
-  stheta = sin(theta);
-
-  if (fabs(stheta) < 1.0E-9) {
-    stheta = 1.0E-9;
+      if (atomType_->isQuadrupole()) {
+        ((snapshotMan_->getSnapshot(snapshotNo))->*storage_)
+            .quadrupole[localIndex_] = atrans * quadrupole_ * a;
+      }
+    }
   }
 
-  ephi[0] = -sphi * ctheta / stheta;
-  ephi[1] = cphi * ctheta / stheta;
-  ephi[2] = 1.0;
+  void DirectionalAtom::rotateBy(const RotMat3x3d& m) { setA(m * getA()); }
 
-  etheta[0] = cphi;
-  etheta[1] = sphi;
-  etheta[2] = 0.0;
+  std::vector<RealType> DirectionalAtom::getGrad() {
+    std::vector<RealType> grad(6, 0.0);
+    Vector3d force;
+    Vector3d torque;
+    Vector3d myEuler;
+    RealType phi, theta;
+    RealType cphi, sphi, ctheta, stheta;
+    Vector3d ephi;
+    Vector3d etheta;
+    Vector3d epsi;
 
-  epsi[0] = sphi / stheta;
-  epsi[1] = -cphi / stheta;
-  epsi[2] = 0.0;
+    force  = getFrc();
+    torque = getTrq();
 
-  // gradient is equal to -force
-  for (int j = 0; j < 3; j++) grad[j] = -force[j];
+    myEuler = getA().toEulerAngles();
 
-  for (int j = 0; j < 3; j++) {
-    grad[3] -= torque[j] * ephi[j];
-    grad[4] -= torque[j] * etheta[j];
-    grad[5] -= torque[j] * epsi[j];
+    phi   = myEuler[0];
+    theta = myEuler[1];
+
+    cphi   = cos(phi);
+    sphi   = sin(phi);
+    ctheta = cos(theta);
+    stheta = sin(theta);
+
+    if (fabs(stheta) < 1.0E-9) { stheta = 1.0E-9; }
+
+    ephi[0] = -sphi * ctheta / stheta;
+    ephi[1] = cphi * ctheta / stheta;
+    ephi[2] = 1.0;
+
+    etheta[0] = cphi;
+    etheta[1] = sphi;
+    etheta[2] = 0.0;
+
+    epsi[0] = sphi / stheta;
+    epsi[1] = -cphi / stheta;
+    epsi[2] = 0.0;
+
+    // gradient is equal to -force
+    for (int j = 0; j < 3; j++)
+      grad[j] = -force[j];
+
+    for (int j = 0; j < 3; j++) {
+      grad[3] -= torque[j] * ephi[j];
+      grad[4] -= torque[j] * etheta[j];
+      grad[5] -= torque[j] * epsi[j];
+    }
+
+    return grad;
   }
 
-  return grad;
-}
-
-void DirectionalAtom::accept(BaseVisitor* v) { v->visit(this); }
+  void DirectionalAtom::accept(BaseVisitor* v) { v->visit(this); }
 }  // namespace OpenMD

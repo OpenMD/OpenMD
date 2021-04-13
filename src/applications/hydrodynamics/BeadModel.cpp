@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,79 +48,79 @@
 #include "types/LennardJonesAdapter.hpp"
 
 namespace OpenMD {
-bool BeadModel::createBeads(std::vector<BeadParam>& beads) {
-  if (sd_->isAtom()) {
-    if (!createSingleBead(static_cast<Atom*>(sd_), beads)) {
-      sprintf(painCave.errMsg,
-              "BeadModel::createBeads Error: GayBerne and other "
-              "non-spherical atoms should use the RoughShell model\n");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-      return false;
-    }
-  } else if (sd_->isRigidBody()) {
-    RigidBody* rb = static_cast<RigidBody*>(sd_);
-    std::vector<Atom*>::iterator ai;
-    Atom* atom;
-    for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
-      if (!createSingleBead(atom, beads)) {
+  bool BeadModel::createBeads(std::vector<BeadParam>& beads) {
+    if (sd_->isAtom()) {
+      if (!createSingleBead(static_cast<Atom*>(sd_), beads)) {
         sprintf(painCave.errMsg,
                 "BeadModel::createBeads Error: GayBerne and other "
                 "non-spherical atoms should use the RoughShell model\n");
         painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
+        painCave.isFatal  = 1;
         simError();
         return false;
       }
-    }
-  }
-  return true;
-}
-
-bool BeadModel::createSingleBead(Atom* atom, std::vector<BeadParam>& beads) {
-  AtomType* atomType = atom->getAtomType();
-  LennardJonesAdapter lja = LennardJonesAdapter(atomType);
-  if (atomType->isGayBerne()) {
-    return false;
-  } else if (lja.isLennardJones()) {
-    BeadParam currBead;
-    currBead.atomName = atom->getType();
-    currBead.pos = atom->getPos();
-    currBead.mass =
-        atom->getMass();  // to compute center of mass in ApproximationModel.cpp
-    currBead.radius = lja.getSigma() / 2.0;
-    std::cout << "using rLJ = " << currBead.radius << " for atom "
-              << currBead.atomName << "\n";
-    beads.push_back(currBead);
-  } else {
-    std::cout << "For atom " << atom->getType() << ", trying ";
-    int obanum(0);
-    std::vector<AtomType*> atChain = atomType->allYourBase();
-    std::vector<AtomType*>::iterator i;
-    for (i = atChain.begin(); i != atChain.end(); ++i) {
-      std::cout << (*i)->getName() << " -> ";
-      obanum = etab.GetAtomicNum((*i)->getName().c_str());
-      if (obanum != 0) {
-        BeadParam currBead;
-        currBead.atomName = atom->getType();
-        currBead.pos = atom->getPos();
-        currBead.mass = atom->getMass();  // to compute center of mass in
-                                          // ApproximationModel.cpp
-        currBead.radius = etab.GetVdwRad(obanum);
-        std::cout << "using rVdW = " << currBead.radius << "\n";
-        beads.push_back(currBead);
-        break;
+    } else if (sd_->isRigidBody()) {
+      RigidBody* rb = static_cast<RigidBody*>(sd_);
+      std::vector<Atom*>::iterator ai;
+      Atom* atom;
+      for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
+        if (!createSingleBead(atom, beads)) {
+          sprintf(painCave.errMsg,
+                  "BeadModel::createBeads Error: GayBerne and other "
+                  "non-spherical atoms should use the RoughShell model\n");
+          painCave.severity = OPENMD_ERROR;
+          painCave.isFatal  = 1;
+          simError();
+          return false;
+        }
       }
     }
-    if (obanum == 0) {
-      sprintf(painCave.errMsg,
-              "Could not find atom type in default element.txt\n");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
+    return true;
   }
-  return true;
-}
+
+  bool BeadModel::createSingleBead(Atom* atom, std::vector<BeadParam>& beads) {
+    AtomType* atomType      = atom->getAtomType();
+    LennardJonesAdapter lja = LennardJonesAdapter(atomType);
+    if (atomType->isGayBerne()) {
+      return false;
+    } else if (lja.isLennardJones()) {
+      BeadParam currBead;
+      currBead.atomName = atom->getType();
+      currBead.pos      = atom->getPos();
+      currBead.mass     = atom->getMass();  // to compute center of mass in
+                                            // ApproximationModel.cpp
+      currBead.radius = lja.getSigma() / 2.0;
+      std::cout << "using rLJ = " << currBead.radius << " for atom "
+                << currBead.atomName << "\n";
+      beads.push_back(currBead);
+    } else {
+      std::cout << "For atom " << atom->getType() << ", trying ";
+      int obanum(0);
+      std::vector<AtomType*> atChain = atomType->allYourBase();
+      std::vector<AtomType*>::iterator i;
+      for (i = atChain.begin(); i != atChain.end(); ++i) {
+        std::cout << (*i)->getName() << " -> ";
+        obanum = etab.GetAtomicNum((*i)->getName().c_str());
+        if (obanum != 0) {
+          BeadParam currBead;
+          currBead.atomName = atom->getType();
+          currBead.pos      = atom->getPos();
+          currBead.mass     = atom->getMass();  // to compute center of mass in
+                                                // ApproximationModel.cpp
+          currBead.radius = etab.GetVdwRad(obanum);
+          std::cout << "using rVdW = " << currBead.radius << "\n";
+          beads.push_back(currBead);
+          break;
+        }
+      }
+      if (obanum == 0) {
+        sprintf(painCave.errMsg,
+                "Could not find atom type in default element.txt\n");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal  = 1;
+        simError();
+      }
+    }
+    return true;
+  }
 }  // namespace OpenMD

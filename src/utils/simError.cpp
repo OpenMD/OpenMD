@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -63,11 +63,11 @@ char checkPointMsg[MAX_SIM_ERROR_MSG_LENGTH];
 int worldRank;
 
 void initSimError(void) {
-  painCave.errMsg[0] = '\0';
-  painCave.isFatal = 0;
-  painCave.severity = OPENMD_ERROR;
+  painCave.errMsg[0]   = '\0';
+  painCave.isFatal     = 0;
+  painCave.severity    = OPENMD_ERROR;
   painCave.isEventLoop = 0;
-  nChecks = 0;
+  nChecks              = 0;
 #ifdef IS_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
 #else
@@ -86,17 +86,15 @@ int simError(void) {
 
   strcpy(errorMsg, "OpenMD ");
   switch (painCave.severity) {
-    case OPENMD_WARNING:
-      strcat(errorMsg, "warning");
-      break;
-    case OPENMD_INFO:
-      strcat(errorMsg, "info");
-      break;
-    default:
-      if (painCave.isFatal) {
-        strcat(errorMsg, "FATAL ");
-      }
-      strcat(errorMsg, "ERROR");
+  case OPENMD_WARNING:
+    strcat(errorMsg, "warning");
+    break;
+  case OPENMD_INFO:
+    strcat(errorMsg, "info");
+    break;
+  default:
+    if (painCave.isFatal) { strcat(errorMsg, "FATAL "); }
+    strcat(errorMsg, "ERROR");
   }
 
 #ifdef IS_MPI
@@ -116,12 +114,12 @@ int simError(void) {
     strcat(errorMsg, "\n");
 
     switch (painCave.severity) {
-      case OPENMD_WARNING:
-      case OPENMD_INFO:
-        fprintf(stdout, "%s", errorMsg);
-        break;
-      default:
-        fprintf(stderr, "%s", errorMsg);
+    case OPENMD_WARNING:
+    case OPENMD_INFO:
+      fprintf(stdout, "%s", errorMsg);
+      break;
+    default:
+      fprintf(stderr, "%s", errorMsg);
     }
 
 #ifdef IS_MPI
@@ -146,7 +144,7 @@ void errorCheckPoint(void) {
 #ifdef IS_MPI
   MPI_Allreduce(&myError, &isError, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);
 #else
-  isError = myError;
+  isError   = myError;
 #endif
 
   if (isError) {

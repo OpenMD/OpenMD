@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,77 +42,64 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef PRIMITIVES_SHORTRANGEINTERACTION_HPP
 #define PRIMITIVES_SHORTRANGEINTERACTION_HPP
 
 #include <memory>
 #include <vector>
 
-#include "visitors/BaseVisitor.hpp"
-#include "utils/PropertyMap.hpp"
 #include "brains/Snapshot.hpp"
 #include "brains/SnapshotManager.hpp"
+#include "utils/PropertyMap.hpp"
+#include "visitors/BaseVisitor.hpp"
 
-namespace OpenMD{
+namespace OpenMD {
 
   /**
-   * @class ShortRangeInteraction 
-   * @brief 
+   * @class ShortRangeInteraction
+   * @brief
    *
    * A ShortRangeInteraction holds some bookeeping data for bonded
    * interactions (e.g. Bonds, Bends, Torsions, Inversions).
    *
    */
-  class ShortRangeInteraction{
-  public:    
-
+  class ShortRangeInteraction {
+  public:
     virtual ~ShortRangeInteraction();
-        
+
     /**
      * Returns the global index of this ShortRangeInteraction.
-     * @return  the global index of this ShortRangeInteraction 
+     * @return  the global index of this ShortRangeInteraction
      */
-    int getGlobalIndex() {
-      return globalIndex_;
-    }
+    int getGlobalIndex() { return globalIndex_; }
 
     /**
      * Sets the global index of this ShortRangeInteraction.
      * @param index new global index to be set
      */
-    void setGlobalIndex(int index) {
-      globalIndex_ = index;
-    }
-    
-    /** 
-     * Returns the local index of this ShortRangeInteraction 
+    void setGlobalIndex(int index) { globalIndex_ = index; }
+
+    /**
+     * Returns the local index of this ShortRangeInteraction
      * @return the local index of this ShortRangeInteraction
      */
-    int getLocalIndex() {
-      return localIndex_;
-    }
+    int getLocalIndex() { return localIndex_; }
 
     /**
      * Sets the local index of this ShortRangeInteraction
      * @param index new index to be set
-     */        
-    void setLocalIndex(int index) {
-      localIndex_ = index;
-    }    
-
+     */
+    void setLocalIndex(int index) { localIndex_ = index; }
 
     /**
      * Sets the Snapshot Manager of this ShortRangeInteraction
      */
-    void setSnapshotManager(SnapshotManager* sman) {
-      snapshotMan_ = sman;
-    }
-
+    void setSnapshotManager(SnapshotManager* sman) { snapshotMan_ = sman; }
 
     /** Returns the name of this ShortRangeInteraction */
     virtual std::string getName() = 0;
-        
+
     /** Sets the name of this ShortRangeInteraction*/
     virtual void setName(const std::string& name) {}
 
@@ -127,26 +114,26 @@ namespace OpenMD{
      * structure and the algorithms used upon them
      * </p>
      * @param v visitor
-     */      
+     */
     virtual void accept(BaseVisitor* v) = 0;
 
     /**
      * Returns the previous value of this ShortRangeInteraction
      * @return the value of this ShortRangeInteraction
-     */    
+     */
     virtual RealType getPrevValue();
 
     /**
      * Returns the current value of this ShortRangeInteraction
      * @return the current value of this ShortRangeInteraction
-     */    
+     */
     virtual RealType getValue();
 
     /**
-     * Returns the value of this ShortRangeInteraction in specified snapshot 
+     * Returns the value of this ShortRangeInteraction in specified snapshot
      * @return the value of this ShortRangeInteraction
      * @param snapshotNo
-     */    
+     */
     virtual RealType getValue(int snapshotNo) = 0;
 
     virtual std::vector<Atom*> getAtoms() { return atoms_; }
@@ -172,20 +159,19 @@ namespace OpenMD{
     /**
      * Returns all of the properties in PropertyMap
      * @return all of the properties in PropertyMap
-     */      
-    std::vector<std::shared_ptr<GenericData> > getProperties();
+     */
+    std::vector<std::shared_ptr<GenericData>> getProperties();
 
     /**
-     * Returns property 
+     * Returns property
      * @param propName name of property
-     * @return a pointer point to property with propName. If no property named propName
-     * exists, return NULL
-     */      
+     * @return a pointer point to property with propName. If no property named
+     * propName exists, return NULL
+     */
     std::shared_ptr<GenericData> getPropertyByName(const std::string& propName);
 
   protected:
-        
-    ShortRangeInteraction();         
+    ShortRangeInteraction();
     ShortRangeInteraction(const ShortRangeInteraction& sri);
     ShortRangeInteraction& operator=(const ShortRangeInteraction& sri);
 
@@ -194,11 +180,10 @@ namespace OpenMD{
 
     int globalIndex_;
     int localIndex_;
-        
+
   private:
-    
     PropertyMap properties_;
   };
 
-}//end namespace OpenMD
-#endif //PRIMITIVES_STUNTDOUBLE_HPP
+}  // end namespace OpenMD
+#endif  // PRIMITIVES_STUNTDOUBLE_HPP

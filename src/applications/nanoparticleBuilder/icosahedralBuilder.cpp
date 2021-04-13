@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -103,9 +103,8 @@ int main(int argc, char* argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg,
-            "No input .omd file name was specified "
-            "on the command line");
+    sprintf(painCave.errMsg, "No input .omd file name was specified "
+                             "on the command line");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
     simError();
@@ -115,17 +114,15 @@ int main(int argc, char* argv[]) {
       (args_info.cuboctahedron_given || args_info.truncatedCube_given)) {
     nShells = args_info.shells_arg;
     if (nShells < 0) {
-      sprintf(painCave.errMsg,
-              "icosahedralBuilder:  The number of shells\n"
-              "\tmust be greater than or equal to zero.");
+      sprintf(painCave.errMsg, "icosahedralBuilder:  The number of shells\n"
+                               "\tmust be greater than or equal to zero.");
       painCave.isFatal = 1;
       cmdline_parser_print_help();
       simError();
     }
   } else {
-    sprintf(painCave.errMsg,
-            "icosahedralBuilder:  The number of shells\n"
-            "\tis required to build a Mackay Icosahedron.");
+    sprintf(painCave.errMsg, "icosahedralBuilder:  The number of shells\n"
+                             "\tis required to build a Mackay Icosahedron.");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
     simError();
@@ -134,9 +131,8 @@ int main(int argc, char* argv[]) {
   if (args_info.latticeConstant_given) {
     latticeConstant = args_info.latticeConstant_arg;
   } else {
-    sprintf(painCave.errMsg,
-            "icosahedralBuilder:  No lattice constant\n"
-            "\tgiven.");
+    sprintf(painCave.errMsg, "icosahedralBuilder:  No lattice constant\n"
+                             "\tgiven.");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
     simError();
@@ -149,23 +145,23 @@ int main(int argc, char* argv[]) {
   vector<Vector3d> Points;
   if (args_info.ico_given) {
     Icosahedron* ico = new Icosahedron();
-    Points = ico->getPoints(nShells);
+    Points           = ico->getPoints(nShells);
   } else if (args_info.deca_given) {
     RegularDecahedron* deca = new RegularDecahedron(nShells);
-    Points = deca->getPoints();
+    Points                  = deca->getPoints();
   } else if (args_info.ino_given) {
-    int columnAtoms = args_info.columnAtoms_arg;
+    int columnAtoms    = args_info.columnAtoms_arg;
     InoDecahedron* ino = new InoDecahedron(columnAtoms, nShells);
-    Points = ino->getPoints();
+    Points             = ino->getPoints();
   } else if (args_info.marks_given) {
-    int columnAtoms = args_info.columnAtoms_arg;
-    int twinAtoms = args_info.twinAtoms_arg;
+    int columnAtoms   = args_info.columnAtoms_arg;
+    int twinAtoms     = args_info.twinAtoms_arg;
     Decahedron* marks = new Decahedron(columnAtoms, nShells, twinAtoms);
-    Points = marks->getPoints();
+    Points            = marks->getPoints();
   } else if (args_info.stone_given) {
-    int columnAtoms = args_info.columnAtoms_arg;
-    int twinAtoms = args_info.twinAtoms_arg;
-    int truncatedPlanes = args_info.truncatedPlanes_arg;
+    int columnAtoms             = args_info.columnAtoms_arg;
+    int twinAtoms               = args_info.twinAtoms_arg;
+    int truncatedPlanes         = args_info.truncatedPlanes_arg;
     CurlingStoneDecahedron* csd = new CurlingStoneDecahedron(
         columnAtoms, nShells, twinAtoms, truncatedPlanes);
     Points = csd->getPoints();
@@ -195,7 +191,7 @@ int main(int argc, char* argv[]) {
       Points = tc->getPoints();
     } else {
       RegularCuboctahedron* rc = new RegularCuboctahedron(lattice, unitCells);
-      Points = rc->getPoints();
+      Points                   = rc->getPoints();
     }
   }
 
@@ -280,7 +276,7 @@ int main(int argc, char* argv[]) {
           "A new OpenMD file called \"%s\" has been "
           "generated.\n",
           outputFileName.c_str());
-  painCave.isFatal = 0;
+  painCave.isFatal  = 0;
   painCave.severity = OPENMD_INFO;
   simError();
   return 0;

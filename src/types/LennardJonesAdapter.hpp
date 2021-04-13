@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,38 +42,39 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_LENNARDJONESADAPTER_HPP
 #define TYPES_LENNARDJONESADAPTER_HPP
 
-#include "utils/GenericData.hpp"
 #include "types/AtomType.hpp"
+#include "utils/GenericData.hpp"
 
 using namespace std;
 namespace OpenMD {
 
   string const LJtypeID = "LJ";
 
-  struct LJAtypeParameters{
+  struct LJAtypeParameters {
     RealType sigma;
     RealType epsilon;
     bool isSoft;
   };
-  typedef SimpleTypeData<LJAtypeParameters> LJAtypeData;   
+  typedef SimpleTypeData<LJAtypeParameters> LJAtypeData;
 
   class LennardJonesAdapter {
   public:
     LennardJonesAdapter(AtomType* AT) { at_ = AT; };
 
     void makeLennardJones(RealType sigma, RealType epsilon, bool isSoft);
-    
+
     bool isLennardJones();
     RealType getSigma();
     RealType getEpsilon();
     bool isSoft();
+
   private:
     AtomType* at_;
-    LJAtypeParameters getLJParam();    
+    LJAtypeParameters getLJParam();
   };
-}
+}  // namespace OpenMD
 #endif

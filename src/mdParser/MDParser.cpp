@@ -6,21 +6,21 @@
 #include <antlr/SemanticException.hpp>
 #line 1 "MDParser.g"
 #line 8 "MDParser.cpp"
-MDParser::MDParser(ANTLR_USE_NAMESPACE(antlr) TokenBuffer& tokenBuf, int k)
-    : ANTLR_USE_NAMESPACE(antlr) LLkParser(tokenBuf, k) {}
+MDParser::MDParser(ANTLR_USE_NAMESPACE(antlr) TokenBuffer& tokenBuf, int k) :
+    ANTLR_USE_NAMESPACE(antlr) LLkParser(tokenBuf, k) {}
 
-MDParser::MDParser(ANTLR_USE_NAMESPACE(antlr) TokenBuffer& tokenBuf)
-    : ANTLR_USE_NAMESPACE(antlr) LLkParser(tokenBuf, 3) {}
+MDParser::MDParser(ANTLR_USE_NAMESPACE(antlr) TokenBuffer& tokenBuf) :
+    ANTLR_USE_NAMESPACE(antlr) LLkParser(tokenBuf, 3) {}
 
-MDParser::MDParser(ANTLR_USE_NAMESPACE(antlr) TokenStream& lexer, int k)
-    : ANTLR_USE_NAMESPACE(antlr) LLkParser(lexer, k) {}
+MDParser::MDParser(ANTLR_USE_NAMESPACE(antlr) TokenStream& lexer, int k) :
+    ANTLR_USE_NAMESPACE(antlr) LLkParser(lexer, k) {}
 
-MDParser::MDParser(ANTLR_USE_NAMESPACE(antlr) TokenStream& lexer)
-    : ANTLR_USE_NAMESPACE(antlr) LLkParser(lexer, 3) {}
+MDParser::MDParser(ANTLR_USE_NAMESPACE(antlr) TokenStream& lexer) :
+    ANTLR_USE_NAMESPACE(antlr) LLkParser(lexer, 3) {}
 
 MDParser::MDParser(const ANTLR_USE_NAMESPACE(antlr)
-                       ParserSharedInputState& state)
-    : ANTLR_USE_NAMESPACE(antlr) LLkParser(state, 3) {}
+                       ParserSharedInputState& state) :
+    ANTLR_USE_NAMESPACE(antlr) LLkParser(state, 3) {}
 
 void MDParser::mdfile() {
   returnAST = ANTLR_USE_NAMESPACE(antlr) nullAST;
@@ -56,58 +56,58 @@ void MDParser::statement() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case ID: {
-        assignment();
-        astFactory->addASTChild(currentAST, returnAST);
-        statement_AST = currentAST.root;
-        break;
-      }
-      case COMPONENT: {
-        componentblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        statement_AST = currentAST.root;
-        break;
-      }
-      case MOLECULE: {
-        moleculeblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        statement_AST = currentAST.root;
-        break;
-      }
-      case ZCONSTRAINT: {
-        zconstraintblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        statement_AST = currentAST.root;
-        break;
-      }
-      case RESTRAINT: {
-        restraintblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        statement_AST = currentAST.root;
-        break;
-      }
-      case FLUCQ: {
-        flucqblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        statement_AST = currentAST.root;
-        break;
-      }
-      case RNEMD: {
-        rnemdblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        statement_AST = currentAST.root;
-        break;
-      }
-      case MINIMIZER: {
-        minimizerblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        statement_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case ID: {
+      assignment();
+      astFactory->addASTChild(currentAST, returnAST);
+      statement_AST = currentAST.root;
+      break;
+    }
+    case COMPONENT: {
+      componentblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      statement_AST = currentAST.root;
+      break;
+    }
+    case MOLECULE: {
+      moleculeblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      statement_AST = currentAST.root;
+      break;
+    }
+    case ZCONSTRAINT: {
+      zconstraintblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      statement_AST = currentAST.root;
+      break;
+    }
+    case RESTRAINT: {
+      restraintblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      statement_AST = currentAST.root;
+      break;
+    }
+    case FLUCQ: {
+      flucqblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      statement_AST = currentAST.root;
+      break;
+    }
+    case RNEMD: {
+      rnemdblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      statement_AST = currentAST.root;
+      break;
+    }
+    case MINIMIZER: {
+      minimizerblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      statement_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -125,12 +125,12 @@ void MDParser::assignment() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp1_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp1_AST = astFactory->create(LT(1));
+    tmp1_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp1_AST);
     match(ID);
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp2_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp2_AST = astFactory->create(LT(1));
+    tmp2_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp2_AST);
     match(ASSIGNEQUAL);
     constant();
@@ -153,7 +153,7 @@ void MDParser::componentblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp4_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp4_AST = astFactory->create(LT(1));
+    tmp4_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp4_AST);
     match(COMPONENT);
     match(LCURLY);
@@ -170,7 +170,7 @@ void MDParser::componentblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp6_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp6_AST = astFactory->create(LT(1));
+    tmp6_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp6_AST);
     match(RCURLY);
 #line 95 "MDParser.g"
@@ -193,7 +193,7 @@ void MDParser::moleculeblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp7_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp7_AST = astFactory->create(LT(1));
+    tmp7_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp7_AST);
     match(MOLECULE);
     match(LCURLY);
@@ -210,7 +210,7 @@ void MDParser::moleculeblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp9_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp9_AST = astFactory->create(LT(1));
+    tmp9_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp9_AST);
     match(RCURLY);
 #line 113 "MDParser.g"
@@ -233,7 +233,7 @@ void MDParser::zconstraintblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp10_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp10_AST = astFactory->create(LT(1));
+    tmp10_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp10_AST);
     match(ZCONSTRAINT);
     match(LCURLY);
@@ -250,7 +250,7 @@ void MDParser::zconstraintblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp12_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp12_AST = astFactory->create(LT(1));
+    tmp12_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp12_AST);
     match(RCURLY);
 #line 98 "MDParser.g"
@@ -273,7 +273,7 @@ void MDParser::restraintblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp13_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp13_AST = astFactory->create(LT(1));
+    tmp13_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp13_AST);
     match(RESTRAINT);
     match(LCURLY);
@@ -290,7 +290,7 @@ void MDParser::restraintblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp15_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp15_AST = astFactory->create(LT(1));
+    tmp15_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp15_AST);
     match(RCURLY);
 #line 101 "MDParser.g"
@@ -313,7 +313,7 @@ void MDParser::flucqblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp16_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp16_AST = astFactory->create(LT(1));
+    tmp16_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp16_AST);
     match(FLUCQ);
     match(LCURLY);
@@ -330,7 +330,7 @@ void MDParser::flucqblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp18_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp18_AST = astFactory->create(LT(1));
+    tmp18_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp18_AST);
     match(RCURLY);
 #line 104 "MDParser.g"
@@ -353,7 +353,7 @@ void MDParser::rnemdblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp19_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp19_AST = astFactory->create(LT(1));
+    tmp19_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp19_AST);
     match(RNEMD);
     match(LCURLY);
@@ -370,7 +370,7 @@ void MDParser::rnemdblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp21_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp21_AST = astFactory->create(LT(1));
+    tmp21_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp21_AST);
     match(RCURLY);
 #line 107 "MDParser.g"
@@ -393,7 +393,7 @@ void MDParser::minimizerblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp22_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp22_AST = astFactory->create(LT(1));
+    tmp22_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp22_AST);
     match(MINIMIZER);
     match(LCURLY);
@@ -410,7 +410,7 @@ void MDParser::minimizerblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp24_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp24_AST = astFactory->create(LT(1));
+    tmp24_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp24_AST);
     match(RCURLY);
 #line 110 "MDParser.g"
@@ -432,48 +432,48 @@ void MDParser::constant() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case NUM_INT:
-      case NUM_LONG: {
-        intConst();
-        astFactory->addASTChild(currentAST, returnAST);
-        constant_AST = currentAST.root;
-        break;
-      }
-      case NUM_FLOAT:
-      case NUM_DOUBLE: {
-        floatConst();
-        astFactory->addASTChild(currentAST, returnAST);
-        constant_AST = currentAST.root;
-        break;
-      }
-      case LPAREN: {
-        vectorConst();
-        astFactory->addASTChild(currentAST, returnAST);
-        constant_AST = currentAST.root;
-        break;
-      }
-      case ID: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp25_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp25_AST = astFactory->create(LT(1));
-        astFactory->addASTChild(currentAST, tmp25_AST);
-        match(ID);
-        constant_AST = currentAST.root;
-        break;
-      }
-      case StringLiteral: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp26_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp26_AST = astFactory->create(LT(1));
-        astFactory->addASTChild(currentAST, tmp26_AST);
-        match(StringLiteral);
-        constant_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case NUM_INT:
+    case NUM_LONG: {
+      intConst();
+      astFactory->addASTChild(currentAST, returnAST);
+      constant_AST = currentAST.root;
+      break;
+    }
+    case NUM_FLOAT:
+    case NUM_DOUBLE: {
+      floatConst();
+      astFactory->addASTChild(currentAST, returnAST);
+      constant_AST = currentAST.root;
+      break;
+    }
+    case LPAREN: {
+      vectorConst();
+      astFactory->addASTChild(currentAST, returnAST);
+      constant_AST = currentAST.root;
+      break;
+    }
+    case ID: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp25_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp25_AST        = astFactory->create(LT(1));
+      astFactory->addASTChild(currentAST, tmp25_AST);
+      match(ID);
+      constant_AST = currentAST.root;
+      break;
+    }
+    case StringLiteral: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp26_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp26_AST        = astFactory->create(LT(1));
+      astFactory->addASTChild(currentAST, tmp26_AST);
+      match(StringLiteral);
+      constant_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -490,28 +490,28 @@ void MDParser::intConst() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case NUM_INT: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp27_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp27_AST = astFactory->create(LT(1));
-        astFactory->addASTChild(currentAST, tmp27_AST);
-        match(NUM_INT);
-        intConst_AST = currentAST.root;
-        break;
-      }
-      case NUM_LONG: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp28_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp28_AST = astFactory->create(LT(1));
-        astFactory->addASTChild(currentAST, tmp28_AST);
-        match(NUM_LONG);
-        intConst_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case NUM_INT: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp27_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp27_AST        = astFactory->create(LT(1));
+      astFactory->addASTChild(currentAST, tmp27_AST);
+      match(NUM_INT);
+      intConst_AST = currentAST.root;
+      break;
+    }
+    case NUM_LONG: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp28_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp28_AST        = astFactory->create(LT(1));
+      astFactory->addASTChild(currentAST, tmp28_AST);
+      match(NUM_LONG);
+      intConst_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -528,28 +528,28 @@ void MDParser::floatConst() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case NUM_FLOAT: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp29_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp29_AST = astFactory->create(LT(1));
-        astFactory->addASTChild(currentAST, tmp29_AST);
-        match(NUM_FLOAT);
-        floatConst_AST = currentAST.root;
-        break;
-      }
-      case NUM_DOUBLE: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp30_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp30_AST = astFactory->create(LT(1));
-        astFactory->addASTChild(currentAST, tmp30_AST);
-        match(NUM_DOUBLE);
-        floatConst_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case NUM_FLOAT: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp29_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp29_AST        = astFactory->create(LT(1));
+      astFactory->addASTChild(currentAST, tmp29_AST);
+      match(NUM_FLOAT);
+      floatConst_AST = currentAST.root;
+      break;
+    }
+    case NUM_DOUBLE: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp30_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp30_AST        = astFactory->create(LT(1));
+      astFactory->addASTChild(currentAST, tmp30_AST);
+      match(NUM_DOUBLE);
+      floatConst_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -567,14 +567,14 @@ void MDParser::vectorConst() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp31_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp31_AST = astFactory->create(LT(1));
+    tmp31_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp31_AST);
     match(LPAREN);
     doubleNumberTuple();
     astFactory->addASTChild(currentAST, returnAST);
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp32_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp32_AST = astFactory->create(LT(1));
+    tmp32_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp32_AST);
     match(RPAREN);
     vectorConst_AST = currentAST.root;
@@ -593,70 +593,70 @@ void MDParser::moleculestatement() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case ID: {
-        assignment();
-        astFactory->addASTChild(currentAST, returnAST);
-        moleculestatement_AST = currentAST.root;
-        break;
-      }
-      case ATOM: {
-        atomblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        moleculestatement_AST = currentAST.root;
-        break;
-      }
-      case BOND: {
-        bondblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        moleculestatement_AST = currentAST.root;
-        break;
-      }
-      case BEND: {
-        bendblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        moleculestatement_AST = currentAST.root;
-        break;
-      }
-      case TORSION: {
-        torsionblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        moleculestatement_AST = currentAST.root;
-        break;
-      }
-      case INVERSION: {
-        inversionblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        moleculestatement_AST = currentAST.root;
-        break;
-      }
-      case RIGIDBODY: {
-        rigidbodyblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        moleculestatement_AST = currentAST.root;
-        break;
-      }
-      case CUTOFFGROUP: {
-        cutoffgroupblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        moleculestatement_AST = currentAST.root;
-        break;
-      }
-      case FRAGMENT: {
-        fragmentblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        moleculestatement_AST = currentAST.root;
-        break;
-      }
-      case CONSTRAINT: {
-        constraintblock();
-        astFactory->addASTChild(currentAST, returnAST);
-        moleculestatement_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case ID: {
+      assignment();
+      astFactory->addASTChild(currentAST, returnAST);
+      moleculestatement_AST = currentAST.root;
+      break;
+    }
+    case ATOM: {
+      atomblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      moleculestatement_AST = currentAST.root;
+      break;
+    }
+    case BOND: {
+      bondblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      moleculestatement_AST = currentAST.root;
+      break;
+    }
+    case BEND: {
+      bendblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      moleculestatement_AST = currentAST.root;
+      break;
+    }
+    case TORSION: {
+      torsionblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      moleculestatement_AST = currentAST.root;
+      break;
+    }
+    case INVERSION: {
+      inversionblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      moleculestatement_AST = currentAST.root;
+      break;
+    }
+    case RIGIDBODY: {
+      rigidbodyblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      moleculestatement_AST = currentAST.root;
+      break;
+    }
+    case CUTOFFGROUP: {
+      cutoffgroupblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      moleculestatement_AST = currentAST.root;
+      break;
+    }
+    case FRAGMENT: {
+      fragmentblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      moleculestatement_AST = currentAST.root;
+      break;
+    }
+    case CONSTRAINT: {
+      constraintblock();
+      astFactory->addASTChild(currentAST, returnAST);
+      moleculestatement_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -674,7 +674,7 @@ void MDParser::atomblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp33_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp33_AST = astFactory->create(LT(1));
+    tmp33_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp33_AST);
     match(ATOM);
     match(LBRACKET);
@@ -695,7 +695,7 @@ void MDParser::atomblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp37_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp37_AST = astFactory->create(LT(1));
+    tmp37_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp37_AST);
     match(RCURLY);
 #line 128 "MDParser.g"
@@ -718,24 +718,24 @@ void MDParser::bondblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp38_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp38_AST = astFactory->create(LT(1));
+    tmp38_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp38_AST);
     match(BOND);
     {
       switch (LA(1)) {
-        case LBRACKET: {
-          match(LBRACKET);
-          intConst();
-          match(RBRACKET);
-          break;
-        }
-        case LCURLY: {
-          break;
-        }
-        default: {
-          throw ANTLR_USE_NAMESPACE(antlr)
-              NoViableAltException(LT(1), getFilename());
-        }
+      case LBRACKET: {
+        match(LBRACKET);
+        intConst();
+        match(RBRACKET);
+        break;
+      }
+      case LCURLY: {
+        break;
+      }
+      default: {
+        throw ANTLR_USE_NAMESPACE(antlr)
+            NoViableAltException(LT(1), getFilename());
+      }
       }
     }
     match(LCURLY);
@@ -752,7 +752,7 @@ void MDParser::bondblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp42_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp42_AST = astFactory->create(LT(1));
+    tmp42_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp42_AST);
     match(RCURLY);
 #line 138 "MDParser.g"
@@ -775,24 +775,24 @@ void MDParser::bendblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp43_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp43_AST = astFactory->create(LT(1));
+    tmp43_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp43_AST);
     match(BEND);
     {
       switch (LA(1)) {
-        case LBRACKET: {
-          match(LBRACKET);
-          intConst();
-          match(RBRACKET);
-          break;
-        }
-        case LCURLY: {
-          break;
-        }
-        default: {
-          throw ANTLR_USE_NAMESPACE(antlr)
-              NoViableAltException(LT(1), getFilename());
-        }
+      case LBRACKET: {
+        match(LBRACKET);
+        intConst();
+        match(RBRACKET);
+        break;
+      }
+      case LCURLY: {
+        break;
+      }
+      default: {
+        throw ANTLR_USE_NAMESPACE(antlr)
+            NoViableAltException(LT(1), getFilename());
+      }
       }
     }
     match(LCURLY);
@@ -809,7 +809,7 @@ void MDParser::bendblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp47_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp47_AST = astFactory->create(LT(1));
+    tmp47_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp47_AST);
     match(RCURLY);
 #line 151 "MDParser.g"
@@ -832,24 +832,24 @@ void MDParser::torsionblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp48_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp48_AST = astFactory->create(LT(1));
+    tmp48_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp48_AST);
     match(TORSION);
     {
       switch (LA(1)) {
-        case LBRACKET: {
-          match(LBRACKET);
-          intConst();
-          match(RBRACKET);
-          break;
-        }
-        case LCURLY: {
-          break;
-        }
-        default: {
-          throw ANTLR_USE_NAMESPACE(antlr)
-              NoViableAltException(LT(1), getFilename());
-        }
+      case LBRACKET: {
+        match(LBRACKET);
+        intConst();
+        match(RBRACKET);
+        break;
+      }
+      case LCURLY: {
+        break;
+      }
+      default: {
+        throw ANTLR_USE_NAMESPACE(antlr)
+            NoViableAltException(LT(1), getFilename());
+      }
       }
     }
     match(LCURLY);
@@ -866,7 +866,7 @@ void MDParser::torsionblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp52_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp52_AST = astFactory->create(LT(1));
+    tmp52_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp52_AST);
     match(RCURLY);
 #line 165 "MDParser.g"
@@ -889,24 +889,24 @@ void MDParser::inversionblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp53_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp53_AST = astFactory->create(LT(1));
+    tmp53_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp53_AST);
     match(INVERSION);
     {
       switch (LA(1)) {
-        case LBRACKET: {
-          match(LBRACKET);
-          intConst();
-          match(RBRACKET);
-          break;
-        }
-        case LCURLY: {
-          break;
-        }
-        default: {
-          throw ANTLR_USE_NAMESPACE(antlr)
-              NoViableAltException(LT(1), getFilename());
-        }
+      case LBRACKET: {
+        match(LBRACKET);
+        intConst();
+        match(RBRACKET);
+        break;
+      }
+      case LCURLY: {
+        break;
+      }
+      default: {
+        throw ANTLR_USE_NAMESPACE(antlr)
+            NoViableAltException(LT(1), getFilename());
+      }
       }
     }
     match(LCURLY);
@@ -923,7 +923,7 @@ void MDParser::inversionblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp57_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp57_AST = astFactory->create(LT(1));
+    tmp57_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp57_AST);
     match(RCURLY);
 #line 180 "MDParser.g"
@@ -946,7 +946,7 @@ void MDParser::rigidbodyblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp58_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp58_AST = astFactory->create(LT(1));
+    tmp58_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp58_AST);
     match(RIGIDBODY);
     match(LBRACKET);
@@ -967,7 +967,7 @@ void MDParser::rigidbodyblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp62_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp62_AST = astFactory->create(LT(1));
+    tmp62_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp62_AST);
     match(RCURLY);
 #line 193 "MDParser.g"
@@ -990,24 +990,24 @@ void MDParser::cutoffgroupblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp63_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp63_AST = astFactory->create(LT(1));
+    tmp63_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp63_AST);
     match(CUTOFFGROUP);
     {
       switch (LA(1)) {
-        case LBRACKET: {
-          match(LBRACKET);
-          intConst();
-          match(RBRACKET);
-          break;
-        }
-        case LCURLY: {
-          break;
-        }
-        default: {
-          throw ANTLR_USE_NAMESPACE(antlr)
-              NoViableAltException(LT(1), getFilename());
-        }
+      case LBRACKET: {
+        match(LBRACKET);
+        intConst();
+        match(RBRACKET);
+        break;
+      }
+      case LCURLY: {
+        break;
+      }
+      default: {
+        throw ANTLR_USE_NAMESPACE(antlr)
+            NoViableAltException(LT(1), getFilename());
+      }
       }
     }
     match(LCURLY);
@@ -1024,7 +1024,7 @@ void MDParser::cutoffgroupblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp67_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp67_AST = astFactory->create(LT(1));
+    tmp67_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp67_AST);
     match(RCURLY);
 #line 200 "MDParser.g"
@@ -1047,7 +1047,7 @@ void MDParser::fragmentblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp68_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp68_AST = astFactory->create(LT(1));
+    tmp68_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp68_AST);
     match(FRAGMENT);
     match(LBRACKET);
@@ -1068,7 +1068,7 @@ void MDParser::fragmentblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp72_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp72_AST = astFactory->create(LT(1));
+    tmp72_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp72_AST);
     match(RCURLY);
 #line 207 "MDParser.g"
@@ -1091,24 +1091,24 @@ void MDParser::constraintblock() {
   try {  // for error handling
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp73_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp73_AST = astFactory->create(LT(1));
+    tmp73_AST        = astFactory->create(LT(1));
     astFactory->makeASTRoot(currentAST, tmp73_AST);
     match(CONSTRAINT);
     {
       switch (LA(1)) {
-        case LBRACKET: {
-          match(LBRACKET);
-          intConst();
-          match(RBRACKET);
-          break;
-        }
-        case LCURLY: {
-          break;
-        }
-        default: {
-          throw ANTLR_USE_NAMESPACE(antlr)
-              NoViableAltException(LT(1), getFilename());
-        }
+      case LBRACKET: {
+        match(LBRACKET);
+        intConst();
+        match(RBRACKET);
+        break;
+      }
+      case LCURLY: {
+        break;
+      }
+      default: {
+        throw ANTLR_USE_NAMESPACE(antlr)
+            NoViableAltException(LT(1), getFilename());
+      }
       }
     }
     match(LCURLY);
@@ -1125,7 +1125,7 @@ void MDParser::constraintblock() {
     }  // ( ... )*
     ANTLR_USE_NAMESPACE(antlr)
     RefAST tmp77_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-    tmp77_AST = astFactory->create(LT(1));
+    tmp77_AST        = astFactory->create(LT(1));
     astFactory->addASTChild(currentAST, tmp77_AST);
     match(RCURLY);
 #line 213 "MDParser.g"
@@ -1147,58 +1147,58 @@ void MDParser::atomstatement() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case ID: {
-        assignment();
-        astFactory->addASTChild(currentAST, returnAST);
-        atomstatement_AST = currentAST.root;
-        break;
-      }
-      case POSITION: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp78_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp78_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp78_AST);
-        match(POSITION);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        atomstatement_AST = currentAST.root;
-        break;
-      }
-      case ORIENTATION: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp82_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp82_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp82_AST);
-        match(ORIENTATION);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        atomstatement_AST = currentAST.root;
-        break;
-      }
-      case CHARGE: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp86_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp86_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp86_AST);
-        match(CHARGE);
-        match(LPAREN);
-        floatConst();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        atomstatement_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case ID: {
+      assignment();
+      astFactory->addASTChild(currentAST, returnAST);
+      atomstatement_AST = currentAST.root;
+      break;
+    }
+    case POSITION: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp78_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp78_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp78_AST);
+      match(POSITION);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      atomstatement_AST = currentAST.root;
+      break;
+    }
+    case ORIENTATION: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp82_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp82_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp82_AST);
+      match(ORIENTATION);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      atomstatement_AST = currentAST.root;
+      break;
+    }
+    case CHARGE: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp86_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp86_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp86_AST);
+      match(CHARGE);
+      match(LPAREN);
+      floatConst();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      atomstatement_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1244,114 +1244,114 @@ void MDParser::bondstatement() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case ID: {
-        assignment();
-        astFactory->addASTChild(currentAST, returnAST);
-        bondstatement_AST = currentAST.root;
-        break;
-      }
-      case MEMBERS: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp91_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp91_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp91_AST);
-        match(MEMBERS);
-        match(LPAREN);
-        inttuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bondstatement_AST = currentAST.root;
-        break;
-      }
-      case FIXED: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp95_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp95_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp95_AST);
-        match(FIXED);
-        match(LPAREN);
-        floatConst();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bondstatement_AST = currentAST.root;
-        break;
-      }
-      case HARMONIC: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp99_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp99_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp99_AST);
-        match(HARMONIC);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bondstatement_AST = currentAST.root;
-        break;
-      }
-      case CUBIC: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp103_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp103_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp103_AST);
-        match(CUBIC);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bondstatement_AST = currentAST.root;
-        break;
-      }
-      case QUARTIC: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp107_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp107_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp107_AST);
-        match(QUARTIC);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bondstatement_AST = currentAST.root;
-        break;
-      }
-      case POLYNOMIAL: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp111_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp111_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp111_AST);
-        match(POLYNOMIAL);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bondstatement_AST = currentAST.root;
-        break;
-      }
-      case MORSE: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp115_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp115_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp115_AST);
-        match(MORSE);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bondstatement_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case ID: {
+      assignment();
+      astFactory->addASTChild(currentAST, returnAST);
+      bondstatement_AST = currentAST.root;
+      break;
+    }
+    case MEMBERS: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp91_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp91_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp91_AST);
+      match(MEMBERS);
+      match(LPAREN);
+      inttuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bondstatement_AST = currentAST.root;
+      break;
+    }
+    case FIXED: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp95_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp95_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp95_AST);
+      match(FIXED);
+      match(LPAREN);
+      floatConst();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bondstatement_AST = currentAST.root;
+      break;
+    }
+    case HARMONIC: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp99_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp99_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp99_AST);
+      match(HARMONIC);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bondstatement_AST = currentAST.root;
+      break;
+    }
+    case CUBIC: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp103_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp103_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp103_AST);
+      match(CUBIC);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bondstatement_AST = currentAST.root;
+      break;
+    }
+    case QUARTIC: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp107_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp107_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp107_AST);
+      match(QUARTIC);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bondstatement_AST = currentAST.root;
+      break;
+    }
+    case POLYNOMIAL: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp111_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp111_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp111_AST);
+      match(POLYNOMIAL);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bondstatement_AST = currentAST.root;
+      break;
+    }
+    case MORSE: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp115_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp115_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp115_AST);
+      match(MORSE);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bondstatement_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1397,128 +1397,128 @@ void MDParser::bendstatement() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case ID: {
-        assignment();
-        astFactory->addASTChild(currentAST, returnAST);
-        bendstatement_AST = currentAST.root;
-        break;
-      }
-      case MEMBERS: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp120_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp120_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp120_AST);
-        match(MEMBERS);
-        match(LPAREN);
-        inttuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bendstatement_AST = currentAST.root;
-        break;
-      }
-      case HARMONIC: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp124_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp124_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp124_AST);
-        match(HARMONIC);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bendstatement_AST = currentAST.root;
-        break;
-      }
-      case GHOSTBEND: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp128_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp128_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp128_AST);
-        match(GHOSTBEND);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bendstatement_AST = currentAST.root;
-        break;
-      }
-      case UREYBRADLEY: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp132_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp132_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp132_AST);
-        match(UREYBRADLEY);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bendstatement_AST = currentAST.root;
-        break;
-      }
-      case CUBIC: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp136_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp136_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp136_AST);
-        match(CUBIC);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bendstatement_AST = currentAST.root;
-        break;
-      }
-      case QUARTIC: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp140_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp140_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp140_AST);
-        match(QUARTIC);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bendstatement_AST = currentAST.root;
-        break;
-      }
-      case POLYNOMIAL: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp144_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp144_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp144_AST);
-        match(POLYNOMIAL);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bendstatement_AST = currentAST.root;
-        break;
-      }
-      case COSINE: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp148_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp148_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp148_AST);
-        match(COSINE);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        bendstatement_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case ID: {
+      assignment();
+      astFactory->addASTChild(currentAST, returnAST);
+      bendstatement_AST = currentAST.root;
+      break;
+    }
+    case MEMBERS: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp120_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp120_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp120_AST);
+      match(MEMBERS);
+      match(LPAREN);
+      inttuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bendstatement_AST = currentAST.root;
+      break;
+    }
+    case HARMONIC: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp124_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp124_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp124_AST);
+      match(HARMONIC);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bendstatement_AST = currentAST.root;
+      break;
+    }
+    case GHOSTBEND: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp128_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp128_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp128_AST);
+      match(GHOSTBEND);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bendstatement_AST = currentAST.root;
+      break;
+    }
+    case UREYBRADLEY: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp132_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp132_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp132_AST);
+      match(UREYBRADLEY);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bendstatement_AST = currentAST.root;
+      break;
+    }
+    case CUBIC: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp136_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp136_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp136_AST);
+      match(CUBIC);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bendstatement_AST = currentAST.root;
+      break;
+    }
+    case QUARTIC: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp140_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp140_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp140_AST);
+      match(QUARTIC);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bendstatement_AST = currentAST.root;
+      break;
+    }
+    case POLYNOMIAL: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp144_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp144_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp144_AST);
+      match(POLYNOMIAL);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bendstatement_AST = currentAST.root;
+      break;
+    }
+    case COSINE: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp148_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp148_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp148_AST);
+      match(COSINE);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      bendstatement_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1535,142 +1535,142 @@ void MDParser::torsionstatement() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case ID: {
-        assignment();
-        astFactory->addASTChild(currentAST, returnAST);
-        torsionstatement_AST = currentAST.root;
-        break;
-      }
-      case MEMBERS: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp152_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp152_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp152_AST);
-        match(MEMBERS);
-        match(LPAREN);
-        inttuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        torsionstatement_AST = currentAST.root;
-        break;
-      }
-      case GHOSTTORSION: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp156_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp156_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp156_AST);
-        match(GHOSTTORSION);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        torsionstatement_AST = currentAST.root;
-        break;
-      }
-      case CUBIC: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp160_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp160_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp160_AST);
-        match(CUBIC);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        torsionstatement_AST = currentAST.root;
-        break;
-      }
-      case QUARTIC: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp164_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp164_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp164_AST);
-        match(QUARTIC);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        torsionstatement_AST = currentAST.root;
-        break;
-      }
-      case POLYNOMIAL: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp168_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp168_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp168_AST);
-        match(POLYNOMIAL);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        torsionstatement_AST = currentAST.root;
-        break;
-      }
-      case CHARMM: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp172_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp172_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp172_AST);
-        match(CHARMM);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        torsionstatement_AST = currentAST.root;
-        break;
-      }
-      case OPLS: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp176_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp176_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp176_AST);
-        match(OPLS);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        torsionstatement_AST = currentAST.root;
-        break;
-      }
-      case TRAPPE: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp180_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp180_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp180_AST);
-        match(TRAPPE);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        torsionstatement_AST = currentAST.root;
-        break;
-      }
-      case HARMONIC: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp184_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp184_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp184_AST);
-        match(HARMONIC);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        torsionstatement_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case ID: {
+      assignment();
+      astFactory->addASTChild(currentAST, returnAST);
+      torsionstatement_AST = currentAST.root;
+      break;
+    }
+    case MEMBERS: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp152_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp152_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp152_AST);
+      match(MEMBERS);
+      match(LPAREN);
+      inttuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      torsionstatement_AST = currentAST.root;
+      break;
+    }
+    case GHOSTTORSION: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp156_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp156_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp156_AST);
+      match(GHOSTTORSION);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      torsionstatement_AST = currentAST.root;
+      break;
+    }
+    case CUBIC: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp160_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp160_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp160_AST);
+      match(CUBIC);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      torsionstatement_AST = currentAST.root;
+      break;
+    }
+    case QUARTIC: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp164_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp164_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp164_AST);
+      match(QUARTIC);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      torsionstatement_AST = currentAST.root;
+      break;
+    }
+    case POLYNOMIAL: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp168_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp168_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp168_AST);
+      match(POLYNOMIAL);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      torsionstatement_AST = currentAST.root;
+      break;
+    }
+    case CHARMM: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp172_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp172_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp172_AST);
+      match(CHARMM);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      torsionstatement_AST = currentAST.root;
+      break;
+    }
+    case OPLS: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp176_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp176_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp176_AST);
+      match(OPLS);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      torsionstatement_AST = currentAST.root;
+      break;
+    }
+    case TRAPPE: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp180_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp180_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp180_AST);
+      match(TRAPPE);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      torsionstatement_AST = currentAST.root;
+      break;
+    }
+    case HARMONIC: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp184_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp184_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp184_AST);
+      match(HARMONIC);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      torsionstatement_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1687,114 +1687,114 @@ void MDParser::inversionstatement() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case ID: {
-        assignment();
-        astFactory->addASTChild(currentAST, returnAST);
-        inversionstatement_AST = currentAST.root;
-        break;
-      }
-      case CENTER: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp188_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp188_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp188_AST);
-        match(CENTER);
-        match(LPAREN);
-        intConst();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        inversionstatement_AST = currentAST.root;
-        break;
-      }
-      case SATELLITES: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp192_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp192_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp192_AST);
-        match(SATELLITES);
-        match(LPAREN);
-        inttuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        inversionstatement_AST = currentAST.root;
-        break;
-      }
-      case AMBERIMPROPER: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp196_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp196_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp196_AST);
-        match(AMBERIMPROPER);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        inversionstatement_AST = currentAST.root;
-        break;
-      }
-      case IMPROPERCOSINE: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp200_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp200_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp200_AST);
-        match(IMPROPERCOSINE);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        inversionstatement_AST = currentAST.root;
-        break;
-      }
-      case HARMONIC: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp204_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp204_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp204_AST);
-        match(HARMONIC);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        inversionstatement_AST = currentAST.root;
-        break;
-      }
-      case CENTRALATOMHEIGHT: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp208_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp208_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp208_AST);
-        match(CENTRALATOMHEIGHT);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        inversionstatement_AST = currentAST.root;
-        break;
-      }
-      case DREIDING: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp212_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp212_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp212_AST);
-        match(DREIDING);
-        match(LPAREN);
-        doubleNumberTuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        inversionstatement_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case ID: {
+      assignment();
+      astFactory->addASTChild(currentAST, returnAST);
+      inversionstatement_AST = currentAST.root;
+      break;
+    }
+    case CENTER: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp188_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp188_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp188_AST);
+      match(CENTER);
+      match(LPAREN);
+      intConst();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      inversionstatement_AST = currentAST.root;
+      break;
+    }
+    case SATELLITES: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp192_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp192_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp192_AST);
+      match(SATELLITES);
+      match(LPAREN);
+      inttuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      inversionstatement_AST = currentAST.root;
+      break;
+    }
+    case AMBERIMPROPER: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp196_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp196_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp196_AST);
+      match(AMBERIMPROPER);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      inversionstatement_AST = currentAST.root;
+      break;
+    }
+    case IMPROPERCOSINE: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp200_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp200_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp200_AST);
+      match(IMPROPERCOSINE);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      inversionstatement_AST = currentAST.root;
+      break;
+    }
+    case HARMONIC: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp204_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp204_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp204_AST);
+      match(HARMONIC);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      inversionstatement_AST = currentAST.root;
+      break;
+    }
+    case CENTRALATOMHEIGHT: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp208_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp208_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp208_AST);
+      match(CENTRALATOMHEIGHT);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      inversionstatement_AST = currentAST.root;
+      break;
+    }
+    case DREIDING: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp212_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp212_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp212_AST);
+      match(DREIDING);
+      match(LPAREN);
+      doubleNumberTuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      inversionstatement_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1811,30 +1811,30 @@ void MDParser::rigidbodystatement() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case ID: {
-        assignment();
-        astFactory->addASTChild(currentAST, returnAST);
-        rigidbodystatement_AST = currentAST.root;
-        break;
-      }
-      case MEMBERS: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp216_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp216_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp216_AST);
-        match(MEMBERS);
-        match(LPAREN);
-        inttuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        rigidbodystatement_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case ID: {
+      assignment();
+      astFactory->addASTChild(currentAST, returnAST);
+      rigidbodystatement_AST = currentAST.root;
+      break;
+    }
+    case MEMBERS: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp216_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp216_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp216_AST);
+      match(MEMBERS);
+      match(LPAREN);
+      inttuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      rigidbodystatement_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1851,30 +1851,30 @@ void MDParser::cutoffgroupstatement() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case ID: {
-        assignment();
-        astFactory->addASTChild(currentAST, returnAST);
-        cutoffgroupstatement_AST = currentAST.root;
-        break;
-      }
-      case MEMBERS: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp220_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp220_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp220_AST);
-        match(MEMBERS);
-        match(LPAREN);
-        inttuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        cutoffgroupstatement_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case ID: {
+      assignment();
+      astFactory->addASTChild(currentAST, returnAST);
+      cutoffgroupstatement_AST = currentAST.root;
+      break;
+    }
+    case MEMBERS: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp220_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp220_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp220_AST);
+      match(MEMBERS);
+      match(LPAREN);
+      inttuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      cutoffgroupstatement_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1908,30 +1908,30 @@ void MDParser::constraintstatement() {
 
   try {  // for error handling
     switch (LA(1)) {
-      case ID: {
-        assignment();
-        astFactory->addASTChild(currentAST, returnAST);
-        constraintstatement_AST = currentAST.root;
-        break;
-      }
-      case MEMBERS: {
-        ANTLR_USE_NAMESPACE(antlr)
-        RefAST tmp224_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
-        tmp224_AST = astFactory->create(LT(1));
-        astFactory->makeASTRoot(currentAST, tmp224_AST);
-        match(MEMBERS);
-        match(LPAREN);
-        inttuple();
-        astFactory->addASTChild(currentAST, returnAST);
-        match(RPAREN);
-        match(SEMICOLON);
-        constraintstatement_AST = currentAST.root;
-        break;
-      }
-      default: {
-        throw ANTLR_USE_NAMESPACE(antlr)
-            NoViableAltException(LT(1), getFilename());
-      }
+    case ID: {
+      assignment();
+      astFactory->addASTChild(currentAST, returnAST);
+      constraintstatement_AST = currentAST.root;
+      break;
+    }
+    case MEMBERS: {
+      ANTLR_USE_NAMESPACE(antlr)
+      RefAST tmp224_AST = ANTLR_USE_NAMESPACE(antlr) nullAST;
+      tmp224_AST        = astFactory->create(LT(1));
+      astFactory->makeASTRoot(currentAST, tmp224_AST);
+      match(MEMBERS);
+      match(LPAREN);
+      inttuple();
+      astFactory->addASTChild(currentAST, returnAST);
+      match(RPAREN);
+      match(SEMICOLON);
+      constraintstatement_AST = currentAST.root;
+      break;
+    }
+    default: {
+      throw ANTLR_USE_NAMESPACE(antlr)
+          NoViableAltException(LT(1), getFilename());
+    }
     }
   } catch (ANTLR_USE_NAMESPACE(antlr) RecognitionException& ex) {
     reportError(ex);
@@ -1949,22 +1949,22 @@ void MDParser::doubleNumber() {
   try {  // for error handling
     {
       switch (LA(1)) {
-        case NUM_INT:
-        case NUM_LONG: {
-          intConst();
-          astFactory->addASTChild(currentAST, returnAST);
-          break;
-        }
-        case NUM_FLOAT:
-        case NUM_DOUBLE: {
-          floatConst();
-          astFactory->addASTChild(currentAST, returnAST);
-          break;
-        }
-        default: {
-          throw ANTLR_USE_NAMESPACE(antlr)
-              NoViableAltException(LT(1), getFilename());
-        }
+      case NUM_INT:
+      case NUM_LONG: {
+        intConst();
+        astFactory->addASTChild(currentAST, returnAST);
+        break;
+      }
+      case NUM_FLOAT:
+      case NUM_DOUBLE: {
+        floatConst();
+        astFactory->addASTChild(currentAST, returnAST);
+        break;
+      }
+      default: {
+        throw ANTLR_USE_NAMESPACE(antlr)
+            NoViableAltException(LT(1), getFilename());
+      }
       }
     }
     doubleNumber_AST = currentAST.root;

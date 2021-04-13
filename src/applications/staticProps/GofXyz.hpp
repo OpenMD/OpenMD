@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,28 +50,23 @@
 namespace OpenMD {
 
   class GofXyz : public RadialDistrFunc {
-    
   public:
-    GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, 
-	   const std::string& sele2, const std::string& sele3,RealType len, int nrbins);
+    GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1,
+           const std::string& sele2, const std::string& sele3, RealType len,
+           int nrbins);
 
-    int getNRBins() {
-      return nRBins_;
-    }
-        
-    RealType getLength() {
-      return len_;
-    }
-        
+    int getNRBins() { return nRBins_; }
+
+    RealType getLength() { return len_; }
+
   private:
-
     virtual void preProcess();
     void initializeHistogram();
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
     virtual void writeRdf();
-        
-    //virtual void validateSelection1(SelectionManager& sman);
-        
+
+    // virtual void validateSelection1(SelectionManager& sman);
+
     RealType len_;
     RealType halfLen_;
     int nRBins_;
@@ -79,14 +74,11 @@ namespace OpenMD {
 
     SelectionEvaluator evaluator3_;
     SelectionManager seleMan3_;
-        
-    std::vector<std::vector<std::vector<int> > > histogram_;
+
+    std::vector<std::vector<std::vector<int>>> histogram_;
 
     std::map<int, RotMat3x3d> rotMats_;
-
   };
 
-
-}
+}  // namespace OpenMD
 #endif
-

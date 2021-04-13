@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,24 +51,25 @@
 
 #include "types/DataHolder.hpp"
 namespace OpenMD {
-  
-  class AtomStamp  : public DataHolder {
+
+  class AtomStamp : public DataHolder {
     DeclareParameter(Type, std::string);
+
   public:
     AtomStamp(int index);
+
   public:
-    
     bool setPosition(const std::vector<RealType>& pos);
     bool setOrientation(const std::vector<RealType>& ort);
     bool havePosition() { return havePos_; }
-    bool haveOrientation() { return haveOrt_; }      
+    bool haveOrientation() { return haveOrt_; }
     RealType getPosX() { return position_[0]; }
     RealType getPosY() { return position_[1]; }
     RealType getPosZ() { return position_[2]; }
-    RealType getEulerPhi()   { return orientation_[0]; }
+    RealType getEulerPhi() { return orientation_[0]; }
     RealType getEulerTheta() { return orientation_[1]; }
-    RealType getEulerPsi()   { return orientation_[2]; }
-    int getIndex() { return index_;}
+    RealType getEulerPsi() { return orientation_[2]; }
+    int getIndex() { return index_; }
     virtual void validate();
     typedef std::set<int>::iterator AtomIter;
     typedef std::vector<int>::iterator BondIter;
@@ -82,21 +83,22 @@ namespace OpenMD {
     }
     int getFirstBond(BondIter& bi) {
       bi = bonds_.begin();
-      return bi != bonds_.end()? *bi: -1;
+      return bi != bonds_.end() ? *bi : -1;
     }
     int getNextBond(BondIter& bi) {
-      ++bi; 
-      return bi != bonds_.end()? *bi: -1;
+      ++bi;
+      return bi != bonds_.end() ? *bi : -1;
     }
-    void addBond(int bondIndex) {bonds_.push_back(bondIndex);}
-    void addBondedAtom(int atomIndex) {bondedAtoms_.insert(atomIndex);}
+    void addBond(int bondIndex) { bonds_.push_back(bondIndex); }
+    void addBondedAtom(int atomIndex) { bondedAtoms_.insert(atomIndex); }
     int getCoordination() { return bonds_.size(); }
-    void overrideCharge(RealType c){
-      orCharge_ = c;
+    void overrideCharge(RealType c) {
+      orCharge_    = c;
       hasOverride_ = true;
     }
 
-    bool hasOverride() {return hasOverride_;}
+    bool hasOverride() { return hasOverride_; }
+
   private:
     Vector3d position_;
     Vector3d orientation_;
@@ -108,6 +110,6 @@ namespace OpenMD {
     std::vector<int> bonds_;
     std::set<int> bondedAtoms_;
   };
-  
-}
+
+}  // namespace OpenMD
 #endif

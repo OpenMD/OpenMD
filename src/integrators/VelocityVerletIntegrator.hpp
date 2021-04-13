@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,17 +51,14 @@
 namespace OpenMD {
 
   class VelocityVerletIntegrator : public Integrator {
-
   protected:
-
     VelocityVerletIntegrator(SimInfo* info);
     virtual void step();
-        
+
   private:
-        
     virtual void moveA() = 0;
     virtual void moveB() = 0;
   };
 
-} //end namespace OpenMD
-#endif //INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+}  // end namespace OpenMD
+#endif  // INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP

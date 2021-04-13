@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,39 +42,39 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef UTILS_MOLOCATOR_HPP
 #define UTILS_MOLOCATOR_HPP
 
 #include <vector>
 
-#include "primitives/Atom.hpp"
-#include "primitives/DirectionalAtom.hpp"
-#include "types/MoleculeStamp.hpp"
-#include "primitives/Molecule.hpp"
+#include "brains/ForceField.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
-#include "brains/ForceField.hpp"
+#include "primitives/Atom.hpp"
+#include "primitives/DirectionalAtom.hpp"
+#include "primitives/Molecule.hpp"
+#include "types/MoleculeStamp.hpp"
 
 namespace OpenMD {
 
-  class MoLocator{
+  class MoLocator {
   public:
-    MoLocator( MoleculeStamp* theStamp, ForceField* theFF);
-    void placeMol( const Vector3d& offset, const Vector3d& ort, Molecule* mol);
-    static RealType getMolMass(MoleculeStamp *molStamp, ForceField *myFF);
+    MoLocator(MoleculeStamp* theStamp, ForceField* theFF);
+    void placeMol(const Vector3d& offset, const Vector3d& ort, Molecule* mol);
+    static RealType getMolMass(MoleculeStamp* molStamp, ForceField* myFF);
 
   private:
-    void calcRef( void );
+    void calcRef(void);
     static RealType getAtomMass(const std::string& at, ForceField* myFF);
-    RotMat3x3d latVec2RotMat(const Vector3d& lv); ///< convert lattice vector to rotation matrix
-    
+    RotMat3x3d latVec2RotMat(
+        const Vector3d& lv);  ///< convert lattice vector to rotation matrix
+
     MoleculeStamp* myStamp;
 
     ForceField* myFF;
     std::vector<Vector3d> refCoords;
     unsigned int nIntegrableObjects;
   };
-}
+}  // namespace OpenMD
 #endif
-

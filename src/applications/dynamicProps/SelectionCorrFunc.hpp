@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,21 +49,21 @@
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace OpenMD {
-  
+
   class SelectionCorrFunc : public ObjectCCF<int> {
   public:
-    SelectionCorrFunc(SimInfo* info, const std::string& filename, 
-                      const std::string& sele1, const std::string& sele2);   
-    
+    SelectionCorrFunc(SimInfo* info, const std::string& filename,
+                      const std::string& sele1, const std::string& sele2);
+
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual int computeProperty2(int frame, StuntDouble* sd);
     virtual int calcCorrVal(int frame1, int frame2, int id1, int id2);
-    virtual void postCorrelate() {}; // don't renormalize the histogram for this correlation function
+    virtual void postCorrelate() {};  // don't renormalize the histogram for
+                                      // this correlation function
 
-    std::vector<std::vector<bool> > selected1_;
-    std::vector<std::vector<bool> > selected2_;
+    std::vector<std::vector<bool>> selected1_;
+    std::vector<std::vector<bool>> selected2_;
   };
-}
+}  // namespace OpenMD
 #endif
-

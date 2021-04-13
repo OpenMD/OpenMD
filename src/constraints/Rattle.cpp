@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -55,115 +55,112 @@
 
 namespace OpenMD {
 
-Rattle::Rattle(SimInfo* info)
-    : info_(info),
-      maxConsIteration_(10),
-      consTolerance_(1.0e-6),
-      doRattle_(false),
-      currConstraintTime_(0.0) {
-  if (info_->getNGlobalConstraints() > 0) doRattle_ = true;
+  Rattle::Rattle(SimInfo* info) :
+      info_(info), maxConsIteration_(10), consTolerance_(1.0e-6),
+      doRattle_(false), currConstraintTime_(0.0) {
+    if (info_->getNGlobalConstraints() > 0) doRattle_ = true;
 
-  if (!doRattle_) return;
+    if (!doRattle_) return;
 
-  Globals* simParams = info_->getSimParams();
+    Globals* simParams = info_->getSimParams();
 
-  if (simParams->haveDt()) {
-    dt_ = simParams->getDt();
-  } else {
-    sprintf(painCave.errMsg, "Rattle Error: dt is not set\n");
-    painCave.isFatal = 1;
-    simError();
+    if (simParams->haveDt()) {
+      dt_ = simParams->getDt();
+    } else {
+      sprintf(painCave.errMsg, "Rattle Error: dt is not set\n");
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    if (simParams->haveConstraintTime()) {
+      constraintTime_ = simParams->getConstraintTime();
+    } else {
+      constraintTime_ = simParams->getStatusTime();
+    }
+
+    constraintOutputFile_ =
+        getPrefix(info_->getFinalConfigFileName()) + ".constraintForces";
+
+    // create ConstraintWriter
+    constraintWriter_ =
+        new ConstraintWriter(info_, constraintOutputFile_.c_str());
+
+    if (!constraintWriter_) {
+      sprintf(painCave.errMsg, "Failed to create ConstraintWriter\n");
+      painCave.isFatal = 1;
+      simError();
+    }
   }
 
-  currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-  if (simParams->haveConstraintTime()) {
-    constraintTime_ = simParams->getConstraintTime();
-  } else {
-    constraintTime_ = simParams->getStatusTime();
+  Rattle::~Rattle() { delete constraintWriter_; }
+
+  void Rattle::constraintA() {
+    if (!doRattle_) return;
+    doConstraint(&Rattle::constraintPairA);
+  }
+  void Rattle::constraintB() {
+    if (!doRattle_) return;
+    doConstraint(&Rattle::constraintPairB);
+
+    if (currentSnapshot_->getTime() >= currConstraintTime_) {
+      Molecule* mol;
+      SimInfo::MoleculeIterator mi;
+      ConstraintPair* consPair;
+      Molecule::ConstraintPairIterator cpi;
+      std::list<ConstraintPair*> constraints;
+      for (mol = info_->beginMolecule(mi); mol != NULL;
+           mol = info_->nextMolecule(mi)) {
+        for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
+             consPair = mol->nextConstraintPair(cpi)) {
+          constraints.push_back(consPair);
+        }
+      }
+      constraintWriter_->writeConstraintForces(constraints);
+      currConstraintTime_ += constraintTime_;
+    }
   }
 
-  constraintOutputFile_ =
-      getPrefix(info_->getFinalConfigFileName()) + ".constraintForces";
+  void Rattle::doConstraint(ConstraintPairFuncPtr func) {
+    if (!doRattle_) return;
 
-  // create ConstraintWriter
-  constraintWriter_ =
-      new ConstraintWriter(info_, constraintOutputFile_.c_str());
-
-  if (!constraintWriter_) {
-    sprintf(painCave.errMsg, "Failed to create ConstraintWriter\n");
-    painCave.isFatal = 1;
-    simError();
-  }
-}
-
-Rattle::~Rattle() { delete constraintWriter_; }
-
-void Rattle::constraintA() {
-  if (!doRattle_) return;
-  doConstraint(&Rattle::constraintPairA);
-}
-void Rattle::constraintB() {
-  if (!doRattle_) return;
-  doConstraint(&Rattle::constraintPairB);
-
-  if (currentSnapshot_->getTime() >= currConstraintTime_) {
     Molecule* mol;
     SimInfo::MoleculeIterator mi;
+    ConstraintElem* consElem;
+    Molecule::ConstraintElemIterator cei;
     ConstraintPair* consPair;
     Molecule::ConstraintPairIterator cpi;
-    std::list<ConstraintPair*> constraints;
+
     for (mol = info_->beginMolecule(mi); mol != NULL;
          mol = info_->nextMolecule(mi)) {
+      for (consElem = mol->beginConstraintElem(cei); consElem != NULL;
+           consElem = mol->nextConstraintElem(cei)) {
+        consElem->setMoved(true);
+        consElem->setMoving(false);
+      }
       for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
            consPair = mol->nextConstraintPair(cpi)) {
-        constraints.push_back(consPair);
+        consPair->resetConstraintForce();
       }
     }
-    constraintWriter_->writeConstraintForces(constraints);
-    currConstraintTime_ += constraintTime_;
-  }
-}
 
-void Rattle::doConstraint(ConstraintPairFuncPtr func) {
-  if (!doRattle_) return;
+    // main loop of constraint algorithm
+    int done      = 0;
+    int iteration = 0;
+    while (!done && iteration < maxConsIteration_) {
+      done = 1;
 
-  Molecule* mol;
-  SimInfo::MoleculeIterator mi;
-  ConstraintElem* consElem;
-  Molecule::ConstraintElemIterator cei;
-  ConstraintPair* consPair;
-  Molecule::ConstraintPairIterator cpi;
+      // loop over every constraint pair
 
-  for (mol = info_->beginMolecule(mi); mol != NULL;
-       mol = info_->nextMolecule(mi)) {
-    for (consElem = mol->beginConstraintElem(cei); consElem != NULL;
-         consElem = mol->nextConstraintElem(cei)) {
-      consElem->setMoved(true);
-      consElem->setMoving(false);
-    }
-    for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
-         consPair = mol->nextConstraintPair(cpi)) {
-      consPair->resetConstraintForce();
-    }
-  }
+      for (mol = info_->beginMolecule(mi); mol != NULL;
+           mol = info_->nextMolecule(mi)) {
+        for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
+             consPair = mol->nextConstraintPair(cpi)) {
+          // dispatch constraint algorithm
+          if (consPair->isMoved()) {
+            int exeStatus = (this->*func)(consPair);
 
-  // main loop of constraint algorithm
-  int done = 0;
-  int iteration = 0;
-  while (!done && iteration < maxConsIteration_) {
-    done = 1;
-
-    // loop over every constraint pair
-
-    for (mol = info_->beginMolecule(mi); mol != NULL;
-         mol = info_->nextMolecule(mi)) {
-      for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
-           consPair = mol->nextConstraintPair(cpi)) {
-        // dispatch constraint algorithm
-        if (consPair->isMoved()) {
-          int exeStatus = (this->*func)(consPair);
-
-          switch (exeStatus) {
+            switch (exeStatus) {
             case consFail:
               sprintf(painCave.errMsg,
                       "Constraint failure in Rattle::constrainA, "
@@ -183,159 +180,156 @@ void Rattle::doConstraint(ConstraintPairFuncPtr func) {
               // move the elements
               break;
             default:
-              sprintf(painCave.errMsg,
-                      "ConstraintAlgorithm::doConstraint() "
-                      "Error: unrecognized status");
+              sprintf(painCave.errMsg, "ConstraintAlgorithm::doConstraint() "
+                                       "Error: unrecognized status");
               painCave.isFatal = 1;
               simError();
               break;
+            }
           }
         }
-      }
-    }  // end for(iter->first())
+      }  // end for(iter->first())
 
 #ifdef IS_MPI
-    MPI_Allreduce(MPI_IN_PLACE, &done, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &done, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
 #endif
 
-    errorCheckPoint();
+      errorCheckPoint();
 
-    for (mol = info_->beginMolecule(mi); mol != NULL;
-         mol = info_->nextMolecule(mi)) {
-      for (consElem = mol->beginConstraintElem(cei); consElem != NULL;
-           consElem = mol->nextConstraintElem(cei)) {
-        consElem->setMoved(consElem->getMoving());
-        consElem->setMoving(false);
+      for (mol = info_->beginMolecule(mi); mol != NULL;
+           mol = info_->nextMolecule(mi)) {
+        for (consElem = mol->beginConstraintElem(cei); consElem != NULL;
+             consElem = mol->nextConstraintElem(cei)) {
+          consElem->setMoved(consElem->getMoving());
+          consElem->setMoving(false);
+        }
       }
-    }
-    iteration++;
-  }  // end while
+      iteration++;
+    }  // end while
 
-  if (!done) {
-    sprintf(painCave.errMsg,
-            "Constraint failure in Rattle::constrainA, "
-            "too many iterations: %d\n",
-            iteration);
-    painCave.isFatal = 1;
-    simError();
+    if (!done) {
+      sprintf(painCave.errMsg,
+              "Constraint failure in Rattle::constrainA, "
+              "too many iterations: %d\n",
+              iteration);
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    errorCheckPoint();
   }
 
-  errorCheckPoint();
-}
+  int Rattle::constraintPairA(ConstraintPair* consPair) {
+    ConstraintElem* consElem1 = consPair->getConsElem1();
+    ConstraintElem* consElem2 = consPair->getConsElem2();
 
-int Rattle::constraintPairA(ConstraintPair* consPair) {
-  ConstraintElem* consElem1 = consPair->getConsElem1();
-  ConstraintElem* consElem2 = consPair->getConsElem2();
+    Vector3d posA = consElem1->getPos();
+    Vector3d posB = consElem2->getPos();
 
-  Vector3d posA = consElem1->getPos();
-  Vector3d posB = consElem2->getPos();
+    Vector3d pab = posA - posB;
 
-  Vector3d pab = posA - posB;
+    // periodic boundary condition
 
-  // periodic boundary condition
+    currentSnapshot_->wrapVector(pab);
 
-  currentSnapshot_->wrapVector(pab);
+    RealType pabsq = pab.lengthSquare();
 
-  RealType pabsq = pab.lengthSquare();
+    RealType rabsq  = consPair->getConsDistSquare();
+    RealType diffsq = rabsq - pabsq;
 
-  RealType rabsq = consPair->getConsDistSquare();
-  RealType diffsq = rabsq - pabsq;
+    // the original rattle code from alan tidesley
+    if (fabs(diffsq) > (consTolerance_ * rabsq * 2.0)) {
+      Vector3d oldPosA = consElem1->getPrevPos();
+      Vector3d oldPosB = consElem2->getPrevPos();
 
-  // the original rattle code from alan tidesley
-  if (fabs(diffsq) > (consTolerance_ * rabsq * 2.0)) {
-    Vector3d oldPosA = consElem1->getPrevPos();
-    Vector3d oldPosB = consElem2->getPrevPos();
+      Vector3d rab = oldPosA - oldPosB;
 
-    Vector3d rab = oldPosA - oldPosB;
+      currentSnapshot_->wrapVector(rab);
+
+      RealType rpab   = dot(rab, pab);
+      RealType rpabsq = rpab * rpab;
+
+      if (rpabsq < (rabsq * -diffsq)) { return consFail; }
+
+      RealType rma = 1.0 / consElem1->getMass();
+      RealType rmb = 1.0 / consElem2->getMass();
+
+      RealType gab = diffsq / (2.0 * (rma + rmb) * rpab);
+
+      Vector3d delta = rab * gab;
+
+      // set atom1's position
+      posA += rma * delta;
+      consElem1->setPos(posA);
+
+      // set atom2's position
+      posB -= rmb * delta;
+      consElem2->setPos(posB);
+
+      delta /= dt_;
+
+      // set atom1's velocity
+      Vector3d velA = consElem1->getVel();
+      velA += rma * delta;
+      consElem1->setVel(velA);
+
+      // set atom2's velocity
+      Vector3d velB = consElem2->getVel();
+      velB -= rmb * delta;
+      consElem2->setVel(velB);
+
+      // report the constraint force back to the constraint pair:
+      Vector3d fcons = 2.0 * delta / dt_;
+      RealType proj  = copysign(fcons.length(), dot(fcons, rab));
+
+      consPair->addConstraintForce(proj);
+      return consSuccess;
+    } else {
+      return consAlready;
+    }
+  }
+
+  int Rattle::constraintPairB(ConstraintPair* consPair) {
+    ConstraintElem* consElem1 = consPair->getConsElem1();
+    ConstraintElem* consElem2 = consPair->getConsElem2();
+
+    Vector3d velA = consElem1->getVel();
+    Vector3d velB = consElem2->getVel();
+
+    Vector3d dv = velA - velB;
+
+    Vector3d posA = consElem1->getPos();
+    Vector3d posB = consElem2->getPos();
+
+    Vector3d rab = posA - posB;
 
     currentSnapshot_->wrapVector(rab);
-
-    RealType rpab = dot(rab, pab);
-    RealType rpabsq = rpab * rpab;
-
-    if (rpabsq < (rabsq * -diffsq)) {
-      return consFail;
-    }
 
     RealType rma = 1.0 / consElem1->getMass();
     RealType rmb = 1.0 / consElem2->getMass();
 
-    RealType gab = diffsq / (2.0 * (rma + rmb) * rpab);
+    RealType rvab = dot(rab, dv);
 
-    Vector3d delta = rab * gab;
+    RealType gab = -rvab / ((rma + rmb) * consPair->getConsDistSquare());
 
-    // set atom1's position
-    posA += rma * delta;
-    consElem1->setPos(posA);
+    if (fabs(gab) > consTolerance_) {
+      Vector3d delta = rab * gab;
+      velA += rma * delta;
+      consElem1->setVel(velA);
 
-    // set atom2's position
-    posB -= rmb * delta;
-    consElem2->setPos(posB);
+      velB -= rmb * delta;
+      consElem2->setVel(velB);
 
-    delta /= dt_;
+      // report the constraint force back to the constraint pair:
 
-    // set atom1's velocity
-    Vector3d velA = consElem1->getVel();
-    velA += rma * delta;
-    consElem1->setVel(velA);
+      Vector3d fcons = 2.0 * delta / dt_;
+      RealType proj  = copysign(fcons.length(), dot(fcons, rab));
 
-    // set atom2's velocity
-    Vector3d velB = consElem2->getVel();
-    velB -= rmb * delta;
-    consElem2->setVel(velB);
-
-    // report the constraint force back to the constraint pair:
-    Vector3d fcons = 2.0 * delta / dt_;
-    RealType proj = copysign(fcons.length(), dot(fcons, rab));
-
-    consPair->addConstraintForce(proj);
-    return consSuccess;
-  } else {
-    return consAlready;
+      consPair->addConstraintForce(proj);
+      return consSuccess;
+    } else {
+      return consAlready;
+    }
   }
-}
-
-int Rattle::constraintPairB(ConstraintPair* consPair) {
-  ConstraintElem* consElem1 = consPair->getConsElem1();
-  ConstraintElem* consElem2 = consPair->getConsElem2();
-
-  Vector3d velA = consElem1->getVel();
-  Vector3d velB = consElem2->getVel();
-
-  Vector3d dv = velA - velB;
-
-  Vector3d posA = consElem1->getPos();
-  Vector3d posB = consElem2->getPos();
-
-  Vector3d rab = posA - posB;
-
-  currentSnapshot_->wrapVector(rab);
-
-  RealType rma = 1.0 / consElem1->getMass();
-  RealType rmb = 1.0 / consElem2->getMass();
-
-  RealType rvab = dot(rab, dv);
-
-  RealType gab = -rvab / ((rma + rmb) * consPair->getConsDistSquare());
-
-  if (fabs(gab) > consTolerance_) {
-    Vector3d delta = rab * gab;
-    velA += rma * delta;
-    consElem1->setVel(velA);
-
-    velB -= rmb * delta;
-    consElem2->setVel(velB);
-
-    // report the constraint force back to the constraint pair:
-
-    Vector3d fcons = 2.0 * delta / dt_;
-    RealType proj = copysign(fcons.length(), dot(fcons, rab));
-
-    consPair->addConstraintForce(proj);
-    return consSuccess;
-  } else {
-    return consAlready;
-  }
-}
 
 }  // namespace OpenMD

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -59,44 +59,44 @@
 
 namespace OpenMD {
 
-TorsionTypeParser::TorsionTypeParser() : trans180_(true) {
-  stringToEnumMap_["GhostTorsion"] = ttGhostTorsion;
-  stringToEnumMap_["Cubic"] = ttCubic;
-  stringToEnumMap_["Quartic"] = ttQuartic;
-  stringToEnumMap_["Polynomial"] = ttPolynomial;
-  stringToEnumMap_["Charmm"] = ttCharmm;
-  stringToEnumMap_["Opls"] = ttOpls;
-  stringToEnumMap_["Trappe"] = ttTrappe;
-  stringToEnumMap_["Harmonic"] = ttHarmonic;
-}
-
-TorsionType* TorsionTypeParser::parseTypeAndPars(const std::string& type,
-                                                 std::vector<RealType> pars) {
-  std::string line(type);
-
-  std::vector<RealType>::iterator it;
-  for (it = pars.begin(); it != pars.end(); ++it) {
-    line.append("\t");
-    line.append(OpenMD::to_string(*it));
+  TorsionTypeParser::TorsionTypeParser() : trans180_(true) {
+    stringToEnumMap_["GhostTorsion"] = ttGhostTorsion;
+    stringToEnumMap_["Cubic"]        = ttCubic;
+    stringToEnumMap_["Quartic"]      = ttQuartic;
+    stringToEnumMap_["Polynomial"]   = ttPolynomial;
+    stringToEnumMap_["Charmm"]       = ttCharmm;
+    stringToEnumMap_["Opls"]         = ttOpls;
+    stringToEnumMap_["Trappe"]       = ttTrappe;
+    stringToEnumMap_["Harmonic"]     = ttHarmonic;
   }
 
-  return parseLine(line);
-}
+  TorsionType* TorsionTypeParser::parseTypeAndPars(const std::string& type,
+                                                   std::vector<RealType> pars) {
+    std::string line(type);
 
-TorsionType* TorsionTypeParser::parseLine(const std::string& line) {
-  StringTokenizer tokenizer(line);
-  TorsionType* torsionType = NULL;
-  int nTokens = tokenizer.countTokens();
+    std::vector<RealType>::iterator it;
+    for (it = pars.begin(); it != pars.end(); ++it) {
+      line.append("\t");
+      line.append(OpenMD::to_string(*it));
+    }
 
-  if (nTokens < 1) {
-    throw OpenMDException("TorsionTypeParser: Not enough tokens");
+    return parseLine(line);
   }
 
-  TorsionTypeEnum tt = getTorsionTypeEnum(tokenizer.nextToken());
+  TorsionType* TorsionTypeParser::parseLine(const std::string& line) {
+    StringTokenizer tokenizer(line);
+    TorsionType* torsionType = NULL;
+    int nTokens              = tokenizer.countTokens();
 
-  nTokens -= 1;
+    if (nTokens < 1) {
+      throw OpenMDException("TorsionTypeParser: Not enough tokens");
+    }
 
-  switch (tt) {
+    TorsionTypeEnum tt = getTorsionTypeEnum(tokenizer.nextToken());
+
+    nTokens -= 1;
+
+    switch (tt) {
     case ttGhostTorsion:
       if (nTokens < 4) {
         throw OpenMDException("TorsionTypeParser: Not enough tokens");
@@ -159,7 +159,7 @@ TorsionType* TorsionTypeParser::parseLine(const std::string& line) {
             dynamic_cast<PolynomialTorsionType*>(torsionType);
 
         for (int i = 0; i < nPairs; ++i) {
-          power = tokenizer.nextTokenAsInt();
+          power      = tokenizer.nextTokenAsInt();
           bool isOdd = power % 2 == 0 ? false : true;
 
           coefficient = tokenizer.nextTokenAsDouble();
@@ -182,8 +182,8 @@ TorsionType* TorsionTypeParser::parseLine(const std::string& line) {
         std::vector<CharmmTorsionParameter> parameters;
         for (int i = 0; i < nSets; ++i) {
           CharmmTorsionParameter currParam;
-          currParam.kchi = tokenizer.nextTokenAsDouble();
-          currParam.n = tokenizer.nextTokenAsInt();
+          currParam.kchi  = tokenizer.nextTokenAsDouble();
+          currParam.n     = tokenizer.nextTokenAsInt();
           currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 *
                             Constants::PI;  // convert to rad
 
@@ -260,16 +260,16 @@ TorsionType* TorsionTypeParser::parseLine(const std::string& line) {
     case ttUnknown:
     default:
       throw OpenMDException("TorsionTypeParser: Unknown Torsion Type");
+    }
+    return torsionType;
   }
-  return torsionType;
-}
 
-TorsionTypeParser::TorsionTypeEnum TorsionTypeParser::getTorsionTypeEnum(
-    const std::string& str) {
-  std::map<std::string, TorsionTypeEnum>::iterator i;
-  i = stringToEnumMap_.find(str);
+  TorsionTypeParser::TorsionTypeEnum TorsionTypeParser::getTorsionTypeEnum(
+      const std::string& str) {
+    std::map<std::string, TorsionTypeEnum>::iterator i;
+    i = stringToEnumMap_.find(str);
 
-  return i == stringToEnumMap_.end() ? ttUnknown : i->second;
-}
+    return i == stringToEnumMap_.end() ? ttUnknown : i->second;
+  }
 
 }  // namespace OpenMD

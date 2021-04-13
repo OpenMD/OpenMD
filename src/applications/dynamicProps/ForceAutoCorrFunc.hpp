@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -60,10 +60,10 @@ namespace OpenMD {
     virtual Mat3x3d calcCorrVal(int frame1, int frame2, int id1, int id2);
     virtual void postCorrelate();
 
-    std::vector<std::vector<Vector3d> > forces_;
+    std::vector<std::vector<Vector3d>> forces_;
     Vector3d sumForces_;
     int forcesCount_;
     Vector3d propertyTemp;
   };
-}
+}  // namespace OpenMD
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,47 +42,46 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_CONSTRAINTSTAMP_HPP
 #define TYPES_CONSTRAINTSTAMP_HPP
 
 #include "types/DataHolder.hpp"
 
 namespace OpenMD {
-  class ConstraintStamp : public DataHolder {   
+  class ConstraintStamp : public DataHolder {
     DeclareParameter(ConstrainedDistance, RealType);
     DeclareParameter(PrintConstraintForce, bool);
+
   public:
     ConstraintStamp();
     virtual ~ConstraintStamp();
 
     void setMembers(std::vector<int> members) {
-      if (members.size() ==2) {
+      if (members.size() == 2) {
         a = members[0];
         b = members[1];
         if (a < 0 || b < 0) {
           std::ostringstream oss;
-          oss << "ConstraintStamp Error: members" 
-              << containerToString(members) 
+          oss << "ConstraintStamp Error: members" << containerToString(members)
               << " is invalid" << std::endl;
           throw OpenMDException(oss.str());
         }
       } else {
         std::ostringstream oss;
-        oss << "ConstraintStamp Error: members" 
-            << containerToString(members) 
+        oss << "ConstraintStamp Error: members" << containerToString(members)
             << " is invalid" << std::endl;
         throw OpenMDException(oss.str());
-      }           
+      }
     }
-    
-    int getA() {return a;} 
-    int getB() {return b;}    
+
+    int getA() { return a; }
+    int getB() { return b; }
     virtual void validate();
 
   private:
     int a;
     int b;
-  };  
-}
+  };
+}  // namespace OpenMD
 #endif

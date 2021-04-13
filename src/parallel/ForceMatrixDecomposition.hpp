@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef PARALLEL_FORCEMATRIXDECOMPOSITION_HPP
 #define PARALLEL_FORCEMATRIXDECOMPOSITION_HPP
 
-#include "parallel/ForceDecomposition.hpp"
-#include "math/SquareMatrix3.hpp"
 #include "brains/Snapshot.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "parallel/ForceDecomposition.hpp"
 
 #ifdef IS_MPI
 #include "parallel/Communicator.hpp"
@@ -56,7 +56,7 @@
 
 using namespace std;
 namespace OpenMD {
-  
+
   class ForceMatrixDecomposition : public ForceDecomposition {
   public:
     ForceMatrixDecomposition(SimInfo* info, InteractionManager* iMan);
@@ -87,11 +87,11 @@ namespace OpenMD {
     // spatial data
     Vector3d getIntergroupVector(int cg1, int cg2);
     Vector3d getInteratomicVector(int atom1, int atom2);
-       
+
     // atom bookkeeping
     int& getNAtomsInRow();
     int getTopologicalDistance(int atom1, int atom2);
-    vector<int>& getExcludesForAtom(int atom1); 
+    vector<int>& getExcludesForAtom(int atom1);
     bool skipAtomPair(int atom1, int atom2, int cg1, int cg2);
     bool excludeAtomPair(int atom1, int atom2);
     int getGlobalIDRow(int atom1);
@@ -102,11 +102,12 @@ namespace OpenMD {
     Vector3d& getAtomVelocityColumn(int atom2);
 
     // filling interaction blocks with pointers
-    void fillInteractionData(InteractionData &idat, int atom1, int atom2, bool newAtom1 = true);
-    void unpackInteractionData(InteractionData &idat, int atom1, int atom2);
-    void unpackPrePairData(InteractionData &idat, int atom1, int atom2);
+    void fillInteractionData(InteractionData& idat, int atom1, int atom2,
+                             bool newAtom1 = true);
+    void unpackInteractionData(InteractionData& idat, int atom1, int atom2);
+    void unpackPrePairData(InteractionData& idat, int atom1, int atom2);
 
-  private:     
+  private:
     int nLocal_;
     int nGroups_;
     vector<int> AtomLocalToGlobal;
@@ -114,13 +115,13 @@ namespace OpenMD {
     vector<RealType> groupCutoff;
     vector<int> groupToGtype;
 
-#ifdef IS_MPI    
+#ifdef IS_MPI
     DataStorage atomRowData;
     DataStorage atomColData;
     DataStorage cgRowData;
     DataStorage cgColData;
 
-    int nAtomsInRow_; 
+    int nAtomsInRow_;
     int nAtomsInCol_;
     int nGroupsInRow_;
     int nGroupsInCol_;
@@ -129,21 +130,21 @@ namespace OpenMD {
     Communicator<Column> colComm;
 
     Plan<int>* AtomPlanIntRow {nullptr};
-    Plan<RealType>* AtomPlanRealRow {nullptr}; 
-    Plan<Vector3d>* AtomPlanVectorRow {nullptr}; 
-    Plan<Mat3x3d>*  AtomPlanMatrixRow {nullptr}; 
+    Plan<RealType>* AtomPlanRealRow {nullptr};
+    Plan<Vector3d>* AtomPlanVectorRow {nullptr};
+    Plan<Mat3x3d>* AtomPlanMatrixRow {nullptr};
     Plan<potVec>* AtomPlanPotRow {nullptr};
 
     Plan<int>* AtomPlanIntColumn {nullptr};
-    Plan<RealType>* AtomPlanRealColumn {nullptr}; 
-    Plan<Vector3d>* AtomPlanVectorColumn {nullptr}; 
-    Plan<Mat3x3d>*  AtomPlanMatrixColumn {nullptr};
-    Plan<potVec>* AtomPlanPotColumn {nullptr}; 
+    Plan<RealType>* AtomPlanRealColumn {nullptr};
+    Plan<Vector3d>* AtomPlanVectorColumn {nullptr};
+    Plan<Mat3x3d>* AtomPlanMatrixColumn {nullptr};
+    Plan<potVec>* AtomPlanPotColumn {nullptr};
 
     Plan<int>* cgPlanIntRow {nullptr};
-    Plan<Vector3d>* cgPlanVectorRow {nullptr}; 
+    Plan<Vector3d>* cgPlanVectorRow {nullptr};
     Plan<int>* cgPlanIntColumn {nullptr};
-    Plan<Vector3d>* cgPlanVectorColumn {nullptr}; 
+    Plan<Vector3d>* cgPlanVectorColumn {nullptr};
 
     // work arrays for assembling potential energy
     vector<potVec> pot_row;
@@ -167,16 +168,16 @@ namespace OpenMD {
     vector<int> AtomRowToGlobal;
     vector<int> AtomColToGlobal;
 
-public:
+  public:
     vector<int> cgRowToGlobal;
     vector<int> cgColToGlobal;
 
-private:
-    vector<vector<int> > cellListRow_;
-    vector<vector<int> > cellListCol_;
+  private:
+    vector<vector<int>> cellListRow_;
+    vector<vector<int>> cellListCol_;
 
-    vector<vector<int> > groupListRow_;
-    vector<vector<int> > groupListCol_;
+    vector<vector<int>> groupListRow_;
+    vector<vector<int>> groupListCol_;
 
     vector<RealType> massFactorsRow;
     vector<RealType> massFactorsCol;
@@ -184,9 +185,7 @@ private:
     vector<int> regionRow;
     vector<int> regionCol;
 #endif
-
   };
 
-}
+}  // namespace OpenMD
 #endif
-

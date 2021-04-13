@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -72,9 +72,7 @@ int main(int argc, char* argv[]) {
   string outFileName;
 
   // parse the command line option
-  if (cmdline_parser(argc, argv, &args_info) != 0) {
-    exit(1);
-  }
+  if (cmdline_parser(argc, argv, &args_info) != 0) { exit(1); }
 
   // get the omd file name and meta-data file name
   if (args_info.input_given) {
@@ -95,8 +93,8 @@ int main(int argc, char* argv[]) {
 
   // convert the input angles to radians for computation
   double initial_affine = args_info.initial_arg;
-  double final_affine = args_info.final_arg;
-  int number = args_info.number_arg;
+  double final_affine   = args_info.final_arg;
+  int number            = args_info.number_arg;
 
   RealType affine_step = (final_affine - initial_affine) / (number + 1);
 
@@ -120,8 +118,8 @@ int main(int argc, char* argv[]) {
   // parse omd file and set up the system
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(omdFileName);
-  oldSnap = oldInfo->getSnapshotManager()->getCurrentSnapshot();
-  oldHmat = oldSnap->getHmat();
+  oldSnap          = oldInfo->getSnapshotManager()->getCurrentSnapshot();
+  oldHmat          = oldSnap->getHmat();
 
   // ProgressBarPtr progressBar {nullptr};
   // progressBar = Utils::make_unique<ProgressBar>();
@@ -130,20 +128,20 @@ int main(int argc, char* argv[]) {
   eos.open(outFileName.c_str());
 
   RealType current_affine = initial_affine;
-  int countStep = 0;
+  int countStep           = 0;
   std::cout << "Calculation for EOS started." << std::endl;
   while (current_affine <= final_affine) {
     // progressBar->setStatus(countStep,number);
     // progressBar->update();
     ++countStep;
-    RealType scaling = std::cbrt(current_affine);
+    RealType scaling    = std::cbrt(current_affine);
     Mat3x3d scaleMatrix = Mat3x3d(0.0);
-    scaleMatrix(0, 0) = scaling;
-    scaleMatrix(1, 1) = scaling;
-    scaleMatrix(2, 2) = scaling;
+    scaleMatrix(0, 0)   = scaling;
+    scaleMatrix(1, 1)   = scaling;
+    scaleMatrix(2, 2)   = scaling;
 
     SimInfo* newInfo = oldCreator.createSim(omdFileName);
-    newSnap = newInfo->getSnapshotManager()->getCurrentSnapshot();
+    newSnap          = newInfo->getSnapshotManager()->getCurrentSnapshot();
 
     newHmat = scaleMatrix * oldHmat;
     newSnap->setHmat(newHmat);
@@ -156,11 +154,11 @@ int main(int argc, char* argv[]) {
         oldPos = sd->getPos();
         oldSnap->wrapVector(oldPos);
         newPos = scaleMatrix * oldPos;
-        sdNew = newInfo->getIOIndexToIntegrableObject(newIndex);
+        sdNew  = newInfo->getIOIndexToIntegrableObject(newIndex);
         sdNew->setPos(newPos);
         sdNew->setVel(sd->getVel());
         if (sd->isAtom()) {
-          atype = static_cast<Atom*>(sd)->getAtomType();
+          atype                        = static_cast<Atom*>(sd)->getAtomType();
           FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
           if (fqa.isFluctuatingCharge()) {
             RealType charge = sd->getFlucQPos();

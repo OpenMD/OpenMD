@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file TrappeTorsionType.hpp
  * @author    Dan Gezelter
  * @date  06/11/2008
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_TRAPPETORSIONTYPE_HPP
 #define TYPES_TRAPPETORSIONTYPE_HPP
@@ -58,42 +58,42 @@
 namespace OpenMD {
 
   /**
-   * @class TrappeTorsionType TrappeTorsionType.hpp "types/TrappeTorsionType.hpp"
+   * @class TrappeTorsionType TrappeTorsionType.hpp
+   "types/TrappeTorsionType.hpp"
    * These torsion types are defined identically with functional form given
    * in the following paper:
    *
-   * "Transferable Potentials for Phase Equilibria. 1. United-Atom 
+   * "Transferable Potentials for Phase Equilibria. 1. United-Atom
    * Description of n-Alkanes," by
    * Marcus G. Martin and J. Ilja Siepmann,
    * J. Phys. Chem. B; 1998; 102(14) pp 2569 - 2577;
    *
-   * Also listed as type A torsions on this page: 
+   * Also listed as type A torsions on this page:
    *
    *    http://siepmann6.chem.umn.edu/trappe/intro.php
    *
    * This torsion potential has the form:
-   * 
-   *  \f[ 
-         V_{tors} = c_0 + c_1*(1+\cos(\phi)) + c_2*(1-\cos(2*\phi)) + 
-                    c_3*(1+\cos(3*\phi)) 
+   *
+   *  \f[
+         V_{tors} = c_0 + c_1*(1+\cos(\phi)) + c_2*(1-\cos(2*\phi)) +
+                    c_3*(1+\cos(3*\phi))
        \f]
    *
-   * Notes: 
-   * 
+   * Notes:
+   *
    * 1) This is very similar to the OplsTorsionType with coefficients
    *    defined without the factor of 1/2, and an extra \f$c_0\f$ term.
    *
    * 2) Coefficients are assumed to be in kcal / mol, although the papers
    *    usually give the parameters in units of K.
    */
-  class TrappeTorsionType : public PolynomialTorsionType{
-    
+  class TrappeTorsionType : public PolynomialTorsionType {
   public:
-    
-    TrappeTorsionType(RealType c0, RealType c1, RealType c2, RealType c3, bool trans180) :  
-      PolynomialTorsionType(), c0_(c0), c1_(c1), c2_(c2), c3_(c3) {
-
-      //convert Trappe Torsion Type to Polynomial Torsion type
+    TrappeTorsionType(RealType c0, RealType c1, RealType c2, RealType c3,
+                      bool trans180) :
+        PolynomialTorsionType(),
+        c0_(c0), c1_(c1), c2_(c2), c3_(c3) {
+      // convert Trappe Torsion Type to Polynomial Torsion type
 
       RealType b0 = c0 + c1 + 2.0 * c2 + c3;
       RealType b1 = c1 - 3.0 * c3;
@@ -109,32 +109,24 @@ namespace OpenMD {
       setCoefficient(1, b1);
       setCoefficient(2, b2);
       setCoefficient(3, b3);
-
     }
-    
-    friend std::ostream& operator <<(std::ostream& os, TrappeTorsionType& ttt);
-    
+
+    friend std::ostream& operator<<(std::ostream& os, TrappeTorsionType& ttt);
+
   private:
-    
     RealType c0_;
     RealType c1_;
     RealType c2_;
     RealType c3_;
-    
   };
-  
-  std::ostream& operator <<(std::ostream& os, TrappeTorsionType& ttt) {
-    
+
+  std::ostream& operator<<(std::ostream& os, TrappeTorsionType& ttt) {
     os << "This TrappeTorsionType has below form:" << std::endl;
-    os << ttt.c0_ << " + " 
-       << ttt.c1_ << "*(1+cos(phi))" << " + "
-       << ttt.c2_ << "*(1-cos(2*phi))" << " + "
-       << ttt.c3_ << "*(1+cos(3*phi))" << std::endl;
+    os << ttt.c0_ << " + " << ttt.c1_ << "*(1+cos(phi))"
+       << " + " << ttt.c2_ << "*(1-cos(2*phi))"
+       << " + " << ttt.c3_ << "*(1+cos(3*phi))" << std::endl;
     return os;
   }
-  
-  
-} //end namespace OpenMD
-#endif //TYPES_TRAPPETORSIONTYPE_HPP
 
-
+}  // end namespace OpenMD
+#endif  // TYPES_TRAPPETORSIONTYPE_HPP

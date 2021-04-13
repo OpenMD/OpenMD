@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,80 +49,63 @@
 #include <memory>
 #include <vector>
 
-#include "config.h"
 #include "MersenneTwister.hpp"
+#include "config.h"
 #include "utils/simError.h"
 
 namespace OpenMD {
 
   /**
-   * @class RandNumGen 
+   * @class RandNumGen
    * @brief a random number generator class
    */
   class RandNumGen {
   public:
-    typedef unsigned long uint32; 
-        
+    typedef unsigned long uint32;
+
     virtual ~RandNumGen() = default;
-        
+
     /** Returns a real number in [0,1] */
-    RealType rand() {
-      return mtRand_->rand();
-    }
+    RealType rand() { return mtRand_->rand(); }
 
     /** Returns a real number in [0, n] */
-    RealType rand( const RealType& n ) {
-      return mtRand_->rand(n);
-    }
+    RealType rand(const RealType& n) { return mtRand_->rand(n); }
 
     /** Returns a real number in [0, 1) */
-    RealType randExc() {
-      return mtRand_->randExc();
-    }
+    RealType randExc() { return mtRand_->randExc(); }
 
-    /** Returns a real number in [0, n) */        
-    RealType randExc( const RealType& n ) {
-      return mtRand_->randExc(n);
-    }
+    /** Returns a real number in [0, n) */
+    RealType randExc(const RealType& n) { return mtRand_->randExc(n); }
 
-    /** Returns a real number in (0, 1) */                
-    RealType randDblExc() {
-      return mtRand_->randDblExc();
-    }
+    /** Returns a real number in (0, 1) */
+    RealType randDblExc() { return mtRand_->randDblExc(); }
 
-    /** Returns a real number in (0, n) */                        
-    RealType randDblExc( const RealType& n ) {
-      return mtRand_->randDblExc(n);
-    }
+    /** Returns a real number in (0, n) */
+    RealType randDblExc(const RealType& n) { return mtRand_->randDblExc(n); }
 
-    /** Returns aninteger in [0,2^32-1]  */            
-    uint32 randInt() {
-      return mtRand_->randInt();
-    }
+    /** Returns aninteger in [0,2^32-1]  */
+    uint32 randInt() { return mtRand_->randInt(); }
 
-    /** Returns aninteger in [0, n]  for n < 2^32 */     
-    uint32 randInt( const uint32& n ) {
-      return mtRand_->randInt(n);
-    }
-	
-    /** Returns a 53-bitreal number in [0,1) (capacity of IEEE RealType precision) */
-    RealType rand53() {
-      return mtRand_->rand53();
-    }
-	
+    /** Returns aninteger in [0, n]  for n < 2^32 */
+    uint32 randInt(const uint32& n) { return mtRand_->randInt(n); }
+
+    /** Returns a 53-bitreal number in [0,1) (capacity of IEEE RealType
+     * precision) */
+    RealType rand53() { return mtRand_->rand53(); }
+
     /** Access to nonuniform random number distributions */
-    RealType randNorm( const RealType mean, const RealType variance) {
+    RealType randNorm(const RealType mean, const RealType variance) {
       return mtRand_->randNorm(mean, variance);
     }
-	
+
     // Re-seeding functions with same behavior as initializers
-    virtual void seed( const uint32 oneSeed ) = 0;
-	
-    virtual void seed()= 0;
+    virtual void seed(const uint32 oneSeed) = 0;
+
+    virtual void seed() = 0;
 
   protected:
     std::unique_ptr<MTRand> mtRand_;
   };
-}
+}  // namespace OpenMD
 
-#endif 
+#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,18 +42,19 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef UTILS_UTILITY_HPP
 #define UTILS_UTILITY_HPP
-#include <vector>
 #include <cmath>
+#include <vector>
+
 #include "config.h"
 #include "utils/next_combination.hpp"
 
 using namespace std;
 namespace OpenMD {
-  inline RealType roundMe( const RealType &x ){
-    return ( x >= 0 ) ? floor( x + 0.5 ) : ceil( x - 0.5 );
+  inline RealType roundMe(const RealType& x) {
+    return (x >= 0) ? floor(x + 0.5) : ceil(x - 0.5);
   }
 
   /**
@@ -70,7 +71,7 @@ namespace OpenMD {
    * replaceWildCard will not generate one special combination, which
    * is n identical wild cards (n is equal to the size of the passing
    * sequence)
-   * 
+   *
    * @code
    * vector<string> sv;
    * vector<vector<string>::iterator> sic;
@@ -79,8 +80,8 @@ namespace OpenMD {
    * sv.push_back("C");
    * sv.push_back("N");
 
-   * while (replaceWithWildCard(sic, sv, resultString)) {   
-   *     for(vector<string>::iterator i = resultString.begin(); 
+   * while (replaceWithWildCard(sic, sv, resultString)) {
+   *     for(vector<string>::iterator i = resultString.begin();
    *          i != resultString.end(); ++i) {
    *         cout << *i << "\t";
    *     }
@@ -97,8 +98,7 @@ namespace OpenMD {
    * @endcode
    */
   bool replaceWithWildCard(vector<vector<string>::iterator>& cont,
-			   vector<string>& sequence, vector<string>& result, 
+                           vector<string>& sequence, vector<string>& result,
                            const string& wildCard = "X");
-}
+}  // namespace OpenMD
 #endif
-

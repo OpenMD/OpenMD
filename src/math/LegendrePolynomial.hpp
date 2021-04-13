@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,19 +42,19 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file LegendrePolynomial.hpp
  * @author    teng lin
  * @date  11/16/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef MATH_LEGENDREPOLYNOMIALS_HPP
 #define MATH_LEGENDREPOLYNOMIALS_HPP
 
-#include <vector>
 #include <cassert>
+#include <vector>
 
 #include "math/Polynomial.hpp"
 
@@ -70,14 +70,17 @@ namespace OpenMD {
     LegendrePolynomial(int maxPower);
     virtual ~LegendrePolynomial() {}
     /**
-     * Calculates the value of the nth Legendre Polynomial evaluated at the given x value.
-     * @return The value of the nth Legendre Polynomial evaluates at the given x value
+     * Calculates the value of the nth Legendre Polynomial evaluated at the
+     * given x value.
+     * @return The value of the nth Legendre Polynomial evaluates at the given x
+     * value
      * @param n
-     * @param x the value of the independent variable for the nth Legendre Polynomial  function
+     * @param x the value of the independent variable for the nth Legendre
+     * Polynomial  function
      */
-        
+
     RealType evaluate(int n, RealType x) {
-      assert (n <= maxPower_ && n >=0); 
+      assert(n <= maxPower_ && n >= 0);
       return polyList_[n].evaluate(x);
     }
 
@@ -85,36 +88,33 @@ namespace OpenMD {
      * Returns the first derivative of the nth Legendre Polynomial.
      * @return the first derivative of the nth Legendre Polynomial
      * @param n
-     * @param x the value of the independent variable for the nth Legendre Polynomial  function
+     * @param x the value of the independent variable for the nth Legendre
+     * Polynomial  function
      */
     RealType evaluateDerivative(int n, RealType x) {
-      assert (n <= maxPower_ && n >=0); 
-      return polyList_[n].evaluateDerivative(x);        
+      assert(n <= maxPower_ && n >= 0);
+      return polyList_[n].evaluateDerivative(x);
     }
 
     /**
-     * Returns the nth Legendre Polynomial 
+     * Returns the nth Legendre Polynomial
      * @return the nth Legendre Polynomial
      * @param n
      */
     const DoublePolynomial& getLegendrePolynomial(int n) const {
-      assert (n <= maxPower_ && n >=0); 
+      assert(n <= maxPower_ && n >= 0);
       return polyList_[n];
     }
 
   protected:
-
     std::vector<DoublePolynomial> polyList_;
-                
+
   private:
-        
     void GeneratePolynomials(int maxPower);
     virtual void GenerateFirstTwoTerms();
-        
+
     int maxPower_;
-  };    
+  };
 
-
-} 
-#endif 
-
+}  // namespace OpenMD
+#endif

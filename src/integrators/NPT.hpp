@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file NPT.hpp
  * @author tlin
@@ -58,65 +58,35 @@
 namespace OpenMD {
   class NPT : public VelocityVerletIntegrator {
   public:
+    NPT(SimInfo* info);
 
-    NPT(SimInfo * info);
+    int getMaxIterationNumber() { return maxIterNum_; }
 
-    int getMaxIterationNumber() {
-      return maxIterNum_;
-    }
+    void setMaxIterationNumber(int maxIter) { maxIterNum_ = maxIter; }
+    RealType getTauThermostat() { return tauThermostat; }
 
-    void setMaxIterationNumber(int maxIter) {
-      maxIterNum_ = maxIter;
-    }
-    RealType getTauThermostat() {
-      return tauThermostat;
-    }
+    void setTauThermostat(RealType tt) { tauThermostat = tt; }
 
-    void setTauThermostat(RealType tt) {
-      tauThermostat = tt;
-    }
+    RealType getTauBarostat() { return tauBarostat; }
+    void setTauBarostat(RealType tb) { tauBarostat = tb; }
 
-    RealType getTauBarostat() {
-      return tauBarostat;
-    }
-    void setTauBarostat(RealType tb) {
-      tauBarostat = tb;
-    }
+    RealType getTargetTemp() { return targetTemp; }
 
-    RealType getTargetTemp() {
-      return targetTemp;
-    }
-            
-    void setTargetTemp(RealType tt) {
-      targetTemp = tt;
-    }
+    void setTargetTemp(RealType tt) { targetTemp = tt; }
 
-    RealType getTargetPressure() {
-      return targetTemp;
-    }
-            
-    void setTargetPressure(RealType tp) {
-      targetPressure = tp;
-    }
+    RealType getTargetPressure() { return targetTemp; }
 
-    RealType getChiTolerance() {
-      return chiTolerance;
-    }
-            
-    void setChiTolerance(RealType tol) {
-      chiTolerance = tol;
-    }
+    void setTargetPressure(RealType tp) { targetPressure = tp; }
 
-    RealType getEtaTolerance() {
-      return etaTolerance;
-    }
-            
-    void setEtaTolerance(RealType tol) {
-      etaTolerance = tol;
-    }
+    RealType getChiTolerance() { return chiTolerance; }
+
+    void setChiTolerance(RealType tol) { chiTolerance = tol; }
+
+    RealType getEtaTolerance() { return etaTolerance; }
+
+    void setEtaTolerance(RealType tol) { etaTolerance = tol; }
 
   protected:
-
     virtual void step() {
       needVirial = true;
       VelocityVerletIntegrator::step();
@@ -127,17 +97,16 @@ namespace OpenMD {
     virtual void resetIntegrator();
 
     virtual void resetEta();
-    
+
     RealType NkBT;
     RealType fkBT;
 
-    RealType tt2;            
+    RealType tt2;
     RealType tb2;
-            
+
     RealType instaTemp;
     RealType instaPress;
     RealType instaVol;
-
 
     // targetTemp, targetPressure, and tauBarostat must be set.
     // One of qmass or tauThermostat must be set;
@@ -152,21 +121,20 @@ namespace OpenMD {
     std::vector<Vector3d> oldJi;
 
     RealType etaTolerance;
-       
+
     pair<RealType, RealType> thermostat;
     Mat3x3d press;
-            
-  private:
 
+  private:
     virtual void moveA();
     virtual void moveB();
-            
+
     virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel) = 0;
-            
+
     virtual void getVelScaleB(Vector3d& sc, int index) = 0;
-            
-    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM, 
-			     int index, Vector3d& sc) = 0;
+
+    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM,
+                             int index, Vector3d& sc) = 0;
 
     virtual void calcVelScale() = 0;
 
@@ -177,19 +145,17 @@ namespace OpenMD {
     virtual void evolveEtaB() = 0;
 
     virtual void scaleSimBox() = 0;
-            
-    virtual RealType calcConservedQuantity() = 0;      
+
+    virtual RealType calcConservedQuantity() = 0;
 
     virtual void loadEta() = 0;
     virtual void saveEta() = 0;
-    RealType chiTolerance;    
-        
+    RealType chiTolerance;
 
-  protected:    
+  protected:
     int maxIterNum_;
-
   };
 
-}      //end namespace OpenMD
+}  // end namespace OpenMD
 
-#endif //INTEGRATORS_NPT_HPP
+#endif  // INTEGRATORS_NPT_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -56,17 +56,21 @@
 namespace OpenMD {
 
   namespace Constants {
-    static const RealType PI = M_PI;
+    static const RealType PI     = M_PI;
     static const RealType TWO_PI = 2.0 * PI;
 
-    const RealType kb = 1.9872156E-3; //!< boltzman's constant in kcal/(mol K)
-    const RealType kB = 8.31451e-7;   //!< boltzmann constant amu*Ang^2*fs^-2/K
-    const RealType energyConvert = 4.184E-4; //!< convert kcal/mol -> (amu A^2)/fs^2
-    const RealType rotationalEnergyConvert = energyConvert*TWO_PI;
+    const RealType kb = 1.9872156E-3;  //!< boltzman's constant in kcal/(mol K)
+    const RealType kB = 8.31451e-7;    //!< boltzmann constant amu*Ang^2*fs^-2/K
+    const RealType energyConvert =
+        4.184E-4;  //!< convert kcal/mol -> (amu A^2)/fs^2
+    const RealType rotationalEnergyConvert = energyConvert * TWO_PI;
 
-    const RealType pressureConvert = 1.63882576e8; //!< converts amu*fs^-2*Ang^-1 -> atm
-    const RealType elasticConvert = 1.66053386e4; //!< converts amu*fs^-2*Ang^-1 -> GPa
-    const RealType energyElasticConvert = 6.947695345; //!< converts kcal*mol^-1*Ang^-3 -> GPa
+    const RealType pressureConvert =
+        1.63882576e8;  //!< converts amu*fs^-2*Ang^-1 -> atm
+    const RealType elasticConvert =
+        1.66053386e4;  //!< converts amu*fs^-2*Ang^-1 -> GPa
+    const RealType energyElasticConvert =
+        6.947695345;  //!< converts kcal*mol^-1*Ang^-3 -> GPa
 
     //! \name chargeFieldConvert Converts electron-volts to kcal/mol
     const RealType chargeFieldConvert = 23.0609;
@@ -83,7 +87,8 @@ namespace OpenMD {
      *    returns values of
      *      kcal mol^-1 Angstrom^-2
      */
-    const RealType surfaceTensionConvert = 1.439326479; //!< converts N/m to kcal/mol*Ang^-2
+    const RealType surfaceTensionConvert =
+        1.439326479;  //!< converts N/m to kcal/mol*Ang^-2
 
     /**
      *  viscoConvert
@@ -117,7 +122,7 @@ namespace OpenMD {
      *     electrons fs^-1
      */
     const RealType currentConvert = 6241.573027317;
-    
+
     /**
      * currentDensityConvert
      *   multiplies standard input file units of
@@ -150,7 +155,7 @@ namespace OpenMD {
      */
     const RealType angstromToBohr = 1.88972612;
     const RealType bohrToAngstrom = 0.52917721092;
-    const RealType hartreeToKcal   = 627.509469;
-  }
-}
+    const RealType hartreeToKcal  = 627.509469;
+  }  // namespace Constants
+}  // namespace OpenMD
 #endif

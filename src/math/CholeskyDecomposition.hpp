@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -53,45 +53,43 @@ namespace OpenMD {
 
   template<class MatrixType>
   void CholeskyDecomposition(MatrixType& A, MatrixType& L) {
-
     unsigned int n = A.getNRow();
     assert(n == A.getNCol() && n == L.getNRow() && n == L.getNCol());
 
-    bool isspd(true);  
-    RealType eps = A.diagonals().abs().max()  *
-      (numeric_limits<RealType>::epsilon())/100;
+    bool isspd(true);
+    RealType eps =
+        A.diagonals().abs().max() * (numeric_limits<RealType>::epsilon()) / 100;
 
-  
-    for(unsigned int j = 0; j < n; j++) {
+    for (unsigned int j = 0; j < n; j++) {
       RealType d(0.0);
       for (unsigned int k = 0; k < j; k++) {
         RealType s(0.0);
-      
+
         for (unsigned int i = 0; i < k; i++) {
-          s += L(k,i) * L(j,i);
+          s += L(k, i) * L(j, i);
         }
-      
+
         // if L(k,k) != 0
-        if (std::abs(L(k,k)) > eps) {
-          s = (A(j,k) - s) / L(k,k);
+        if (std::abs(L(k, k)) > eps) {
+          s = (A(j, k) - s) / L(k, k);
         } else {
-          s = (A(j,k) -s);
+          s     = (A(j, k) - s);
           isspd = false;
         }
-        L(j,k) = s;
-        d = d + s*s;
-      
+        L(j, k) = s;
+        d       = d + s * s;
+
         // this is approximately doing: isspd = isspd && ( A(k,j) == A(j,k) )
-        isspd = isspd && (abs(A(k,j) - A(j,k)) < eps );
+        isspd = isspd && (abs(A(k, j) - A(j, k)) < eps);
       }
-      d = A(j,j) - d;
-      isspd = isspd && (d > eps);
-      L(j,j) = sqrt(d > 0.0 ? d : 0.0);
-      for (unsigned int k = j+1; k < n; k++)  {
-        L(j,k) = 0.0;
+      d       = A(j, j) - d;
+      isspd   = isspd && (d > eps);
+      L(j, j) = sqrt(d > 0.0 ? d : 0.0);
+      for (unsigned int k = j + 1; k < n; k++) {
+        L(j, k) = 0.0;
       }
     }
   }
-}
+}  // namespace OpenMD
 
 #endif

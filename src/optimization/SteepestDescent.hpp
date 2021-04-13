@@ -29,24 +29,25 @@
 
 namespace QuantLib {
 
-    //! Multi-dimensional steepest-descent class
-    /*! User has to provide line-search method and optimization end criteria
+  //! Multi-dimensional steepest-descent class
+  /*! User has to provide line-search method and optimization end criteria
 
         search direction \f$ = - f'(x) \f$
     */
-    class SteepestDescent : public LineSearchBasedMethod {
-      public:
-        SteepestDescent(LineSearch* lineSearch = NULL)
-            : LineSearchBasedMethod(lineSearch) {}
-      private:
-        //! \name LineSearchBasedMethod interface
-        //@{
-        DynamicVector<RealType> getUpdatedDirection(const Problem& P,
-                                                    RealType gold2,
-                                                    const DynamicVector<RealType>& oldGradient);
-        //@}
-    };
+  class SteepestDescent : public LineSearchBasedMethod {
+  public:
+    SteepestDescent(LineSearch* lineSearch = NULL) :
+        LineSearchBasedMethod(lineSearch) {}
 
-}
+  private:
+    //! \name LineSearchBasedMethod interface
+    //@{
+    DynamicVector<RealType> getUpdatedDirection(
+        const Problem& P, RealType gold2,
+        const DynamicVector<RealType>& oldGradient);
+    //@}
+  };
+
+}  // namespace QuantLib
 
 #endif

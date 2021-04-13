@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -53,23 +53,23 @@ namespace OpenMD {
   public:
     BondCorrFunc(SimInfo* info, const std::string& filename,
                  const std::string& sele1, const std::string& sele2);
-    
+
   private:
     virtual int computeProperty1(int frame, Bond* bond);
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
-    
+
     virtual void computeProperty1(int frame) { return; }
     virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
     virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
-    
+
     virtual void computeProperty2(int frame) { return; }
     virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
     virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
     virtual int computeProperty2(int frame, Bond* bond) { return -1; }
-    
-    virtual RealType calcCorrVal(int frame1, int frame2) {return 0.0;}
-    
-    std::vector<std::vector<RealType> > delta_;
+
+    virtual RealType calcCorrVal(int frame1, int frame2) { return 0.0; }
+
+    std::vector<std::vector<RealType>> delta_;
   };
-}
+}  // namespace OpenMD
 #endif

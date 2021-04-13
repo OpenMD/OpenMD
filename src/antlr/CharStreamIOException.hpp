@@ -8,24 +8,24 @@
  * $Id$
  */
 
-#include <antlr/config.hpp>
 #include <antlr/CharStreamException.hpp>
+#include <antlr/config.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-class ANTLR_API CharStreamIOException : public CharStreamException {
-public:
-	ANTLR_USE_NAMESPACE(std)exception io;
+  class ANTLR_API CharStreamIOException : public CharStreamException {
+  public:
+    ANTLR_USE_NAMESPACE(std) exception io;
 
-	CharStreamIOException(ANTLR_USE_NAMESPACE(std)exception& e)
-		: CharStreamException(e.what()), io(e) {}
-	~CharStreamIOException() throw() {}
-};
+    CharStreamIOException(ANTLR_USE_NAMESPACE(std) exception& e) :
+        CharStreamException(e.what()), io(e) {}
+    ~CharStreamIOException() throw() {}
+  };
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif //INC_CharStreamIOException_hpp__
+#endif  // INC_CharStreamIOException_hpp__

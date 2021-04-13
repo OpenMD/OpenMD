@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,9 +44,9 @@
  */
 
 /**
- * @file MemoryUtils.hpp
- * @author    tlin
- * @date  10/25/2004
+ * @file    MemoryUtils.hpp
+ * @authors tlin crdrisko
+ * @date    10/25/2004
  * @version 1.0
  */
 
@@ -100,13 +100,12 @@ namespace OpenMD {
       void lifted_deleter(std::pair<T1, T2>& val) {
         lifted_deleter(val.second);
       }
-    }
+    }  // namespace details
 
     // Base case - Combine using constexpr-if when we switch to C++17
     template<typename Container,
              typename = typename std::enable_if<!details::is_container<typename Container::value_type>::value>::type>
     void deletePointers(Container& container) {
-
       for (auto& elem : container)
         details::lifted_deleter(elem);
     }
@@ -116,11 +115,10 @@ namespace OpenMD {
              typename = typename std::enable_if<details::is_container<typename Container::value_type>::value>::type,
              typename = int /* Dummy parameter to allow multiple default template parameters in overloads */>
     void deletePointers(Container& containerOfContainers) {
-
       for (auto& container : containerOfContainers)
         deletePointers(container);
     }
-  }
-}
+  }  // namespace Utils
+}  // namespace OpenMD
 
-#endif // OPENMD_UTILS_MEMORYUTILS_HPP
+#endif  // OPENMD_UTILS_MEMORYUTILS_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,10 +46,10 @@
 #ifndef TYPES_FLUCTUATINGCHARGEADAPTER_HPP
 #define TYPES_FLUCTUATINGCHARGEADAPTER_HPP
 
+#include "math/Polynomial.hpp"
+#include "types/AtomType.hpp"
 #include "utils/GenericData.hpp"
 #include "utils/Tuple.hpp"
-#include "types/AtomType.hpp"
-#include "math/Polynomial.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -60,12 +60,12 @@ namespace OpenMD {
     RealType chargeMass;
     bool isMetallic;
     bool usesSlaterIntramolecular;
-    RealType nValence;     /** number of valence electrons in neutral atom */
-    RealType nMobile;      /** number of "mobile" electrons */
+    RealType nValence; /** number of valence electrons in neutral atom */
+    RealType nMobile;  /** number of "mobile" electrons */
     RealType electronegativity; /** (relative) electronegativity */
-    RealType hardness;     /** diagonal "Coulomb" Jii */
-    int slaterN;           /** principal quantum number for Slater orbitals */
-    RealType slaterZeta;   /** off-diagonal Slater exponent */
+    RealType hardness;          /** diagonal "Coulomb" Jii */
+    int slaterN;            /** principal quantum number for Slater orbitals */
+    RealType slaterZeta;    /** off-diagonal Slater exponent */
     DoublePolynomial vself; /** Polynomial representation of self potential */
   };
   typedef SimpleTypeData<FluctuatingAtypeParameters> FluctuatingAtypeData;
@@ -85,7 +85,6 @@ namespace OpenMD {
     // new style to support Dream2
     void makeFluctuatingCharge(RealType chargeMass, RealType nValence,
                                RealType nMobile, DoublePolynomial vs);
-    
 
     bool isFluctuatingCharge();
     bool isMetallic();
@@ -104,5 +103,5 @@ namespace OpenMD {
     AtomType* at_;
     FluctuatingAtypeParameters getFluctuatingChargeParam();
   };
-}
+}  // namespace OpenMD
 #endif

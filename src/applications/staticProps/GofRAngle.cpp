@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -56,420 +56,412 @@
 
 namespace OpenMD {
 
-GofRAngle::GofRAngle(SimInfo* info, const std::string& filename,
-                     const std::string& sele1, const std::string& sele2,
-                     RealType len, int nrbins, int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2, nrbins),
-      nAngleBins_(nangleBins),
-      len_(len),
-      doSele3_(false),
-      seleMan3_(info),
+  GofRAngle::GofRAngle(SimInfo* info, const std::string& filename,
+                       const std::string& sele1, const std::string& sele2,
+                       RealType len, int nrbins, int nangleBins) :
+      RadialDistrFunc(info, filename, sele1, sele2, nrbins),
+      nAngleBins_(nangleBins), len_(len), doSele3_(false), seleMan3_(info),
       evaluator3_(info) {
-  deltaR_ = len_ / (double)nBins_;
-  deltaCosAngle_ = 2.0 / (double)nAngleBins_;
-  histogram_.resize(nBins_);
-  avgGofr_.resize(nBins_);
-  for (unsigned int i = 0; i < nBins_; ++i) {
-    histogram_[i].resize(nAngleBins_);
-    avgGofr_[i].resize(nAngleBins_);
+    deltaR_        = len_ / (double)nBins_;
+    deltaCosAngle_ = 2.0 / (double)nAngleBins_;
+    histogram_.resize(nBins_);
+    avgGofr_.resize(nBins_);
+    for (unsigned int i = 0; i < nBins_; ++i) {
+      histogram_[i].resize(nAngleBins_);
+      avgGofr_[i].resize(nAngleBins_);
+    }
+
+    setAnalysisType("Radial Distribution Function");
+
+    std::stringstream params;
+    params << " nBins = " << nBins_ << ", maxLen = " << len_
+           << ", deltaR = " << deltaR_ << ", nAngleBins = " << nAngleBins_
+           << ", deltaCosAngle = " << deltaCosAngle_;
+    const std::string paramString = params.str();
+    setParameterString(paramString);
   }
 
-  setAnalysisType("Radial Distribution Function");
+  GofRAngle::GofRAngle(SimInfo* info, const std::string& filename,
+                       const std::string& sele1, const std::string& sele2,
+                       const std::string& sele3, RealType len, int nrbins,
+                       int nangleBins) :
+      RadialDistrFunc(info, filename, sele1, sele2, nrbins),
+      nAngleBins_(nangleBins), len_(len), doSele3_(true),
+      selectionScript3_(sele3), seleMan3_(info), evaluator3_(info) {
+    deltaR_        = len_ / (double)nBins_;
+    deltaCosAngle_ = 2.0 / (double)nAngleBins_;
+    histogram_.resize(nBins_);
+    avgGofr_.resize(nBins_);
+    for (unsigned int i = 0; i < nBins_; ++i) {
+      histogram_[i].resize(nAngleBins_);
+      avgGofr_[i].resize(nAngleBins_);
+    }
 
-  std::stringstream params;
-  params << " nBins = " << nBins_ << ", maxLen = " << len_
-         << ", deltaR = " << deltaR_ << ", nAngleBins = " << nAngleBins_
-         << ", deltaCosAngle = " << deltaCosAngle_;
-  const std::string paramString = params.str();
-  setParameterString(paramString);
-}
-
-GofRAngle::GofRAngle(SimInfo* info, const std::string& filename,
-                     const std::string& sele1, const std::string& sele2,
-                     const std::string& sele3, RealType len, int nrbins,
-                     int nangleBins)
-    : RadialDistrFunc(info, filename, sele1, sele2, nrbins),
-      nAngleBins_(nangleBins),
-      len_(len),
-      doSele3_(true),
-      selectionScript3_(sele3),
-      seleMan3_(info),
-      evaluator3_(info) {
-  deltaR_ = len_ / (double)nBins_;
-  deltaCosAngle_ = 2.0 / (double)nAngleBins_;
-  histogram_.resize(nBins_);
-  avgGofr_.resize(nBins_);
-  for (unsigned int i = 0; i < nBins_; ++i) {
-    histogram_[i].resize(nAngleBins_);
-    avgGofr_[i].resize(nAngleBins_);
-  }
-
-  evaluator3_.loadScriptString(sele3);
-  if (!evaluator3_.isDynamic()) {
-    seleMan3_.setSelectionSet(evaluator3_.evaluate());
-  }
-}
-
-void GofRAngle::processNonOverlapping(SelectionManager& sman1,
-                                      SelectionManager& sman2) {
-  StuntDouble* sd1;
-  StuntDouble* sd2;
-  StuntDouble* sd3;
-  int i;
-  int j;
-  int k;
-
-  // This is the same as a non-overlapping pairwise loop structure:
-  // for (int i = 0;  i < ni ; ++i ) {
-  //   for (int j = 0; j < nj; ++j) {}
-  // }
-
-  if (doSele3_) {
-    if (evaluator3_.isDynamic()) {
+    evaluator3_.loadScriptString(sele3);
+    if (!evaluator3_.isDynamic()) {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
     }
-    if (sman1.getSelectionCount() != seleMan3_.getSelectionCount()) {
+  }
+
+  void GofRAngle::processNonOverlapping(SelectionManager& sman1,
+                                        SelectionManager& sman2) {
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    StuntDouble* sd3;
+    int i;
+    int j;
+    int k;
+
+    // This is the same as a non-overlapping pairwise loop structure:
+    // for (int i = 0;  i < ni ; ++i ) {
+    //   for (int j = 0; j < nj; ++j) {}
+    // }
+
+    if (doSele3_) {
+      if (evaluator3_.isDynamic()) {
+        seleMan3_.setSelectionSet(evaluator3_.evaluate());
+      }
+      if (sman1.getSelectionCount() != seleMan3_.getSelectionCount()) {
+        RadialDistrFunc::processNonOverlapping(sman1, sman2);
+      }
+
+      for (sd1 = sman1.beginSelected(i), sd3 = seleMan3_.beginSelected(k);
+           sd1 != NULL && sd3 != NULL;
+           sd1 = sman1.nextSelected(i), sd3 = seleMan3_.nextSelected(k)) {
+        for (sd2 = sman2.beginSelected(j); sd2 != NULL;
+             sd2 = sman2.nextSelected(j)) {
+          collectHistogram(sd1, sd2, sd3);
+        }
+      }
+    } else {
       RadialDistrFunc::processNonOverlapping(sman1, sman2);
     }
-
-    for (sd1 = sman1.beginSelected(i), sd3 = seleMan3_.beginSelected(k);
-         sd1 != NULL && sd3 != NULL;
-         sd1 = sman1.nextSelected(i), sd3 = seleMan3_.nextSelected(k)) {
-      for (sd2 = sman2.beginSelected(j); sd2 != NULL;
-           sd2 = sman2.nextSelected(j)) {
-        collectHistogram(sd1, sd2, sd3);
-      }
-    }
-  } else {
-    RadialDistrFunc::processNonOverlapping(sman1, sman2);
   }
-}
 
-void GofRAngle::processOverlapping(SelectionManager& sman) {
-  StuntDouble* sd1;
-  StuntDouble* sd2;
-  StuntDouble* sd3;
-  int i;
-  int j;
-  int k;
+  void GofRAngle::processOverlapping(SelectionManager& sman) {
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    StuntDouble* sd3;
+    int i;
+    int j;
+    int k;
 
-  // This is the same as a pairwise loop structure:
-  // for (int i = 0;  i < n-1 ; ++i ) {
-  //   for (int j = i + 1; j < n; ++j) {}
-  // }
+    // This is the same as a pairwise loop structure:
+    // for (int i = 0;  i < n-1 ; ++i ) {
+    //   for (int j = i + 1; j < n; ++j) {}
+    // }
 
-  if (doSele3_) {
-    if (evaluator3_.isDynamic()) {
-      seleMan3_.setSelectionSet(evaluator3_.evaluate());
-    }
-    if (sman.getSelectionCount() != seleMan3_.getSelectionCount()) {
+    if (doSele3_) {
+      if (evaluator3_.isDynamic()) {
+        seleMan3_.setSelectionSet(evaluator3_.evaluate());
+      }
+      if (sman.getSelectionCount() != seleMan3_.getSelectionCount()) {
+        RadialDistrFunc::processOverlapping(sman);
+      }
+      for (sd1 = sman.beginSelected(i), sd3 = seleMan3_.beginSelected(k);
+           sd1 != NULL && sd3 != NULL;
+           sd1 = sman.nextSelected(i), sd3 = seleMan3_.nextSelected(k)) {
+        for (j = i, sd2 = sman.nextSelected(j); sd2 != NULL;
+             sd2 = sman.nextSelected(j)) {
+          collectHistogram(sd1, sd2, sd3);
+        }
+      }
+    } else {
       RadialDistrFunc::processOverlapping(sman);
     }
-    for (sd1 = sman.beginSelected(i), sd3 = seleMan3_.beginSelected(k);
-         sd1 != NULL && sd3 != NULL;
-         sd1 = sman.nextSelected(i), sd3 = seleMan3_.nextSelected(k)) {
-      for (j = i, sd2 = sman.nextSelected(j); sd2 != NULL;
-           sd2 = sman.nextSelected(j)) {
-        collectHistogram(sd1, sd2, sd3);
-      }
-    }
-  } else {
-    RadialDistrFunc::processOverlapping(sman);
-  }
-}
-
-void GofRAngle::preProcess() {
-  for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
-    std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
-  }
-}
-
-void GofRAngle::initializeHistogram() {
-  npairs_ = 0;
-  for (unsigned int i = 0; i < histogram_.size(); ++i) {
-    std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
-  }
-}
-
-void GofRAngle::processHistogram() {
-  int nPairs = getNPairs();
-  RealType volume =
-      info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
-  RealType pairDensity = nPairs / volume;
-  RealType pairConstant = (4.0 * Constants::PI * pairDensity) / 3.0;
-
-  for (unsigned int i = 0; i < histogram_.size(); ++i) {
-    RealType rLower = i * deltaR_;
-    RealType rUpper = rLower + deltaR_;
-    RealType volSlice = (rUpper * rUpper * rUpper) - (rLower * rLower * rLower);
-    RealType nIdeal = volSlice * pairConstant;
-
-    for (unsigned int j = 0; j < histogram_[i].size(); ++j) {
-      avgGofr_[i][j] += histogram_[i][j] / nIdeal;
-    }
-  }
-}
-
-void GofRTheta::processHistogram() {
-  int nPairs = getNPairs();
-  RealType volume =
-      info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
-  RealType pairDensity = nPairs / volume;
-  RealType pairConstant =
-      (4.0 * Constants::PI * pairDensity) / (3.0 * (double)nAngleBins_);
-
-  for (unsigned int i = 0; i < histogram_.size(); ++i) {
-    RealType rLower = i * deltaR_;
-    RealType rUpper = rLower + deltaR_;
-    RealType volSlice = (rUpper * rUpper * rUpper) - (rLower * rLower * rLower);
-    RealType nIdeal = volSlice * pairConstant;
-
-    for (unsigned int j = 0; j < histogram_[i].size(); ++j) {
-      avgGofr_[i][j] += histogram_[i][j] / nIdeal;
-    }
-  }
-}
-
-void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
-  if (sd1 == sd2) {
-    return;
-  }
-  bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-  Vector3d pos1 = sd1->getPos();
-  Vector3d pos2 = sd2->getPos();
-  Vector3d r12 = pos2 - pos1;
-  if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(r12);
-
-  RealType distance = r12.length();
-  int whichRBin = int(distance / deltaR_);
-
-  if (distance <= len_) {
-    RealType cosAngle = evaluateAngle(sd1, sd2);
-    RealType halfBin = (nAngleBins_ - 1) * 0.5;
-    int whichThetaBin = int(halfBin * (cosAngle + 1.0));
-    ++histogram_[whichRBin][whichThetaBin];
-
-    ++npairs_;
-  }
-}
-
-void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2,
-                                 StuntDouble* sd3) {
-  if (sd1 == sd2) {
-    return;
-  }
-  bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-  Vector3d p1 = sd1->getPos();
-  Vector3d p3 = sd3->getPos();
-
-  Vector3d c = 0.5 * (p1 + p3);
-  Vector3d r13 = p3 - p1;
-
-  Vector3d r12 = sd2->getPos() - c;
-
-  if (usePeriodicBoundaryConditions_) {
-    currentSnapshot_->wrapVector(r12);
-    currentSnapshot_->wrapVector(r13);
   }
 
-  RealType distance = r12.length();
-  int whichRBin = int(distance / deltaR_);
-
-  if (distance <= len_) {
-    RealType cosAngle = evaluateAngle(sd1, sd2, sd3);
-    RealType halfBin = (nAngleBins_ - 1) * 0.5;
-    int whichThetaBin = int(halfBin * (cosAngle + 1.0));
-    ++histogram_[whichRBin][whichThetaBin];
-
-    ++npairs_;
-  }
-}
-
-void GofRAngle::writeRdf() {
-  std::ofstream ofs(outputFilename_.c_str());
-  if (ofs.is_open()) {
-    Revision r;
-    ofs << "# " << getAnalysisType() << "\n";
-    ofs << "# OpenMD " << r.getFullRevision() << "\n";
-    ofs << "# " << r.getBuildDate() << "\n";
-    ofs << "# selection script1: \"" << selectionScript1_;
-    ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"";
-    if (doSele3_) {
-      ofs << "\tselection script3: \"" << selectionScript3_ << "\"\n";
-    } else {
-      ofs << "\n";
-    }
-
-    if (!paramString_.empty()) ofs << "# parameters: " << paramString_ << "\n";
-
+  void GofRAngle::preProcess() {
     for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
-      // RealType r = deltaR_ * (i + 0.5);
+      std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
+    }
+  }
 
-      for (unsigned int j = 0; j < avgGofr_[i].size(); ++j) {
-        // RealType cosAngle = -1.0 + (j + 0.5)*deltaCosAngle_;
-        ofs << avgGofr_[i][j] / nProcessed_ << "\t";
+  void GofRAngle::initializeHistogram() {
+    npairs_ = 0;
+    for (unsigned int i = 0; i < histogram_.size(); ++i) {
+      std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
+    }
+  }
+
+  void GofRAngle::processHistogram() {
+    int nPairs = getNPairs();
+    RealType volume =
+        info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
+    RealType pairDensity  = nPairs / volume;
+    RealType pairConstant = (4.0 * Constants::PI * pairDensity) / 3.0;
+
+    for (unsigned int i = 0; i < histogram_.size(); ++i) {
+      RealType rLower = i * deltaR_;
+      RealType rUpper = rLower + deltaR_;
+      RealType volSlice =
+          (rUpper * rUpper * rUpper) - (rLower * rLower * rLower);
+      RealType nIdeal = volSlice * pairConstant;
+
+      for (unsigned int j = 0; j < histogram_[i].size(); ++j) {
+        avgGofr_[i][j] += histogram_[i][j] / nIdeal;
       }
+    }
+  }
 
-      ofs << "\n";
+  void GofRTheta::processHistogram() {
+    int nPairs = getNPairs();
+    RealType volume =
+        info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
+    RealType pairDensity = nPairs / volume;
+    RealType pairConstant =
+        (4.0 * Constants::PI * pairDensity) / (3.0 * (double)nAngleBins_);
+
+    for (unsigned int i = 0; i < histogram_.size(); ++i) {
+      RealType rLower = i * deltaR_;
+      RealType rUpper = rLower + deltaR_;
+      RealType volSlice =
+          (rUpper * rUpper * rUpper) - (rLower * rLower * rLower);
+      RealType nIdeal = volSlice * pairConstant;
+
+      for (unsigned int j = 0; j < histogram_[i].size(); ++j) {
+        avgGofr_[i][j] += histogram_[i][j] / nIdeal;
+      }
+    }
+  }
+
+  void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+    if (sd1 == sd2) { return; }
+    bool usePeriodicBoundaryConditions_ =
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
+    Vector3d pos1 = sd1->getPos();
+    Vector3d pos2 = sd2->getPos();
+    Vector3d r12  = pos2 - pos1;
+    if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(r12);
+
+    RealType distance = r12.length();
+    int whichRBin     = int(distance / deltaR_);
+
+    if (distance <= len_) {
+      RealType cosAngle = evaluateAngle(sd1, sd2);
+      RealType halfBin  = (nAngleBins_ - 1) * 0.5;
+      int whichThetaBin = int(halfBin * (cosAngle + 1.0));
+      ++histogram_[whichRBin][whichThetaBin];
+
+      ++npairs_;
+    }
+  }
+
+  void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2,
+                                   StuntDouble* sd3) {
+    if (sd1 == sd2) { return; }
+    bool usePeriodicBoundaryConditions_ =
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
+    Vector3d p1 = sd1->getPos();
+    Vector3d p3 = sd3->getPos();
+
+    Vector3d c   = 0.5 * (p1 + p3);
+    Vector3d r13 = p3 - p1;
+
+    Vector3d r12 = sd2->getPos() - c;
+
+    if (usePeriodicBoundaryConditions_) {
+      currentSnapshot_->wrapVector(r12);
+      currentSnapshot_->wrapVector(r13);
     }
 
-  } else {
-    sprintf(painCave.errMsg, "GofRAngle: unable to open %s\n",
-            outputFilename_.c_str());
-    painCave.isFatal = 1;
-    simError();
+    RealType distance = r12.length();
+    int whichRBin     = int(distance / deltaR_);
+
+    if (distance <= len_) {
+      RealType cosAngle = evaluateAngle(sd1, sd2, sd3);
+      RealType halfBin  = (nAngleBins_ - 1) * 0.5;
+      int whichThetaBin = int(halfBin * (cosAngle + 1.0));
+      ++histogram_[whichRBin][whichThetaBin];
+
+      ++npairs_;
+    }
   }
 
-  ofs.close();
-}
+  void GofRAngle::writeRdf() {
+    std::ofstream ofs(outputFilename_.c_str());
+    if (ofs.is_open()) {
+      Revision r;
+      ofs << "# " << getAnalysisType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      ofs << "# selection script1: \"" << selectionScript1_;
+      ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"";
+      if (doSele3_) {
+        ofs << "\tselection script3: \"" << selectionScript3_ << "\"\n";
+      } else {
+        ofs << "\n";
+      }
 
-RealType GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
-  bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
 
-  Vector3d pos1 = sd1->getPos();
-  Vector3d pos2 = sd2->getPos();
-  Vector3d r12 = pos2 - pos1;
+      for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
+        // RealType r = deltaR_ * (i + 0.5);
 
-  if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(r12);
+        for (unsigned int j = 0; j < avgGofr_[i].size(); ++j) {
+          // RealType cosAngle = -1.0 + (j + 0.5)*deltaCosAngle_;
+          ofs << avgGofr_[i][j] / nProcessed_ << "\t";
+        }
 
-  r12.normalize();
+        ofs << "\n";
+      }
 
-  Vector3d vec;
+    } else {
+      sprintf(painCave.errMsg, "GofRAngle: unable to open %s\n",
+              outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
 
-  if (!sd1->isDirectional()) {
-    sprintf(painCave.errMsg,
-            "GofRTheta: attempted to use a non-directional object: %s\n",
-            sd1->getType().c_str());
-    painCave.isFatal = 1;
-    simError();
+    ofs.close();
   }
 
-  if (sd1->isAtom()) {
-    AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
-    MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+  RealType GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
+    bool usePeriodicBoundaryConditions_ =
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-    if (ma1.isDipole())
-      vec = sd1->getDipole();
-    else
+    Vector3d pos1 = sd1->getPos();
+    Vector3d pos2 = sd2->getPos();
+    Vector3d r12  = pos2 - pos1;
+
+    if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(r12);
+
+    r12.normalize();
+
+    Vector3d vec;
+
+    if (!sd1->isDirectional()) {
+      sprintf(painCave.errMsg,
+              "GofRTheta: attempted to use a non-directional object: %s\n",
+              sd1->getType().c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+
+    if (sd1->isAtom()) {
+      AtomType* atype1     = static_cast<Atom*>(sd1)->getAtomType();
+      MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+
+      if (ma1.isDipole())
+        vec = sd1->getDipole();
+      else
+        vec = sd1->getA().transpose() * V3Z;
+    } else {
       vec = sd1->getA().transpose() * V3Z;
-  } else {
-    vec = sd1->getA().transpose() * V3Z;
+    }
+
+    vec.normalize();
+
+    return dot(r12, vec);
   }
 
-  vec.normalize();
+  RealType GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2,
+                                    StuntDouble* sd3) {
+    bool usePeriodicBoundaryConditions_ =
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-  return dot(r12, vec);
-}
+    Vector3d p1 = sd1->getPos();
+    Vector3d p3 = sd3->getPos();
 
-RealType GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2,
-                                  StuntDouble* sd3) {
-  bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    Vector3d c   = 0.5 * (p1 + p3);
+    Vector3d r13 = p3 - p1;
 
-  Vector3d p1 = sd1->getPos();
-  Vector3d p3 = sd3->getPos();
+    Vector3d r12 = sd2->getPos() - c;
 
-  Vector3d c = 0.5 * (p1 + p3);
-  Vector3d r13 = p3 - p1;
+    if (usePeriodicBoundaryConditions_) {
+      currentSnapshot_->wrapVector(r12);
+      currentSnapshot_->wrapVector(r13);
+    }
 
-  Vector3d r12 = sd2->getPos() - c;
+    r12.normalize();
+    r13.normalize();
 
-  if (usePeriodicBoundaryConditions_) {
-    currentSnapshot_->wrapVector(r12);
-    currentSnapshot_->wrapVector(r13);
+    return dot(r12, r13);
   }
 
-  r12.normalize();
-  r13.normalize();
+  RealType GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
+    Vector3d v1, v2;
 
-  return dot(r12, r13);
-}
+    if (!sd1->isDirectional()) {
+      sprintf(painCave.errMsg,
+              "GofROmega: attempted to use a non-directional object: %s\n",
+              sd1->getType().c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
 
-RealType GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
-  Vector3d v1, v2;
-
-  if (!sd1->isDirectional()) {
-    sprintf(painCave.errMsg,
-            "GofROmega: attempted to use a non-directional object: %s\n",
-            sd1->getType().c_str());
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  if (sd1->isAtom()) {
-    AtomType* atype1 = static_cast<Atom*>(sd1)->getAtomType();
-    MultipoleAdapter ma1 = MultipoleAdapter(atype1);
-    if (ma1.isDipole())
-      v1 = sd1->getDipole();
-    else
+    if (sd1->isAtom()) {
+      AtomType* atype1     = static_cast<Atom*>(sd1)->getAtomType();
+      MultipoleAdapter ma1 = MultipoleAdapter(atype1);
+      if (ma1.isDipole())
+        v1 = sd1->getDipole();
+      else
+        v1 = sd1->getA().transpose() * V3Z;
+    } else {
       v1 = sd1->getA().transpose() * V3Z;
-  } else {
-    v1 = sd1->getA().transpose() * V3Z;
-  }
+    }
 
-  if (!sd2->isDirectional()) {
-    sprintf(painCave.errMsg,
-            "GofROmega attempted to use a non-directional object: %s\n",
-            sd2->getType().c_str());
-    painCave.isFatal = 1;
-    simError();
-  }
+    if (!sd2->isDirectional()) {
+      sprintf(painCave.errMsg,
+              "GofROmega attempted to use a non-directional object: %s\n",
+              sd2->getType().c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
 
-  if (sd2->isAtom()) {
-    AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();
-    MultipoleAdapter ma2 = MultipoleAdapter(atype2);
+    if (sd2->isAtom()) {
+      AtomType* atype2     = static_cast<Atom*>(sd2)->getAtomType();
+      MultipoleAdapter ma2 = MultipoleAdapter(atype2);
 
-    if (ma2.isDipole())
-      v2 = sd2->getDipole();
-    else
+      if (ma2.isDipole())
+        v2 = sd2->getDipole();
+      else
+        v2 = sd2->getA().transpose() * V3Z;
+    } else {
       v2 = sd2->getA().transpose() * V3Z;
-  } else {
-    v2 = sd2->getA().transpose() * V3Z;
+    }
+
+    v1.normalize();
+    v2.normalize();
+    return dot(v1, v2);
   }
 
-  v1.normalize();
-  v2.normalize();
-  return dot(v1, v2);
-}
+  RealType GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2,
+                                    StuntDouble* sd3) {
+    bool usePeriodicBoundaryConditions_ =
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-RealType GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2,
-                                  StuntDouble* sd3) {
-  bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+    Vector3d v1;
+    Vector3d v2;
 
-  Vector3d v1;
-  Vector3d v2;
+    v1 = sd3->getPos() - sd1->getPos();
+    if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(v1);
 
-  v1 = sd3->getPos() - sd1->getPos();
-  if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(v1);
+    if (!sd2->isDirectional()) {
+      sprintf(painCave.errMsg,
+              "GofROmega: attempted to use a non-directional object: %s\n",
+              sd2->getType().c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
 
-  if (!sd2->isDirectional()) {
-    sprintf(painCave.errMsg,
-            "GofROmega: attempted to use a non-directional object: %s\n",
-            sd2->getType().c_str());
-    painCave.isFatal = 1;
-    simError();
-  }
+    if (sd2->isAtom()) {
+      AtomType* atype2     = static_cast<Atom*>(sd2)->getAtomType();
+      MultipoleAdapter ma2 = MultipoleAdapter(atype2);
 
-  if (sd2->isAtom()) {
-    AtomType* atype2 = static_cast<Atom*>(sd2)->getAtomType();
-    MultipoleAdapter ma2 = MultipoleAdapter(atype2);
-
-    if (ma2.isDipole())
-      v2 = sd2->getDipole();
-    else
+      if (ma2.isDipole())
+        v2 = sd2->getDipole();
+      else
+        v2 = sd2->getA().transpose() * V3Z;
+    } else {
       v2 = sd2->getA().transpose() * V3Z;
-  } else {
-    v2 = sd2->getA().transpose() * V3Z;
-  }
+    }
 
-  v1.normalize();
-  v2.normalize();
-  return dot(v1, v2);
-}
+    v1.normalize();
+    v2.normalize();
+    return dot(v1, v2);
+  }
 }  // namespace OpenMD

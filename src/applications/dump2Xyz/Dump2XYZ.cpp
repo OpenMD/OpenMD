@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -81,9 +81,7 @@ int main(int argc, char* argv[]) {
   bool printGlobalID(false);
 
   // parse the command line option
-  if (cmdline_parser(argc, argv, &args_info) != 0) {
-    exit(1);
-  }
+  if (cmdline_parser(argc, argv, &args_info) != 0) { exit(1); }
 
   // get the dumpfile name and meta-data file name
   if (args_info.input_given) {
@@ -103,7 +101,7 @@ int main(int argc, char* argv[]) {
 
   // parse md file and set up the system
   SimCreator creator;
-  SimInfo* info = creator.createSim(dumpFileName, false);
+  SimInfo* info          = creator.createSim(dumpFileName, false);
   ForceManager* forceMan = new ForceManager(info);
 
   // create visitor list
@@ -230,7 +228,7 @@ int main(int argc, char* argv[]) {
 
   // open dump file
   DumpReader* dumpReader = new DumpReader(info, dumpFileName);
-  int nframes = dumpReader->getNFrames();
+  int nframes            = dumpReader->getNFrames();
 
   ofstream xyzStream(xyzFileName.c_str());
 
@@ -256,7 +254,7 @@ int main(int argc, char* argv[]) {
       currentSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
       for (mol = info->beginMolecule(miter); mol != NULL;
            mol = info->nextMolecule(miter)) {
-        molCom = mol->getCom();
+        molCom    = mol->getCom();
         newMolCom = molCom;
         currentSnapshot->wrapVector(newMolCom);
         displacement = newMolCom - molCom;

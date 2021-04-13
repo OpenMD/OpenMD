@@ -31,126 +31,123 @@
 #include "optimization/StatusFunction.hpp"
 
 namespace QuantLib {
-    
-    class Constraint;
-    //! Constrained optimization problem
-    class Problem {
-    public:
-        //! default constructor
-        Problem(ObjectiveFunction& objectiveFunction,
-                Constraint& constraint,
-                OpenMD::StatusFunction& statFunc,
-                const DynamicVector<RealType>& initialValue = DynamicVector<RealType>())
-            : objectiveFunction_(objectiveFunction), constraint_(constraint),
-              currentValue_(initialValue), statusFunction_(statFunc) {}
-        
-        /*! \warning it does not reset the current minumum to any initial value
-         */
-        void reset();
-        
-        //! call objective function computation and increment evaluation counter
-        RealType value(const DynamicVector<RealType>& x);
-        
-        //! call objective function gradient computation and increment
-        //  evaluation counter
-        void gradient(DynamicVector<RealType>& grad_f,
-                      const DynamicVector<RealType>& x);
 
-        //! call objective function computation and it gradient
-        RealType valueAndGradient(DynamicVector<RealType>& grad_f,
-                                  const DynamicVector<RealType>& x);
+  class Constraint;
+  //! Constrained optimization problem
+  class Problem {
+  public:
+    //! default constructor
+    Problem(ObjectiveFunction& objectiveFunction, Constraint& constraint,
+            OpenMD::StatusFunction& statFunc,
+            const DynamicVector<RealType>& initialValue =
+                DynamicVector<RealType>()) :
+        objectiveFunction_(objectiveFunction),
+        constraint_(constraint), currentValue_(initialValue),
+        statusFunction_(statFunc) {}
 
-        //! Constraint
-        Constraint& constraint() const { return constraint_; }
+    /*! \warning it does not reset the current minumum to any initial value
+     */
+    void reset();
 
-        //! Objective function
-        ObjectiveFunction& objectiveFunction() const { return objectiveFunction_; }
+    //! call objective function computation and increment evaluation counter
+    RealType value(const DynamicVector<RealType>& x);
 
-        void setCurrentValue(const DynamicVector<RealType>& currentValue) {
-            currentValue_=currentValue;
-            statusFunction_.writeStatus(functionEvaluation_, 
-                                        gradientEvaluation_, 
-                                        currentValue_,
-                                        functionValue_);
-        }
+    //! call objective function gradient computation and increment
+    //  evaluation counter
+    void gradient(DynamicVector<RealType>& grad_f,
+                  const DynamicVector<RealType>& x);
 
-        //! current value of the local minimum
-        const DynamicVector<RealType>& currentValue() const { return currentValue_; }
+    //! call objective function computation and it gradient
+    RealType valueAndGradient(DynamicVector<RealType>& grad_f,
+                              const DynamicVector<RealType>& x);
 
-        void setFunctionValue(RealType functionValue) {
-            functionValue_=functionValue;
-        }
+    //! Constraint
+    Constraint& constraint() const { return constraint_; }
 
-        //! value of objective function
-        RealType functionValue() const { return functionValue_; }
+    //! Objective function
+    ObjectiveFunction& objectiveFunction() const { return objectiveFunction_; }
 
-        void setGradientNormValue(RealType squaredNorm) {
-            squaredNorm_=squaredNorm;
-        }
-        //! value of objective function gradient norm
-        RealType gradientNormValue() const { return squaredNorm_; }
-
-        //! number of evaluation of objective function
-        int functionEvaluation() const { return functionEvaluation_; }
-
-        //! number of evaluation of objective function gradient
-        int gradientEvaluation() const { return gradientEvaluation_; }
-
-        RealType DotProduct(DynamicVector<RealType>& v1, DynamicVector<RealType>& v2);
-        RealType computeGradientNormValue(DynamicVector<RealType>& grad_f);
-        
-
-    protected:
-        //! Unconstrained objective function
-        ObjectiveFunction& objectiveFunction_;
-        //! Constraint
-        Constraint& constraint_;
-        //! current value of the local minimum
-        DynamicVector<RealType> currentValue_;
-        //! function and gradient norm values at the curentValue_ (i.e. the last step)
-        RealType functionValue_, squaredNorm_;
-        //! number of evaluation of objective function and its gradient
-        int functionEvaluation_, gradientEvaluation_;
-        //! status function
-        StatusFunction& statusFunction_;
-
-    };
-    
-    // inline definitions
-    inline RealType Problem::value(const DynamicVector<RealType>& x) {
-        ++functionEvaluation_;
-        functionValue_ = objectiveFunction_.value(x);
-        statusFunction_.writeStatus(functionEvaluation_, 
-                                    gradientEvaluation_, 
-                                    currentValue_,
-                                    functionValue_);        
-        
-        return functionValue_;
+    void setCurrentValue(const DynamicVector<RealType>& currentValue) {
+      currentValue_ = currentValue;
+      statusFunction_.writeStatus(functionEvaluation_, gradientEvaluation_,
+                                  currentValue_, functionValue_);
     }
-    
-    inline void Problem::gradient(DynamicVector<RealType>& grad_f,
-                                  const DynamicVector<RealType>& x) {
-        ++gradientEvaluation_;
-        objectiveFunction_.gradient(grad_f, x);
+
+    //! current value of the local minimum
+    const DynamicVector<RealType>& currentValue() const {
+      return currentValue_;
     }
-    
-    inline RealType Problem::valueAndGradient(DynamicVector<RealType>& grad_f,
-                                              const DynamicVector<RealType>& x) {
-        ++functionEvaluation_;
-        ++gradientEvaluation_;
-        functionValue_ = objectiveFunction_.valueAndGradient(grad_f, x);
-        statusFunction_.writeStatus(functionEvaluation_, 
-                                    gradientEvaluation_, 
-                                    currentValue_,
-                                    functionValue_);        
-        return functionValue_;
+
+    void setFunctionValue(RealType functionValue) {
+      functionValue_ = functionValue;
     }
-    
-    inline void Problem::reset() {
-        functionEvaluation_ = gradientEvaluation_ = 0;
-        functionValue_ = squaredNorm_ = 0;
+
+    //! value of objective function
+    RealType functionValue() const { return functionValue_; }
+
+    void setGradientNormValue(RealType squaredNorm) {
+      squaredNorm_ = squaredNorm;
     }
-    
-}
+    //! value of objective function gradient norm
+    RealType gradientNormValue() const { return squaredNorm_; }
+
+    //! number of evaluation of objective function
+    int functionEvaluation() const { return functionEvaluation_; }
+
+    //! number of evaluation of objective function gradient
+    int gradientEvaluation() const { return gradientEvaluation_; }
+
+    RealType DotProduct(DynamicVector<RealType>& v1,
+                        DynamicVector<RealType>& v2);
+    RealType computeGradientNormValue(DynamicVector<RealType>& grad_f);
+
+  protected:
+    //! Unconstrained objective function
+    ObjectiveFunction& objectiveFunction_;
+    //! Constraint
+    Constraint& constraint_;
+    //! current value of the local minimum
+    DynamicVector<RealType> currentValue_;
+    //! function and gradient norm values at the curentValue_ (i.e. the last
+    //! step)
+    RealType functionValue_, squaredNorm_;
+    //! number of evaluation of objective function and its gradient
+    int functionEvaluation_, gradientEvaluation_;
+    //! status function
+    StatusFunction& statusFunction_;
+  };
+
+  // inline definitions
+  inline RealType Problem::value(const DynamicVector<RealType>& x) {
+    ++functionEvaluation_;
+    functionValue_ = objectiveFunction_.value(x);
+    statusFunction_.writeStatus(functionEvaluation_, gradientEvaluation_,
+                                currentValue_, functionValue_);
+
+    return functionValue_;
+  }
+
+  inline void Problem::gradient(DynamicVector<RealType>& grad_f,
+                                const DynamicVector<RealType>& x) {
+    ++gradientEvaluation_;
+    objectiveFunction_.gradient(grad_f, x);
+  }
+
+  inline RealType Problem::valueAndGradient(DynamicVector<RealType>& grad_f,
+                                            const DynamicVector<RealType>& x) {
+    ++functionEvaluation_;
+    ++gradientEvaluation_;
+    functionValue_ = objectiveFunction_.valueAndGradient(grad_f, x);
+    statusFunction_.writeStatus(functionEvaluation_, gradientEvaluation_,
+                                currentValue_, functionValue_);
+    return functionValue_;
+  }
+
+  inline void Problem::reset() {
+    functionEvaluation_ = gradientEvaluation_ = 0;
+    functionValue_ = squaredNorm_ = 0;
+  }
+
+}  // namespace QuantLib
 
 #endif

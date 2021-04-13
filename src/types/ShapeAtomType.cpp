@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -47,55 +47,55 @@
 
 namespace OpenMD {
 
-ShapeAtomType::~ShapeAtomType() {
-  std::vector<RealSphericalHarmonic*>::iterator iter;
-  for (iter = contactFuncs.begin(); iter != contactFuncs.end(); ++iter)
-    delete (*iter);
-  for (iter = rangeFuncs.begin(); iter != rangeFuncs.end(); ++iter)
-    delete (*iter);
-  for (iter = strengthFuncs.begin(); iter != strengthFuncs.end(); ++iter)
-    delete (*iter);
-  contactFuncs.clear();
-  rangeFuncs.clear();
-  strengthFuncs.clear();
-}
+  ShapeAtomType::~ShapeAtomType() {
+    std::vector<RealSphericalHarmonic*>::iterator iter;
+    for (iter = contactFuncs.begin(); iter != contactFuncs.end(); ++iter)
+      delete (*iter);
+    for (iter = rangeFuncs.begin(); iter != rangeFuncs.end(); ++iter)
+      delete (*iter);
+    for (iter = strengthFuncs.begin(); iter != strengthFuncs.end(); ++iter)
+      delete (*iter);
+    contactFuncs.clear();
+    rangeFuncs.clear();
+    strengthFuncs.clear();
+  }
 
-RealType ShapeAtomType::getContactValueAt(RealType costheta, RealType phi) {
-  std::vector<RealSphericalHarmonic*>::iterator contactIter;
-  RealType contactVal;
+  RealType ShapeAtomType::getContactValueAt(RealType costheta, RealType phi) {
+    std::vector<RealSphericalHarmonic*>::iterator contactIter;
+    RealType contactVal;
 
-  contactVal = 0.0;
+    contactVal = 0.0;
 
-  for (contactIter = contactFuncs.begin(); contactIter != contactFuncs.end();
-       ++contactIter)
-    contactVal += (*contactIter)->getValueAt(costheta, phi);
+    for (contactIter = contactFuncs.begin(); contactIter != contactFuncs.end();
+         ++contactIter)
+      contactVal += (*contactIter)->getValueAt(costheta, phi);
 
-  return contactVal;
-}
+    return contactVal;
+  }
 
-RealType ShapeAtomType::getRangeValueAt(RealType costheta, RealType phi) {
-  std::vector<RealSphericalHarmonic*>::iterator rangeIter;
-  RealType rangeVal;
+  RealType ShapeAtomType::getRangeValueAt(RealType costheta, RealType phi) {
+    std::vector<RealSphericalHarmonic*>::iterator rangeIter;
+    RealType rangeVal;
 
-  rangeVal = 0.0;
+    rangeVal = 0.0;
 
-  for (rangeIter = rangeFuncs.begin(); rangeIter != rangeFuncs.end();
-       ++rangeIter)
-    rangeVal += (*rangeIter)->getValueAt(costheta, phi);
+    for (rangeIter = rangeFuncs.begin(); rangeIter != rangeFuncs.end();
+         ++rangeIter)
+      rangeVal += (*rangeIter)->getValueAt(costheta, phi);
 
-  return rangeVal;
-}
+    return rangeVal;
+  }
 
-RealType ShapeAtomType::getStrengthValueAt(RealType costheta, RealType phi) {
-  std::vector<RealSphericalHarmonic*>::iterator strengthIter;
-  RealType strengthVal;
+  RealType ShapeAtomType::getStrengthValueAt(RealType costheta, RealType phi) {
+    std::vector<RealSphericalHarmonic*>::iterator strengthIter;
+    RealType strengthVal;
 
-  strengthVal = 0.0;
+    strengthVal = 0.0;
 
-  for (strengthIter = strengthFuncs.begin();
-       strengthIter != strengthFuncs.end(); ++strengthIter)
-    strengthVal += (*strengthIter)->getValueAt(costheta, phi);
+    for (strengthIter = strengthFuncs.begin();
+         strengthIter != strengthFuncs.end(); ++strengthIter)
+      strengthVal += (*strengthIter)->getValueAt(costheta, phi);
 
-  return strengthVal;
-}
+    return strengthVal;
+  }
 }  // namespace OpenMD

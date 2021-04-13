@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -51,9 +51,9 @@
 #include <iostream>
 namespace OpenMD {
 
-RigidBodyStamp::RigidBodyStamp(int index) : index_(index) {
-  deprecatedKeywords_.insert("nMembers");
-}
+  RigidBodyStamp::RigidBodyStamp(int index) : index_(index) {
+    deprecatedKeywords_.insert("nMembers");
+  }
 
-void RigidBodyStamp::validate() { DataHolder::validate(); }
+  void RigidBodyStamp::validate() { DataHolder::validate(); }
 }  // namespace OpenMD

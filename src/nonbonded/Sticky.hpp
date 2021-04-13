@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,15 +42,15 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef NONBONDED_STICKY_HPP
 #define NONBONDED_STICKY_HPP
 
+#include "brains/ForceField.hpp"
+#include "math/CubicSpline.hpp"
+#include "math/SquareMatrix3.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "types/StickyAdapter.hpp"
-#include "brains/ForceField.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "math/CubicSpline.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -70,30 +70,34 @@ namespace OpenMD {
   };
 
   class Sticky : public HydrogenBondingInteraction {
-    
-  public:    
+  public:
     Sticky();
-    void setForceField(ForceField *ff) {forceField_ = ff;};
-    void setSimulatedAtomTypes(set<AtomType*> &simtypes) {simTypes_ = simtypes; initialize();};
+    void setForceField(ForceField* ff) { forceField_ = ff; };
+    void setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+      simTypes_ = simtypes;
+      initialize();
+    };
     void addType(AtomType* atomType);
-    virtual void calcForce(InteractionData &idat);
+    virtual void calcForce(InteractionData& idat);
     virtual string getName() { return name_; }
     virtual int getHash() { return STICKY_INTERACTION; }
-    virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
-    
+    virtual RealType getSuggestedCutoffRadius(
+        pair<AtomType*, AtomType*> atypes);
+
   private:
     void initialize();
     bool initialized_;
-    set<int> Stypes;              /**< The set of AtomType idents that are Sticky types */
-    vector<int> Stids;            /**< The mapping from AtomType ident -> Sticky type ident */
-    vector<vector<StickyInteractionData> > MixingMap;  /**< The mixing parameters between 
+    set<int> Stypes; /**< The set of AtomType idents that are Sticky types */
+    vector<int>
+        Stids; /**< The mapping from AtomType ident -> Sticky type ident */
+    vector<vector<StickyInteractionData>>
+        MixingMap; /**< The mixing parameters between
                                                           two Sticky types */
     int nSticky_;
-    ForceField* forceField_;    
+    ForceField* forceField_;
     set<AtomType*> simTypes_;
     string name_;
   };
-}
+}  // namespace OpenMD
 
-                               
 #endif

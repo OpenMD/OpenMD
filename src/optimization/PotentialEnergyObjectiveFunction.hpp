@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,17 +46,15 @@
 #ifndef OPTIMIZATION_POTENTIALENERGYOBJECTIVEFUNCTION_HPP
 #define OPTIMIZATION_POTENTIALENERGYOBJECTIVEFUNCTION_HPP
 
-#include "optimization/ObjectiveFunction.hpp"
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
 #include "constraints/Shake.hpp"
 #include "flucq/FluctuatingChargeConstraints.hpp"
-
+#include "optimization/ObjectiveFunction.hpp"
 
 using namespace QuantLib;
 namespace OpenMD {
   class PotentialEnergyObjectiveFunction : public ObjectiveFunction {
-    
   public:
     PotentialEnergyObjectiveFunction(SimInfo* info, ForceManager* forceMan);
 
@@ -71,10 +69,10 @@ namespace OpenMD {
   private:
     // transform minimization coordinates into cartesian and
     // rotational coordinates
-    void setCoor(const DynamicVector<RealType> &x) const;
+    void setCoor(const DynamicVector<RealType>& x) const;
     // transform cartesian and rotational coordinates into minimization
-    // coordinates 
-    void getGrad(DynamicVector<RealType> &grad);
+    // coordinates
+    void getGrad(DynamicVector<RealType>& grad);
 
     SimInfo* info_ {nullptr};
     ForceManager* forceMan_;
@@ -89,7 +87,6 @@ namespace OpenMD {
     int myrank_;
     std::vector<int> displacements_;
 #endif
-
   };
-}
+}  // namespace OpenMD
 #endif

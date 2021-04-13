@@ -8,21 +8,21 @@
  * $Id$
  */
 
-#include <antlr/config.hpp>
 #include <antlr/TokenStreamException.hpp>
+#include <antlr/config.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-class TokenStreamRetryException : public TokenStreamException {
-public:
-	TokenStreamRetryException() {}
-	~TokenStreamRetryException() throw() {}
-};
+  class TokenStreamRetryException : public TokenStreamException {
+  public:
+    TokenStreamRetryException() {}
+    ~TokenStreamRetryException() throw() {}
+  };
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif //INC_TokenStreamRetryException_hpp__
+#endif  // INC_TokenStreamRetryException_hpp__

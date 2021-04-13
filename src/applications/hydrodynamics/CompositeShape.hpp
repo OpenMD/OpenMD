@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,28 +45,27 @@
 
 #ifndef APPLICATION_HYDRODYNAMICS_COMPOSITESHAPE_HPP
 #define APPLICATION_HYDRODYNAMICS_COMPOSITESHAPE_HPP
-#include "hydrodynamics/Shape.hpp"
 #include <vector>
+
+#include "hydrodynamics/Shape.hpp"
 namespace OpenMD {
   /**
    * @class CompositeShape
    * Combine composite pattern and visitor pattern
-   */ 
+   */
   class CompositeShape : public Shape {
-    
   public:
     CompositeShape() {}
     virtual ~CompositeShape();
     virtual bool isInterior(Vector3d pos);
     virtual std::pair<Vector3d, Vector3d> getBoundingBox();
-    virtual bool hasAnalyticalSolution() { return false;}
+    virtual bool hasAnalyticalSolution() { return false; }
     virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature);
-    void addShape(Shape* s) {shapes_.push_back(s);}
-    
-  private:
-    
-    std::vector<Shape*> shapes_;      
-};
+    void addShape(Shape* s) { shapes_.push_back(s); }
 
-}
+  private:
+    std::vector<Shape*> shapes_;
+  };
+
+}  // namespace OpenMD
 #endif

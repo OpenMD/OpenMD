@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_SECTIONPARSERMANAGER_HPP
 #define IO_SECTIONPARSERMANAGER_HPP
 
@@ -56,27 +56,27 @@ namespace OpenMD {
     int priority;
     SectionParser* sectionParser;
     int lineNo;
-    std::streampos  offset;
+    std::streampos offset;
     bool isActive;
   };
 
   class SameSectionParserFunctor {
   public:
-    SameSectionParserFunctor(const std::string &section) : section_(section) {}
-    
+    SameSectionParserFunctor(const std::string& section) : section_(section) {}
+
     bool operator()(SectionParserContext context) {
       return context.sectionParser->getSectionName() == section_;
     }
-        
+
   private:
     std::string section_;
   };
   /**
-   * @class SectionParserManager SectionParserManager.hpp "io/SectionParserManager.hpp"
-   * SectionParserManager maintains a priority list
+   * @class SectionParserManager SectionParserManager.hpp
+   * "io/SectionParserManager.hpp" SectionParserManager maintains a priority
+   * list
    */
   class SectionParserManager {
-
   public:
     typedef std::list<SectionParserContext> SectionParserContextList;
     typedef SectionParserContextList::iterator iterator;
@@ -85,29 +85,25 @@ namespace OpenMD {
     SectionParserManager() : beginPriority_(0), priorityDifference_(100) {}
     ~SectionParserManager();
 
-    void parse(std::istream& input, ForceField&  ff);
-        
+    void parse(std::istream& input, ForceField& ff);
+
     void push_front(SectionParser* sp);
 
     void push_back(SectionParser* sp);
-        
-    void insert(SectionParser* sp, int priority);
-        
-    const_iterator begin() const {
-      return sectionParsers_.begin();
-    }
 
-    const_iterator end() const{
-      return sectionParsers_.end();
-    }
-        
+    void insert(SectionParser* sp, int priority);
+
+    const_iterator begin() const { return sectionParsers_.begin(); }
+
+    const_iterator end() const { return sectionParsers_.end(); }
+
   private:
-    iterator findSectionParser(const std::string &sectionName);
+    iterator findSectionParser(const std::string& sectionName);
     const int beginPriority_;
     int priorityDifference_;
-        
+
     SectionParserContextList sectionParsers_;
   };
 
-}
-#endif //IO_SECTIONPARSERMANAGER_HPP
+}  // namespace OpenMD
+#endif  // IO_SECTIONPARSERMANAGER_HPP

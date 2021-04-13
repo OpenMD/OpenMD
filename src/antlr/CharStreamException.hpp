@@ -8,22 +8,22 @@
  * $Id$
  */
 
-#include <antlr/config.hpp>
 #include <antlr/ANTLRException.hpp>
+#include <antlr/config.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-class ANTLR_API CharStreamException : public ANTLRException {
-public:
-	CharStreamException(const ANTLR_USE_NAMESPACE(std)string& s)
-		: ANTLRException(s) {}
-	~CharStreamException() throw() {}
-};
+  class ANTLR_API CharStreamException : public ANTLRException {
+  public:
+    CharStreamException(const ANTLR_USE_NAMESPACE(std) string& s) :
+        ANTLRException(s) {}
+    ~CharStreamException() throw() {}
+  };
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif //INC_CharStreamException_hpp__
+#endif  // INC_CharStreamException_hpp__

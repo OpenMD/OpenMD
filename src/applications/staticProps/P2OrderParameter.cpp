@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -53,249 +53,234 @@
 using namespace std;
 namespace OpenMD {
 
-P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename,
-                                   const string& sele1)
-    : StaticAnalyser(info, filename, 1),
-      doVect_(true),
-      doOffset_(false),
-      selectionScript1_(sele1),
-      seleMan1_(info),
-      seleMan2_(info),
-      evaluator1_(info),
-      evaluator2_(info) {
-  setOutputName(getPrefix(filename) + ".p2");
+  P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename,
+                                     const string& sele1) :
+      StaticAnalyser(info, filename, 1),
+      doVect_(true), doOffset_(false), selectionScript1_(sele1),
+      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info) {
+    setOutputName(getPrefix(filename) + ".p2");
 
-  evaluator1_.loadScriptString(sele1);
-}
+    evaluator1_.loadScriptString(sele1);
+  }
 
-P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename,
-                                   const string& sele1, const string& sele2)
-    : StaticAnalyser(info, filename, 1),
-      doVect_(false),
-      doOffset_(false),
-      selectionScript1_(sele1),
-      selectionScript2_(sele2),
-      seleMan1_(info),
-      seleMan2_(info),
-      evaluator1_(info),
-      evaluator2_(info) {
-  setOutputName(getPrefix(filename) + ".p2");
+  P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename,
+                                     const string& sele1, const string& sele2) :
+      StaticAnalyser(info, filename, 1),
+      doVect_(false), doOffset_(false), selectionScript1_(sele1),
+      selectionScript2_(sele2), seleMan1_(info), seleMan2_(info),
+      evaluator1_(info), evaluator2_(info) {
+    setOutputName(getPrefix(filename) + ".p2");
 
-  evaluator1_.loadScriptString(sele1);
-  evaluator2_.loadScriptString(sele2);
-}
+    evaluator1_.loadScriptString(sele1);
+    evaluator2_.loadScriptString(sele2);
+  }
 
-P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename,
-                                   const string& sele1, int seleOffset)
-    : StaticAnalyser(info, filename, 1),
-      doVect_(false),
-      doOffset_(true),
-      selectionScript1_(sele1),
-      seleMan1_(info),
-      seleMan2_(info),
-      evaluator1_(info),
-      evaluator2_(info),
+  P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename,
+                                     const string& sele1, int seleOffset) :
+      StaticAnalyser(info, filename, 1),
+      doVect_(false), doOffset_(true), selectionScript1_(sele1),
+      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
       seleOffset_(seleOffset) {
-  setOutputName(getPrefix(filename) + ".p2");
+    setOutputName(getPrefix(filename) + ".p2");
 
-  evaluator1_.loadScriptString(sele1);
-}
+    evaluator1_.loadScriptString(sele1);
+  }
 
-void P2OrderParameter::process() {
-  StuntDouble* sd1;
-  StuntDouble* sd2;
-  int ii;
-  int jj;
-  int vecCount;
-  bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+  void P2OrderParameter::process() {
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    int ii;
+    int jj;
+    int vecCount;
+    bool usePeriodicBoundaryConditions_ =
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-  DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
 
-  for (int i = 0; i < nFrames; i += step_) {
-    reader.readFrame(i);
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    for (int i = 0; i < nFrames; i += step_) {
+      reader.readFrame(i);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-    Mat3x3d orderTensor(0.0);
-    vecCount = 0;
+      Mat3x3d orderTensor(0.0);
+      vecCount = 0;
 
-    seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
 
-    if (doVect_) {
-      for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
-           sd1 = seleMan1_.nextSelected(ii)) {
-        if (sd1->isDirectional()) {
-          Vector3d vec = sd1->getA().transpose() * V3Z;
-
-          vec.normalize();
-          orderTensor += outProduct(vec, vec);
-          vecCount++;
-        }
-      }
-
-      orderTensor /= vecCount;
-
-    } else {
-      if (doOffset_) {
+      if (doVect_) {
         for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
              sd1 = seleMan1_.nextSelected(ii)) {
-          // This will require careful rewriting if StaticProps is
-          // ever parallelized.  For an example, see
-          // Thermo::getTaggedAtomPairDistance
+          if (sd1->isDirectional()) {
+            Vector3d vec = sd1->getA().transpose() * V3Z;
 
-          int sd2Index = sd1->getGlobalIndex() + seleOffset_;
-          sd2 = info_->getIOIndexToIntegrableObject(sd2Index);
-
-          Vector3d vec = sd1->getPos() - sd2->getPos();
-
-          if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(vec);
-
-          vec.normalize();
-
-          orderTensor += outProduct(vec, vec);
-          vecCount++;
+            vec.normalize();
+            orderTensor += outProduct(vec, vec);
+            vecCount++;
+          }
         }
 
         orderTensor /= vecCount;
+
       } else {
-        seleMan2_.setSelectionSet(evaluator2_.evaluate());
+        if (doOffset_) {
+          for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
+               sd1 = seleMan1_.nextSelected(ii)) {
+            // This will require careful rewriting if StaticProps is
+            // ever parallelized.  For an example, see
+            // Thermo::getTaggedAtomPairDistance
 
-        if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount()) {
-          sprintf(painCave.errMsg,
-                  "In frame %d, the number of selected StuntDoubles are\n"
-                  "\tnot the same in --sele1 and sele2\n",
-                  i);
-          painCave.severity = OPENMD_INFO;
-          painCave.isFatal = 0;
-          simError();
-        }
+            int sd2Index = sd1->getGlobalIndex() + seleOffset_;
+            sd2          = info_->getIOIndexToIntegrableObject(sd2Index);
 
-        for (sd1 = seleMan1_.beginSelected(ii),
-            sd2 = seleMan2_.beginSelected(jj);
-             sd1 != NULL && sd2 != NULL; sd1 = seleMan1_.nextSelected(ii),
-            sd2 = seleMan2_.nextSelected(jj)) {
-          Vector3d vec = sd1->getPos() - sd2->getPos();
+            Vector3d vec = sd1->getPos() - sd2->getPos();
 
-          if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(vec);
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(vec);
 
-          vec.normalize();
+            vec.normalize();
 
-          orderTensor += outProduct(vec, vec);
-          vecCount++;
-        }
+            orderTensor += outProduct(vec, vec);
+            vecCount++;
+          }
 
-        orderTensor /= vecCount;
-      }
-    }
+          orderTensor /= vecCount;
+        } else {
+          seleMan2_.setSelectionSet(evaluator2_.evaluate());
 
-    if (vecCount == 0) {
-      sprintf(painCave.errMsg,
-              "In frame %d, the number of selected vectors was zero.\n"
-              "\tThis will not give a meaningful order parameter.",
-              i);
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
+          if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount()) {
+            sprintf(painCave.errMsg,
+                    "In frame %d, the number of selected StuntDoubles are\n"
+                    "\tnot the same in --sele1 and sele2\n",
+                    i);
+            painCave.severity = OPENMD_INFO;
+            painCave.isFatal  = 0;
+            simError();
+          }
 
-    orderTensor -= (RealType)(1.0 / 3.0) * Mat3x3d::identity();
+          for (sd1                             = seleMan1_.beginSelected(ii),
+              sd2                              = seleMan2_.beginSelected(jj);
+               sd1 != NULL && sd2 != NULL; sd1 = seleMan1_.nextSelected(ii),
+              sd2                              = seleMan2_.nextSelected(jj)) {
+            Vector3d vec = sd1->getPos() - sd2->getPos();
 
-    Vector3d eigenvalues;
-    Mat3x3d eigenvectors;
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(vec);
 
-    Mat3x3d::diagonalize(orderTensor, eigenvalues, eigenvectors);
+            vec.normalize();
 
-    int which(-1);
-    RealType maxEval = 0.0;
-    for (int k = 0; k < 3; k++) {
-      if (fabs(eigenvalues[k]) > maxEval) {
-        which = k;
-        maxEval = fabs(eigenvalues[k]);
-      }
-    }
-    RealType p2 = 1.5 * maxEval;
+            orderTensor += outProduct(vec, vec);
+            vecCount++;
+          }
 
-    // the eigen vector is already normalized in SquareMatrix3::diagonalize
-    Vector3d director = eigenvectors.getColumn(which);
-    if (director[0] < 0) {
-      director.negate();
-    }
-
-    RealType angle = 0.0;
-    vecCount = 0;
-
-    if (doVect_) {
-      for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
-           sd1 = seleMan1_.nextSelected(ii)) {
-        if (sd1->isDirectional()) {
-          Vector3d vec = sd1->getA().transpose() * V3Z;
-          vec.normalize();
-          angle += acos(dot(vec, director));
-          vecCount++;
+          orderTensor /= vecCount;
         }
       }
-      angle = angle / (vecCount * Constants::PI) * 180.0;
 
-    } else {
-      if (doOffset_) {
+      if (vecCount == 0) {
+        sprintf(painCave.errMsg,
+                "In frame %d, the number of selected vectors was zero.\n"
+                "\tThis will not give a meaningful order parameter.",
+                i);
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal  = 1;
+        simError();
+      }
+
+      orderTensor -= (RealType)(1.0 / 3.0) * Mat3x3d::identity();
+
+      Vector3d eigenvalues;
+      Mat3x3d eigenvectors;
+
+      Mat3x3d::diagonalize(orderTensor, eigenvalues, eigenvectors);
+
+      int which(-1);
+      RealType maxEval = 0.0;
+      for (int k = 0; k < 3; k++) {
+        if (fabs(eigenvalues[k]) > maxEval) {
+          which   = k;
+          maxEval = fabs(eigenvalues[k]);
+        }
+      }
+      RealType p2 = 1.5 * maxEval;
+
+      // the eigen vector is already normalized in SquareMatrix3::diagonalize
+      Vector3d director = eigenvectors.getColumn(which);
+      if (director[0] < 0) { director.negate(); }
+
+      RealType angle = 0.0;
+      vecCount       = 0;
+
+      if (doVect_) {
         for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
              sd1 = seleMan1_.nextSelected(ii)) {
-          // This will require careful rewriting if StaticProps is
-          // ever parallelized.  For an example, see
-          // Thermo::getTaggedAtomPairDistance
-
-          int sd2Index = sd1->getGlobalIndex() + seleOffset_;
-          sd2 = info_->getIOIndexToIntegrableObject(sd2Index);
-
-          Vector3d vec = sd1->getPos() - sd2->getPos();
-          if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(vec);
-          vec.normalize();
-          angle += acos(dot(vec, director));
-          vecCount++;
+          if (sd1->isDirectional()) {
+            Vector3d vec = sd1->getA().transpose() * V3Z;
+            vec.normalize();
+            angle += acos(dot(vec, director));
+            vecCount++;
+          }
         }
         angle = angle / (vecCount * Constants::PI) * 180.0;
 
       } else {
-        for (sd1 = seleMan1_.beginSelected(ii),
-            sd2 = seleMan2_.beginSelected(jj);
-             sd1 != NULL && sd2 != NULL; sd1 = seleMan1_.nextSelected(ii),
-            sd2 = seleMan2_.nextSelected(jj)) {
-          Vector3d vec = sd1->getPos() - sd2->getPos();
-          if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(vec);
-          vec.normalize();
-          angle += acos(dot(vec, director));
-          vecCount++;
+        if (doOffset_) {
+          for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
+               sd1 = seleMan1_.nextSelected(ii)) {
+            // This will require careful rewriting if StaticProps is
+            // ever parallelized.  For an example, see
+            // Thermo::getTaggedAtomPairDistance
+
+            int sd2Index = sd1->getGlobalIndex() + seleOffset_;
+            sd2          = info_->getIOIndexToIntegrableObject(sd2Index);
+
+            Vector3d vec = sd1->getPos() - sd2->getPos();
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(vec);
+            vec.normalize();
+            angle += acos(dot(vec, director));
+            vecCount++;
+          }
+          angle = angle / (vecCount * Constants::PI) * 180.0;
+
+        } else {
+          for (sd1                             = seleMan1_.beginSelected(ii),
+              sd2                              = seleMan2_.beginSelected(jj);
+               sd1 != NULL && sd2 != NULL; sd1 = seleMan1_.nextSelected(ii),
+              sd2                              = seleMan2_.nextSelected(jj)) {
+            Vector3d vec = sd1->getPos() - sd2->getPos();
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(vec);
+            vec.normalize();
+            angle += acos(dot(vec, director));
+            vecCount++;
+          }
+          angle = angle / (vecCount * Constants::PI) * 180.0;
         }
-        angle = angle / (vecCount * Constants::PI) * 180.0;
       }
+
+      OrderParam param;
+      param.p2       = p2;
+      param.director = director;
+      param.angle    = angle;
+
+      orderParams_.push_back(param);
     }
 
-    OrderParam param;
-    param.p2 = p2;
-    param.director = director;
-    param.angle = angle;
-
-    orderParams_.push_back(param);
+    writeP2();
   }
 
-  writeP2();
-}
+  void P2OrderParameter::writeP2() {
+    ofstream os(getOutputFileName().c_str());
+    os << "#radial distribution function\n";
+    os << "#selection1: (" << selectionScript1_ << ")\t";
+    if (!doVect_) { os << "selection2: (" << selectionScript2_ << ")\n"; }
+    os << "#p2\tdirector_x\tdirector_y\tdiretor_z\tangle(degree)\n";
 
-void P2OrderParameter::writeP2() {
-  ofstream os(getOutputFileName().c_str());
-  os << "#radial distribution function\n";
-  os << "#selection1: (" << selectionScript1_ << ")\t";
-  if (!doVect_) {
-    os << "selection2: (" << selectionScript2_ << ")\n";
+    for (size_t i = 0; i < orderParams_.size(); ++i) {
+      os << orderParams_[i].p2 << "\t" << orderParams_[i].director[0] << "\t"
+         << orderParams_[i].director[1] << "\t" << orderParams_[i].director[2]
+         << "\t" << orderParams_[i].angle << "\n";
+    }
   }
-  os << "#p2\tdirector_x\tdirector_y\tdiretor_z\tangle(degree)\n";
-
-  for (size_t i = 0; i < orderParams_.size(); ++i) {
-    os << orderParams_[i].p2 << "\t" << orderParams_[i].director[0] << "\t"
-       << orderParams_[i].director[1] << "\t" << orderParams_[i].director[2]
-       << "\t" << orderParams_[i].angle << "\n";
-  }
-}
 
 }  // namespace OpenMD

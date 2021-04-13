@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,23 +42,22 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef MATH_CUBICSPLINE_HPP
 #define MATH_CUBICSPLINE_HPP
-
-#include "config.h"
 
 #include <memory>
 #include <vector>
 
+#include "config.h"
+
 using namespace std;
 namespace OpenMD {
 
-  class CubicSpline {       
-    
-  public:    
+  class CubicSpline {
+  public:
     CubicSpline();
-    virtual ~CubicSpline() {} 
+    virtual ~CubicSpline() {}
     void addPoint(const RealType xp, const RealType yp);
     void addPoints(const vector<RealType>& xps, const vector<RealType>& yps);
     RealType getValueAt(const RealType& t);
@@ -66,13 +65,13 @@ namespace OpenMD {
     void getValueAt(const RealType& t, RealType& v);
     void getValueAndDerivativeAt(const RealType& t, RealType& v, RealType& d);
     RealType getSpacing();
-    
+
   private:
     void generate();
     std::vector<int> sort_permutation(std::vector<RealType>& v);
     std::vector<RealType> apply_permutation(std::vector<RealType> const& v,
                                             std::vector<int> const& p);
-    
+
     bool isUniform;
     bool generated;
     RealType dx, dt;
@@ -81,19 +80,18 @@ namespace OpenMD {
     vector<RealType> y_;
     vector<RealType> b;
     vector<RealType> c;
-    vector<RealType> d;    
+    vector<RealType> d;
   };
 
-  class Comparator{
+  class Comparator {
     std::vector<RealType>& _v;
+
   public:
     Comparator(std::vector<RealType>& v) : _v(v) {}
-    bool operator()(size_t i, size_t j){
-      return _v[i] < _v[j];
-    }
+    bool operator()(size_t i, size_t j) { return _v[i] < _v[j]; }
   };
 
   using CubicSplinePtr = std::shared_ptr<CubicSpline>;
-}
+}  // namespace OpenMD
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,28 +44,29 @@
  */
 
 /*
-*/
+ */
 
 #ifndef APPLICATIONS_STATICPROPS_ORDERPARAMETERPROBZ_HPP
 #define APPLICATIONS_STATICPROPS_ORDERPARAMETERPROBZ_HPP
 
 #include <string>
 #include <vector>
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
+
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "brains/SimInfo.hpp"
-#include "math/Vector3.hpp"
 #include "brains/Thermo.hpp"
+#include "math/Vector3.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
 
 namespace OpenMD {
 
-  class OrderParameterProbZ: public StaticAnalyser{
-
+  class OrderParameterProbZ : public StaticAnalyser {
   public:
-    OrderParameterProbZ(SimInfo* info, const std::string& filename, const std::string& sele,
-      const RealType dipoleX, const RealType dipoleY, const RealType dipoleZ,
-      int nbins, int axis=2);
+    OrderParameterProbZ(SimInfo* info, const std::string& filename,
+                        const std::string& sele, const RealType dipoleX,
+                        const RealType dipoleY, const RealType dipoleZ,
+                        int nbins, int axis = 2);
 
     virtual void process();
 
@@ -79,7 +80,7 @@ namespace OpenMD {
     SelectionManager seleMan_;
     Thermo thermo_;
 
-		std::vector<RealType> sliceSDCount_;
+    std::vector<RealType> sliceSDCount_;
     std::vector<RealType> flucSliceSDCount_;
     Vector3d refAxis_, dipoleVector_;
 
@@ -88,5 +89,5 @@ namespace OpenMD {
     std::string axisLabel_;
   };
 
-}
+}  // namespace OpenMD
 #endif

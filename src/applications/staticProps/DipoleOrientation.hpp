@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -57,9 +57,10 @@ namespace OpenMD {
 
   class DipoleOrientation : public SlabStatistics {
   public:
-    DipoleOrientation(SimInfo* info, const std::string& filename, const std::string& sele,
-                      const RealType dipoleX, const RealType dipoleY, const RealType dipoleZ,
-                      int nzbins, int axis=2);
+    DipoleOrientation(SimInfo* info, const std::string& filename,
+                      const std::string& sele, const RealType dipoleX,
+                      const RealType dipoleY, const RealType dipoleZ,
+                      int nzbins, int axis = 2);
     void processFrame(int frame);
     void processStuntDouble(StuntDouble* sd, int bin) {};
 
@@ -72,6 +73,6 @@ namespace OpenMD {
     Vector3d refAxis_, dipoleVector_;
     std::string axisLabel_;
   };
-}
+}  // namespace OpenMD
 
 #endif

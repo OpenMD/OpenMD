@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file QuarticBondType.hpp
  * @author    tlin
  * @date  11/01/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_QUARTICBONDTYPE_HPP
 #define TYPES_QUARTICBONDTYPE_HPP
@@ -57,20 +57,17 @@
 
 namespace OpenMD {
   /**
-   * @class QuarticBondType 
+   * @class QuarticBondType
    * @todo document
    */
   class QuarticBondType : public BondType {
-
   public:
-        
-        
     QuarticBondType(RealType r0, RealType k4, RealType k3, RealType k2,
-                    RealType k1, RealType k0) : BondType(r0), k4_(k4), k3_(k3),
-                                                k2_(k2), k1_(k1), k0_(k0){
-    }
-    
-    void setForceConstant(RealType k4, RealType k3, RealType k2, RealType k1, 
+                    RealType k1, RealType k0) :
+        BondType(r0),
+        k4_(k4), k3_(k3), k2_(k2), k1_(k1), k0_(k0) {}
+
+    void setForceConstant(RealType k4, RealType k3, RealType k2, RealType k1,
                           RealType k0) {
       k4_ = k4;
       k3_ = k3;
@@ -79,7 +76,7 @@ namespace OpenMD {
       k0_ = k0;
     }
 
-    void getForceConstant(RealType& k4, RealType& k3, RealType& k2, 
+    void getForceConstant(RealType& k4, RealType& k3, RealType& k2,
                           RealType& k1, RealType& k0) {
       k4 = k4_;
       k3 = k3_;
@@ -89,23 +86,22 @@ namespace OpenMD {
     }
 
     virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
-      RealType dr =  r- r0;
+      RealType dr  = r - r0;
       RealType dr2 = dr * dr;
       RealType dr3 = dr2 * dr;
       RealType dr4 = dr3 * dr;
-      
-      V =k0_ + k1_ * dr + k2_*dr2 + k3_*dr3 + k4_*dr4;
-      dVdr = k1_ + 2.0*k2_ * dr + 3.0 * k3_*dr2 + 4.0*k4_*dr3;            
-    }        
-    
+
+      V    = k0_ + k1_ * dr + k2_ * dr2 + k3_ * dr3 + k4_ * dr4;
+      dVdr = k1_ + 2.0 * k2_ * dr + 3.0 * k3_ * dr2 + 4.0 * k4_ * dr3;
+    }
+
   private:
     RealType k4_;
     RealType k3_;
     RealType k2_;
     RealType k1_;
     RealType k0_;
-    
   };
 
-}//end namespace OpenMD
-#endif //TYPES_QUADRATICBONDTYPE_HPP
+}  // end namespace OpenMD
+#endif  // TYPES_QUADRATICBONDTYPE_HPP

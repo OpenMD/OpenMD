@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,38 +48,37 @@
 
 #include <vector>
 
-#include "utils/simError.h"
 #include "math/RandNumGen.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
-  
+
   /**
-   * @class ParallelRandNumGen 
+   * @class ParallelRandNumGen
    * @brief a parallel random number generator
    * @note use SeqRandNumGen if you want a non-parallel random number
    * generator.
    */
   class ParallelRandNumGen : public RandNumGen {
   public:
-    typedef unsigned long uint32; 
-    
-    ParallelRandNumGen( const uint32& oneSeed);
-    
+    typedef unsigned long uint32;
+
+    ParallelRandNumGen(const uint32& oneSeed);
+
     ParallelRandNumGen();
-    
-    virtual void seed( const uint32 oneSeed );
-    
+
+    virtual void seed(const uint32 oneSeed);
+
     virtual void seed();
-    
+
   private:
-    
     ParallelRandNumGen(const ParallelRandNumGen&);
-    ParallelRandNumGen& operator =(const ParallelRandNumGen&);
-    
-    static int nCreatedRNG_; /**< number of random number 
+    ParallelRandNumGen& operator=(const ParallelRandNumGen&);
+
+    static int nCreatedRNG_; /**< number of random number
                                 generators created */
     int myRank_;
   };
-}
+}  // namespace OpenMD
 
-#endif 
+#endif

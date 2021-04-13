@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -60,55 +60,56 @@
 
 namespace OpenMD {
 
-BendTypeParser::BendTypeParser() {
-  stringToEnumMap_["Harmonic"] = btHarmonic;
-  stringToEnumMap_["GhostBend"] = btGhostBend;
-  stringToEnumMap_["UreyBradley"] = btUreyBradley;
-  stringToEnumMap_["Cubic"] = btCubic;
-  stringToEnumMap_["Quartic"] = btQuartic;
-  stringToEnumMap_["Polynomial"] = btPolynomial;
-  stringToEnumMap_["Cosine"] = btCosine;
-  stringToEnumMap_["SDK"] = btSDK;
-  stringToEnumMap_["CosineSeries"] = btCosineSeries;
-  stringToEnumMap_["HarmonicSine"] = btHarmonicSine;
-}
-
-BendType* BendTypeParser::parseTypeAndPars(const std::string& type,
-                                           std::vector<RealType> pars) {
-  std::string line(type);
-
-  std::vector<RealType>::iterator it;
-  for (it = pars.begin(); it != pars.end(); ++it) {
-    line.append("\t");
-    line.append(OpenMD::to_string(*it));
-  }
-  // Assume all overrides know about our functional forms:
-  return parseLine(line, 1.0);
-}
-
-BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
-  StringTokenizer tokenizer(line);
-  BendType* bendType = NULL;
-  int nTokens = tokenizer.countTokens();
-  RealType theta0, ktheta;
-  RealType deg2rad = Constants::PI / 180.0;
-
-  if (nTokens < 2) {
-    throw OpenMDException("BendTypeParser: Not enough tokens");
+  BendTypeParser::BendTypeParser() {
+    stringToEnumMap_["Harmonic"]     = btHarmonic;
+    stringToEnumMap_["GhostBend"]    = btGhostBend;
+    stringToEnumMap_["UreyBradley"]  = btUreyBradley;
+    stringToEnumMap_["Cubic"]        = btCubic;
+    stringToEnumMap_["Quartic"]      = btQuartic;
+    stringToEnumMap_["Polynomial"]   = btPolynomial;
+    stringToEnumMap_["Cosine"]       = btCosine;
+    stringToEnumMap_["SDK"]          = btSDK;
+    stringToEnumMap_["CosineSeries"] = btCosineSeries;
+    stringToEnumMap_["HarmonicSine"] = btHarmonicSine;
   }
 
-  BendTypeEnum bt = getBendTypeEnum(tokenizer.nextToken());
-  nTokens -= 1;
+  BendType* BendTypeParser::parseTypeAndPars(const std::string& type,
+                                             std::vector<RealType> pars) {
+    std::string line(type);
 
-  // switch is a nightmare to maintain
-  switch (bt) {
+    std::vector<RealType>::iterator it;
+    for (it = pars.begin(); it != pars.end(); ++it) {
+      line.append("\t");
+      line.append(OpenMD::to_string(*it));
+    }
+    // Assume all overrides know about our functional forms:
+    return parseLine(line, 1.0);
+  }
+
+  BendType* BendTypeParser::parseLine(const std::string& line,
+                                      RealType kScale) {
+    StringTokenizer tokenizer(line);
+    BendType* bendType = NULL;
+    int nTokens        = tokenizer.countTokens();
+    RealType theta0, ktheta;
+    RealType deg2rad = Constants::PI / 180.0;
+
+    if (nTokens < 2) {
+      throw OpenMDException("BendTypeParser: Not enough tokens");
+    }
+
+    BendTypeEnum bt = getBendTypeEnum(tokenizer.nextToken());
+    nTokens -= 1;
+
+    // switch is a nightmare to maintain
+    switch (bt) {
     case btHarmonic:
 
       if (nTokens < 2) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
-        ktheta = tokenizer.nextTokenAsDouble() * kScale;
+        theta0   = tokenizer.nextTokenAsDouble() * deg2rad;
+        ktheta   = tokenizer.nextTokenAsDouble() * kScale;
         bendType = new HarmonicBendType(theta0, ktheta);
       }
       break;
@@ -116,8 +117,8 @@ BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
       if (nTokens < 2) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
-        ktheta = tokenizer.nextTokenAsDouble() * kScale;
+        theta0   = tokenizer.nextTokenAsDouble() * deg2rad;
+        ktheta   = tokenizer.nextTokenAsDouble() * kScale;
         bendType = new HarmonicBendType(theta0, ktheta);
       }
       break;
@@ -126,11 +127,11 @@ BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
       if (nTokens < 4) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
-        ktheta = tokenizer.nextTokenAsDouble();
-        RealType s0 = tokenizer.nextTokenAsDouble();
+        theta0       = tokenizer.nextTokenAsDouble() * deg2rad;
+        ktheta       = tokenizer.nextTokenAsDouble();
+        RealType s0  = tokenizer.nextTokenAsDouble();
         RealType kub = tokenizer.nextTokenAsDouble();
-        bendType = new UreyBradleyBendType(theta0, ktheta, s0, kub);
+        bendType     = new UreyBradleyBendType(theta0, ktheta, s0, kub);
       }
       break;
 
@@ -138,7 +139,7 @@ BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
       if (nTokens < 5) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
+        theta0      = tokenizer.nextTokenAsDouble() * deg2rad;
         RealType k3 = tokenizer.nextTokenAsDouble();
         RealType k2 = tokenizer.nextTokenAsDouble();
         RealType k1 = tokenizer.nextTokenAsDouble();
@@ -152,7 +153,7 @@ BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
       if (nTokens < 6) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
+        theta0      = tokenizer.nextTokenAsDouble() * deg2rad;
         RealType k4 = tokenizer.nextTokenAsDouble();
         RealType k3 = tokenizer.nextTokenAsDouble();
         RealType k2 = tokenizer.nextTokenAsDouble();
@@ -175,7 +176,7 @@ BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
         PolynomialBendType* pbt = new PolynomialBendType(theta0);
 
         for (int i = 0; i < nPairs; ++i) {
-          power = tokenizer.nextTokenAsInt();
+          power       = tokenizer.nextTokenAsInt();
           coefficient = tokenizer.nextTokenAsDouble();
           pbt->setCoefficient(power, coefficient);
         }
@@ -187,8 +188,8 @@ BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
       if (nTokens < 2) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
-        ktheta = tokenizer.nextTokenAsDouble();
+        theta0   = tokenizer.nextTokenAsDouble() * deg2rad;
+        ktheta   = tokenizer.nextTokenAsDouble();
         bendType = new CosineBendType(theta0, ktheta);
       }
       break;
@@ -197,12 +198,12 @@ BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
       if (nTokens < 6) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
-        ktheta = tokenizer.nextTokenAsDouble();
-        RealType sigma = tokenizer.nextTokenAsDouble();
+        theta0           = tokenizer.nextTokenAsDouble() * deg2rad;
+        ktheta           = tokenizer.nextTokenAsDouble();
+        RealType sigma   = tokenizer.nextTokenAsDouble();
         RealType epsilon = tokenizer.nextTokenAsDouble();
-        int nRep = tokenizer.nextTokenAsInt();
-        int mAtt = tokenizer.nextTokenAsInt();
+        int nRep         = tokenizer.nextTokenAsInt();
+        int mAtt         = tokenizer.nextTokenAsInt();
         bendType = new SDKBendType(theta0, ktheta, sigma, epsilon, nRep, mAtt);
       }
       break;
@@ -212,8 +213,8 @@ BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
       if (nTokens < 2) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        theta0 = tokenizer.nextTokenAsDouble() * deg2rad;
-        ktheta = tokenizer.nextTokenAsDouble() * kScale;
+        theta0   = tokenizer.nextTokenAsDouble() * deg2rad;
+        ktheta   = tokenizer.nextTokenAsDouble() * kScale;
         bendType = new CosineSeriesBendType(theta0, ktheta);
       }
       break;
@@ -223,7 +224,7 @@ BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
       if (nTokens < 1) {
         throw OpenMDException("BendTypeParser: Not enough tokens");
       } else {
-        ktheta = tokenizer.nextTokenAsDouble() * kScale;
+        ktheta   = tokenizer.nextTokenAsDouble() * kScale;
         bendType = new HarmonicSineBendType(ktheta);
       }
       break;
@@ -231,17 +232,17 @@ BendType* BendTypeParser::parseLine(const std::string& line, RealType kScale) {
     case btUnknown:
     default:
       throw OpenMDException("BendTypeParser: Unknown Bend Type");
+    }
+
+    return bendType;
   }
 
-  return bendType;
-}
+  BendTypeParser::BendTypeEnum BendTypeParser::getBendTypeEnum(
+      const std::string& str) {
+    std::map<std::string, BendTypeEnum>::iterator i;
+    i = stringToEnumMap_.find(str);
 
-BendTypeParser::BendTypeEnum BendTypeParser::getBendTypeEnum(
-    const std::string& str) {
-  std::map<std::string, BendTypeEnum>::iterator i;
-  i = stringToEnumMap_.find(str);
-
-  return i == stringToEnumMap_.end() ? btUnknown : i->second;
-}
+    return i == stringToEnumMap_.end() ? btUnknown : i->second;
+  }
 
 }  // namespace OpenMD

@@ -33,7 +33,7 @@
 #include <stddef.h>
 #include <string.h>
 
-const int no_argument = 0;
+const int no_argument       = 0;
 const int required_argument = 1;
 const int optional_argument = 2;
 
@@ -55,7 +55,7 @@ static char* optcursor = NULL;
 http://www.freebsd.org/cgi/man.cgi?query=getopt&sektion=3&manpath=FreeBSD+9.0-RELEASE
 */
 int getopt(int argc, char* const argv[], const char* optstring) {
-  int optchar = -1;
+  int optchar         = -1;
   const char* optdecl = NULL;
 
   optarg = NULL;
@@ -125,7 +125,7 @@ int getopt(int argc, char* const argv[], const char* optstring) {
                colon character ( ':' ) if the first character of optstring
                was a colon, or a question-mark character ( '?' ) otherwise.
             */
-            optarg = NULL;
+            optarg  = NULL;
             optchar = (optstring[0] == ':') ? ':' : '?';
           }
         } else {
@@ -156,12 +156,12 @@ no_more_optchars:
 */
 int getopt_long(int argc, char* const argv[], const char* optstring,
                 const struct option* longopts, int* longindex) {
-  const struct option* o = longopts;
-  const struct option* match = NULL;
-  int num_matches = 0;
-  size_t argument_name_length = 0;
+  const struct option* o       = longopts;
+  const struct option* match   = NULL;
+  int num_matches              = 0;
+  size_t argument_name_length  = 0;
   const char* current_argument = NULL;
-  int retval = -1;
+  int retval                   = -1;
 
   optarg = NULL;
   optopt = 0;
@@ -172,7 +172,7 @@ int getopt_long(int argc, char* const argv[], const char* optstring,
     return getopt(argc, argv, optstring);
 
   /* It's an option; starts with -- and is longer than two chars. */
-  current_argument = argv[optind] + 2;
+  current_argument     = argv[optind] + 2;
   argument_name_length = strcspn(current_argument, "=");
   for (; o->name; ++o) {
     if (strncmp(o->name, current_argument, argument_name_length) == 0) {
@@ -201,9 +201,7 @@ int getopt_long(int argc, char* const argv[], const char* optstring,
       if (match->has_arg == required_argument) {
         /* Only scan the next argv for required arguments. Behavior is not
            specified, but has been observed with Ubuntu and Mac OSX. */
-        if (optarg == NULL && ++optind < argc) {
-          optarg = argv[optind];
-        }
+        if (optarg == NULL && ++optind < argc) { optarg = argv[optind]; }
 
         if (optarg == NULL) retval = ':';
       }

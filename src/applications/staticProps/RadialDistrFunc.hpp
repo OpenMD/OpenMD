@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,10 +49,10 @@
 #include <string>
 #include <vector>
 
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "utils/Constants.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 namespace OpenMD {
 
@@ -67,18 +67,17 @@ namespace OpenMD {
                     unsigned int nbins);
 
     void process();
-    
-  protected:
 
+  protected:
     virtual void preProcess() {}
     virtual void postProcess() {}
     virtual void processNonOverlapping(SelectionManager& sman1,
                                        SelectionManager& sman2);
     virtual void processOverlapping(SelectionManager& sman);
 
-    int getNPairs() { return nPairs_;}
-    int getNSelected1() { return nSelected1_;}
-    int getNSelected2() { return nSelected2_;}
+    int getNPairs() { return nPairs_; }
+    int getNSelected1() { return nSelected1_; }
+    int getNSelected2() { return nSelected2_; }
 
     Snapshot* currentSnapshot_;
 
@@ -95,7 +94,6 @@ namespace OpenMD {
     SelectionManager common_;
 
   private:
-
     virtual void initializeHistogram() {}
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2) = 0;
     virtual void processHistogram() {}
@@ -109,5 +107,5 @@ namespace OpenMD {
     int nSelected2_;
   };
 
-}
+}  // namespace OpenMD
 #endif

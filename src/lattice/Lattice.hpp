@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,58 +42,53 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef LATTICE_BASELATTICE_HPP
 #define LATTICE_BASELATTICE_HPP
 
 #include <vector>
+
 #include "math/Vector3.hpp"
 
 namespace OpenMD {
 
-  class Lattice{
+  class Lattice {
   protected:
-    Lattice(){
-      
-      setOrigin(V3Zero);
-    }
-    
+    Lattice() { setOrigin(V3Zero); }
+
   public:
-
-    //virtual destructor of Lattice
+    // virtual destructor of Lattice
     virtual ~Lattice() = default;
-    
-    int getNumSitesPerCell() {return nCellSites;}
 
-    void getLatticePointsPos(std::vector<Vector3d>& latticePos, int nx, int ny, int nz);
+    int getNumSitesPerCell() { return nCellSites; }
 
-    std::vector<Vector3d> getLatticePointsOrt() {return cellSitesOrt;}
-    
-    //get lattice constant of unit cell
-    virtual  std::vector<RealType> getLatticeConstant() =0;
+    void getLatticePointsPos(std::vector<Vector3d>& latticePos, int nx, int ny,
+                             int nz);
 
-    //set lattice constant of unit cell
-    virtual void setLatticeConstant(const  std::vector<RealType>& lc)=0;
+    std::vector<Vector3d> getLatticePointsOrt() { return cellSitesOrt; }
 
-    //get origin of unit cell
-    Vector3d getOrigin( ) {return origin;} 
+    // get lattice constant of unit cell
+    virtual std::vector<RealType> getLatticeConstant() = 0;
 
-    //set origin of unit cell
-    void setOrigin(const Vector3d& newOrigin){
-      this->origin = newOrigin;
-    }
+    // set lattice constant of unit cell
+    virtual void setLatticeConstant(const std::vector<RealType>& lc) = 0;
+
+    // get origin of unit cell
+    Vector3d getOrigin() { return origin; }
+
+    // set origin of unit cell
+    void setOrigin(const Vector3d& newOrigin) { this->origin = newOrigin; }
 
   protected:
-    virtual void update() =0;
-    
+    virtual void update() = 0;
+
     int nCellSites;
-    Vector3d origin;    
+    Vector3d origin;
     std::vector<Vector3d> cellSitesPos;
     std::vector<Vector3d> cellSitesOrt;
     Vector3d cellLen;
   };
 
-
-}
+}  // namespace OpenMD
 
 #endif

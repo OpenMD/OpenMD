@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,9 +48,10 @@
 
 #include <string>
 #include <vector>
+
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -66,10 +67,10 @@ namespace OpenMD {
    *
    *   \param rCut cutoff radius for finding lists of nearest neighbors
    *   \param sele1 selection of StuntDoubles used for the distribution
-   *   \param sele2 selection of StuntDoubles used for nearest neighbor computation
+   *   \param sele2 selection of StuntDoubles used for nearest neighbor
+   * computation
    */
   class CoordinationNumber : public StaticAnalyser {
-    
   public:
     CoordinationNumber(SimInfo* info, const std::string& filename,
                        const std::string& sele1, const std::string& sele2,
@@ -80,10 +81,10 @@ namespace OpenMD {
     virtual void writeOutput();
 
   protected:
-    virtual RealType computeCoordination(int a, vector<vector<int> > neighbors);
+    virtual RealType computeCoordination(int a, vector<vector<int>> neighbors);
     RealType rCut_;
     int bins_;
-    
+
     std::string sele1_;
     SelectionManager seleMan1_;
     SelectionEvaluator evaluator1_;
@@ -97,7 +98,7 @@ namespace OpenMD {
     int nnMax_;
     RealType delta_;
     int count_;
-    std::vector<RealType>  histogram_;
+    std::vector<RealType> histogram_;
   };
 
   /**
@@ -109,14 +110,13 @@ namespace OpenMD {
    * neighboring atoms.
    */
   class SCN : public CoordinationNumber {
-    
   public:
     SCN(SimInfo* info, const std::string& filename, const std::string& sele1,
         const std::string& sele2, RealType rCut, int bins);
 
-    virtual RealType computeCoordination(int a, vector<vector<int> > neighbors);
+    virtual RealType computeCoordination(int a, vector<vector<int>> neighbors);
   };
-    
+
   /**
    * @class GCN
    * @brief Generalized Coordinate Number
@@ -130,13 +130,12 @@ namespace OpenMD {
    *    http://dx.doi.org/10.1126/science.aab3501
    */
   class GCN : public CoordinationNumber {
-    
   public:
     GCN(SimInfo* info, const std::string& filename, const std::string& sele1,
         const std::string& sele2, RealType rCut, int bins);
 
-    virtual RealType computeCoordination(int a, vector<vector<int> > neighbors);
+    virtual RealType computeCoordination(int a, vector<vector<int>> neighbors);
   };
 
-}
+}  // namespace OpenMD
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file NVT.hpp
  * @author tlin
@@ -62,53 +62,37 @@ namespace OpenMD {
    * Basic thermostating via Hoover, Phys.Rev.A, 1985, Vol. 31 (5) 1695-1697
    * @todo document
    */
-  class NVT : public VelocityVerletIntegrator{
+  class NVT : public VelocityVerletIntegrator {
   public:
     NVT(SimInfo* info);
 
-    int getMaxIterationNumber() {
-      return maxIterNum_;
-    }
-        
-    void setMaxIterationNumber(int maxIter) {
-      maxIterNum_ = maxIter;
-    }
+    int getMaxIterationNumber() { return maxIterNum_; }
 
-    RealType getTauThermostat() {
-      return tauThermostat_;
-    }
+    void setMaxIterationNumber(int maxIter) { maxIterNum_ = maxIter; }
 
-    void setTauThermostat(RealType tt) {
-      tauThermostat_ = tt;
-    }
+    RealType getTauThermostat() { return tauThermostat_; }
 
-    RealType getTargetTemp() {
-      return targetTemp_;
-    }
+    void setTauThermostat(RealType tt) { tauThermostat_ = tt; }
 
-    void setTargetTemp(RealType tt) {
-      targetTemp_ = tt;
-    }
+    RealType getTargetTemp() { return targetTemp_; }
 
-    RealType getChiTolerance() {
-      return chiTolerance_;
-    }
+    void setTargetTemp(RealType tt) { targetTemp_ = tt; }
 
-    void setChiTolerance(RealType tol) {
-      chiTolerance_ = tol;
-    }
-        
+    RealType getChiTolerance() { return chiTolerance_; }
+
+    void setChiTolerance(RealType tol) { chiTolerance_ = tol; }
+
   protected:
     virtual void moveA();
 
     virtual void moveB();
 
-    virtual void doUpdateSizes() ;
+    virtual void doUpdateSizes();
 
     virtual void resetIntegrator();
-    
+
   private:
-    virtual RealType calcConservedQuantity();              
+    virtual RealType calcConservedQuantity();
 
     int maxIterNum_;
     RealType targetTemp_;
@@ -119,7 +103,6 @@ namespace OpenMD {
     std::vector<Vector3d> oldJi_;
   };
 
+}  // end namespace OpenMD
 
-} //end namespace OpenMD
-
-#endif //INTEGRATOR_NVT_HPP
+#endif  // INTEGRATOR_NVT_HPP

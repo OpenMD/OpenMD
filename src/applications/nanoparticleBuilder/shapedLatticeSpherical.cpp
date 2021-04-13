@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,29 +50,29 @@
 using namespace std;
 namespace OpenMD {
 
-shapedLatticeSpherical::shapedLatticeSpherical(RealType latticeConstant,
-                                               std::string latticeType,
-                                               RealType radius)
-    : shapedLattice(latticeConstant, latticeType) {
-  sphereRadius_ = radius;
-  Vector3d dimension;
-  dimension[0] = 2.0 * radius;
-  dimension[1] = 2.0 * radius;
-  dimension[2] = 2.0 * radius;
-  setGridDimension(dimension);
-  Vector3d origin;
-  origin[0] = latticeConstant / 2.0;
-  origin[1] = latticeConstant / 2.0;
-  origin[2] = latticeConstant / 2.0;
-  setOrigin(origin);
-}
-/**
- * Determines whether a point lies with a sphere at origin 0
- *
- */
-bool shapedLatticeSpherical::isInterior(Vector3d point) {
-  bool isIT = false;
-  if (point.length() <= sphereRadius_) isIT = true;
-  return isIT;
-}
+  shapedLatticeSpherical::shapedLatticeSpherical(RealType latticeConstant,
+                                                 std::string latticeType,
+                                                 RealType radius) :
+      shapedLattice(latticeConstant, latticeType) {
+    sphereRadius_ = radius;
+    Vector3d dimension;
+    dimension[0] = 2.0 * radius;
+    dimension[1] = 2.0 * radius;
+    dimension[2] = 2.0 * radius;
+    setGridDimension(dimension);
+    Vector3d origin;
+    origin[0] = latticeConstant / 2.0;
+    origin[1] = latticeConstant / 2.0;
+    origin[2] = latticeConstant / 2.0;
+    setOrigin(origin);
+  }
+  /**
+   * Determines whether a point lies with a sphere at origin 0
+   *
+   */
+  bool shapedLatticeSpherical::isInterior(Vector3d point) {
+    bool isIT = false;
+    if (point.length() <= sphereRadius_) isIT = true;
+    return isIT;
+  }
 }  // namespace OpenMD

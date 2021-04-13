@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,45 +42,47 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_DATAHOLDER_HPP
 #define TYPES_DATAHOLDER_HPP
 
 #include <iostream>
-#include <string>
-#include <sstream>
 #include <map>
 #include <set>
-#include "math/Vector3.hpp"
-#include "utils/ParameterManager.hpp"
+#include <sstream>
+#include <string>
+
 #include "io/ParamConstraint.hpp"
-#include "utils/simError.h"
+#include "math/Vector3.hpp"
 #include "utils/OpenMDException.hpp"
+#include "utils/ParameterManager.hpp"
 #include "utils/StringUtils.hpp"
+#include "utils/simError.h"
 namespace OpenMD {
-  
+
   class DataHolder {
   public:
     DataHolder() {}
     virtual ~DataHolder() = default;
-    
+
     template<class T>
     void assign(const std::string& keyword, T val) {
-      ParamMap::iterator i =parameters_.find(keyword);
+      ParamMap::iterator i = parameters_.find(keyword);
       if (i != parameters_.end()) {
         bool result = i->second->setData(val);
-        if (!result ) {
+        if (!result) {
           std::stringstream ss;
-          ss <<   "Error in parsing " << keyword << ": expected " << 
-            i->second->getParamType() << " but got " << &val << "\n";
+          ss << "Error in parsing " << keyword << ": expected "
+             << i->second->getParamType() << " but got " << &val << "\n";
           throw OpenMDException(ss.str());
         }
-      } else if (deprecatedKeywords_.find(keyword) != 
-                 deprecatedKeywords_.end()){
+      } else if (deprecatedKeywords_.find(keyword) !=
+                 deprecatedKeywords_.end()) {
         sprintf(painCave.errMsg,
-                "%s keyword has been deprecated in OpenMD. Please update your .omd file.\n",
-                keyword.c_str() );
-        painCave.isFatal = 0;
+                "%s keyword has been deprecated in OpenMD. Please update your "
+                ".omd file.\n",
+                keyword.c_str());
+        painCave.isFatal  = 0;
         painCave.severity = OPENMD_WARNING;
         simError();
       } else {
@@ -89,28 +91,28 @@ namespace OpenMD {
         throw OpenMDException(ss.str());
       }
     }
-    
+
     virtual void validate() {
       ParamMap::iterator i;
       for (i = parameters_.begin(); i != parameters_.end(); ++i) {
         if (!i->second->isOptional() && i->second->empty()) {
           std::stringstream ss;
-          ss <<  i->second->getKeyword()  << " must be set.\n";
+          ss << i->second->getKeyword() << " must be set.\n";
           throw OpenMDException(ss.str());
         }
       }
     }
-    
+
   protected:
     typedef std::map<std::string, ParameterBase*> ParamMap;
-    
-    ParamMap parameters_;        
+
+    ParamMap parameters_;
     std::set<std::string> deprecatedKeywords_;
-    
+
   private:
     DataHolder(const DataHolder&);
     DataHolder& operator=(const DataHolder&);
   };
-  
-}
+
+}  // namespace OpenMD
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_SHIFTEDMIEBONDTYPE_HPP
 #define TYPES_SHIFTEDMIEBONDTYPE_HPP
 
@@ -51,41 +51,39 @@
 namespace OpenMD {
 
   /**
-   * @class ShiftedMieBondType 
+   * @class ShiftedMieBondType
    *
    * @brief ShiftedMieBondType is used to correct 1-3 bend interactions in
    * the SDK force field.
    *
-   * The functional form is given by: 
-   \f[ 
-   V(r) = V_{Mie}(n,m,sigma,epsilon,r_{ij}) - V_{Mie}(n,m,sigma,epsilon,rs) for r_{ij} < r_{s} 
-   \f] 
-   * where 
-   \f[ 
-   V_{Mie}(n,m,\sigma,\epsilon,r) =  \left(\frac{n}{n-m}\right) \left(\frac{n}{m}\right)^{m/(n-m)} \epsilon \left[\left( \frac{\sigma}{r} \right)^{n} - \left( \frac{\sigma}{r} \right)^{m}\right] 
-   \f]
+   * The functional form is given by:
+   \f[
+   V(r) = V_{Mie}(n,m,sigma,epsilon,r_{ij}) - V_{Mie}(n,m,sigma,epsilon,rs) for
+   r_{ij} < r_{s} \f]
+   * where
+   \f[
+   V_{Mie}(n,m,\sigma,\epsilon,r) =  \left(\frac{n}{n-m}\right)
+   \left(\frac{n}{m}\right)^{m/(n-m)} \epsilon \left[\left( \frac{\sigma}{r}
+   \right)^{n} - \left( \frac{\sigma}{r} \right)^{m}\right] \f]
    * and
    \f[
    r_{s} = e^{\frac{m \log (\sigma )+\log (m)-n \log (\sigma )-\log (n)}{m-n}}
    \f]
    */
   class ShiftedMieBondType : public BondType {
-    
   public:
-    
     ShiftedMieBondType(RealType mySigma, RealType myEpsilon, int myNrep,
-                       int myMatt) : BondType(0.0) {
-
-      sigma = mySigma;
+                       int myMatt) :
+        BondType(0.0) {
+      sigma   = mySigma;
       epsilon = myEpsilon;
-      n = myNrep;
-      m = myMatt;
+      n       = myNrep;
+      m       = myMatt;
 
-      rS_ = exp( log( pow(sigma, m-n ) * RealType(m) / n ));
-      
-      nmScale_ = n * pow(RealType(n) / m, 
-                          RealType(m) / (n - m)) / (n - m);
-      
+      rS_ = exp(log(pow(sigma, m - n) * RealType(m) / n));
+
+      nmScale_ = n * pow(RealType(n) / m, RealType(m) / (n - m)) / (n - m);
+
       RealType rss = rS_ / sigma;
       RealType rsi = 1.0 / rss;
       RealType rsn = pow(rsi, n);
@@ -94,47 +92,37 @@ namespace OpenMD {
       potS_ = nmScale_ * epsilon * (rsn - rsm);
 
       setEquilibriumBondLength(rS_);
-      
     }
-        
+
     virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
       RealType ros, ri, rin, rim, rin1, rim1;
 
-      ros = r / sigma;      
-      ri = 1.0 / ros;
-      rin = pow(ri, n);
-      rim = pow(ri, m);
+      ros  = r / sigma;
+      ri   = 1.0 / ros;
+      rin  = pow(ri, n);
+      rim  = pow(ri, m);
       rin1 = rin * ri;
       rim1 = rim * ri;
-      
-      V = nmScale_ * epsilon * (rin - rim) - potS_;
+
+      V    = nmScale_ * epsilon * (rin - rim) - potS_;
       dVdr = nmScale_ * epsilon * (-n * rin1 + m * rim1) / sigma;
     }
-    
-    RealType getSigma() {
-      return sigma;
-    }
-    
-    RealType getEpsilon() {
-      return epsilon;
-    }
-    
-    int getNrep() {
-      return n;
-    }
-    int getMatt() {
-      return m;
-    }
+
+    RealType getSigma() { return sigma; }
+
+    RealType getEpsilon() { return epsilon; }
+
+    int getNrep() { return n; }
+    int getMatt() { return m; }
 
   private:
-    
     RealType sigma;
     RealType epsilon;
     int n;
     int m;
     RealType nmScale_;
     RealType rS_;
-    RealType potS_;       
+    RealType potS_;
   };
-}
+}  // namespace OpenMD
 #endif

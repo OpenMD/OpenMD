@@ -8,33 +8,27 @@
  * $Id$
  */
 
-#include <antlr/config.hpp>
 #include <antlr/RecognitionException.hpp>
+#include <antlr/config.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-class ANTLR_API SemanticException : public RecognitionException {
-public:
-	SemanticException(const ANTLR_USE_NAMESPACE(std)string& s)
-	: RecognitionException(s)
-	{
-	}
-	SemanticException(const ANTLR_USE_NAMESPACE(std)string& s,
-							const ANTLR_USE_NAMESPACE(std)string& fileName_,
-							int line_,int column_)
-	: RecognitionException(s,fileName_,line_,column_)
-	{
-	}
+  class ANTLR_API SemanticException : public RecognitionException {
+  public:
+    SemanticException(const ANTLR_USE_NAMESPACE(std) string& s) :
+        RecognitionException(s) {}
+    SemanticException(const ANTLR_USE_NAMESPACE(std) string& s,
+                      const ANTLR_USE_NAMESPACE(std) string& fileName_,
+                      int line_, int column_) :
+        RecognitionException(s, fileName_, line_, column_) {}
 
-	~SemanticException() throw()
-	{
-	}
-};
+    ~SemanticException() throw() {}
+  };
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif //INC_SemanticException_hpp__
+#endif  // INC_SemanticException_hpp__

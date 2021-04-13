@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,49 +45,46 @@
 
 #ifndef APPLICATIONS_STATICPROPS_P2ORDERPARAMETER_HPP
 #define APPLICATIONS_STATICPROPS_P2ORDERPARAMETER_HPP
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 using namespace std;
 namespace OpenMD {
 
-  class P2OrderParameter : public StaticAnalyser{
-  public:    
+  class P2OrderParameter : public StaticAnalyser {
+  public:
     P2OrderParameter(SimInfo* info, const string& filename,
                      const string& sele1);
-    P2OrderParameter(SimInfo* info, const string& filename, 
-                     const string& sele1, const string& sele2);
-    P2OrderParameter(SimInfo* info, const string& filename, 
-                     const string& sele1, const int seleOffset);
+    P2OrderParameter(SimInfo* info, const string& filename, const string& sele1,
+                     const string& sele2);
+    P2OrderParameter(SimInfo* info, const string& filename, const string& sele1,
+                     const int seleOffset);
     virtual void process();
-    
+
   private:
-    
-    struct OrderParam{
+    struct OrderParam {
       RealType p2;
       Vector3d director;
       RealType angle;
     };
-            
+
     void writeP2();
-    
+
     Snapshot* currentSnapshot_;
-    
+
     bool doVect_;
     bool doOffset_;
     string selectionScript1_;
     string selectionScript2_;
     SelectionManager seleMan1_;
-    SelectionManager seleMan2_;       
+    SelectionManager seleMan2_;
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
     int seleOffset_;
 
     vector<OrderParam> orderParams_;
-    
   };
-}
+}  // namespace OpenMD
 
 #endif
-

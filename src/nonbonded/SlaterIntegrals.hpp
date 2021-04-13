@@ -59,21 +59,27 @@
  * preparation. arXiv:0812.1544
  */
 
-#include "config.h"
+#include <algorithm>
 #include <cmath>
-#include <limits>
 #include <cstdlib>
 #include <iostream>
-#include <algorithm>
+#include <limits>
+
+#include "config.h"
 #include "math/Factorials.hpp"
 #include "utils/Constants.hpp"
 
 #ifndef NONBONDED_SLATERINTEGRALS_HPP
 #define NONBONDED_SLATERINTEGRALS_HPP
 
-template <typename T> inline T sqr(T t) { return t*t; }
-template <typename T> inline T mod(T x, T m)
-{ return x<0 ? m - 1 - ((-x) - 1)%m : x%m; }
+template<typename T>
+inline T sqr(T t) {
+  return t * t;
+}
+template<typename T>
+inline T mod(T x, T m) {
+  return x < 0 ? m - 1 - ((-x) - 1) % m : x % m;
+}
 
 // #include "parameters.h"
 
@@ -91,20 +97,17 @@ template <typename T> inline T mod(T x, T m)
  * @return the value of Rosen's A integral
  * @note N. Rosen, Phys. Rev., 38 (1931), 255
  */
-inline RealType RosenA(int n, RealType a)
-{
+inline RealType RosenA(int n, RealType a) {
   RealType RosenA_ = 0.;
-  if (a != 0.)
-    {
-      RealType Term = 1.;
-      RosenA_ = Term;
-      for (int nu=1; nu<=n; nu++)
-        {
-          Term *= a / nu;
-          RosenA_ += Term;
-        }
-      RosenA_ = (RosenA_/Term) * (exp(-a)/a);
+  if (a != 0.) {
+    RealType Term = 1.;
+    RosenA_       = Term;
+    for (int nu = 1; nu <= n; nu++) {
+      Term *= a / nu;
+      RosenA_ += Term;
     }
+    RosenA_ = (RosenA_ / Term) * (exp(-a) / a);
+  }
   return RosenA_;
 }
 
@@ -126,40 +129,35 @@ inline RealType RosenA(int n, RealType a)
 inline RealType RosenB(int n, RealType alpha) {
   RealType RosenB_;
 
-  if (alpha != 0.)
-    {
-      RealType Term = 1.;
-      bool IsPositive = true;
+  if (alpha != 0.) {
+    RealType Term   = 1.;
+    bool IsPositive = true;
 
-      // These two expressions are (up to constant factors) equivalent
-      // to computing the hyperbolic sine and cosine of a respectively
-      // The series consists of adding up these terms in an alternating fashion
-      RealType PSinhRosenA =  exp(alpha) - exp(-alpha);
-      RealType PCoshRosenA = -exp(alpha) - exp(-alpha);
-      RealType TheSum = PSinhRosenA;
-      RealType PHyperRosenA;
-      for (unsigned nu=1; nu<=(unsigned)n; nu++)
-        {
-          if (IsPositive)
-            {
-              PHyperRosenA = PCoshRosenA;
-              IsPositive = false;
-            }
-          else // term to add should be negative
-            {
-              PHyperRosenA = PSinhRosenA;
-              IsPositive = true;
-            }
-          Term *= alpha / nu;
-          TheSum += Term * PHyperRosenA;
-        }
-      RosenB_ = TheSum / (alpha*Term);
+    // These two expressions are (up to constant factors) equivalent
+    // to computing the hyperbolic sine and cosine of a respectively
+    // The series consists of adding up these terms in an alternating fashion
+    RealType PSinhRosenA = exp(alpha) - exp(-alpha);
+    RealType PCoshRosenA = -exp(alpha) - exp(-alpha);
+    RealType TheSum      = PSinhRosenA;
+    RealType PHyperRosenA;
+    for (unsigned nu = 1; nu <= (unsigned)n; nu++) {
+      if (IsPositive) {
+        PHyperRosenA = PCoshRosenA;
+        IsPositive   = false;
+      } else  // term to add should be negative
+      {
+        PHyperRosenA = PSinhRosenA;
+        IsPositive   = true;
+      }
+      Term *= alpha / nu;
+      TheSum += Term * PHyperRosenA;
     }
-  else // pathological case of a=0
-    {
-      printf("WARNING, a = 0 in RosenB\n");
-      RosenB_ = (1. - pow(-1., n)) / (n + 1.);
-    }
+    RosenB_ = TheSum / (alpha * Term);
+  } else  // pathological case of a=0
+  {
+    printf("WARNING, a = 0 in RosenB\n");
+    RosenB_ = (1. - pow(-1., n)) / (n + 1.);
+  }
   return RosenB_;
 }
 
@@ -173,27 +171,28 @@ inline RealType RosenB(int n, RealType alpha) {
  * @return the value of Rosen's D factor
  * @note N. Rosen, Phys. Rev., 38 (1931), 255
  */
-inline RealType RosenD(int m, int n, int p)
-{
-  if (m+n+p > maxFact)
-    {
-      printf("Error, arguments exceed maximum factorial computed %d > %d\n", m+n+p, maxFact);
-      ::exit(0);
-    }
+inline RealType RosenD(int m, int n, int p) {
+  if (m + n + p > maxFact) {
+    printf("Error, arguments exceed maximum factorial computed %d > %d\n",
+           m + n + p, maxFact);
+    ::exit(0);
+  }
 
   RealType RosenD_ = 0;
-  for (int k=max(p-m,0); k<=min(n,p); k++)
-    {
-      if (mod(k,2) == 0)
-        RosenD_ += (fact[m] / (fact[p-k] * fact[m-p+k])) * (fact[n] / (fact[n-k] * fact[k]));
-      else
-        RosenD_ -= (fact[m] / ( fact[p-k] * fact[m-p+k])) * (fact[n] / (fact[n-k] * fact[k]));
-    }
+  for (int k = max(p - m, 0); k <= min(n, p); k++) {
+    if (mod(k, 2) == 0)
+      RosenD_ += (fact[m] / (fact[p - k] * fact[m - p + k])) *
+                 (fact[n] / (fact[n - k] * fact[k]));
+    else
+      RosenD_ -= (fact[m] / (fact[p - k] * fact[m - p + k])) *
+                 (fact[n] / (fact[n - k] * fact[k]));
+  }
   return RosenD_;
 }
 
 /** @brief Computes Coulomb integral analytically over s-type STOs
- * Computes the two-center Coulomb integral over Slater-type orbitals of s symmetry.
+ * Computes the two-center Coulomb integral over Slater-type orbitals of s
+ * symmetry.
  * @param a : Slater zeta exponent of first atom in inverse Bohr (au)
  * @param b : Slater zeta exponent of second atom in inverse Bohr (au)
  * @param m : principal quantum number of first atom
@@ -203,8 +202,7 @@ inline RealType RosenD(int m, int n, int p)
  * @note N. Rosen, Phys. Rev., 38 (1931), 255
  * @note In Rosen's paper, this integral is known as K2.
  */
-inline RealType sSTOCoulInt(RealType a, RealType b, int m, int n, RealType R)
-{
+inline RealType sSTOCoulInt(RealType a, RealType b, int m, int n, RealType R) {
   RealType x, K2;
   RealType Factor1, Factor2, Term, OneElectronTerm;
   RealType eps, epsi;
@@ -218,93 +216,87 @@ inline RealType sSTOCoulInt(RealType a, RealType b, int m, int n, RealType R)
 
   // First compute the two-electron component
   RealType sSTOCoulInt_ = 0.;
-  if (std::fabs(x) < std::numeric_limits<RealType>::epsilon()) // Pathological case
-    {
+  if (std::fabs(x) <
+      std::numeric_limits<RealType>::epsilon())  // Pathological case
+  {
+    // This solution for the one-center coulomb integrals comes from
+    // Yoshiyuki Hase, Computers & Chemistry 9(4), pp. 285-287 (1985).
 
-      // This solution for the one-center coulomb integrals comes from
-      // Yoshiyuki Hase, Computers & Chemistry 9(4), pp. 285-287 (1985).
+    RealType Term1 = fact[2 * m - 1] / pow(2 * a, 2 * m);
+    RealType Term2 = 0.;
+    for (int nu = 1; nu <= 2 * n; nu++) {
+      Term2 += nu * pow(2 * b, 2 * n - nu) * fact[2 * (m + n) - nu - 1] /
+               (fact[2 * n - nu] * 2 * n * pow(2 * (a + b), 2 * (m + n) - nu));
+    }
+    sSTOCoulInt_ = pow(2 * a, 2 * m + 1) * (Term1 - Term2) / fact[2 * m];
 
-      RealType Term1 = fact[2*m - 1] / pow(2*a, 2*m);
-      RealType Term2 = 0.;
-      for (int nu = 1; nu <= 2*n; nu++) {
-        Term2 += nu * pow(2*b, 2*n - nu) * fact[2*(m+n)-nu-1] /
-          (fact[2*n-nu]*2*n * pow(2*(a+b), 2*(m+n)-nu));
+    // Original QTPIE code for the one-center case is below.  Doesn't
+    // appear to generate the correct one-center results.
+    //
+    // if ((a==b) && (m==n))
+    //   {
+    //     for (int nu=0; nu<=2*n-1; nu++)
+    //       {
+    //         K2 = 0.;
+    //         for (unsigned p=0; p<=2*n+m; p++) K2 += 1. / fact[p];
+    //         sSTOCoulInt_ += K2 * fact[2*n+m] / fact[m];
+    //       }
+    //     sSTOCoulInt_ = 2 * a / (n * fact[2*n]) * sSTOCoulInt_;
+    //   }
+    // else
+    //   {
+    //     // Not implemented
+    //     printf("ERROR, sSTOCoulInt cannot compute from arguments\n");
+    //     printf("a = %lf b = %lf m = %d n = %d R = %lf\n",a, b, m, n, R);
+    //     exit(0);
+    //   }
+
+  } else {
+    OneElectronTerm = 1. / R +
+                      pow(x, 2 * m) / (fact[2 * m] * R) *
+                          ((x - 2 * m) * RosenA(2 * m - 1, x) - exp(-x)) +
+                      sSTOCoulInt_;
+    eps = epsilon / OneElectronTerm;
+    if (a == b) {
+      // Apply Rosen (48)
+      Factor1 = -a * pow(a * R, 2 * m) / (n * fact[2 * m]);
+      for (int nu = 0; nu <= 2 * n - 1; nu++) {
+        Factor2 = (2. * n - nu) / fact[nu] * pow(a * R, nu);
+        epsi    = eps / fabs(Factor1 * Factor2);
+        K2      = 0.;
+        for (int p = 0; p <= m + (nu - 1) / 2; p++) {
+          Term = RosenD(2 * m - 1, nu, 2 * p) / (2. * p + 1.) *
+                 RosenA(2 * m + nu - 1 - 2 * p, x);
+          K2 += Term;
+          if ((Term > 0) && (Term < epsi)) goto label1;
+        }
+        sSTOCoulInt_ += K2 * Factor2;
       }
-      sSTOCoulInt_ = pow(2*a, 2*m+1) * (Term1 - Term2) / fact[2*m];
-
-      // Original QTPIE code for the one-center case is below.  Doesn't
-      // appear to generate the correct one-center results.
-      //
-      // if ((a==b) && (m==n))
-      //   {
-      //     for (int nu=0; nu<=2*n-1; nu++)
-      //       {
-      //         K2 = 0.;
-      //         for (unsigned p=0; p<=2*n+m; p++) K2 += 1. / fact[p];
-      //         sSTOCoulInt_ += K2 * fact[2*n+m] / fact[m];
-      //       }
-      //     sSTOCoulInt_ = 2 * a / (n * fact[2*n]) * sSTOCoulInt_;
-      //   }
-      // else
-      //   {
-      //     // Not implemented
-      //     printf("ERROR, sSTOCoulInt cannot compute from arguments\n");
-      //     printf("a = %lf b = %lf m = %d n = %d R = %lf\n",a, b, m, n, R);
-      //     exit(0);
-      //   }
-
-    }
-  else
-    {
-      OneElectronTerm = 1./R + pow(x, 2*m)/(fact[2*m]*R)*
-        ((x-2*m)*RosenA(2*m-1,x)-exp(-x)) + sSTOCoulInt_;
-      eps = epsilon / OneElectronTerm;
-      if (a == b)
-        {
-          // Apply Rosen (48)
-          Factor1 = -a*pow(a*R, 2*m)/(n*fact[2*m]);
-          for (int nu=0; nu<=2*n-1; nu++)
-            {
-              Factor2 = (2.*n-nu)/fact[nu]*pow(a*R,nu);
-              epsi = eps / fabs(Factor1 * Factor2);
-              K2 = 0.;
-              for (int p=0; p<=m+(nu-1)/2; p++)
-                {
-                  Term = RosenD(2*m-1, nu, 2*p)/(2.*p+1.) *RosenA(2*m+nu-1-2*p,x);
-                  K2 += Term;
-                  if ((Term > 0) && (Term < epsi)) goto label1;
-                }
-              sSTOCoulInt_ +=  K2 * Factor2;
-            }
-        label1:
-          sSTOCoulInt_ *= Factor1;
+    label1:
+      sSTOCoulInt_ *= Factor1;
+    } else {
+      Factor1 = -a * pow(a * R, 2 * m) / (2. * n * fact[2 * m]);
+      epsi    = eps / fabs(Factor1);
+      if (b == 0.)
+        printf("WARNING: b = 0 in sSTOCoulInt\n");
+      else {
+        // Apply Rosen (54)
+        for (int nu = 0; nu <= 2 * n - 1; nu++) {
+          K2 = 0;
+          for (int p = 0; p <= 2 * m + nu - 1; p++)
+            K2 = K2 + RosenD(2 * m - 1, nu, p) * RosenB(p, R * (a - b)) *
+                          RosenA(2 * m + nu - 1 - p, R * (a + b));
+          Term = K2 * (2 * n - nu) / fact[nu] * pow(b * R, nu);
+          sSTOCoulInt_ += Term;
+          if (fabs(Term) < epsi) goto label2;
         }
-      else
-        {
-          Factor1 = -a*pow(a*R,2*m)/(2.*n*fact[2*m]);
-          epsi = eps/fabs(Factor1);
-          if (b == 0.)
-            printf("WARNING: b = 0 in sSTOCoulInt\n");
-          else
-            {
-              // Apply Rosen (54)
-              for (int nu=0; nu<=2*n-1; nu++)
-                {
-                  K2 = 0;
-                  for (int p=0; p<=2*m+nu-1; p++)
-                    K2=K2+RosenD(2*m-1,nu,p)*RosenB(p,R*(a-b))
-                      *RosenA(2*m+nu-1-p,R*(a+b));
-                  Term = K2*(2*n-nu)/fact[nu]*pow(b*R, nu);
-                  sSTOCoulInt_ += Term;
-                  if (fabs(Term) < epsi) goto label2;
-                }
-            label2:
-              sSTOCoulInt_ *= Factor1;
-            }
-        }
-      // Now add the one-electron term from Rosen (47) = Rosen (53)
-      sSTOCoulInt_ += OneElectronTerm;
+      label2:
+        sSTOCoulInt_ *= Factor1;
+      }
     }
+    // Now add the one-electron term from Rosen (47) = Rosen (53)
+    sSTOCoulInt_ += OneElectronTerm;
+  }
   return sSTOCoulInt_;
 }
 
@@ -321,41 +313,35 @@ inline RealType sSTOCoulInt(RealType a, RealType b, int m, int n, RealType R)
  * @note N. Rosen, Phys. Rev., 38 (1931), 255
  * @note In the Rosen paper, this integral is known as I.
  */
-inline RealType sSTOOvInt(RealType a, RealType b, int m, int n, RealType R)
-{
+inline RealType sSTOOvInt(RealType a, RealType b, int m, int n, RealType R) {
   RealType Factor, Term, eps;
 
   // To speed up calculation, we terminate loop once contributions
   // to integral fall below the bound, epsilon
-  RealType epsilon = 0.;
+  RealType epsilon    = 0.;
   RealType sSTOOvInt_ = 0.;
 
-  if (a == b)
-    {
-      Factor = pow(a*R, m+n+1)/sqrt(fact[2*m]*fact[2*n]);
-      eps = epsilon / fabs(Factor);
-      for (int q=0; q<=(m+n)/2; q++)
-        {
-          Term = RosenD(m,n,2*q)/(2.*q+1.)*RosenA(m+n-2*q,a*R);
-          sSTOOvInt_ += Term;
-          if (fabs(Term) < eps) exit(0);
-        }
-      sSTOOvInt_ *= Factor;
+  if (a == b) {
+    Factor = pow(a * R, m + n + 1) / sqrt(fact[2 * m] * fact[2 * n]);
+    eps    = epsilon / fabs(Factor);
+    for (int q = 0; q <= (m + n) / 2; q++) {
+      Term = RosenD(m, n, 2 * q) / (2. * q + 1.) * RosenA(m + n - 2 * q, a * R);
+      sSTOOvInt_ += Term;
+      if (fabs(Term) < eps) exit(0);
     }
-  else
-    {
-      Factor = 0.5*pow(a*R, m+0.5)*pow(b*R,n+0.5)
-        /sqrt(fact[2*m]*fact[2*n]);
-      eps = epsilon / fabs(Factor);
-      for (int q=0; q<=m+n; q++)
-        {
-          Term = RosenD(m,n,q)*RosenB(q, R/2.*(a-b))
-            * RosenA(m+n-q,R/2.*(a+b));
-          sSTOOvInt_ += Term;
-          if (fabs(Term) < eps) exit(0);
-        }
-      sSTOOvInt_ *= Factor;
+    sSTOOvInt_ *= Factor;
+  } else {
+    Factor = 0.5 * pow(a * R, m + 0.5) * pow(b * R, n + 0.5) /
+             sqrt(fact[2 * m] * fact[2 * n]);
+    eps = epsilon / fabs(Factor);
+    for (int q = 0; q <= m + n; q++) {
+      Term = RosenD(m, n, q) * RosenB(q, R / 2. * (a - b)) *
+             RosenA(m + n - q, R / 2. * (a + b));
+      sSTOOvInt_ += Term;
+      if (fabs(Term) < eps) exit(0);
     }
+    sSTOOvInt_ *= Factor;
+  }
   return sSTOOvInt_;
 }
 
@@ -371,21 +357,22 @@ inline RealType sSTOOvInt(RealType a, RealType b, int m, int n, RealType R)
  * @note N. Rosen, Phys. Rev., 38 (1931), 255
  * @note untested
  */
-inline RealType KinInt(RealType a, RealType b, int m, int n,RealType R)
-{
-  RealType KinInt_ = -0.5*b*b*sSTOOvInt(a, b, m, n, R);
-  if (n > 0)
-    {
-      KinInt_ += b*b*pow(2*b/(2*b-1),0.5) * sSTOOvInt(a, b, m, n-1, R);
-      if (n > 1) KinInt_ += pow(n*(n-1)/((n-0.5)*(n-1.5)), 0.5)
-                   * sSTOOvInt(a, b, m, n-2, R);
-    }
+inline RealType KinInt(RealType a, RealType b, int m, int n, RealType R) {
+  RealType KinInt_ = -0.5 * b * b * sSTOOvInt(a, b, m, n, R);
+  if (n > 0) {
+    KinInt_ +=
+        b * b * pow(2 * b / (2 * b - 1), 0.5) * sSTOOvInt(a, b, m, n - 1, R);
+    if (n > 1)
+      KinInt_ += pow(n * (n - 1) / ((n - 0.5) * (n - 1.5)), 0.5) *
+                 sSTOOvInt(a, b, m, n - 2, R);
+  }
   return KinInt_;
 }
 
 /**
- * @brief Computes derivative of Coulomb integral with respect to the interatomic distance
- *   Computes the two-center Coulomb integral over Slater-type orbitals of s symmetry.
+ * @brief Computes derivative of Coulomb integral with respect to the
+ * interatomic distance Computes the two-center Coulomb integral over
+ * Slater-type orbitals of s symmetry.
  * @param a: Slater zeta exponent of first atom in inverse Bohr (au)
  * @param b: Slater zeta exponent of second atom in inverse Bohr (au)
  * @param m: principal quantum number of first atom
@@ -394,84 +381,82 @@ inline RealType KinInt(RealType a, RealType b, int m, int n,RealType R)
  * @return the derivative of the Coulomb potential energy integral
  * @note Derived in QTPIE research notes, May 15 2007
  */
-inline RealType sSTOCoulIntGrad(RealType a, RealType b, int m, int n, RealType R)
-{
+inline RealType sSTOCoulIntGrad(RealType a, RealType b, int m, int n,
+                                RealType R) {
   RealType x;
   // x is the argument of the auxiliary RosenA and RosenB functions
   x = 2. * a * R;
 
   // First compute the two-electron component
   RealType sSTOCoulIntGrad_ = 0.;
-  if (x==0) // Pathological case
-    {
-      printf("WARNING: argument given to sSTOCoulIntGrad is 0\n");
-      printf("a = %lf R= %lf\n", a, R);
+  if (x == 0)  // Pathological case
+  {
+    printf("WARNING: argument given to sSTOCoulIntGrad is 0\n");
+    printf("a = %lf R= %lf\n", a, R);
+  } else {
+    RealType K2, TheSum;
+    if (a == b) {
+      TheSum = 0.;
+      for (int nu = 0; nu <= 2 * (n - 1); nu++) {
+        K2 = 0.;
+        for (int p = 0; p <= (m + nu) / 2; p++)
+          K2 += RosenD(2 * m - 1, nu + 1, 2 * p) / (2 * p + 1.) *
+                RosenA(2 * m + nu - 1 - 2 * p, x);
+        TheSum += (2 * n - nu - 1) / fact[nu] * pow(a * R, nu) * K2;
+      }
+      sSTOCoulIntGrad_ =
+          -pow(a, 2 * m + 2) * pow(R, 2 * m) / (n * fact[2 * m]) * TheSum;
+      TheSum = 0.;
+      for (int nu = 0; nu <= 2 * n - 1; nu++) {
+        K2 = 0.;
+        for (int p = 0; p <= (m + nu - 1) / 2; p++)
+          K2 += RosenD(2 * m - 1, nu, 2 * p) / (2 * p + 1.) *
+                RosenA(2 * m + nu - 2 * p, x);
+        TheSum += (2 * n - nu) / fact[nu] * pow(a * R, nu) * K2;
+      }
+      sSTOCoulIntGrad_ +=
+          2 * pow(a, 2 * m + 2) * pow(R, 2 * m) / (n * fact[2 * m]) * TheSum;
+    } else {
+      // Slater exponents are different
+      // First calculate some useful arguments
+      RealType y = R * (a + b);
+      RealType z = R * (a - b);
+      TheSum     = 0.;
+      for (int nu = 0; nu <= 2 * n - 1; nu++) {
+        K2 = 0.;
+        for (int p = 0; p <= 2 * m + nu; p++)
+          K2 += RosenD(2 * m - 1, nu + 1, p) * RosenB(p, z) *
+                RosenA(2 * m + nu - p, y);
+        TheSum += (2 * n - nu - 1) / fact[nu] * pow(b * R, nu) * K2;
+      }
+      sSTOCoulIntGrad_ = -b * pow(a, 2 * m + 1) * pow(R, 2 * m) /
+                         (2 * n * fact[2 * m]) * TheSum;
+      TheSum = 0.;
+      for (int nu = 0; nu <= 2 * n; nu++) {
+        K2 = 0.;
+        for (int p = 0; p <= 2 * m - 1 + nu; p++)
+          K2 += RosenD(2 * m - 1, nu, p) *
+                ((a - b) * RosenB(p + 1, z) * RosenA(2 * m + nu - p - 1, y) +
+                 (a + b) * RosenB(p, z) * RosenA(2 * m + nu - p, y));
+        TheSum += (2 * n - nu) / fact[nu] * pow(b * R, nu) * K2;
+      }
+      sSTOCoulIntGrad_ +=
+          pow(a, 2 * m + 1) * pow(R, 2 * m) / (2 * n * fact[2 * m]) * TheSum;
     }
-  else
-    {
-      RealType K2, TheSum;
-      if (a == b)
-        {
-          TheSum = 0.;
-          for (int nu=0; nu<=2*(n-1); nu++)
-            {
-              K2 = 0.;
-              for (int p=0; p<=(m+nu)/2; p++)
-                K2 += RosenD(2*m-1, nu+1, 2*p)/(2*p + 1.) * RosenA(2*m+nu-1-2*p, x);
-              TheSum += (2*n-nu-1)/fact[nu]*pow(a*R, nu) * K2;
-            }
-          sSTOCoulIntGrad_ = -pow(a, 2*m+2)*pow(R, 2*m) /(n*fact[2*m])*TheSum;
-          TheSum = 0.;
-          for (int nu=0; nu<=2*n-1; nu++)
-            {
-              K2 = 0.;
-              for (int p=0; p<=(m+nu-1)/2; p++)
-                K2 += RosenD(2*m-1, nu, 2*p)/(2*p + 1.) * RosenA(2*m+nu-2*p, x);
-              TheSum += (2*n-nu)/fact[nu]*pow(a*R,nu) * K2;
-            }
-          sSTOCoulIntGrad_ += 2*pow(a, 2*m+2)*pow(R, 2*m) /(n*fact[2*m])*TheSum;
-        }
-      else
-        {
-          // Slater exponents are different
-          // First calculate some useful arguments
-          RealType y = R*(a+b);
-          RealType z = R*(a-b);
-          TheSum = 0.;
-          for (int nu=0; nu<=2*n-1; nu++)
-            {
-              K2 = 0.;
-              for (int p=0; p<=2*m+nu; p++)
-                K2 += RosenD(2*m-1, nu+1, p)
-                  * RosenB(p,z)*RosenA(2*m+nu-p, y);
-              TheSum += (2*n-nu-1)/fact[nu]*pow(b*R,nu) * K2;
-            }
-          sSTOCoulIntGrad_ = -b*pow(a,2*m+1)*pow(R,2*m)/
-            (2*n*fact[2*m])*TheSum;
-          TheSum = 0.;
-          for (int nu=0; nu<=2*n; nu++)
-            {
-              K2 = 0.;
-              for (int p=0; p<=2*m-1+nu; p++)
-                K2 += RosenD(2*m-1, nu, p)
-                  * ((a-b)*RosenB(p+1,z)*RosenA(2*m+nu-p-1, y)
-                     +(a+b)*RosenB(p  ,z)*RosenA(2*m+nu-p  , y));
-              TheSum += (2*n-nu)/fact[nu]*pow(b*R,nu) * K2;
-            }
-          sSTOCoulIntGrad_ += pow(a,2*m+1)*pow(R,2*m)/(2*n*fact[2*m])*TheSum;
-        }
-      // Now add one-electron terms and common term
-      sSTOCoulIntGrad_ = sSTOCoulIntGrad_ - (2.*m+1.)/sqr(R)
-        + 2.*m/R * sSTOCoulInt(a,b,m,n,R)
-        + pow(x,2*m)/(fact[2*m]*sqr(R)) * ((2.*m+1.)*exp(-x)
-                                           + 2.*m*(1.+2.*m-x)*RosenA(2*m-1,x));
-    }
+    // Now add one-electron terms and common term
+    sSTOCoulIntGrad_ = sSTOCoulIntGrad_ - (2. * m + 1.) / sqr(R) +
+                       2. * m / R * sSTOCoulInt(a, b, m, n, R) +
+                       pow(x, 2 * m) / (fact[2 * m] * sqr(R)) *
+                           ((2. * m + 1.) * exp(-x) +
+                            2. * m * (1. + 2. * m - x) * RosenA(2 * m - 1, x));
+  }
   return sSTOCoulIntGrad_;
 }
 
 /**
- * @brief Computes gradient of overlap integral with respect to the interatomic diatance
- *   Computes the derivative of the overlap integral over two Slater-type orbitals of s symmetry.
+ * @brief Computes gradient of overlap integral with respect to the interatomic
+ * diatance Computes the derivative of the overlap integral over two Slater-type
+ * orbitals of s symmetry.
  * @param a: Slater zeta exponent of first atom in inverse Bohr (au)
  * @param b: Slater zeta exponent of second atom in inverse Bohr (au)
  * @param m: principal quantum number of first atom
@@ -480,53 +465,58 @@ inline RealType sSTOCoulIntGrad(RealType a, RealType b, int m, int n, RealType R
  * @return the derivative of the sSTOOvInt integral
  * @note Derived in QTPIE research notes, May 15 2007
  */
-inline RealType sSTOOvIntGrad(RealType a, RealType b, int m, int n, RealType R)
-{
+inline RealType sSTOOvIntGrad(RealType a, RealType b, int m, int n,
+                              RealType R) {
   // Calculate first term
-  RealType sSTOOvIntGrad_ = (m+n+1.)/R * sSTOOvInt(a, b, m, n, R);
+  RealType sSTOOvIntGrad_ = (m + n + 1.) / R * sSTOOvInt(a, b, m, n, R);
 
   // Calculate remaining terms; answers depend on exponents
   RealType TheSum = 0.;
-  RealType x = a * R;
-  if (a == b)
-    {
-      for (int q=0; q<=(m+n)/2; q++)
-        TheSum += RosenD(m,n,2*q) / (2*q + 1.) * RosenA(m+n-2*q+1, x);
-      sSTOOvIntGrad_ -= a*pow(x,m+n+1)/ sqrt(fact[2*m]*fact[2*n])*TheSum;
-    }
-  else
-    {
-      RealType w = b*R;
-      RealType y = 0.5*R*(a+b);
-      RealType z = 0.5*R*(a-b);
-      for (int q=0; q<m+n; q++)
-        TheSum = TheSum + RosenD(m,n,q) *
-          ((a-b)*RosenB(q+1,z)*RosenA(m+n-q  ,y)
-           +(a+b)*RosenB(q  ,z)*RosenA(m+n-q+1,y));
-      sSTOOvIntGrad_ -= 0.25*sqrt((pow(x, 2*m+1)*pow(w, 2*n+1))/(fact[2*m]*fact[2*n]))*TheSum;
-    }
+  RealType x      = a * R;
+  if (a == b) {
+    for (int q = 0; q <= (m + n) / 2; q++)
+      TheSum +=
+          RosenD(m, n, 2 * q) / (2 * q + 1.) * RosenA(m + n - 2 * q + 1, x);
+    sSTOOvIntGrad_ -=
+        a * pow(x, m + n + 1) / sqrt(fact[2 * m] * fact[2 * n]) * TheSum;
+  } else {
+    RealType w = b * R;
+    RealType y = 0.5 * R * (a + b);
+    RealType z = 0.5 * R * (a - b);
+    for (int q = 0; q < m + n; q++)
+      TheSum = TheSum + RosenD(m, n, q) *
+                            ((a - b) * RosenB(q + 1, z) * RosenA(m + n - q, y) +
+                             (a + b) * RosenB(q, z) * RosenA(m + n - q + 1, y));
+    sSTOOvIntGrad_ -= 0.25 *
+                      sqrt((pow(x, 2 * m + 1) * pow(w, 2 * n + 1)) /
+                           (fact[2 * m] * fact[2 * n])) *
+                      TheSum;
+  }
   return sSTOOvIntGrad_;
 }
 
 /**
- * @brief Calculates a Slater-type orbital exponent based on the hardness parameters
+ * @brief Calculates a Slater-type orbital exponent based on the hardness
+ * parameters
  * @param hardness: chemical hardness in atomic units
  * @param        n: principal quantum number
  * @note Modified for use with OpenMD by Gezelter and Michalka.
  */
-inline RealType getSTOZeta(int n, RealType hardness)
-{
+inline RealType getSTOZeta(int n, RealType hardness) {
   //  Approximate the exact value of the constant of proportionality
   //  by its value at a very small distance epsilon
   //  since the exact R = 0 case has not be programmed
   RealType epsilon = 1.0e-8;
 
   // Assign orbital exponent
-  return pow(sSTOCoulInt(1., 1., n, n, epsilon) / hardness, -1./(3. + 2.*n));
+  return pow(sSTOCoulInt(1., 1., n, n, epsilon) / hardness,
+             -1. / (3. + 2. * n));
 }
 
-/** @brief Computes Coulomb integral analytically using s-type Slater-style densities under the shifted force approximation
- * Computes the two-center Coulomb integral over Slater-type densities of s symmetry using a shifted force approximation
+/** @brief Computes Coulomb integral analytically using s-type Slater-style
+ * densities under the shifted force approximation Computes the two-center
+ * Coulomb integral over Slater-type densities of s symmetry using a shifted
+ * force approximation
  * @param a : Slater zeta exponent of first atom in inverse Angstroms
  * @param b : Slater zeta exponent of second atom in inverse Angstroms
  * @param R : internuclear distance in Angstroms
@@ -534,66 +524,71 @@ inline RealType getSTOZeta(int n, RealType hardness)
  * @return value of the shifted-force Coulomb potential energy integral
  */
 inline RealType sSTDCoulSF(RealType a, RealType b, RealType R, RealType Rc) {
-  RealType a2 = a*a;
-  RealType a4 = a2*a2;
-  RealType b2 = b*b;
-  RealType b4 = b2*b2;
-  RealType apb = a+b;
-  RealType a2b23 = pow(a2-b2,3);
+  RealType a2    = a * a;
+  RealType a4    = a2 * a2;
+  RealType b2    = b * b;
+  RealType b4    = b2 * b2;
+  RealType apb   = a + b;
+  RealType a2b23 = pow(a2 - b2, 3);
 
-  RealType term1 = 2.0 * exp(R*apb) * a2b23;
-  RealType term2 =  exp(R*b) * b4 * (b2*(2.0+R*a) - a2*(6.0+R*a));
-  RealType term3 = -exp(R*a) * a4 * (a2*(2.0+R*b) - b2*(6.0+R*b));
+  RealType term1 = 2.0 * exp(R * apb) * a2b23;
+  RealType term2 = exp(R * b) * b4 * (b2 * (2.0 + R * a) - a2 * (6.0 + R * a));
+  RealType term3 = -exp(R * a) * a4 * (a2 * (2.0 + R * b) - b2 * (6.0 + R * b));
 
   RealType denom = 2.0 * R * a2b23;
-  RealType numer = exp(-R*apb)*(term1 + term2 + term3);
+  RealType numer = exp(-R * apb) * (term1 + term2 + term3);
 
   RealType S = numer / denom;
-  
-  term1 = 2.0 * exp(Rc*apb) * a2b23;
-  term2 =  exp(Rc*b) * b4 * (b2*(2.0+Rc*a) - a2*(6.0+Rc*a));
-  term3 = -exp(Rc*a) * a4 * (a2*(2.0+Rc*b) - b2*(6.0+Rc*b));
 
-  numer = exp(-Rc*apb)*(term1 + term2 + term3);
-  denom = 2.0 * Rc * pow(a2-b2,3);
+  term1 = 2.0 * exp(Rc * apb) * a2b23;
+  term2 = exp(Rc * b) * b4 * (b2 * (2.0 + Rc * a) - a2 * (6.0 + Rc * a));
+  term3 = -exp(Rc * a) * a4 * (a2 * (2.0 + Rc * b) - b2 * (6.0 + Rc * b));
+
+  numer = exp(-Rc * apb) * (term1 + term2 + term3);
+  denom = 2.0 * Rc * pow(a2 - b2, 3);
 
   RealType Sc = numer / denom;
 
-  term1 = -2.0 * exp(3*Rc*a + 4*Rc*b) * a2b23;
-  term2 = exp(2.0*Rc*(a + 2.0*b))*b4*(a2*(6.0 + Rc*a*(6.0 + Rc*a)) -
-                                      b2*(2.0 + Rc*a*(2.0 + Rc*a)));
-  term3 = exp(3.0*Rc*apb)*a4*(a2*(2.0 + Rc*b*(2.0 + Rc*b)) -
-                              b2*(6.0 + Rc*b*(6.0 + Rc*b)));
-  
-  numer = exp(-3.0*Rc*a - 4.0*Rc*b)*(term1 + term2 + term3);
+  term1 = -2.0 * exp(3 * Rc * a + 4 * Rc * b) * a2b23;
+  term2 = exp(2.0 * Rc * (a + 2.0 * b)) * b4 *
+          (a2 * (6.0 + Rc * a * (6.0 + Rc * a)) -
+           b2 * (2.0 + Rc * a * (2.0 + Rc * a)));
+  term3 = exp(3.0 * Rc * apb) * a4 *
+          (a2 * (2.0 + Rc * b * (2.0 + Rc * b)) -
+           b2 * (6.0 + Rc * b * (6.0 + Rc * b)));
+
+  numer = exp(-3.0 * Rc * a - 4.0 * Rc * b) * (term1 + term2 + term3);
   denom = 2.0 * Rc * Rc * a2b23;
-  
+
   RealType Scp = numer / denom;
 
-  return S - Sc - Scp*(R-Rc);
-  
+  return S - Sc - Scp * (R - Rc);
 }
 
-/** @brief Computes Coulomb integral analytically using s-type Slater-style densities under the shifted force approximation
- * Computes the two-center Coulomb integral over Slater-type densities of s symmetry using a shifted force approximation
+/** @brief Computes Coulomb integral analytically using s-type Slater-style
+ * densities under the shifted force approximation Computes the two-center
+ * Coulomb integral over Slater-type densities of s symmetry using a shifted
+ * force approximation
  * @param a : Slater zeta exponent of both atoms in inverse Angstroms
  * @param R : internuclear distance in Angstroms
  * @param Rc: internuclear cutoff distance in Angstroms
  * @return value of the shifted-force Coulomb potential energy integral
  */
 inline RealType sSTDCoulSF(RealType a, RealType R, RealType Rc) {
+  RealType poly =
+      (-48.0 + 48.0 * exp(R * a) - R * a * (33.0 + R * a * (9.0 + R * a)));
+  RealType polyc =
+      (-48.0 + 48.0 * exp(Rc * a) - Rc * a * (33.0 + Rc * a * (9.0 + Rc * a)));
 
-  RealType poly =  (-48.0 + 48.0*exp(R*a)  - R*a*(33.0  + R*a*(9.0  + R*a )));
-  RealType polyc = (-48.0 + 48.0*exp(Rc*a) - Rc*a*(33.0 + Rc*a*(9.0 + Rc*a)));
+  RealType S  = exp(-R * a) * poly / (48.0 * R);
+  RealType Sc = exp(-Rc * a) * polyc / (48.0 * Rc);
 
-  RealType S =  exp(-R *a)*poly  / (48.0*R );
-  RealType Sc = exp(-Rc*a)*polyc / (48.0*Rc);
+  RealType poly2c =
+      (48.0 - 48.0 * exp(Rc * a) +
+       Rc * a * (4.0 + Rc * a) * (12.0 + Rc * a * (3.0 + Rc * a)));
+  RealType Scp = exp(-Rc * a) * poly2c / (48.0 * Rc * Rc);
 
-  RealType poly2c = (48.0 - 48.0*exp(Rc*a) +
-                     Rc*a*(4.0 + Rc*a)*(12.0 + Rc*a*(3.0 + Rc*a)));
-  RealType Scp = exp(-Rc*a)*poly2c / (48.0*Rc*Rc);
-
-  return S - Sc - Scp*(R-Rc);
+  return S - Sc - Scp * (R - Rc);
 }
 
 #endif

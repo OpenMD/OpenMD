@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -61,359 +61,329 @@
 
 namespace OpenMD {
 
-Integrator::Integrator(SimInfo* info)
-    : info_(info),
-      forceMan_(NULL),
-      rotAlgo_(NULL),
-      flucQ_(NULL),
-      rattle_(NULL),
-      velocitizer_(nullptr),
-      needPotential(false),
-      needVirial(false),
-      needReset(false),
-      needVelocityScaling(false),
-      useRNEMD(false),
-      dumpWriter(NULL),
-      statWriter(NULL),
-      thermo(info_),
+  Integrator::Integrator(SimInfo* info) :
+      info_(info), forceMan_(NULL), rotAlgo_(NULL), flucQ_(NULL), rattle_(NULL),
+      velocitizer_(nullptr), needPotential(false), needVirial(false),
+      needReset(false), needVelocityScaling(false), useRNEMD(false),
+      dumpWriter(NULL), statWriter(NULL), thermo(info_),
       snap(info_->getSnapshotManager()->getCurrentSnapshot()) {
-  simParams = info->getSimParams();
+    simParams = info->getSimParams();
 
-  if (simParams->haveDt()) {
-    dt = simParams->getDt();
-    dt2 = 0.5 * dt;
-  } else {
-    sprintf(painCave.errMsg, "Integrator Error: dt is not set\n");
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  if (simParams->haveRunTime()) {
-    runTime = simParams->getRunTime();
-  } else {
-    sprintf(painCave.errMsg, "Integrator Error: runTime is not set\n");
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  // set the status, sample, and thermal kick times
-  if (simParams->haveSampleTime()) {
-    sampleTime = simParams->getSampleTime();
-    statusTime = sampleTime;
-  } else {
-    sampleTime = simParams->getRunTime();
-    statusTime = sampleTime;
-  }
-
-  if (simParams->haveStatusTime()) {
-    statusTime = simParams->getStatusTime();
-  }
-
-  if (simParams->haveThermalTime()) {
-    thermalTime = simParams->getThermalTime();
-  } else {
-    thermalTime = simParams->getRunTime();
-  }
-
-  if (!simParams->getUseInitalTime()) {
-    snap->setTime(0.0);
-  }
-
-  if (simParams->haveResetTime()) {
-    needReset = true;
-    resetTime = simParams->getResetTime();
-  }
-
-  // Create a default ForceManager: If the subclass wants to use
-  // a different ForceManager, use setForceManager
-  forceMan_ = new ForceManager(info);
-
-  // check for the temperature set flag (velocity scaling)
-  needVelocityScaling = false;
-  if (simParams->haveTempSet()) {
-    needVelocityScaling = simParams->getTempSet();
-  }
-
-  if (needVelocityScaling) {
-    if (simParams->haveTargetTemp()) {
-      targetScalingTemp = simParams->getTargetTemp();
+    if (simParams->haveDt()) {
+      dt  = simParams->getDt();
+      dt2 = 0.5 * dt;
     } else {
-      sprintf(painCave.errMsg,
-              "Integrator Error: Target Temperature must be set to turn on "
-              "tempSet\n");
+      sprintf(painCave.errMsg, "Integrator Error: dt is not set\n");
       painCave.isFatal = 1;
       simError();
     }
-  }
 
-  // Create a default a velocitizer: If the subclass wants to use
-  // a different velocitizer, use setVelocitizer
-  // Remove in favor of std::make_unique<> when we switch to C++14 and above
-  velocitizer_ = Utils::make_unique<Velocitizer>(info);
+    if (simParams->haveRunTime()) {
+      runTime = simParams->getRunTime();
+    } else {
+      sprintf(painCave.errMsg, "Integrator Error: runTime is not set\n");
+      painCave.isFatal = 1;
+      simError();
+    }
 
-  if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
-    useRNEMD = simParams->getRNEMDParameters()->getUseRNEMD();
+    // set the status, sample, and thermal kick times
+    if (simParams->haveSampleTime()) {
+      sampleTime = simParams->getSampleTime();
+      statusTime = sampleTime;
+    } else {
+      sampleTime = simParams->getRunTime();
+      statusTime = sampleTime;
+    }
 
-    if (useRNEMD) {
-      RNEMD::MethodFactory rnemdMethod{
-          simParams->getRNEMDParameters()->getMethod()};
-      rnemd_ = rnemdMethod.create(info);
+    if (simParams->haveStatusTime()) {
+      statusTime = simParams->getStatusTime();
+    }
 
-      if (simParams->getRNEMDParameters()->haveExchangeTime()) {
-        RNEMD_exchangeTime = simParams->getRNEMDParameters()->getExchangeTime();
+    if (simParams->haveThermalTime()) {
+      thermalTime = simParams->getThermalTime();
+    } else {
+      thermalTime = simParams->getRunTime();
+    }
 
-        // check to make sure exchange time is a multiple of dt;
-        RealType newET = ceil(RNEMD_exchangeTime / dt) * dt;
-        if (fabs(newET - RNEMD_exchangeTime) > 1e-6) {
-          RNEMD_exchangeTime = newET;
+    if (!simParams->getUseInitalTime()) { snap->setTime(0.0); }
+
+    if (simParams->haveResetTime()) {
+      needReset = true;
+      resetTime = simParams->getResetTime();
+    }
+
+    // Create a default ForceManager: If the subclass wants to use
+    // a different ForceManager, use setForceManager
+    forceMan_ = new ForceManager(info);
+
+    // check for the temperature set flag (velocity scaling)
+    needVelocityScaling = false;
+    if (simParams->haveTempSet()) {
+      needVelocityScaling = simParams->getTempSet();
+    }
+
+    if (needVelocityScaling) {
+      if (simParams->haveTargetTemp()) {
+        targetScalingTemp = simParams->getTargetTemp();
+      } else {
+        sprintf(painCave.errMsg,
+                "Integrator Error: Target Temperature must be set to turn on "
+                "tempSet\n");
+        painCave.isFatal = 1;
+        simError();
+      }
+    }
+
+    // Create a default a velocitizer: If the subclass wants to use
+    // a different velocitizer, use setVelocitizer
+    // Remove in favor of std::make_unique<> when we switch to C++14 and above
+    velocitizer_ = Utils::make_unique<Velocitizer>(info);
+
+    if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
+      useRNEMD = simParams->getRNEMDParameters()->getUseRNEMD();
+
+      if (useRNEMD) {
+        RNEMD::MethodFactory rnemdMethod {
+            simParams->getRNEMDParameters()->getMethod()};
+        rnemd_ = rnemdMethod.create(info);
+
+        if (simParams->getRNEMDParameters()->haveExchangeTime()) {
+          RNEMD_exchangeTime =
+              simParams->getRNEMDParameters()->getExchangeTime();
+
+          // check to make sure exchange time is a multiple of dt;
+          RealType newET = ceil(RNEMD_exchangeTime / dt) * dt;
+          if (fabs(newET - RNEMD_exchangeTime) > 1e-6) {
+            RNEMD_exchangeTime = newET;
+          }
         }
       }
     }
-  }
 
-  rotAlgo_ = new DLM();
-  rattle_ = new Rattle(info);
+    rotAlgo_ = new DLM();
+    rattle_  = new Rattle(info);
 
-  if (simParams->getFluctuatingChargeParameters()->havePropagator()) {
-    std::string prop = toUpperCopy(
-        simParams->getFluctuatingChargeParameters()->getPropagator());
-    if (prop.compare("NVT") == 0) {
-      flucQ_ = new FluctuatingChargeNVT(info);
-    } else if (prop.compare("NVE") == 0) {
-      flucQ_ = new FluctuatingChargeNVE(info);
-    } else if (prop.compare("LANGEVIN") == 0) {
-      flucQ_ = new FluctuatingChargeLangevin(info);
-    } else if (prop.compare("DAMPED") == 0) {
-      flucQ_ = new FluctuatingChargeDamped(info);
-    } else {
-      sprintf(
-          painCave.errMsg,
-          "Integrator Error: Unknown Fluctuating Charge propagator (%s) "
-          "requested\n",
-          simParams->getFluctuatingChargeParameters()->getPropagator().c_str());
-      painCave.isFatal = 1;
+    if (simParams->getFluctuatingChargeParameters()->havePropagator()) {
+      std::string prop = toUpperCopy(
+          simParams->getFluctuatingChargeParameters()->getPropagator());
+      if (prop.compare("NVT") == 0) {
+        flucQ_ = new FluctuatingChargeNVT(info);
+      } else if (prop.compare("NVE") == 0) {
+        flucQ_ = new FluctuatingChargeNVE(info);
+      } else if (prop.compare("LANGEVIN") == 0) {
+        flucQ_ = new FluctuatingChargeLangevin(info);
+      } else if (prop.compare("DAMPED") == 0) {
+        flucQ_ = new FluctuatingChargeDamped(info);
+      } else {
+        sprintf(painCave.errMsg,
+                "Integrator Error: Unknown Fluctuating Charge propagator (%s) "
+                "requested\n",
+                simParams->getFluctuatingChargeParameters()
+                    ->getPropagator()
+                    .c_str());
+        painCave.isFatal = 1;
+      }
     }
+    flucQ_->setForceManager(forceMan_);
   }
-  flucQ_->setForceManager(forceMan_);
-}
 
-Integrator::~Integrator() {
-  delete forceMan_;
-  delete flucQ_;
-  delete rotAlgo_;
-  delete rattle_;
-  delete dumpWriter;
-  delete stats;
-  delete statWriter;
-}
-
-void Integrator::updateSizes() {
-  doUpdateSizes();
-  flucQ_->updateSizes();
-}
-
-void Integrator::setForceManager(ForceManager* forceMan) {
-  if (forceMan_ != forceMan && forceMan_ != NULL) {
+  Integrator::~Integrator() {
     delete forceMan_;
-  }
-  forceMan_ = forceMan;
-  // forward this on:
-  if (flucQ_ != NULL) {
-    flucQ_->setForceManager(forceMan_);
-  }
-}
-
-void Integrator::setVelocitizer(std::unique_ptr<Velocitizer> velocitizer) {
-  velocitizer_ = std::move(velocitizer);
-}
-
-void Integrator::setFluctuatingChargePropagator(
-    FluctuatingChargePropagator* prop) {
-  if (prop != flucQ_ && flucQ_ != NULL) {
     delete flucQ_;
-  }
-  flucQ_ = prop;
-  if (forceMan_ != NULL) {
-    flucQ_->setForceManager(forceMan_);
-  }
-}
-
-void Integrator::setRotationAlgorithm(RotationAlgorithm* algo) {
-  if (algo != rotAlgo_ && rotAlgo_ != NULL) {
     delete rotAlgo_;
+    delete rattle_;
+    delete dumpWriter;
+    delete stats;
+    delete statWriter;
   }
 
-  rotAlgo_ = algo;
-}
-
-void Integrator::setRNEMD(std::unique_ptr<RNEMD::RNEMD> rnemd) {
-  rnemd_ = std::move(rnemd);
-}
-
-void Integrator::integrate() {
-  initialize();
-
-  while (snap->getTime() <= runTime) {
-    preStep();
-    step();
-    postStep();
+  void Integrator::updateSizes() {
+    doUpdateSizes();
+    flucQ_->updateSizes();
   }
 
-  finalize();
-}
+  void Integrator::setForceManager(ForceManager* forceMan) {
+    if (forceMan_ != forceMan && forceMan_ != NULL) { delete forceMan_; }
+    forceMan_ = forceMan;
+    // forward this on:
+    if (flucQ_ != NULL) { flucQ_->setForceManager(forceMan_); }
+  }
 
-void Integrator::saveConservedQuantity() {
-  snap->setConservedQuantity(calcConservedQuantity());
-}
+  void Integrator::setVelocitizer(std::unique_ptr<Velocitizer> velocitizer) {
+    velocitizer_ = std::move(velocitizer);
+  }
 
-void Integrator::initialize() {
-  forceMan_->initialize();
+  void Integrator::setFluctuatingChargePropagator(
+      FluctuatingChargePropagator* prop) {
+    if (prop != flucQ_ && flucQ_ != NULL) { delete flucQ_; }
+    flucQ_ = prop;
+    if (forceMan_ != NULL) { flucQ_->setForceManager(forceMan_); }
+  }
 
-  // remove center of mass drift velocity (in case we passed in a
-  // configuration that was drifting)
-  velocitizer_->removeComDrift();
+  void Integrator::setRotationAlgorithm(RotationAlgorithm* algo) {
+    if (algo != rotAlgo_ && rotAlgo_ != NULL) { delete rotAlgo_; }
 
-  // find the initial fluctuating charges.
-  flucQ_->initialize();
-  // initialize the forces before the first step
-  calcForce();
-  // execute the constraint algorithm to make sure that the system is
-  // constrained at the very beginning
-  if (info_->getNGlobalConstraints() > 0) {
-    rattle_->constraintA();
+    rotAlgo_ = algo;
+  }
+
+  void Integrator::setRNEMD(std::unique_ptr<RNEMD::RNEMD> rnemd) {
+    rnemd_ = std::move(rnemd);
+  }
+
+  void Integrator::integrate() {
+    initialize();
+
+    while (snap->getTime() <= runTime) {
+      preStep();
+      step();
+      postStep();
+    }
+
+    finalize();
+  }
+
+  void Integrator::saveConservedQuantity() {
+    snap->setConservedQuantity(calcConservedQuantity());
+  }
+
+  void Integrator::initialize() {
+    forceMan_->initialize();
+
+    // remove center of mass drift velocity (in case we passed in a
+    // configuration that was drifting)
+    velocitizer_->removeComDrift();
+
+    // find the initial fluctuating charges.
+    flucQ_->initialize();
+    // initialize the forces before the first step
     calcForce();
-    rattle_->constraintB();
-    // copy the current snapshot to previous snapshot
-    info_->getSnapshotManager()->advance();
-  }
-
-  if (needVelocityScaling) {
-    velocitizer_->randomize(targetScalingTemp);
-  }
-
-  dumpWriter = createDumpWriter();
-  statWriter = createStatWriter();
-  dumpWriter->writeDumpAndEor();
-
-  // Remove in favor of std::make_unique<> when we switch to C++14 and above
-  progressBar = Utils::make_unique<ProgressBar>();
-
-  // save statistics, before writeStat,  we must save statistics
-  saveConservedQuantity();
-  stats->collectStats();
-
-  if (useRNEMD) rnemd_->getStarted();
-
-  statWriter->writeStat();
-
-  currSample = sampleTime + snap->getTime();
-  currStatus = statusTime + snap->getTime();
-  currThermal = thermalTime + snap->getTime();
-  if (needReset) {
-    currReset = resetTime + snap->getTime();
-  }
-  if (useRNEMD) {
-    currRNEMD = RNEMD_exchangeTime + snap->getTime();
-  }
-  needPotential = false;
-  needVirial = false;
-}
-
-void Integrator::preStep() {
-  RealType difference = snap->getTime() + dt - currStatus;
-
-  if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
-    needPotential = true;
-    needVirial = true;
-  }
-}
-
-void Integrator::calcForce() {
-  forceMan_->calcForces();
-  flucQ_->applyConstraints();
-}
-
-void Integrator::postStep() {
-  RealType difference;
-
-  saveConservedQuantity();
-
-  if (needVelocityScaling) {
-    difference = snap->getTime() - currThermal;
-
-    if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
-      velocitizer_->randomize(targetScalingTemp);
-      currThermal += thermalTime;
+    // execute the constraint algorithm to make sure that the system is
+    // constrained at the very beginning
+    if (info_->getNGlobalConstraints() > 0) {
+      rattle_->constraintA();
+      calcForce();
+      rattle_->constraintB();
+      // copy the current snapshot to previous snapshot
+      info_->getSnapshotManager()->advance();
     }
-  }
 
-  if (useRNEMD) {
-    difference = snap->getTime() - currRNEMD;
+    if (needVelocityScaling) { velocitizer_->randomize(targetScalingTemp); }
 
-    if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
-      rnemd_->doRNEMD();
-      currRNEMD += RNEMD_exchangeTime;
-    }
-    rnemd_->collectData();
-  }
-
-  difference = snap->getTime() - currSample;
-
-  if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
+    dumpWriter = createDumpWriter();
+    statWriter = createStatWriter();
     dumpWriter->writeDumpAndEor();
-    currSample += sampleTime;
-  }
 
-  difference = snap->getTime() - currStatus;
+    // Remove in favor of std::make_unique<> when we switch to C++14 and above
+    progressBar = Utils::make_unique<ProgressBar>();
 
-  if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
+    // save statistics, before writeStat,  we must save statistics
+    saveConservedQuantity();
     stats->collectStats();
 
-    if (useRNEMD) {
-      rnemd_->writeOutputFile();
-    }
+    if (useRNEMD) rnemd_->getStarted();
 
     statWriter->writeStat();
 
-    progressBar->setStatus(snap->getTime(), runTime);
+    currSample  = sampleTime + snap->getTime();
+    currStatus  = statusTime + snap->getTime();
+    currThermal = thermalTime + snap->getTime();
+    if (needReset) { currReset = resetTime + snap->getTime(); }
+    if (useRNEMD) { currRNEMD = RNEMD_exchangeTime + snap->getTime(); }
+    needPotential = false;
+    needVirial    = false;
+  }
+
+  void Integrator::preStep() {
+    RealType difference = snap->getTime() + dt - currStatus;
+
+    if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
+      needPotential = true;
+      needVirial    = true;
+    }
+  }
+
+  void Integrator::calcForce() {
+    forceMan_->calcForces();
+    flucQ_->applyConstraints();
+  }
+
+  void Integrator::postStep() {
+    RealType difference;
+
+    saveConservedQuantity();
+
+    if (needVelocityScaling) {
+      difference = snap->getTime() - currThermal;
+
+      if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
+        velocitizer_->randomize(targetScalingTemp);
+        currThermal += thermalTime;
+      }
+    }
+
+    if (useRNEMD) {
+      difference = snap->getTime() - currRNEMD;
+
+      if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
+        rnemd_->doRNEMD();
+        currRNEMD += RNEMD_exchangeTime;
+      }
+      rnemd_->collectData();
+    }
+
+    difference = snap->getTime() - currSample;
+
+    if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
+      dumpWriter->writeDumpAndEor();
+      currSample += sampleTime;
+    }
+
+    difference = snap->getTime() - currStatus;
+
+    if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
+      stats->collectStats();
+
+      if (useRNEMD) { rnemd_->writeOutputFile(); }
+
+      statWriter->writeStat();
+
+      progressBar->setStatus(snap->getTime(), runTime);
+      progressBar->update();
+
+      needPotential = false;
+      needVirial    = false;
+      currStatus += statusTime;
+    }
+
+    difference = snap->getTime() - currReset;
+
+    if (needReset && (difference > 0 || fabs(difference) <= OpenMD::epsilon)) {
+      resetIntegrator();
+      currReset += resetTime;
+    }
+    // save snapshot
+    info_->getSnapshotManager()->advance();
+
+    // increase time
+    snap->increaseTime(dt);
+  }
+
+  void Integrator::finalize() {
+    dumpWriter->writeEor();
+    if (useRNEMD) { rnemd_->writeOutputFile(); }
+    progressBar->setStatus(runTime, runTime);
     progressBar->update();
 
-    needPotential = false;
-    needVirial = false;
-    currStatus += statusTime;
+    statWriter->writeStatReport();
   }
 
-  difference = snap->getTime() - currReset;
+  DumpWriter* Integrator::createDumpWriter() { return new DumpWriter(info_); }
 
-  if (needReset && (difference > 0 || fabs(difference) <= OpenMD::epsilon)) {
-    resetIntegrator();
-    currReset += resetTime;
+  StatWriter* Integrator::createStatWriter() {
+    stats      = new Stats(info_);
+    statWriter = new StatWriter(info_->getStatFileName(), stats);
+    statWriter->setReportFileName(info_->getReportFileName());
+
+    return statWriter;
   }
-  // save snapshot
-  info_->getSnapshotManager()->advance();
-
-  // increase time
-  snap->increaseTime(dt);
-}
-
-void Integrator::finalize() {
-  dumpWriter->writeEor();
-  if (useRNEMD) {
-    rnemd_->writeOutputFile();
-  }
-  progressBar->setStatus(runTime, runTime);
-  progressBar->update();
-
-  statWriter->writeStatReport();
-}
-
-DumpWriter* Integrator::createDumpWriter() { return new DumpWriter(info_); }
-
-StatWriter* Integrator::createStatWriter() {
-  stats = new Stats(info_);
-  statWriter = new StatWriter(info_->getStatFileName(), stats);
-  statWriter->setReportFileName(info_->getReportFileName());
-
-  return statWriter;
-}
 }  // namespace OpenMD

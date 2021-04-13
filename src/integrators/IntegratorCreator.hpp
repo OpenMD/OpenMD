@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,8 +42,8 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
-#ifndef INTEGRATORS_INTEGRATORCREATOR_HPP 
+
+#ifndef INTEGRATORS_INTEGRATORCREATOR_HPP
 #define INTEGRATORS_INTEGRATORCREATOR_HPP
 
 #include <string>
@@ -63,7 +63,7 @@ namespace OpenMD {
     const std::string& getIdent() const { return ident_; }
 
     virtual Integrator* create(SimInfo* info) const = 0;
-            
+
   private:
     std::string ident_;
   };
@@ -76,10 +76,11 @@ namespace OpenMD {
   class IntegratorBuilder : public IntegratorCreator {
   public:
     IntegratorBuilder(const std::string& ident) : IntegratorCreator(ident) {}
-    virtual  Integrator* create(SimInfo* info) const {return new ConcreteIntegrator(info);}
+    virtual Integrator* create(SimInfo* info) const {
+      return new ConcreteIntegrator(info);
+    }
   };
 
-}
+}  // namespace OpenMD
 
-#endif //INTEGRATORS_INTEGRATORCREATOR_HPP
-
+#endif  // INTEGRATORS_INTEGRATORCREATOR_HPP

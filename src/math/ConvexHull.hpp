@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -46,36 +46,35 @@
 #ifndef MATH_CONVEXHULL_HPP_
 #define MATH_CONVEXHULL_HPP_
 
-#include "math/Vector3.hpp"
+#include <cassert>
+#include <string>
+#include <vector>
+
 #include "config.h"
 #include "math/Hull.hpp"
 #include "math/Triangle.hpp"
-
-#include <cassert>
-#include <vector>
-#include <string>
+#include "math/Vector3.hpp"
 
 namespace OpenMD {
   class ConvexHull : public Hull {
   public:
+    ConvexHull();
+    virtual ~ConvexHull() {};
 
-    ConvexHull();    
-    virtual ~ConvexHull(){};
-
-    void computeHull( std::vector<StuntDouble*> bodydoubles );
+    void computeHull(std::vector<StuntDouble*> bodydoubles);
 
     /* Total area of Hull*/
-    RealType getArea(){ return area_;}
+    RealType getArea() { return area_; }
 
     /* Total Volume enclosed by Hull */
-    RealType getVolume(){ return volume_; } 
+    RealType getVolume() { return volume_; }
 
-    std::vector<Triangle> getMesh(){return Triangles_;}
+    std::vector<Triangle> getMesh() { return Triangles_; }
 
   protected:
     const std::string options_;
     int dim_;
-    
+
   private:
     // These variables are private so that each new hull returns
     // information about itself.
@@ -83,5 +82,5 @@ namespace OpenMD {
     RealType area_;
     std::vector<Triangle> Triangles_;
   };
-}
+}  // namespace OpenMD
 #endif /*MATH_CONVEXHULL_HPP_*/

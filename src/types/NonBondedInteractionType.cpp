@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -55,111 +55,111 @@
 
 namespace OpenMD {
 
-NonBondedInteractionType::NonBondedInteractionType() {
-  nbitp.is_LennardJones = false;
-  nbitp.is_Morse = false;
-  nbitp.is_MAW = false;
-  nbitp.is_EAMTable = false;
-  nbitp.is_EAMZhou = false;
-  nbitp.is_EAMOxides = false;
-  nbitp.is_SC = false;
-  nbitp.is_RepulsivePower = false;
-  nbitp.is_Mie = false;
-  nbitp.is_Buckingham = false;
-  nbitp.is_InversePowerSeries = false;
-  atomTypes_.first = NULL;
-  atomTypes_.second = NULL;
-}
-void NonBondedInteractionType::setAtomTypes(
-    std::pair<AtomType*, AtomType*> ats) {
-  atomTypes_ = ats;
-}
+  NonBondedInteractionType::NonBondedInteractionType() {
+    nbitp.is_LennardJones       = false;
+    nbitp.is_Morse              = false;
+    nbitp.is_MAW                = false;
+    nbitp.is_EAMTable           = false;
+    nbitp.is_EAMZhou            = false;
+    nbitp.is_EAMOxides          = false;
+    nbitp.is_SC                 = false;
+    nbitp.is_RepulsivePower     = false;
+    nbitp.is_Mie                = false;
+    nbitp.is_Buckingham         = false;
+    nbitp.is_InversePowerSeries = false;
+    atomTypes_.first            = NULL;
+    atomTypes_.second           = NULL;
+  }
+  void NonBondedInteractionType::setAtomTypes(
+      std::pair<AtomType*, AtomType*> ats) {
+    atomTypes_ = ats;
+  }
 
-std::pair<AtomType*, AtomType*> NonBondedInteractionType::getAtomTypes() {
-  return atomTypes_;
-}
+  std::pair<AtomType*, AtomType*> NonBondedInteractionType::getAtomTypes() {
+    return atomTypes_;
+  }
 
-void NonBondedInteractionType::addProperty(
-    std::shared_ptr<GenericData> genData) {
-  properties_.addProperty(genData);
-}
+  void NonBondedInteractionType::addProperty(
+      std::shared_ptr<GenericData> genData) {
+    properties_.addProperty(genData);
+  }
 
-void NonBondedInteractionType::removeProperty(const std::string& propName) {
-  properties_.removeProperty(propName);
-}
+  void NonBondedInteractionType::removeProperty(const std::string& propName) {
+    properties_.removeProperty(propName);
+  }
 
-std::vector<std::string> NonBondedInteractionType::getPropertyNames() {
-  return properties_.getPropertyNames();
-}
+  std::vector<std::string> NonBondedInteractionType::getPropertyNames() {
+    return properties_.getPropertyNames();
+  }
 
-std::vector<std::shared_ptr<GenericData>>
-NonBondedInteractionType::getProperties() {
-  return properties_.getProperties();
-}
+  std::vector<std::shared_ptr<GenericData>>
+      NonBondedInteractionType::getProperties() {
+    return properties_.getProperties();
+  }
 
-std::shared_ptr<GenericData> NonBondedInteractionType::getPropertyByName(
-    const std::string& propName) {
-  return properties_.getPropertyByName(propName);
-}
+  std::shared_ptr<GenericData> NonBondedInteractionType::getPropertyByName(
+      const std::string& propName) {
+    return properties_.getPropertyByName(propName);
+  }
 
-void NonBondedInteractionType::setLennardJones() {
-  nbitp.is_LennardJones = true;
-}
+  void NonBondedInteractionType::setLennardJones() {
+    nbitp.is_LennardJones = true;
+  }
 
-bool NonBondedInteractionType::isLennardJones() {
-  return nbitp.is_LennardJones;
-}
+  bool NonBondedInteractionType::isLennardJones() {
+    return nbitp.is_LennardJones;
+  }
 
-void NonBondedInteractionType::setMorse() { nbitp.is_Morse = true; }
+  void NonBondedInteractionType::setMorse() { nbitp.is_Morse = true; }
 
-bool NonBondedInteractionType::isMorse() { return nbitp.is_Morse; }
+  bool NonBondedInteractionType::isMorse() { return nbitp.is_Morse; }
 
-void NonBondedInteractionType::setEAMTable() { nbitp.is_EAMTable = true; }
+  void NonBondedInteractionType::setEAMTable() { nbitp.is_EAMTable = true; }
 
-bool NonBondedInteractionType::isEAMTable() { return nbitp.is_EAMTable; }
+  bool NonBondedInteractionType::isEAMTable() { return nbitp.is_EAMTable; }
 
-void NonBondedInteractionType::setEAMZhou() { nbitp.is_EAMZhou = true; }
+  void NonBondedInteractionType::setEAMZhou() { nbitp.is_EAMZhou = true; }
 
-bool NonBondedInteractionType::isEAMZhou() { return nbitp.is_EAMZhou; }
+  bool NonBondedInteractionType::isEAMZhou() { return nbitp.is_EAMZhou; }
 
-void NonBondedInteractionType::setEAMOxides() { nbitp.is_EAMOxides = true; }
+  void NonBondedInteractionType::setEAMOxides() { nbitp.is_EAMOxides = true; }
 
-bool NonBondedInteractionType::isEAMOxides() { return nbitp.is_EAMOxides; }
+  bool NonBondedInteractionType::isEAMOxides() { return nbitp.is_EAMOxides; }
 
-bool NonBondedInteractionType::isSC() { return nbitp.is_SC; }
+  bool NonBondedInteractionType::isSC() { return nbitp.is_SC; }
 
-void NonBondedInteractionType::setSC() { nbitp.is_SC = true; }
+  void NonBondedInteractionType::setSC() { nbitp.is_SC = true; }
 
-bool NonBondedInteractionType::isMAW() { return nbitp.is_MAW; }
+  bool NonBondedInteractionType::isMAW() { return nbitp.is_MAW; }
 
-void NonBondedInteractionType::setMAW() { nbitp.is_MAW = true; }
+  void NonBondedInteractionType::setMAW() { nbitp.is_MAW = true; }
 
-bool NonBondedInteractionType::isMetal() {
-  return isSC() || isEAMTable() || isEAMZhou();
-}
+  bool NonBondedInteractionType::isMetal() {
+    return isSC() || isEAMTable() || isEAMZhou();
+  }
 
-bool NonBondedInteractionType::isRepulsivePower() {
-  return nbitp.is_RepulsivePower;
-}
+  bool NonBondedInteractionType::isRepulsivePower() {
+    return nbitp.is_RepulsivePower;
+  }
 
-void NonBondedInteractionType::setRepulsivePower() {
-  nbitp.is_RepulsivePower = true;
-}
+  void NonBondedInteractionType::setRepulsivePower() {
+    nbitp.is_RepulsivePower = true;
+  }
 
-bool NonBondedInteractionType::isMie() { return nbitp.is_Mie; }
+  bool NonBondedInteractionType::isMie() { return nbitp.is_Mie; }
 
-void NonBondedInteractionType::setMie() { nbitp.is_Mie = true; }
+  void NonBondedInteractionType::setMie() { nbitp.is_Mie = true; }
 
-bool NonBondedInteractionType::isBuckingham() { return nbitp.is_Buckingham; }
+  bool NonBondedInteractionType::isBuckingham() { return nbitp.is_Buckingham; }
 
-void NonBondedInteractionType::setBuckingham() { nbitp.is_Buckingham = true; }
+  void NonBondedInteractionType::setBuckingham() { nbitp.is_Buckingham = true; }
 
-bool NonBondedInteractionType::isInversePowerSeries() {
-  return nbitp.is_InversePowerSeries;
-}
+  bool NonBondedInteractionType::isInversePowerSeries() {
+    return nbitp.is_InversePowerSeries;
+  }
 
-void NonBondedInteractionType::setInversePowerSeries() {
-  nbitp.is_InversePowerSeries = true;
-}
+  void NonBondedInteractionType::setInversePowerSeries() {
+    nbitp.is_InversePowerSeries = true;
+  }
 
 }  // namespace OpenMD

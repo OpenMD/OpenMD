@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef INTEGRATORS_FLUCTUATINGCHARGELANGEVIN_HPP
 #define INTEGRATORS_FLUCTUATINGCHARGELANGEVIN_HPP
 
@@ -54,39 +54,22 @@ namespace OpenMD {
   class FluctuatingChargeLangevin : public FluctuatingChargePropagator {
   public:
     FluctuatingChargeLangevin(SimInfo* info);
-    
-    RealType getTargetTemp() {
-      return targetTemp_;
-    }
 
-    void setTargetTemp(RealType tt) {
-      targetTemp_ = tt;
-    }
+    RealType getTargetTemp() { return targetTemp_; }
 
-    RealType getDragCoefficient() {
-      return drag_;
-    }
+    void setTargetTemp(RealType tt) { targetTemp_ = tt; }
 
-    void setDragCoefficient(RealType drag) {
-      drag_ = drag;
-    }
+    RealType getDragCoefficient() { return drag_; }
 
-    int getMaxIterationNumber() {
-      return maxIterNum_;
-    }
-        
-    void setMaxIterationNumber(int maxIter) {
-      maxIterNum_ = maxIter;
-    }
+    void setDragCoefficient(RealType drag) { drag_ = drag; }
 
-    RealType getForceTolerance() {
-      return forceTolerance_;
-    }
+    int getMaxIterationNumber() { return maxIterNum_; }
 
-    void setForceTolerance(RealType tol) {
-      forceTolerance_ = tol;
-    }
+    void setMaxIterationNumber(int maxIter) { maxIterNum_ = maxIter; }
 
+    RealType getForceTolerance() { return forceTolerance_; }
+
+    void setForceTolerance(RealType tol) { forceTolerance_ = tol; }
 
   private:
     virtual void initialize();
@@ -103,12 +86,11 @@ namespace OpenMD {
     RealType variance_;
     RealType dt2_;
     RealType dt_;
-    
-    Snapshot* snap {nullptr};
-    SeqRandNumGen randNumGen_; 
 
+    Snapshot* snap {nullptr};
+    SeqRandNumGen randNumGen_;
   };
 
-}
+}  // namespace OpenMD
 
-#endif 
+#endif

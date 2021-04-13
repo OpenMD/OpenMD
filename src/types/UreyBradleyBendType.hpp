@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,14 +42,14 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file UreyBradleyBendType.hpp
  * @author    tlin
  * @date  11/01/2004
  * @version 1.0
- */ 
- 
+ */
+
 #ifndef TYPES_UREYBRADLEYBENDTYPE_HPP
 #define TYPES_UREYBRADLEYBENDTYPE_HPP
 
@@ -57,44 +57,30 @@
 #include "types/HarmonicBondType.hpp"
 namespace OpenMD {
   /**
-   * @class UreyBradleyBendType 
+   * @class UreyBradleyBendType
    *
    * @todo documentation
    */
   class UreyBradleyBendType : public HarmonicBendType {
-    
   public:
-    
-    UreyBradleyBendType(RealType theta0, RealType ktheta, RealType s0, 
-                        RealType kub) : HarmonicBendType(theta0, ktheta), 
-                                        hbt_(HarmonicBondType(s0, kub)){
-    }
-    
-    RealType getUBForceConstant() {
-      return hbt_.getForceConstant();
-    }
-    
-    void setUBForceConstant(RealType kub) {
-      hbt_.setForceConstant(kub);
-    }
-    
-    RealType getUBLength() {
-      return hbt_.getEquilibriumBondLength();
-    }
-    
-    void setUBLength(RealType s) {
-      hbt_.setEquilibriumBondLength(s);
-    }
-    
-    HarmonicBondType* getHarmonicBondType() {
-      return &hbt_;
-    }
-                
+    UreyBradleyBendType(RealType theta0, RealType ktheta, RealType s0,
+                        RealType kub) :
+        HarmonicBendType(theta0, ktheta),
+        hbt_(HarmonicBondType(s0, kub)) {}
+
+    RealType getUBForceConstant() { return hbt_.getForceConstant(); }
+
+    void setUBForceConstant(RealType kub) { hbt_.setForceConstant(kub); }
+
+    RealType getUBLength() { return hbt_.getEquilibriumBondLength(); }
+
+    void setUBLength(RealType s) { hbt_.setEquilibriumBondLength(s); }
+
+    HarmonicBondType* getHarmonicBondType() { return &hbt_; }
+
   private:
     HarmonicBondType hbt_;
   };
-  
-}//end namespace OpenMD
-#endif //TYPES_UREYBRADLEYBENDTYPE_HPP
 
-
+}  // end namespace OpenMD
+#endif  // TYPES_UREYBRADLEYBENDTYPE_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,9 +45,9 @@
 
 #ifndef APPLICATIONS_STATICPROPS_HBONDGEOMETRIC_HPP
 #define APPLICATIONS_STATICPROPS_HBONDGEOMETRIC_HPP
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
 
 namespace OpenMD {
 
@@ -64,39 +64,36 @@ namespace OpenMD {
    */
   class HBondGeometric : public StaticAnalyser {
   public:
-
-    HBondGeometric(SimInfo* info, const std::string& filename, 
+    HBondGeometric(SimInfo* info, const std::string& filename,
                    const std::string& sele1, const std::string& sele2,
-                   double rCut, double thetaCut,
-                   int nbins);
-    
+                   double rCut, double thetaCut, int nbins);
+
     virtual void process();
-   
+
   private:
     virtual void initializeHistogram();
-    virtual void collectHistogram(int nHB, int nD, int nA);    
+    virtual void collectHistogram(int nHB, int nD, int nA);
     void writeHistogram();
 
     Snapshot* currentSnapshot_;
     std::string selectionScript1_;
-    SelectionManager seleMan1_;    
+    SelectionManager seleMan1_;
     SelectionEvaluator evaluator1_;
     std::string selectionScript2_;
-    SelectionManager seleMan2_;    
+    SelectionManager seleMan2_;
     SelectionEvaluator evaluator2_;
     ForceField* ff_;
-                
+
     RealType rCut_;
     RealType thetaCut_;
     int frameCounter_;
     int nBins_;
-   
+
     std::vector<int> nHBonds_;
     std::vector<int> nDonor_;
     std::vector<int> nAcceptor_;
     int nSelected_;
   };
-}
+}  // namespace OpenMD
 
 #endif
-

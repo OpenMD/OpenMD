@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,14 +42,14 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file Vector3.hpp
  * @author Teng Lin
  * @date 09/14/2004
  * @version 1.0
  */
- 
+
 #ifndef MATH_VECTOR3_HPP
 #define MATH_VECTOR3_HPP
 
@@ -59,21 +59,21 @@
 #include "Vector.hpp"
 
 namespace OpenMD {
-  
+
   /**
    * @class Vector3 Vector3.hpp "math/Vector3.hpp"
-   * @brief 
+   * @brief
    */
-  
+
   template<typename Real>
-  class Vector3 : public Vector<Real, 3>{
+  class Vector3 : public Vector<Real, 3> {
   public:
     typedef Real ElemType;
     typedef Real* ElemPoinerType;
-    Vector3() : Vector<Real, 3>(){}
-    
+    Vector3() : Vector<Real, 3>() {}
+
     /** Constructs and initializes a Vector3 from x, y, z coordinates */
-    inline Vector3( Real x, Real y, Real z) {
+    inline Vector3(Real x, Real y, Real z) {
       this->data_[0] = x;
       this->data_[1] = y;
       this->data_[2] = z;
@@ -81,53 +81,52 @@ namespace OpenMD {
 
     /** Constructs and initializes from an array*/
     inline Vector3(Real* array) : Vector<Real, 3>(array) {}
-    
+
     inline Vector3(const Vector<Real, 3>& v) : Vector<Real, 3>(v) {}
-    
-    inline Vector3<Real>& operator = (const Vector<Real, 3>& v) {
+
+    inline Vector3<Real>& operator=(const Vector<Real, 3>& v) {
       if (this == &v) { return *this; }
       Vector<Real, 3>::operator=(v);
       return *this;
     }
-    
+
     /**
      * Returns reference of the first element of Vector3.
      * @return reference of the first element of Vector3
      */
-    inline Real& x() {  return this->data_[0];}
-    
+    inline Real& x() { return this->data_[0]; }
+
     /**
      * Returns the first element of Vector3.
      * @return  the first element of Vector3
      */
-    inline Real x() const {  return this->data_[0];}
-    
+    inline Real x() const { return this->data_[0]; }
+
     /**
      * Returns reference of the second element of Vector3.
      * @return reference of the second element of Vector3
      */
-    inline Real& y() {  return this->data_[1];}
-    
+    inline Real& y() { return this->data_[1]; }
+
     /**
      * Returns  the second element of Vector3.
      * @return c the second element of Vector3
      */
-    inline Real y() const {  return this->data_[1];}
-    
+    inline Real y() const { return this->data_[1]; }
+
     /**
      * Returns reference of the third element of Vector3.
      * @return reference of the third element of Vector3
      */
-    inline Real& z() {  return this->data_[2];}
-    
+    inline Real& z() { return this->data_[2]; }
+
     /**
      * Returns  the third element of Vector3.
      * @return f the third element of Vector3
      */
-    inline Real z() const {  return this->data_[2];}
-    
+    inline Real z() const { return this->data_[2]; }
   };
-  
+
   /**
    * Returns the cross product of two Vectors
    * @param v1 first vector
@@ -135,16 +134,15 @@ namespace OpenMD {
    * @return the cross product  of v1 and v2
    */
   template<typename Real>
-  inline Vector3<Real> cross( const Vector3<Real>& v1, const Vector3<Real>& v2 ) {
+  inline Vector3<Real> cross(const Vector3<Real>& v1, const Vector3<Real>& v2) {
     Vector3<Real> result;
-    
+
     result.x() = v1.y() * v2.z() - v1.z() * v2.y();
     result.y() = v1.z() * v2.x() - v1.x() * v2.z();
     result.z() = v1.x() * v2.y() - v1.y() * v2.x();
-    
+
     return result;
   }
-
 
   /**
    * Returns the linear indexing for integer vectors. Compare to
@@ -154,19 +152,19 @@ namespace OpenMD {
    * @param s second vector
    */
   template<typename Real>
-  inline Real Vlinear( const Vector3<Real>& p, const Vector3<Real>& s ) {
+  inline Real Vlinear(const Vector3<Real>& p, const Vector3<Real>& s) {
     return (p.z() * s.y() + p.y()) * s.x() + p.x();
   }
 
   typedef Vector3<int> Vector3i;
-  
-  typedef Vector3<RealType> Vector3d;    
 
-  const Vector3d V3Zero(0.0 , 0.0, 0.0);
-  const Vector3d V3X( 1.0, 0.0, 0.0 ) ;
-  const Vector3d V3Y( 0.0, 1.0, 0.0 ) ;
-  const Vector3d V3Z ( 0.0, 0.0, 1.0 ) ;
- 
-}
+  typedef Vector3<RealType> Vector3d;
+
+  const Vector3d V3Zero(0.0, 0.0, 0.0);
+  const Vector3d V3X(1.0, 0.0, 0.0);
+  const Vector3d V3Y(0.0, 1.0, 0.0);
+  const Vector3d V3Z(0.0, 0.0, 1.0);
+
+}  // namespace OpenMD
 
 #endif

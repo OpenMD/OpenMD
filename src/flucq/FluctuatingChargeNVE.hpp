@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,12 +42,12 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef INTEGRATORS_FLUCTUATINGCHARGENVE_HPP
 #define INTEGRATORS_FLUCTUATINGCHARGENVE_HPP
 
-#include "flucq/FluctuatingChargePropagator.hpp"
 #include "brains/Thermo.hpp"
+#include "flucq/FluctuatingChargePropagator.hpp"
 
 namespace OpenMD {
 
@@ -61,16 +61,15 @@ namespace OpenMD {
     virtual void moveB();
     virtual void PositionStep(RealType dt);
     virtual void VelocityStep(RealType dt);
-    virtual void updateSizes(){}; 
-
+    virtual void updateSizes() {};
 
     RealType dt2_;
     RealType dt_;
-    
+
     Snapshot* snap {nullptr};
     Thermo thermo;
   };
 
-}
+}  // namespace OpenMD
 
-#endif 
+#endif

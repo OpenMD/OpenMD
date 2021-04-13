@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,6 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
 
 #ifndef IO_BASEATOMTYPESSECTIONPARSER_HPP
 #define IO_BASEATOMTYPESSECTIONPARSER_HPP
@@ -51,18 +50,17 @@
 namespace OpenMD {
 
   /**
-   * @class BaseAtomTypesSectionParser BaseAtomTypesSectionParser.hpp "io/BaseAtomTypesSectionParser.hpp"
+   * @class BaseAtomTypesSectionParser BaseAtomTypesSectionParser.hpp
+   * "io/BaseAtomTypesSectionParser.hpp"
    */
   class BaseAtomTypesSectionParser : public SectionParser {
   public:
     BaseAtomTypesSectionParser();
+
   private:
     void parseLine(ForceField& ff, const std::string& line, int lineNo);
-            
   };
 
+}  // namespace OpenMD
 
-} //namespace OpenMD
-
-#endif //IO_ATOMTYPESSECTIONPARSER_HPP
-
+#endif  // IO_ATOMTYPESSECTIONPARSER_HPP

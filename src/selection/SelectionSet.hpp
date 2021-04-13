@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,22 +48,23 @@
 
 #include <iostream>
 #include <vector>
+
 #include "utils/OpenMDBitSet.hpp"
 
 namespace OpenMD {
 
-  /** 
+  /**
    * The SelectionType enum.
    *
    * This is used to sort different types of selections by object type
    */
   enum SelectionType {
-    STUNTDOUBLE = 0,     /**< StuntDoubles (Atoms & RigidBodies) */
-    BOND = 1,            /**< Bonds */
-    BEND = 2,            /**< Bends */
-    TORSION = 3,         /**< Torsions */
-    INVERSION = 4,       /**< Inversions */
-    MOLECULE = 5,        /**< Molecules */
+    STUNTDOUBLE      = 0, /**< StuntDoubles (Atoms & RigidBodies) */
+    BOND             = 1, /**< Bonds */
+    BEND             = 2, /**< Bends */
+    TORSION          = 3, /**< Torsions */
+    INVERSION        = 4, /**< Inversions */
+    MOLECULE         = 5, /**< Molecules */
     N_SELECTIONTYPES = 6
   };
 
@@ -77,21 +78,24 @@ namespace OpenMD {
     /** Returns the number of bits set to true in this SelectionSet.  */
     std::vector<int> countBits();
 
-    /** Sets the bit at the specified index to to the complement of its current value. */
+    /** Sets the bit at the specified index to to the complement of its current
+     * value. */
     void flip(std::vector<int> bitIndex);
- 
-    /** Sets each bit from the specified fromIndex(inclusive) to the specified toIndex(exclusive) to the complement of its current value. */
-    void flip(std::vector<int> fromIndex, std::vector<int> toIndex); 
+
+    /** Sets each bit from the specified fromIndex(inclusive) to the specified
+     * toIndex(exclusive) to the complement of its current value. */
+    void flip(std::vector<int> fromIndex, std::vector<int> toIndex);
 
     /** Sets each bit to the complement of its current value. */
     void flip();
-        
+
     /** Returns the value of the bit with the specified index. */
     std::vector<bool> get(std::vector<int> bitIndex);
-        
-    /** Returns a new SelectionSet composed of bits from this SelectionSet from fromIndex(inclusive) to toIndex(exclusive). */
-    SelectionSet get(std::vector<int> fromIndex, std::vector<int> toIndex); 
-        
+
+    /** Returns a new SelectionSet composed of bits from this SelectionSet from
+     * fromIndex(inclusive) to toIndex(exclusive). */
+    SelectionSet get(std::vector<int> fromIndex, std::vector<int> toIndex);
+
     /** Returns true if any bits are set to true */
     std::vector<bool> any();
 
@@ -99,86 +103,101 @@ namespace OpenMD {
     std::vector<bool> none();
 
     std::vector<int> firstOffBit() const;
-        
-    /** Returns the index of the first bit that is set to false that occurs on or after the specified starting index.*/
-    std::vector<int> nextOffBit(std::vector<int> fromIndex) const; 
+
+    /** Returns the index of the first bit that is set to false that occurs on
+     * or after the specified starting index.*/
+    std::vector<int> nextOffBit(std::vector<int> fromIndex) const;
 
     std::vector<int> firstOnBit() const;
-        
-    /** Returns the index of the first bit that is set to true that occurs on or after the specified starting index. */
-    std::vector<int> nextOnBit(std::vector<int> fromIndex) const; 
-        
-    /** Performs a logical AND of this target bit set with the argument bit set. */
-    void andOperator (const SelectionSet& bs);
-       
+
+    /** Returns the index of the first bit that is set to true that occurs on or
+     * after the specified starting index. */
+    std::vector<int> nextOnBit(std::vector<int> fromIndex) const;
+
+    /** Performs a logical AND of this target bit set with the argument bit set.
+     */
+    void andOperator(const SelectionSet& bs);
+
     /** Performs a logical OR of this bit set with the bit set argument. */
-    void orOperator (const SelectionSet& bs); 
-        
+    void orOperator(const SelectionSet& bs);
+
     /** Performs a logical XOR of this bit set with the bit set argument. */
-    void xorOperator (const SelectionSet& bs);        
-               
+    void xorOperator(const SelectionSet& bs);
+
     void setBitOn(std::vector<int> bitIndex);
 
     void setBitOff(std::vector<int> bitIndex);
 
-    //void setRangeOn(std::vector<int> fromIndex, std::vector<int> toIndex) {  setBits(fromIndex, toIndex, true);  }
+    // void setRangeOn(std::vector<int> fromIndex, std::vector<int> toIndex) {
+    // setBits(fromIndex, toIndex, true);  }
 
-    //void setRangeOff(std::vector<int> fromIndex, std::vector<int> toIndex) {  setBits(fromIndex, toIndex, false);  }        
+    // void setRangeOff(std::vector<int> fromIndex, std::vector<int> toIndex) {
+    // setBits(fromIndex, toIndex, false);  }
 
     /** Sets all of the bits in this SelectionSet to false. */
     void clearAll();
 
     void setAll();
-        
-    /** Returns the number of bits of space actually in use by this SelectionSet to represent bit values. */
+
+    /** Returns the number of bits of space actually in use by this SelectionSet
+     * to represent bit values. */
     std::vector<int> size() const;
 
     /** Changes the size of SelectionSet*/
     void resize(std::vector<int> nbits);
-        
-    SelectionSet& operator&= (const SelectionSet &ss) {  andOperator (ss); return *this; }
-    SelectionSet& operator|= (const SelectionSet &ss) { orOperator (ss); return *this; }
-    SelectionSet& operator^= (const SelectionSet &ss) { xorOperator (ss); return *this; }
-    SelectionSet& operator-= (const SelectionSet &ss) { 
+
+    SelectionSet& operator&=(const SelectionSet& ss) {
+      andOperator(ss);
+      return *this;
+    }
+    SelectionSet& operator|=(const SelectionSet& ss) {
+      orOperator(ss);
+      return *this;
+    }
+    SelectionSet& operator^=(const SelectionSet& ss) {
+      xorOperator(ss);
+      return *this;
+    }
+    SelectionSet& operator-=(const SelectionSet& ss) {
       SelectionSet tmp = *this ^ ss;
       *this &= tmp;
       return *this;
     }
 
     SelectionSet parallelReduce();
-        
-    std::vector<bool>  operator[] (std::vector<int> bitIndex)  const {  
+
+    std::vector<bool> operator[](std::vector<int> bitIndex) const {
       std::vector<bool> result(N_SELECTIONTYPES);
-      for (int i = 0; i < N_SELECTIONTYPES; i++) 
+      for (int i = 0; i < N_SELECTIONTYPES; i++)
         result[i] = bitsets_[i][bitIndex[i]];
       return result;
     }
 
-    friend SelectionSet operator| (const SelectionSet& bs1, const SelectionSet& bs2);
-    friend SelectionSet operator& (const SelectionSet& bs1, const SelectionSet& bs2);
-    friend SelectionSet operator^ (const SelectionSet& bs1, const SelectionSet& bs2);
-    friend SelectionSet operator- (const SelectionSet& bs1, const SelectionSet& bs2);
-        
-    friend bool operator== (const SelectionSet & bs1, const SelectionSet &bs2);
+    friend SelectionSet operator|(const SelectionSet& bs1,
+                                  const SelectionSet& bs2);
+    friend SelectionSet operator&(const SelectionSet& bs1,
+                                  const SelectionSet& bs2);
+    friend SelectionSet operator^(const SelectionSet& bs1,
+                                  const SelectionSet& bs2);
+    friend SelectionSet operator-(const SelectionSet& bs1,
+                                  const SelectionSet& bs2);
 
-    //friend std::istream& operator>> ( std::istream&, const SelectionSet& bs);
-    friend std::ostream& operator<< ( std::ostream&, const SelectionSet& bs) ;
+    friend bool operator==(const SelectionSet& bs1, const SelectionSet& bs2);
+
+    // friend std::istream& operator>> ( std::istream&, const SelectionSet& bs);
+    friend std::ostream& operator<<(std::ostream&, const SelectionSet& bs);
 
     std::vector<OpenMDBitSet> bitsets_;
 
-    
-
   private:
-
     /** Sets the bit at the specified index to the specified value. */
-    //void setBit(std::vector<int> bitIndex, bool value);
-        
-    /** Sets the bits from the specified fromIndex(inclusive) to the specified toIndex(exclusive) to the specified value. */
-    //void setBits(std::vector<int> fromIndex, std::vector<int> toIndex, bool value);
-        
+    // void setBit(std::vector<int> bitIndex, bool value);
 
+    /** Sets the bits from the specified fromIndex(inclusive) to the specified
+     * toIndex(exclusive) to the specified value. */
+    // void setBits(std::vector<int> fromIndex, std::vector<int> toIndex, bool
+    // value);
   };
 
-
-}
+}  // namespace OpenMD
 #endif

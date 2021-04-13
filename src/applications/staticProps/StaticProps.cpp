@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -112,9 +112,7 @@ int main(int argc, char* argv[]) {
   gengetopt_args_info args_info;
 
   // parse the command line option
-  if (cmdline_parser(argc, argv, &args_info) != 0) {
-    exit(1);
-  }
+  if (cmdline_parser(argc, argv, &args_info) != 0) { exit(1); }
 
   // get the dumpfile name
   std::string dumpFileName = args_info.input_arg;
@@ -166,20 +164,18 @@ int main(int argc, char* argv[]) {
                args_info.end_given) {
       if (args_info.begin_arg < 0 || args_info.end_arg < 0 ||
           args_info.begin_arg > args_info.end_arg - 2) {
-        sprintf(painCave.errMsg,
-                "below conditions are not satisfied:\n"
-                "0 <= begin && 0<= end && begin <= end-2\n");
+        sprintf(painCave.errMsg, "below conditions are not satisfied:\n"
+                                 "0 <= begin && 0<= end && begin <= end-2\n");
         painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
+        painCave.isFatal  = 1;
         simError();
       }
       batchMode = true;
     } else {
-      sprintf(painCave.errMsg,
-              "either --sele1, --sele2, --sele3 are specified,"
-              " or --molname, --begin, --end are specified\n");
+      sprintf(painCave.errMsg, "either --sele1, --sele2, --sele3 are specified,"
+                               " or --molname, --begin, --end are specified\n");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   }
@@ -195,39 +191,37 @@ int main(int argc, char* argv[]) {
 
   int privilegedAxis;
   switch (args_info.privilegedAxis_arg) {
-    case privilegedAxis_arg_x:
-      privilegedAxis = 0;
-      break;
-    case privilegedAxis_arg_y:
-      privilegedAxis = 1;
-      break;
-    case privilegedAxis_arg_z:
-    default:
-      privilegedAxis = 2;
-      break;
+  case privilegedAxis_arg_x:
+    privilegedAxis = 0;
+    break;
+  case privilegedAxis_arg_y:
+    privilegedAxis = 1;
+    break;
+  case privilegedAxis_arg_z:
+  default:
+    privilegedAxis = 2;
+    break;
   }
 
   int privilegedAxis2;
   switch (args_info.privilegedAxis2_arg) {
-    case privilegedAxis2_arg_x:
-      privilegedAxis2 = 0;
-      break;
-    case privilegedAxis2_arg_y:
-      privilegedAxis2 = 1;
-      break;
-    case privilegedAxis2_arg_z:
-    default:
-      privilegedAxis2 = 2;
-      break;
+  case privilegedAxis2_arg_x:
+    privilegedAxis2 = 0;
+    break;
+  case privilegedAxis2_arg_y:
+    privilegedAxis2 = 1;
+    break;
+  case privilegedAxis2_arg_z:
+  default:
+    privilegedAxis2 = 2;
+    break;
   }
 
   RealType maxLen;
   RealType zmaxLen(0.0);
   if (args_info.length_given) {
     maxLen = args_info.length_arg;
-    if (args_info.zlength_given) {
-      zmaxLen = args_info.zlength_arg;
-    }
+    if (args_info.zlength_given) { zmaxLen = args_info.zlength_arg; }
   } else {
     Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
     // The maximum length for radial distribution functions is actually half
@@ -261,30 +255,30 @@ int main(int argc, char* argv[]) {
 
   int momentum_type;
   switch (args_info.momentum_arg) {
-    case momentum_arg_P:
-      momentum_type = 0;
-      break;
-    case momentum_arg_J:
-    default:
-      momentum_type = 1;
-      break;
+  case momentum_arg_P:
+    momentum_type = 0;
+    break;
+  case momentum_arg_J:
+  default:
+    momentum_type = 1;
+    break;
   }
 
   int momentum_comp;
   switch (args_info.component_arg) {
-    case component_arg_x:
-      momentum_comp = 0;
-      break;
-    case component_arg_y:
-      momentum_comp = 1;
-      break;
-    case component_arg_z:
-    default:
-      momentum_comp = 2;
-      break;
+  case component_arg_x:
+    momentum_comp = 0;
+    break;
+  case component_arg_y:
+    momentum_comp = 1;
+    break;
+  case component_arg_z:
+  default:
+    momentum_comp = 2;
+    break;
   }
 
-  std::unique_ptr<StaticAnalyser> analyser{nullptr};
+  std::unique_ptr<StaticAnalyser> analyser {nullptr};
 
   if (args_info.gofr_given) {
     analyser = Utils::make_unique<GofR>(info, dumpFileName, sele1, sele2,
@@ -333,7 +327,7 @@ int main(int argc, char* argv[]) {
     } else {
       sprintf(painCave.errMsg, "--refsele must set when --gxyz is used");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.twodgofr_given) {
@@ -344,7 +338,7 @@ int main(int argc, char* argv[]) {
       sprintf(painCave.errMsg,
               "A slab width (dz) must be specified when calculating TwoDGofR");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.p2_given) {
@@ -364,7 +358,7 @@ int main(int argc, char* argv[]) {
               "At least one selection script (--sele1) must be specified when "
               "calculating P2 order parameters");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.rp2_given) {
@@ -379,7 +373,7 @@ int main(int argc, char* argv[]) {
               "Order "
               "Parameters");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.multipole_given) {
@@ -396,7 +390,7 @@ int main(int argc, char* argv[]) {
               "Tetrahedrality "
               "Parameters");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.tet_param_z_given) {
@@ -410,7 +404,7 @@ int main(int argc, char* argv[]) {
               "Tetrahedrality "
               "Parameters");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.tet_param_dens_given) {
@@ -424,7 +418,7 @@ int main(int argc, char* argv[]) {
               "Tetrahedrality "
               "Parameters");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.tet_hb_given) {
@@ -437,7 +431,7 @@ int main(int argc, char* argv[]) {
               "A cutoff radius (rcut) must be specified when calculating "
               " Tetrahedrality Hydrogen Bonding Matrix");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.tet_param_xyz_given) {
@@ -446,15 +440,14 @@ int main(int argc, char* argv[]) {
               "A cutoff radius (rcut) must be specified when calculating"
               " Tetrahedrality Parameters");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
     if (!args_info.voxelSize_given) {
-      sprintf(painCave.errMsg,
-              "A voxel size must be specified when calculating"
-              " volume-resolved Tetrahedrality Parameters");
+      sprintf(painCave.errMsg, "A voxel size must be specified when calculating"
+                               " volume-resolved Tetrahedrality Parameters");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
     if (!args_info.gaussWidth_given) {
@@ -462,7 +455,7 @@ int main(int argc, char* argv[]) {
               "A gaussian width must be specified when calculating"
               " volume-resolved Tetrahedrality Parameters");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
     analyser = Utils::make_unique<TetrahedralityParamXYZ>(
@@ -478,7 +471,7 @@ int main(int argc, char* argv[]) {
               "Order "
               "Parameters");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.for_given) {
@@ -491,7 +484,7 @@ int main(int argc, char* argv[]) {
               "Order "
               "Parameters");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.bad_given) {
@@ -504,7 +497,7 @@ int main(int argc, char* argv[]) {
               "Angle "
               "Distributions");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.scd_given) {
@@ -549,22 +542,22 @@ int main(int argc, char* argv[]) {
         info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.pipe_density_given) {
     switch (privilegedAxis) {
-      case 0:
-        analyser = Utils::make_unique<PipeDensity>(
-            info, dumpFileName, sele1, args_info.nbins_y_arg,
-            args_info.nbins_z_arg, privilegedAxis);
-        break;
-      case 1:
-        analyser = Utils::make_unique<PipeDensity>(
-            info, dumpFileName, sele1, args_info.nbins_z_arg,
-            args_info.nbins_x_arg, privilegedAxis);
-        break;
-      case 2:
-      default:
-        analyser = Utils::make_unique<PipeDensity>(
-            info, dumpFileName, sele1, args_info.nbins_x_arg,
-            args_info.nbins_y_arg, privilegedAxis);
-        break;
+    case 0:
+      analyser = Utils::make_unique<PipeDensity>(
+          info, dumpFileName, sele1, args_info.nbins_y_arg,
+          args_info.nbins_z_arg, privilegedAxis);
+      break;
+    case 1:
+      analyser = Utils::make_unique<PipeDensity>(
+          info, dumpFileName, sele1, args_info.nbins_z_arg,
+          args_info.nbins_x_arg, privilegedAxis);
+      break;
+    case 2:
+    default:
+      analyser = Utils::make_unique<PipeDensity>(
+          info, dumpFileName, sele1, args_info.nbins_x_arg,
+          args_info.nbins_y_arg, privilegedAxis);
+      break;
     }
   } else if (args_info.rnemdz_given) {
     analyser = Utils::make_unique<RNEMDZ>(info, dumpFileName, sele1,
@@ -600,7 +593,7 @@ int main(int argc, char* argv[]) {
               "At least one selection script (--sele1) must be specified when "
               "calculating P(angle) distributions");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
@@ -629,7 +622,7 @@ int main(int argc, char* argv[]) {
               "A cutoff radius (rcut) must be specified when calculating\n"
               "\t Coordination Numbers");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.surfDiffusion_given) {
@@ -644,7 +637,7 @@ int main(int argc, char* argv[]) {
               "A particle radius (radius) must be specified when calculating "
               "Rho(r)");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.hullvol_given) {
@@ -666,7 +659,7 @@ int main(int argc, char* argv[]) {
                 "Hydrogen "
                 "Bonding Statistics");
         painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
+        painCave.isFatal  = 1;
         simError();
       }
     } else {
@@ -675,7 +668,7 @@ int main(int argc, char* argv[]) {
           "A cutoff radius (rcut) must be specified when calculating Hydrogen "
           "Bonding Statistics");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.potDiff_given) {
@@ -694,40 +687,40 @@ int main(int argc, char* argv[]) {
                                                  args_info.voxelSize_arg);
   } else if (args_info.velocityZ_given) {
     switch (privilegedAxis) {
-      case 0:
-        if (privilegedAxis2 == 1) {
-          analyser = Utils::make_unique<VelocityZ>(
-              info, dumpFileName, sele1, args_info.nbins_x_arg,
-              args_info.nbins_y_arg, privilegedAxis, privilegedAxis2);
-        } else if (privilegedAxis2 == 2) {
-          analyser = Utils::make_unique<VelocityZ>(
-              info, dumpFileName, sele1, args_info.nbins_x_arg,
-              args_info.nbins_z_arg, privilegedAxis, privilegedAxis2);
-        }
-        break;
-      case 1:
-        if (privilegedAxis2 == 0) {
-          analyser = Utils::make_unique<VelocityZ>(
-              info, dumpFileName, sele1, args_info.nbins_y_arg,
-              args_info.nbins_x_arg, privilegedAxis, privilegedAxis2);
-        } else if (privilegedAxis2 == 2) {
-          analyser = Utils::make_unique<VelocityZ>(
-              info, dumpFileName, sele1, args_info.nbins_y_arg,
-              args_info.nbins_z_arg, privilegedAxis, privilegedAxis2);
-        }
-        break;
-      case 2:
-      default:
-        if (privilegedAxis2 == 0) {
-          analyser = Utils::make_unique<VelocityZ>(
-              info, dumpFileName, sele1, args_info.nbins_z_arg,
-              args_info.nbins_x_arg, privilegedAxis, privilegedAxis2);
-        } else if (privilegedAxis2 == 1) {
-          analyser = Utils::make_unique<VelocityZ>(
-              info, dumpFileName, sele1, args_info.nbins_z_arg,
-              args_info.nbins_y_arg, privilegedAxis, privilegedAxis2);
-        }
-        break;
+    case 0:
+      if (privilegedAxis2 == 1) {
+        analyser = Utils::make_unique<VelocityZ>(
+            info, dumpFileName, sele1, args_info.nbins_x_arg,
+            args_info.nbins_y_arg, privilegedAxis, privilegedAxis2);
+      } else if (privilegedAxis2 == 2) {
+        analyser = Utils::make_unique<VelocityZ>(
+            info, dumpFileName, sele1, args_info.nbins_x_arg,
+            args_info.nbins_z_arg, privilegedAxis, privilegedAxis2);
+      }
+      break;
+    case 1:
+      if (privilegedAxis2 == 0) {
+        analyser = Utils::make_unique<VelocityZ>(
+            info, dumpFileName, sele1, args_info.nbins_y_arg,
+            args_info.nbins_x_arg, privilegedAxis, privilegedAxis2);
+      } else if (privilegedAxis2 == 2) {
+        analyser = Utils::make_unique<VelocityZ>(
+            info, dumpFileName, sele1, args_info.nbins_y_arg,
+            args_info.nbins_z_arg, privilegedAxis, privilegedAxis2);
+      }
+      break;
+    case 2:
+    default:
+      if (privilegedAxis2 == 0) {
+        analyser = Utils::make_unique<VelocityZ>(
+            info, dumpFileName, sele1, args_info.nbins_z_arg,
+            args_info.nbins_x_arg, privilegedAxis, privilegedAxis2);
+      } else if (privilegedAxis2 == 1) {
+        analyser = Utils::make_unique<VelocityZ>(
+            info, dumpFileName, sele1, args_info.nbins_z_arg,
+            args_info.nbins_y_arg, privilegedAxis, privilegedAxis2);
+      }
+      break;
     }
   } else if (args_info.dipole_orientation_given) {
     if (args_info.dipoleX_given && args_info.dipoleY_given &&
@@ -739,7 +732,7 @@ int main(int argc, char* argv[]) {
     else {
       sprintf(painCave.errMsg, "Dipole components must be provided.");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
 
@@ -753,17 +746,13 @@ int main(int argc, char* argv[]) {
     else {
       sprintf(painCave.errMsg, "Dipole components must be provided.");
       painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
+      painCave.isFatal  = 1;
       simError();
     }
   }
 
-  if (args_info.output_given) {
-    analyser->setOutputName(args_info.output_arg);
-  }
-  if (args_info.step_given) {
-    analyser->setStep(args_info.step_arg);
-  }
+  if (args_info.output_given) { analyser->setOutputName(args_info.output_arg); }
+  if (args_info.step_given) { analyser->setStep(args_info.step_arg); }
 
   analyser->process();
 

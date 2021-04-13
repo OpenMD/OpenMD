@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,30 +49,26 @@
 
 using namespace std;
 namespace OpenMD {
-  
-  class ContactAngle2 : public SequentialAnalyzer{
+
+  class ContactAngle2 : public SequentialAnalyzer {
   public:
-    ContactAngle2(SimInfo* info, const std::string& filename, 
+    ContactAngle2(SimInfo* info, const std::string& filename,
                   const std::string& sele1, const std::string& sele2,
                   RealType solidZ, RealType centroidX, RealType centroidY,
-                  RealType threshDens, RealType bufferLength,
-                  int nrbins, int nZBins);
-    
-    virtual void doFrame(int frame);
-    
-  private:
+                  RealType threshDens, RealType bufferLength, int nrbins,
+                  int nZBins);
 
+    virtual void doFrame(int frame);
+
+  private:
     RealType solidZ_;
     RealType centroidX_;
     RealType centroidY_;
     RealType threshDens_;
     RealType bufferLength_;
     std::size_t nRBins_;
-    std::size_t nZBins_;       
+    std::size_t nZBins_;
   };
-}
+}  // namespace OpenMD
 
 #endif
-
-
-

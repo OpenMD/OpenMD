@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,27 +42,25 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef VISITORS_ZCONSVISITOR_HPP
 #define VISITORS_ZCONSVISITOR_HPP
 
 #include "io/ZConsReader.hpp"
 #include "primitives/RigidBody.hpp"
-#include "visitors/BaseVisitor.hpp"
 #include "visitors/AtomData.hpp"
-
-
+#include "visitors/BaseVisitor.hpp"
 
 namespace OpenMD {
 
   /**
    * @class ZConsVisitor
-   * @note 
+   * @note
    */
-  class ZConsVisitor : public BaseVisitor{
+  class ZConsVisitor : public BaseVisitor {
   public:
     using BaseVisitor::visit;
-    enum ZConsState{zsFixed = 0, zsMoving};
+    enum ZConsState { zsFixed = 0, zsMoving };
 
     ZConsVisitor(SimInfo* info);
     ~ZConsVisitor();
@@ -73,15 +71,16 @@ namespace OpenMD {
 
     virtual void update();
 
-    bool haveZconsMol() {return !zmolStates_.empty(); }
+    bool haveZconsMol() { return !zmolStates_.empty(); }
 
     virtual const std::string toString();
+
   protected:
     void internalVisit(StuntDouble* sd, const std::string& prefix);
     bool isZconstraint(int index, std::string& prefix);
     void readZconsFile(RealType time);
 
-  private:  
+  private:
     std::vector<RealType> zconsPos;
     std::map<int, ZConsState> zmolStates_;
     RealType zconsTol_;
@@ -93,7 +92,5 @@ namespace OpenMD {
     std::map<int, int> zatomToZmol_;
   };
 
-}//namespace OpenMD
-#endif // _ZCONS_VISITOR_H_
-
-
+}  // namespace OpenMD
+#endif  // _ZCONS_VISITOR_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef INTEGRATORS_NPTSZ_HPP
 #define INTEGRATORS_NPTSZ_HPP
 
@@ -50,18 +50,18 @@
 
 namespace OpenMD {
 
-  /** 
+  /**
    * A utility integrator (much like NPTxyz) but which keeps the
    * relative scaling of x & y fixed.  The z-axis can float separately
    * from the x & y axes.  There is no known conserved quantity for
    * this integrator, but we still compute the equivalent quantity
    * from a fully flexible constant pressure integrator.
-   */   
+   */
   class NPTsz : public NPTf {
   public:
-    NPTsz(SimInfo * info) ;
+    NPTsz(SimInfo* info);
 
-  private:            
+  private:
     virtual void scaleSimBox();
     virtual RealType calcConservedQuantity();
     virtual void loadEta();
@@ -69,6 +69,6 @@ namespace OpenMD {
     unsigned int axis_, axis1_, axis2_;
   };
 
-}
+}  // namespace OpenMD
 
 #endif

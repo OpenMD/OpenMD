@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,31 +50,28 @@
 namespace OpenMD {
 
   class GofAngle2 : public RadialDistrFunc {
-    
   public:
-    GofAngle2(SimInfo* info, const std::string& filename, 
-              const std::string& sele1, const std::string& sele2, 
+    GofAngle2(SimInfo* info, const std::string& filename,
+              const std::string& sele1, const std::string& sele2,
               int nangleBins);
-    GofAngle2(SimInfo* info, const std::string& filename, 
-              const std::string& sele1, const std::string& sele2, 
+    GofAngle2(SimInfo* info, const std::string& filename,
+              const std::string& sele1, const std::string& sele2,
               const std::string& sele3, int nangleBins);
-   
-    int getNAngleBins() {return nAngleBins_;}
-        
-  private:
 
+    int getNAngleBins() { return nAngleBins_; }
+
+  private:
     virtual void preProcess();
-    virtual void processNonOverlapping( SelectionManager& sman1,
-                                        SelectionManager& sman2);
-    virtual void processOverlapping( SelectionManager& sman );
+    virtual void processNonOverlapping(SelectionManager& sman1,
+                                       SelectionManager& sman2);
+    virtual void processOverlapping(SelectionManager& sman);
     virtual void initializeHistogram();
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2, 
+    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2,
                                   StuntDouble* sd3);
     virtual void processHistogram();
 
     virtual void writeRdf();
-
 
     RealType deltaCosAngle_;
     int nAngleBins_;
@@ -83,11 +80,11 @@ namespace OpenMD {
     SelectionManager seleMan3_;
     SelectionEvaluator evaluator3_;
     std::string selectionScript3_;
-        
-    std::vector<std::vector<int> > histogram_;
-    std::vector<std::vector<int> > avgGofr_;
+
+    std::vector<std::vector<int>> histogram_;
+    std::vector<std::vector<int>> avgGofr_;
     int npairs_;
   };
 
-}
+}  // namespace OpenMD
 #endif

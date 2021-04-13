@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,67 +42,67 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file DirectionalAtom.hpp
  * @author    tlin
  * @date  10/23/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef PRIMITIVES_DIRECTIONALATOM_HPP
 #define PRIMITIVES_DIRECTIONALATOM_HPP
 
 #include "primitives/Atom.hpp"
 #include "types/AtomType.hpp"
-namespace OpenMD{
+namespace OpenMD {
   class DirectionalAtom : public Atom {
   public:
     DirectionalAtom(AtomType* dAtomType);
     /**
      * Returns the inertia tensor of this stuntdouble
      * @return the inertia tensor of this stuntdouble
-     */ 
-    virtual Mat3x3d getI();            
-    
+     */
+    virtual Mat3x3d getI();
+
     /**
      * Sets  the previous rotation matrix of this stuntdouble
-     * @param a  new rotation matrix 
-     */         
+     * @param a  new rotation matrix
+     */
     virtual void setPrevA(const RotMat3x3d& a);
-    
+
     /**
      * Sets  the current rotation matrix of this stuntdouble
-     * @param a  new rotation matrix 
-     */         
+     * @param a  new rotation matrix
+     */
     virtual void setA(const RotMat3x3d& a);
-    
+
     /**
      * Sets  the rotation matrix of this stuntdouble in specified snapshot
-     * @param a rotation matrix to be set 
-     * @param snapshotNo 
+     * @param a rotation matrix to be set
+     * @param snapshotNo
      * @see #getA
-     */         
+     */
     virtual void setA(const RotMat3x3d& a, int snapshotNo);
-    
-    /** 
-     * Left multiple rotation matrix by another rotation matrix 
+
+    /**
+     * Left multiple rotation matrix by another rotation matrix
      * @param m a rotation matrix
      */
     void rotateBy(const RotMat3x3d& m);
-        
+
     /**
      * Returns the gradient of this stuntdouble
      * @return the gradient of this stuntdouble
-     */ 
+     */
     virtual std::vector<RealType> getGrad();
-    
+
     virtual void accept(BaseVisitor* v);
-   
+
   private:
     Mat3x3d I_;
-    Vector3d dipole_;    // body fixed dipole vector
-    Mat3x3d quadrupole_; // body fixed quadrupole tensor
-  };  
-}//namespace OpenMD
-#endif //PRIMITIVES_DIRECTIONALATOM_HPP
+    Vector3d dipole_;     // body fixed dipole vector
+    Mat3x3d quadrupole_;  // body fixed quadrupole tensor
+  };
+}  // namespace OpenMD
+#endif  // PRIMITIVES_DIRECTIONALATOM_HPP

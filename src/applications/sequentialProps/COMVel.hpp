@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -49,21 +49,18 @@
 
 using namespace std;
 namespace OpenMD {
-  
-  class COMVel : public SequentialAnalyzer{
+
+  class COMVel : public SequentialAnalyzer {
   public:
-    COMVel(SimInfo* info, const std::string& filename, 
-	   const std::string& sele1, const std::string& sele2);
-    
+    COMVel(SimInfo* info, const std::string& filename, const std::string& sele1,
+           const std::string& sele2);
+
     virtual void doFrame(int frame);
     virtual void writeSequence();
-    
+
   private:
     std::vector<Vector3d> values_;
   };
-}
+}  // namespace OpenMD
 
 #endif
-
-
-

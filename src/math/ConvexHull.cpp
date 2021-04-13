@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -65,10 +65,10 @@ using namespace std;
 
 ConvexHull::ConvexHull() : Hull(), options_("qhull FA Qt Pp"), dim_(3) {}
 
-void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
+void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
 #ifdef HAVE_QHULL_REENTRANT
   qhT qh_qh;
-  qhT *qh = &qh_qh;
+  qhT* qh = &qh_qh;
   QHULL_LIB_CHECK
 #endif
 
@@ -77,19 +77,19 @@ void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
   Triangles_.clear();
 
   vertexT *vertex, **vertexp;
-  facetT *facet;
-  setT *vertices;
+  facetT* facet;
+  setT* vertices;
   int curlong, totlong;
 
   vector<double> ptArray(numpoints * dim_);
 
   // Copy the positon vector into a points vector for qhull.
-  vector<StuntDouble *>::iterator SD;
+  vector<StuntDouble*>::iterator SD;
   int i = 0;
 
   for (SD = bodydoubles.begin(); SD != bodydoubles.end(); ++SD) {
-    Vector3d pos = (*SD)->getPos();
-    ptArray[dim_ * i] = pos.x();
+    Vector3d pos          = (*SD)->getPos();
+    ptArray[dim_ * i]     = pos.x();
     ptArray[dim_ * i + 1] = pos.y();
     ptArray[dim_ * i + 2] = pos.z();
     i++;
@@ -105,11 +105,11 @@ void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
   int exitcode = setjmp(qh->errexit);
   if (!exitcode) {
     qh->NOerrexit = False;
-    qh_initflags(qh, const_cast<char *>(options_.c_str()));
+    qh_initflags(qh, const_cast<char*>(options_.c_str()));
     qh_init_B(qh, &ptArray[0], numpoints, dim_, ismalloc);
     qh_qhull(qh);
     qh_check_output(qh);
-    exitcode = qh_ERRnone;
+    exitcode      = qh_ERRnone;
     qh->NOerrexit = True;
   } else {
     sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute convex hull");
@@ -120,11 +120,11 @@ void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
   qh_init_A(NULL, NULL, stderr, 0, NULL);
   int exitcode = setjmp(qh errexit);
   if (!exitcode) {
-    qh_initflags(const_cast<char *>(options_.c_str()));
+    qh_initflags(const_cast<char*>(options_.c_str()));
     qh_init_B(&ptArray[0], numpoints, dim_, ismalloc);
     qh_qhull();
     qh_check_output();
-    exitcode = qh_ERRnone;
+    exitcode     = qh_ERRnone;
     qh NOerrexit = True;
   } else {
     sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute convex hull");
@@ -169,7 +169,7 @@ void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
     coords.push_back(ptArray[dim_ * idx + 1]);
     coords.push_back(ptArray[dim_ * idx + 2]);
 
-    StuntDouble *sd = bodydoubles[idx];
+    StuntDouble* sd = bodydoubles[idx];
 
     Vector3d vel = sd->getVel();
     vels.push_back(vel.x());
@@ -188,7 +188,7 @@ void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
     coordsOnProc[iproc] = dim_ * hullSitesOnProc[iproc];
   }
 
-  displacements[0] = 0;
+  displacements[0]       = 0;
   vectorDisplacements[0] = 0;
 
   for (int iproc = 1; iproc < nproc; iproc++) {
@@ -237,11 +237,11 @@ void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
   exitcode = setjmp(qh->errexit);
   if (!exitcode) {
     qh->NOerrexit = False;
-    qh_initflags(qh, const_cast<char *>(options_.c_str()));
+    qh_initflags(qh, const_cast<char*>(options_.c_str()));
     qh_init_B(qh, &globalCoords[0], globalHullSites, dim_, ismalloc);
     qh_qhull(qh);
     qh_check_output(qh);
-    exitcode = qh_ERRnone;
+    exitcode      = qh_ERRnone;
     qh->NOerrexit = True;
   } else {
     sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute convex hull");
@@ -253,7 +253,7 @@ void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
   exitcode = setjmp(qh errexit);
   if (!exitcode) {
     qh NOerrexit = False;
-    qh_initflags(const_cast<char *>(options_.c_str()));
+    qh_initflags(const_cast<char*>(options_.c_str()));
     qh_init_B(&globalCoords[0], globalHullSites, dim_, ismalloc);
     qh_qhull();
     qh_check_output();
@@ -288,13 +288,13 @@ void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
 #ifdef HAVE_QHULL_REENTRANT
     RealType faceArea = qh_facetarea(qh, facet);
     face.setArea(faceArea);
-    vertices = qh_facet3vertex(qh, facet);
-    coordT *center = qh_getcenter(qh, vertices);
+    vertices       = qh_facet3vertex(qh, facet);
+    coordT* center = qh_getcenter(qh, vertices);
 #else
     RealType faceArea = qh_facetarea(facet);
     face.setArea(faceArea);
-    vertices = qh_facet3vertex(facet);
-    coordT *center = qh_getcenter(vertices);
+    vertices       = qh_facet3vertex(facet);
+    coordT* center = qh_getcenter(vertices);
 #endif
     Vector3d V3dCentroid(center[0], center[1], center[2]);
     face.setCentroid(V3dCentroid);
@@ -318,7 +318,7 @@ void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
       RealType mass;
 
 #ifdef IS_MPI
-      vel = Vector3d(globalVels[dim_ * id], globalVels[dim_ * id + 1],
+      vel  = Vector3d(globalVels[dim_ * id], globalVels[dim_ * id + 1],
                      globalVels[dim_ * id + 2]);
       mass = globalMasses[id];
 
@@ -333,11 +333,11 @@ void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
         face.addVertexSD(NULL);
       }
 #else
-      vel = bodydoubles[id]->getVel();
-      mass = bodydoubles[id]->getMass();
+      vel    = bodydoubles[id]->getVel();
+      mass   = bodydoubles[id]->getMass();
       face.addVertexSD(bodydoubles[id]);
 #endif
-      faceVel = faceVel + vel;
+      faceVel  = faceVel + vel;
       faceMass = faceMass + mass;
       ver++;
     }  // Foreachvertex
@@ -367,14 +367,14 @@ void ConvexHull::computeHull(vector<StuntDouble *> bodydoubles) {
 #ifdef HAVE_QHULL_REENTRANT
   qh_getarea(qh, qh->facet_list);
   volume_ = qh->totvol;
-  area_ = qh->totarea;
+  area_   = qh->totarea;
   qh_freeqhull(qh, !qh_ALL);
   qh_memfreeshort(qh, &curlong, &totlong);
 
 #else
   qh_getarea(qh facet_list);
   volume_ = qh totvol;
-  area_ = qh totarea;
+  area_   = qh totarea;
 
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);

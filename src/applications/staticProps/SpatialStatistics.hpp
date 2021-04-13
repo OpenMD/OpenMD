@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -68,10 +68,12 @@ namespace OpenMD {
     virtual ~SpatialStatistics();
 
     void addOutputData(OutputData* dat) { data_.push_back(dat); }
-    void addOutputDataAt(OutputData* dat, unsigned int loc) { data_[loc] = dat; }
+    void addOutputDataAt(OutputData* dat, unsigned int loc) {
+      data_[loc] = dat;
+    }
     virtual void process();
     virtual void processFrame(int frame);
-    virtual int getBin(Vector3d pos) = 0;
+    virtual int getBin(Vector3d pos)                          = 0;
     virtual void processStuntDouble(StuntDouble* sd, int bin) = 0;
 
   protected:
@@ -81,7 +83,6 @@ namespace OpenMD {
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
   };
-
 
   class SlabStatistics : public SpatialStatistics {
   public:
@@ -99,11 +100,10 @@ namespace OpenMD {
     std::string axisLabel_;
   };
 
-
   class ShellStatistics : public SpatialStatistics {
   public:
-    ShellStatistics(SimInfo* info, const std::string& filename, const std::string& sele,
-                    int nbins);
+    ShellStatistics(SimInfo* info, const std::string& filename,
+                    const std::string& sele, int nbins);
 
     virtual int getBin(Vector3d pos);
     void setCoordinateOrigin(Vector3d co) { coordinateOrigin_ = co; }
@@ -114,6 +114,6 @@ namespace OpenMD {
     Vector3d coordinateOrigin_;
     RealType binWidth_;
   };
-}
+}  // namespace OpenMD
 
 #endif

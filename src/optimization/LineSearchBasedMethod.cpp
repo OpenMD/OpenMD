@@ -27,101 +27,101 @@
 using namespace OpenMD;
 namespace QuantLib {
 
-LineSearchBasedMethod::LineSearchBasedMethod(LineSearch* lineSearch)
-    : lineSearch_(lineSearch) {
-  if (!lineSearch_) lineSearch_ = new ArmijoLineSearch();
-}
+  LineSearchBasedMethod::LineSearchBasedMethod(LineSearch* lineSearch) :
+      lineSearch_(lineSearch) {
+    if (!lineSearch_) lineSearch_ = new ArmijoLineSearch();
+  }
 
-LineSearchBasedMethod::~LineSearchBasedMethod() { delete lineSearch_; }
+  LineSearchBasedMethod::~LineSearchBasedMethod() { delete lineSearch_; }
 
-EndCriteria::Type LineSearchBasedMethod::minimize(
-    Problem& P, const EndCriteria& endCriteria,
-    RealType initialStepSize = 1.0) {
-  // Initializations
-  RealType ftol = endCriteria.functionEpsilon();
-  size_t maxStationaryStateIterations_ =
-      endCriteria.maxStationaryStateIterations();
-  EndCriteria::Type ecType = EndCriteria::None;   // reset end criteria
-  P.reset();                                      // reset problem
-  DynamicVector<RealType> x_ = P.currentValue();  // store the starting point
-  size_t iterationNumber_ = 0;
-  // dimension line search
-  lineSearch_->searchDirection() = DynamicVector<RealType>(x_.size());
-  bool done = false;
+  EndCriteria::Type LineSearchBasedMethod::minimize(
+      Problem& P, const EndCriteria& endCriteria,
+      RealType initialStepSize = 1.0) {
+    // Initializations
+    RealType ftol = endCriteria.functionEpsilon();
+    size_t maxStationaryStateIterations_ =
+        endCriteria.maxStationaryStateIterations();
+    EndCriteria::Type ecType = EndCriteria::None;   // reset end criteria
+    P.reset();                                      // reset problem
+    DynamicVector<RealType> x_ = P.currentValue();  // store the starting point
+    size_t iterationNumber_    = 0;
+    // dimension line search
+    lineSearch_->searchDirection() = DynamicVector<RealType>(x_.size());
+    bool done                      = false;
 
-  // function and squared norm of gradient values;
-  RealType fnew, fold, gold2;
-  RealType fdiff;
-  // classical initial value for line-search step
-  // RealType t = 1.0;
-  // new initial value for line-search step
-  RealType t = initialStepSize;
-  // Set gradient g at the size of the optimization problem
-  // search direction
-  size_t sz = lineSearch_->searchDirection().size();
-  DynamicVector<RealType> prevGradient(sz), d(sz), sddiff(sz), direction(sz);
-  // Initialize objective function, gradient prevGradient and
-  // search direction
+    // function and squared norm of gradient values;
+    RealType fnew, fold, gold2;
+    RealType fdiff;
+    // classical initial value for line-search step
+    // RealType t = 1.0;
+    // new initial value for line-search step
+    RealType t = initialStepSize;
+    // Set gradient g at the size of the optimization problem
+    // search direction
+    size_t sz = lineSearch_->searchDirection().size();
+    DynamicVector<RealType> prevGradient(sz), d(sz), sddiff(sz), direction(sz);
+    // Initialize objective function, gradient prevGradient and
+    // search direction
 
-  P.setFunctionValue(P.valueAndGradient(prevGradient, x_));
-  P.setGradientNormValue(P.DotProduct(prevGradient, prevGradient));
-  lineSearch_->searchDirection() = -prevGradient;
+    P.setFunctionValue(P.valueAndGradient(prevGradient, x_));
+    P.setGradientNormValue(P.DotProduct(prevGradient, prevGradient));
+    lineSearch_->searchDirection() = -prevGradient;
 
-  bool first_time = true;
-  // Loop over iterations
-  do {
-    fold = P.functionValue();
-    gold2 = P.gradientNormValue();
+    bool first_time = true;
+    // Loop over iterations
+    do {
+      fold  = P.functionValue();
+      gold2 = P.gradientNormValue();
 
-    // Linesearch
-    if (!first_time) prevGradient = lineSearch_->lastGradient();
+      // Linesearch
+      if (!first_time) prevGradient = lineSearch_->lastGradient();
 
-    t = (*lineSearch_)(P, ecType, endCriteria, t);
+      t = (*lineSearch_)(P, ecType, endCriteria, t);
 
-    // don't throw: it can fail just because maxIterations exceeded
-    // QL_REQUIRE(lineSearch_->succeed(), "line-search failed!");
-    if (lineSearch_->succeed()) {
-      // Updates
-      // New point
-      x_ = lineSearch_->lastX();
-      P.setCurrentValue(x_);
-      // New function value
-      P.setFunctionValue(lineSearch_->lastFunctionValue());
-      // New gradient and search direction vectors
+      // don't throw: it can fail just because maxIterations exceeded
+      // QL_REQUIRE(lineSearch_->succeed(), "line-search failed!");
+      if (lineSearch_->succeed()) {
+        // Updates
+        // New point
+        x_ = lineSearch_->lastX();
+        P.setCurrentValue(x_);
+        // New function value
+        P.setFunctionValue(lineSearch_->lastFunctionValue());
+        // New gradient and search direction vectors
 
-      // orthogonalization coef
-      P.setGradientNormValue(lineSearch_->lastGradientNorm2());
+        // orthogonalization coef
+        P.setGradientNormValue(lineSearch_->lastGradientNorm2());
 
-      // conjugate gradient search direction
-      direction = getUpdatedDirection(P, gold2, prevGradient);
+        // conjugate gradient search direction
+        direction = getUpdatedDirection(P, gold2, prevGradient);
 
-      sddiff = direction - lineSearch_->searchDirection();
+        sddiff = direction - lineSearch_->searchDirection();
 
-      lineSearch_->searchDirection() = direction;
-      // Now compute accuracy and check end criteria
-      // Numerical Recipes exit strategy on fx (see NR in C++, p.423)
+        lineSearch_->searchDirection() = direction;
+        // Now compute accuracy and check end criteria
+        // Numerical Recipes exit strategy on fx (see NR in C++, p.423)
 
-      fnew = P.functionValue();
-      fdiff = 2.0 * std::fabs(fnew - fold) /
-              (std::fabs(fnew) + std::fabs(fold) +
-               std::numeric_limits<RealType>::epsilon());
+        fnew  = P.functionValue();
+        fdiff = 2.0 * std::fabs(fnew - fold) /
+                (std::fabs(fnew) + std::fabs(fold) +
+                 std::numeric_limits<RealType>::epsilon());
 
-      if (fdiff < ftol ||
-          endCriteria.checkMaxIterations(iterationNumber_, ecType)) {
-        endCriteria.checkStationaryFunctionValue(
-            0.0, 0.0, maxStationaryStateIterations_, ecType);
-        endCriteria.checkMaxIterations(iterationNumber_, ecType);
-        return ecType;
+        if (fdiff < ftol ||
+            endCriteria.checkMaxIterations(iterationNumber_, ecType)) {
+          endCriteria.checkStationaryFunctionValue(
+              0.0, 0.0, maxStationaryStateIterations_, ecType);
+          endCriteria.checkMaxIterations(iterationNumber_, ecType);
+          return ecType;
+        }
+        P.setCurrentValue(x_);  // update problem current value
+        ++iterationNumber_;     // Increase iteration number
+        first_time = false;
+      } else {
+        done = true;
       }
-      P.setCurrentValue(x_);  // update problem current value
-      ++iterationNumber_;     // Increase iteration number
-      first_time = false;
-    } else {
-      done = true;
-    }
-  } while (!done);
-  P.setCurrentValue(x_);
-  return ecType;
-}
+    } while (!done);
+    P.setCurrentValue(x_);
+    return ecType;
+  }
 
 }  // namespace QuantLib

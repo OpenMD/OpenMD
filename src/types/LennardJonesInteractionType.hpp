@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_LENNARDJONESINTERACTIONTYPE_HPP
 #define TYPES_LENNARDJONESINTERACTIONTYPE_HPP
 
@@ -50,33 +50,27 @@
 
 namespace OpenMD {
   /**
-   * @class LennardJonesInteractionType 
+   * @class LennardJonesInteractionType
    *
    * LennardJonesInteractionType is one of the basic interaction types.
-   * \f[ V = 4 \epsilon \left(\left( \sigma/r \right)^{12} - 
+   * \f[ V = 4 \epsilon \left(\left( \sigma/r \right)^{12} -
          \left( \sigma/r\right)^6\right) \f]
    */
   class LennardJonesInteractionType : public NonBondedInteractionType {
-    
   public:
-    
     LennardJonesInteractionType(RealType mySigma, RealType myEpsilon) {
       setLennardJones();
-      sigma = mySigma;
+      sigma   = mySigma;
       epsilon = myEpsilon;
     }
 
-    RealType getSigma() {
-      return sigma;
-    }
-    
-    RealType getEpsilon() {
-      return epsilon;
-    }
+    RealType getSigma() { return sigma; }
+
+    RealType getEpsilon() { return epsilon; }
 
   private:
     RealType sigma;
-    RealType epsilon;    
+    RealType epsilon;
   };
-}
+}  // namespace OpenMD
 #endif

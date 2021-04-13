@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -59,290 +59,292 @@
 
 namespace OpenMD {
 
-StaticAnalyser::StaticAnalyser(SimInfo* info, const std::string& filename,
-                               unsigned int nbins)
-    : info_(info), dumpFilename_(filename), step_(1), nBins_(nbins) {}
+  StaticAnalyser::StaticAnalyser(SimInfo* info, const std::string& filename,
+                                 unsigned int nbins) :
+      info_(info),
+      dumpFilename_(filename), step_(1), nBins_(nbins) {}
 
-void StaticAnalyser::writeOutput() {
-  std::vector<OutputData*>::iterator i;
-  OutputData* outputData;
+  void StaticAnalyser::writeOutput() {
+    std::vector<OutputData*>::iterator i;
+    OutputData* outputData;
 
-  std::ofstream ofs(outputFilename_.c_str());
+    std::ofstream ofs(outputFilename_.c_str());
 
-  if (ofs.is_open()) {
-    Revision r;
-    ofs << "# " << getAnalysisType() << "\n";
-    ofs << "# OpenMD " << r.getFullRevision() << "\n";
-    ofs << "# " << r.getBuildDate() << "\n";
-    // ofs << "# selection script1: \"" << selectionScript1_ ;
-    // ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-    if (!paramString_.empty()) ofs << "# parameters: " << paramString_ << "\n";
-    ofs << "#";
-    for (outputData = beginOutputData(i); outputData;
-         outputData = nextOutputData(i)) {
-      ofs << "\t" << outputData->title << "(" << outputData->units << ")";
-      // add some extra tabs for column alignment
-      if (outputData->dataType == odtVector3) ofs << "\t\t";
-      if (outputData->dataType == odtArray2d) {
-        ofs << "(";
-        for (unsigned int j = 0; j < outputData->accumulatorArray2d[0].size();
-             j++) {
-          ofs << outputData->columnNames[j] << "\t";
-        }
-        ofs << ")\t";
-      }
-    }
-
-    ofs << std::endl;
-
-    ofs.precision(8);
-
-    for (unsigned int j = 0; j < nBins_; j++) {
-      for (outputData = beginOutputData(i); outputData;
-           outputData = nextOutputData(i)) {
-        writeData(ofs, outputData, j);
-      }
-      ofs << std::endl;
-    }
-
-    ofs << "#######################################################\n";
-    ofs << "# 95% confidence intervals in those quantities follow:\n";
-    ofs << "#######################################################\n";
-
-    for (unsigned int j = 0; j < nBins_; j++) {
+    if (ofs.is_open()) {
+      Revision r;
+      ofs << "# " << getAnalysisType() << "\n";
+      ofs << "# OpenMD " << r.getFullRevision() << "\n";
+      ofs << "# " << r.getBuildDate() << "\n";
+      // ofs << "# selection script1: \"" << selectionScript1_ ;
+      // ofs << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
+      if (!paramString_.empty())
+        ofs << "# parameters: " << paramString_ << "\n";
       ofs << "#";
       for (outputData = beginOutputData(i); outputData;
            outputData = nextOutputData(i)) {
-        writeErrorBars(ofs, outputData, j);
+        ofs << "\t" << outputData->title << "(" << outputData->units << ")";
+        // add some extra tabs for column alignment
+        if (outputData->dataType == odtVector3) ofs << "\t\t";
+        if (outputData->dataType == odtArray2d) {
+          ofs << "(";
+          for (unsigned int j = 0; j < outputData->accumulatorArray2d[0].size();
+               j++) {
+            ofs << outputData->columnNames[j] << "\t";
+          }
+          ofs << ")\t";
+        }
       }
+
       ofs << std::endl;
-    }
 
-    ofs.flush();
-    ofs.close();
+      ofs.precision(8);
 
-  } else {
-    sprintf(painCave.errMsg, "StaticAnalyser: unable to open %s\n",
-            outputFilename_.c_str());
-    painCave.isFatal = 1;
-    simError();
-  }
-}
+      for (unsigned int j = 0; j < nBins_; j++) {
+        for (outputData = beginOutputData(i); outputData;
+             outputData = nextOutputData(i)) {
+          writeData(ofs, outputData, j);
+        }
+        ofs << std::endl;
+      }
 
-void StaticAnalyser::writeReal(std::ostream& os, OutputData* dat,
-                               unsigned int bin) {
-  assert(bin < nBins_);
+      ofs << "#######################################################\n";
+      ofs << "# 95% confidence intervals in those quantities follow:\n";
+      ofs << "#######################################################\n";
 
-  RealType r;
-  std::size_t count = dat->accumulator[bin]->count();
+      for (unsigned int j = 0; j < nBins_; j++) {
+        ofs << "#";
+        for (outputData = beginOutputData(i); outputData;
+             outputData = nextOutputData(i)) {
+          writeErrorBars(ofs, outputData, j);
+        }
+        ofs << std::endl;
+      }
 
-  if (count == 0) {
-    os << "\t";
-  } else {
-    if (dat->dataHandling == odhMax) {
-      dynamic_cast<Accumulator*>(dat->accumulator[bin])->getMax(r);
-    } else if (dat->dataHandling == odhTotal) {
-      dynamic_cast<Accumulator*>(dat->accumulator[bin])->getTotal(r);
+      ofs.flush();
+      ofs.close();
+
     } else {
-      dynamic_cast<Accumulator*>(dat->accumulator[bin])->getAverage(r);
-    }
-
-    if (std::isinf(r) || std::isnan(r)) {
-      sprintf(painCave.errMsg,
-              "StaticAnalyser detected a numerical error writing:\n"
-              "\t%s for bin %u",
-              dat->title.c_str(), bin);
+      sprintf(painCave.errMsg, "StaticAnalyser: unable to open %s\n",
+              outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
-    } else {
-      os << "\t" << r;
     }
   }
-}
 
-void StaticAnalyser::writeVector(std::ostream& os, OutputData* dat,
+  void StaticAnalyser::writeReal(std::ostream& os, OutputData* dat,
                                  unsigned int bin) {
-  assert(bin < nBins_);
+    assert(bin < nBins_);
 
-  Vector3d v;
-  std::size_t count = dat->accumulator[bin]->count();
-
-  if (count == 0) {
-    os << "\t\t\t";
-  } else {
-    if (dat->dataHandling == odhTotal) {
-      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getTotal(v);
-    } else {
-      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);
-    }
-
-    if (std::isinf(v[0]) || std::isnan(v[0]) || std::isinf(v[1]) ||
-        std::isnan(v[1]) || std::isinf(v[2]) || std::isnan(v[2])) {
-      sprintf(painCave.errMsg,
-              "StaticAnalyser detected a numerical error writing:\n"
-              "\t%s for bin %u",
-              dat->title.c_str(), bin);
-      painCave.isFatal = 1;
-      simError();
-    } else {
-      os << "\t" << v[0] << "\t" << v[1] << "\t" << v[2];
-    }
-  }
-}
-
-void StaticAnalyser::writeArray(std::ostream& os, OutputData* dat,
-                                unsigned int bin) {
-  assert(bin < nBins_);
-
-  RealType s;
-  std::size_t columns = dat->accumulatorArray2d[0].size();
-
-  for (std::size_t i = 0; i < columns; i++) {
-    std::size_t count = dat->accumulatorArray2d[bin][i]->count();
+    RealType r;
+    std::size_t count = dat->accumulator[bin]->count();
 
     if (count == 0) {
       os << "\t";
+    } else {
+      if (dat->dataHandling == odhMax) {
+        dynamic_cast<Accumulator*>(dat->accumulator[bin])->getMax(r);
+      } else if (dat->dataHandling == odhTotal) {
+        dynamic_cast<Accumulator*>(dat->accumulator[bin])->getTotal(r);
+      } else {
+        dynamic_cast<Accumulator*>(dat->accumulator[bin])->getAverage(r);
+      }
+
+      if (std::isinf(r) || std::isnan(r)) {
+        sprintf(painCave.errMsg,
+                "StaticAnalyser detected a numerical error writing:\n"
+                "\t%s for bin %u",
+                dat->title.c_str(), bin);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        os << "\t" << r;
+      }
+    }
+  }
+
+  void StaticAnalyser::writeVector(std::ostream& os, OutputData* dat,
+                                   unsigned int bin) {
+    assert(bin < nBins_);
+
+    Vector3d v;
+    std::size_t count = dat->accumulator[bin]->count();
+
+    if (count == 0) {
+      os << "\t\t\t";
     } else {
       if (dat->dataHandling == odhTotal) {
-        dynamic_cast<Accumulator*>(dat->accumulatorArray2d[bin][i])
-            ->getTotal(s);
+        dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getTotal(v);
       } else {
-        dynamic_cast<Accumulator*>(dat->accumulatorArray2d[bin][i])
-            ->getAverage(s);
+        dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])->getAverage(v);
       }
 
-      if (std::isinf(s) || std::isnan(s)) {
+      if (std::isinf(v[0]) || std::isnan(v[0]) || std::isinf(v[1]) ||
+          std::isnan(v[1]) || std::isinf(v[2]) || std::isnan(v[2])) {
         sprintf(painCave.errMsg,
                 "StaticAnalyser detected a numerical error writing:\n"
-                "\t%s for bin %u, column %u",
-                dat->title.c_str(), bin, static_cast<unsigned int>(i));
+                "\t%s for bin %u",
+                dat->title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
       } else {
-        os << "\t" << s;
+        os << "\t" << v[0] << "\t" << v[1] << "\t" << v[2];
       }
     }
   }
-}
 
-void StaticAnalyser::writeData(std::ostream& os, OutputData* dat,
-                               unsigned int bin) {
-  assert(bin < nBins_);
+  void StaticAnalyser::writeArray(std::ostream& os, OutputData* dat,
+                                  unsigned int bin) {
+    assert(bin < nBins_);
 
-  if (dat->dataType == odtReal) {
-    writeReal(os, dat, bin);
-  } else if (dat->dataType == odtVector3) {
-    writeVector(os, dat, bin);
-  } else if (dat->dataType == odtArray2d) {
-    writeArray(os, dat, bin);
-  }
-}
+    RealType s;
+    std::size_t columns = dat->accumulatorArray2d[0].size();
 
-void StaticAnalyser::writeRealErrorBars(std::ostream& os, OutputData* dat,
-                                        unsigned int bin) {
-  assert(bin < nBins_);
+    for (std::size_t i = 0; i < columns; i++) {
+      std::size_t count = dat->accumulatorArray2d[bin][i]->count();
 
-  RealType r;
-  std::size_t count = dat->accumulator[bin]->count();
+      if (count == 0) {
+        os << "\t";
+      } else {
+        if (dat->dataHandling == odhTotal) {
+          dynamic_cast<Accumulator*>(dat->accumulatorArray2d[bin][i])
+              ->getTotal(s);
+        } else {
+          dynamic_cast<Accumulator*>(dat->accumulatorArray2d[bin][i])
+              ->getAverage(s);
+        }
 
-  if (count == 0) {
-    os << "\t";
-  } else {
-    dynamic_cast<Accumulator*>(dat->accumulator[bin])
-        ->get95percentConfidenceInterval(r);
-
-    if (std::isinf(r) || std::isnan(r)) {
-      sprintf(painCave.errMsg,
-              "StaticAnalyser detected a numerical error writing:\n"
-              "\tstandard deviation of %s for bin %u",
-              dat->title.c_str(), bin);
-      painCave.isFatal = 1;
-      simError();
-    } else {
-      os << "\t" << r;
+        if (std::isinf(s) || std::isnan(s)) {
+          sprintf(painCave.errMsg,
+                  "StaticAnalyser detected a numerical error writing:\n"
+                  "\t%s for bin %u, column %u",
+                  dat->title.c_str(), bin, static_cast<unsigned int>(i));
+          painCave.isFatal = 1;
+          simError();
+        } else {
+          os << "\t" << s;
+        }
+      }
     }
   }
-}
 
-void StaticAnalyser::writeVectorErrorBars(std::ostream& os, OutputData* dat,
+  void StaticAnalyser::writeData(std::ostream& os, OutputData* dat,
+                                 unsigned int bin) {
+    assert(bin < nBins_);
+
+    if (dat->dataType == odtReal) {
+      writeReal(os, dat, bin);
+    } else if (dat->dataType == odtVector3) {
+      writeVector(os, dat, bin);
+    } else if (dat->dataType == odtArray2d) {
+      writeArray(os, dat, bin);
+    }
+  }
+
+  void StaticAnalyser::writeRealErrorBars(std::ostream& os, OutputData* dat,
                                           unsigned int bin) {
-  assert(bin < nBins_);
+    assert(bin < nBins_);
 
-  Vector3d v;
-  std::size_t count = dat->accumulator[bin]->count();
-
-  if (count == 0) {
-    os << "\t\t\t";
-  } else {
-    dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])
-        ->get95percentConfidenceInterval(v);
-
-    if (std::isinf(v[0]) || std::isnan(v[0]) || std::isinf(v[1]) ||
-        std::isnan(v[1]) || std::isinf(v[2]) || std::isnan(v[2])) {
-      sprintf(painCave.errMsg,
-              "StaticAnalyser detected a numerical error writing:\n"
-              "\tstandard deviation of %s for bin %u",
-              dat->title.c_str(), bin);
-      painCave.isFatal = 1;
-      simError();
-    } else {
-      os << "\t" << v[0] << "\t" << v[1] << "\t" << v[2];
-    }
-  }
-}
-
-void StaticAnalyser::writeArrayErrorBars(std::ostream& os, OutputData* dat,
-                                         unsigned int bin) {
-  assert(bin < nBins_);
-
-  RealType s;
-  std::size_t columns = dat->accumulatorArray2d[0].size();
-
-  for (std::size_t i = 0; i < columns; i++) {
-    std::size_t count = dat->accumulatorArray2d[bin][i]->count();
+    RealType r;
+    std::size_t count = dat->accumulator[bin]->count();
 
     if (count == 0) {
       os << "\t";
     } else {
-      dynamic_cast<Accumulator*>(dat->accumulatorArray2d[bin][i])
-          ->get95percentConfidenceInterval(s);
+      dynamic_cast<Accumulator*>(dat->accumulator[bin])
+          ->get95percentConfidenceInterval(r);
 
-      if (std::isinf(s) || std::isnan(s)) {
+      if (std::isinf(r) || std::isnan(r)) {
         sprintf(painCave.errMsg,
                 "StaticAnalyser detected a numerical error writing:\n"
-                "\t%s std. dev. for bin %u, column %u",
-                dat->title.c_str(), bin, static_cast<unsigned int>(i));
+                "\tstandard deviation of %s for bin %u",
+                dat->title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
       } else {
-        os << "\t" << s;
+        os << "\t" << r;
       }
     }
   }
-}
 
-void StaticAnalyser::writeErrorBars(std::ostream& os, OutputData* dat,
-                                    unsigned int bin) {
-  assert(bin < nBins_);
+  void StaticAnalyser::writeVectorErrorBars(std::ostream& os, OutputData* dat,
+                                            unsigned int bin) {
+    assert(bin < nBins_);
 
-  if (dat->dataType == odtReal) {
-    writeRealErrorBars(os, dat, bin);
-  } else if (dat->dataType == odtVector3) {
-    writeVectorErrorBars(os, dat, bin);
-  } else if (dat->dataType == odtArray2d) {
-    writeArrayErrorBars(os, dat, bin);
+    Vector3d v;
+    std::size_t count = dat->accumulator[bin]->count();
+
+    if (count == 0) {
+      os << "\t\t\t";
+    } else {
+      dynamic_cast<VectorAccumulator*>(dat->accumulator[bin])
+          ->get95percentConfidenceInterval(v);
+
+      if (std::isinf(v[0]) || std::isnan(v[0]) || std::isinf(v[1]) ||
+          std::isnan(v[1]) || std::isinf(v[2]) || std::isnan(v[2])) {
+        sprintf(painCave.errMsg,
+                "StaticAnalyser detected a numerical error writing:\n"
+                "\tstandard deviation of %s for bin %u",
+                dat->title.c_str(), bin);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        os << "\t" << v[0] << "\t" << v[1] << "\t" << v[2];
+      }
+    }
   }
-}
 
-OutputData* StaticAnalyser::beginOutputData(
-    std::vector<OutputData*>::iterator& i) {
-  i = data_.begin();
-  return i != data_.end() ? *i : NULL;
-}
+  void StaticAnalyser::writeArrayErrorBars(std::ostream& os, OutputData* dat,
+                                           unsigned int bin) {
+    assert(bin < nBins_);
 
-OutputData* StaticAnalyser::nextOutputData(
-    std::vector<OutputData*>::iterator& i) {
-  ++i;
-  return i != data_.end() ? *i : NULL;
-}
+    RealType s;
+    std::size_t columns = dat->accumulatorArray2d[0].size();
+
+    for (std::size_t i = 0; i < columns; i++) {
+      std::size_t count = dat->accumulatorArray2d[bin][i]->count();
+
+      if (count == 0) {
+        os << "\t";
+      } else {
+        dynamic_cast<Accumulator*>(dat->accumulatorArray2d[bin][i])
+            ->get95percentConfidenceInterval(s);
+
+        if (std::isinf(s) || std::isnan(s)) {
+          sprintf(painCave.errMsg,
+                  "StaticAnalyser detected a numerical error writing:\n"
+                  "\t%s std. dev. for bin %u, column %u",
+                  dat->title.c_str(), bin, static_cast<unsigned int>(i));
+          painCave.isFatal = 1;
+          simError();
+        } else {
+          os << "\t" << s;
+        }
+      }
+    }
+  }
+
+  void StaticAnalyser::writeErrorBars(std::ostream& os, OutputData* dat,
+                                      unsigned int bin) {
+    assert(bin < nBins_);
+
+    if (dat->dataType == odtReal) {
+      writeRealErrorBars(os, dat, bin);
+    } else if (dat->dataType == odtVector3) {
+      writeVectorErrorBars(os, dat, bin);
+    } else if (dat->dataType == odtArray2d) {
+      writeArrayErrorBars(os, dat, bin);
+    }
+  }
+
+  OutputData* StaticAnalyser::beginOutputData(
+      std::vector<OutputData*>::iterator& i) {
+    i = data_.begin();
+    return i != data_.end() ? *i : NULL;
+  }
+
+  OutputData* StaticAnalyser::nextOutputData(
+      std::vector<OutputData*>::iterator& i) {
+    ++i;
+    return i != data_.end() ? *i : NULL;
+  }
 }  // namespace OpenMD

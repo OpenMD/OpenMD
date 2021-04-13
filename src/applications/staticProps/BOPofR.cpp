@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -56,371 +56,368 @@
 using namespace MATPACK;
 namespace OpenMD {
 
-BOPofR::BOPofR(SimInfo* info, const std::string& filename,
-               const std::string& sele, double rCut, unsigned int nbins,
-               RealType len)
-    : StaticAnalyser(info, filename, nbins),
-      selectionScript_(sele),
-      seleMan_(info),
-      evaluator_(info) {
-  setOutputName(getPrefix(filename) + ".bo");
-  setAnalysisType("Bond Order Parameter(r)");
+  BOPofR::BOPofR(SimInfo* info, const std::string& filename,
+                 const std::string& sele, double rCut, unsigned int nbins,
+                 RealType len) :
+      StaticAnalyser(info, filename, nbins),
+      selectionScript_(sele), seleMan_(info), evaluator_(info) {
+    setOutputName(getPrefix(filename) + ".bo");
+    setAnalysisType("Bond Order Parameter(r)");
 
-  evaluator_.loadScriptString(sele);
-  if (!evaluator_.isDynamic()) {
-    seleMan_.setSelectionSet(evaluator_.evaluate());
-  }
-
-  // Set up cutoff radius and order of the Legendre Polynomial:
-
-  rCut_ = rCut;
-  len_ = len;
-
-  std::stringstream params;
-  params << " rcut = " << rCut_ << ", len = " << len_ << ", nbins = " << nBins_;
-  const std::string paramString = params.str();
-  setParameterString(paramString);
-
-  deltaR_ = len_ / nBins_;
-  RCount_.resize(nBins_);
-  WofR_.resize(nBins_);
-  QofR_.resize(nBins_);
-
-  for (unsigned int i = 0; i < nBins_; i++) {
-    RCount_[i] = 0;
-    WofR_[i] = 0;
-    QofR_[i] = 0;
-  }
-
-  // Make arrays for Wigner3jm
-  RealType* THRCOF = new RealType[2 * lMax_ + 1];
-  // Variables for Wigner routine
-  RealType lPass, m1Pass, m2m, m2M;
-  int error, mSize;
-  mSize = 2 * lMax_ + 1;
-
-  for (int l = 0; l <= lMax_; l++) {
-    lPass = (RealType)l;
-    for (int m1 = -l; m1 <= l; m1++) {
-      m1Pass = (RealType)m1;
-
-      std::pair<int, int> lm = std::make_pair(l, m1);
-
-      // Zero work array
-      for (int ii = 0; ii < 2 * l + 1; ii++) {
-        THRCOF[ii] = 0.0;
-      }
-
-      // Get Wigner coefficients
-      Wigner3jm(lPass, lPass, lPass, m1Pass, m2m, m2M, THRCOF, mSize, error);
-
-      m2Min[lm] = (int)floor(m2m);
-      m2Max[lm] = (int)floor(m2M);
-
-      for (int mmm = 0; mmm <= (int)(m2M - m2m); mmm++) {
-        w3j[lm].push_back(THRCOF[mmm]);
-      }
-    }
-  }
-
-  delete[] THRCOF;
-  THRCOF = NULL;
-}
-
-void BOPofR::initializeHistogram() {
-  for (unsigned int i = 0; i < nBins_; i++) {
-    RCount_[i] = 0;
-    WofR_[i] = 0;
-    QofR_[i] = 0;
-  }
-}
-
-void BOPofR::process() {
-  Molecule* mol;
-  Atom* atom;
-  int myIndex;
-  SimInfo::MoleculeIterator mi;
-  Molecule::AtomIterator ai;
-  StuntDouble* sd;
-  Vector3d vec;
-  RealType costheta;
-  RealType phi;
-  RealType r;
-  Vector3d rCOM;
-  RealType distCOM;
-  Vector3d pos;
-  Vector3d CenterOfMass;
-  std::map<std::pair<int, int>, ComplexType> q;
-  std::vector<RealType> q_l;
-  std::vector<RealType> q2;
-  std::vector<ComplexType> w;
-  std::vector<ComplexType> w_hat;
-  std::vector<RealType> Q2;
-  std::vector<RealType> Q;
-  std::vector<ComplexType> W;
-  std::vector<ComplexType> W_hat;
-  int nBonds;
-  SphericalHarmonic sphericalHarmonic;
-  int i;
-  bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-  DumpReader reader(info_, dumpFilename_);
-  int nFrames = reader.getNFrames();
-  frameCounter_ = 0;
-
-  Thermo thermo(info_);
-
-  q_l.resize(lMax_ + 1);
-  q2.resize(lMax_ + 1);
-  w.resize(lMax_ + 1);
-  w_hat.resize(lMax_ + 1);
-
-  Q2.resize(lMax_ + 1);
-  Q.resize(lMax_ + 1);
-  W.resize(lMax_ + 1);
-  W_hat.resize(lMax_ + 1);
-
-  for (int istep = 0; istep < nFrames; istep += step_) {
-    reader.readFrame(istep);
-    frameCounter_++;
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    CenterOfMass = thermo.getCom();
-    if (evaluator_.isDynamic()) {
+    evaluator_.loadScriptString(sele);
+    if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
-    // outer loop is over the selected StuntDoubles:
+    // Set up cutoff radius and order of the Legendre Polynomial:
 
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {
-      myIndex = sd->getGlobalIndex();
+    rCut_ = rCut;
+    len_  = len;
 
-      nBonds = 0;
+    std::stringstream params;
+    params << " rcut = " << rCut_ << ", len = " << len_
+           << ", nbins = " << nBins_;
+    const std::string paramString = params.str();
+    setParameterString(paramString);
 
-      for (int l = 0; l <= lMax_; l++) {
-        for (int m = -l; m <= l; m++) {
-          q[std::make_pair(l, m)] = 0.0;
+    deltaR_ = len_ / nBins_;
+    RCount_.resize(nBins_);
+    WofR_.resize(nBins_);
+    QofR_.resize(nBins_);
+
+    for (unsigned int i = 0; i < nBins_; i++) {
+      RCount_[i] = 0;
+      WofR_[i]   = 0;
+      QofR_[i]   = 0;
+    }
+
+    // Make arrays for Wigner3jm
+    RealType* THRCOF = new RealType[2 * lMax_ + 1];
+    // Variables for Wigner routine
+    RealType lPass, m1Pass, m2m, m2M;
+    int error, mSize;
+    mSize = 2 * lMax_ + 1;
+
+    for (int l = 0; l <= lMax_; l++) {
+      lPass = (RealType)l;
+      for (int m1 = -l; m1 <= l; m1++) {
+        m1Pass = (RealType)m1;
+
+        std::pair<int, int> lm = std::make_pair(l, m1);
+
+        // Zero work array
+        for (int ii = 0; ii < 2 * l + 1; ii++) {
+          THRCOF[ii] = 0.0;
+        }
+
+        // Get Wigner coefficients
+        Wigner3jm(lPass, lPass, lPass, m1Pass, m2m, m2M, THRCOF, mSize, error);
+
+        m2Min[lm] = (int)floor(m2m);
+        m2Max[lm] = (int)floor(m2M);
+
+        for (int mmm = 0; mmm <= (int)(m2M - m2m); mmm++) {
+          w3j[lm].push_back(THRCOF[mmm]);
         }
       }
-      pos = sd->getPos();
-      rCOM = CenterOfMass - pos;
-      if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(rCOM);
-      distCOM = rCOM.length();
+    }
 
-      // inner loop is over all other atoms in the system:
+    delete[] THRCOF;
+    THRCOF = NULL;
+  }
 
-      for (mol = info_->beginMolecule(mi); mol != NULL;
-           mol = info_->nextMolecule(mi)) {
-        for (atom = mol->beginAtom(ai); atom != NULL;
-             atom = mol->nextAtom(ai)) {
-          if (atom->getGlobalIndex() != myIndex) {
-            vec = pos - atom->getPos();
+  void BOPofR::initializeHistogram() {
+    for (unsigned int i = 0; i < nBins_; i++) {
+      RCount_[i] = 0;
+      WofR_[i]   = 0;
+      QofR_[i]   = 0;
+    }
+  }
 
-            if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(vec);
+  void BOPofR::process() {
+    Molecule* mol;
+    Atom* atom;
+    int myIndex;
+    SimInfo::MoleculeIterator mi;
+    Molecule::AtomIterator ai;
+    StuntDouble* sd;
+    Vector3d vec;
+    RealType costheta;
+    RealType phi;
+    RealType r;
+    Vector3d rCOM;
+    RealType distCOM;
+    Vector3d pos;
+    Vector3d CenterOfMass;
+    std::map<std::pair<int, int>, ComplexType> q;
+    std::vector<RealType> q_l;
+    std::vector<RealType> q2;
+    std::vector<ComplexType> w;
+    std::vector<ComplexType> w_hat;
+    std::vector<RealType> Q2;
+    std::vector<RealType> Q;
+    std::vector<ComplexType> W;
+    std::vector<ComplexType> W_hat;
+    int nBonds;
+    SphericalHarmonic sphericalHarmonic;
+    int i;
+    bool usePeriodicBoundaryConditions_ =
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-            // Calculate "bonds" and build Q_lm(r) where
-            //      Q_lm = Y_lm(theta(r),phi(r))
-            // The spherical harmonics are wrt any arbitrary coordinate
-            // system, we choose standard spherical coordinates
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames   = reader.getNFrames();
+    frameCounter_ = 0;
 
-            r = vec.length();
+    Thermo thermo(info_);
 
-            // Check to see if neighbor is in bond cutoff
+    q_l.resize(lMax_ + 1);
+    q2.resize(lMax_ + 1);
+    w.resize(lMax_ + 1);
+    w_hat.resize(lMax_ + 1);
 
-            if (r < rCut_) {
-              costheta = vec.z() / r;
-              phi = atan2(vec.y(), vec.x());
+    Q2.resize(lMax_ + 1);
+    Q.resize(lMax_ + 1);
+    W.resize(lMax_ + 1);
+    W_hat.resize(lMax_ + 1);
 
-              for (int l = 0; l <= lMax_; l++) {
-                sphericalHarmonic.setL(l);
-                for (int m = -l; m <= l; m++) {
-                  sphericalHarmonic.setM(m);
-                  q[std::make_pair(l, m)] +=
-                      sphericalHarmonic.getValueAt(costheta, phi);
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      frameCounter_++;
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      CenterOfMass     = thermo.getCom();
+      if (evaluator_.isDynamic()) {
+        seleMan_.setSelectionSet(evaluator_.evaluate());
+      }
+
+      // outer loop is over the selected StuntDoubles:
+
+      for (sd = seleMan_.beginSelected(i); sd != NULL;
+           sd = seleMan_.nextSelected(i)) {
+        myIndex = sd->getGlobalIndex();
+
+        nBonds = 0;
+
+        for (int l = 0; l <= lMax_; l++) {
+          for (int m = -l; m <= l; m++) {
+            q[std::make_pair(l, m)] = 0.0;
+          }
+        }
+        pos  = sd->getPos();
+        rCOM = CenterOfMass - pos;
+        if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(rCOM);
+        distCOM = rCOM.length();
+
+        // inner loop is over all other atoms in the system:
+
+        for (mol = info_->beginMolecule(mi); mol != NULL;
+             mol = info_->nextMolecule(mi)) {
+          for (atom = mol->beginAtom(ai); atom != NULL;
+               atom = mol->nextAtom(ai)) {
+            if (atom->getGlobalIndex() != myIndex) {
+              vec = pos - atom->getPos();
+
+              if (usePeriodicBoundaryConditions_)
+                currentSnapshot_->wrapVector(vec);
+
+              // Calculate "bonds" and build Q_lm(r) where
+              //      Q_lm = Y_lm(theta(r),phi(r))
+              // The spherical harmonics are wrt any arbitrary coordinate
+              // system, we choose standard spherical coordinates
+
+              r = vec.length();
+
+              // Check to see if neighbor is in bond cutoff
+
+              if (r < rCut_) {
+                costheta = vec.z() / r;
+                phi      = atan2(vec.y(), vec.x());
+
+                for (int l = 0; l <= lMax_; l++) {
+                  sphericalHarmonic.setL(l);
+                  for (int m = -l; m <= l; m++) {
+                    sphericalHarmonic.setM(m);
+                    q[std::make_pair(l, m)] +=
+                        sphericalHarmonic.getValueAt(costheta, phi);
+                  }
                 }
+                nBonds++;
               }
-              nBonds++;
             }
           }
         }
-      }
 
-      for (int l = 0; l <= lMax_; l++) {
-        q2[l] = 0.0;
-        for (int m = -l; m <= l; m++) {
-          q[std::make_pair(l, m)] /= (RealType)nBonds;
-          q2[l] += norm(q[std::make_pair(l, m)]);
-        }
-        q_l[l] = sqrt(q2[l] * 4.0 * Constants::PI / (RealType)(2 * l + 1));
-      }
-
-      // Find Third Order Invariant W_l
-
-      for (int l = 0; l <= lMax_; l++) {
-        w[l] = 0.0;
-        for (int m1 = -l; m1 <= l; m1++) {
-          std::pair<int, int> lm = std::make_pair(l, m1);
-          for (int mmm = 0; mmm <= (m2Max[lm] - m2Min[lm]); mmm++) {
-            int m2 = m2Min[lm] + mmm;
-            int m3 = -m1 - m2;
-            w[l] += w3j[lm][mmm] * q[lm] * q[std::make_pair(l, m2)] *
-                    q[std::make_pair(l, m3)];
+        for (int l = 0; l <= lMax_; l++) {
+          q2[l] = 0.0;
+          for (int m = -l; m <= l; m++) {
+            q[std::make_pair(l, m)] /= (RealType)nBonds;
+            q2[l] += norm(q[std::make_pair(l, m)]);
           }
+          q_l[l] = sqrt(q2[l] * 4.0 * Constants::PI / (RealType)(2 * l + 1));
         }
 
-        w_hat[l] = w[l] / pow(q2[l], RealType(1.5));
-      }
+        // Find Third Order Invariant W_l
 
-      collectHistogram(q_l, w_hat, distCOM);
+        for (int l = 0; l <= lMax_; l++) {
+          w[l] = 0.0;
+          for (int m1 = -l; m1 <= l; m1++) {
+            std::pair<int, int> lm = std::make_pair(l, m1);
+            for (int mmm = 0; mmm <= (m2Max[lm] - m2Min[lm]); mmm++) {
+              int m2 = m2Min[lm] + mmm;
+              int m3 = -m1 - m2;
+              w[l] += w3j[lm][mmm] * q[lm] * q[std::make_pair(l, m2)] *
+                      q[std::make_pair(l, m3)];
+            }
+          }
 
-      //  printf( "%s  %18.10g %18.10g %18.10g %18.10g \n",
-      //  sd->getType().c_str(),pos[0],pos[1],pos[2],real(w_hat[6]));
-    }
-  }
+          w_hat[l] = w[l] / pow(q2[l], RealType(1.5));
+        }
 
-  writeOrderParameter();
-}
+        collectHistogram(q_l, w_hat, distCOM);
 
-IcosahedralOfR::IcosahedralOfR(SimInfo* info, const std::string& filename,
-                               const std::string& sele, double rCut,
-                               unsigned int nbins, RealType len)
-    : BOPofR(info, filename, sele, rCut, nbins, len) {
-  setAnalysisType("Icosahedral Bond Order Parameter(r)");
-}
-
-void IcosahedralOfR::collectHistogram(std::vector<RealType> q,
-                                      std::vector<ComplexType> what,
-                                      RealType distCOM) {
-  if (distCOM < len_) {
-    // Figure out where this distance goes...
-    int whichBin = int(distCOM / deltaR_);
-    RCount_[whichBin]++;
-
-    if (real(what[6]) < -0.15) {
-      WofR_[whichBin]++;
-    }
-    if (q[6] > 0.5) {
-      QofR_[whichBin]++;
-    }
-  }
-}
-
-FCCOfR::FCCOfR(SimInfo* info, const std::string& filename,
-               const std::string& sele, double rCut, unsigned int nbins,
-               RealType len)
-    : BOPofR(info, filename, sele, rCut, nbins, len) {
-  setAnalysisType("FCC Bond Order Parameter(r)");
-}
-
-void FCCOfR::collectHistogram(std::vector<RealType> q,
-                              std::vector<ComplexType> what, RealType distCOM) {
-  if (distCOM < len_) {
-    // Figure out where this distance goes...
-    int whichBin = int(distCOM / deltaR_);
-    RCount_[whichBin]++;
-
-    if (real(what[4]) < -0.12) {
-      WofR_[whichBin]++;
-    }
-  }
-}
-
-void IcosahedralOfR::writeOrderParameter() {
-  Revision rev;
-  std::ofstream osq((getOutputFileName() + "qr").c_str());
-
-  if (osq.is_open()) {
-    osq << "# " << getAnalysisType() << "\n";
-    osq << "# OpenMD " << rev.getFullRevision() << "\n";
-    osq << "# " << rev.getBuildDate() << "\n";
-    osq << "# selection script: \"" << selectionScript_ << "\"\n";
-    if (!paramString_.empty()) osq << "# parameters: " << paramString_ << "\n";
-
-    // Normalize by number of frames and write it out:
-
-    for (unsigned int i = 0; i < nBins_; ++i) {
-      RealType Rval = (i + 0.5) * deltaR_;
-      osq << Rval;
-      if (RCount_[i] == 0) {
-        osq << "\t" << 0;
-        osq << "\n";
-      } else {
-        osq << "\t" << (RealType)QofR_[i] / (RealType)RCount_[i];
-        osq << "\n";
+        //  printf( "%s  %18.10g %18.10g %18.10g %18.10g \n",
+        //  sd->getType().c_str(),pos[0],pos[1],pos[2],real(w_hat[6]));
       }
     }
 
-    osq.close();
-
-  } else {
-    sprintf(painCave.errMsg, "IcosahedralOfR: unable to open %s\n",
-            (getOutputFileName() + "q").c_str());
-    painCave.isFatal = 1;
-    simError();
+    writeOrderParameter();
   }
 
-  std::ofstream osw((getOutputFileName() + "wr").c_str());
+  IcosahedralOfR::IcosahedralOfR(SimInfo* info, const std::string& filename,
+                                 const std::string& sele, double rCut,
+                                 unsigned int nbins, RealType len) :
+      BOPofR(info, filename, sele, rCut, nbins, len) {
+    setAnalysisType("Icosahedral Bond Order Parameter(r)");
+  }
 
-  if (osw.is_open()) {
-    osw << "# " << getAnalysisType() << "\n";
-    osw << "# OpenMD " << rev.getFullRevision() << "\n";
-    osw << "# " << rev.getBuildDate() << "\n";
-    osw << "# selection script: \"" << selectionScript_ << "\"\n";
-    if (!paramString_.empty()) osw << "# parameters: " << paramString_ << "\n";
+  void IcosahedralOfR::collectHistogram(std::vector<RealType> q,
+                                        std::vector<ComplexType> what,
+                                        RealType distCOM) {
+    if (distCOM < len_) {
+      // Figure out where this distance goes...
+      int whichBin = int(distCOM / deltaR_);
+      RCount_[whichBin]++;
 
-    // Normalize by number of frames and write it out:
-    for (unsigned int i = 0; i < nBins_; ++i) {
-      RealType Rval = deltaR_ * (i + 0.5);
-      osw << Rval;
-      if (RCount_[i] == 0) {
-        osw << "\t" << 0;
-        osw << "\n";
-      } else {
-        osw << "\t" << (RealType)WofR_[i] / (RealType)RCount_[i];
-        osw << "\n";
-      }
+      if (real(what[6]) < -0.15) { WofR_[whichBin]++; }
+      if (q[6] > 0.5) { QofR_[whichBin]++; }
     }
-
-    osw.close();
-  } else {
-    sprintf(painCave.errMsg, "IcosahedralOfR: unable to open %s\n",
-            (getOutputFileName() + "w").c_str());
-    painCave.isFatal = 1;
-    simError();
   }
-}
-void FCCOfR::writeOrderParameter() {
-  std::ofstream osw((getOutputFileName() + "wr").c_str());
 
-  if (osw.is_open()) {
+  FCCOfR::FCCOfR(SimInfo* info, const std::string& filename,
+                 const std::string& sele, double rCut, unsigned int nbins,
+                 RealType len) :
+      BOPofR(info, filename, sele, rCut, nbins, len) {
+    setAnalysisType("FCC Bond Order Parameter(r)");
+  }
+
+  void FCCOfR::collectHistogram(std::vector<RealType> q,
+                                std::vector<ComplexType> what,
+                                RealType distCOM) {
+    if (distCOM < len_) {
+      // Figure out where this distance goes...
+      int whichBin = int(distCOM / deltaR_);
+      RCount_[whichBin]++;
+
+      if (real(what[4]) < -0.12) { WofR_[whichBin]++; }
+    }
+  }
+
+  void IcosahedralOfR::writeOrderParameter() {
     Revision rev;
-    osw << "# " << getAnalysisType() << "\n";
-    osw << "# OpenMD " << rev.getFullRevision() << "\n";
-    osw << "# " << rev.getBuildDate() << "\n";
-    osw << "# selection script: \"" << selectionScript_ << "\"\n";
-    if (!paramString_.empty()) osw << "# parameters: " << paramString_ << "\n";
+    std::ofstream osq((getOutputFileName() + "qr").c_str());
 
-    // Normalize by number of frames and write it out:
-    for (unsigned int i = 0; i < nBins_; ++i) {
-      RealType Rval = deltaR_ * (i + 0.5);
-      osw << Rval;
-      if (RCount_[i] == 0) {
-        osw << "\t" << 0;
-        osw << "\n";
-      } else {
-        osw << "\t" << (RealType)WofR_[i] / (RealType)RCount_[i];
-        osw << "\n";
+    if (osq.is_open()) {
+      osq << "# " << getAnalysisType() << "\n";
+      osq << "# OpenMD " << rev.getFullRevision() << "\n";
+      osq << "# " << rev.getBuildDate() << "\n";
+      osq << "# selection script: \"" << selectionScript_ << "\"\n";
+      if (!paramString_.empty())
+        osq << "# parameters: " << paramString_ << "\n";
+
+      // Normalize by number of frames and write it out:
+
+      for (unsigned int i = 0; i < nBins_; ++i) {
+        RealType Rval = (i + 0.5) * deltaR_;
+        osq << Rval;
+        if (RCount_[i] == 0) {
+          osq << "\t" << 0;
+          osq << "\n";
+        } else {
+          osq << "\t" << (RealType)QofR_[i] / (RealType)RCount_[i];
+          osq << "\n";
+        }
       }
+
+      osq.close();
+
+    } else {
+      sprintf(painCave.errMsg, "IcosahedralOfR: unable to open %s\n",
+              (getOutputFileName() + "q").c_str());
+      painCave.isFatal = 1;
+      simError();
     }
 
-    osw.close();
-  } else {
-    sprintf(painCave.errMsg, "FCCOfR: unable to open %s\n",
-            (getOutputFileName() + "w").c_str());
-    painCave.isFatal = 1;
-    simError();
+    std::ofstream osw((getOutputFileName() + "wr").c_str());
+
+    if (osw.is_open()) {
+      osw << "# " << getAnalysisType() << "\n";
+      osw << "# OpenMD " << rev.getFullRevision() << "\n";
+      osw << "# " << rev.getBuildDate() << "\n";
+      osw << "# selection script: \"" << selectionScript_ << "\"\n";
+      if (!paramString_.empty())
+        osw << "# parameters: " << paramString_ << "\n";
+
+      // Normalize by number of frames and write it out:
+      for (unsigned int i = 0; i < nBins_; ++i) {
+        RealType Rval = deltaR_ * (i + 0.5);
+        osw << Rval;
+        if (RCount_[i] == 0) {
+          osw << "\t" << 0;
+          osw << "\n";
+        } else {
+          osw << "\t" << (RealType)WofR_[i] / (RealType)RCount_[i];
+          osw << "\n";
+        }
+      }
+
+      osw.close();
+    } else {
+      sprintf(painCave.errMsg, "IcosahedralOfR: unable to open %s\n",
+              (getOutputFileName() + "w").c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
   }
-}
+  void FCCOfR::writeOrderParameter() {
+    std::ofstream osw((getOutputFileName() + "wr").c_str());
+
+    if (osw.is_open()) {
+      Revision rev;
+      osw << "# " << getAnalysisType() << "\n";
+      osw << "# OpenMD " << rev.getFullRevision() << "\n";
+      osw << "# " << rev.getBuildDate() << "\n";
+      osw << "# selection script: \"" << selectionScript_ << "\"\n";
+      if (!paramString_.empty())
+        osw << "# parameters: " << paramString_ << "\n";
+
+      // Normalize by number of frames and write it out:
+      for (unsigned int i = 0; i < nBins_; ++i) {
+        RealType Rval = deltaR_ * (i + 0.5);
+        osw << Rval;
+        if (RCount_[i] == 0) {
+          osw << "\t" << 0;
+          osw << "\n";
+        } else {
+          osw << "\t" << (RealType)WofR_[i] / (RealType)RCount_[i];
+          osw << "\n";
+        }
+      }
+
+      osw.close();
+    } else {
+      sprintf(painCave.errMsg, "FCCOfR: unable to open %s\n",
+              (getOutputFileName() + "w").c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+  }
 }  // namespace OpenMD

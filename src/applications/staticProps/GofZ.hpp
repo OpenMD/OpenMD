@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,14 +50,12 @@
 namespace OpenMD {
 
   class GofZ : public RadialDistrFunc {
-
   public:
     GofZ(SimInfo* info, const std::string& filename, const std::string& sele1,
          const std::string& sele2, RealType len, RealType maxz, int nrbins,
-         int axis=2);
+         int axis = 2);
 
   private:
-
     virtual void preProcess();
     virtual void initializeHistogram();
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
@@ -73,5 +71,5 @@ namespace OpenMD {
     std::string axisLabel_;
   };
 
-}
+}  // namespace OpenMD
 #endif

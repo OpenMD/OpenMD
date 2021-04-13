@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -58,52 +58,52 @@
 #include "utils/simError.h"
 namespace OpenMD {
 
-NonBondedInteractionsSectionParser::NonBondedInteractionsSectionParser(
-    ForceFieldOptions& options)
-    : options_(options) {
-  setSectionName("NonBondedInteractions");
+  NonBondedInteractionsSectionParser::NonBondedInteractionsSectionParser(
+      ForceFieldOptions& options) :
+      options_(options) {
+    setSectionName("NonBondedInteractions");
 
-  stringToEnumMap_["MAW"] = MAW;
-  stringToEnumMap_["ShiftedMorse"] = ShiftedMorse;
-  stringToEnumMap_["LennardJones"] = LennardJones;
-  stringToEnumMap_["RepulsiveMorse"] = RepulsiveMorse;
-  stringToEnumMap_["RepulsivePower"] = RepulsivePower;
-  stringToEnumMap_["Mie"] = Mie;
-  stringToEnumMap_["Buckingham"] = Buckingham;
-  stringToEnumMap_["EAMTable"] = EAMTable;
-  stringToEnumMap_["EAMZhou"] = EAMZhou;
-  stringToEnumMap_["EAMOxides"] = EAMOxides;
-  stringToEnumMap_["InversePowerSeries"] = InversePowerSeries;
-}
-
-void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
-                                                   const std::string& line,
-                                                   int lineNo) {
-  StringTokenizer tokenizer(line);
-  int nTokens = tokenizer.countTokens();
-  if (nTokens < 3) {
-    sprintf(painCave.errMsg,
-            "NonBondedInteractionsSectionParser Error: Not enough tokens at "
-            "line %d\n",
-            lineNo);
-    painCave.isFatal = 1;
-    simError();
+    stringToEnumMap_["MAW"]                = MAW;
+    stringToEnumMap_["ShiftedMorse"]       = ShiftedMorse;
+    stringToEnumMap_["LennardJones"]       = LennardJones;
+    stringToEnumMap_["RepulsiveMorse"]     = RepulsiveMorse;
+    stringToEnumMap_["RepulsivePower"]     = RepulsivePower;
+    stringToEnumMap_["Mie"]                = Mie;
+    stringToEnumMap_["Buckingham"]         = Buckingham;
+    stringToEnumMap_["EAMTable"]           = EAMTable;
+    stringToEnumMap_["EAMZhou"]            = EAMZhou;
+    stringToEnumMap_["EAMOxides"]          = EAMOxides;
+    stringToEnumMap_["InversePowerSeries"] = InversePowerSeries;
   }
 
-  meus_ = options_.getMetallicEnergyUnitScaling();
-  eus_ = options_.getEnergyUnitScaling();
-  dus_ = options_.getDistanceUnitScaling();
+  void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
+                                                     const std::string& line,
+                                                     int lineNo) {
+    StringTokenizer tokenizer(line);
+    int nTokens = tokenizer.countTokens();
+    if (nTokens < 3) {
+      sprintf(painCave.errMsg,
+              "NonBondedInteractionsSectionParser Error: Not enough tokens at "
+              "line %d\n",
+              lineNo);
+      painCave.isFatal = 1;
+      simError();
+    }
 
-  std::string at1 = tokenizer.nextToken();
-  std::string at2 = tokenizer.nextToken();
-  std::string itype = tokenizer.nextToken();
+    meus_ = options_.getMetallicEnergyUnitScaling();
+    eus_  = options_.getEnergyUnitScaling();
+    dus_  = options_.getDistanceUnitScaling();
 
-  NonBondedInteractionTypeEnum nbit = getNonBondedInteractionTypeEnum(itype);
-  nTokens -= 3;
-  NonBondedInteractionType* interactionType = NULL;
+    std::string at1   = tokenizer.nextToken();
+    std::string at2   = tokenizer.nextToken();
+    std::string itype = tokenizer.nextToken();
 
-  // switch is a nightmare to maintain
-  switch (nbit) {
+    NonBondedInteractionTypeEnum nbit = getNonBondedInteractionTypeEnum(itype);
+    nTokens -= 3;
+    NonBondedInteractionType* interactionType = NULL;
+
+    // switch is a nightmare to maintain
+    switch (nbit) {
     case MAW:
       if (nTokens != 5) {
         sprintf(painCave.errMsg,
@@ -114,11 +114,11 @@ void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
         painCave.isFatal = 1;
         simError();
       } else {
-        RealType r_e = dus_ * tokenizer.nextTokenAsDouble();
-        RealType D_e = eus_ * tokenizer.nextTokenAsDouble();
-        RealType beta = tokenizer.nextTokenAsDouble() / dus_;
-        RealType ca1 = tokenizer.nextTokenAsDouble();
-        RealType cb1 = tokenizer.nextTokenAsDouble();
+        RealType r_e    = dus_ * tokenizer.nextTokenAsDouble();
+        RealType D_e    = eus_ * tokenizer.nextTokenAsDouble();
+        RealType beta   = tokenizer.nextTokenAsDouble() / dus_;
+        RealType ca1    = tokenizer.nextTokenAsDouble();
+        RealType cb1    = tokenizer.nextTokenAsDouble();
         interactionType = new MAWInteractionType(D_e, beta, r_e, ca1, cb1);
       }
       break;
@@ -133,9 +133,9 @@ void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
         painCave.isFatal = 1;
         simError();
       } else {
-        RealType r0 = dus_ * tokenizer.nextTokenAsDouble();
-        RealType D0 = eus_ * tokenizer.nextTokenAsDouble();
-        RealType beta0 = tokenizer.nextTokenAsDouble() / dus_;
+        RealType r0     = dus_ * tokenizer.nextTokenAsDouble();
+        RealType D0     = eus_ * tokenizer.nextTokenAsDouble();
+        RealType beta0  = tokenizer.nextTokenAsDouble() / dus_;
         interactionType = new MorseInteractionType(D0, beta0, r0, mtShifted);
       }
       break;
@@ -150,9 +150,9 @@ void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
         painCave.isFatal = 1;
         simError();
       } else {
-        RealType r0 = dus_ * tokenizer.nextTokenAsDouble();
-        RealType D0 = eus_ * tokenizer.nextTokenAsDouble();
-        RealType beta0 = tokenizer.nextTokenAsDouble() / dus_;
+        RealType r0     = dus_ * tokenizer.nextTokenAsDouble();
+        RealType D0     = eus_ * tokenizer.nextTokenAsDouble();
+        RealType beta0  = tokenizer.nextTokenAsDouble() / dus_;
         interactionType = new MorseInteractionType(D0, beta0, r0, mtRepulsive);
       }
       break;
@@ -167,9 +167,9 @@ void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
         painCave.isFatal = 1;
         simError();
       } else {
-        RealType sigma = dus_ * tokenizer.nextTokenAsDouble();
+        RealType sigma   = dus_ * tokenizer.nextTokenAsDouble();
         RealType epsilon = eus_ * tokenizer.nextTokenAsDouble();
-        interactionType = new LennardJonesInteractionType(sigma, epsilon);
+        interactionType  = new LennardJonesInteractionType(sigma, epsilon);
       }
       break;
 
@@ -183,9 +183,9 @@ void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
         painCave.isFatal = 1;
         simError();
       } else {
-        RealType sigma = dus_ * tokenizer.nextTokenAsDouble();
+        RealType sigma   = dus_ * tokenizer.nextTokenAsDouble();
         RealType epsilon = eus_ * tokenizer.nextTokenAsDouble();
-        int nRep = tokenizer.nextTokenAsInt();
+        int nRep         = tokenizer.nextTokenAsInt();
         interactionType =
             new RepulsivePowerInteractionType(sigma, epsilon, nRep);
       }
@@ -201,11 +201,11 @@ void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
         painCave.isFatal = 1;
         simError();
       } else {
-        RealType sigma = dus_ * tokenizer.nextTokenAsDouble();
+        RealType sigma   = dus_ * tokenizer.nextTokenAsDouble();
         RealType epsilon = eus_ * tokenizer.nextTokenAsDouble();
-        int nRep = tokenizer.nextTokenAsInt();
-        int mAtt = tokenizer.nextTokenAsInt();
-        interactionType = new MieInteractionType(sigma, epsilon, nRep, mAtt);
+        int nRep         = tokenizer.nextTokenAsInt();
+        int mAtt         = tokenizer.nextTokenAsInt();
+        interactionType  = new MieInteractionType(sigma, epsilon, nRep, mAtt);
       }
       break;
 
@@ -225,12 +225,12 @@ void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
         RealType B = tokenizer.nextTokenAsDouble() / dus_;
         RealType C =
             tokenizer.nextTokenAsDouble();  // should also have a scaling
-        RealType sigma = 0.0;
+        RealType sigma   = 0.0;
         RealType epsilon = 0.0;
 
         if (btype.compare("MODIFIED")) {
-          sigma = dus_ * tokenizer.nextTokenAsDouble();
-          epsilon = eus_ * tokenizer.nextTokenAsDouble();
+          sigma           = dus_ * tokenizer.nextTokenAsDouble();
+          epsilon         = eus_ * tokenizer.nextTokenAsDouble();
           interactionType = new BuckinghamInteractionType(A, B, C, sigma,
                                                           epsilon, btModified);
 
@@ -259,14 +259,14 @@ void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
         painCave.isFatal = 1;
         simError();
       } else {
-        RealType re = dus_ * tokenizer.nextTokenAsDouble();
+        RealType re    = dus_ * tokenizer.nextTokenAsDouble();
         RealType alpha = tokenizer.nextTokenAsDouble();
-        RealType beta = tokenizer.nextTokenAsDouble();
+        RealType beta  = tokenizer.nextTokenAsDouble();
         // Because EAM is a metallic potential, we'll use the metallic
         // unit scaling for these two parameters
-        RealType A = meus_ * tokenizer.nextTokenAsDouble();
-        RealType B = meus_ * tokenizer.nextTokenAsDouble();
-        RealType kappa = tokenizer.nextTokenAsDouble();
+        RealType A      = meus_ * tokenizer.nextTokenAsDouble();
+        RealType B      = meus_ * tokenizer.nextTokenAsDouble();
+        RealType kappa  = tokenizer.nextTokenAsDouble();
         RealType lambda = tokenizer.nextTokenAsDouble();
 
         interactionType =
@@ -284,11 +284,11 @@ void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
         painCave.isFatal = 1;
         simError();
       } else {
-        RealType re = dus_ * tokenizer.nextTokenAsDouble();
+        RealType re    = dus_ * tokenizer.nextTokenAsDouble();
         RealType alpha = tokenizer.nextTokenAsDouble();
         // Because EAM is a metallic potential, we'll use the metallic
         // unit scaling for these two parameters
-        RealType A = meus_ * tokenizer.nextTokenAsDouble();
+        RealType A  = meus_ * tokenizer.nextTokenAsDouble();
         RealType Ci = tokenizer.nextTokenAsDouble();
         RealType Cj = tokenizer.nextTokenAsDouble();
 
@@ -311,7 +311,7 @@ void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
         RealType coefficient;
 
         for (int i = 0; i < nPairs; ++i) {
-          power = tokenizer.nextTokenAsInt();
+          power       = tokenizer.nextTokenAsInt();
           coefficient = tokenizer.nextTokenAsDouble() * eus_ * pow(dus_, power);
           series.push_back(std::make_pair(power, coefficient));
         }
@@ -330,20 +330,20 @@ void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,
       simError();
 
       break;
+    }
+
+    if (interactionType != NULL) {
+      ff.addNonBondedInteractionType(at1, at2, interactionType);
+    }
   }
 
-  if (interactionType != NULL) {
-    ff.addNonBondedInteractionType(at1, at2, interactionType);
+  NonBondedInteractionsSectionParser::NonBondedInteractionTypeEnum
+      NonBondedInteractionsSectionParser::getNonBondedInteractionTypeEnum(
+          const std::string& str) {
+    std::map<std::string, NonBondedInteractionTypeEnum>::iterator i;
+    i = stringToEnumMap_.find(str);
+
+    return i == stringToEnumMap_.end() ? Unknown : i->second;
   }
-}
-
-NonBondedInteractionsSectionParser::NonBondedInteractionTypeEnum
-NonBondedInteractionsSectionParser::getNonBondedInteractionTypeEnum(
-    const std::string& str) {
-  std::map<std::string, NonBondedInteractionTypeEnum>::iterator i;
-  i = stringToEnumMap_.find(str);
-
-  return i == stringToEnumMap_.end() ? Unknown : i->second;
-}
 
 }  // end namespace OpenMD

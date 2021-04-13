@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,17 +42,17 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef IO_STATWRITER_HPP
 #define IO_STATWRITER_HPP
 
 #include "brains/Stats.hpp"
-#include "utils/StringTokenizer.hpp"
 #include "utils/CaseConversion.hpp"
+#include "utils/StringTokenizer.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
-  
+
   /**
    * @class StatWriter StatWriter.hpp "io/StatWriter.hpp"
    * @brief A configurable Statistics Writer
@@ -64,8 +64,8 @@ namespace OpenMD {
 
     void writeStat();
     void writeStatReport();
-    void setReportFileName(const std::string& rfn){ reportFileName_ = rfn; }
-            
+    void setReportFileName(const std::string& rfn) { reportFileName_ = rfn; }
+
   private:
     void writeTitle();
     void writeReal(int i);
@@ -73,12 +73,12 @@ namespace OpenMD {
     void writePotVec(int i);
     void writeMatrix(int i);
     void writeArray(int i);
-        
+
     std::ofstream statfile_;
     std::ofstream reportfile_;
     std::string reportFileName_;
     std::string version;
     Stats* stats_;
   };
-}
+}  // namespace OpenMD
 #endif

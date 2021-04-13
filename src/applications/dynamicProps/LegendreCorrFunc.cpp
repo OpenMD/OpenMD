@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -52,70 +52,70 @@
 #include "utils/simError.h"
 
 namespace OpenMD {
-LegendreCorrFunc::LegendreCorrFunc(SimInfo* info, const std::string& filename,
-                                   const std::string& sele1,
-                                   const std::string& sele2, int order)
-    : ObjectACF<Vector3d>(info, filename, sele1, sele2, DataStorage::dslAmat),
+  LegendreCorrFunc::LegendreCorrFunc(SimInfo* info, const std::string& filename,
+                                     const std::string& sele1,
+                                     const std::string& sele2, int order) :
+      ObjectACF<Vector3d>(info, filename, sele1, sele2, DataStorage::dslAmat),
       order_(order) {
-  setCorrFuncType("Legendre Correlation Function");
-  setOutputName(getPrefix(dumpFilename_) + ".lcorr");
+    setCorrFuncType("Legendre Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".lcorr");
 
-  std::stringstream params;
-  params << " order = " << order_;
-  const std::string paramString = params.str();
-  setParameterString(paramString);
+    std::stringstream params;
+    params << " order = " << order_;
+    const std::string paramString = params.str();
+    setParameterString(paramString);
 
-  setLabelString("Pn(costheta_x)\tPn(costheta_y)\tPn(costheta_z)");
+    setLabelString("Pn(costheta_x)\tPn(costheta_y)\tPn(costheta_z)");
 
-  LegendrePolynomial polynomial(order);
-  legendre_ = polynomial.getLegendrePolynomial(order);
+    LegendrePolynomial polynomial(order);
+    legendre_ = polynomial.getLegendrePolynomial(order);
 
-  rotMats_.resize(nFrames_);
-}
+    rotMats_.resize(nFrames_);
+  }
 
-int LegendreCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-  rotMats_[frame].push_back(sd->getA());
-  return rotMats_[frame].size() - 1;
-}
+  int LegendreCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
+    rotMats_[frame].push_back(sd->getA());
+    return rotMats_[frame].size() - 1;
+  }
 
-Vector3d LegendreCorrFunc::calcCorrVal(int frame1, int frame2, int id1,
-                                       int id2) {
-  // The lab frame vector corresponding to the body-fixed
-  // z-axis is simply the second column of A.transpose()
-  // or, identically, the second row of A itself.
-  // Similar identites give the 0th and 1st rows of A for
-  // the lab vectors associated with body-fixed x- and y- axes.
+  Vector3d LegendreCorrFunc::calcCorrVal(int frame1, int frame2, int id1,
+                                         int id2) {
+    // The lab frame vector corresponding to the body-fixed
+    // z-axis is simply the second column of A.transpose()
+    // or, identically, the second row of A itself.
+    // Similar identites give the 0th and 1st rows of A for
+    // the lab vectors associated with body-fixed x- and y- axes.
 
-  Vector3d v1x = rotMats_[frame1][id1].getRow(0);
-  Vector3d v1y = rotMats_[frame1][id1].getRow(1);
-  Vector3d v1z = rotMats_[frame1][id1].getRow(2);
+    Vector3d v1x = rotMats_[frame1][id1].getRow(0);
+    Vector3d v1y = rotMats_[frame1][id1].getRow(1);
+    Vector3d v1z = rotMats_[frame1][id1].getRow(2);
 
-  Vector3d v2x = rotMats_[frame2][id2].getRow(0);
-  Vector3d v2y = rotMats_[frame2][id2].getRow(1);
-  Vector3d v2z = rotMats_[frame2][id2].getRow(2);
+    Vector3d v2x = rotMats_[frame2][id2].getRow(0);
+    Vector3d v2y = rotMats_[frame2][id2].getRow(1);
+    Vector3d v2z = rotMats_[frame2][id2].getRow(2);
 
-  RealType ux =
-      legendre_.evaluate(dot(v1x, v2x) / (v1x.length() * v2x.length()));
-  RealType uy =
-      legendre_.evaluate(dot(v1y, v2y) / (v1y.length() * v2y.length()));
-  RealType uz =
-      legendre_.evaluate(dot(v1z, v2z) / (v1z.length() * v2z.length()));
+    RealType ux =
+        legendre_.evaluate(dot(v1x, v2x) / (v1x.length() * v2x.length()));
+    RealType uy =
+        legendre_.evaluate(dot(v1y, v2y) / (v1y.length() * v2y.length()));
+    RealType uz =
+        legendre_.evaluate(dot(v1z, v2z) / (v1z.length() * v2z.length()));
 
-  return Vector3d(ux, uy, uz);
-}
+    return Vector3d(ux, uy, uz);
+  }
 
-void LegendreCorrFunc::validateSelection(SelectionManager& seleMan) {
-  StuntDouble* sd;
-  int i;
-  for (sd = seleMan1_.beginSelected(i); sd != NULL;
-       sd = seleMan1_.nextSelected(i)) {
-    if (!sd->isDirectional()) {
-      sprintf(painCave.errMsg,
-              "LegendreCorrFunc::validateSelection Error: "
-              "at least one of the selected objects is not Directional\n");
-      painCave.isFatal = 1;
-      simError();
+  void LegendreCorrFunc::validateSelection(SelectionManager& seleMan) {
+    StuntDouble* sd;
+    int i;
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {
+      if (!sd->isDirectional()) {
+        sprintf(painCave.errMsg,
+                "LegendreCorrFunc::validateSelection Error: "
+                "at least one of the selected objects is not Directional\n");
+        painCave.isFatal = 1;
+        simError();
+      }
     }
   }
-}
 }  // namespace OpenMD

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,26 +45,26 @@
 
 #ifndef APPLICATIONS_STATICPROPS_CHARGEDENSITYZ_HPP
 #define APPLICATIONS_STATICPROPS_CHARGEDENSITYZ_HPP
+#include <map>
+#include <set>
+
+#include "applications/staticProps/StaticAnalyser.hpp"
+#include "brains/Thermo.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "utils/ElementsTable.hpp"
-#include "brains/Thermo.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
-#include<set>
-#include<map>
 
 namespace OpenMD {
 
-  class ChargeDensityZ : public StaticAnalyser{
+  class ChargeDensityZ : public StaticAnalyser {
   public:
     ChargeDensityZ(SimInfo* info, const std::string& filename,
-		   const std::string& sele, int nzbins, RealType vRadius,std::string atomName = "Au", bool xyzGen=false, int axis=2);
+                   const std::string& sele, int nzbins, RealType vRadius,
+                   std::string atomName = "Au", bool xyzGen = false,
+                   int axis = 2);
     virtual void process();
 
-
-
   private:
-
     virtual void writeDensity();
     virtual void generateXYZForLastFrame();
 
@@ -84,7 +84,7 @@ namespace OpenMD {
     std::vector<RealType> densityFlucZAverageFirstFrame_;
     std::vector<RealType> absDensityFlucZAverageFirstFrame_;
 
-    int axis_,x_,y_;
+    int axis_, x_, y_;
     RealType vRadius_;
     std::string fileName_;
     std::string atomFlucCharge_;
@@ -92,22 +92,22 @@ namespace OpenMD {
 
     Mat3x3d hmat_;
 
-    std::map<std::string,RealType> vander_waals_r;
+    std::map<std::string, RealType> vander_waals_r;
     std::map<std::string, RealType> averageChargeForEachType_;
     std::map<std::string, int> SDCount_;
     std::string axisLabel_;
 
-    std::map<int,RealType> averageChargeUsingGlobalIndex_;
-    std::map<int,std::vector<RealType> > totalChargeUsingGlobalIndex_;
-    std::map<int,RealType > totalChargeFluctationsUsingGlobalIndex_;
-    std::map<int,std::vector<RealType> > zPosUsingGlobalIndex_;
-    std::map<int,std::vector<RealType> > xPosUsingGlobalIndex_;
-    std::map<int,std::vector<RealType> > yPosUsingGlobalIndex_;
-    std::map<int,int> countUsingGlobalIndex_;
-    std::map<int,RealType> vanderRUsingGlobalIndex_;
+    std::map<int, RealType> averageChargeUsingGlobalIndex_;
+    std::map<int, std::vector<RealType>> totalChargeUsingGlobalIndex_;
+    std::map<int, RealType> totalChargeFluctationsUsingGlobalIndex_;
+    std::map<int, std::vector<RealType>> zPosUsingGlobalIndex_;
+    std::map<int, std::vector<RealType>> xPosUsingGlobalIndex_;
+    std::map<int, std::vector<RealType>> yPosUsingGlobalIndex_;
+    std::map<int, int> countUsingGlobalIndex_;
+    std::map<int, RealType> vanderRUsingGlobalIndex_;
     std::map<int, std::string> atomNameGlobalIndex_;
   };
 
-}
+}  // namespace OpenMD
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -47,30 +47,30 @@
 #define APPLICATIONS_DYNAMICPROPS_DYNAMICPROPERTY_HPP
 
 #include <string>
+
 #include "brains/SimInfo.hpp"
 
 namespace OpenMD {
 
   /**
-   * @class DynamicProperty DynamicProperty.hpp "applications/dynamicProps/DynamicProperty"
+   * @class DynamicProperty DynamicProperty.hpp
+   * "applications/dynamicProps/DynamicProperty"
    * @brief Base class for Dynamic properties
    */
 
   class DynamicProperty {
   public:
-    DynamicProperty(){ }
+    DynamicProperty() {}
     virtual ~DynamicProperty() = default;
     virtual void doCorrelate() = 0;
 
     void setOutputName(const std::string& filename) {
       outputFilename_ = filename;
     }
-    const std::string& getOutputFileName() const {
-      return outputFilename_;
-    }
+    const std::string& getOutputFileName() const { return outputFilename_; }
 
   protected:
     std::string outputFilename_;
   };
-}
+}  // namespace OpenMD
 #endif

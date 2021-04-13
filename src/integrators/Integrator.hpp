@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,23 +42,23 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef INTEGRATORS_INTEGRATOR_HPP
 #define INTEGRATORS_INTEGRATOR_HPP
 
 #include <memory>
 
 #include "brains/ForceManager.hpp"
-#include "restraints/ThermoIntegrationForceManager.hpp"
 #include "brains/Stats.hpp"
+#include "brains/Velocitizer.hpp"
+#include "constraints/Rattle.hpp"
+#include "flucq/FluctuatingChargePropagator.hpp"
+#include "integrators/DLM.hpp"
+#include "integrators/RotationAlgorithm.hpp"
 #include "io/DumpWriter.hpp"
 #include "io/StatWriter.hpp"
-#include "integrators/RotationAlgorithm.hpp"
-#include "flucq/FluctuatingChargePropagator.hpp"
-#include "brains/Velocitizer.hpp"
+#include "restraints/ThermoIntegrationForceManager.hpp"
 #include "rnemd/RNEMD.hpp"
-#include "constraints/Rattle.hpp"
-#include "integrators/DLM.hpp"
 #include "utils/ProgressBar.hpp"
 
 namespace OpenMD {
@@ -75,10 +75,10 @@ namespace OpenMD {
   class Integrator {
   public:
     /**
-    * @brief Default Destructor
-    */
+     * @brief Default Destructor
+     */
     virtual ~Integrator();
-    
+
     void integrate();
     void updateSizes();
     void setForceManager(ForceManager* forceMan);
@@ -117,7 +117,7 @@ namespace OpenMD {
     RealType currThermal;
     RealType currReset;
     RealType currRNEMD;
-    
+
     SimInfo* info_ {nullptr};
     Globals* simParams {nullptr};
     ForceManager* forceMan_ {nullptr};
@@ -129,26 +129,26 @@ namespace OpenMD {
 
     bool needPotential {false};
     bool needVirial {false};
-    bool needReset {false};    
+    bool needReset {false};
     bool needVelocityScaling {false};
     bool useRNEMD {false};
 
     RealType targetScalingTemp;
-    
+
     Stats* stats {nullptr};
     DumpWriter* dumpWriter {nullptr};
     StatWriter* statWriter {nullptr};
     Thermo thermo;
 
     Snapshot* snap {nullptr};
-    
-  private:        
+
+  private:
     virtual RealType calcConservedQuantity() = 0;
     virtual DumpWriter* createDumpWriter();
     virtual StatWriter* createStatWriter();
 
     ProgressBarPtr progressBar {nullptr};
   };
-}
+}  // namespace OpenMD
 
-#endif // INTEGRATORS_INTEGRATOR_HPP
+#endif  // INTEGRATORS_INTEGRATOR_HPP

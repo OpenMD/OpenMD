@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -54,110 +54,117 @@ using namespace std;
 
 namespace OpenMD {
 
-Decahedron::Decahedron(int columnAtoms, int shells, int twinAtoms)
-    : N_(columnAtoms), M_(shells), K_(twinAtoms) {
-  Basis.clear();
-  Points.clear();
+  Decahedron::Decahedron(int columnAtoms, int shells, int twinAtoms) :
+      N_(columnAtoms), M_(shells), K_(twinAtoms) {
+    Basis.clear();
+    Points.clear();
 
-  //
-  // Initialize Basis vectors.
-  //
-  const RealType phi = 2.0 * Constants::PI / 5.0;  // 72 degrees
-  const RealType r3o2 = 0.5 * sqrt(3.0);
+    //
+    // Initialize Basis vectors.
+    //
+    const RealType phi  = 2.0 * Constants::PI / 5.0;  // 72 degrees
+    const RealType r3o2 = 0.5 * sqrt(3.0);
 
-  Basis.push_back(Vector3d(r3o2 * cos(0.0 * phi), r3o2 * sin(0.0 * phi), 0.0));
-  Basis.push_back(Vector3d(r3o2 * cos(1.0 * phi), r3o2 * sin(1.0 * phi), 0.0));
-  Basis.push_back(Vector3d(r3o2 * cos(2.0 * phi), r3o2 * sin(2.0 * phi), 0.0));
-  Basis.push_back(Vector3d(r3o2 * cos(3.0 * phi), r3o2 * sin(3.0 * phi), 0.0));
-  Basis.push_back(Vector3d(r3o2 * cos(4.0 * phi), r3o2 * sin(4.0 * phi), 0.0));
-}
-
-vector<Vector3d> Decahedron::getPoints() {
-  // Generate central column of Decahedron
-
-  for (int i = 0; i < N_; i++) {
-    Points.push_back(Vector3d(0.0, 0.0, RealType(i) - 0.5 * (N_ - 1)));
+    Basis.push_back(
+        Vector3d(r3o2 * cos(0.0 * phi), r3o2 * sin(0.0 * phi), 0.0));
+    Basis.push_back(
+        Vector3d(r3o2 * cos(1.0 * phi), r3o2 * sin(1.0 * phi), 0.0));
+    Basis.push_back(
+        Vector3d(r3o2 * cos(2.0 * phi), r3o2 * sin(2.0 * phi), 0.0));
+    Basis.push_back(
+        Vector3d(r3o2 * cos(3.0 * phi), r3o2 * sin(3.0 * phi), 0.0));
+    Basis.push_back(
+        Vector3d(r3o2 * cos(4.0 * phi), r3o2 * sin(4.0 * phi), 0.0));
   }
 
-  for (int i = 1; i < M_ + 1; i++) {
-    // generate the shells of the decahedron:
+  vector<Vector3d> Decahedron::getPoints() {
+    // Generate central column of Decahedron
+
+    for (int i = 0; i < N_; i++) {
+      Points.push_back(Vector3d(0.0, 0.0, RealType(i) - 0.5 * (N_ - 1)));
+    }
+
+    for (int i = 1; i < M_ + 1; i++) {
+      // generate the shells of the decahedron:
+
+      vector<Vector3d> ring;
+
+      if (i > K_ - 1) {
+        ring = truncatedRing(i, i - K_ + 1);
+      } else {
+        ring = truncatedRing(i, 0);
+      }
+
+      // shift the rings in the z-direction (along the shell)
+
+      for (int j = 0; j < N_ - i; j++) {
+        Vector3d shift =
+            Vector3d(0, 0, -0.5 * RealType((N_ - i) - 1) + RealType(j));
+
+        for (vector<Vector3d>::iterator k = ring.begin(); k != ring.end();
+             ++k) {
+          Points.push_back((*k) + shift);
+        }
+      }
+    }
+    return Points;
+  }
+
+  vector<Vector3d> Decahedron::truncatedRing(int n, int k) {
+    // This function generates the rings of a Decahedron
+    // n: index of shell (order of ring)
+    // k: how many atoms are missing from both ends of one side of
+    //    pentagon ring
 
     vector<Vector3d> ring;
 
-    if (i > K_ - 1) {
-      ring = truncatedRing(i, i - K_ + 1);
-    } else {
-      ring = truncatedRing(i, 0);
-    }
+    // Generate atomic coordinates along each side of pentagonal ring
+    for (int i = 0; i < 5; i++) {
+      Vector3d b1 = Basis[i];
+      Vector3d b2 = Basis[(i + 1) % 5];
 
-    // shift the rings in the z-direction (along the shell)
+      if (k == 0) {
+        // without truncation
+        for (int j = 0; j < n; j++) {
+          ring.push_back(RealType(n) * b1 + RealType(j) * (b2 - b1));
+        }
 
-    for (int j = 0; j < N_ - i; j++) {
-      Vector3d shift =
-          Vector3d(0, 0, -0.5 * RealType((N_ - i) - 1) + RealType(j));
-
-      for (vector<Vector3d>::iterator k = ring.begin(); k != ring.end(); ++k) {
-        Points.push_back((*k) + shift);
+      } else {
+        for (int j = k; j <= n - k; j++) {
+          // with truncation
+          ring.push_back(RealType(n) * b1 + RealType(j) * (b2 - b1));
+        }
       }
     }
+    return ring;
   }
-  return Points;
-}
 
-vector<Vector3d> Decahedron::truncatedRing(int n, int k) {
-  // This function generates the rings of a Decahedron
-  // n: index of shell (order of ring)
-  // k: how many atoms are missing from both ends of one side of
-  //    pentagon ring
+  CurlingStoneDecahedron::CurlingStoneDecahedron(int columnAtoms, int shells,
+                                                 int twinAtoms,
+                                                 int truncatedPlanes) :
+      Decahedron(columnAtoms, shells, twinAtoms),
+      T_(truncatedPlanes) {}
 
-  vector<Vector3d> ring;
+  vector<Vector3d> CurlingStoneDecahedron::getPoints() {
+    vector<Vector3d> raw = Decahedron::getPoints();
+    vector<Vector3d> snipped;
+    RealType maxZ, minZ;
 
-  // Generate atomic coordinates along each side of pentagonal ring
-  for (int i = 0; i < 5; i++) {
-    Vector3d b1 = Basis[i];
-    Vector3d b2 = Basis[(i + 1) % 5];
+    maxZ = raw.begin()->z();
+    minZ = raw.begin()->z();
 
-    if (k == 0) {
-      // without truncation
-      for (int j = 0; j < n; j++) {
-        ring.push_back(RealType(n) * b1 + RealType(j) * (b2 - b1));
-      }
+    for (vector<Vector3d>::iterator i = raw.begin(); i != raw.end(); ++i) {
+      maxZ = max(maxZ, (*i).z());
+      minZ = min(minZ, (*i).z());
+    }
 
-    } else {
-      for (int j = k; j <= n - k; j++) {
-        // with truncation
-        ring.push_back(RealType(n) * b1 + RealType(j) * (b2 - b1));
+    for (vector<Vector3d>::iterator i = raw.begin(); i != raw.end(); ++i) {
+      if (((*i).z() < maxZ - 0.995 * (T_ / 2.0)) &&
+          ((*i).z() > minZ + 0.995 * (T_ / 2.0))) {
+        snipped.push_back((*i));
       }
     }
+    return snipped;
   }
-  return ring;
-}
-
-CurlingStoneDecahedron::CurlingStoneDecahedron(int columnAtoms, int shells,
-                                               int twinAtoms,
-                                               int truncatedPlanes)
-    : Decahedron(columnAtoms, shells, twinAtoms), T_(truncatedPlanes) {}
-
-vector<Vector3d> CurlingStoneDecahedron::getPoints() {
-  vector<Vector3d> raw = Decahedron::getPoints();
-  vector<Vector3d> snipped;
-  RealType maxZ, minZ;
-
-  maxZ = raw.begin()->z();
-  minZ = raw.begin()->z();
-
-  for (vector<Vector3d>::iterator i = raw.begin(); i != raw.end(); ++i) {
-    maxZ = max(maxZ, (*i).z());
-    minZ = min(minZ, (*i).z());
-  }
-
-  for (vector<Vector3d>::iterator i = raw.begin(); i != raw.end(); ++i) {
-    if (((*i).z() < maxZ - 0.995 * (T_ / 2.0)) &&
-        ((*i).z() > minZ + 0.995 * (T_ / 2.0))) {
-      snipped.push_back((*i));
-    }
-  }
-  return snipped;
-}
 
 }  // namespace OpenMD

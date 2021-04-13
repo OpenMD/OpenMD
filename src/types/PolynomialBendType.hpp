@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,13 +42,13 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 /**
  * @file PolynomialBendType.hpp
  * @author    teng lin
  * @date  11/16/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_POLYNOMIALBENDTYPE_HPP
 #define TYPES_POLYNOMIALBENDTYPE_HPP
@@ -58,13 +58,13 @@
 #include "types/BendType.hpp"
 
 namespace OpenMD {
-  
+
   /**
-   * @class PolynomialBendType PolynomialBendType.hpp "types/PolynomialBendType.hpp"
+   * @class PolynomialBendType PolynomialBendType.hpp
+   * "types/PolynomialBendType.hpp"
    * @todo documentation
    */
-  class PolynomialBendType : public BendType{
-
+  class PolynomialBendType : public BendType {
   public:
     PolynomialBendType(RealType theta) : BendType(theta) {}
 
@@ -75,49 +75,47 @@ namespace OpenMD {
     RealType getCoefficient(int power) {
       return polynomial_.getCoefficient(power);
     }
-    
-    void calcForce(RealType theta, RealType & V, RealType & dVdr) {
+
+    void calcForce(RealType theta, RealType& V, RealType& dVdr) {
       RealType delta = theta - theta0_;
-      V = polynomial_.evaluate(delta);
-      dVdr = polynomial_.evaluateDerivative(delta);
-      
+      V              = polynomial_.evaluate(delta);
+      dVdr           = polynomial_.evaluateDerivative(delta);
     }
 
-    friend std::ostream& operator <<(std::ostream& os, PolynomialBendType& pbt);
-    
+    friend std::ostream& operator<<(std::ostream& os, PolynomialBendType& pbt);
+
   private:
-    
     DoublePolynomial polynomial_;
   };
-  
-  std::ostream& operator <<(std::ostream& os, PolynomialBendType& pbt) {
+
+  std::ostream& operator<<(std::ostream& os, PolynomialBendType& pbt) {
     DoublePolynomial::const_iterator i;
-    
+
     i = pbt.polynomial_.begin();
-    
+
     if (i == pbt.polynomial_.end()) {
       os << "This PolynomialBendType contains nothing" << std::endl;
       return os;
     }
-    
-    os << "This PolynomialBendType contains below terms:" << std::endl;    
-    
-    while(true){
-      os << i->second << "*" << "(theta - " << pbt.getTheta() << ")" << 
-        "^" << i->first;
-      
-      if (++i == pbt.polynomial_.end()) {
-	// If we reach the end of the polynomial pair, write out a
-	// newline and then escape the loop
-	os << std::endl;
-	break;
-      } else {
-	// otherwise, write out a "+"
-	os << " + ";
-      }
-    }    
-    return os;
-  } 
-} //end namespace OpenMD
-#endif //TYPES_POLYNOMIALBENDTYPE_HPP
 
+    os << "This PolynomialBendType contains below terms:" << std::endl;
+
+    while (true) {
+      os << i->second << "*"
+         << "(theta - " << pbt.getTheta() << ")"
+         << "^" << i->first;
+
+      if (++i == pbt.polynomial_.end()) {
+        // If we reach the end of the polynomial pair, write out a
+        // newline and then escape the loop
+        os << std::endl;
+        break;
+      } else {
+        // otherwise, write out a "+"
+        os << " + ";
+      }
+    }
+    return os;
+  }
+}  // end namespace OpenMD
+#endif  // TYPES_POLYNOMIALBENDTYPE_HPP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2020 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,7 +42,7 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
- 
+
 #ifndef TYPES_MAWINTERACTIONTYPE_HPP
 #define TYPES_MAWINTERACTIONTYPE_HPP
 
@@ -50,16 +50,16 @@
 
 namespace OpenMD {
   /**
-   * @class MAWInteractionType 
+   * @class MAWInteractionType
    *
-   
+
    * MAWInteractionType (Metal-Angular-Water) is one of the basic
    * Metal-to-NonMetal interaction types.
    *
    * \f[ V =  D_e * \exp(-a(r-r_e)) * (\exp(-a(r-r_e)) - 2) *
-                         (1 + ca1*(1-\sqrt(3)*\cos(\theta))^2 + 
+                         (1 + ca1*(1-\sqrt(3)*\cos(\theta))^2 +
                               cb1*3*(\sin(\theta)*\cos(\phi))^2) \f]
-   
+
    * The spherical coordinates are defined in the body-fixed frame
    * of a rigid-body water molecule (HO bonds are on the Y-Z plane)
    * and the dipole vector of the water molecule points along the
@@ -69,44 +69,32 @@ namespace OpenMD {
    */
 
   class MAWInteractionType : public NonBondedInteractionType {
-       
   public:
-        
     MAWInteractionType(RealType myD0, RealType myBeta0, RealType myR0,
-                       RealType myCa1, RealType myCb1){
-      D_e = myD0;
+                       RealType myCa1, RealType myCb1) {
+      D_e  = myD0;
       beta = myBeta0;
-      r_e = myR0;
-      ca1 = myCa1;
-      cb1 = myCb1;
+      r_e  = myR0;
+      ca1  = myCa1;
+      cb1  = myCb1;
       setMAW();
     }
-    RealType getD() {
-      return D_e;
-    }
-    
-    RealType getBeta() {
-      return beta;
-    }
+    RealType getD() { return D_e; }
 
-    RealType getR() {
-      return r_e;
-    }
+    RealType getBeta() { return beta; }
 
-    RealType getCA1() {
-      return ca1;
-    }
+    RealType getR() { return r_e; }
 
-    RealType getCB1() {
-      return cb1;
-    }
+    RealType getCA1() { return ca1; }
 
-  private:    
+    RealType getCB1() { return cb1; }
+
+  private:
     RealType D_e;
     RealType beta;
     RealType r_e;
-    RealType ca1;    
+    RealType ca1;
     RealType cb1;
   };
-}
+}  // namespace OpenMD
 #endif
