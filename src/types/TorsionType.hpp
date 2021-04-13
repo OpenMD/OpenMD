@@ -52,7 +52,7 @@
 
 #ifndef TYPES_TORSIONTYPE_HPP
 #define TYPES_TORSIONTYPE_HPP
-#include "config.h"
+#include <config.h>
 namespace OpenMD {
 
   /**

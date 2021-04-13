@@ -43,7 +43,7 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "config.h"
+#include <config.h>
 
 #define _LARGEFILE_SOURCE64
 #define _FILE_OFFSET_BITS 64

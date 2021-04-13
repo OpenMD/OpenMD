@@ -1,6 +1,6 @@
 #include "optimization/Problem.hpp"
 
-#include "config.h"
+#include <config.h>
 
 namespace QuantLib {
   RealType Problem::DotProduct(DynamicVector<RealType>& v1,

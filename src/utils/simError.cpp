@@ -47,11 +47,11 @@
 #include <mpi.h>
 #endif
 
+#include <config.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-
-#include "config.h"
 
 int nChecks;
 

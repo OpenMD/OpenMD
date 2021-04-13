@@ -53,11 +53,12 @@
 #ifndef USETHEFORCE_FORCEFIELD_HPP
 #define USETHEFORCE_FORCEFIELD_HPP
 
+#include <config.h>
+
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "config.h"
 #include "io/ForceFieldOptions.hpp"
 #include "io/SectionParserManager.hpp"
 #include "io/ifstrstream.hpp"

@@ -45,10 +45,11 @@
 
 #include "types/FluctuatingChargeAdapter.hpp"
 
+#include <config.h>
+
 #include <cstdio>
 #include <memory>
 
-#include "config.h"
 #include "nonbonded/SlaterIntegrals.hpp"
 #include "utils/simError.h"
 

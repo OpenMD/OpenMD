@@ -45,7 +45,7 @@
 
 #ifndef UTILS_CONSTANTS_HPP
 #define UTILS_CONSTANTS_HPP
-#include "config.h"
+#include <config.h>
 
 #ifdef _MSC_VER
 #include <math.h>

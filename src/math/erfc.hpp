@@ -2,7 +2,7 @@
  * Borrowed from OpenMM.
  */
 
-#include "config.h"
+#include <config.h>
 #ifndef MATH_ERFC_H
 #define MATH_ERFC_H
 

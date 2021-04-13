@@ -46,9 +46,10 @@
 #ifndef MATH_REALSYMMETRICTRIDIAGONAL_HPP
 #define MATH_REALSYMMETRICTRIDIAGONAL_HPP
 
+#include <config.h>
+
 #include <algorithm>
 
-#include "config.h"
 #include "math/DynamicRectMatrix.hpp"
 // for min(), max() below
 #include <cmath>

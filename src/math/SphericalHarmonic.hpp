@@ -53,11 +53,11 @@
 #ifndef MATH_SPHERICALHARMONIC_HPP
 #define MATH_SPHERICALHARMONIC_HPP
 
+#include <config.h>
+
 #include <cmath>
 #include <complex>
 #include <cstring>
-
-#include "config.h"
 
 #ifdef SINGLE_PRECISION
 typedef std::complex<float> ComplexType;

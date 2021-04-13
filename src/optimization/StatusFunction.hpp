@@ -1,7 +1,8 @@
 #ifndef OPTIMIZATION_STATUSFUNCTION_HPP
 #define OPTIMIZATION_STATUSFUNCTION_HPP
+#include <config.h>
+
 #include "brains/Stats.hpp"
-#include "config.h"
 #include "io/DumpWriter.hpp"
 #include "io/StatWriter.hpp"
 

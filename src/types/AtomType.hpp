@@ -47,9 +47,10 @@
 
 #define TYPES_ATOMTYPE_HPP
 
+#include <config.h>
+
 #include <string>
 
-#include "config.h"
 #include "utils/PropertyMap.hpp"
 
 using namespace std;

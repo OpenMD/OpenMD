@@ -30,10 +30,10 @@ GNU General Public License for more details.
 
 #ifndef PRIMITIVES_ELEMENT_HPP
 #define PRIMITIVES_ELEMENT_HPP
+#include <config.h>
+
 #include <cstring>
 #include <string>
-
-#include "config.h"
 
 namespace OpenMD {
   class Element {

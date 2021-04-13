@@ -54,11 +54,11 @@
 #ifndef UTIL_GENERICDATA_HPP
 #define UTIL_GENERICDATA_HPP
 
+#include <config.h>
+
 #include <list>
 #include <string>
 #include <vector>
-
-#include "config.h"
 namespace OpenMD {
 
   /**

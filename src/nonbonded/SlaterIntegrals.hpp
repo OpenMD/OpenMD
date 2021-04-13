@@ -59,13 +59,14 @@
  * preparation. arXiv:0812.1544
  */
 
+#include <config.h>
+
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <limits>
 
-#include "config.h"
 #include "math/Factorials.hpp"
 #include "utils/Constants.hpp"
 

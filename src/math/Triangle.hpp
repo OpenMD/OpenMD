@@ -46,9 +46,10 @@
 #ifndef MATH_FACET_HPP
 #define MATH_FACET_HPP
 
+#include <config.h>
+
 #include <vector>
 
-#include "config.h"
 #include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
 #include "primitives/StuntDouble.hpp"

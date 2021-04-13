@@ -45,10 +45,11 @@
 
 #ifndef UTILS_UTILITY_HPP
 #define UTILS_UTILITY_HPP
+#include <config.h>
+
 #include <cmath>
 #include <vector>
 
-#include "config.h"
 #include "utils/next_combination.hpp"
 
 using namespace std;

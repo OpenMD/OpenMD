@@ -46,7 +46,7 @@
 #ifndef APPLICATIONS_STATICPROPS_HXY_HPP
 #define APPLICATIONS_STATICPROPS_HXY_HPP
 
-#include "config.h"
+#include <config.h>
 
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
 

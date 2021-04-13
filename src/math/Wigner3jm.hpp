@@ -27,7 +27,7 @@
 #ifndef MATH_WIGNER3JM_HPP
 #define MATH_WIGNER3JM_HPP
 
-#include "config.h"
+#include <config.h>
 
 namespace MATPACK {
 

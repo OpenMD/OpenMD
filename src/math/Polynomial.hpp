@@ -53,13 +53,14 @@
 #ifndef MATH_POLYNOMIAL_HPP
 #define MATH_POLYNOMIAL_HPP
 
+#include <config.h>
+
 #include <complex>
 #include <iostream>
 #include <list>
 #include <map>
 #include <utility>
 
-#include "config.h"
 #include "math/Eigenvalue.hpp"
 
 namespace OpenMD {

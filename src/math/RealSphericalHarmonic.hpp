@@ -53,9 +53,9 @@
 #ifndef MATH_REALSPHERICALHARMONIC_HPP
 #define MATH_REALSPHERICALHARMONIC_HPP
 
-#include <cstring>
+#include <config.h>
 
-#include "config.h"
+#include <cstring>
 #define RSH_SIN 0
 #define RSH_COS 1
 

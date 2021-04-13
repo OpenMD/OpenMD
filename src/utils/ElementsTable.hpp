@@ -31,9 +31,10 @@ GNU General Public License for more details.
 #ifndef UTILS_ELEMENTSTABLE_HPP
 #define UTILS_ELEMENTSTABLE_HPP
 
+#include <config.h>
+
 #include <vector>
 
-#include "config.h"
 #include "primitives/Element.hpp"
 
 namespace OpenMD {

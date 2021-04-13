@@ -45,11 +45,12 @@
 
 #include "types/CharmmTorsionType.hpp"
 
+#include <config.h>
+
 #include <algorithm>
 #include <cmath>
 #include <fstream>
 
-#include "config.h"
 #include "math/ChebyshevT.hpp"
 #include "math/ChebyshevU.hpp"
 

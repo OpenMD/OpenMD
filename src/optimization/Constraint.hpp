@@ -23,7 +23,8 @@
 
 #ifndef quantlib_optimization_constraint_h
 #define quantlib_optimization_constraint_h
-#include "config.h"
+#include <config.h>
+
 #include "math/DynamicVector.hpp"
 
 using namespace OpenMD;

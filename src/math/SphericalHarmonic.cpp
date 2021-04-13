@@ -45,11 +45,12 @@
 
 #include "math/SphericalHarmonic.hpp"
 
+#include <config.h>
+
 #include <cmath>
 #include <cstdio>
 #include <limits>
 
-#include "config.h"
 #include "utils/Constants.hpp"
 #include "utils/simError.h"
 

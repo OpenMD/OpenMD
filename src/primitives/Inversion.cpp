@@ -45,9 +45,10 @@
 
 #include "primitives/Inversion.hpp"
 
+#include <config.h>
+
 #include <cmath>
 
-#include "config.h"
 #include "utils/Constants.hpp"
 
 namespace OpenMD {

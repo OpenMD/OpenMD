@@ -46,6 +46,8 @@
 #ifndef UTILS_PARAMETERMANAGER_HPP
 #define UTILS_PARAMETERMANAGER_HPP
 
+#include <config.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
@@ -53,7 +55,6 @@
 #include <string>
 #include <vector>
 
-#include "config.h"
 #include "utils/CaseConversion.hpp"
 #include "utils/StringTokenizer.hpp"
 #include "utils/simError.h"

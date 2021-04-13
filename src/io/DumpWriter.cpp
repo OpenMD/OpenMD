@@ -43,7 +43,7 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "config.h"
+#include <config.h>
 
 #ifdef IS_MPI
 #include <mpi.h>

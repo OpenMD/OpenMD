@@ -46,10 +46,10 @@
 #ifndef MATH_CUBICSPLINE_HPP
 #define MATH_CUBICSPLINE_HPP
 
+#include <config.h>
+
 #include <memory>
 #include <vector>
-
-#include "config.h"
 
 using namespace std;
 namespace OpenMD {

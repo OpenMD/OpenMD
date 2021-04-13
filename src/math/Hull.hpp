@@ -46,11 +46,12 @@
 #ifndef MATH_HULL_HPP_
 #define MATH_HULL_HPP_
 
+#include <config.h>
+
 #include <cassert>
 #include <string>
 #include <vector>
 
-#include "config.h"
 #include "math/Triangle.hpp"
 #include "math/Vector3.hpp"
 #include "primitives/StuntDouble.hpp"

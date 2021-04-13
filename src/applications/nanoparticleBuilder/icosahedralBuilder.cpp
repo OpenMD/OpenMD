@@ -43,12 +43,13 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include <config.h>
+
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
 #include "clusters/Cuboctahedron.hpp"
 #include "clusters/Decahedron.hpp"
 #include "clusters/Icosahedron.hpp"
-#include "config.h"
 #include "icosahedralBuilderCmd.hpp"
 #include "io/DumpWriter.hpp"
 #include "utils/MoLocator.hpp"

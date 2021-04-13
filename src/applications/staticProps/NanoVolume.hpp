@@ -45,10 +45,11 @@
 
 #ifndef APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
 #define APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
+#include <config.h>
+
 #include <vector>
 
 #include "applications/staticProps/StaticAnalyser.hpp"
-#include "config.h"
 #include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"

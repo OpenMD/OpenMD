@@ -46,11 +46,12 @@
 #ifndef MATH_ALPHAHULL_HPP_
 #define MATH_ALPHAHULL_HPP_
 
+#include <config.h>
+
 #include <cassert>
 #include <string>
 #include <vector>
 
-#include "config.h"
 #include "math/Hull.hpp"
 #include "math/Triangle.hpp"
 #include "math/Vector3.hpp"

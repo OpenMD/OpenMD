@@ -53,11 +53,11 @@
 #ifndef UTIL_STRINGTOKENIZER_HPP
 #define UTIL_STRINGTOKENIZER_HPP
 
+#include <config.h>
+
 #include <cstdlib>
 #include <string>
 #include <vector>
-
-#include "config.h"
 namespace OpenMD {
 
   /**

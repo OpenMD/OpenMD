@@ -45,12 +45,12 @@
 
 #include "utils/StringUtils.hpp"
 
+#include <config.h>
+
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
 #include <string>
-
-#include "config.h"
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp

@@ -30,13 +30,14 @@ GNU General Public License for more details.
 
 #include "utils/ElementsTable.hpp"
 
+#include <config.h>
+
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
 
-#include "config.h"
 #include "io/ifstrstream.hpp"
 #include "utils/simError.h"
 

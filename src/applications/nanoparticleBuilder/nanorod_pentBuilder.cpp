@@ -43,6 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include <config.h>
+
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -57,7 +59,6 @@
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
-#include "config.h"
 #include "io/DumpWriter.hpp"
 #include "lattice/Lattice.hpp"
 #include "lattice/LatticeFactory.hpp"

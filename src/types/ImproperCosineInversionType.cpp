@@ -44,10 +44,11 @@
  */
 #include "types/ImproperCosineInversionType.hpp"
 
+#include <config.h>
+
 #include <algorithm>
 #include <cmath>
 
-#include "config.h"
 #include "math/ChebyshevT.hpp"
 #include "math/ChebyshevU.hpp"
 

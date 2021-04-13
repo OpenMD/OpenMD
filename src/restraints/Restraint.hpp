@@ -53,9 +53,10 @@
 #ifndef RESTRAINTS_RESTRAINT_HPP
 #define RESTRAINTS_RESTRAINT_HPP
 
+#include <config.h>
+
 #include <map>
 
-#include "config.h"
 #include "math/Vector3.hpp"
 #include "utils/GenericData.hpp"
 

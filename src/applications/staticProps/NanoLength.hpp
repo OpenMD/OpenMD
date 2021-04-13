@@ -46,10 +46,11 @@
 #ifndef APPLICATIONS_STATICPROPS_NANOLENGTH_HPP
 #define APPLICATIONS_STATICPROPS_NANOLENGTH_HPP
 
+#include <config.h>
+
 #include <vector>
 
 #include "applications/staticProps/StaticAnalyser.hpp"
-#include "config.h"
 #include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"

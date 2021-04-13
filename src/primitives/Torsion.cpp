@@ -45,9 +45,10 @@
 
 #include "primitives/Torsion.hpp"
 
+#include <config.h>
+
 #include <cmath>
 
-#include "config.h"
 #include "utils/Constants.hpp"
 
 namespace OpenMD {

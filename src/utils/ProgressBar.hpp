@@ -46,10 +46,10 @@
 #ifndef UTILS_PROGRESSBAR_HPP
 #define UTILS_PROGRESSBAR_HPP
 
+#include <config.h>
+
 #include <ctime>
 #include <memory>
-
-#include "config.h"
 
 namespace OpenMD {
 

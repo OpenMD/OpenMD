@@ -46,11 +46,12 @@
 #ifndef MATH_RANDNUMGEN_HPP
 #define MATH_RANDNUMGEN_HPP
 
+#include <config.h>
+
 #include <memory>
 #include <vector>
 
 #include "MersenneTwister.hpp"
-#include "config.h"
 #include "utils/simError.h"
 
 namespace OpenMD {

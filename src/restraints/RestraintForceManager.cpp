@@ -47,10 +47,11 @@
 #include <mpi.h>
 #endif
 
+#include <config.h>
+
 #include <cmath>
 #include <memory>
 
-#include "config.h"
 #include "io/RestReader.hpp"
 #include "restraints/MolecularRestraint.hpp"
 #include "restraints/ObjectRestraint.hpp"

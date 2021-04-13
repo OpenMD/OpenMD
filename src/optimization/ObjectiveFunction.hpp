@@ -1,7 +1,7 @@
 /* -*- mode: c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
 /*
-  Copyright (C) 2001, 2002, 2003 Nicolas Di Césaré
+  Copyright (C) 2001, 2002, 2003 Nicolas Di Cï¿½sarï¿½
 
   This file is part of QuantLib, a free-software/open-source library
   for financial quantitative analysts and developers - http://quantlib.org/
@@ -23,7 +23,8 @@
 
 #ifndef optimization_objectivefunction_h
 #define optimization_objectivefunction_h
-#include "config.h"
+#include <config.h>
+
 #include "math/DynamicVector.hpp"
 
 using namespace OpenMD;

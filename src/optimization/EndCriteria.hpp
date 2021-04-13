@@ -3,7 +3,7 @@
 /*
  Copyright (C) 2006, 2007 Ferdinando Ametrano
  Copyright (C) 2007 Marco Bianchetti
- Copyright (C) 2001, 2002, 2003 Nicolas Di Césaré
+ Copyright (C) 2001, 2002, 2003 Nicolas Di Cï¿½sarï¿½
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -26,9 +26,9 @@
 #ifndef quantlib_optimization_criteria_hpp
 #define quantlib_optimization_criteria_hpp
 
-#include <ostream>
+#include <config.h>
 
-#include "config.h"
+#include <ostream>
 
 namespace QuantLib {
 

@@ -53,11 +53,11 @@
 #ifndef MATH_VECTOR_HPP
 #define MATH_VECTOR_HPP
 
+#include <config.h>
+
 #include <cassert>
 #include <cmath>
 #include <iostream>
-
-#include "config.h"
 namespace OpenMD {
 
   static const RealType epsilon = 0.000001;

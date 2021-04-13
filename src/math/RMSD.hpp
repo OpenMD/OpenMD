@@ -33,9 +33,10 @@
 #ifndef MATH_RMSD_HPP
 #define MATH_RMSD_HPP
 
+#include <config.h>
+
 #include <vector>
 
-#include "config.h"
 #include "math/SquareMatrix3.hpp"
 
 namespace OpenMD {

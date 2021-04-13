@@ -45,9 +45,10 @@
 
 #include "primitives/GhostBend.hpp"
 
+#include <config.h>
+
 #include <cmath>
 
-#include "config.h"
 #include "primitives/DirectionalAtom.hpp"
 #include "utils/Constants.hpp"
 

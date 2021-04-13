@@ -52,7 +52,7 @@
 
 #ifndef TYPES_INVERSIONTYPE_HPP
 #define TYPES_INVERSIONTYPE_HPP
-#include "config.h"
+#include <config.h>
 namespace OpenMD {
 
   enum InversionKey {
