@@ -69,7 +69,7 @@ void testUniform() {
     ++histogram[index];  // rantInt returns an integer in [0, N-1]
   }
   std::ofstream uniform("uniform.dat");
-  double avg = num / N;
+  double avg       = num / N;
   double tolerance = 0.01 * avg;
   for (int i = 0; i < N; ++i) {
     // assert((histogram[i] - avg) /avg <= tolerance);
@@ -79,11 +79,11 @@ void testUniform() {
 
 void testGaussian() {
   SeqRandNumGen randNumGen(823645754);
-  double mean = 100.0;
-  double variance = 1.0;
+  double mean                 = 100.0;
+  double variance             = 1.0;
   const unsigned long int num = 1000000;
-  double interval = 0.1;
-  const int size = 2000;
+  double interval             = 0.1;
+  const int size              = 2000;
   vector<unsigned long int> histogram(size, 0);
   vector<double> normalizedHistogram(size);
   for (unsigned long int i = 0; i < num; ++i) {
@@ -102,7 +102,7 @@ void testGaussian() {
 }
 #ifdef IS_MPI
 void testParallelRandNumGen() {
-  const unsigned long int seed = 324271632;
+  const unsigned long int seed   = 324271632;
   const unsigned long int nloops = 1000000;
   MPI_Status istatus;
   ParallelRandNumGen mpiRandNumGen(seed);

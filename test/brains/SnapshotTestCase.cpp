@@ -58,7 +58,7 @@ void SnapshotTestCase::testMemoryLayout() {
   v.insert(v.end(), num, Vector3d(2.3, 0.84, 0.18));
 
   double* sbegin = v[0].getArrayPointer();
-  double* send = v[num - 1].getArrayPointer() + 3;
+  double* send   = v[num - 1].getArrayPointer() + 3;
 
   CPPUNIT_ASSERT_EQUAL(sizeof(Vector3d), sizeof(double) * 3);
   CPPUNIT_ASSERT_EQUAL((unsigned int)sbegin, (unsigned int)&v[0]);

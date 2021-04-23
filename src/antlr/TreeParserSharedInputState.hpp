@@ -8,38 +8,38 @@
  * $Id$
  */
 
-#include <antlr/RefCount.hpp>
 #include <antlr/config.hpp>
+#include <antlr/RefCount.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-  /** This object contains the data associated with an
-   *  input AST.  Multiple parsers
-   *  share a single TreeParserSharedInputState to parse
-   *  the same tree or to have the parser walk multiple
-   *  trees.
-   */
-  class ANTLR_API TreeParserInputState {
-  public:
-    TreeParserInputState() : guessing(0) {}
-    virtual ~TreeParserInputState() {}
+/** This object contains the data associated with an
+ *  input AST.  Multiple parsers
+ *  share a single TreeParserSharedInputState to parse
+ *  the same tree or to have the parser walk multiple
+ *  trees.
+ */
+class ANTLR_API TreeParserInputState {
+public:
+	TreeParserInputState() : guessing(0) {}
+	virtual ~TreeParserInputState() {}
 
-  public:
-    /** Are we guessing (guessing>0)? */
-    int guessing;  //= 0;
+public:
+	/** Are we guessing (guessing>0)? */
+	int guessing; //= 0;
 
-  private:
-    // we don't want these:
-    TreeParserInputState(const TreeParserInputState&);
-    TreeParserInputState& operator=(const TreeParserInputState&);
-  };
+private:
+	// we don't want these:
+	TreeParserInputState(const TreeParserInputState&);
+	TreeParserInputState& operator=(const TreeParserInputState&);
+};
 
-  typedef RefCount<TreeParserInputState> TreeParserSharedInputState;
+typedef RefCount<TreeParserInputState> TreeParserSharedInputState;
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif  // INC_TreeParserSharedInputState_hpp__
+#endif //INC_TreeParserSharedInputState_hpp__

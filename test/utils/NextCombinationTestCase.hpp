@@ -47,21 +47,19 @@
 #define TEST_NEXTCOMBINATIONTESTCASE_HPP
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "utils/next_combination.hpp"
+
 #include "utils/Utility.hpp"
+#include "utils/next_combination.hpp"
 using namespace OpenMD;
 
 class NextCombinationTestCase : public CPPUNIT_NS::TestFixture {
-    CPPUNIT_TEST_SUITE( NextCombinationTestCase );
-    CPPUNIT_TEST(testNextCombination);
+  CPPUNIT_TEST_SUITE(NextCombinationTestCase);
+  CPPUNIT_TEST(testNextCombination);
 
-    CPPUNIT_TEST_SUITE_END();
+  CPPUNIT_TEST_SUITE_END();
 
-    public:
-
-        void testNextCombination(); 
-
+public:
+  void testNextCombination();
 };
 
-
-#endif //TEST_NEXTCOMBINATIONTESTCASE_HPP
+#endif  // TEST_NEXTCOMBINATIONTESTCASE_HPP

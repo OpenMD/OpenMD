@@ -61,19 +61,18 @@ void RandNumGenTestCase::testUniform() {
         N - 1)];  // rantInt returns an integer in [0, N-1]
   }
 
-  int avg = num / N;
+  int avg          = num / N;
   double tolerance = 0.01;
   for (int i = 0; i < num; ++i) {
-    if ((histogram[i] - avg) / avg > tolerance) {
-    }
+    if ((histogram[i] - avg) / avg > tolerance) {}
   }
 }
 
 void RandNumGenTestCase::testGaussian() {
   MTRand randNumGen(823645754);
-  double mean = 3.0;
+  double mean     = 3.0;
   double variance = 1.0;
-  const int num = 1000000;
+  const int num   = 1000000;
   double interval = 0.001;
   unsigned long int histogram[1000];
   for (int i = 0; i < num; ++i) {
@@ -87,7 +86,7 @@ void RandNumGenTestCase::testGaussian() {
 
 void RandNumGenTestCase::testMPIRNG() {
 #ifdef IS_MPI
-  const int seed = 324271632;
+  const int seed   = 324271632;
   const int nloops = 1000000;
   MPI_Status istatus;
   ParallelRandNumGen mpiRandNumGen(seed);

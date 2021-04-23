@@ -8,38 +8,50 @@
  * $Id$
  */
 
-#include <antlr/TokenStreamException.hpp>
 #include <antlr/config.hpp>
+#include <antlr/TokenStreamException.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-  /** Exception thrown from generated lexers when there's no default error
-   * handler specified.
-   * @see TokenStream
-   */
-  class TokenStreamRecognitionException : public TokenStreamException {
-  public:
-    TokenStreamRecognitionException(RecognitionException& re) :
-        TokenStreamException(re.getMessage()), recog(re) {}
-    virtual ~TokenStreamRecognitionException() throw() {}
-    virtual ANTLR_USE_NAMESPACE(std) string toString() const {
-      return recog.getFileLineColumnString() + getMessage();
-    }
+/** Exception thrown from generated lexers when there's no default error
+ * handler specified.
+ * @see TokenStream
+ */
+class TokenStreamRecognitionException : public TokenStreamException {
+public:
+	TokenStreamRecognitionException(RecognitionException& re)
+	: TokenStreamException(re.getMessage())
+	, recog(re)
+	{
+	}
+	virtual ~TokenStreamRecognitionException() throw()
+	{
+	}
+	virtual ANTLR_USE_NAMESPACE(std)string toString() const
+	{
+		return recog.getFileLineColumnString()+getMessage();
+	}
 
-    virtual ANTLR_USE_NAMESPACE(std) string getFilename() const throw() {
-      return recog.getFilename();
-    }
-    virtual int getLine() const throw() { return recog.getLine(); }
-    virtual int getColumn() const throw() { return recog.getColumn(); }
-
-  private:
-    RecognitionException recog;
-  };
+	virtual ANTLR_USE_NAMESPACE(std)string getFilename() const throw()
+	{
+		return recog.getFilename();
+	}
+	virtual int getLine() const throw()
+	{
+		return recog.getLine();
+	}
+	virtual int getColumn() const throw()
+	{
+		return recog.getColumn();
+	}
+private:
+	RecognitionException recog;
+};
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif  // INC_TokenStreamRecognitionException_hpp__
+#endif //INC_TokenStreamRecognitionException_hpp__

@@ -8,47 +8,53 @@
  * $Id$
  */
 
-#include <antlr/CommonAST.hpp>
 #include <antlr/config.hpp>
+#include <antlr/CommonAST.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-  /** A CommonAST whose initialization copies hidden token
-   *  information from the Token used to create a node.
-   */
-  class ANTLR_API CommonASTWithHiddenTokens : public CommonAST {
-  public:
-    CommonASTWithHiddenTokens();
-    virtual ~CommonASTWithHiddenTokens();
-    virtual const char* typeName(void) const {
-      return CommonASTWithHiddenTokens::TYPE_NAME;
-    }
-    /// Clone this AST node.
-    virtual RefAST clone(void) const;
+/** A CommonAST whose initialization copies hidden token
+ *  information from the Token used to create a node.
+ */
+class ANTLR_API CommonASTWithHiddenTokens : public CommonAST {
+public:
+	CommonASTWithHiddenTokens();
+	virtual ~CommonASTWithHiddenTokens();
+	virtual const char* typeName( void ) const
+	{
+		return CommonASTWithHiddenTokens::TYPE_NAME;
+	}
+	/// Clone this AST node.
+	virtual RefAST clone( void ) const;
 
-    // Borland C++ builder seems to need the decl's of the first two...
-    virtual void initialize(int t, const ANTLR_USE_NAMESPACE(std) string& txt);
-    virtual void initialize(RefAST t);
-    virtual void initialize(RefToken t);
+	// Borland C++ builder seems to need the decl's of the first two...
+	virtual void initialize(int t,const ANTLR_USE_NAMESPACE(std)string& txt);
+	virtual void initialize(RefAST t);
+	virtual void initialize(RefToken t);
 
-    virtual RefToken getHiddenAfter() const { return hiddenAfter; }
+	virtual RefToken getHiddenAfter() const
+	{
+		return hiddenAfter;
+	}
 
-    virtual RefToken getHiddenBefore() const { return hiddenBefore; }
+	virtual RefToken getHiddenBefore() const
+	{
+		return hiddenBefore;
+	}
 
-    static RefAST factory();
+	static RefAST factory();
 
-    static const char* const TYPE_NAME;
+	static const char* const TYPE_NAME;
+protected:
+	RefToken hiddenBefore,hiddenAfter; // references to hidden tokens
+};
 
-  protected:
-    RefToken hiddenBefore, hiddenAfter;  // references to hidden tokens
-  };
-
-  typedef ASTRefCount<CommonASTWithHiddenTokens> RefCommonASTWithHiddenTokens;
+typedef ASTRefCount<CommonASTWithHiddenTokens> RefCommonASTWithHiddenTokens;
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif  // INC_CommonASTWithHiddenTokens_hpp__
+#endif //INC_CommonASTWithHiddenTokens_hpp__

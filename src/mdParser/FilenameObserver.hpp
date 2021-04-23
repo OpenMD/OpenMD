@@ -49,14 +49,14 @@
 class MDParser;
 class MDLexer;
 class FilenameObserver {
-public:
-  FilenameObserver();
-  void setParser(MDParser* parser);
-  void setLexer(MDLexer* lexer);
-  void notify(const std::string& filename);
-
-private:
-  MDParser* parser_;
-  MDLexer* lexer_;
+    public:
+        FilenameObserver();
+        void setParser(MDParser* parser);
+        void setLexer(MDLexer* lexer);
+        void notify(const std::string& filename);
+    private:
+        MDParser* parser_;
+        MDLexer* lexer_;
+    
 };
 #endif

@@ -70,8 +70,8 @@ using namespace zlib_stream;
 
 // a dummy class
 class dummy {
- public:
-  dummy(float f_ = 3.14f, int i_ = 1) : f(f_), i(i_){};
+public:
+  dummy(float f_ = 3.14f, int i_ = 1) : f(f_), i(i_) {};
   void reset() {
     f = 0.0;
     i = 0;
@@ -95,14 +95,14 @@ class dummy {
     return in;
   }
 
- protected:
+protected:
   float f;
   int i;
 };
 
 void ZipstreamTeseCase::test_buffer_to_buffer() {
-  const size_t n = 1024;
-  char in_buffer[n] = {'\0'};
+  const size_t n     = 1024;
+  char in_buffer[n]  = {'\0'};
   char zip_buffer[n] = {'\0'};
 
   for (size_t i = 0; i < n - 1; ++i)
@@ -127,8 +127,8 @@ void ZipstreamTeseCase::test_buffer_to_buffer() {
 }
 
 void ZipstreamTeseCase::test_wbuffer_to_wbuffer() {
-  const size_t n = 1024;
-  wchar_t in_buffer[n] = {'\0'};
+  const size_t n        = 1024;
+  wchar_t in_buffer[n]  = {'\0'};
   wchar_t zip_buffer[n] = {'\0'};
 
   for (size_t i = 0; i < n - 1; ++i)
@@ -217,8 +217,8 @@ void ZipstreamTeseCase::test_wstring_wstring() {
   Testing wide characters
 
   */
-  f_r = 0.0f;
-  d_r = 0.0;
+  f_r  = 0.0f;
+  d_r  = 0.0;
   ui_r = ul_r = us_r = 0;
   dum_r.reset();
   // creating the target zip string, could be a fstream
@@ -273,8 +273,8 @@ void ZipstreamTeseCase::test_file_file() {
   Testing file to file unzipping
 
   ------------------------------------------------------------------------------*/
-  f_r = 0.0f;
-  d_r = 0.0;
+  f_r  = 0.0f;
+  d_r  = 0.0;
   ui_r = ul_r = us_r = 0;
   dum_r.reset();
 
@@ -288,17 +288,15 @@ void ZipstreamTeseCase::test_file_file() {
             << " " << dum;
     // zip ostream needs special flushing...
     fzipper.zflush();
-    crc_z = fzipper.rdbuf()->get_crc();
-    in_size_z = fzipper.rdbuf()->get_in_size();
+    crc_z      = fzipper.rdbuf()->get_crc();
+    in_size_z  = fzipper.rdbuf()->get_in_size();
     out_size_z = fzipper.rdbuf()->get_out_size();
   }
 
   // create a stream on zip string
   ifstream ifstream_;
   ifstream_.open("test.zip", ios::in | ios::binary);
-  if (!ifstream_.is_open()) {
-    cerr << "Could not open file test.zip" << endl;
-  }
+  if (!ifstream_.is_open()) { cerr << "Could not open file test.zip" << endl; }
   // create unzipper istream
   zip_istream funzipper(ifstream_);
 
@@ -306,8 +304,8 @@ void ZipstreamTeseCase::test_file_file() {
   funzipper >> f_r >> d_r >> ui_r >> ul_r >> us_r >> c_r >> dum_r;
   funzipper.read_footer();
 
-  crc_uz = funzipper.rdbuf()->get_crc();
-  in_size_uz = funzipper.rdbuf()->get_in_size();
+  crc_uz      = funzipper.rdbuf()->get_crc();
+  in_size_uz  = funzipper.rdbuf()->get_in_size();
   out_size_uz = funzipper.rdbuf()->get_out_size();
 
   // ouputing results

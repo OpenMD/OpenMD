@@ -48,66 +48,66 @@
  * @author    tlin
  * @date  10/23/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef PRIMITIVES_DIRECTIONALATOM_HPP
 #define PRIMITIVES_DIRECTIONALATOM_HPP
 
 #include "primitives/Atom.hpp"
 #include "types/DirectionalAtomType.hpp"
-namespace OpenMD{
-    class DirectionalAtom : public Atom {
-        public:
-            DirectionalAtom(DirectionalAtomType* dAtomType);
-            /**
-             * Returns the inertia tensor of this stuntdouble
-             * @return the inertia tensor of this stuntdouble
-             */ 
-            virtual Mat3x3d getI();
+namespace OpenMD {
+  class DirectionalAtom : public Atom {
+  public:
+    DirectionalAtom(DirectionalAtomType* dAtomType);
+    /**
+     * Returns the inertia tensor of this stuntdouble
+     * @return the inertia tensor of this stuntdouble
+     */
+    virtual Mat3x3d getI();
 
+    /**
+     * Sets  the previous rotation matrix of this stuntdouble
+     * @param a  new rotation matrix
+     */
+    virtual void setPrevA(const RotMat3x3d& a);
 
-           /**
-             * Sets  the previous rotation matrix of this stuntdouble
-             * @param a  new rotation matrix 
-             */         
-           virtual void setPrevA(const RotMat3x3d& a);
-           
-           /**
-             * Sets  the current rotation matrix of this stuntdouble
-             * @param a  new rotation matrix 
-             */         
-            virtual void setA(const RotMat3x3d& a);
+    /**
+     * Sets  the current rotation matrix of this stuntdouble
+     * @param a  new rotation matrix
+     */
+    virtual void setA(const RotMat3x3d& a);
 
-           /**
-             * Sets  the rotation matrix of this stuntdouble in specified snapshot
-             * @param a rotation matrix to be set 
-             * @param snapshotNo 
-             * @see #getA
-             */         
-            virtual void setA(const RotMat3x3d& a, int snapshotNo);
+    /**
+     * Sets  the rotation matrix of this stuntdouble in specified snapshot
+     * @param a rotation matrix to be set
+     * @param snapshotNo
+     * @see #getA
+     */
+    virtual void setA(const RotMat3x3d& a, int snapshotNo);
 
-            /** 
-             * Left multiple rotation matrix by another rotation matrix 
-             * @param m a rotation matrix
-             */
-            void rotateBy(const RotMat3x3d& m);
-            
-            /** Sets the internal unit frame of this stuntdouble by three euler angles */
-            void setUnitFrameFromEuler(double phi, double theta, double psi);
+    /**
+     * Left multiple rotation matrix by another rotation matrix
+     * @param m a rotation matrix
+     */
+    void rotateBy(const RotMat3x3d& m);
 
-            /**
-             * Returns the gradient of this stuntdouble
-             * @return the gradient of this stuntdouble
-             */ 
-            virtual std::vector<double> getGrad();
+    /** Sets the internal unit frame of this stuntdouble by three euler angles
+     */
+    void setUnitFrameFromEuler(double phi, double theta, double psi);
 
-            virtual void accept(BaseVisitor* v);
+    /**
+     * Returns the gradient of this stuntdouble
+     * @return the gradient of this stuntdouble
+     */
+    virtual std::vector<double> getGrad();
 
-        protected:
-            Mat3x3d inertiaTensor_;   /**< inertial tensor */    
-            RotMat3x3d sU_;               /**< body fixed standard unit vector */
-    };
+    virtual void accept(BaseVisitor* v);
 
-}//namespace OpenMD
+  protected:
+    Mat3x3d inertiaTensor_; /**< inertial tensor */
+    RotMat3x3d sU_;         /**< body fixed standard unit vector */
+  };
 
-#endif //PRIMITIVES_DIRECTIONALATOM_HPP
+}  // namespace OpenMD
+
+#endif  // PRIMITIVES_DIRECTIONALATOM_HPP

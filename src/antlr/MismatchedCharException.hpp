@@ -8,82 +8,95 @@
  * $Id$
  */
 
-#include <antlr/BitSet.hpp>
-#include <antlr/RecognitionException.hpp>
 #include <antlr/config.hpp>
+#include <antlr/RecognitionException.hpp>
+#include <antlr/BitSet.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-  class CharScanner;
+class CharScanner;
 
-  class ANTLR_API MismatchedCharException : public RecognitionException {
-  public:
-    // Types of chars
+class ANTLR_API MismatchedCharException : public RecognitionException {
+public:
+	// Types of chars
 #ifndef NO_STATIC_CONSTS
-    static const int CHAR      = 1;
-    static const int NOT_CHAR  = 2;
-    static const int RANGE     = 3;
-    static const int NOT_RANGE = 4;
-    static const int SET       = 5;
-    static const int NOT_SET   = 6;
+	static const int CHAR = 1;
+	static const int NOT_CHAR = 2;
+	static const int RANGE = 3;
+	static const int NOT_RANGE = 4;
+	static const int SET = 5;
+	static const int NOT_SET = 6;
 #else
-  enum {
-    CHAR      = 1,
-    NOT_CHAR  = 2,
-    RANGE     = 3,
-    NOT_RANGE = 4,
-    SET       = 5,
-    NOT_SET   = 6
-  };
+	enum {
+		CHAR = 1,
+		NOT_CHAR = 2,
+		RANGE = 3,
+		NOT_RANGE = 4,
+		SET = 5,
+		NOT_SET = 6
+	};
 #endif
 
-  public:
-    // One of the above
-    int mismatchType;
+public:
+	// One of the above
+	int mismatchType;
 
-    // what was found on the input stream
-    int foundChar;
+	// what was found on the input stream
+	int foundChar;
 
-    // For CHAR/NOT_CHAR and RANGE/NOT_RANGE
-    int expecting;
+	// For CHAR/NOT_CHAR and RANGE/NOT_RANGE
+	int expecting;
 
-    // For RANGE/NOT_RANGE (expecting is lower bound of range)
-    int upper;
+	// For RANGE/NOT_RANGE (expecting is lower bound of range)
+	int upper;
 
-    // For SET/NOT_SET
-    BitSet set;
+	// For SET/NOT_SET
+	BitSet set;
 
-  protected:
-    // who knows...they may want to ask scanner questions
-    CharScanner* scanner;
+protected:
+	// who knows...they may want to ask scanner questions
+	CharScanner* scanner;
 
-  public:
-    MismatchedCharException();
+public:
+	MismatchedCharException();
 
-    // Expected range / not range
-    MismatchedCharException(int c, int lower, int upper_, bool matchNot,
-                            CharScanner* scanner_);
+	// Expected range / not range
+	MismatchedCharException(
+		int c,
+		int lower,
+		int upper_,
+		bool matchNot,
+		CharScanner* scanner_
+	);
 
-    // Expected token / not token
-    MismatchedCharException(int c, int expecting_, bool matchNot,
-                            CharScanner* scanner_);
+	// Expected token / not token
+	MismatchedCharException(
+		int c,
+		int expecting_,
+		bool matchNot,
+		CharScanner* scanner_
+	);
 
-    // Expected BitSet / not BitSet
-    MismatchedCharException(int c, BitSet set_, bool matchNot,
-                            CharScanner* scanner_);
+	// Expected BitSet / not BitSet
+	MismatchedCharException(
+		int c,
+		BitSet set_,
+		bool matchNot,
+		CharScanner* scanner_
+	);
 
-    ~MismatchedCharException() throw() {}
+	~MismatchedCharException() throw() {}
 
-    /**
-     * Returns a clean error message (no line number/column information)
-     */
-    ANTLR_USE_NAMESPACE(std) string getMessage() const;
-  };
+	/**
+	 * Returns a clean error message (no line number/column information)
+	 */
+	ANTLR_USE_NAMESPACE(std)string getMessage() const;
+};
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif  // INC_MismatchedCharException_hpp__
+#endif //INC_MismatchedCharException_hpp__

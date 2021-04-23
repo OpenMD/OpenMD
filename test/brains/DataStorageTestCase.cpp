@@ -82,9 +82,9 @@ void DataStorageTestCase::testDataStorage() {
 
   // test getArrayPointer
 
-  double* pamat = ds2.getArrayPointer(DataStorage::dslAmat);
+  double* pamat   = ds2.getArrayPointer(DataStorage::dslAmat);
   double* pzangle = ds2.getArrayPointer(DataStorage::dslZAngle);
-  double* pforce = ds2.getArrayPointer(DataStorage::dslForce);
+  double* pforce  = ds2.getArrayPointer(DataStorage::dslForce);
 
   pamat[9] = 2.0993;
   CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[1](0, 0), 2.0993,

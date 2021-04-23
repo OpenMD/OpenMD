@@ -203,7 +203,7 @@ void RectMatrixTestCase::testConstructor() {
 
   // test copy assignment
   RMat2x2 tmp4 = m2;
-  tmp4 = tmp4;
+  tmp4         = tmp4;
   CPPUNIT_ASSERT(tmp4 == m2);
 
   double tmp5[4];

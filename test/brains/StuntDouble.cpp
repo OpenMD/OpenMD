@@ -54,38 +54,33 @@
 
 namespace OpenMD {
 
-StuntDouble::StuntDouble(ObjectType objType, DataStoragePointer storage)
-    : objType_(objType),
-      storage_(storage),
-      linear_(false),
-      linearAxis_(-1),
-      globalIndex_(-1),
-      localIndex_(-1),
-      snapshotMan_(NULL) {}
+  StuntDouble::StuntDouble(ObjectType objType, DataStoragePointer storage) :
+      objType_(objType), storage_(storage), linear_(false), linearAxis_(-1),
+      globalIndex_(-1), localIndex_(-1), snapshotMan_(NULL) {}
 
-StuntDouble::~StuntDouble() {}
+  StuntDouble::~StuntDouble() {}
 
-void StuntDouble::zeroForces() { setFrc(V3Zero); }
-void StuntDouble::addProperty(GenericData* genData) {
-  properties_.addProperty(genData);
-}
+  void StuntDouble::zeroForces() { setFrc(V3Zero); }
+  void StuntDouble::addProperty(GenericData* genData) {
+    properties_.addProperty(genData);
+  }
 
-void StuntDouble::removeProperty(std::string& propName) {
-  properties_.removeProperty(propName);
-}
+  void StuntDouble::removeProperty(std::string& propName) {
+    properties_.removeProperty(propName);
+  }
 
-void StuntDouble::clearProperties() { properties_.clearProperties(); }
+  void StuntDouble::clearProperties() { properties_.clearProperties(); }
 
-std::vector<std::string> StuntDouble::getPropertyNames() {
-  return properties_.getPropertyNames();
-}
+  std::vector<std::string> StuntDouble::getPropertyNames() {
+    return properties_.getPropertyNames();
+  }
 
-std::vector<GenericData*> StuntDouble::getProperties() {
-  return properties_.getProperties();
-}
+  std::vector<GenericData*> StuntDouble::getProperties() {
+    return properties_.getProperties();
+  }
 
-GenericData* StuntDouble::getPropertyByName(std::string& propName) {
-  return properties_.getPropertyByName(propName);
-}
+  GenericData* StuntDouble::getPropertyByName(std::string& propName) {
+    return properties_.getPropertyByName(propName);
+  }
 
 }  // namespace OpenMD

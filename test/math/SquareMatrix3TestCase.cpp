@@ -93,15 +93,15 @@ void SquareMatrix3TestCase::testSetupRotationMatrix() {
   RotMat3x3d m5L(v2);
   RotMat3x3d m5R;
   double root2Over4 = sqrt(2) / 4.0;
-  m5R(0, 0) = 0.5 - root2Over4;
-  m5R(0, 1) = 0.5 + root2Over4;
-  m5R(0, 2) = 0.5;
-  m5R(1, 0) = -0.5 - root2Over4;
-  m5R(1, 1) = -0.5 + root2Over4;
-  m5R(1, 2) = 0.5;
-  m5R(2, 0) = 0.5;
-  m5R(2, 1) = -0.5;
-  m5R(2, 2) = sqrt(2) / 2.0;
+  m5R(0, 0)         = 0.5 - root2Over4;
+  m5R(0, 1)         = 0.5 + root2Over4;
+  m5R(0, 2)         = 0.5;
+  m5R(1, 0)         = -0.5 - root2Over4;
+  m5R(1, 1)         = -0.5 + root2Over4;
+  m5R(1, 2)         = 0.5;
+  m5R(2, 0)         = 0.5;
+  m5R(2, 1)         = -0.5;
+  m5R(2, 2)         = sqrt(2) / 2.0;
   CPPUNIT_ASSERT(m5L == m5R);
 }
 
@@ -151,7 +151,7 @@ void SquareMatrix3TestCase::testTransformation() {
   m1(2, 0) = 0.96;
   m1(2, 1) = 0;
   m1(2, 2) = 0.28;
-  q1L = m1.toQuaternion();
+  q1L      = m1.toQuaternion();
   // CPPUNIT_ASSERT( q1L == q1R);
 
   RotMat3x3d m2;
@@ -159,7 +159,7 @@ void SquareMatrix3TestCase::testTransformation() {
   Quat4d q2R;
   q2L.normalize();
 
-  m2 = q2L.toRotationMatrix3();
+  m2  = q2L.toRotationMatrix3();
   q2R = m2.toQuaternion();
   CPPUNIT_ASSERT(q2L == q2R);
 
@@ -168,16 +168,16 @@ void SquareMatrix3TestCase::testTransformation() {
   Vector3d v1R(M_PI / 4.0, M_PI / 4.0, M_PI / 4.0);
   RotMat3x3d m3;
   double root2Over4 = sqrt(2) / 4.0;
-  m3(0, 0) = 0.5 - root2Over4;
-  m3(0, 1) = 0.5 + root2Over4;
-  m3(0, 2) = 0.5;
-  m3(1, 0) = -0.5 - root2Over4;
-  m3(1, 1) = -0.5 + root2Over4;
-  m3(1, 2) = 0.5;
-  m3(2, 0) = 0.5;
-  m3(2, 1) = -0.5;
-  m3(2, 2) = sqrt(2) / 2.0;
-  v1L = m3.toEulerAngles();
+  m3(0, 0)          = 0.5 - root2Over4;
+  m3(0, 1)          = 0.5 + root2Over4;
+  m3(0, 2)          = 0.5;
+  m3(1, 0)          = -0.5 - root2Over4;
+  m3(1, 1)          = -0.5 + root2Over4;
+  m3(1, 2)          = 0.5;
+  m3(2, 0)          = 0.5;
+  m3(2, 1)          = -0.5;
+  m3(2, 2)          = sqrt(2) / 2.0;
+  v1L               = m3.toEulerAngles();
   CPPUNIT_ASSERT(v1L == v1R);
 
   // test diagonalize
@@ -196,7 +196,7 @@ void SquareMatrix3TestCase::testTransformation() {
   m4(2, 0) = 5.0;
   m4(2, 1) = 6.0;
   m4(2, 2) = 7.0;
-  a = m4;
+  a        = m4;
 
   RotMat3x3d::diagonalize(a, w, m5L);
 

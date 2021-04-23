@@ -48,7 +48,7 @@
  * @author    tlin
  * @date  10/22/2004
  * @version 1.0
- */ 
+ */
 
 #ifndef PRIMITIVES_ATOM_HPP
 #define PRIMITIVES_ATOM_HPP
@@ -56,62 +56,47 @@
 #include "primitives/StuntDouble.hpp"
 #include "types/AtomType.hpp"
 
-namespace OpenMD{
-    class Atom : public StuntDouble {
-        public:
-            Atom(AtomType* at);
-            /**
-             * Returns the inertia tensor of this stuntdouble
-             * @return the inertia tensor of this stuntdouble
-             */ 
-            virtual Mat3x3d getI();
+namespace OpenMD {
+  class Atom : public StuntDouble {
+  public:
+    Atom(AtomType* at);
+    /**
+     * Returns the inertia tensor of this stuntdouble
+     * @return the inertia tensor of this stuntdouble
+     */
+    virtual Mat3x3d getI();
 
-            /**
-             * Returns the gradient of this stuntdouble
-             * @return the inertia tensor of this stuntdouble
-             */ 
-            virtual std::vector<double> getGrad();
+    /**
+     * Returns the gradient of this stuntdouble
+     * @return the inertia tensor of this stuntdouble
+     */
+    virtual std::vector<double> getGrad();
 
-            virtual void accept(BaseVisitor* v);
+    virtual void accept(BaseVisitor* v);
 
-            /** 
-             * Returns the AtomType of this Atom.
-             * @return the atom type of this atom
-             */
-            AtomType* getAtomType() {
-                return atomType_;
-            }
-            
-            //forward  functions of AtomType class
-            bool    isCharge()  {
-                return atomType_->isCharge(); 
-            }
-            
-            bool    isDirectional() {
-                return atomType_->isDirectional(); 
-            }
+    /**
+     * Returns the AtomType of this Atom.
+     * @return the atom type of this atom
+     */
+    AtomType* getAtomType() { return atomType_; }
 
-            bool    isDipole()  { 
-                return atomType_->isDipole(); 
-            }
-            
-            bool    isGayBerne()  {
-                return atomType_->isGayBerne(); 
-            }
-            
-            bool    isSticky()  { 
-                return atomType_->isSticky(); 
-            }
+    // forward  functions of AtomType class
+    bool isCharge() { return atomType_->isCharge(); }
 
-            bool    isShape()  { 
-                return atomType_->isShape(); 
-            }            
+    bool isDirectional() { return atomType_->isDirectional(); }
 
-        private:
-            AtomType* atomType_;
-       
-    };
+    bool isDipole() { return atomType_->isDipole(); }
 
-}//namepace OpenMD
+    bool isGayBerne() { return atomType_->isGayBerne(); }
 
-#endif //PRIMITIVES_ATOM_HPP
+    bool isSticky() { return atomType_->isSticky(); }
+
+    bool isShape() { return atomType_->isShape(); }
+
+  private:
+    AtomType* atomType_;
+  };
+
+}  // namespace OpenMD
+
+#endif  // PRIMITIVES_ATOM_HPP

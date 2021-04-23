@@ -72,10 +72,10 @@ void StringTokenizerTestCase::testStringTokenizer() {
 
   CPPUNIT_ASSERT(tokenizer2.countTokens() == 5);
 
-  float floatVal = tokenizer2.nextTokenAsFloat();
-  int intVal = tokenizer2.nextTokenAsInt();
-  double doubleVal = tokenizer2.nextTokenAsDouble();
-  bool boolVal = tokenizer2.nextTokenAsBool();
+  float floatVal        = tokenizer2.nextTokenAsFloat();
+  int intVal            = tokenizer2.nextTokenAsInt();
+  double doubleVal      = tokenizer2.nextTokenAsDouble();
+  bool boolVal          = tokenizer2.nextTokenAsBool();
   std::string stringVal = tokenizer2.nextToken();
 
   CPPUNIT_ASSERT_DOUBLES_EQUAL(floatVal, 1991.2, 0.0001);

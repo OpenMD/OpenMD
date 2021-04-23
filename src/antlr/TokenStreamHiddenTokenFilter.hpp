@@ -8,88 +8,88 @@
  * $Id$
  */
 
-#include <antlr/TokenStreamBasicFilter.hpp>
 #include <antlr/config.hpp>
+#include <antlr/TokenStreamBasicFilter.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-  /**This object filters a token stream coming from a lexer
-   * or another TokenStream so that only certain token channels
-   * get transmitted to the parser.
-   *
-   * Any of the channels can be filtered off as "hidden" channels whose
-   * tokens can be accessed from the parser.
-   */
-  class ANTLR_API TokenStreamHiddenTokenFilter : public TokenStreamBasicFilter {
-    // protected BitSet discardMask;
-  protected:
-    BitSet hideMask;
+/**This object filters a token stream coming from a lexer
+ * or another TokenStream so that only certain token channels
+ * get transmitted to the parser.
+ *
+ * Any of the channels can be filtered off as "hidden" channels whose
+ * tokens can be accessed from the parser.
+ */
+class ANTLR_API TokenStreamHiddenTokenFilter : public TokenStreamBasicFilter {
+	// protected BitSet discardMask;
+protected:
+	BitSet hideMask;
 
-  private:
-    RefToken nextMonitoredToken;
+private:
+	RefToken nextMonitoredToken;
 
-  protected:
-    /** track tail of hidden list emanating from previous
-     *  monitored token
-     */
-    RefToken lastHiddenToken;
+protected:
+	/** track tail of hidden list emanating from previous
+	 *  monitored token
+	 */
+	RefToken lastHiddenToken;
 
-    RefToken firstHidden;  // = null;
+	RefToken firstHidden; // = null;
 
-  public:
-    TokenStreamHiddenTokenFilter(TokenStream& input);
+public:
+	TokenStreamHiddenTokenFilter(TokenStream& input);
 
-  protected:
-    void consume();
+protected:
+	void consume();
 
-  private:
-    void consumeFirst();
+private:
+	void consumeFirst();
 
-  public:
-    BitSet getDiscardMask() const;
+public:
+	BitSet getDiscardMask() const;
 
-    /** Return a ptr to the hidden token appearing immediately after
-     *  token t in the input stream.
-     */
-    RefToken getHiddenAfter(RefToken t);
+	/** Return a ptr to the hidden token appearing immediately after
+	 *  token t in the input stream.
+	 */
+	RefToken getHiddenAfter(RefToken t);
 
-    /** Return a ptr to the hidden token appearing immediately before
-     *  token t in the input stream.
-     */
-    RefToken getHiddenBefore(RefToken t);
+	/** Return a ptr to the hidden token appearing immediately before
+	 *  token t in the input stream.
+	 */
+	RefToken getHiddenBefore(RefToken t);
 
-    BitSet getHideMask() const;
+	BitSet getHideMask() const;
 
-    /** Return the first hidden token if one appears
-     *  before any monitored token.
-     */
-    RefToken getInitialHiddenToken();
+	/** Return the first hidden token if one appears
+	 *  before any monitored token.
+	 */
+	RefToken getInitialHiddenToken();
 
-    void hide(int m);
+	void hide(int m);
 
-    void hide(const BitSet& mask);
+	void hide(const BitSet& mask);
 
-  protected:
-    RefToken LA(int i);
+protected:
+	RefToken LA(int i);
 
-  public:
-    /** Return the next monitored token.
-     *  Test the token following the monitored token.
-     *  If following is another monitored token, save it
-     *  for the next invocation of nextToken (like a single
-     *  lookahead token) and return it then.
-     *  If following is unmonitored, nondiscarded (hidden)
-     *  channel token, add it to the monitored token.
-     *
-     *  Note: EOF must be a monitored Token.
-     */
-    RefToken nextToken();
-  };
+public:
+/** Return the next monitored token.
+ *  Test the token following the monitored token.
+ *  If following is another monitored token, save it
+ *  for the next invocation of nextToken (like a single
+ *  lookahead token) and return it then.
+ *  If following is unmonitored, nondiscarded (hidden)
+ *  channel token, add it to the monitored token.
+ *
+ *  Note: EOF must be a monitored Token.
+ */
+	RefToken nextToken();
+};
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif  // INC_TokenStreamHiddenTokenFilter_hpp__
+#endif //INC_TokenStreamHiddenTokenFilter_hpp__

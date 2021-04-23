@@ -174,7 +174,7 @@ void VectorTestCase::testArithmetic() {
 void VectorTestCase::testOperators() {
   // test unary minus
   Vec4 a0 = v2;
-  a0 = -a0;
+  a0      = -a0;
   CPPUNIT_ASSERT(a0 == v1);
 
   // test add
@@ -232,7 +232,7 @@ void VectorTestCase::testAccessEntries() {
   CPPUNIT_ASSERT_DOUBLES_EQUAL(v3(0), 4.0, OpenMD::NumericConstant::epsilon);
 
   Vec4 a1;
-  double *pa1 = a1.getArrayPointer();
+  double* pa1 = a1.getArrayPointer();
 
   pa1[0] = 4.0;
   pa1[1] = 1.0;

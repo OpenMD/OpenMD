@@ -8,25 +8,27 @@
  * $Id$
  */
 
-#include <antlr/Token.hpp>
 #include <antlr/config.hpp>
+#include <antlr/Token.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-  /** This interface allows any object to pretend it is a stream
-   * of tokens.
-   * @author Terence Parr, MageLang Institute
-   */
-  class ANTLR_API TokenStream {
-  public:
-    virtual RefToken nextToken() = 0;
-    virtual ~TokenStream() {}
-  };
+/** This interface allows any object to pretend it is a stream
+ * of tokens.
+ * @author Terence Parr, MageLang Institute
+ */
+class ANTLR_API TokenStream {
+public:
+	virtual RefToken nextToken()=0;
+	virtual ~TokenStream()
+	{
+	}
+};
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
 
-#endif  // INC_TokenStream_hpp__
+#endif //INC_TokenStream_hpp__
