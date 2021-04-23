@@ -75,7 +75,7 @@ if (NOT NO_PARALLEL)
       else()
         set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
         set(ENV{CXX} ${MPI_CXX_COMPILER})
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_FLAGS}")
       endif()
    ENDIF()
 endif()
@@ -167,6 +167,59 @@ LONG_TODAY(BUILD_DATE)
 
 check_include_file_cxx(conio.h      HAVE_CONIO_H)
 check_cxx_symbol_exists(strncasecmp   "string.h"   HAVE_STRNCASECMP)
+
+
+# Give the user the option to format their code according to the OpenMD Style
+option(FORMAT_OPENMD "Builds specified libraries while also formatting the code." OFF)
+
+if (FORMAT_OPENMD AND NOT WIN32)
+  find_program(formatter clang-format HINTS /opt/local/libexec/llvm-10/bin/)
+
+  if (NOT formatter_NOTFOUND)
+    message(STATUS "Formatting OpenMD")
+
+    ## Run clang-format on all code except the files passed as arguments with the '-i' flag ##
+    execute_process(COMMAND bash ../cmake/scripts/format-codebase.sh
+                                    -f ${formatter}
+                                    -i antlr/*
+                                    -i applications/thermalizer/thermalizerCmd.hpp
+                                    -i applications/thermalizer/thermalizerCmd.cpp
+                                    -i applications/simpleBuilder/simpleBuilderCmd.hpp
+                                    -i applications/simpleBuilder/simpleBuilderCmd.cpp
+                                    -i applications/dump2Xyz/Dump2XYZCmd.hpp
+                                    -i applications/dump2Xyz/Dump2XYZCmd.cpp
+                                    -i applications/sequentialProps/SequentialPropsCmd.cpp
+                                    -i applications/sequentialProps/SequentialPropsCmd.hpp
+                                    -i applications/randomBuilder/randomBuilderCmd.hpp
+                                    -i applications/randomBuilder/randomBuilderCmd.cpp
+                                    -i applications/hydrodynamics/HydroCmd.hpp
+                                    -i applications/hydrodynamics/HydroCmd.cpp
+                                    -i applications/staticProps/StaticPropsCmd.hpp
+                                    -i applications/staticProps/StaticPropsCmd.cpp
+                                    -i applications/omd2omd/omd2omdCmd.cpp
+                                    -i applications/omd2omd/omd2omdCmd.hpp
+                                    -i applications/nanoparticleBuilder/nanorodBuilderCmd.hpp
+                                    -i applications/nanoparticleBuilder/nanorod_pentBuilderCmd.cpp
+                                    -i applications/nanoparticleBuilder/icosahedralBuilderCmd.hpp
+                                    -i applications/nanoparticleBuilder/nanoparticleBuilderCmd.hpp
+                                    -i applications/nanoparticleBuilder/nanorodBuilderCmd.cpp
+                                    -i applications/nanoparticleBuilder/nanorod_pentBuilderCmd.hpp
+                                    -i applications/nanoparticleBuilder/nanoparticleBuilderCmd.cpp
+                                    -i applications/nanoparticleBuilder/icosahedralBuilderCmd.cpp
+                                    -i applications/recenter/recenterCmd.cpp
+                                    -i applications/recenter/recenterCmd.hpp
+                                    -i applications/dynamicProps/DynamicPropsCmd.hpp
+                                    -i applications/dynamicProps/DynamicPropsCmd.cpp
+                                    -i applications/eos/equationofstateCmd.cpp
+                                    -i applications/eos/equationofstateCmd.hpp
+                                    -i applications/elasticConstants/elasticConstantsCmd.hpp
+                                    -i applications/elasticConstants/elasticConstantsCmd.cpp
+                                    -i mdParser/*
+                                    -i utils/MemoryUtils.hpp
+                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src
+                    OUTPUT_QUIET)
+  endif()
+endif()
 
 # Optional libraries: If we can find these, we will build with them
 # Look for OpenBabel libraries
@@ -963,12 +1016,12 @@ install(DIRECTORY samples/
         DESTINATION samples
         DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         PATTERN ".svn" EXCLUDE
-	PATTERN "*.dump" EXCLUDE
-	PATTERN "*.report" EXCLUDE
-	PATTERN "*.stat" EXCLUDE
-	PATTERN "*.eor" EXCLUDE
-	PATTERN "*.rnemd" EXCLUDE
-	PATTERN "*.fz" EXCLUDE
+  PATTERN "*.dump" EXCLUDE
+  PATTERN "*.report" EXCLUDE
+  PATTERN "*.stat" EXCLUDE
+  PATTERN "*.eor" EXCLUDE
+  PATTERN "*.rnemd" EXCLUDE
+  PATTERN "*.fz" EXCLUDE
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
 configure_file( samples/builders/runMe.in
