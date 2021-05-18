@@ -405,7 +405,6 @@ src/flucq/FluctuatingChargeNVT.cpp
 src/integrators/Integrator.cpp
 src/integrators/IntegratorFactory.cpp
 src/integrators/LangevinDynamics.cpp
-src/integrators/LangevinPiston.cpp
 src/integrators/LDForceManager.cpp
 src/integrators/NgammaT.cpp
 src/integrators/NPA.cpp
@@ -585,6 +584,7 @@ src/flucq/FluctuatingChargeObjectiveFunction.cpp
 src/flucq/FluctuatingChargeForces.cpp
 src/flucq/FluctuatingChargePropagator.cpp
 src/integrators/LangevinHullForceManager.cpp
+src/integrators/LangevinPiston.cpp
 src/rnemd/NIVS.cpp
 src/rnemd/RNEMD.cpp
 src/rnemd/Swap.cpp

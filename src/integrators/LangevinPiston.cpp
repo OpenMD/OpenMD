@@ -43,6 +43,10 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "integrators/LangevinPiston.hpp"
 
 #include "brains/SimInfo.hpp"
@@ -341,7 +345,21 @@ namespace OpenMD {
 
   void LangevinPiston::genRandomForce(RealType& randomForce,
                                       RealType variance) {
-    randomForce = randNumGen_.randNorm(0, variance);
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif      
+      randomForce = randNumGen_.randNorm(0, variance);
+#ifdef IS_MPI
+    }
+#endif
+    
+    // push this out to the other processors
+    
+#ifdef IS_MPI
+    // Same command on all nodes:
+    MPI_Bcast(&randomForce, 1, MPI_REALTYPE, 0, MPI_COMM_WORLD);
+#endif
+    
     return;
   }
 
