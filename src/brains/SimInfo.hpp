@@ -54,8 +54,10 @@
 #define BRAINS_SIMMODEL_HPP
 
 #include <iostream>
+#include <map>
 #include <memory>
 #include <set>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -68,6 +70,7 @@
 #include "types/MoleculeStamp.hpp"
 #include "utils/LocalIndexManager.hpp"
 #include "utils/PropertyMap.hpp"
+#include "utils/RandNumGen.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -90,7 +93,7 @@ namespace OpenMD {
    */
   class SimInfo {
   public:
-    typedef map<int, Molecule*>::iterator MoleculeIterator;
+    typedef std::map<int, Molecule*>::iterator MoleculeIterator;
 
     /**
      * Constructor of SimInfo
@@ -159,6 +162,7 @@ namespace OpenMD {
       if (!hasNGlobalConstraints_) calcNConstraints();
       return nGlobalConstraints_;
     }
+
     /**
      * Returns the number of local molecules.
      * @return the number of local molecules
@@ -243,8 +247,10 @@ namespace OpenMD {
 
     /** Returns the snapshot manager. */
     SnapshotManager* getSnapshotManager() { return sman_; }
+
     /** Returns the storage layout (computed by SimCreator) */
     int getStorageLayout() { return storageLayout_; }
+
     /** Sets the storage layout (computed by SimCreator) */
     void setStorageLayout(int sl) { storageLayout_ = sl; }
 
@@ -256,7 +262,12 @@ namespace OpenMD {
 
     Globals* getSimParams() { return simParams_; }
 
+    Utils::RandNumGenPtr getRandomNumberGenerator() const {
+      return randNumGen_;
+    }
+
     void update();
+
     /**
      * Do final bookkeeping before Force managers need their data.
      */
@@ -275,6 +286,7 @@ namespace OpenMD {
 
     /** Return the total number of the molecule stamps */
     int getNMoleculeStamp() { return moleculeStamps_.size(); }
+
     /**
      * Finds a molecule with a specified global index
      * @return a pointer point to found molecule
@@ -294,48 +306,55 @@ namespace OpenMD {
      * processor to the global atom index.  With only one processor,
      * these should be identical.
      */
-    vector<int> getGlobalAtomIndices();
+    std::vector<int> getGlobalAtomIndices();
 
     /**
      * returns a vector which maps the local cutoff group index on
      * this processor to the global cutoff group index.  With only one
      * processor, these should be identical.
      */
-    vector<int> getGlobalGroupIndices();
+    std::vector<int> getGlobalGroupIndices();
 
-    string getFinalConfigFileName() { return finalConfigFileName_; }
+    std::string getFinalConfigFileName() { return finalConfigFileName_; }
 
-    void setFinalConfigFileName(const string& fileName) {
+    void setFinalConfigFileName(const std::string& fileName) {
       finalConfigFileName_ = fileName;
     }
 
-    string getRawMetaData() { return rawMetaData_; }
-    void setRawMetaData(const string& rawMetaData) {
+    std::string getRawMetaData() { return rawMetaData_; }
+
+    void setRawMetaData(const std::string& rawMetaData) {
       rawMetaData_ = rawMetaData;
     }
 
-    string getDumpFileName() { return dumpFileName_; }
+    std::string getDumpFileName() { return dumpFileName_; }
 
-    void setDumpFileName(const string& fileName) { dumpFileName_ = fileName; }
+    void setDumpFileName(const std::string& fileName) {
+      dumpFileName_ = fileName;
+    }
 
-    string getStatFileName() { return statFileName_; }
+    std::string getStatFileName() { return statFileName_; }
 
-    void setStatFileName(const string& fileName) { statFileName_ = fileName; }
+    void setStatFileName(const std::string& fileName) {
+      statFileName_ = fileName;
+    }
 
-    string getReportFileName() { return reportFileName_; }
+    std::string getReportFileName() { return reportFileName_; }
 
-    void setReportFileName(const string& fileName) {
+    void setReportFileName(const std::string& fileName) {
       reportFileName_ = fileName;
     }
 
-    string getRestFileName() { return restFileName_; }
+    std::string getRestFileName() { return restFileName_; }
 
-    void setRestFileName(const string& fileName) { restFileName_ = fileName; }
+    void setRestFileName(const std::string& fileName) {
+      restFileName_ = fileName;
+    }
 
     /**
      * Sets GlobalGroupMembership
      */
-    void setGlobalGroupMembership(const vector<int>& ggm) {
+    void setGlobalGroupMembership(const std::vector<int>& ggm) {
       assert(ggm.size() == static_cast<size_t>(nGlobalAtoms_));
       globalGroupMembership_ = ggm;
     }
@@ -343,7 +362,7 @@ namespace OpenMD {
     /**
      * Sets GlobalMolMembership
      */
-    void setGlobalMolMembership(const vector<int>& gmm) {
+    void setGlobalMolMembership(const std::vector<int>& gmm) {
       assert(gmm.size() ==
              (static_cast<size_t>(nGlobalAtoms_ + nGlobalRigidBodies_)));
       globalMolMembership_ = gmm;
@@ -366,13 +385,13 @@ namespace OpenMD {
      * Removes property from PropertyMap by name
      * @param propName the name of property to be removed
      */
-    void removeProperty(const string& propName);
+    void removeProperty(const std::string& propName);
 
     /**
      * Returns all names of properties
      * @return all names of properties
      */
-    std::vector<string> getPropertyNames();
+    std::vector<std::string> getPropertyNames();
 
     /**
      * Returns all of the properties in PropertyMap
@@ -386,7 +405,7 @@ namespace OpenMD {
      * @return a pointer point to property with propName. If no property named
      * propName exists, return NULL
      */
-    std::shared_ptr<GenericData> getPropertyByName(const string& propName);
+    std::shared_ptr<GenericData> getPropertyByName(const std::string& propName);
 
     /**
      * add all special interaction pairs (including excluded
@@ -426,11 +445,12 @@ namespace OpenMD {
      */
     void addMoleculeStamp(MoleculeStamp* molStamp, int nmol);
 
-    // Other classes holdingn important information
+    // Other classes holding important information
     ForceField* forceField_; /**< provides access to defined atom types, bond
                                 types, etc. */
-    Globals*
-        simParams_; /**< provides access to simulation parameters set by user */
+    Globals* simParams_;     /**< provides access to simulation parameters
+                                set by user */
+    Utils::RandNumGenPtr randNumGen_;
 
     ///  Counts of local objects
     int nAtoms_;              /**< number of atoms in local processor */
@@ -501,7 +521,7 @@ namespace OpenMD {
 
   private:
     /// Data structures holding primary simulation objects
-    map<int, Molecule*>
+    std::map<int, Molecule*>
         molecules_; /**< map holding pointers to LOCAL molecules */
 
     /// Stamps are templates for objects that are then used to create
@@ -509,8 +529,8 @@ namespace OpenMD {
     /// information on how to build that molecule (i.e. the topology,
     /// the atoms, the bonds, etc.)  Once the system is built, the
     /// stamps are no longer useful.
-    vector<int> molStampIds_; /**< stamp id for molecules in the system */
-    vector<MoleculeStamp*> moleculeStamps_; /**< molecule stamps array */
+    std::vector<int> molStampIds_; /**< stamp id for molecules in the system */
+    std::vector<MoleculeStamp*> moleculeStamps_; /**< molecule stamps array */
 
     /**
      * A vector that maps between the global index of an atom, and the
@@ -518,10 +538,12 @@ namespace OpenMD {
      * by SimCreator once and only once, since it never changed during
      * the simulation.  It should be nGlobalAtoms_ in size.
      */
-    vector<int> globalGroupMembership_;
+    std::vector<int> globalGroupMembership_;
 
   public:
-    vector<int> getGlobalGroupMembership() { return globalGroupMembership_; }
+    std::vector<int> getGlobalGroupMembership() {
+      return globalGroupMembership_;
+    }
 
   private:
     /**
@@ -530,26 +552,26 @@ namespace OpenMD {
      * by SimCreator once and only once, since it is never changed
      * during the simulation. It shoudl be nGlobalAtoms_ in size.
      */
-    vector<int> globalMolMembership_;
+    std::vector<int> globalMolMembership_;
 
     /**
      * A vector that maps between the local index of an atom and the
      * index of the AtomType.
      */
-    vector<int> identArray_;
+    std::vector<int> identArray_;
 
   public:
-    vector<int> getIdentArray() { return identArray_; }
+    std::vector<int> getIdentArray() { return identArray_; }
 
     /**
      * A vector that contains information about the local region of an
      * atom (used for fluctuating charges, etc.)
      */
   private:
-    vector<int> regions_;
+    std::vector<int> regions_;
 
   public:
-    vector<int> getRegions() { return regions_; }
+    std::vector<int> getRegions() { return regions_; }
 
   private:
     /**
@@ -559,10 +581,10 @@ namespace OpenMD {
      * factor for that atom is 1.  For massless atoms, the factor is
      * also 1.
      */
-    vector<RealType> massFactors_;
+    std::vector<RealType> massFactors_;
 
   public:
-    vector<RealType> getMassFactors() { return massFactors_; }
+    std::vector<RealType> getMassFactors() { return massFactors_; }
 
     PairList* getExcludedInteractions() { return &excludedInteractions_; }
     PairList* getOneTwoInteractions() { return &oneTwoInteractions_; }
@@ -595,14 +617,14 @@ namespace OpenMD {
     LocalIndexManager localIndexMan_;
 
     // unparsed MetaData block for storing in Dump and EOR files:
-    string rawMetaData_;
+    std::string rawMetaData_;
 
     // file names
-    string finalConfigFileName_;
-    string dumpFileName_;
-    string statFileName_;
-    string reportFileName_;
-    string restFileName_;
+    std::string finalConfigFileName_;
+    std::string dumpFileName_;
+    std::string statFileName_;
+    std::string reportFileName_;
+    std::string restFileName_;
 
     bool topologyDone_; /** flag to indicate whether the topology has
                              been scanned and all the relevant
@@ -623,10 +645,10 @@ namespace OpenMD {
      * not belong to local processor, a NULL will be return.
      */
     StuntDouble* getIOIndexToIntegrableObject(int index);
-    void setIOIndexToIntegrableObject(const vector<StuntDouble*>& v);
+    void setIOIndexToIntegrableObject(const std::vector<StuntDouble*>& v);
 
   private:
-    vector<StuntDouble*> IOIndexToIntegrableObject;
+    std::vector<StuntDouble*> IOIndexToIntegrableObject;
 
   public:
     /**
@@ -642,7 +664,7 @@ namespace OpenMD {
     /**
      * Set MolToProcMap array
      */
-    void setMolToProcMap(const vector<int>& molToProcMap) {
+    void setMolToProcMap(const std::vector<int>& molToProcMap) {
       molToProcMap_ = molToProcMap;
     }
 
@@ -652,7 +674,7 @@ namespace OpenMD {
      * in the system.  It maps a molecule to the processor on which it
      * resides. it is filled by SimCreator once and only once.
      */
-    vector<int> molToProcMap_;
+    std::vector<int> molToProcMap_;
   };
 
 }  // namespace OpenMD

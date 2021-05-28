@@ -51,7 +51,6 @@
  */
 
 #ifdef IS_MPI
-#include "math/ParallelRandNumGen.hpp"
 #include "mpi.h"
 #endif
 
@@ -75,7 +74,6 @@
 #include "brains/SimCreator.hpp"
 #include "brains/SimSnapshotManager.hpp"
 #include "io/DumpReader.hpp"
-#include "math/SeqRandNumGen.hpp"
 #include "mdParser/MDLexer.hpp"
 #include "mdParser/MDParser.hpp"
 #include "mdParser/MDTreeParser.hpp"
@@ -87,6 +85,7 @@
 #include "types/MultipoleAdapter.hpp"
 #include "types/PolarizableAdapter.hpp"
 #include "types/SuttonChenAdapter.hpp"
+#include "utils/RandNumGen.hpp"
 #include "utils/Revision.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
@@ -530,22 +529,18 @@ namespace OpenMD {
       simError();
     }
 
-    Globals* simParams = info->getSimParams();
-
     a = 3.0 * nGlobalMols / info->getNGlobalAtoms();
 
     // initialize atomsPerProc
     atomsPerProc.insert(atomsPerProc.end(), nProcessors, 0);
 
     if (worldRank == 0) {
-      SeqRandNumGen* myRandom;  // divide labor does not need Parallel
-                                // random number generator
-      if (simParams->haveSeed()) {
-        int seedValue = simParams->getSeed();
-        myRandom      = new SeqRandNumGen(seedValue);
-      } else {
-        myRandom = new SeqRandNumGen();
-      }
+      Utils::RandNumGenPtr myRandom = info->getRandomNumberGenerator();
+
+      std::uniform_int_distribution<> processorDistribution {0,
+                                                             nProcessors - 1};
+      std::uniform_real_distribution<RealType> yDistribution {0, 1};
+
       RealType numerator   = info->getNGlobalAtoms();
       RealType denominator = nProcessors;
       RealType precast     = numerator / denominator;
@@ -559,8 +554,7 @@ namespace OpenMD {
           loops++;
 
           // Pick a processor at random
-
-          int which_proc = (int)(myRandom->rand() * nProcessors);
+          int which_proc = processorDistribution(*myRandom);
 
           // get the molecule stamp first
           int stampId                  = info->getMoleculeStampId(i);
@@ -614,7 +608,7 @@ namespace OpenMD {
           // where a = penalty / (average atoms per molecule)
 
           RealType x = (RealType)(new_atoms - nTarget);
-          RealType y = myRandom->rand();
+          RealType y = yDistribution(*myRandom);
 
           if (y < exp(-a * x)) {
             molToProcMap[i] = which_proc;
@@ -627,8 +621,6 @@ namespace OpenMD {
           }
         }
       }
-
-      delete myRandom;
 
       // Spray out this nonsense to all other processors:
       MPI_Bcast(&molToProcMap[0], nGlobalMols, MPI_INT, 0, MPI_COMM_WORLD);

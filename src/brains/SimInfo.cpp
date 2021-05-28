@@ -50,15 +50,20 @@
  * @version 1.0
  */
 
+#include "brains/SimInfo.hpp"
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
+
 #include <algorithm>
+#include <cstdint>
 #include <map>
+#include <memory>
+#include <random>
 #include <set>
 
 #include "brains/ForceField.hpp"
-#include "brains/SimInfo.hpp"
 #include "io/ForceFieldOptions.hpp"
 #include "math/Vector3.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
@@ -66,14 +71,15 @@
 #include "primitives/StuntDouble.hpp"
 #include "selection/SelectionManager.hpp"
 #include "utils/MemoryUtils.hpp"
+#include "utils/RandNumGen.hpp"
 #include "utils/simError.h"
 
 using namespace std;
 namespace OpenMD {
 
   SimInfo::SimInfo(ForceField* ff, Globals* simParams) :
-      forceField_(ff), simParams_(simParams), nAtoms_(0), nBonds_(0),
-      nBends_(0), nTorsions_(0), nInversions_(0), nRigidBodies_(0),
+      forceField_(ff), simParams_(simParams), randNumGen_ {nullptr}, nAtoms_(0),
+      nBonds_(0), nBends_(0), nTorsions_(0), nInversions_(0), nRigidBodies_(0),
       nIntegrableObjects_(0), nCutoffGroups_(0), nConstraints_(0),
       nFluctuatingCharges_(0), nGlobalMols_(0), nGlobalAtoms_(0),
       nGlobalCutoffGroups_(0), nGlobalIntegrableObjects_(0),
@@ -158,6 +164,17 @@ namespace OpenMD {
 
     nGlobalMols_ = molStampIds_.size();
     molToProcMap_.resize(nGlobalMols_);
+
+    // Initialize the random number generator on each processing
+    // element using either the user-supplied seed or a default seed
+    std::uint_fast32_t seed;
+
+    if (simParams_->haveSeed())
+      seed = static_cast<std::uint_fast32_t>(simParams_->getSeed());
+    else
+      seed = std::mt19937::default_seed;
+
+    randNumGen_ = std::make_shared<Utils::RandNumGen>(seed);
   }
 
   SimInfo::~SimInfo() {

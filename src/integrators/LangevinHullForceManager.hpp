@@ -46,13 +46,17 @@
 #ifndef INTEGRATOR_LANGEVINHULLFORCEMANAGER_HPP
 #define INTEGRATOR_LANGEVINHULLFORCEMANAGER_HPP
 
+#include <map>
+#include <memory>
+#include <vector>
+
 #include "brains/ForceManager.hpp"
 #include "brains/Thermo.hpp"
 #include "brains/Velocitizer.hpp"
 #include "math/Hull.hpp"
-#include "math/SeqRandNumGen.hpp"
 #include "math/Triangle.hpp"
 #include "primitives/Molecule.hpp"
+#include "utils/RandNumGen.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -74,10 +78,11 @@ namespace OpenMD {
     virtual void postCalculation();
 
   private:
-    vector<Vector3d> genTriangleForces(int nTriangles, RealType variance);
+    std::vector<Vector3d> genTriangleForces(int nTriangles);
 
     Globals* simParams;
-    SeqRandNumGen randNumGen_;
+    Utils::RandNumGenPtr randNumGen_;
+    std::normal_distribution<RealType> forceDistribution_;
     std::unique_ptr<Velocitizer> veloMunge {nullptr};
 
     RealType dt_;
@@ -85,18 +90,16 @@ namespace OpenMD {
     RealType targetPressure_;
     RealType viscosity_;
 
-    RealType variance_;
-
     enum HullTypeEnum { hullConvex, hullAlphaShape, hullUnknown };
 
-    map<string, HullTypeEnum> stringToEnumMap_;
+    std::map<string, HullTypeEnum> stringToEnumMap_;
     HullTypeEnum hullType_;
 
     bool doThermalCoupling_;
     bool doPressureCoupling_;
 
     Hull* surfaceMesh_;
-    vector<StuntDouble*> localSites_;
+    std::vector<StuntDouble*> localSites_;
   };
 
 }  // end namespace OpenMD

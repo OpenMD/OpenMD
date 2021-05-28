@@ -46,11 +46,17 @@
 #ifndef INTEGRATOR_LDFORCEMANAGER_HPP
 #define INTEGRATOR_LDFORCEMANAGER_HPP
 
+#include <map>
+#include <memory>
+#include <random>
+#include <string>
+#include <vector>
+
 #include "brains/ForceManager.hpp"
 #include "brains/Velocitizer.hpp"
 #include "hydrodynamics/Shape.hpp"
-#include "math/SeqRandNumGen.hpp"
 #include "primitives/Molecule.hpp"
+#include "utils/RandNumGen.hpp"
 
 namespace OpenMD {
 
@@ -95,7 +101,7 @@ namespace OpenMD {
     MomentData* getMomentData(StuntDouble* sd);
 
     void genRandomForceAndTorque(Vector3d& force, Vector3d& torque,
-                                 unsigned int index, RealType variance);
+                                 unsigned int index);
 
     std::map<std::string, HydroProp*> hydroPropMap_;
     std::vector<HydroProp*> hydroProps_;
@@ -103,18 +109,20 @@ namespace OpenMD {
     std::map<std::string, MomentData*> momentsMap_;
     std::vector<MomentData*> moments_;
 
-    SeqRandNumGen randNumGen_;
-    RealType variance_;
+    // convergence parameters:
+    int maxIterNum_;
+    RealType forceTolerance_;
+    RealType dt2_;
+
+    // random number generation:
+    Utils::RandNumGenPtr randNumGen_;
+    std::normal_distribution<RealType> forceDistribution_;
+
     RealType langevinBufferRadius_;
     RealType frozenBufferRadius_;
     bool sphericalBoundaryConditions_;
     Globals* simParams;
     std::unique_ptr<Velocitizer> veloMunge {nullptr};
-    // convergence parameters:
-    int maxIterNum_;
-    RealType forceTolerance_;
-    RealType dt2_;
   };
-
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // BRAINS_FORCEMANAGER_HPP

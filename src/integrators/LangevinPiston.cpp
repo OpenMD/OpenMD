@@ -47,11 +47,13 @@
 #include <mpi.h>
 #endif
 
-#include "integrators/LangevinPiston.hpp"
+#include <cmath>
+#include <random>
 
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
 #include "integrators/IntegratorCreator.hpp"
+#include "integrators/LangevinPiston.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
 #include "utils/simError.h"
@@ -78,11 +80,22 @@ namespace OpenMD {
       gamma_ = simParams->getLangevinPistonDrag();
     }
 
-    // variance units: amu^2 Angs^4 fs^-4
-    variance_ = 2.0 * W_ * gamma_ * Constants::kB * targetTemp / dt;
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif
+      randNumGen_ = info->getRandomNumberGenerator();
 
-    // randomForce will have units amu Ang^2 fs^-2  (because sqrt(variance)):
-    genRandomForce(randomForce_, variance_);
+      // standard deviation units: amu Angs^2 fs^-2
+      RealType stdDev =
+          std::sqrt(2.0 * W_ * gamma_ * Constants::kB * targetTemp / dt);
+
+      forceDistribution_ = std::normal_distribution<RealType>(0.0, stdDev);
+#ifdef IS_MPI
+    }
+#endif
+
+    // randomForce will have units amu Ang^2 fs^-2:
+    genRandomForce(randomForce_);
   }
 
   void LangevinPiston::moveA() {
@@ -278,7 +291,7 @@ namespace OpenMD {
   void LangevinPiston::evolveEtaB() {
     prevEta = eta;
 
-    genRandomForce(randomForce_, variance_);
+    genRandomForce(randomForce_);
 
     eta = oldEta + dt2 * (instaVol * (instaPress - targetPressure) /
                               (Constants::pressureConvert * W_) -
@@ -305,7 +318,6 @@ namespace OpenMD {
     RealType scaleFactor;
 
     // This is from solving the first order equation that defines eta
-
     scaleFactor = exp(dt * eta);
 
     if ((scaleFactor > 1.1) || (scaleFactor < 0.9)) {
@@ -328,8 +340,6 @@ namespace OpenMD {
     return (fabs(prevEta - eta) <= etaTolerance);
   }
 
-  RealType LangevinPiston::calcConservedQuantity() { return 0.0; }
-
   void LangevinPiston::loadEta() {
     Mat3x3d etaMat = snap->getBarostat();
     eta            = etaMat(0, 0);
@@ -343,24 +353,18 @@ namespace OpenMD {
     snap->setBarostat(etaMat);
   }
 
-  void LangevinPiston::genRandomForce(RealType& randomForce,
-                                      RealType variance) {
+  void LangevinPiston::genRandomForce(RealType& randomForce) {
 #ifdef IS_MPI
     if (worldRank == 0) {
-#endif      
-      randomForce = randNumGen_.randNorm(0, variance);
+#endif
+      randomForce = forceDistribution_(*randNumGen_);
 #ifdef IS_MPI
     }
-#endif
-    
     // push this out to the other processors
-    
-#ifdef IS_MPI
     // Same command on all nodes:
     MPI_Bcast(&randomForce, 1, MPI_REALTYPE, 0, MPI_COMM_WORLD);
 #endif
-    
+
     return;
   }
-
 }  // namespace OpenMD

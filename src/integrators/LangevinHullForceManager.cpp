@@ -43,12 +43,16 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include <cmath>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <random>
+#include <string>
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
-
-#include <fstream>
-#include <iostream>
 
 #include "integrators/LangevinHullForceManager.hpp"
 #include "math/AlphaHull.hpp"
@@ -159,7 +163,19 @@ namespace OpenMD {
 
     dt_ = simParams->getDt();
 
-    if (doThermalCoupling_) variance_ = 2.0 * Constants::kb * targetTemp_ / dt_;
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif
+      if (doThermalCoupling_) {
+        randNumGen_ = info->getRandomNumberGenerator();
+
+        RealType stdDev = std::sqrt(2.0 * Constants::kb * targetTemp_ / dt_);
+
+        forceDistribution_ = std::normal_distribution<RealType>(0.0, stdDev);
+      }
+#ifdef IS_MPI
+    }
+#endif
 
     // Build a vector of integrable objects to determine if the are
     // surface atoms
@@ -188,18 +204,18 @@ namespace OpenMD {
   void LangevinHullForceManager::postCalculation() {
     int nTriangles, thisFacet;
     RealType thisArea;
-    vector<Triangle> sMesh;
+    std::vector<Triangle> sMesh;
     Triangle thisTriangle;
-    vector<Triangle>::iterator face;
-    vector<StuntDouble*> vertexSDs;
-    vector<StuntDouble*>::iterator vertex;
+    std::vector<Triangle>::iterator face;
+    std::vector<StuntDouble*> vertexSDs;
+    std::vector<StuntDouble*>::iterator vertex;
 
     Vector3d unitNormal, centroid, facetVel;
     Vector3d langevinForce, vertexForce;
     Vector3d extPressure, randomForce, dragForce;
 
     Mat3x3d hydroTensor, S;
-    vector<Vector3d> randNums;
+    std::vector<Vector3d> randNums;
 
     // Compute surface Mesh
     surfaceMesh_->computeHull(localSites_);
@@ -209,7 +225,7 @@ namespace OpenMD {
 
     if (doThermalCoupling_) {
       // Generate all of the necessary random forces
-      randNums = genTriangleForces(nTriangles, variance_);
+      randNums = genTriangleForces(nTriangles);
     }
 
     // Loop over the mesh faces
@@ -257,28 +273,23 @@ namespace OpenMD {
     ForceManager::postCalculation();
   }
 
-  vector<Vector3d> LangevinHullForceManager::genTriangleForces(int nTriangles,
-                                                               RealType var) {
+  std::vector<Vector3d> LangevinHullForceManager::genTriangleForces(
+      int nTriangles) {
     // zero fill the random vector before starting:
-    vector<Vector3d> gaussRand;
-    gaussRand.resize(nTriangles);
+    std::vector<Vector3d> gaussRand(nTriangles);
     std::fill(gaussRand.begin(), gaussRand.end(), V3Zero);
 
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
       for (int i = 0; i < nTriangles; i++) {
-        gaussRand[i][0] = randNumGen_.randNorm(0.0, var);
-        gaussRand[i][1] = randNumGen_.randNorm(0.0, var);
-        gaussRand[i][2] = randNumGen_.randNorm(0.0, var);
+        gaussRand[i][0] = forceDistribution_(*randNumGen_);
+        gaussRand[i][1] = forceDistribution_(*randNumGen_);
+        gaussRand[i][2] = forceDistribution_(*randNumGen_);
       }
 #ifdef IS_MPI
     }
-#endif
-
     // push these out to the other processors
-
-#ifdef IS_MPI
     // Same command on all nodes:
     MPI_Bcast(gaussRand[0].getArrayPointer(), nTriangles * 3, MPI_REALTYPE, 0,
               MPI_COMM_WORLD);

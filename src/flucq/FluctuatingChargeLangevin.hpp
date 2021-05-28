@@ -46,8 +46,10 @@
 #ifndef INTEGRATORS_FLUCTUATINGCHARGELANGEVIN_HPP
 #define INTEGRATORS_FLUCTUATINGCHARGELANGEVIN_HPP
 
+#include <random>
+
 #include "flucq/FluctuatingChargePropagator.hpp"
-#include "math/SeqRandNumGen.hpp"
+#include "utils/RandNumGen.hpp"
 
 namespace OpenMD {
 
@@ -76,19 +78,21 @@ namespace OpenMD {
     virtual void moveA();
     virtual void applyConstraints();
     virtual void moveB();
-    virtual void updateSizes();
-    virtual RealType calcConservedQuantity();
+
+    virtual void updateSizes() {}
+    virtual RealType calcConservedQuantity() { return 0.0; }
 
     int maxIterNum_;
     RealType forceTolerance_;
     RealType targetTemp_;
     RealType drag_;
-    RealType variance_;
     RealType dt2_;
     RealType dt_;
 
-    Snapshot* snap {nullptr};
-    SeqRandNumGen randNumGen_;
+    Snapshot* snap_ {nullptr};
+
+    Utils::RandNumGenPtr randNumGen_ {nullptr};
+    std::normal_distribution<RealType> forceDistribution_;
   };
 
 }  // namespace OpenMD

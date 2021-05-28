@@ -45,6 +45,8 @@
 
 #include "FluctuatingChargeLangevin.hpp"
 
+#include <cmath>
+
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
 #include "utils/simError.h"
@@ -53,7 +55,8 @@ namespace OpenMD {
 
   FluctuatingChargeLangevin::FluctuatingChargeLangevin(SimInfo* info) :
       FluctuatingChargePropagator(info), maxIterNum_(4), forceTolerance_(1e-6),
-      snap(info->getSnapshotManager()->getCurrentSnapshot()) {}
+      snap_(info->getSnapshotManager()->getCurrentSnapshot()),
+      randNumGen_(info->getRandomNumberGenerator()) {}
 
   void FluctuatingChargeLangevin::initialize() {
     FluctuatingChargePropagator::initialize();
@@ -93,7 +96,10 @@ namespace OpenMD {
       }
     }
 
-    variance_ = 2.0 * Constants::kb * targetTemp_ * drag_ / dt_;
+    RealType stdDev =
+        std::sqrt(2.0 * Constants::kb * targetTemp_ * drag_ / dt_);
+
+    forceDistribution_ = std::normal_distribution<RealType>(0.0, stdDev);
   }
 
   void FluctuatingChargeLangevin::moveA() {
@@ -139,7 +145,7 @@ namespace OpenMD {
          mol = info_->nextMolecule(i)) {
       for (atom = mol->beginFluctuatingCharge(j); atom != NULL;
            atom = mol->nextFluctuatingCharge(j)) {
-        randomForce = randNumGen_.randNorm(0, variance_);
+        randomForce = forceDistribution_(*randNumGen_);
         atom->addFlucQFrc(randomForce);
 
         // What remains contains velocity explicitly, but the velocity
@@ -203,8 +209,4 @@ namespace OpenMD {
       }
     }
   }
-
-  void FluctuatingChargeLangevin::updateSizes() {}
-
-  RealType FluctuatingChargeLangevin::calcConservedQuantity() { return 0.0; }
 }  // namespace OpenMD

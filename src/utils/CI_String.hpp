@@ -59,7 +59,6 @@ namespace OpenMD {
                          std::size_t count_) noexcept {
         while (count_-- != 0) {
           if (std::toupper(*s1_) < std::toupper(*s2_)) return -1;
-
           if (std::toupper(*s1_) > std::toupper(*s2_)) return 1;
 
           ++s1_;
@@ -85,6 +84,7 @@ namespace OpenMD {
       static bool eq(char a, char b) noexcept {
         return std::toupper(a) == std::toupper(b);
       }
+
       static bool lt(char a, char b) noexcept {
         return std::toupper(a) < std::toupper(b);
       }

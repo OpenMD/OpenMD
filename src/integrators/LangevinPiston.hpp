@@ -46,8 +46,11 @@
 #ifndef INTEGRATORS_LAGNEVINPISTON_HPP
 #define INTEGRATORS_LAGNEVINPISTON_HPP
 
+#include <memory>
+#include <random>
+
 #include "integrators/NPT.hpp"
-#include "math/SeqRandNumGen.hpp"
+#include "utils/RandNumGen.hpp"
 
 namespace OpenMD {
 
@@ -65,7 +68,6 @@ namespace OpenMD {
    * molecular dynamics simulation: The Langevin piston method",
    * J. Chem. Phys. 103, 4613 (1995); https://doi.org/10.1063/1.47064
    */
-
   class LangevinPiston : public NPT {
   public:
     LangevinPiston(SimInfo* info);
@@ -93,21 +95,22 @@ namespace OpenMD {
     virtual void calcVelScale();
 
     virtual void scaleSimBox();
-    virtual RealType calcConservedQuantity();
+    virtual RealType calcConservedQuantity() { return 0.0; }
 
     virtual void loadEta();
     virtual void saveEta();
-    void genRandomForce(RealType& randomForce, RealType variance);
+    void genRandomForce(RealType& randomForce);
 
     RealType eta;
     RealType oldEta;
     RealType prevEta;
     RealType vScale;
 
-    SeqRandNumGen randNumGen_;
+    Utils::RandNumGenPtr randNumGen_;
+    std::normal_distribution<RealType> forceDistribution_;
+
     RealType W_;
     RealType gamma_;
-    RealType variance_;
     RealType randomForce_;
   };
 }  // end namespace OpenMD

@@ -43,70 +43,39 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef MATH_RANDNUMGEN_HPP
-#define MATH_RANDNUMGEN_HPP
-
-#include <config.h>
+#ifndef OPENMD_UTILS_RANDNUMGEN_HPP
+#define OPENMD_UTILS_RANDNUMGEN_HPP
 
 #include <memory>
-#include <vector>
-
-#include "MersenneTwister.hpp"
-#include "utils/simError.h"
+#include <random>
 
 namespace OpenMD {
+  namespace Utils {
 
-  /**
-   * @class RandNumGen
-   * @brief a random number generator class
-   */
-  class RandNumGen {
-  public:
-    typedef unsigned long uint32;
+    /**
+     * Minimize the interface for the standard library's Mersenne Twister
+     *  PRNG while maintaining the @c UniformRandomBitGenerator named
+     *  requirement.
+     */
+    class RandNumGen {
+    public:
+      // Required to conform to the UniformRandomBitGenerator definition
+      using result_type = std::mt19937::result_type;
 
-    virtual ~RandNumGen() = default;
+      static constexpr result_type min() { return std::mt19937::min(); }
+      static constexpr result_type max() { return std::mt19937::max(); }
 
-    /** Returns a real number in [0,1] */
-    RealType rand() { return mtRand_->rand(); }
+    public:
+      explicit RandNumGen(result_type seed);
 
-    /** Returns a real number in [0, n] */
-    RealType rand(const RealType& n) { return mtRand_->rand(n); }
+      result_type operator()() { return engine(); }
 
-    /** Returns a real number in [0, 1) */
-    RealType randExc() { return mtRand_->randExc(); }
+    private:
+      std::mt19937 engine;
+    };
 
-    /** Returns a real number in [0, n) */
-    RealType randExc(const RealType& n) { return mtRand_->randExc(n); }
-
-    /** Returns a real number in (0, 1) */
-    RealType randDblExc() { return mtRand_->randDblExc(); }
-
-    /** Returns a real number in (0, n) */
-    RealType randDblExc(const RealType& n) { return mtRand_->randDblExc(n); }
-
-    /** Returns aninteger in [0,2^32-1]  */
-    uint32 randInt() { return mtRand_->randInt(); }
-
-    /** Returns aninteger in [0, n]  for n < 2^32 */
-    uint32 randInt(const uint32& n) { return mtRand_->randInt(n); }
-
-    /** Returns a 53-bitreal number in [0,1) (capacity of IEEE RealType
-     * precision) */
-    RealType rand53() { return mtRand_->rand53(); }
-
-    /** Access to nonuniform random number distributions */
-    RealType randNorm(const RealType mean, const RealType variance) {
-      return mtRand_->randNorm(mean, variance);
-    }
-
-    // Re-seeding functions with same behavior as initializers
-    virtual void seed(const uint32 oneSeed) = 0;
-
-    virtual void seed() = 0;
-
-  protected:
-    std::unique_ptr<MTRand> mtRand_;
-  };
+    using RandNumGenPtr = std::shared_ptr<RandNumGen>;
+  }  // namespace Utils
 }  // namespace OpenMD
 
-#endif
+#endif  // OPENMD_UTILS_RANDNUMGEN_HPP

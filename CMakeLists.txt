@@ -458,7 +458,6 @@ src/math/CubicSpline.cpp
 src/math/LegendrePolynomial.cpp
 src/math/RealSphericalHarmonic.cpp
 src/math/RMSD.cpp
-src/math/SeqRandNumGen.cpp
 src/math/SphericalHarmonic.cpp
 src/math/Wigner3jm.cpp
 src/mdParser/FilenameObserver.cpp
@@ -544,6 +543,7 @@ src/types/ZconsStamp.cpp
 src/utils/ElementsTable.cpp
 src/utils/MoLocator.cpp
 src/utils/PropertyMap.cpp
+src/utils/RandNumGen.cpp
 src/utils/StringTokenizer.cpp
 src/utils/StringUtils.cpp
 src/utils/Trim.cpp
@@ -597,7 +597,6 @@ src/io/RestWriter.cpp
 src/io/StatWriter.cpp
 src/io/ZConsWriter.cpp
 src/io/ifstrstream.cpp
-src/math/ParallelRandNumGen.cpp
 src/nonbonded/Electrostatic.cpp
 src/optimization/PotentialEnergyObjectiveFunction.cpp
 src/parallel/ForceDecomposition.cpp
@@ -611,6 +610,7 @@ src/selection/DistanceFinder.cpp
 src/selection/SelectionManager.cpp
 src/selection/SelectionSet.cpp
 src/utils/ProgressBar.cpp
+src/utils/RandNumGen.cpp
 src/utils/simError.cpp
 src/utils/OpenMDBitSet.cpp
 )

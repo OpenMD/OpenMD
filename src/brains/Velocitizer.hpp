@@ -46,11 +46,10 @@
 #ifndef BRAINS_VELOCITIZER_HPP
 #define BRAINS_VELOCITIZER_HPP
 
-#include <memory>
-
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
-#include "math/RandNumGen.hpp"
+#include "io/Globals.hpp"
+#include "utils/RandNumGen.hpp"
 
 namespace OpenMD {
 
@@ -64,7 +63,7 @@ namespace OpenMD {
   class Velocitizer {
   public:
     Velocitizer(SimInfo* info);
-    virtual ~Velocitizer();
+    virtual ~Velocitizer() = default;
 
     /** @brief Resamples velocities and angular momenta
      * Resamples velocities and angular momenta from a Maxwell-Boltzmann
@@ -100,9 +99,9 @@ namespace OpenMD {
 
   private:
     SimInfo* info_ {nullptr};
-    Globals* globals_;
     Thermo thermo_;
-    RandNumGen* randNumGen_;
+    Globals* globals_;
+    Utils::RandNumGenPtr randNumGen_ {nullptr};
   };
 }  // namespace OpenMD
 

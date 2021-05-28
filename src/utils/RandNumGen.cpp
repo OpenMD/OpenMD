@@ -43,42 +43,51 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef MATH_PARALLELRANDNUMGEN_HPP
-#define MATH_PARALLELRANDNUMGEN_HPP
+#include "utils/RandNumGen.hpp"
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
+#include <numeric>
+#include <random>
 #include <vector>
 
-#include "math/RandNumGen.hpp"
-#include "utils/simError.h"
-
 namespace OpenMD {
+  namespace Utils {
 
-  /**
-   * @class ParallelRandNumGen
-   * @brief a parallel random number generator
-   * @note use SeqRandNumGen if you want a non-parallel random number
-   * generator.
-   */
-  class ParallelRandNumGen : public RandNumGen {
-  public:
-    typedef unsigned long uint32;
+    RandNumGen::RandNumGen(result_type seed) {
+      result_type result;
+      int nProcessors {1};
 
-    ParallelRandNumGen(const uint32& oneSeed);
+#ifdef IS_MPI
+      int worldRank {};
+      MPI_Status status;
 
-    ParallelRandNumGen();
+      MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
+      MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
 
-    virtual void seed(const uint32 oneSeed);
-
-    virtual void seed();
-
-  private:
-    ParallelRandNumGen(const ParallelRandNumGen&);
-    ParallelRandNumGen& operator=(const ParallelRandNumGen&);
-
-    static int nCreatedRNG_; /**< number of random number
-                                generators created */
-    int myRank_;
-  };
-}  // namespace OpenMD
-
+      if (worldRank == 0) {
 #endif
+        std::vector<result_type> initalSequence(nProcessors);
+        std::iota(initalSequence.begin(), initalSequence.end(), seed);
+
+        // Generate the seed_seq to initialize the RNG on each processor
+        std::seed_seq seq(initalSequence.begin(), initalSequence.end());
+        std::vector<result_type> seeds(nProcessors);
+        seq.generate(seeds.begin(), seeds.end());
+
+        result = seeds[0];
+
+#ifdef IS_MPI
+        for (int index {1}; index < nProcessors; ++index)
+          MPI_Send(&seeds[index], 1, MPI_INT, index, 10, MPI_COMM_WORLD);
+      } else {
+        MPI_Recv(&result, 1, MPI_INT, 0, 10, MPI_COMM_WORLD, &status);
+      }
+#endif
+
+      engine = std::mt19937(result);
+    }
+  }  // namespace Utils
+}  // namespace OpenMD

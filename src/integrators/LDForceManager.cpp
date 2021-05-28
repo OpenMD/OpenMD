@@ -44,8 +44,10 @@
  */
 #include "integrators/LDForceManager.hpp"
 
+#include <cmath>
 #include <fstream>
 #include <iostream>
+#include <random>
 
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "hydrodynamics/Sphere.hpp"
@@ -61,9 +63,9 @@ using namespace std;
 namespace OpenMD {
 
   LDForceManager::LDForceManager(SimInfo* info) :
-      ForceManager(info), maxIterNum_(4), forceTolerance_(1e-6) {
-    simParams = info->getSimParams();
-
+      ForceManager(info), maxIterNum_(4), forceTolerance_(1e-6),
+      randNumGen_(info->getRandomNumberGenerator()),
+      simParams(info->getSimParams()) {
     // Remove in favor of std::make_unique<> when we switch to C++14 and above
     veloMunge = Utils::make_unique<Velocitizer>(info);
 
@@ -103,7 +105,6 @@ namespace OpenMD {
     }
 
     // Build the hydroProp_ map:
-
     Molecule* mol;
     StuntDouble* sd;
     SimInfo::MoleculeIterator i;
@@ -231,8 +232,10 @@ namespace OpenMD {
         }
       }
     }
-    variance_ =
-        2.0 * Constants::kb * simParams->getTargetTemp() / simParams->getDt();
+    RealType stdDev = std::sqrt(
+        2.0 * Constants::kb * simParams->getTargetTemp() / simParams->getDt());
+
+    forceDistribution_ = std::normal_distribution<RealType>(0.0, stdDev);
   }
 
   map<string, HydroProp*> LDForceManager::parseFrictionFile(
@@ -349,8 +352,7 @@ namespace OpenMD {
 
             Vector3d randomForceBody;
             Vector3d randomTorqueBody;
-            genRandomForceAndTorque(randomForceBody, randomTorqueBody, index,
-                                    variance_);
+            genRandomForceAndTorque(randomForceBody, randomTorqueBody, index);
             Vector3d randomForceLab  = Atrans * randomForceBody;
             Vector3d randomTorqueLab = Atrans * randomTorqueBody;
             sd->addFrc(randomForceLab);
@@ -453,8 +455,7 @@ namespace OpenMD {
             Vector3d systemForce;
             Vector3d randomForce;
             Vector3d randomTorque;
-            genRandomForceAndTorque(randomForce, randomTorque, index,
-                                    variance_);
+            genRandomForceAndTorque(randomForce, randomTorque, index);
             systemForce = sd->getFrc();
             sd->addFrc(randomForce);
 
@@ -516,17 +517,16 @@ namespace OpenMD {
 
   void LDForceManager::genRandomForceAndTorque(Vector3d& force,
                                                Vector3d& torque,
-                                               unsigned int index,
-                                               RealType variance) {
+                                               unsigned int index) {
     Vector<RealType, 6> Z;
     Vector<RealType, 6> generalForce;
 
-    Z[0] = randNumGen_.randNorm(0, variance);
-    Z[1] = randNumGen_.randNorm(0, variance);
-    Z[2] = randNumGen_.randNorm(0, variance);
-    Z[3] = randNumGen_.randNorm(0, variance);
-    Z[4] = randNumGen_.randNorm(0, variance);
-    Z[5] = randNumGen_.randNorm(0, variance);
+    Z[0] = forceDistribution_(*randNumGen_);
+    Z[1] = forceDistribution_(*randNumGen_);
+    Z[2] = forceDistribution_(*randNumGen_);
+    Z[3] = forceDistribution_(*randNumGen_);
+    Z[4] = forceDistribution_(*randNumGen_);
+    Z[5] = forceDistribution_(*randNumGen_);
 
     generalForce = hydroProps_[index]->getS() * Z;
 

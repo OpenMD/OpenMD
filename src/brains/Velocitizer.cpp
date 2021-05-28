@@ -45,6 +45,9 @@
 
 #include "brains/Velocitizer.hpp"
 
+#include <memory>
+#include <random>
+
 #include "brains/Thermo.hpp"
 #include "flucq/FluctuatingChargeConstraints.hpp"
 #include "math/SquareMatrix3.hpp"
@@ -52,36 +55,13 @@
 #include "primitives/StuntDouble.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/Constants.hpp"
-
-#ifndef IS_MPI
-#include "math/SeqRandNumGen.hpp"
-#else
-#include "math/ParallelRandNumGen.hpp"
-#endif
+#include "utils/RandNumGen.hpp"
 
 namespace OpenMD {
 
-  Velocitizer::Velocitizer(SimInfo* info) : info_(info), thermo_(info) {
-    globals_ = info->getSimParams();
-
-#ifndef IS_MPI
-    if (globals_->haveSeed()) {
-      int seedValue = globals_->getSeed();
-      randNumGen_   = new SeqRandNumGen(seedValue);
-    } else {
-      randNumGen_ = new SeqRandNumGen();
-    }
-#else
-    if (globals_->haveSeed()) {
-      int seedValue = globals_->getSeed();
-      randNumGen_   = new ParallelRandNumGen(seedValue);
-    } else {
-      randNumGen_ = new ParallelRandNumGen();
-    }
-#endif
-  }
-
-  Velocitizer::~Velocitizer() { delete randNumGen_; }
+  Velocitizer::Velocitizer(SimInfo* info) :
+      info_(info), thermo_(info), globals_(info->getSimParams()),
+      randNumGen_(info->getRandomNumberGenerator()) {}
 
   void Velocitizer::scale(RealType lambda) {
     SimInfo::MoleculeIterator mi;
@@ -130,6 +110,8 @@ namespace OpenMD {
     Molecule* mol;
     StuntDouble* sd;
 
+    std::normal_distribution<RealType> normalDistribution {0.0, 1.0};
+
     kebar = Constants::kB * temperature * info_->getNdfRaw() /
             (2.0 * info_->getNdf());
     for (mol = info_->beginMolecule(mi); mol != NULL;
@@ -145,7 +127,7 @@ namespace OpenMD {
         // centered on vbar
 
         for (int k = 0; k < 3; k++) {
-          v[k] = vbar * randNumGen_->randNorm(0.0, 1.0);
+          v[k] = vbar * normalDistribution(*randNumGen_);
         }
         sd->setVel(v);
 
@@ -159,13 +141,13 @@ namespace OpenMD {
 
             j[l] = 0.0;
             jbar = sqrt(2.0 * kebar * I(m, m));
-            j[m] = jbar * randNumGen_->randNorm(0.0, 1.0);
+            j[m] = jbar * normalDistribution(*randNumGen_);
             jbar = sqrt(2.0 * kebar * I(n, n));
-            j[n] = jbar * randNumGen_->randNorm(0.0, 1.0);
+            j[n] = jbar * normalDistribution(*randNumGen_);
           } else {
             for (int k = 0; k < 3; k++) {
               jbar = sqrt(2.0 * kebar * I(k, k));
-              j[k] = jbar * randNumGen_->randNorm(0.0, 1.0);
+              j[k] = jbar * normalDistribution(*randNumGen_);
             }
           }
 
@@ -193,6 +175,8 @@ namespace OpenMD {
     StuntDouble* sd;
     FluctuatingChargeParameters* fqParams;
     FluctuatingChargeConstraints* fqConstraints;
+
+    std::normal_distribution<RealType> normalDistribution {0.0, 1.0};
 
     Globals* simParams = info_->getSimParams();
     fqParams           = simParams->getFluctuatingChargeParameters();
@@ -223,7 +207,7 @@ namespace OpenMD {
 
             // picks random velocities from a gaussian distribution
             // centered on vbar
-            atom->setFlucQVel(wbar * randNumGen_->randNorm(0.0, 1.0));
+            atom->setFlucQVel(wbar * normalDistribution(*randNumGen_));
           }
         }
 
@@ -244,7 +228,7 @@ namespace OpenMD {
               wbar = sqrt(aw2);
               // picks random velocities from a gaussian distribution
               // centered on vbar
-              atom->setFlucQVel(wbar * randNumGen_->randNorm(0.0, 1.0));
+              atom->setFlucQVel(wbar * normalDistribution(*randNumGen_));
             }
           }
         }
