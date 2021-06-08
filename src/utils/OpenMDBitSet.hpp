@@ -94,12 +94,20 @@ namespace OpenMD {
     /** Returns the index of the first bit that is set to false that occurs on
      * or after the specified starting index.*/
     int nextOffBit(int fromIndex) const;
+    
+    /** Returns the index of the n^th bit that is set to false that occurs on
+     * or after the specified starting index.*/
+    int nthOffBit(int fromIndex, int n) const;
 
     int firstOnBit() const { return bitset_[0] ? 0 : nextOnBit(0); }
 
     /** Returns the index of the first bit that is set to true that occurs on or
      * after the specified starting index. */
     int nextOnBit(int fromIndex) const;
+
+    /** Returns the index of the n^th bit that is set to true that occurs on or
+     * after the specified starting index. */
+    int nthOnBit(int fromIndex, int n) const;
 
     /** Performs a logical AND of this target bit set with the argument bit set.
      */

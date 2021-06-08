@@ -110,7 +110,18 @@ namespace OpenMD {
 
     return -1;
   }
+  
+  int OpenMDBitSet::nthOffBit(int fromIndex, int n) const {
 
+    std::vector<int> indices;
+    for (int i = nextOffBit(fromIndex); i != -1; i = nextOffBit(i + 1)) {
+      indices.push_back(i);
+    }
+    
+    if (n <= indices.size()) return indices[n];
+    return -1;
+  }
+  
   int OpenMDBitSet::nextOnBit(int fromIndex) const {
     if (fromIndex <= -1) {
       // in case -1 or other negative number is passed to this function
@@ -126,6 +137,17 @@ namespace OpenMD {
     return -1;
   }
 
+  int OpenMDBitSet::nthOnBit(int fromIndex, int n) const {
+
+    std::vector<int> indices;
+    for (int i = nextOnBit(fromIndex); i != -1; i = nextOnBit(i + 1)) {
+      indices.push_back(i);
+    }
+    
+    if (n <= indices.size()) return indices[n];
+    return -1;
+  }
+  
   void OpenMDBitSet::andOperator(const OpenMDBitSet& bs) {
     assert(size() == bs.size());
 

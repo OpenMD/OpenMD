@@ -476,7 +476,17 @@ namespace OpenMD {
      * @param i iterator used to keep track of the selection
      */
     Molecule* nextUnselectedMolecule(int& i);
-
+    
+    /**
+     * Finds the n^th selected Molecule in the selection. In parallel,
+     * if this molecule is not the responsibility of the local
+     * processor, a NULL is returned.
+     * @return a pointer to the Molecule object, returns NULL if no Molecule was
+     * found.
+     * @param n which molecule in the selection set to find
+     */
+    Molecule* nthSelectedMolecule(int& n);
+    
     std::set<AtomType*> getSelectedAtomTypes();
 
     SelectionManager& operator&=(const SelectionManager& sman) {
