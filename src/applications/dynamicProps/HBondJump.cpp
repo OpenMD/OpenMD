@@ -68,6 +68,21 @@ namespace OpenMD {
     setParameterString(paramString);
 
     if (!uniqueSelections_) { seleMan2_ = seleMan1_; }
+    evaluator1_.loadScriptString(selectionScript1_);
+    // if selection is static, we only need to evaluate it once
+    if (!evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      validateSelection(seleMan1_);
+    }
+
+    if (uniqueSelections_) {
+      evaluator2_.loadScriptString(selectionScript2_);
+      if (!evaluator2_.isDynamic()) {
+        seleMan2_.setSelectionSet(evaluator2_.evaluate());
+        validateSelection(seleMan2_);
+      }
+    }
+
     if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
       // If all selections are static, we can pre-set the selections:
       common_             = seleMan1_ & seleMan2_;
