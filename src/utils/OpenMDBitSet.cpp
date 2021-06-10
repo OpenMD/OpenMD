@@ -111,7 +111,7 @@ namespace OpenMD {
     return -1;
   }
   
-  int OpenMDBitSet::nthOffBit(int fromIndex, int n) const {
+  int OpenMDBitSet::nthOffBit(unsigned long int fromIndex, unsigned long int n) const {
 
     std::vector<int> indices;
     for (int i = nextOffBit(fromIndex); i != -1; i = nextOffBit(i + 1)) {
@@ -137,7 +137,7 @@ namespace OpenMD {
     return -1;
   }
 
-  int OpenMDBitSet::nthOnBit(int fromIndex, int n) const {
+  int OpenMDBitSet::nthOnBit(unsigned long int fromIndex, unsigned long int n) const {
 
     std::vector<int> indices;
     for (int i = nextOnBit(fromIndex); i != -1; i = nextOnBit(i + 1)) {
