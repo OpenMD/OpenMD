@@ -184,5 +184,5 @@ namespace OpenMD {
     std::string wildCardAtomTypeName_;
     std::string forceFieldFileName_;
   };
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif

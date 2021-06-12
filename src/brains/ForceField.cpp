@@ -787,5 +787,4 @@ namespace OpenMD {
     }
     return ffStream;
   }
-
-}  // end namespace OpenMD
+}  // namespace OpenMD

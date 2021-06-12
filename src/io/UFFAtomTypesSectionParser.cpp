@@ -157,4 +157,4 @@ namespace OpenMD {
     //     // ka now represents the xij in equation 20 -- the expected vdw
     //     distance kaSquared = (Ra * Rb); ka = sqrt(kaSquared);
   }
-}  // end namespace OpenMD
+}  // namespace OpenMD

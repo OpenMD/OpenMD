@@ -103,5 +103,5 @@ namespace OpenMD {
     RealType k1_;
     RealType k0_;
   };
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_QUARTICBENDTYPE_HPP

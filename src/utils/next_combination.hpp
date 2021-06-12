@@ -154,5 +154,5 @@ namespace OpenMD {
     }
   }  // end next_combination
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // UTILS_NEXT_COMBINATION_HPP

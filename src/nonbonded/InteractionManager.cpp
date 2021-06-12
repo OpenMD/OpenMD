@@ -635,4 +635,4 @@ namespace OpenMD {
     }
     return cutoff;
   }
-}  // end namespace OpenMD
+}  // namespace OpenMD

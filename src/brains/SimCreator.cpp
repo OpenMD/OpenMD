@@ -548,75 +548,75 @@ namespace OpenMD {
       int which_proc {0};
 
       for (int i = 0; i < nGlobalMols; i++) {
-        
         // get the molecule stamp first
         int stampId                  = info->getMoleculeStampId(i);
         MoleculeStamp* moleculeStamp = info->getMoleculeStamp(stampId);
-        int add_atoms = moleculeStamp->getNAtoms();
+        int add_atoms                = moleculeStamp->getNAtoms();
 
-        if ( nProcessors > 1 ) {
+        if (nProcessors > 1) {
           int done  = 0;
           int loops = 0;
-          
+
           while (!done) {
             loops++;
-            
+
             // Pick a processor at random
             which_proc = processorDistribution(*myRandom);
-                        
+
             // How many atoms does this processor have so far?
             int old_atoms = atomsPerProc[which_proc];
             int new_atoms = old_atoms + add_atoms;
-            
+
             // If we've been through this loop too many times, we need
             // to just give up and assign the molecule to this processor
             // and be done with it.
-            
+
             if (loops > 100) {
-              sprintf(painCave.errMsg,
-                      "There have been 100 attempts to assign molecule %d to an\n"
-                      "\tunderworked processor, but there's no good place to\n"
-                      "\tleave it. OpenMD is assigning it at random to processor "
-                      "%d.\n",
-                      i, which_proc);
-              
+              sprintf(
+                  painCave.errMsg,
+                  "There have been 100 attempts to assign molecule %d to an\n"
+                  "\tunderworked processor, but there's no good place to\n"
+                  "\tleave it. OpenMD is assigning it at random to processor "
+                  "%d.\n",
+                  i, which_proc);
+
               painCave.isFatal  = 0;
               painCave.severity = OPENMD_INFO;
               simError();
-              
+
               molToProcMap[i] = which_proc;
               atomsPerProc[which_proc] += add_atoms;
-              
+
               done = 1;
               continue;
             }
 
             // If we can add this molecule to this processor without sending
             // it above nTarget, then go ahead and do it:
-            
+
             if (new_atoms <= nTarget) {
               molToProcMap[i] = which_proc;
               atomsPerProc[which_proc] += add_atoms;
-              
+
               done = 1;
               continue;
             }
-            
+
             // The only situation left is when new_atoms > nTarget.  We
             // want to accept this with some probability that dies off the
             // farther we are from nTarget
-            
+
             // roughly:  x = new_atoms - nTarget
             //           Pacc(x) = exp(- a * x)
             // where a = penalty / (average atoms per molecule)
-            
+
             RealType x = (RealType)(new_atoms - nTarget);
             RealType y = yDistribution(*myRandom);
-            
+
             if (y < exp(-a * x)) {
               molToProcMap[i] = which_proc;
               atomsPerProc[which_proc] += add_atoms;
-              
+
               done = 1;
               continue;
             } else {
@@ -624,11 +624,11 @@ namespace OpenMD {
             }
           }
         } else {
-          which_proc = 0;
+          which_proc      = 0;
           molToProcMap[i] = which_proc;
           atomsPerProc[which_proc] += add_atoms;
         }
-      }   
+      }
 
       // Spray out this nonsense to all other processors:
       MPI_Bcast(&molToProcMap[0], nGlobalMols, MPI_INT, 0, MPI_COMM_WORLD);

@@ -66,6 +66,6 @@ namespace OpenMD {
     virtual void calcForce(RealType& angle, bool doParticlePot);
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 
 #endif  // PRIMITIVES_GHOSTBEND_HPP

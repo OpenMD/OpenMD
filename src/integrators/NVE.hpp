@@ -67,6 +67,6 @@ namespace OpenMD {
     virtual RealType calcConservedQuantity();
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 
 #endif

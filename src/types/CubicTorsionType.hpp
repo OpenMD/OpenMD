@@ -95,5 +95,5 @@ namespace OpenMD {
     RealType k0_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_CUBICTORSIONTYPE_HPP

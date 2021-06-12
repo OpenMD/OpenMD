@@ -164,4 +164,4 @@ namespace OpenMD {
 
   RealType LangevinDynamics::calcConservedQuantity() { return 0.0; }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

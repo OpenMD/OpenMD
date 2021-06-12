@@ -1652,4 +1652,4 @@ namespace OpenMD {
     return atom1;
 #endif
   }
-}  // end namespace OpenMD
+}  // namespace OpenMD

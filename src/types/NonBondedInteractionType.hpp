@@ -159,5 +159,5 @@ namespace OpenMD {
     PropertyMap properties_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_NONBONDEDINTERACTIONTYPE_HPP

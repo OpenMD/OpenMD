@@ -102,5 +102,5 @@ namespace OpenMD {
     std::vector<StuntDouble*> localSites_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // LANGEVINHULL_FORCEMANAGER

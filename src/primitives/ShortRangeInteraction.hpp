@@ -185,5 +185,5 @@ namespace OpenMD {
     PropertyMap properties_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // PRIMITIVES_STUNTDOUBLE_HPP

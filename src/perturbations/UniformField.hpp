@@ -98,5 +98,5 @@ namespace OpenMD {
     Vector3d EF;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif

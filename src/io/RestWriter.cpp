@@ -292,4 +292,4 @@ namespace OpenMD {
 
   void RestWriter::writeClosing(std::ostream& os) { os.flush(); }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

@@ -74,5 +74,5 @@ namespace OpenMD {
     RealType r0; /**equilibrium bond length< */
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_BONDTYPE_HPP

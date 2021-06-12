@@ -253,5 +253,5 @@ namespace OpenMD {
     virtual InteractionFamily getFamily() { return HYDROGENBONDING_FAMILY; }
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif

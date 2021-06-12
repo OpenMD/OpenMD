@@ -82,5 +82,5 @@ namespace OpenMD {
     HarmonicBondType hbt_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_UREYBRADLEYBENDTYPE_HPP

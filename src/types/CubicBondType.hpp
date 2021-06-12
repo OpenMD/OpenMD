@@ -98,5 +98,5 @@ namespace OpenMD {
     RealType k0_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_CUBICBONDTYPE_HPP

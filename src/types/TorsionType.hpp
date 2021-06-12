@@ -66,5 +66,5 @@ namespace OpenMD {
                            RealType& dVdCosPhi) = 0;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_TORSIONTYPE_HPP

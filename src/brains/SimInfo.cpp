@@ -1049,5 +1049,4 @@ namespace OpenMD {
     nGlobalConstraints_     = nConstraints_;
 #endif
   }
-
-}  // end namespace OpenMD
+}  // namespace OpenMD

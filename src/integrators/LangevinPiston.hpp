@@ -113,6 +113,6 @@ namespace OpenMD {
     RealType gamma_;
     RealType randomForce_;
   };
-}  // end namespace OpenMD
+}  // namespace OpenMD
 
 #endif  // INTEGRATORS_LANGEVINPISTON_HPP

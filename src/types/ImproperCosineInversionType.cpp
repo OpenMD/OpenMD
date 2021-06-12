@@ -77,4 +77,4 @@ namespace OpenMD {
       this->setPolynomial(finalPolynomial);
     }
   }
-}  // end namespace OpenMD
+}  // namespace OpenMD

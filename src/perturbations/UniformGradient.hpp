@@ -139,5 +139,5 @@ namespace OpenMD {
     RealType g_, cpsi_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif

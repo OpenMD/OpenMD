@@ -85,6 +85,6 @@ namespace OpenMD {
     RealType vScale;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 
 #endif  // INTEGRATORS_NPTI_HPP

@@ -88,5 +88,5 @@ namespace OpenMD {
     return os;
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_OPLSTORSIONTYPE_HPP

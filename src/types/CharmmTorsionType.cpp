@@ -87,4 +87,4 @@ namespace OpenMD {
     myfile << "The Polynomial contains below terms:" << std::endl;*/
     }
   }
-}  // end namespace OpenMD
+}  // namespace OpenMD

@@ -95,5 +95,5 @@ namespace OpenMD {
     Vector3d MF;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif

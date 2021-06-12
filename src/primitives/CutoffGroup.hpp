@@ -155,5 +155,5 @@ namespace OpenMD {
     DataStoragePointer storage_;
     SnapshotManager* snapshotMan_;
   };
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // PRIMITIVES_CUTOFFGROUP_HPP

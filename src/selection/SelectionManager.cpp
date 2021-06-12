@@ -68,7 +68,7 @@ namespace OpenMD {
     molecules_.resize(nObjects_[MOLECULE]);
 
     ss_.resize(nObjects_);
-    
+
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;
     Molecule::RigidBodyIterator rbIter;
@@ -536,7 +536,6 @@ namespace OpenMD {
     return i == -1 ? NULL : molecules_[i];
 #endif
   }
-  
 
   /**
    * getSelectedAtomTypes

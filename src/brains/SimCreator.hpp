@@ -129,5 +129,5 @@ namespace OpenMD {
         mdFileName_;  // save the meta-data file name which may be used later
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // BRAINS_SIMCREATOR_HPP

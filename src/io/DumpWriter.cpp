@@ -833,4 +833,4 @@ namespace OpenMD {
     os.flush();
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

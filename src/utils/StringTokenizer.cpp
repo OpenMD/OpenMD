@@ -246,4 +246,4 @@ namespace OpenMD {
     return result;
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

@@ -116,5 +116,5 @@ namespace OpenMD {
     BondType* bondType_; /**< bond type */
     std::string name_;
   };
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // PRIMITIVES_BOND_HPP

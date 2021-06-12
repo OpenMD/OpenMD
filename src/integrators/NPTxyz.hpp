@@ -67,6 +67,6 @@ namespace OpenMD {
     virtual void loadEta();
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 
 #endif  // INTEGRATORS_NPTXYZ_HPP

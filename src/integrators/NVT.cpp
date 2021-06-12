@@ -269,4 +269,4 @@ namespace OpenMD {
     return conservedQuantity;
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
