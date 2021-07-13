@@ -97,12 +97,12 @@ def findWaters():
                     dz = opos[2] - hpos[2]
                     dist = math.sqrt(dx*dx + dy*dy + dz*dz)
                     if (dist < OHbond):
-                        if (H.len() >= 2):
+                        if (len(H) >= 2):
                             print("oxygen %d had too many hydrogens" % (i))
                         H.append(j)
-            if (H.len() != 2):
-                print("oxygen %d had %d hydrogens, skipping" % (i, H.len()))
-            if (H.len() == 2):
+            if (len(H) != 2):
+                print("oxygen %d had %d hydrogens, skipping" % (i, len(H)))
+            if (len(H) == 2):
                 Xcom = Omass * opos[0] + Hmass*(positions[H[0]][0] + positions[H[1]][0])
                 Ycom = Omass * opos[1] + Hmass*(positions[H[0]][1] + positions[H[1]][1])
                 Zcom = Omass * opos[2] + Hmass*(positions[H[0]][2] + positions[H[1]][2])
