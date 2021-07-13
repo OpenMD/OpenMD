@@ -41,7 +41,6 @@ WaterQuats = []
 indices = []
 Hmat = []
 BoxInv = []
-H = []
 Eliminate = []
 
 #Hmat = zeros([3,3],Float)
@@ -77,22 +76,17 @@ def findWaters():
     print("finding water molecules")
     # simpler since we only have to find H atoms within a few
     # angstroms of each water:
-
+    H = []
     hCovRad = 0.32
     oCovRad = 0.73
     covTol = 0.45
     OHbond = hCovRad + oCovRad + covTol
     Hmass = 1.0079
     Omass = 15.9994
-    # initialize H array to an error condition
-    H.append(-1)
-    H.append(-1)
     
     for i in range(len(indices)):
         if (atypes[i] == "O"):
-            nH = 0
-            H[0] = -1
-            H[1] = -1
+            H.clear()
             COM = [0.0, 0.0, 0.0]
             opos = positions[i]
             for j in range(len(indices)):
@@ -103,14 +97,12 @@ def findWaters():
                     dz = opos[2] - hpos[2]
                     dist = math.sqrt(dx*dx + dy*dy + dz*dz)
                     if (dist < OHbond):
-                        if (nH >= 2):
+                        if (H.len() >= 2):
                             print("oxygen %d had too many hydrogens" % (i))
-                            sys.exit(1)
-                        H[nH] = j
-                        nH = nH + 1
-            if (nH != 2):
-                print("oxygen %d had %d hydrogens, skipping" % (i, nH))
-            if (nH == 2):
+                        H.append(j)
+            if (H.len() != 2):
+                print("oxygen %d had %d hydrogens, skipping" % (i, H.len()))
+            if (H.len() == 2):
                 Xcom = Omass * opos[0] + Hmass*(positions[H[0]][0] + positions[H[1]][0])
                 Ycom = Omass * opos[1] + Hmass*(positions[H[0]][1] + positions[H[1]][1])
                 Zcom = Omass * opos[2] + Hmass*(positions[H[0]][2] + positions[H[1]][2])
