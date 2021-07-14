@@ -52,7 +52,7 @@
 namespace OpenMD {
 
   ThermoIntegrationForceManager::ThermoIntegrationForceManager(SimInfo* info) :
-      RestraintForceManager(info) {
+    RestraintForceManager(info) {
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
     simParam      = info_->getSimParams();
 
@@ -103,8 +103,6 @@ namespace OpenMD {
     // perform the standard calcForces first
     ForceManager::calcForces();
 
-    curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-
     // now scale forces and torques of all the sds
 
     for (mol = info_->beginMolecule(mi); mol != NULL;
@@ -123,13 +121,15 @@ namespace OpenMD {
       }
     }
 
-    // set rawPotential to be the unmodulated potential
-    lrPot_ = curSnapshot->getLongRangePotential();
-    curSnapshot->setRawPotential(lrPot_);
+    curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
 
-    // modulate the potential and update the snapshot
-    lrPot_ *= factor_;
-    curSnapshot->setLongRangePotential(lrPot_);
+    // set rawPotential to be the unscaled potential energy
+    RealType rawPot = curSnapshot->getPotentialEnergy();
+    curSnapshot->setRawPotential(rawPot);
+
+    // scale the potential and update the snapshot
+    rawPot *= factor_;
+    curSnapshot->setPotentialEnergy(rawPot);
 
     // scale the virial tensor
     tempTau = curSnapshot->getVirialTensor();
@@ -137,29 +137,24 @@ namespace OpenMD {
     curSnapshot->setVirialTensor(tempTau);
 
     // now, on to the applied restraining potentials (if needed):
-    RealType restPot_local = 0.0;
-    RealType vHarm_local   = 0.0;
+    RealType scaledRestPot(0.0);
+    RealType restPot(0.0);
 
     if (simParam->getUseRestraints()) {
       // do restraints from RestraintForceManager:
-      restPot_local = doRestraints(1.0 - factor_);
-      vHarm_local   = getUnscaledPotential();
+      scaledRestPot = doRestraints(1.0 - factor_);
+      restPot   = getUnscaledPotential();
     }
 
 #ifdef IS_MPI
-    RealType restPot;
-    MPI_Allreduce(&restPot_local, &restPot, 1, MPI_REALTYPE, MPI_SUM,
+    MPI_Allreduce(MPI_IN_PLACE, &scaledRestPot, 1, MPI_REALTYPE, MPI_SUM,
+		  MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &restPot, 1, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
-    MPI_Allreduce(&vHarm_local, &vHarm_, 1, MPI_REALTYPE, MPI_SUM,
-                  MPI_COMM_WORLD);
-    lrPot_ += restPot;
-#else
-    lrPot_ += restPot_local;
-    vHarm_ = vHarm_local;
 #endif
 
-    // give the final values to stats
-    curSnapshot->setLongRangePotential(lrPot_);
-    curSnapshot->setRestraintPotential(vHarm_);
+    // give the final values to the snapshot
+    curSnapshot->setPotentialEnergy(rawPot + scaledRestPot);
+    curSnapshot->setRestraintPotential(restPot);
   }
 }  // namespace OpenMD

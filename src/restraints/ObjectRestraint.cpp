@@ -57,7 +57,7 @@ namespace OpenMD {
       Vector3d frc = -kDisp_ * del;
       RealType p   = 0.5 * kDisp_ * del.lengthSquare();
 
-      pot_ = p;
+      pot_ += p;
       force_ += frc * scaleFactor_;
       if (printRest_) restInfo_[rtDisplacement] = std::make_pair(r, p);
     }
@@ -101,6 +101,7 @@ namespace OpenMD {
         p                 = 0.5 * kTwist_ * dTwist * dTwist;
         pot_ += p;
         tBody -= dVdtwist * V3Z;
+
         if (printRest_) restInfo_[rtTwist] = std::make_pair(twistAngle, p);
       }
 
@@ -128,6 +129,7 @@ namespace OpenMD {
 
       Vector3d tLab = A.transpose() * tBody;
       torque_       = tLab * scaleFactor_;
+
     }
   }
 }  // namespace OpenMD

@@ -64,8 +64,6 @@ namespace OpenMD {
     RealType tIntLambda_;
     RealType tIntK_;
     RealType factor_;
-    RealType lrPot_;
-    RealType vHarm_;
   };
 
 }  // namespace OpenMD
