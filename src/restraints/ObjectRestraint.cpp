@@ -85,10 +85,9 @@ namespace OpenMD {
       Quat4d quat     = temp.toQuaternion();
 
       RealType twistAngle;
-      Vector3d swingAxis;
       RealType swingX, swingY;
 
-      quat.toSwingTwist(swingX, swingY, twistAngle);
+      quat.toTwistSwing(twistAngle, swingX, swingY);
 
       RealType p;
       Vector3d tTwist, tSwing;

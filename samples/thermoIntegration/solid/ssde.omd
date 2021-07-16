@@ -11,12 +11,12 @@ component{
 restraint{
   restraintType = "object";
   objectSelection = "select SSD_E";
-  displacementSpringConstant = 4.3;
-  twistSpringConstant = 750;   
+  displacementSpringConstant = 4.29;
+  twistSpringConstant = 17.75;   
   restrainedTwistAngle = 0.0;
-  swingXSpringConstant = 700;
+  swingXSpringConstant = 13.88;
   restrainedSwingXAngle = 0.0;
-  swingYSpringConstant = 700;
+  swingYSpringConstant = 13.88;
   restrainedSwingYAngle = 0.0;
   print = "false";
 }
@@ -24,7 +24,7 @@ restraint{
 useRestraints = "true";
 Restraint_file = "idealCrystal.in";
 
-ensemble = NVT;
+ensemble = NVE;
 forceField = "DUFF";
 electrostaticSummationMethod = "shifted_force";
 dielectric = 80.0;
@@ -36,19 +36,19 @@ targetPressure = 1.0;
 tauThermostat = 1e3;
 tauBarostat = 1e4;
 
-dt = 2.0;
+dt = 1.0;
 runTime = 1e3;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 
 useThermodynamicIntegration = "true";
-thermodynamicIntegrationLambda = 0.0;
+thermodynamicIntegrationLambda = 0.5;
 thermodynamicIntegrationK = 1.0;
 
 //tempSet = "true";
 //thermalTime = 10;
 sampleTime = 100;
-statusTime = 10;
+statusTime = 1;
   </MetaData>
   <Snapshot>
     <FrameData>
