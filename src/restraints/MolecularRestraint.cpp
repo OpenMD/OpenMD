@@ -147,13 +147,12 @@ namespace OpenMD {
       RotMat3x3d Atrans = v * w_tr.transpose();
       RotMat3x3d A      = Atrans.transpose();
 
-      RealType twistAngle;
-      Vector3d swingAxis;
-
       Quat4d quat = A.toQuaternion();
 
+      RealType twistAngle;
       RealType swingX, swingY;
-      quat.toSwingTwist(swingX, swingY, twistAngle);
+
+      quat.toTwistSwing(twistAngle, swingX, swingY);
 
       RealType dVdtwist, dVdswingX, dVdswingY;
       RealType dTwist, dSwingX, dSwingY;
