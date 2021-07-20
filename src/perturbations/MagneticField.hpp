@@ -50,8 +50,8 @@
 #ifndef PERTURBATIONS_MAGNETICFIELD_HPP
 #define PERTURBATIONS_MAGNETICFIELD_HPP
 
+#include "brains/ForceModifier.hpp"
 #include "brains/SimInfo.hpp"
-#include "perturbations/Perturbation.hpp"
 
 namespace OpenMD {
 
@@ -79,21 +79,20 @@ namespace OpenMD {
    (\mathbf{\omega} \times \mathbf{D} ) \times \mathbf{B} \f$
 
   */
-  class MagneticField : public Perturbation {
+  class MagneticField : public ForceModifier {
   public:
     MagneticField(SimInfo* info);
 
-  protected:
-    virtual void initialize();
-    virtual void applyPerturbation();
-
   private:
+    void modifyForces() override;
+    void initialize();
+
     bool initialized;
     bool doMagneticField;
+
     Globals* simParams;
-    SimInfo* info_ {nullptr};
     Vector3d MF;
   };
-
 }  // namespace OpenMD
+
 #endif

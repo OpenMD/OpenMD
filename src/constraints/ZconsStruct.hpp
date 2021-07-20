@@ -45,7 +45,9 @@
 
 #ifndef CONSTRAINTS_ZCONSSTRUCT_HPP
 #define CONSTRAINTS_ZCONSSTRUCT_HPP
+
 #include "primitives/Molecule.hpp"
+
 namespace OpenMD {
 
   struct ZconstraintParam {
@@ -69,7 +71,6 @@ namespace OpenMD {
     RealType zpos;
     RealType zconsPos;
   };
-
 }  // namespace OpenMD
 
 #endif

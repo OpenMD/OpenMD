@@ -43,8 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef INTEGRATOR_LDFORCEMANAGER_HPP
-#define INTEGRATOR_LDFORCEMANAGER_HPP
+#ifndef INTEGRATOR_LDFORCEMODIFIER_HPP
+#define INTEGRATOR_LDFORCEMODIFIER_HPP
 
 #include <map>
 #include <memory>
@@ -52,7 +52,7 @@
 #include <string>
 #include <vector>
 
-#include "brains/ForceManager.hpp"
+#include "brains/ForceModifier.hpp"
 #include "brains/Velocitizer.hpp"
 #include "hydrodynamics/Shape.hpp"
 #include "primitives/Molecule.hpp"
@@ -72,34 +72,24 @@ namespace OpenMD {
   };
 
   /**
-   * @class LDForceManager
-   * Force manager for Lagevin Dynamics applying friction and random
+   * @class LDForceModifier
+   * Force modifier for Lagevin Dynamics applying friction and random
    * forces as well as torques.
    */
-  class LDForceManager : public ForceManager {
+  class LDForceModifier : public ForceModifier {
   public:
-    LDForceManager(SimInfo* info);
+    LDForceModifier(SimInfo* info);
 
+    void modifyForces() override;
     int getMaxIterationNumber() { return maxIterNum_; }
-
     void setMaxIterationNumber(int maxIter) { maxIterNum_ = maxIter; }
-
     RealType getForceTolerance() { return forceTolerance_; }
-
     void setForceTolerance(RealType tol) { forceTolerance_ = tol; }
-
-    RealType getDt2() { return dt2_; }
-
-    void setDt2(RealType dt2) { dt2_ = dt2; }
-
-  protected:
-    virtual void postCalculation();
 
   private:
     std::map<std::string, HydroProp*> parseFrictionFile(
         const std::string& filename);
     MomentData* getMomentData(StuntDouble* sd);
-
     void genRandomForceAndTorque(Vector3d& force, Vector3d& torque,
                                  unsigned int index);
 
@@ -121,8 +111,8 @@ namespace OpenMD {
     RealType langevinBufferRadius_;
     RealType frozenBufferRadius_;
     bool sphericalBoundaryConditions_;
-    Globals* simParams;
-    std::unique_ptr<Velocitizer> veloMunge {nullptr};
+    Globals* simParams_;
+    std::unique_ptr<Velocitizer> veloMunge_ {nullptr};
   };
 }  // namespace OpenMD
-#endif  // BRAINS_FORCEMANAGER_HPP
+#endif  // INTEGRATOR_LDFORCEMODIFIER_HPP

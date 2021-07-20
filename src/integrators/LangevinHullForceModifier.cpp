@@ -43,6 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "integrators/LangevinHullForceModifier.hpp"
+
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -54,7 +56,7 @@
 #include <mpi.h>
 #endif
 
-#include "integrators/LangevinHullForceManager.hpp"
+#include "brains/ForceModifier.hpp"
 #include "math/AlphaHull.hpp"
 #include "math/CholeskyDecomposition.hpp"
 #include "math/ConvexHull.hpp"
@@ -63,11 +65,12 @@
 #include "utils/MemoryUtils.hpp"
 
 using namespace std;
+
 namespace OpenMD {
 
-  LangevinHullForceManager::LangevinHullForceManager(SimInfo* info) :
-      ForceManager(info) {
-    simParams = info->getSimParams();
+  LangevinHullForceModifier::LangevinHullForceModifier(SimInfo* info) :
+      ForceModifier {info} {
+    simParams_ = info->getSimParams();
 
     // Remove in favor of std::make_unique<> when we switch to C++14 and above
     veloMunge = Utils::make_unique<Velocitizer>(info);
@@ -78,12 +81,12 @@ namespace OpenMD {
     stringToEnumMap_["AlphaShape"] = hullAlphaShape;
     stringToEnumMap_["Unknown"]    = hullUnknown;
 
-    const std::string ht = simParams->getHULL_Method();
+    const std::string ht = simParams_->getHULL_Method();
 
     std::map<std::string, HullTypeEnum>::iterator iter;
     iter      = stringToEnumMap_.find(ht);
     hullType_ = (iter == stringToEnumMap_.end()) ?
-                    LangevinHullForceManager::hullUnknown :
+                    LangevinHullForceModifier::hullUnknown :
                     iter->second;
 
     switch (hullType_) {
@@ -91,7 +94,7 @@ namespace OpenMD {
       surfaceMesh_ = new ConvexHull();
       break;
     case hullAlphaShape:
-      surfaceMesh_ = new AlphaHull(simParams->getAlpha());
+      surfaceMesh_ = new AlphaHull(simParams_->getAlpha());
       break;
     case hullUnknown:
     default:
@@ -107,7 +110,7 @@ namespace OpenMD {
 
     /* Check that the simulation has target pressure and target
      temperature set */
-    if (!simParams->haveTargetTemp()) {
+    if (!simParams_->haveTargetTemp()) {
       sprintf(painCave.errMsg,
               "LangevinHullForceManager: no targetTemp (K) was set.\n"
               "\tOpenMD is turning off the thermal coupling to the bath.\n");
@@ -116,9 +119,9 @@ namespace OpenMD {
       simError();
       doThermalCoupling_ = false;
     } else {
-      targetTemp_ = simParams->getTargetTemp();
+      targetTemp_ = simParams_->getTargetTemp();
 
-      if (!simParams->haveViscosity()) {
+      if (!simParams_->haveViscosity()) {
         sprintf(painCave.errMsg,
                 "LangevinHullForceManager: no viscosity was set.\n"
                 "\tOpenMD is turning off the thermal coupling to the bath.\n");
@@ -127,7 +130,7 @@ namespace OpenMD {
         simError();
         doThermalCoupling_ = false;
       } else {
-        viscosity_ = simParams->getViscosity();
+        viscosity_ = simParams_->getViscosity();
         if (fabs(viscosity_) < 1e-6) {
           sprintf(painCave.errMsg,
                   "LangevinHullDynamics: The bath viscosity was set lower\n"
@@ -140,7 +143,7 @@ namespace OpenMD {
         }
       }
     }
-    if (!simParams->haveTargetPressure()) {
+    if (!simParams_->haveTargetPressure()) {
       sprintf(painCave.errMsg,
               "LangevinHullForceManager: no targetPressure (atm) was set.\n"
               "\tOpenMD is turning off the pressure coupling to the bath.\n");
@@ -151,9 +154,9 @@ namespace OpenMD {
     } else {
       // Convert pressure from atm -> amu/(fs^2*Ang)
       targetPressure_ =
-          simParams->getTargetPressure() / Constants::pressureConvert;
+          simParams_->getTargetPressure() / Constants::pressureConvert;
     }
-    if (simParams->getUsePeriodicBoundaryConditions()) {
+    if (simParams_->getUsePeriodicBoundaryConditions()) {
       sprintf(painCave.errMsg,
               "LangevinHallForceManager: You can't use the Langevin Hull\n"
               "\tintegrator with periodic boundary conditions turned on!\n");
@@ -161,7 +164,7 @@ namespace OpenMD {
       simError();
     }
 
-    dt_ = simParams->getDt();
+    dt_ = simParams_->getDt();
 
 #ifdef IS_MPI
     if (worldRank == 0) {
@@ -199,9 +202,11 @@ namespace OpenMD {
     surfaceMesh_->computeHull(localSites_);
   }
 
-  LangevinHullForceManager::~LangevinHullForceManager() { delete surfaceMesh_; }
+  LangevinHullForceModifier::~LangevinHullForceModifier() {
+    delete surfaceMesh_;
+  }
 
-  void LangevinHullForceManager::postCalculation() {
+  void LangevinHullForceModifier::modifyForces() {
     int nTriangles, thisFacet;
     RealType thisArea;
     std::vector<Triangle> sMesh;
@@ -270,10 +275,9 @@ namespace OpenMD {
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     currSnapshot->setVolume(surfaceMesh_->getVolume());
     currSnapshot->setHullVolume(surfaceMesh_->getVolume());
-    ForceManager::postCalculation();
   }
 
-  std::vector<Vector3d> LangevinHullForceManager::genTriangleForces(
+  std::vector<Vector3d> LangevinHullForceModifier::genTriangleForces(
       int nTriangles) {
     // zero fill the random vector before starting:
     std::vector<Vector3d> gaussRand(nTriangles);

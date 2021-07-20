@@ -43,6 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "rnemd/Swap.hpp"
+
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -67,7 +69,6 @@
 #include "primitives/StuntDouble.hpp"
 #include "rnemd/RNEMD.hpp"
 #include "rnemd/RNEMDParameters.hpp"
-#include "rnemd/Swap.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/Accumulator.hpp"
@@ -505,7 +506,7 @@ namespace OpenMD {
         }
       } else {
         sprintf(painCave.errMsg,
-                "RNEMD::doSwap exchange NOT performed because selected object\n"
+                "Swap exchange NOT performed because selected object\n"
                 "\twas not present in at least one of the two slabs.\n");
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;

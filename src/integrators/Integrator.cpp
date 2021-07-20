@@ -112,10 +112,6 @@ namespace OpenMD {
       resetTime = simParams->getResetTime();
     }
 
-    // Create a default ForceManager: If the subclass wants to use
-    // a different ForceManager, use setForceManager
-    forceMan_ = new ForceManager(info);
-
     // check for the temperature set flag (velocity scaling)
     needVelocityScaling = false;
     if (simParams->haveTempSet()) {
@@ -160,6 +156,8 @@ namespace OpenMD {
       }
     }
 
+    if (forceMan_ == NULL) forceMan_ = new ForceManager(info);
+
     rotAlgo_ = new DLM();
     rattle_  = new Rattle(info);
 
@@ -184,6 +182,7 @@ namespace OpenMD {
         painCave.isFatal = 1;
       }
     }
+
     flucQ_->setForceManager(forceMan_);
   }
 
@@ -200,13 +199,6 @@ namespace OpenMD {
   void Integrator::updateSizes() {
     doUpdateSizes();
     flucQ_->updateSizes();
-  }
-
-  void Integrator::setForceManager(ForceManager* forceMan) {
-    if (forceMan_ != forceMan && forceMan_ != NULL) { delete forceMan_; }
-    forceMan_ = forceMan;
-    // forward this on:
-    if (flucQ_ != NULL) { flucQ_->setForceManager(forceMan_); }
   }
 
   void Integrator::setVelocitizer(std::unique_ptr<Velocitizer> velocitizer) {

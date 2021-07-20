@@ -43,30 +43,77 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef RESTRAINTS_THERMOINTEGRATIONFORCEMANAGER_HPP
-#define RESTRAINTS_THERMOINTEGRATIONFORCEMANAGER_HPP
+#ifndef CONSTRAINTS_ZCONSTRAINTFORCEMODIFIER_HPP
+#define CONSTRAINTS_ZCONSTRAINTFORCEMODIFIER_HPP
 
-#include "restraints/RestraintForceManager.hpp"
+#include <list>
+#include <string>
+#include <vector>
+
+#include "brains/ForceModifier.hpp"
+#include "constraints/ZconsStruct.hpp"
+#include "io/ZConsWriter.hpp"
 
 namespace OpenMD {
 
-  class ThermoIntegrationForceManager : public RestraintForceManager {
+  class ZConstraintForceModifier : public ForceModifier {
   public:
-    ThermoIntegrationForceManager(SimInfo* info);
-    ~ThermoIntegrationForceManager();
+    ZConstraintForceModifier(SimInfo* info);
+    ~ZConstraintForceModifier();
 
-    virtual void calcForces();
+    void modifyForces() override;
+
+    RealType getZConsTime() { return zconsTime_; }
+    std::string getZConsOutput() { return zconsOutput_; }
 
   private:
-    Globals* simParam;
+    RealType getZTargetPos(int index);
+    void update();
+    void calcTotalMassMovingZMols();
+    bool isZMol(Molecule* mol);
+    void updateZPos();
+    bool checkZConsState();
+    void zeroVelocity();
+    bool haveFixedZMols();
+    void doZconstraintForce();
+    RealType getZFOfFixedZMols(Molecule* mol, StuntDouble* sd,
+                               RealType totalForce);
+    RealType getZFOfMovingMols(Molecule* mol, RealType totalForce);
+    bool haveMovingZMols();
+    void doHarmonic();
+    RealType getHFOfFixedZMols(Molecule* mol, StuntDouble* sd,
+                               RealType totalForce);
+    RealType getHFOfUnconsMols(Molecule* mol, RealType totalForce);
+
+    // void updateCantPos();
+
+    std::list<ZconstraintMol> movingZMols_; /**< moving zconstraint molecules */
+    std::list<ZconstraintMol> fixedZMols_;  /**< fixed zconstraint molecules */
+    std::vector<Molecule*> unzconsMols_;    /**< free molecules */
+
+    RealType zconsTime_;
+    std::string zconsOutput_;
+    RealType zconsTol_;
+    bool usingSMD_;
+    RealType zconsFixingTime_;
+    RealType zconsGap_;
+    bool usingZconsGap_;
+    RealType dt_;
+
+    const static int whichDirection = 2;
+
+    std::map<int, ZconstraintParam> allZMolIndices_;
+
     Snapshot* currSnapshot_;
+    RealType currZconsTime_;
 
-    RealType tIntLambda_;
-    RealType tIntK_;
-    RealType factor_;
-    RealType lrPot_;
-    RealType vHarm_;
+    RealType totMassMovingZMols_;
+    RealType totMassUnconsMols_; /**< mass of unconstrained molecules
+                                     in the system (never changes) */
+
+    ZConsWriter* fzOut;
+    const RealType infiniteTime;
   };
-
 }  // namespace OpenMD
-#endif
+
+#endif  // CONSTRAINTS_ZCONSTRAINTFORCEMODIFIER_HPP

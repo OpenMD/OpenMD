@@ -53,13 +53,13 @@
 #ifndef BRAINS_FORCEMANAGER_HPP
 #define BRAINS_FORCEMANAGER_HPP
 
+#include "brains/ForceModifier.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
 #include "nonbonded/Cutoffs.hpp"
 #include "nonbonded/InteractionManager.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
 #include "parallel/ForceDecomposition.hpp"
-#include "perturbations/Perturbation.hpp"
 #include "primitives/Molecule.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
@@ -124,28 +124,27 @@ namespace OpenMD {
     CutoffMethod
         cutoffMethod_; /**< Cutoff Method for most non-bonded interactions */
 
-    set<AtomType*> atomTypes_;
-    vector<pair<AtomType*, AtomType*>> interactions_;
-    map<Bend*, BendDataSet> bendDataSets;
-    map<Torsion*, TorsionDataSet> torsionDataSets;
-    map<Inversion*, InversionDataSet> inversionDataSets;
-    // vector<pair<int, int> > neighborList_;
-    vector<int> neighborList_;
-    vector<int> point_;
+    std::set<AtomType*> atomTypes_;
+    std::vector<pair<AtomType*, AtomType*>> interactions_;
+    std::map<Bend*, BendDataSet> bendDataSets;
+    std::map<Torsion*, TorsionDataSet> torsionDataSets;
+    std::map<Inversion*, InversionDataSet> inversionDataSets;
+    std::vector<int> neighborList_;
+    std::vector<int> point_;
 
-    vector<RealType> vdwScale_;
-    vector<RealType> electrostaticScale_;
+    std::vector<RealType> vdwScale_;
+    std::vector<RealType> electrostaticScale_;
 
     Mat3x3d virialTensor;
 
-    vector<Perturbation*> perturbations_;
+    std::vector<ForceModifier*> forceModifiers_;
 
     bool doPotentialSelection_ {false};
-    string selectionScript_;
+    std::string selectionScript_;
     SelectionManager seleMan_;
     SelectionEvaluator evaluator_;
-    // And all of the variables and structures for long range interactions:
 
+    // And all of the variables and structures for long range interactions:
     InteractionData idat;
     SelfData sdat;
   };

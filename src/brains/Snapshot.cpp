@@ -491,7 +491,7 @@ namespace OpenMD {
 
   void Snapshot::setPotentialEnergy(const RealType pe) {
     frameData.potentialEnergy = pe;
-    hasPotentialEnergy = true;
+    hasPotentialEnergy        = true;
   }
 
   void Snapshot::setExcludedPotentials(potVec exPot) {

@@ -50,8 +50,8 @@
 #ifndef PERTURBATIONS_UNIFORMFIELD_HPP
 #define PERTURBATIONS_UNIFORMFIELD_HPP
 
+#include "brains/ForceModifier.hpp"
 #include "brains/SimInfo.hpp"
-#include "perturbations/Perturbation.hpp"
 
 namespace OpenMD {
 
@@ -81,22 +81,21 @@ namespace OpenMD {
    potential, \f$ U = - \mathbf{D} \cdot \mathbf{E} \f$ and a torque,
    \f$ \mathbf{\tau} = \mathbf{D} \times \mathbf{E} \f$.
   */
-  class UniformField : public Perturbation {
+  class UniformField : public ForceModifier {
   public:
     UniformField(SimInfo* info);
 
-  protected:
-    virtual void initialize();
-    virtual void applyPerturbation();
-
   private:
+    void modifyForces() override;
+    void initialize();
+
     bool initialized;
     bool doUniformField;
     bool doParticlePot;
+
     Globals* simParams;
-    SimInfo* info_ {nullptr};
     Vector3d EF;
   };
-
 }  // namespace OpenMD
+
 #endif

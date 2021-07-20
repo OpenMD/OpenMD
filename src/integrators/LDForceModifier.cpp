@@ -42,13 +42,14 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-#include "integrators/LDForceManager.hpp"
+#include "integrators/LDForceModifier.hpp"
 
 #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <random>
 
+#include "brains/ForceModifier.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "math/CholeskyDecomposition.hpp"
@@ -62,18 +63,20 @@
 using namespace std;
 namespace OpenMD {
 
-  LDForceManager::LDForceManager(SimInfo* info) :
-      ForceManager(info), maxIterNum_(4), forceTolerance_(1e-6),
-      randNumGen_(info->getRandomNumberGenerator()),
-      simParams(info->getSimParams()) {
+  LDForceModifier::LDForceModifier(SimInfo* info) :
+      ForceModifier {info}, maxIterNum_ {4}, forceTolerance_ {1e-6},
+      randNumGen_ {info->getRandomNumberGenerator()},
+      simParams_ {info->getSimParams()} {
+    dt2_ = simParams_->getDt() * 0.5;
+
     // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    veloMunge = Utils::make_unique<Velocitizer>(info);
+    veloMunge_ = Utils::make_unique<Velocitizer>(info_);
 
     sphericalBoundaryConditions_ = false;
-    if (simParams->getUseSphericalBoundaryConditions()) {
+    if (simParams_->getUseSphericalBoundaryConditions()) {
       sphericalBoundaryConditions_ = true;
-      if (simParams->haveLangevinBufferRadius()) {
-        langevinBufferRadius_ = simParams->getLangevinBufferRadius();
+      if (simParams_->haveLangevinBufferRadius()) {
+        langevinBufferRadius_ = simParams_->getLangevinBufferRadius();
       } else {
         sprintf(painCave.errMsg,
                 "langevinBufferRadius must be specified "
@@ -83,8 +86,8 @@ namespace OpenMD {
         simError();
       }
 
-      if (simParams->haveFrozenBufferRadius()) {
-        frozenBufferRadius_ = simParams->getFrozenBufferRadius();
+      if (simParams_->haveFrozenBufferRadius()) {
+        frozenBufferRadius_ = simParams_->getFrozenBufferRadius();
       } else {
         sprintf(painCave.errMsg,
                 "frozenBufferRadius must be specified "
@@ -111,8 +114,8 @@ namespace OpenMD {
     Molecule::IntegrableObjectIterator j;
     bool needHydroPropFile = false;
 
-    for (mol = info->beginMolecule(i); mol != NULL;
-         mol = info->nextMolecule(i)) {
+    for (mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i)) {
       for (sd = mol->beginIntegrableObject(j); sd != NULL;
            sd = mol->nextIntegrableObject(j)) {
         if (sd->isRigidBody()) {
@@ -123,8 +126,8 @@ namespace OpenMD {
     }
 
     if (needHydroPropFile) {
-      if (simParams->haveHydroPropFile()) {
-        hydroPropMap_ = parseFrictionFile(simParams->getHydroPropFile());
+      if (simParams_->haveHydroPropFile()) {
+        hydroPropMap_ = parseFrictionFile(simParams_->getHydroPropFile());
       } else {
         sprintf(
             painCave.errMsg,
@@ -136,8 +139,8 @@ namespace OpenMD {
         simError();
       }
 
-      for (mol = info->beginMolecule(i); mol != NULL;
-           mol = info->nextMolecule(i)) {
+      for (mol = info_->beginMolecule(i); mol != NULL;
+           mol = info_->nextMolecule(i)) {
         for (sd = mol->beginIntegrableObject(j); sd != NULL;
              sd = mol->nextIntegrableObject(j)) {
           map<string, HydroProp*>::iterator iter =
@@ -158,8 +161,8 @@ namespace OpenMD {
       }
 
     } else {
-      for (mol = info->beginMolecule(i); mol != NULL;
-           mol = info->nextMolecule(i)) {
+      for (mol = info_->beginMolecule(i); mol != NULL;
+           mol = info_->nextMolecule(i)) {
         for (sd = mol->beginIntegrableObject(j); sd != NULL;
              sd = mol->nextIntegrableObject(j)) {
           Shape* currShape = NULL;
@@ -197,7 +200,7 @@ namespace OpenMD {
             }
           }
 
-          if (!simParams->haveTargetTemp()) {
+          if (!simParams_->haveTargetTemp()) {
             sprintf(painCave.errMsg,
                     "You can't use LangevinDynamics without a targetTemp!\n");
             painCave.isFatal  = 1;
@@ -205,7 +208,7 @@ namespace OpenMD {
             simError();
           }
 
-          if (!simParams->haveViscosity()) {
+          if (!simParams_->haveViscosity()) {
             sprintf(painCave.errMsg,
                     "You can't use LangevinDynamics without a viscosity!\n");
             painCave.isFatal  = 1;
@@ -214,7 +217,7 @@ namespace OpenMD {
           }
 
           HydroProp* currHydroProp = currShape->getHydroProp(
-              simParams->getViscosity(), simParams->getTargetTemp());
+              simParams_->getViscosity(), simParams_->getTargetTemp());
           map<string, HydroProp*>::iterator iter =
               hydroPropMap_.find(sd->getType());
           if (iter != hydroPropMap_.end()) {
@@ -232,16 +235,18 @@ namespace OpenMD {
         }
       }
     }
-    RealType stdDev = std::sqrt(
-        2.0 * Constants::kb * simParams->getTargetTemp() / simParams->getDt());
+
+    RealType stdDev =
+        std::sqrt(2.0 * Constants::kb * simParams_->getTargetTemp() /
+                  simParams_->getDt());
 
     forceDistribution_ = std::normal_distribution<RealType>(0.0, stdDev);
   }
 
-  map<string, HydroProp*> LDForceManager::parseFrictionFile(
-      const string& filename) {
-    map<string, HydroProp*> props;
-    ifstream ifs(filename.c_str());
+  std::map<std::string, HydroProp*> LDForceModifier::parseFrictionFile(
+      const std::string& filename) {
+    std::map<std::string, HydroProp*> props;
+    std::ifstream ifs(filename.c_str());
     if (ifs.is_open()) {}
 
     const unsigned int BufferSize = 65535;
@@ -255,7 +260,7 @@ namespace OpenMD {
     return props;
   }
 
-  MomentData* LDForceManager::getMomentData(StuntDouble* sd) {
+  MomentData* LDForceModifier::getMomentData(StuntDouble* sd) {
     map<string, MomentData*>::iterator j = momentsMap_.find(sd->getType());
     if (j != momentsMap_.end()) {
       return j->second;
@@ -294,7 +299,7 @@ namespace OpenMD {
     }
   }
 
-  void LDForceManager::postCalculation() {
+  void LDForceModifier::modifyForces() {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator j;
     Molecule* mol;
@@ -507,17 +512,17 @@ namespace OpenMD {
         ++index;
       }
     }
+
     info_->setFdf(fdf);
-    veloMunge->removeComDrift();
+    veloMunge_->removeComDrift();
     // Remove angular drift if we are not using periodic boundary conditions.
-    if (!simParams->getUsePeriodicBoundaryConditions())
-      veloMunge->removeAngularDrift();
-    ForceManager::postCalculation();
+    if (!simParams_->getUsePeriodicBoundaryConditions())
+      veloMunge_->removeAngularDrift();
   }
 
-  void LDForceManager::genRandomForceAndTorque(Vector3d& force,
-                                               Vector3d& torque,
-                                               unsigned int index) {
+  void LDForceModifier::genRandomForceAndTorque(Vector3d& force,
+                                                Vector3d& torque,
+                                                unsigned int index) {
     Vector<RealType, 6> Z;
     Vector<RealType, 6> generalForce;
 

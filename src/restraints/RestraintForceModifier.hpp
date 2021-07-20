@@ -43,18 +43,44 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef PERTURBATIONS_PERTURBATION_HPP
-#define PERTURBATIONS_PERTURBATION_HPP
+#ifndef RESTRAINTS_RESTRAINTFORCEMODIFIER_HPP
+#define RESTRAINTS_RESTRAINTFORCEMODIFIER_HPP
+
+#include <map>
+#include <string>
+#include <vector>
+
+#include "brains/ForceModifier.hpp"
+#include "brains/Snapshot.hpp"
+#include "io/RestWriter.hpp"
+#include "restraints/Restraint.hpp"
 
 namespace OpenMD {
 
-  //! Abstract class for external perturbation classes
-  class Perturbation {
+  class RestraintForceModifier : public ForceModifier {
   public:
-    virtual ~Perturbation() {}
-    virtual void applyPerturbation() = 0;
-  };
+    RestraintForceModifier(SimInfo* info);
+    virtual ~RestraintForceModifier();
 
+    void modifyForces() override;
+
+  protected:
+    RealType doRestraints(RealType scalingFactor);
+    RealType getUnscaledPotential() { return unscaledPotential_; }
+
+  private:
+    std::vector<Restraint*> restraints_;
+    std::vector<Molecule*> restrainedMols_;
+    std::vector<StuntDouble*> restrainedObjs_;
+    RealType unscaledPotential_;
+
+    std::vector<std::map<int, Restraint::RealPair>> restInfo_;
+    std::string restOutput_;
+    RealType currRestTime_;
+    RealType restTime_;
+    RestWriter* restOut;
+    Snapshot* currSnapshot_;
+  };
 }  // namespace OpenMD
 
-#endif
+#endif  // RESTRAINTS_RESTRAINTFORCEMODIFIER_HPP

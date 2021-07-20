@@ -43,8 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef INTEGRATOR_LANGEVINHULLFORCEMANAGER_HPP
-#define INTEGRATOR_LANGEVINHULLFORCEMANAGER_HPP
+#ifndef INTEGRATOR_LANGEVINHULLFORCEMODIFIER_HPP
+#define INTEGRATOR_LANGEVINHULLFORCEMODIFIER_HPP
 
 #include <map>
 #include <memory>
@@ -62,25 +62,24 @@ using namespace std;
 namespace OpenMD {
 
   /**
-   * @class LangevinHullForceManager
-   * Force manager for NPT Langevin Hull Dynamics applying friction
+   * @class LangevinHullForceModifier
+   * Force modifier for NPT Langevin Hull Dynamics applying friction
    * and random forces as well as torques.  Stochastic force is
    * determined by the area of surface triangles on the convex hull.
    * See: Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011),
    *      and Kohanoff et al. CHEMPHYSCHEM 6, 1848-1852 (2005).
    */
-  class LangevinHullForceManager : public ForceManager {
+  class LangevinHullForceModifier : public ForceModifier {
   public:
-    LangevinHullForceManager(SimInfo* info);
-    virtual ~LangevinHullForceManager();
+    LangevinHullForceModifier(SimInfo* info);
+    ~LangevinHullForceModifier();
 
-  protected:
-    virtual void postCalculation();
+    void modifyForces() override;
 
   private:
     std::vector<Vector3d> genTriangleForces(int nTriangles);
 
-    Globals* simParams;
+    Globals* simParams_;
     Utils::RandNumGenPtr randNumGen_;
     std::normal_distribution<RealType> forceDistribution_;
     std::unique_ptr<Velocitizer> veloMunge {nullptr};
@@ -101,6 +100,6 @@ namespace OpenMD {
     Hull* surfaceMesh_;
     std::vector<StuntDouble*> localSites_;
   };
-
 }  // namespace OpenMD
-#endif  // LANGEVINHULL_FORCEMANAGER
+
+#endif  // INTEGRATOR_LANGEVINHULLFORCEMODIFIER_HPP

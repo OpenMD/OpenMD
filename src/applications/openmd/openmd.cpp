@@ -43,18 +43,17 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
-
 #include <fstream>
 #include <iostream>
 #include <locale>
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
-#include "constraints/ZconstraintForceManager.hpp"
 #include "integrators/Integrator.hpp"
 #include "integrators/IntegratorFactory.hpp"
 #include "optimization/Constraint.hpp"
@@ -62,8 +61,6 @@
 #include "optimization/OptimizationFactory.hpp"
 #include "optimization/PotentialEnergyObjectiveFunction.hpp"
 #include "optimization/Problem.hpp"
-#include "restraints/RestraintForceManager.hpp"
-#include "restraints/ThermoIntegrationForceManager.hpp"
 #include "utils/CaseConversion.hpp"
 #include "utils/Revision.hpp"
 #include "utils/simError.h"
@@ -234,7 +231,6 @@ int main(int argc, char* argv[]) {
     delete myMinimizer;
   } else if (simParams->haveEnsemble()) {
     // create Integrator
-
     Integrator* myIntegrator =
         IntegratorFactory::getInstance().createIntegrator(
             toUpperCopy(simParams->getEnsemble()), info);
@@ -245,27 +241,6 @@ int main(int argc, char* argv[]) {
               simParams->getEnsemble().c_str());
       painCave.isFatal = 1;
       simError();
-    }
-
-    // Thermodynamic Integration Method
-    // set the force manager for thermodynamic integration if specified
-    if (simParams->getUseThermodynamicIntegration()) {
-      ForceManager* fman = new ThermoIntegrationForceManager(info);
-      myIntegrator->setForceManager(fman);
-    }
-
-    // Restraints
-    if (simParams->getUseRestraints() &&
-        !simParams->getUseThermodynamicIntegration()) {
-      ForceManager* fman = new RestraintForceManager(info);
-      myIntegrator->setForceManager(fman);
-    }
-
-    // Zconstraint-Method
-    if (simParams->getNZconsStamps() > 0) {
-      info->setNZconstraint(simParams->getNZconsStamps());
-      ForceManager* fman = new ZconstraintForceManager(info);
-      myIntegrator->setForceManager(fman);
     }
 
     myIntegrator->integrate();
