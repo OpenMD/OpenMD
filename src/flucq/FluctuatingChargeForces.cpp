@@ -43,11 +43,12 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "flucq/FluctuatingChargeForces.hpp"
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
 
-#include "flucq/FluctuatingChargeForces.hpp"
 #include "math/RealSymmetricTridiagonal.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 

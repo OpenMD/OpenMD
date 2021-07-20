@@ -43,17 +43,18 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
+#include "utils/OpenMDBitSet.hpp"
 
 #include <algorithm>
 #include <cassert>
 #include <iterator>
 #include <string>
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "utils/Algorithm.hpp"
-#include "utils/OpenMDBitSet.hpp"
 
 namespace OpenMD {
   int OpenMDBitSet::countBits() {
@@ -110,18 +111,18 @@ namespace OpenMD {
 
     return -1;
   }
-  
-  int OpenMDBitSet::nthOffBit(unsigned long int fromIndex, unsigned long int n) const {
 
+  int OpenMDBitSet::nthOffBit(unsigned long int fromIndex,
+                              unsigned long int n) const {
     std::vector<int> indices;
     for (int i = nextOffBit(fromIndex); i != -1; i = nextOffBit(i + 1)) {
       indices.push_back(i);
     }
-    
+
     if (n <= indices.size()) return indices[n];
     return -1;
   }
-  
+
   int OpenMDBitSet::nextOnBit(int fromIndex) const {
     if (fromIndex <= -1) {
       // in case -1 or other negative number is passed to this function
@@ -137,17 +138,17 @@ namespace OpenMD {
     return -1;
   }
 
-  int OpenMDBitSet::nthOnBit(unsigned long int fromIndex, unsigned long int n) const {
-
+  int OpenMDBitSet::nthOnBit(unsigned long int fromIndex,
+                             unsigned long int n) const {
     std::vector<int> indices;
     for (int i = nextOnBit(fromIndex); i != -1; i = nextOnBit(i + 1)) {
       indices.push_back(i);
     }
-    
+
     if (n <= indices.size()) return indices[n];
     return -1;
   }
-  
+
   void OpenMDBitSet::andOperator(const OpenMDBitSet& bs) {
     assert(size() == bs.size());
 

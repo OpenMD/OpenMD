@@ -43,9 +43,7 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
+#include "nonbonded/Electrostatic.hpp"
 
 #include <cmath>
 #include <cstdio>
@@ -53,11 +51,14 @@
 #include <memory>
 #include <numeric>
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "flucq/FluctuatingChargeForces.hpp"
 #include "io/Globals.hpp"
 #include "math/SquareMatrix.hpp"
 #include "math/erfc.hpp"
-#include "nonbonded/Electrostatic.hpp"
 #include "nonbonded/SlaterIntegrals.hpp"
 #include "primitives/Molecule.hpp"
 #include "types/FixedChargeAdapter.hpp"

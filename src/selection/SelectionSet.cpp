@@ -43,16 +43,17 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
+#include "selection/SelectionSet.hpp"
 
 #include <algorithm>
 #include <cassert>
 #include <iterator>
 #include <string>
 
-#include "selection/SelectionSet.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "utils/Algorithm.hpp"
 
 namespace OpenMD {

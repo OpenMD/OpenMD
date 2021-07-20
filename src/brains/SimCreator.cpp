@@ -50,14 +50,16 @@
  * @version 1.0
  */
 
-#ifdef IS_MPI
-#include "mpi.h"
-#endif
+#include "brains/SimCreator.hpp"
 
 #include <exception>
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
 #include "antlr/ANTLRException.hpp"
 #include "antlr/CharStreamException.hpp"
@@ -71,7 +73,6 @@
 #include "antlr/TokenStreamRecognitionException.hpp"
 #include "brains/ForceField.hpp"
 #include "brains/MoleculeCreator.hpp"
-#include "brains/SimCreator.hpp"
 #include "brains/SimSnapshotManager.hpp"
 #include "io/DumpReader.hpp"
 #include "mdParser/MDLexer.hpp"

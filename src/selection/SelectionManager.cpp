@@ -45,10 +45,11 @@
 
 #include "selection/SelectionManager.hpp"
 
-#include "brains/SimInfo.hpp"
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
+
+#include "brains/SimInfo.hpp"
 
 namespace OpenMD {
   SelectionManager::SelectionManager(SimInfo* info) : info_(info) {

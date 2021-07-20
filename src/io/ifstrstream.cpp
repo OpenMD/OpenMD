@@ -50,11 +50,11 @@
  * @version 1.0
  */
 
+#include "io/ifstrstream.hpp"
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
-
-#include "io/ifstrstream.hpp"
 
 namespace OpenMD {
 

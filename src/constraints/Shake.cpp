@@ -45,11 +45,12 @@
 
 #include "constraints/Shake.hpp"
 
-#include "primitives/Molecule.hpp"
-#include "utils/simError.h"
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
+
+#include "primitives/Molecule.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
 

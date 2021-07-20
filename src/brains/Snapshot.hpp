@@ -238,6 +238,7 @@ namespace OpenMD {
     potVec getSelectionPotentials();
 
     RealType getPotentialEnergy();
+    void setPotentialEnergy(const RealType pe);
     RealType getKineticEnergy();
     RealType getTranslationalKineticEnergy();
     RealType getRotationalKineticEnergy();

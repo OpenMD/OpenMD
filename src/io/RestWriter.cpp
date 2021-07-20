@@ -43,16 +43,17 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
+#include "io/RestWriter.hpp"
 
 #include <iostream>
 #include <sstream>
 #include <string>
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "brains/SnapshotManager.hpp"
-#include "io/RestWriter.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {

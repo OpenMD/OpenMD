@@ -44,8 +44,9 @@
  */
 
 #include "flucq/FluctuatingChargeObjectiveFunction.hpp"
+
 #ifdef IS_MPI
-#include "mpi.h"
+#include <mpi.h>
 #endif
 
 namespace OpenMD {

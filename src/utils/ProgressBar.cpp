@@ -43,10 +43,6 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
-
 #include <cstdlib>
 #include <iostream>
 
@@ -62,6 +58,10 @@
 #include <cstdio>
 
 #include <sys/ioctl.h>
+#endif
+
+#ifdef IS_MPI
+#include <mpi.h>
 #endif
 
 #include "utils/ProgressBar.hpp"

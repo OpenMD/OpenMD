@@ -454,12 +454,17 @@ namespace OpenMD {
     // if we're doing a thermodynamic integration, we'll want the raw
     // potential as well as the full potential:
 
-    if (simParams->getUseThermodynamicIntegration())
+    if (simParams->getUseThermodynamicIntegration()) {
       statsMask_.set(RAW_POTENTIAL);
+      statsMask_.set(RESTRAINT_POTENTIAL);
+    }
 
     // if we've got restraints turned on, we'll also want a report of the
     // total harmonic restraints
-    if (simParams->getUseRestraints()) { statsMask_.set(RESTRAINT_POTENTIAL); }
+    if (simParams->getUseRestraints()) {
+      statsMask_.set(RAW_POTENTIAL);
+      statsMask_.set(RESTRAINT_POTENTIAL);
+    }
 
     if (simParams->havePrintPressureTensor() &&
         simParams->getPrintPressureTensor()) {

@@ -113,9 +113,9 @@ namespace OpenMD {
         new IntegratorBuilder<LangevinHullDynamics>("LANGEVINHULL"));
     IntegratorFactory::getInstance().registerIntegrator(
         new IntegratorBuilder<LangevinHullDynamics>("SMIPD"));
+#endif
     IntegratorFactory::getInstance().registerIntegrator(
         new IntegratorBuilder<LangevinPiston>("LANGEVINPISTON"));
-#endif
   }
 
   void registerOptimizers() {

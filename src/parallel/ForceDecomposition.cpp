@@ -43,12 +43,13 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "parallel/ForceDecomposition.hpp"
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
 
 #include "math/Vector3.hpp"
-#include "parallel/ForceDecomposition.hpp"
 
 using namespace std;
 namespace OpenMD {

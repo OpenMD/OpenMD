@@ -52,16 +52,16 @@
 
 #include "brains/SimInfo.hpp"
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
-
 #include <algorithm>
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <random>
 #include <set>
+
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
 #include "brains/ForceField.hpp"
 #include "io/ForceFieldOptions.hpp"

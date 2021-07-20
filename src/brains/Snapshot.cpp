@@ -483,11 +483,15 @@ namespace OpenMD {
       frameData.potentialEnergy = this->getLongRangePotential();
       frameData.potentialEnergy += this->getShortRangePotential();
       frameData.potentialEnergy += this->getSelfPotential();
-      frameData.potentialEnergy += this->getRestraintPotential();
       frameData.potentialEnergy += this->getExcludedPotential();
       hasPotentialEnergy = true;
     }
     return frameData.potentialEnergy;
+  }
+
+  void Snapshot::setPotentialEnergy(const RealType pe) {
+    frameData.potentialEnergy = pe;
+    hasPotentialEnergy = true;
   }
 
   void Snapshot::setExcludedPotentials(potVec exPot) {

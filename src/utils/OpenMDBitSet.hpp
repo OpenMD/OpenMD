@@ -94,7 +94,7 @@ namespace OpenMD {
     /** Returns the index of the first bit that is set to false that occurs on
      * or after the specified starting index.*/
     int nextOffBit(int fromIndex) const;
-    
+
     /** Returns the index of the n^th bit that is set to false that occurs on
      * or after the specified starting index.*/
     int nthOffBit(unsigned long int fromIndex, unsigned long int n) const;
