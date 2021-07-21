@@ -520,13 +520,9 @@ namespace OpenMD {
     return frameData.restraintPotential;
   }
 
-  void Snapshot::setRawPotential(RealType rp) {
-    frameData.rawPotential = rp;
-  }
+  void Snapshot::setRawPotential(RealType rp) { frameData.rawPotential = rp; }
 
-  RealType Snapshot::getRawPotential() {
-    return frameData.rawPotential;
-  }
+  RealType Snapshot::getRawPotential() { return frameData.rawPotential; }
 
   void Snapshot::setSelectionPotentials(potVec selPot) {
     frameData.selectionPotentials = selPot;
