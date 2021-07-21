@@ -62,8 +62,6 @@ namespace OpenMD {
     Snapshot* currSnapshot_;
 
     RealType factor_;
-    RealType lrPot_;
-    RealType vHarm_;
   };
 }  // namespace OpenMD
 

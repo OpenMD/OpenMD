@@ -353,6 +353,10 @@ namespace OpenMD {
 
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
     currSnapshot_->setRestraintPotential(restPot);
+    
+    RealType pe = currSnapshot_->getPotentialEnergy();
+    currSnapshot_->setRawPotential( pe );
+    currSnapshot_->setPotentialEnergy( pe + restPot );
 
     RealType pe = currSnapshot_->getPotentialEnergy();
     currSnapshot_->setRawPotential(pe);
@@ -495,6 +499,7 @@ namespace OpenMD {
         oRest->calcForce(pos, A);
         (*ro)->addFrc(oRest->getRestraintForce());
         (*ro)->addTrq(oRest->getRestraintTorque());
+	
       } else {
         // plain vanilla positional restraints:
 
