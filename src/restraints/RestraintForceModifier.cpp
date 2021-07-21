@@ -312,11 +312,11 @@ namespace OpenMD {
     // ThermodynamicIntegration subclasses RestraintForceManager, and there
     // are times when it won't use restraints at all, so only open the
     // restraint file if we are actually using restraints:
-
     if (simParam->getUseRestraints()) {
       std::string refFile = simParam->getRestraint_file();
       RestReader* rr      = new RestReader(info, refFile, stuntDoubleIndex);
       rr->readReferenceStructure();
+      delete rr;
     }
 
     restOutput_ = getPrefix(info_->getFinalConfigFileName()) + ".rest";

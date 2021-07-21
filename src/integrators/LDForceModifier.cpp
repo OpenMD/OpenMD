@@ -67,7 +67,8 @@ namespace OpenMD {
       ForceModifier {info}, maxIterNum_ {4}, forceTolerance_ {1e-6},
       randNumGen_ {info->getRandomNumberGenerator()},
       simParams_ {info->getSimParams()} {
-    dt2_ = simParams_->getDt() * 0.5;
+    RealType dt = simParams_->getDt();
+    dt2_        = dt * 0.5;
 
     // Remove in favor of std::make_unique<> when we switch to C++14 and above
     veloMunge_ = Utils::make_unique<Velocitizer>(info_);
@@ -237,8 +238,7 @@ namespace OpenMD {
     }
 
     RealType stdDev =
-        std::sqrt(2.0 * Constants::kb * simParams_->getTargetTemp() /
-                  simParams_->getDt());
+        std::sqrt(2.0 * Constants::kb * simParams_->getTargetTemp() / dt);
 
     forceDistribution_ = std::normal_distribution<RealType>(0.0, stdDev);
   }
