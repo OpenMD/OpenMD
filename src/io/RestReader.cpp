@@ -43,9 +43,7 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
+#include "io/RestReader.hpp"
 
 #include <cmath>
 #include <cstdio>
@@ -59,7 +57,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "io/RestReader.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "primitives/Molecule.hpp"
 #include "restraints/MolecularRestraint.hpp"
 #include "restraints/ObjectRestraint.hpp"
@@ -427,4 +428,4 @@ namespace OpenMD {
     }
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

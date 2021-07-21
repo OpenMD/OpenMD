@@ -52,19 +52,13 @@
 
 #include "integrators/LangevinDynamics.hpp"
 
-#include "integrators/LDForceManager.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
+
 namespace OpenMD {
 
   LangevinDynamics::LangevinDynamics(SimInfo* info) :
-      VelocityVerletIntegrator(info) {
-    setForceManager(new LDForceManager(info));
-
-    // Langevin Dynamics Force Manager needs to know about the half-time step
-    // size to get convergence on the friction forces:
-    dynamic_cast<LDForceManager*>(forceMan_)->setDt2(dt2);
-  }
+      VelocityVerletIntegrator(info) {}
 
   void LangevinDynamics::moveA() {
     SimInfo::MoleculeIterator i;
@@ -163,5 +157,4 @@ namespace OpenMD {
   }
 
   RealType LangevinDynamics::calcConservedQuantity() { return 0.0; }
-
-}  // end namespace OpenMD
+}  // namespace OpenMD

@@ -104,4 +104,4 @@ namespace OpenMD {
       ff.addTorsionType(at1, at2, at3, at4, torsionType);
     }
   }
-}  // end namespace OpenMD
+}  // namespace OpenMD

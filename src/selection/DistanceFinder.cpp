@@ -43,12 +43,13 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "selection/DistanceFinder.hpp"
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
 
 #include "primitives/Molecule.hpp"
-#include "selection/DistanceFinder.hpp"
 
 namespace OpenMD {
 

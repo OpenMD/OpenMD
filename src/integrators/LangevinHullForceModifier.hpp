@@ -43,79 +43,63 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef CONSTRAINTS_ZCONSTRAINTFORCEMANAGER_HPP
-#define CONSTRAINTS_ZCONSTRAINTFORCEMANAGER_HPP
-#include <list>
-#include <string>
+#ifndef INTEGRATOR_LANGEVINHULLFORCEMODIFIER_HPP
+#define INTEGRATOR_LANGEVINHULLFORCEMODIFIER_HPP
+
+#include <map>
+#include <memory>
 #include <vector>
 
 #include "brains/ForceManager.hpp"
-#include "constraints/ZconsStruct.hpp"
-#include "io/ZConsWriter.hpp"
+#include "brains/Thermo.hpp"
+#include "brains/Velocitizer.hpp"
+#include "math/Hull.hpp"
+#include "math/Triangle.hpp"
+#include "primitives/Molecule.hpp"
+#include "utils/RandNumGen.hpp"
+
+using namespace std;
 namespace OpenMD {
 
-  class ZconstraintForceManager : public ForceManager {
+  /**
+   * @class LangevinHullForceModifier
+   * Force modifier for NPT Langevin Hull Dynamics applying friction
+   * and random forces as well as torques.  Stochastic force is
+   * determined by the area of surface triangles on the convex hull.
+   * See: Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011),
+   *      and Kohanoff et al. CHEMPHYSCHEM 6, 1848-1852 (2005).
+   */
+  class LangevinHullForceModifier : public ForceModifier {
   public:
-    ZconstraintForceManager(SimInfo* info);
-    ~ZconstraintForceManager();
+    LangevinHullForceModifier(SimInfo* info);
+    ~LangevinHullForceModifier();
 
-    virtual void calcForces();
-
-    RealType getZConsTime() { return zconsTime_; }
-    std::string getZConsOutput() { return zconsOutput_; }
-
-    void update();
-    virtual void init();
+    void modifyForces() override;
 
   private:
-    bool isZMol(Molecule* mol);
-    void thermalize(void);
+    std::vector<Vector3d> genTriangleForces(int nTriangles);
 
-    void zeroVelocity();
-    void doZconstraintForce();
-    void doHarmonic();
-    bool checkZConsState();
-    void updateZPos();
-    void updateCantPos();
-    void calcTotalMassMovingZMols();
-    bool haveMovingZMols();
-    bool haveFixedZMols();
-    RealType getZTargetPos(int index);
-    RealType getZFOfFixedZMols(Molecule* mol, StuntDouble* sd,
-                               RealType totalForce);
-    RealType getZFOfMovingMols(Molecule* mol, RealType totalForce);
-    RealType getHFOfFixedZMols(Molecule* mol, StuntDouble* sd,
-                               RealType totalForce);
-    RealType getHFOfUnconsMols(Molecule* mol, RealType totalForce);
+    Globals* simParams_;
+    Utils::RandNumGenPtr randNumGen_;
+    std::normal_distribution<RealType> forceDistribution_;
+    std::unique_ptr<Velocitizer> veloMunge {nullptr};
 
-    std::list<ZconstraintMol>
-        movingZMols_;                      /**<   moving zconstraint molecules*/
-    std::list<ZconstraintMol> fixedZMols_; /**< fixed zconstraint molecules*/
-    std::vector<Molecule*> unzconsMols_;   /**< free molecules*/
-
-    RealType zconsTime_;
-    std::string zconsOutput_;
-    RealType zconsTol_;
-    bool usingSMD_;
-    RealType zconsFixingTime_;
-    RealType zconsGap_;
-    bool usingZconsGap_;
     RealType dt_;
+    RealType targetTemp_;
+    RealType targetPressure_;
+    RealType viscosity_;
 
-    const static int whichDirection = 2;
+    enum HullTypeEnum { hullConvex, hullAlphaShape, hullUnknown };
 
-    std::map<int, ZconstraintParam> allZMolIndices_;
+    std::map<string, HullTypeEnum> stringToEnumMap_;
+    HullTypeEnum hullType_;
 
-    Snapshot* currSnapshot_;
-    RealType currZconsTime_;
+    bool doThermalCoupling_;
+    bool doPressureCoupling_;
 
-    RealType totMassMovingZMols_;
-    RealType totMassUnconsMols_; /**< mass of unconstrained molecules
-                                     in the system (never changes) */
-
-    ZConsWriter* fzOut;
-    const RealType infiniteTime;
+    Hull* surfaceMesh_;
+    std::vector<StuntDouble*> localSites_;
   };
-
 }  // namespace OpenMD
-#endif
+
+#endif  // INTEGRATOR_LANGEVINHULLFORCEMODIFIER_HPP

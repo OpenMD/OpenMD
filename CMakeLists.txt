@@ -405,7 +405,7 @@ src/flucq/FluctuatingChargeNVT.cpp
 src/integrators/Integrator.cpp
 src/integrators/IntegratorFactory.cpp
 src/integrators/LangevinDynamics.cpp
-src/integrators/LDForceManager.cpp
+src/integrators/LDForceModifier.cpp
 src/integrators/NgammaT.cpp
 src/integrators/NPA.cpp
 src/integrators/NPAT.cpp
@@ -576,14 +576,14 @@ src/brains/SimCreator.cpp
 src/brains/SimInfo.cpp
 src/brains/Thermo.cpp
 src/brains/Velocitizer.cpp
-src/constraints/ZconstraintForceManager.cpp
+src/constraints/ZconstraintForceModifier.cpp
 src/constraints/Rattle.cpp
 src/constraints/Shake.cpp
 src/flucq/FluctuatingChargeConstraints.cpp
 src/flucq/FluctuatingChargeObjectiveFunction.cpp
 src/flucq/FluctuatingChargeForces.cpp
 src/flucq/FluctuatingChargePropagator.cpp
-src/integrators/LangevinHullForceManager.cpp
+src/integrators/LangevinHullForceModifier.cpp
 src/integrators/LangevinPiston.cpp
 src/rnemd/NIVS.cpp
 src/rnemd/RNEMD.cpp
@@ -604,8 +604,8 @@ src/parallel/ForceMatrixDecomposition.cpp
 src/perturbations/UniformField.cpp
 src/perturbations/MagneticField.cpp
 src/perturbations/UniformGradient.cpp
-src/restraints/RestraintForceManager.cpp
-src/restraints/ThermoIntegrationForceManager.cpp
+src/restraints/RestraintForceModifier.cpp
+src/restraints/ThermoIntegrationForceModifier.cpp
 src/selection/DistanceFinder.cpp
 src/selection/SelectionManager.cpp
 src/selection/SelectionSet.cpp
@@ -627,7 +627,7 @@ src/integrators/LangevinHullDynamics.cpp
 src/math/Triangle.cpp
 )
 set(QHULL_PARALLEL_SOURCE
-src/integrators/LangevinHullForceManager.cpp
+src/integrators/LangevinHullForceModifier.cpp
 src/math/ConvexHull.cpp
 src/math/AlphaHull.cpp
 )
@@ -715,7 +715,6 @@ src/applications/dynamicProps/AngularVelVelOutProdCorrFunc.cpp
 src/applications/dynamicProps/WCorrFunc.cpp
 src/applications/dynamicProps/BondCorrFunc.cpp
 src/applications/dynamicProps/DynamicPropsCmd.cpp
-
 )
 
 set (HYDROSOURCE
@@ -797,7 +796,6 @@ src/applications/staticProps/PositionZ.cpp
 src/applications/staticProps/DipoleOrientation.cpp
 src/applications/staticProps/ChargeDensityZ.cpp
 src/applications/staticProps/OrderParameterProbZ.cpp
-
 )
 
 set (NANOPARTICLEBUILDERSOURCE
@@ -883,10 +881,10 @@ add_executable(elasticConstants ${ELASTICCONSTANTSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(elasticConstants openmd_single openmd_core openmd_single openmd_core openmd_single)
 
 if (USE_OPENBABEL)
-set (ATOM2OMDSOURCE
-src/applications/atom2omd/atom2omd.cpp
-src/applications/atom2omd/openmdformat.cpp
-)
+  set (ATOM2OMDSOURCE
+  src/applications/atom2omd/atom2omd.cpp
+  src/applications/atom2omd/openmdformat.cpp
+  )
   add_executable(atom2omd ${ATOM2OMDSOURCE} ${GETOPT_SOURCE})
   target_link_libraries(atom2omd openmd_single openmd_core openmd_single openmd_core ${OPENBABEL_LIBRARIES})
   INSTALL(TARGETS atom2omd RUNTIME DESTINATION bin

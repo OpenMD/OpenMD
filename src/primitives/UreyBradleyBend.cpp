@@ -61,4 +61,4 @@ namespace OpenMD {
     if (doParticlePot) { atoms_[1]->addParticlePot(bond_->getPotential()); }
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

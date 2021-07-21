@@ -45,6 +45,7 @@
 
 #include "perturbations/MagneticField.hpp"
 
+#include "brains/ForceModifier.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "primitives/Molecule.hpp"
 #include "types/FixedChargeAdapter.hpp"
@@ -54,7 +55,7 @@
 namespace OpenMD {
 
   MagneticField::MagneticField(SimInfo* info) :
-      initialized(false), doMagneticField(false), info_(info) {
+      ForceModifier {info}, initialized {false}, doMagneticField {false} {
     simParams = info_->getSimParams();
   }
 
@@ -80,7 +81,7 @@ namespace OpenMD {
     initialized = true;
   }
 
-  void MagneticField::applyPerturbation() {
+  void MagneticField::modifyForces() {
     if (!initialized) initialize();
 
     SimInfo::MoleculeIterator i;

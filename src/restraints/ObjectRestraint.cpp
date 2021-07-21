@@ -128,7 +128,6 @@ namespace OpenMD {
 
       Vector3d tLab = A.transpose() * tBody;
       torque_       = tLab * scaleFactor_;
-
     }
   }
 }  // namespace OpenMD

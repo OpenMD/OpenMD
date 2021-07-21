@@ -43,11 +43,12 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "FluctuatingChargeConstraints.hpp"
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
 
-#include "FluctuatingChargeConstraints.hpp"
 #include "primitives/Molecule.hpp"
 
 namespace OpenMD {

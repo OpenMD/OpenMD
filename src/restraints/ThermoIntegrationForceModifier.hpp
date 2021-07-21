@@ -43,28 +43,26 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef RESTRAINTS_THERMOINTEGRATIONFORCEMANAGER_HPP
-#define RESTRAINTS_THERMOINTEGRATIONFORCEMANAGER_HPP
+#ifndef RESTRAINTS_THERMOINTEGRATIONFORCEMODIFIER_HPP
+#define RESTRAINTS_THERMOINTEGRATIONFORCEMODIFIER_HPP
 
-#include "restraints/RestraintForceManager.hpp"
+#include "brains/Snapshot.hpp"
+#include "restraints/RestraintForceModifier.hpp"
 
 namespace OpenMD {
 
-  class ThermoIntegrationForceManager : public RestraintForceManager {
+  class ThermoIntegrationForceModifier : public RestraintForceModifier {
   public:
-    ThermoIntegrationForceManager(SimInfo* info);
-    ~ThermoIntegrationForceManager();
+    ThermoIntegrationForceModifier(SimInfo* info);
 
-    virtual void calcForces();
+    void modifyForces() override;
 
   private:
-    Globals* simParam;
+    Globals* simParam_;
     Snapshot* currSnapshot_;
 
-    RealType tIntLambda_;
-    RealType tIntK_;
     RealType factor_;
   };
-
 }  // namespace OpenMD
-#endif
+
+#endif  // RESTRAINTS_THERMOINTEGRATIONFORCEMODIFIER_HPP

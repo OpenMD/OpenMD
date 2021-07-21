@@ -43,6 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "rnemd/VSS.hpp"
+
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -67,7 +69,6 @@
 #include "primitives/StuntDouble.hpp"
 #include "rnemd/RNEMD.hpp"
 #include "rnemd/RNEMDParameters.hpp"
-#include "rnemd/VSS.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/Accumulator.hpp"
@@ -499,7 +500,7 @@ namespace OpenMD {
 
       if (successfulExchange != true) {
         sprintf(painCave.errMsg,
-                "RNEMD::doVSS exchange NOT performed - roots that solve\n"
+                "VSS exchange NOT performed - roots that solve\n"
                 "\tthe constraint equations may not exist or there may be\n"
                 "\tno selected objects in one or both slabs.\n");
         painCave.isFatal  = 0;

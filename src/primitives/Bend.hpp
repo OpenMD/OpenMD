@@ -130,5 +130,5 @@ namespace OpenMD {
     BendType* bendType_; /**< bend type */
     std::string name_;
   };
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // PRIMITIVES_BEND_HPP

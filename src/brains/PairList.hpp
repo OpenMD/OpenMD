@@ -102,6 +102,6 @@ namespace OpenMD {
     bool modified_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 
 #endif  // __PAIRLIST_H__

@@ -80,4 +80,4 @@ namespace OpenMD {
     options_.validateOptions();
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

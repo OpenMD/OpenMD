@@ -57,7 +57,6 @@
 #include "integrators/RotationAlgorithm.hpp"
 #include "io/DumpWriter.hpp"
 #include "io/StatWriter.hpp"
-#include "restraints/ThermoIntegrationForceManager.hpp"
 #include "rnemd/RNEMD.hpp"
 #include "utils/ProgressBar.hpp"
 
@@ -81,7 +80,6 @@ namespace OpenMD {
 
     void integrate();
     void updateSizes();
-    void setForceManager(ForceManager* forceMan);
     void setVelocitizer(std::unique_ptr<Velocitizer> velocitizer);
     void setFluctuatingChargePropagator(FluctuatingChargePropagator* prop);
     void setRotationAlgorithm(RotationAlgorithm* algo);

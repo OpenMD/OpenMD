@@ -120,4 +120,4 @@ namespace OpenMD {
       return NULL;
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

@@ -45,21 +45,23 @@
 
 #include "perturbations/UniformField.hpp"
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
+#include "brains/ForceModifier.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "primitives/Molecule.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
 #include "utils/Constants.hpp"
-#ifdef IS_MPI
-#include "mpi.h"
-#endif
 
 namespace OpenMD {
 
   UniformField::UniformField(SimInfo* info) :
-      initialized(false), doUniformField(false), doParticlePot(false),
-      info_(info) {
+      ForceModifier {info}, initialized {false}, doUniformField {false},
+      doParticlePot {false} {
     simParams = info_->getSimParams();
   }
 
@@ -91,7 +93,7 @@ namespace OpenMD {
     initialized = true;
   }
 
-  void UniformField::applyPerturbation() {
+  void UniformField::modifyForces() {
     if (!initialized) initialize();
 
     SimInfo::MoleculeIterator i;

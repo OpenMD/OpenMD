@@ -642,5 +642,5 @@ namespace OpenMD {
 
   typedef Polynomial<RealType> DoublePolynomial;
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // MATH_POLYNOMIAL_HPP

@@ -52,15 +52,13 @@
 
 #include "integrators/LangevinHullDynamics.hpp"
 
-#include "integrators/LangevinHullForceManager.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
+
 namespace OpenMD {
 
   LangevinHullDynamics::LangevinHullDynamics(SimInfo* info) :
-      VelocityVerletIntegrator(info) {
-    setForceManager(new LangevinHullForceManager(info));
-  }
+      VelocityVerletIntegrator(info) {}
 
   void LangevinHullDynamics::moveA() {
     SimInfo::MoleculeIterator i;
@@ -159,5 +157,4 @@ namespace OpenMD {
   }
 
   RealType LangevinHullDynamics::calcConservedQuantity() { return 0.0; }
-
-}  // end namespace OpenMD
+}  // namespace OpenMD

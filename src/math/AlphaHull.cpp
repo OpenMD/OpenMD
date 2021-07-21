@@ -43,11 +43,7 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
-
-/* Standard includes independent of library */
+#include "math/AlphaHull.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -55,7 +51,10 @@
 #include <iterator>
 #include <list>
 
-#include "math/AlphaHull.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "math/qhull.hpp"
 #include "utils/simError.h"
 

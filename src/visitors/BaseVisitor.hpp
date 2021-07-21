@@ -98,5 +98,5 @@ namespace OpenMD {
     std::string visitorName;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif

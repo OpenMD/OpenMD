@@ -415,4 +415,4 @@ namespace OpenMD {
     return o;
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

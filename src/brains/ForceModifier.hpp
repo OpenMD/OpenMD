@@ -43,64 +43,24 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef INTEGRATOR_LANGEVINHULLFORCEMANAGER_HPP
-#define INTEGRATOR_LANGEVINHULLFORCEMANAGER_HPP
+#ifndef BRAINS_FORCEMODIFIER_HPP
+#define BRAINS_FORCEMODIFIER_HPP
 
-#include <map>
-#include <memory>
-#include <vector>
+#include "brains/SimInfo.hpp"
 
-#include "brains/ForceManager.hpp"
-#include "brains/Thermo.hpp"
-#include "brains/Velocitizer.hpp"
-#include "math/Hull.hpp"
-#include "math/Triangle.hpp"
-#include "primitives/Molecule.hpp"
-#include "utils/RandNumGen.hpp"
-
-using namespace std;
 namespace OpenMD {
 
-  /**
-   * @class LangevinHullForceManager
-   * Force manager for NPT Langevin Hull Dynamics applying friction
-   * and random forces as well as torques.  Stochastic force is
-   * determined by the area of surface triangles on the convex hull.
-   * See: Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011),
-   *      and Kohanoff et al. CHEMPHYSCHEM 6, 1848-1852 (2005).
-   */
-  class LangevinHullForceManager : public ForceManager {
+  //! Abstract class for external ForceModifier classes
+  class ForceModifier {
   public:
-    LangevinHullForceManager(SimInfo* info);
-    virtual ~LangevinHullForceManager();
+    virtual ~ForceModifier()    = default;
+    virtual void modifyForces() = 0;
 
   protected:
-    virtual void postCalculation();
+    ForceModifier(SimInfo* info) : info_ {info} {}
 
-  private:
-    std::vector<Vector3d> genTriangleForces(int nTriangles);
-
-    Globals* simParams;
-    Utils::RandNumGenPtr randNumGen_;
-    std::normal_distribution<RealType> forceDistribution_;
-    std::unique_ptr<Velocitizer> veloMunge {nullptr};
-
-    RealType dt_;
-    RealType targetTemp_;
-    RealType targetPressure_;
-    RealType viscosity_;
-
-    enum HullTypeEnum { hullConvex, hullAlphaShape, hullUnknown };
-
-    std::map<string, HullTypeEnum> stringToEnumMap_;
-    HullTypeEnum hullType_;
-
-    bool doThermalCoupling_;
-    bool doPressureCoupling_;
-
-    Hull* surfaceMesh_;
-    std::vector<StuntDouble*> localSites_;
+    SimInfo* info_ {nullptr};
   };
+}  // namespace OpenMD
 
-}  // end namespace OpenMD
-#endif  // LANGEVINHULL_FORCEMANAGER
+#endif  // BRAINS_FORCEMODIFIER_HPP

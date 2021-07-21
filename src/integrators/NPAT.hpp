@@ -93,6 +93,6 @@ namespace OpenMD {
     unsigned int axis_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 
 #endif  // INTEGRATORS_NPTF_HPP

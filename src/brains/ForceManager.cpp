@@ -52,12 +52,14 @@
 
 #include "brains/ForceManager.hpp"
 
-#include "primitives/Molecule.hpp"
 #define __OPENMD_C
 #include <cstdio>
 #include <iomanip>
 #include <iostream>
 
+#include "constraints/ZconstraintForceModifier.hpp"
+#include "integrators/LDForceModifier.hpp"
+#include "integrators/LangevinHullForceModifier.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "parallel/ForceMatrixDecomposition.hpp"
 #include "perturbations/MagneticField.hpp"
@@ -66,7 +68,10 @@
 #include "primitives/Bend.hpp"
 #include "primitives/Bond.hpp"
 #include "primitives/Inversion.hpp"
+#include "primitives/Molecule.hpp"
 #include "primitives/Torsion.hpp"
+#include "restraints/RestraintForceModifier.hpp"
+#include "restraints/ThermoIntegrationForceModifier.hpp"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
 
@@ -83,7 +88,7 @@ namespace OpenMD {
   }
 
   ForceManager::~ForceManager() {
-    Utils::deletePointers(perturbations_);
+    Utils::deletePointers(forceModifiers_);
 
     delete switcher_;
     delete interactionMan_;
@@ -446,20 +451,51 @@ namespace OpenMD {
     electrostaticScale_[2] = fopts.getelectrostatic13scale();
     electrostaticScale_[3] = fopts.getelectrostatic14scale();
 
+    // Initialize the perturbations
     if (info_->getSimParams()->haveUniformField()) {
       UniformField* eField = new UniformField(info_);
-      perturbations_.push_back(eField);
+      forceModifiers_.push_back(eField);
     }
 
     if (info_->getSimParams()->haveMagneticField()) {
       MagneticField* mField = new MagneticField(info_);
-      perturbations_.push_back(mField);
+      forceModifiers_.push_back(mField);
     }
+
     if (info_->getSimParams()->haveUniformGradientStrength() ||
         info_->getSimParams()->haveUniformGradientDirection1() ||
         info_->getSimParams()->haveUniformGradientDirection2()) {
       UniformGradient* eGrad = new UniformGradient(info_);
-      perturbations_.push_back(eGrad);
+      forceModifiers_.push_back(eGrad);
+    }
+
+    // Initialize the force modifiers (order matters)
+    if (info_->getSimParams()->getUseThermodynamicIntegration()) {
+      ThermoIntegrationForceModifier* thermoInt =
+          new ThermoIntegrationForceModifier(info_);
+      forceModifiers_.push_back(thermoInt);
+    } else if (info_->getSimParams()->getUseRestraints()) {
+      RestraintForceModifier* restraint = new RestraintForceModifier(info_);
+      forceModifiers_.push_back(restraint);
+    }
+
+    std::string ensembleParam =
+        toUpperCopy(info_->getSimParams()->getEnsemble());
+
+    if (ensembleParam == "LHULL" || ensembleParam == "LANGEVINHULL" ||
+        ensembleParam == "SMIPD") {
+      LangevinHullForceModifier* langevinHullFM =
+          new LangevinHullForceModifier(info_);
+      forceModifiers_.push_back(langevinHullFM);
+    } else if (ensembleParam == "LANGEVINDYNAMICS" || ensembleParam == "LD") {
+      LDForceModifier* langevinDynamicsFM = new LDForceModifier(info_);
+      forceModifiers_.push_back(langevinDynamicsFM);
+    }
+
+    if (info_->getSimParams()->getNZconsStamps() > 0) {
+      info_->setNZconstraint(info_->getSimParams()->getNZconsStamps());
+      ZConstraintForceModifier* zCons = new ZConstraintForceModifier(info_);
+      forceModifiers_.push_back(zCons);
     }
 
     usePeriodicBoundaryConditions_ =
@@ -1033,19 +1069,17 @@ namespace OpenMD {
   }
 
   void ForceManager::postCalculation() {
-    vector<Perturbation*>::iterator pi;
-    for (pi = perturbations_.begin(); pi != perturbations_.end(); ++pi) {
-      (*pi)->applyPerturbation();
-    }
+    for (auto& forceModifier : forceModifiers_)
+      forceModifier->modifyForces();
 
+    // Modify the rigid bodies in response to the applied force modifications
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
 
-    // collect the atomic forces onto rigid bodies
-
+    // Collect the atomic forces onto rigid bodies
     for (mol = info_->beginMolecule(mi); mol != NULL;
          mol = info_->nextMolecule(mi)) {
       for (rb = mol->beginRigidBody(rbIter); rb != NULL;
@@ -1059,48 +1093,48 @@ namespace OpenMD {
     MPI_Allreduce(MPI_IN_PLACE, virialTensor.getArrayPointer(), 9, MPI_REALTYPE,
                   MPI_SUM, MPI_COMM_WORLD);
 #endif
-
     curSnapshot->setVirialTensor(virialTensor);
 
-    if (info_->getSimParams()->getUseLongRangeCorrections()) {
-      /*
-      RealType vol = curSnapshot->getVolume();
-      RealType Elrc(0.0);
-      RealType Wlrc(0.0);
+    /*
+      if (info_->getSimParams()->getUseLongRangeCorrections()) {
+        RealType vol = curSnapshot->getVolume();
+        RealType Elrc(0.0);
+        RealType Wlrc(0.0);
 
-      set<AtomType*>::iterator i;
-      set<AtomType*>::iterator j;
+        set<AtomType*>::iterator i;
+        set<AtomType*>::iterator j;
 
-      RealType n_i, n_j;
-      RealType rho_i, rho_j;
-      pair<RealType, RealType> LRI;
+        RealType n_i, n_j;
+        RealType rho_i, rho_j;
+        pair<RealType, RealType> LRI;
 
-      for (i = atomTypes_.begin(); i != atomTypes_.end(); ++i) {
-      n_i = RealType(info_->getGlobalCountOfType(*i));
-      rho_i = n_i /  vol;
-      for (j = atomTypes_.begin(); j != atomTypes_.end(); ++j) {
-      n_j = RealType(info_->getGlobalCountOfType(*j));
-      rho_j = n_j / vol;
+        for (i = atomTypes_.begin(); i != atomTypes_.end(); ++i) {
+        n_i = RealType(info_->getGlobalCountOfType(*i));
+        rho_i = n_i /  vol;
+        for (j = atomTypes_.begin(); j != atomTypes_.end(); ++j) {
+        n_j = RealType(info_->getGlobalCountOfType(*j));
+        rho_j = n_j / vol;
 
-      LRI = interactionMan_->getLongRangeIntegrals( (*i), (*j) );
+        LRI = interactionMan_->getLongRangeIntegrals( (*i), (*j) );
 
-      Elrc += n_i   * rho_j * LRI.first;
-      Wlrc -= rho_i * rho_j * LRI.second;
+        Elrc += n_i   * rho_j * LRI.first;
+        Wlrc -= rho_i * rho_j * LRI.second;
+        }
+        }
+        Elrc *= 2.0 * Constants::PI;
+        Wlrc *= 2.0 * Constants::PI;
+
+        RealType lrp = curSnapshot->getLongRangePotential();
+        curSnapshot->setLongRangePotential(lrp + Elrc);
+        virialTensor += Wlrc * SquareMatrix3<RealType>::identity();
+        curSnapshot->setVirialTensor(virialTensor);
       }
-      }
-      Elrc *= 2.0 * Constants::PI;
-      Wlrc *= 2.0 * Constants::PI;
-
-      RealType lrp = curSnapshot->getLongRangePotential();
-      curSnapshot->setLongRangePotential(lrp + Elrc);
-      virialTensor += Wlrc * SquareMatrix3<RealType>::identity();
-      curSnapshot->setVirialTensor(virialTensor);
     */
-    }
   }
 
   void ForceManager::calcSelectedForces(Molecule* mol1, Molecule* mol2) {
     if (!initialized_) initialize();
+
     selectedPreCalculation(mol1, mol2);
     selectedShortRangeInteractions(mol1, mol2);
     selectedLongRangeInteractions(mol1, mol2);
@@ -1760,18 +1794,16 @@ namespace OpenMD {
   }
 
   void ForceManager::selectedPostCalculation(Molecule* mol1, Molecule* mol2) {
-    vector<Perturbation*>::iterator pi;
-    for (pi = perturbations_.begin(); pi != perturbations_.end(); ++pi) {
-      (*pi)->applyPerturbation();
-    }
+    for (auto& forceModifier : forceModifiers_)
+      forceModifier->modifyForces();
 
+    // Modify the rigid bodies in response to the applied force modifications
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
 
-    // collect the atomic forces onto rigid bodies
-
+    // Collect the atomic forces onto rigid bodies
     for (rb = mol1->beginRigidBody(rbIter); rb != NULL;
          rb = mol1->nextRigidBody(rbIter)) {
       Mat3x3d rbTau = rb->calcForcesAndTorquesAndVirial();
@@ -1790,41 +1822,41 @@ namespace OpenMD {
 #endif
     curSnapshot->setVirialTensor(virialTensor);
 
-    if (info_->getSimParams()->getUseLongRangeCorrections()) {
-      /*
-      RealType vol = curSnapshot->getVolume();
-      RealType Elrc(0.0);
-      RealType Wlrc(0.0);
+    /*
+      if (info_->getSimParams()->getUseLongRangeCorrections()) {
 
-      set<AtomType*>::iterator i;
-      set<AtomType*>::iterator j;
+        RealType vol = curSnapshot->getVolume();
+        RealType Elrc(0.0);
+        RealType Wlrc(0.0);
 
-      RealType n_i, n_j;
-      RealType rho_i, rho_j;
-      pair<RealType, RealType> LRI;
+        set<AtomType*>::iterator i;
+        set<AtomType*>::iterator j;
 
-      for (i = atomTypes_.begin(); i != atomTypes_.end(); ++i) {
-      n_i = RealType(info_->getGlobalCountOfType(*i));
-      rho_i = n_i /  vol;
-      for (j = atomTypes_.begin(); j != atomTypes_.end(); ++j) {
-      n_j = RealType(info_->getGlobalCountOfType(*j));
-      rho_j = n_j / vol;
+        RealType n_i, n_j;
+        RealType rho_i, rho_j;
+        pair<RealType, RealType> LRI;
 
-      LRI = interactionMan_->getLongRangeIntegrals( (*i), (*j) );
+        for (i = atomTypes_.begin(); i != atomTypes_.end(); ++i) {
+        n_i = RealType(info_->getGlobalCountOfType(*i));
+        rho_i = n_i /  vol;
+        for (j = atomTypes_.begin(); j != atomTypes_.end(); ++j) {
+        n_j = RealType(info_->getGlobalCountOfType(*j));
+        rho_j = n_j / vol;
 
-      Elrc += n_i   * rho_j * LRI.first;
-      Wlrc -= rho_i * rho_j * LRI.second;
+        LRI = interactionMan_->getLongRangeIntegrals( (*i), (*j) );
+
+        Elrc += n_i   * rho_j * LRI.first;
+        Wlrc -= rho_i * rho_j * LRI.second;
+        }
+        }
+        Elrc *= 2.0 * Constants::PI;
+        Wlrc *= 2.0 * Constants::PI;
+
+        RealType lrp = curSnapshot->getLongRangePotential();
+        curSnapshot->setLongRangePotential(lrp + Elrc);
+        virialTensor += Wlrc * SquareMatrix3<RealType>::identity();
+        curSnapshot->setVirialTensor(virialTensor);
       }
-      }
-      Elrc *= 2.0 * Constants::PI;
-      Wlrc *= 2.0 * Constants::PI;
-
-      RealType lrp = curSnapshot->getLongRangePotential();
-      curSnapshot->setLongRangePotential(lrp + Elrc);
-      virialTensor += Wlrc * SquareMatrix3<RealType>::identity();
-      curSnapshot->setVirialTensor(virialTensor);
     */
-    }
   }
-
 }  // namespace OpenMD

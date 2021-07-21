@@ -43,22 +43,31 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "constraints/ZconstraintForceModifier.hpp"
+
+#include <cmath>
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
-#include <cmath>
 
-#include "constraints/ZconstraintForceManager.hpp"
 #include "integrators/Integrator.hpp"
 #include "utils/Constants.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
-  ZconstraintForceManager::ZconstraintForceManager(SimInfo* info) :
-      ForceManager(info), infiniteTime(1e31) {
-    currSnapshot_     = info_->getSnapshotManager()->getCurrentSnapshot();
+
+  ZConstraintForceModifier::ZConstraintForceModifier(SimInfo* info) :
+      ForceModifier {info}, infiniteTime {1e31} {
     Globals* simParam = info_->getSimParams();
+    currSnapshot_     = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    // Zero out the velocities of center of mass of unconstrained
+    // molecules and the velocities of center of mass of every single
+    // z-constrained molecueles
+    zeroVelocity();
+    currZconsTime_ = currSnapshot_->getTime();
 
     if (simParam->haveDt()) {
       dt_ = simParam->getDt();
@@ -170,7 +179,7 @@ namespace OpenMD {
                   MPI_COMM_WORLD);
 #endif
 
-    // creat zconsWriter
+    // create zconsWriter
     fzOut = new ZConsWriter(info_, zconsOutput_.c_str());
 
     if (!fzOut) {
@@ -181,9 +190,30 @@ namespace OpenMD {
     }
   }
 
-  ZconstraintForceManager::~ZconstraintForceManager() { delete fzOut; }
+  ZConstraintForceModifier::~ZConstraintForceModifier() { delete fzOut; }
 
-  void ZconstraintForceManager::update() {
+  RealType ZConstraintForceModifier::getZTargetPos(int index) {
+    RealType zTargetPos;
+#ifndef IS_MPI
+    Molecule* mol = info_->getMoleculeByGlobalIndex(index);
+    assert(mol);
+    Vector3d com = mol->getCom();
+    zTargetPos   = com[whichDirection];
+#else
+    int whichProc = info_->getMolToProc(index);
+    if (whichProc == worldRank) {
+      Molecule* mol = info_->getMoleculeByGlobalIndex(index);
+      Vector3d com  = mol->getCom();
+      zTargetPos    = com[whichDirection];
+      MPI_Bcast(&zTargetPos, 1, MPI_REALTYPE, whichProc, MPI_COMM_WORLD);
+    } else {
+      MPI_Bcast(&zTargetPos, 1, MPI_REALTYPE, whichProc, MPI_COMM_WORLD);
+    }
+#endif
+    return zTargetPos;
+  }
+
+  void ZConstraintForceModifier::update() {
     fixedZMols_.clear();
     movingZMols_.clear();
     unzconsMols_.clear();
@@ -239,24 +269,27 @@ namespace OpenMD {
     }
   }
 
-  bool ZconstraintForceManager::isZMol(Molecule* mol) {
+  void ZConstraintForceModifier::calcTotalMassMovingZMols() {
+    totMassMovingZMols_ = 0.0;
+    std::list<ZconstraintMol>::iterator i;
+    for (i = movingZMols_.begin(); i != movingZMols_.end(); ++i) {
+      totMassMovingZMols_ += i->mol->getMass();
+    }
+
+#ifdef IS_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &totMassMovingZMols_, 1, MPI_REALTYPE, MPI_SUM,
+                  MPI_COMM_WORLD);
+#endif
+  }
+
+  bool ZConstraintForceModifier::isZMol(Molecule* mol) {
     return allZMolIndices_.find(mol->getGlobalIndex()) ==
                    allZMolIndices_.end() ?
                false :
                true;
   }
 
-  void ZconstraintForceManager::init() {
-    // Zero out the velocities of center of mass of unconstrained
-    // molecules and the velocities of center of mass of every single
-    // z-constrained molecueles
-    zeroVelocity();
-    currZconsTime_ = currSnapshot_->getTime();
-  }
-
-  void ZconstraintForceManager::calcForces() {
-    ForceManager::calcForces();
-
+  void ZConstraintForceModifier::modifyForces() {
     if (usingZconsGap_) { updateZPos(); }
 
     if (checkZConsState()) {
@@ -284,7 +317,75 @@ namespace OpenMD {
     }
   }
 
-  void ZconstraintForceManager::zeroVelocity() {
+  void ZConstraintForceModifier::updateZPos() {
+    std::list<ZconstraintMol>::iterator i;
+    for (i = fixedZMols_.begin(); i != fixedZMols_.end(); ++i) {
+      i->param.zTargetPos += zconsGap_;
+    }
+  }
+
+  bool ZConstraintForceModifier::checkZConsState() {
+    Vector3d com;
+    RealType diff;
+    int changed = 0;
+
+    std::list<ZconstraintMol>::iterator i;
+    std::list<ZconstraintMol>::iterator j;
+
+    std::list<ZconstraintMol> newMovingZMols;
+    for (i = fixedZMols_.begin(); i != fixedZMols_.end();) {
+      com        = i->mol->getCom();
+      Vector3d d = com - Vector3d(0.0, 0.0, i->param.zTargetPos);
+      info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(d);
+
+      RealType diff = fabs(d[whichDirection]);
+
+      if (diff > zconsTol_) {
+        if (usingZconsGap_) { i->endFixingTime = infiniteTime; }
+        j = i++;
+        newMovingZMols.push_back(*j);
+        fixedZMols_.erase(j);
+        changed = 1;
+      } else {
+        ++i;
+      }
+    }
+
+    std::list<ZconstraintMol> newFixedZMols;
+    for (i = movingZMols_.begin(); i != movingZMols_.end();) {
+      com        = i->mol->getCom();
+      Vector3d d = com - Vector3d(0.0, 0.0, i->param.zTargetPos);
+      info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(d);
+      diff = fabs(d[whichDirection]);
+
+      if (diff <= zconsTol_) {
+        if (usingZconsGap_) {
+          i->endFixingTime = currSnapshot_->getTime() + zconsFixingTime_;
+        }
+        // This moving zconstraint molecule is now fixed
+        j = i++;
+        newFixedZMols.push_back(*j);
+        movingZMols_.erase(j);
+        changed = 1;
+      } else {
+        ++i;
+      }
+    }
+
+    // merge the lists
+    fixedZMols_.insert(fixedZMols_.end(), newFixedZMols.begin(),
+                       newFixedZMols.end());
+    movingZMols_.insert(movingZMols_.end(), newMovingZMols.begin(),
+                        newMovingZMols.end());
+
+#ifdef IS_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &changed, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+#endif
+
+    return (changed > 0);
+  }
+
+  void ZConstraintForceModifier::zeroVelocity() {
     Vector3d comVel;
     Vector3d vel;
     std::list<ZconstraintMol>::iterator i;
@@ -359,7 +460,18 @@ namespace OpenMD {
     }
   }
 
-  void ZconstraintForceManager::doZconstraintForce() {
+  bool ZConstraintForceModifier::haveFixedZMols() {
+    int haveFixed = fixedZMols_.empty() ? 0 : 1;
+
+#ifdef IS_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &haveFixed, 1, MPI_INT, MPI_SUM,
+                  MPI_COMM_WORLD);
+#endif
+
+    return haveFixed > 0;
+  }
+
+  void ZConstraintForceModifier::doZconstraintForce() {
     RealType totalFZ;
     Vector3d com;
     Vector3d force(0.0);
@@ -430,7 +542,30 @@ namespace OpenMD {
     }
   }
 
-  void ZconstraintForceManager::doHarmonic() {
+  RealType ZConstraintForceModifier::getZFOfFixedZMols(Molecule* mol,
+                                                       StuntDouble* sd,
+                                                       RealType totalForce) {
+    return totalForce * sd->getMass() / mol->getMass();
+  }
+
+  RealType ZConstraintForceModifier::getZFOfMovingMols(Molecule* mol,
+                                                       RealType totalForce) {
+    return totalForce * mol->getMass() /
+           (totMassUnconsMols_ + totMassMovingZMols_);
+  }
+
+  bool ZConstraintForceModifier::haveMovingZMols() {
+    int haveMoving = movingZMols_.empty() ? 0 : 1;
+
+#ifdef IS_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &haveMoving, 1, MPI_INT, MPI_SUM,
+                  MPI_COMM_WORLD);
+#endif
+
+    return haveMoving > 0;
+  }
+
+  void ZConstraintForceModifier::doHarmonic() {
     RealType totalFZ = 0.0;
     Vector3d force(0.0);
     Vector3d com;
@@ -481,158 +616,21 @@ namespace OpenMD {
     }
   }
 
-  bool ZconstraintForceManager::checkZConsState() {
-    Vector3d com;
-    RealType diff;
-    int changed = 0;
-
-    std::list<ZconstraintMol>::iterator i;
-    std::list<ZconstraintMol>::iterator j;
-
-    std::list<ZconstraintMol> newMovingZMols;
-    for (i = fixedZMols_.begin(); i != fixedZMols_.end();) {
-      com        = i->mol->getCom();
-      Vector3d d = com - Vector3d(0.0, 0.0, i->param.zTargetPos);
-      info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(d);
-
-      RealType diff = fabs(d[whichDirection]);
-
-      if (diff > zconsTol_) {
-        if (usingZconsGap_) { i->endFixingTime = infiniteTime; }
-        j = i++;
-        newMovingZMols.push_back(*j);
-        fixedZMols_.erase(j);
-        changed = 1;
-      } else {
-        ++i;
-      }
-    }
-
-    std::list<ZconstraintMol> newFixedZMols;
-    for (i = movingZMols_.begin(); i != movingZMols_.end();) {
-      com        = i->mol->getCom();
-      Vector3d d = com - Vector3d(0.0, 0.0, i->param.zTargetPos);
-      info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(d);
-      diff = fabs(d[whichDirection]);
-
-      if (diff <= zconsTol_) {
-        if (usingZconsGap_) {
-          i->endFixingTime = currSnapshot_->getTime() + zconsFixingTime_;
-        }
-        // This moving zconstraint molecule is now fixed
-        j = i++;
-        newFixedZMols.push_back(*j);
-        movingZMols_.erase(j);
-        changed = 1;
-      } else {
-        ++i;
-      }
-    }
-
-    // merge the lists
-    fixedZMols_.insert(fixedZMols_.end(), newFixedZMols.begin(),
-                       newFixedZMols.end());
-    movingZMols_.insert(movingZMols_.end(), newMovingZMols.begin(),
-                        newMovingZMols.end());
-
-#ifdef IS_MPI
-    MPI_Allreduce(MPI_IN_PLACE, &changed, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-#endif
-
-    return (changed > 0);
-  }
-
-  bool ZconstraintForceManager::haveFixedZMols() {
-    int haveFixed = fixedZMols_.empty() ? 0 : 1;
-
-#ifdef IS_MPI
-    MPI_Allreduce(MPI_IN_PLACE, &haveFixed, 1, MPI_INT, MPI_SUM,
-                  MPI_COMM_WORLD);
-#endif
-
-    return haveFixed > 0;
-  }
-
-  bool ZconstraintForceManager::haveMovingZMols() {
-    int haveMoving = movingZMols_.empty() ? 0 : 1;
-
-#ifdef IS_MPI
-    MPI_Allreduce(MPI_IN_PLACE, &haveMoving, 1, MPI_INT, MPI_SUM,
-                  MPI_COMM_WORLD);
-#endif
-
-    return haveMoving > 0;
-  }
-
-  void ZconstraintForceManager::calcTotalMassMovingZMols() {
-    totMassMovingZMols_ = 0.0;
-    std::list<ZconstraintMol>::iterator i;
-    for (i = movingZMols_.begin(); i != movingZMols_.end(); ++i) {
-      totMassMovingZMols_ += i->mol->getMass();
-    }
-
-#ifdef IS_MPI
-    MPI_Allreduce(MPI_IN_PLACE, &totMassMovingZMols_, 1, MPI_REALTYPE, MPI_SUM,
-                  MPI_COMM_WORLD);
-#endif
-  }
-
-  RealType ZconstraintForceManager::getZFOfFixedZMols(Molecule* mol,
-                                                      StuntDouble* sd,
-                                                      RealType totalForce) {
+  RealType ZConstraintForceModifier::getHFOfFixedZMols(Molecule* mol,
+                                                       StuntDouble* sd,
+                                                       RealType totalForce) {
     return totalForce * sd->getMass() / mol->getMass();
   }
 
-  RealType ZconstraintForceManager::getZFOfMovingMols(Molecule* mol,
-                                                      RealType totalForce) {
-    return totalForce * mol->getMass() /
-           (totMassUnconsMols_ + totMassMovingZMols_);
-  }
-
-  RealType ZconstraintForceManager::getHFOfFixedZMols(Molecule* mol,
-                                                      StuntDouble* sd,
-                                                      RealType totalForce) {
-    return totalForce * sd->getMass() / mol->getMass();
-  }
-
-  RealType ZconstraintForceManager::getHFOfUnconsMols(Molecule* mol,
-                                                      RealType totalForce) {
+  RealType ZConstraintForceModifier::getHFOfUnconsMols(Molecule* mol,
+                                                       RealType totalForce) {
     return totalForce * mol->getMass() / totMassUnconsMols_;
   }
 
-  void ZconstraintForceManager::updateZPos() {
-    std::list<ZconstraintMol>::iterator i;
-    for (i = fixedZMols_.begin(); i != fixedZMols_.end(); ++i) {
-      i->param.zTargetPos += zconsGap_;
-    }
-  }
-
-  void ZconstraintForceManager::updateCantPos() {
-    std::list<ZconstraintMol>::iterator i;
-    for (i = movingZMols_.begin(); i != movingZMols_.end(); ++i) {
-      i->cantPos += i->param.cantVel * dt_;
-    }
-  }
-
-  RealType ZconstraintForceManager::getZTargetPos(int index) {
-    RealType zTargetPos;
-#ifndef IS_MPI
-    Molecule* mol = info_->getMoleculeByGlobalIndex(index);
-    assert(mol);
-    Vector3d com = mol->getCom();
-    zTargetPos   = com[whichDirection];
-#else
-    int whichProc = info_->getMolToProc(index);
-    if (whichProc == worldRank) {
-      Molecule* mol = info_->getMoleculeByGlobalIndex(index);
-      Vector3d com  = mol->getCom();
-      zTargetPos    = com[whichDirection];
-      MPI_Bcast(&zTargetPos, 1, MPI_REALTYPE, whichProc, MPI_COMM_WORLD);
-    } else {
-      MPI_Bcast(&zTargetPos, 1, MPI_REALTYPE, whichProc, MPI_COMM_WORLD);
-    }
-#endif
-    return zTargetPos;
-  }
-
+  // void ZConstraintForceModifier::updateCantPos() {
+  //   std::list<ZconstraintMol>::iterator i;
+  //   for (i = movingZMols_.begin(); i != movingZMols_.end(); ++i) {
+  //     i->cantPos += i->param.cantVel * dt_;
+  //   }
+  // }
 }  // namespace OpenMD

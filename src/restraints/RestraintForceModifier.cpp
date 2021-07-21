@@ -43,29 +43,32 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
+#include "restraints/RestraintForceModifier.hpp"
 
 #include <config.h>
 
 #include <cmath>
 #include <memory>
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
+#include "brains/ForceModifier.hpp"
 #include "io/RestReader.hpp"
 #include "restraints/MolecularRestraint.hpp"
 #include "restraints/ObjectRestraint.hpp"
-#include "restraints/RestraintForceManager.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "utils/Constants.hpp"
+#include "utils/MemoryUtils.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
 
-  RestraintForceManager::RestraintForceManager(SimInfo* info) :
-      ForceManager(info) {
+  RestraintForceModifier::RestraintForceModifier(SimInfo* info) :
+      ForceModifier {info} {
     // order of affairs:
     //
     // 1) create restraints from the restraintStamps found in the MD
@@ -79,8 +82,10 @@ namespace OpenMD {
     // call the normal force manager calcForces, then loop through the
     // restrained objects and do their restraint forces.
 
-    currSnapshot_     = info_->getSnapshotManager()->getCurrentSnapshot();
     Globals* simParam = info_->getSimParams();
+    currSnapshot_     = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    currRestTime_ = currSnapshot_->getTime();
 
     if (simParam->haveStatusTime()) {
       restTime_ = simParam->getStatusTime();
@@ -307,11 +312,11 @@ namespace OpenMD {
     // ThermodynamicIntegration subclasses RestraintForceManager, and there
     // are times when it won't use restraints at all, so only open the
     // restraint file if we are actually using restraints:
-
     if (simParam->getUseRestraints()) {
       std::string refFile = simParam->getRestraint_file();
       RestReader* rr      = new RestReader(info, refFile, stuntDoubleIndex);
       rr->readReferenceStructure();
+      delete rr;
     }
 
     restOutput_ = getPrefix(info_->getFinalConfigFileName()) + ".rest";
@@ -330,21 +335,13 @@ namespace OpenMD {
     }
   }
 
-  RestraintForceManager::~RestraintForceManager() {
+  RestraintForceModifier::~RestraintForceModifier() {
+    Utils::deletePointers(restraints_);
+
     delete restOut;
-    std::vector<Restraint*>::const_iterator resti;
-    for (resti = restraints_.begin(); resti != restraints_.end(); ++resti) {
-      delete (*resti);
-    }
-    restraints_.clear();
   }
 
-  void RestraintForceManager::init() {
-    currRestTime_ = currSnapshot_->getTime();
-  }
-
-  void RestraintForceManager::calcForces() {
-    ForceManager::calcForces();
+  void RestraintForceModifier::modifyForces() {
     RealType restPot(0.0);
 
     restPot = doRestraints(1.0);
@@ -356,10 +353,10 @@ namespace OpenMD {
 
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
     currSnapshot_->setRestraintPotential(restPot);
-    
+
     RealType pe = currSnapshot_->getPotentialEnergy();
-    currSnapshot_->setRawPotential( pe );
-    currSnapshot_->setPotentialEnergy( pe + restPot );
+    currSnapshot_->setRawPotential(pe);
+    currSnapshot_->setPotentialEnergy(pe + restPot);
 
     // write out forces and current positions of restrained molecules
     if (currSnapshot_->getTime() >= currRestTime_) {
@@ -368,7 +365,7 @@ namespace OpenMD {
     }
   }
 
-  RealType RestraintForceManager::doRestraints(RealType scalingFactor) {
+  RealType RestraintForceModifier::doRestraints(RealType scalingFactor) {
     std::vector<Molecule*>::const_iterator rm;
     std::shared_ptr<GenericData> data;
     Molecule::IntegrableObjectIterator ioi;
@@ -498,7 +495,7 @@ namespace OpenMD {
         oRest->calcForce(pos, A);
         (*ro)->addFrc(oRest->getRestraintForce());
         (*ro)->addTrq(oRest->getRestraintTorque());
-	
+
       } else {
         // plain vanilla positional restraints:
 

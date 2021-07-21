@@ -43,9 +43,7 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
+#include "utils/simError.h"
 
 #include <config.h>
 
@@ -53,9 +51,11 @@
 #include <cstdlib>
 #include <cstring>
 
-int nChecks;
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
-#include "utils/simError.h"
+int nChecks;
 
 errorStruct painCave;
 

@@ -46,9 +46,7 @@
 #define _LARGEFILE_SOURCE64
 #define _FILE_OFFSET_BITS 64
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
+#include "io/DumpReader.hpp"
 
 #include <cmath>
 #include <cstdio>
@@ -59,8 +57,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "brains/Thermo.hpp"
-#include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/MemoryUtils.hpp"
 #include "utils/StringTokenizer.hpp"
@@ -746,4 +747,4 @@ namespace OpenMD {
       }
     }
   }
-}  // end namespace OpenMD
+}  // namespace OpenMD

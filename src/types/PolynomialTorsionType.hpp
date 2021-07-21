@@ -126,5 +126,5 @@ namespace OpenMD {
      return os;
      }*/
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_POLYNOMIALTORSIONTYPE_HPP

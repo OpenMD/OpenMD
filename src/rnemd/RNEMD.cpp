@@ -43,6 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
+#include "rnemd/RNEMD.hpp"
+
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -65,7 +67,6 @@
 #include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
-#include "rnemd/RNEMD.hpp"
 #include "rnemd/RNEMDParameters.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"

@@ -113,4 +113,4 @@ namespace OpenMD {
     angle = theta / Constants::PI * 180.0;
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

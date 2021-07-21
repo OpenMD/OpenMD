@@ -193,6 +193,6 @@ namespace OpenMD {
 
   };  // End class Triangle
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 
 #endif  // MATH_FACET_HPP

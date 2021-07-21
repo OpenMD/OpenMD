@@ -45,16 +45,16 @@
 
 #include "flucq/FluctuatingChargePropagator.hpp"
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "flucq/FluctuatingChargeObjectiveFunction.hpp"
 #include "optimization/Constraint.hpp"
 #include "optimization/EndCriteria.hpp"
 #include "optimization/OptimizationFactory.hpp"
 #include "optimization/Problem.hpp"
 #include "optimization/StatusFunction.hpp"
-
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
 
 using namespace QuantLib;
 namespace OpenMD {

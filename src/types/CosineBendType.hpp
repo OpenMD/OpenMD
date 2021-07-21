@@ -88,5 +88,5 @@ namespace OpenMD {
     RealType c0_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_COSINEBENDTYPE_HPP

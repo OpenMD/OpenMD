@@ -96,4 +96,4 @@ namespace OpenMD {
       da.makeDirectional(I);
     }
   }
-}  // end namespace OpenMD
+}  // namespace OpenMD

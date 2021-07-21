@@ -97,4 +97,4 @@ namespace OpenMD {
       ff.addInversionType(at1, at2, at3, at4, inversionType);
     }
   }
-}  // end namespace OpenMD
+}  // namespace OpenMD

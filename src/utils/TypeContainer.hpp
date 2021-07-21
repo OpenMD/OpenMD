@@ -206,6 +206,6 @@ namespace OpenMD {
     MapType data_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 
 #endif  // UTILS_TYPECONTAINER_HPP

@@ -195,5 +195,5 @@ namespace OpenMD {
    */
   std::string trimCopy(const std::string& input);
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // UTILS_TRIM_HPP

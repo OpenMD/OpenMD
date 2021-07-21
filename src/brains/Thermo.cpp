@@ -43,14 +43,15 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif  // is_mpi
+#include "brains/Thermo.hpp"
 
 #include <cmath>
 #include <iostream>
 
-#include "brains/Thermo.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "primitives/Molecule.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"

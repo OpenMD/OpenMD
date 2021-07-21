@@ -85,5 +85,5 @@ namespace OpenMD {
     CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters);
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_CHARMMTORSIONTYPE_HPP

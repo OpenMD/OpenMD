@@ -87,6 +87,6 @@ namespace OpenMD {
     Mat3x3d vScale;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 
 #endif  // INTEGRATORS_NPTF_HPP

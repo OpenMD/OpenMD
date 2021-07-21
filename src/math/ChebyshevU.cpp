@@ -77,4 +77,4 @@ namespace OpenMD {
     polyList_.push_back(u1);
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

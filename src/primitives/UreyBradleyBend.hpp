@@ -75,6 +75,6 @@ namespace OpenMD {
     Bond* bond_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 
 #endif  // PRIMITIVES_UREYBRADLEYBEND_HPP

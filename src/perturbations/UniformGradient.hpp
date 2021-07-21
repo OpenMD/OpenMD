@@ -50,8 +50,8 @@
 #ifndef PERTURBATIONS_UNIFORMGRADIENT_HPP
 #define PERTURBATIONS_UNIFORMGRADIENT_HPP
 
+#include "brains/ForceModifier.hpp"
 #include "brains/SimInfo.hpp"
-#include "perturbations/Perturbation.hpp"
 
 namespace OpenMD {
 
@@ -120,24 +120,23 @@ namespace OpenMD {
     \f$ \mathbf{F} = 2 \mathsf{Q} \times \nabla \mathbf{E} \f$
 
   */
-  class UniformGradient : public Perturbation {
+  class UniformGradient : public ForceModifier {
   public:
     UniformGradient(SimInfo* info);
 
-  protected:
-    virtual void initialize();
-    virtual void applyPerturbation();
-
   private:
+    void modifyForces() override;
+    void initialize();
+
     bool initialized;
     bool doUniformGradient;
     bool doParticlePot;
+
     Globals* simParams;
-    SimInfo* info_ {nullptr};
     Mat3x3d Grad_;
     Vector3d a_, b_;
     RealType g_, cpsi_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif

@@ -346,4 +346,4 @@ namespace OpenMD {
     return i == stringToEnumMap_.end() ? Unknown : i->second;
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

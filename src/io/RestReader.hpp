@@ -132,6 +132,6 @@ namespace OpenMD {
     char buffer[bufferSize];
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 
 #endif  // IO_RESTREADER_HPP

@@ -43,15 +43,16 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
+#include "io/ZConsWriter.hpp"
 
 #include <algorithm>
 #include <iostream>
 #include <vector>
 
-#include "io/ZConsWriter.hpp"
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "utils/simError.h"
 
 namespace OpenMD {

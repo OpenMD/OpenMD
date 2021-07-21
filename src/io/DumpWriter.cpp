@@ -43,20 +43,21 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include <config.h>
+#include "io/DumpWriter.hpp"
 
 #ifdef IS_MPI
 #include <mpi.h>
 #endif
 
-#include "io/DumpWriter.hpp"
+#include <config.h>
+
+#include "io/Globals.hpp"
 #include "io/basic_teebuf.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
 #ifdef HAVE_ZLIB
 #include "io/gzstream.hpp"
 #endif
-#include "io/Globals.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -833,4 +834,4 @@ namespace OpenMD {
     os.flush();
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

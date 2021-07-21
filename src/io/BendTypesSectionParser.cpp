@@ -92,4 +92,4 @@ namespace OpenMD {
 
     if (bendType != NULL) { ff.addBendType(at1, at2, at3, bendType); }
   }
-}  // end namespace OpenMD
+}  // namespace OpenMD

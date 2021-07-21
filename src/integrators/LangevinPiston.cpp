@@ -43,17 +43,18 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
+#include "integrators/LangevinPiston.hpp"
 
 #include <cmath>
 #include <random>
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
 #include "integrators/IntegratorCreator.hpp"
-#include "integrators/LangevinPiston.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/Constants.hpp"
 #include "utils/simError.h"

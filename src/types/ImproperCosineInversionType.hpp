@@ -86,5 +86,5 @@ namespace OpenMD {
         std::vector<ImproperCosineInversionParameter>& parameters);
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP

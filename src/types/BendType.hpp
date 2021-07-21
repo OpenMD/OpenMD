@@ -74,5 +74,5 @@ namespace OpenMD {
     RealType theta0_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_BENDTYPE_HPP

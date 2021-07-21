@@ -105,4 +105,4 @@ namespace OpenMD {
     }
   }
 
-}  // end namespace OpenMD
+}  // namespace OpenMD

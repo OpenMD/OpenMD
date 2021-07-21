@@ -316,4 +316,4 @@ namespace OpenMD {
         std::shared_ptr<GenericData>(new ShapeAtypeData("Shape", st)));
     //  delete shapeStream;
   }
-}  // end namespace OpenMD
+}  // namespace OpenMD

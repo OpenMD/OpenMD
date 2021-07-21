@@ -360,5 +360,5 @@ namespace OpenMD {
     IndexListContainer inversionIndexContainer_;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // UTILS_LOCALINDEXMANAGER_HPP

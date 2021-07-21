@@ -130,5 +130,5 @@ namespace OpenMD {
     SimInfo* info_ {nullptr};
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif

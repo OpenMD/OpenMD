@@ -74,5 +74,5 @@ namespace OpenMD {
     virtual InversionKey getKey()               = 0;
   };
 
-}  // end namespace OpenMD
+}  // namespace OpenMD
 #endif  // TYPES_INVERSIONTYPE_HPP
