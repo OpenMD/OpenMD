@@ -100,6 +100,12 @@ namespace OpenMD {
       Mat3x3d R(0.0);
 
       for (unsigned int n = 0; n < struc.size(); n++) {
+
+        /*
+         * First migrate the center of mass:
+         */       
+        struc[n] -= molCom;
+
         /*
          * correlation matrix R:
          *   R(i,j) = sum(over n): y(n,i) * x(n,j)
