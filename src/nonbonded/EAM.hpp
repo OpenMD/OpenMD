@@ -111,25 +111,29 @@ namespace OpenMD {
 
     RealType fastPower(RealType x, int y);
 
-    RealType ZhouPhiCoreCore(RealType r, RealType re, RealType A,
-                             RealType alpha, RealType kappa);
-    RealType ZhouPhiCoreValence(RealType r, RealType re, RealType B,
-                                RealType beta, RealType lambda);
+    // RealType ZhouPhiCoreCore(RealType r, RealType re, RealType A,
+    // RealType alpha, RealType kappa);
+    // RealType ZhouPhiCoreValence(RealType r, RealType re, RealType B,
+    // RealType beta, RealType lambda);
+    //
+    // RealType ZhouPhi(RealType r, RealType re, RealType A, RealType B,
+    // RealType alpha, RealType beta, RealType kappa,
+    // RealType lambda);
+    //
+    // RealType ZhouRho(RealType r, RealType re, RealType fe, RealType beta,
+    // RealType lambda);
 
-    RealType ZhouPhi(RealType r, RealType re, RealType A, RealType B,
-                     RealType alpha, RealType beta, RealType kappa,
-                     RealType lambda);
-
-    RealType ZhouRho(RealType r, RealType re, RealType fe, RealType beta,
-                     RealType lambda);
-
-    RealType PhiCoreCore(RealType r, RealType re, RealType A, RealType alpha);
-    RealType PhiCoreValence(RealType r, RealType re, RealType B, RealType beta);
+    RealType PhiCoreCore(RealType r, RealType re, RealType A, RealType alpha,
+                         RealType kappa);
+    RealType PhiCoreValence(RealType r, RealType re, RealType B, RealType beta,
+                            RealType lambda);
 
     RealType Phi(RealType r, RealType re, RealType A, RealType B,
-                 RealType alpha, RealType beta);
+                 RealType alpha, RealType beta, RealType kappa,
+                 RealType lambda);
 
-    RealType Rho(RealType r, RealType re, RealType fe, RealType beta);
+    RealType Rho(RealType r, RealType re, RealType fe, RealType beta,
+                 RealType lambda);
     RealType gFunc(RealType q, RealType nV, RealType nM);
     RealType gPrime(RealType q, RealType nV, RealType nM);
     RealType Zhou2001Functional(RealType rho, RealType rhoe,
