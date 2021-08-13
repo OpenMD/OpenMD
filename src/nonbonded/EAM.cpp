@@ -117,7 +117,7 @@ namespace OpenMD {
               a * fastPower(sigma / (r + 1e-5), 30));
     }
 
-    else if (mixMeth_ == eamDream1) {
+    else if ((mixMeth_ == eamDream1) || (mixMeth_ == eamJohnson)) {
       return (A * exp(-alpha * (r / re - 1.0))) /
              (1.0 + fastPower(r / re - kappa, 20));
     }
@@ -132,7 +132,7 @@ namespace OpenMD {
       return -(B * exp(-beta * (r / re - 1.0)));
     }
 
-    else if (mixMeth_ == eamDream1) {
+    else if ((mixMeth_ == eamDream1) || (mixMeth_ == eamJohnson)) {
       return -(B * exp(-beta * (r / re - 1.0))) /
              (1.0 + fastPower(r / re - lambda, 20));
     }
@@ -154,7 +154,7 @@ namespace OpenMD {
       return (fe * exp(-beta * (r / re - 1.0)));
     }
 
-    else if (mixMeth_ == eamDream1) {
+    else if ((mixMeth_ == eamDream1) || (mixMeth_ == eamJohnson)) {
       return (fe * exp(-beta * (r / re - 1.0))) /
              (1.0 + fastPower(r / re - lambda, 20));
     }
@@ -452,7 +452,6 @@ namespace OpenMD {
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
     string EAMMixMeth        = fopts.getEAMMixingMethod();
     toUpper(EAMMixMeth);
-
     if (EAMMixMeth == "JOHNSON")
       mixMeth_ = eamJohnson;
     else if (EAMMixMeth == "DREAM1")
