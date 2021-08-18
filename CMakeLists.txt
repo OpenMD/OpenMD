@@ -587,6 +587,8 @@ src/integrators/LangevinHullForceModifier.cpp
 src/integrators/LangevinPiston.cpp
 src/rnemd/NIVS.cpp
 src/rnemd/RNEMD.cpp
+src/rnemd/SPF.cpp
+src/rnemd/SPFForceManager.cpp
 src/rnemd/Swap.cpp
 src/rnemd/VSS.cpp
 src/io/ConstraintWriter.cpp

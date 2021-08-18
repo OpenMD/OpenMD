@@ -52,6 +52,7 @@
 #include "brains/SimInfo.hpp"
 #include "rnemd/NIVS.hpp"
 #include "rnemd/RNEMD.hpp"
+#include "rnemd/SPF.hpp"
 #include "rnemd/Swap.hpp"
 #include "rnemd/VSS.hpp"
 #include "utils/CI_String.hpp"
@@ -65,15 +66,18 @@ namespace OpenMD {
       explicit MethodFactory(const std::string& methodStr) :
           methodStr_ {Utils::traits_cast<Utils::ci_char_traits>(methodStr)} {}
 
-      std::unique_ptr<RNEMD> create(SimInfo* info) {
+      std::unique_ptr<RNEMD> create(SimInfo* info, ForceManager* forceMan) {
         if (methodStr_ == "Swap")
-          return Utils::make_unique<SwapMethod>(info);
+          return Utils::make_unique<SwapMethod>(info, forceMan);
 
         else if (methodStr_ == "NIVS")
-          return Utils::make_unique<NIVSMethod>(info);
+          return Utils::make_unique<NIVSMethod>(info, forceMan);
+
+        else if (methodStr_ == "SPF")
+          return Utils::make_unique<SPFMethod>(info, forceMan);
 
         else
-          return Utils::make_unique<VSSMethod>(info);
+          return Utils::make_unique<VSSMethod>(info, forceMan);
       }
 
     private:

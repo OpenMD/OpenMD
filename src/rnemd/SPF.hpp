@@ -43,24 +43,35 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef OPENMD_RNEMD_VSS_HPP
-#define OPENMD_RNEMD_VSS_HPP
+#ifndef OPENMD_RNEMD_SPF_HPP
+#define OPENMD_RNEMD_SPF_HPP
 
 #include "brains/SimInfo.hpp"
 #include "rnemd/RNEMD.hpp"
+#include "rnemd/SPFForceManager.hpp"
 #include "selection/SelectionManager.hpp"
 
 namespace OpenMD {
   namespace RNEMD {
 
-    class VSSMethod : public RNEMD {
+    class SPFMethod : public RNEMD {
     public:
-      explicit VSSMethod(SimInfo* info, ForceManager* forceMan);
+      explicit SPFMethod(SimInfo* info, ForceManager* forceMan);
 
       void doRNEMDImpl(SelectionManager& smanA,
                        SelectionManager& smanB) override;
+
+    private:
+      void updateLambda();
+      void selectMolecule();
+
+      RealType lambda_ {};
+      SPFForceManager* forceManager_ {nullptr};
+      SelectionManager sourceSman_;
+      RealType targetSlabCenter_ {};
+      bool hasMovingMolecule_ {false};
     };
   }  // namespace RNEMD
 }  // namespace OpenMD
 
-#endif  // OPENMD_RNEMD_VSS_HPP
+#endif  // OPENMD_RNEMD_SPF_HPP

@@ -127,6 +127,8 @@ namespace OpenMD {
     RealType rawPot = curSnapshot->getPotentialEnergy();
     curSnapshot->setRawPotential(rawPot);
 
+    RealType rp = curSnapshot->getRestraintPotential();
+
     // scale the potential and update the snapshot
     rawPot *= factor_;
     curSnapshot->setPotentialEnergy(rawPot);
@@ -141,7 +143,7 @@ namespace OpenMD {
     RealType restPot(0.0);
 
     if (simParam_->getUseRestraints()) {
-      // do restraints from RestraintForceManager:
+      // do restraints from RestraintForceModifier:
       scaledRestPot = doRestraints(1.0 - factor_);
       restPot       = getUnscaledPotential();
     }
@@ -154,7 +156,7 @@ namespace OpenMD {
 #endif
 
     // give the final values to the snapshot
-    curSnapshot->setLongRangePotential(rawPot + scaledRestPot);
-    curSnapshot->setRestraintPotential(restPot);
+    curSnapshot->setPotentialEnergy(rawPot + scaledRestPot);
+    curSnapshot->setRestraintPotential(rp + restPot);
   }
 }  // namespace OpenMD

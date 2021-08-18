@@ -55,7 +55,7 @@ namespace OpenMD {
 
     class SwapMethod : public RNEMD {
     public:
-      explicit SwapMethod(SimInfo* info);
+      explicit SwapMethod(SimInfo* info, ForceManager* forceMan);
 
       void doRNEMDImpl(SelectionManager& smanA,
                        SelectionManager& smanB) override;

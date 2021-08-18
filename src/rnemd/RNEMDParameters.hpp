@@ -63,6 +63,7 @@ namespace OpenMD {
       DeclareParameter(FluxType, std::string);
       DeclareParameter(ExchangeTime, RealType);
       DeclareParameter(KineticFlux, RealType);
+      DeclareParameter(ParticleFlux, RealType);
       DeclareParameter(MomentumFlux, RealType);
       DeclareParameter(MomentumFluxVector, std::vector<RealType>);
       DeclareParameter(AngularMomentumFlux, RealType);

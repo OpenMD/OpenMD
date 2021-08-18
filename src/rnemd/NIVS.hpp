@@ -57,7 +57,7 @@ namespace OpenMD {
 
     class NIVSMethod : public RNEMD {
     public:
-      explicit NIVSMethod(SimInfo* info);
+      explicit NIVSMethod(SimInfo* info, ForceManager* forceMan);
 
       void doRNEMDImpl(SelectionManager& smanA,
                        SelectionManager& smanB) override;

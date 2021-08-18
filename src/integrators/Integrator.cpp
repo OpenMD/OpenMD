@@ -56,6 +56,8 @@
 #include "integrators/DLM.hpp"
 #include "rnemd/MethodFactory.hpp"
 #include "rnemd/RNEMD.hpp"
+#include "rnemd/SPFForceManager.hpp"
+#include "utils/CI_String.hpp"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
 
@@ -139,9 +141,15 @@ namespace OpenMD {
       useRNEMD = simParams->getRNEMDParameters()->getUseRNEMD();
 
       if (useRNEMD) {
+        // ForceManager will only be changed if SPF-RNEMD is enabled
+        if (Utils::traits_cast<Utils::ci_char_traits>(
+                simParams->getRNEMDParameters()->getMethod()) == "SPF") {
+          forceMan_ = new RNEMD::SPFForceManager(info);
+        }
+
         RNEMD::MethodFactory rnemdMethod {
             simParams->getRNEMDParameters()->getMethod()};
-        rnemd_ = rnemdMethod.create(info);
+        rnemd_ = rnemdMethod.create(info, forceMan_);
 
         if (simParams->getRNEMDParameters()->haveExchangeTime()) {
           RNEMD_exchangeTime =

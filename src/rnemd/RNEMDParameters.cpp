@@ -63,6 +63,7 @@ namespace OpenMD {
       DefineOptionalParameterWithDefaultValue(ExchangeTime, "exchangeTime",
                                               100.0);
       DefineOptionalParameter(KineticFlux, "kineticFlux");
+      DefineOptionalParameter(ParticleFlux, "particleFlux");
       DefineOptionalParameter(MomentumFlux, "momentumFlux");
       DefineOptionalParameter(MomentumFluxVector, "momentumFluxVector");
       DefineOptionalParameter(AngularMomentumFlux, "angularMomentumFlux");
@@ -92,9 +93,9 @@ namespace OpenMD {
       CheckParameter(ExchangeTime, isPositive());
       CheckParameter(OutputBins, isPositive());
       CheckParameter(OutputBinWidth, isPositive());
-      CheckParameter(Method, isEqualIgnoreCase("Swap") ||
-                                 isEqualIgnoreCase("NIVS") ||
-                                 isEqualIgnoreCase("VSS"));
+      CheckParameter(Method,
+                     isEqualIgnoreCase("Swap") || isEqualIgnoreCase("NIVS") ||
+                         isEqualIgnoreCase("VSS") || isEqualIgnoreCase("SPF"));
       CheckParameter(
           FluxType,
           isEqualIgnoreCase("KE") || isEqualIgnoreCase("Px") ||
@@ -105,7 +106,7 @@ namespace OpenMD {
               isEqualIgnoreCase("KE+Py") || isEqualIgnoreCase("KE+Lx") ||
               isEqualIgnoreCase("KE+Ly") || isEqualIgnoreCase("KE+Lz") ||
               isEqualIgnoreCase("KE+Pvector") ||
-              isEqualIgnoreCase("KE+Lvector"));
+              isEqualIgnoreCase("KE+Lvector") || isEqualIgnoreCase("Particle"));
       CheckParameter(PrivilegedAxis, isEqualIgnoreCase("x") ||
                                          isEqualIgnoreCase("y") ||
                                          isEqualIgnoreCase("z"));

@@ -43,24 +43,61 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef OPENMD_RNEMD_VSS_HPP
-#define OPENMD_RNEMD_VSS_HPP
+#ifndef OPENMD_RNEMD_SPFFORCEMANAGER_HPP
+#define OPENMD_RNEMD_SPFFORCEMANAGER_HPP
 
-#include "brains/SimInfo.hpp"
-#include "rnemd/RNEMD.hpp"
-#include "selection/SelectionManager.hpp"
+#include "brains/ForceManager.hpp"
 
 namespace OpenMD {
   namespace RNEMD {
 
-    class VSSMethod : public RNEMD {
+    class SPFForceManager : public ForceManager {
     public:
-      explicit VSSMethod(SimInfo* info, ForceManager* forceMan);
+      SPFForceManager(SimInfo* info);
+      ~SPFForceManager();
 
-      void doRNEMDImpl(SelectionManager& smanA,
-                       SelectionManager& smanB) override;
+      void setSelectedMolecule(Molecule* selectedMolecule,
+                               Vector3d newPosition);
+
+      RealType getDeltaU() const { return potentialB_ - potentialA_; }
+
+      void updateLambda(RealType lambda) { lambda_ = lambda; }
+
+      void acceptGhost() {
+        *currentSnapshot_ = *ghostSnapshot_;
+
+        currentSnapshot_->clearDerivedProperties();
+        ghostSnapshot_->clearDerivedProperties();
+      }
+
+    private:
+      void calcForces() override;
+
+      void updatePotentials();
+      void updateLongRangePotentials();
+      void updateShortRangePotentials();
+      void updateSelfPotentials();
+      void updateExcludedPotentials();
+      void updateRestraintPotentials();
+      void updateSelectionPotentials();
+      void updateVirialTensor();
+
+      template<typename T>
+      T linearCombination(T current, T ghost) {
+        return T {(1.0 - lambda_) * current + lambda_ * ghost};
+      }
+
+      Snapshot* currentSnapshot_;
+      Snapshot* ghostSnapshot_;
+
+      Molecule* selectedMolecule_;
+
+      RealType potentialA_ {};
+      RealType potentialB_ {};
+
+      RealType lambda_;
     };
   }  // namespace RNEMD
 }  // namespace OpenMD
 
-#endif  // OPENMD_RNEMD_VSS_HPP
+#endif  // OPENMD_RNEMD_SPFFORCEMANAGER_HPP

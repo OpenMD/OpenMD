@@ -52,6 +52,7 @@
 #include <string>
 #include <vector>
 
+#include "brains/ForceManager.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/Snapshot.hpp"
 #include "math/SquareMatrix3.hpp"
@@ -67,7 +68,7 @@ namespace OpenMD {
 
     class RNEMD {
     public:
-      RNEMD(SimInfo* info);
+      RNEMD(SimInfo* info, ForceManager* forceMan);
       virtual ~RNEMD();
 
       void getStarted();
@@ -76,6 +77,8 @@ namespace OpenMD {
       void writeOutputFile();
 
     protected:
+      enum RNEMDPrivilegedAxis { rnemdX = 0, rnemdY = 1, rnemdZ = 2 };
+
       enum RNEMDFluxType {
         rnemdKE,         // translational kinetic energy flux
         rnemdRotKE,      // rotational kinetic energy flux
@@ -88,6 +91,7 @@ namespace OpenMD {
         rnemdLy,         // flux of angular momentum along y axis
         rnemdLz,         // flux of angular momentum along z axis
         rnemdLvector,    // flux of angular momentum vector
+        rnemdParticle,   // flux of particles
         rnemdKePx,       // flux of translational KE and x-momentum
         rnemdKePy,       // flux of translational KE and y-momentum
         rnemdKePvector,  // full combo flying platter
@@ -98,8 +102,17 @@ namespace OpenMD {
         rnemdUnknownFluxType
       };
 
+      SimInfo* info_ {nullptr};
       Snapshot* currentSnap_ {nullptr};
+      Mat3x3d hmat_;
+      RealType slabWidth_;
 
+      SelectionManager commonA_;
+      SelectionManager commonB_;
+      RealType slabACenter_;
+      RealType slabBCenter_;
+
+      RNEMDPrivilegedAxis rnemdPrivilegedAxis_;
       RNEMDFluxType rnemdFluxType_;
 
       std::string rnemdFluxTypeLabel_;
@@ -110,25 +123,24 @@ namespace OpenMD {
 
       Vector3d coordinateOrigin_;
 
-      RealType kineticTarget_ {
-          0.0};  // target or desired one-time exchange energy
-      Vector3d momentumTarget_ {
-          V3Zero};  // target or desired one-time exchange momentum
-      Vector3d angularMomentumTarget_ {
-          V3Zero};  // target or desired one-time exchange angular momentum
+      // target or desired one-time exchanges
+      RealType kineticTarget_ {0.0};
+      RealType particleTarget_ {0.0};
+      Vector3d momentumTarget_ {V3Zero};
+      Vector3d angularMomentumTarget_ {V3Zero};
 
-      RealType kineticExchange_ {
-          0.0};  // actual exchange energy (running total)
-      Vector3d momentumExchange_ {
-          V3Zero};  // actual exchange momentum (running total)
-      Vector3d angularMomentumExchange_ {
-          V3Zero};  // actual exchange momentum (running total)
+      // actual exchanges (running total)
+      RealType kineticExchange_ {0.0};
+      RealType particleExchange_ {0.0};
+      Vector3d momentumExchange_ {V3Zero};
+      Vector3d angularMomentumExchange_ {V3Zero};
 
       unsigned int trialCount_ {0};
       unsigned int failTrialCount_ {0};
       unsigned int failRootCount_ {0};
 
       void setKineticFlux(RealType kineticFlux);
+      void setParticleFlux(RealType particleFlux);
       void setMomentumFluxVector(
           const std::vector<RealType>& momentumFluxVector);
       void setAngularMomentumFluxVector(
@@ -149,8 +161,6 @@ namespace OpenMD {
         ENDINDEX
       };
 
-      enum RNEMDPrivilegedAxis { rnemdX = 0, rnemdY = 1, rnemdZ = 2 };
-
       struct OutputData {
         std::string title;
         std::string units;
@@ -162,10 +172,8 @@ namespace OpenMD {
       using OutputBitSet  = std::bitset<ENDINDEX - BEGININDEX>;
       using OutputMapType = std::map<std::string, OutputFields>;
 
-      SimInfo* info_ {nullptr};
-      Mat3x3d hmat_;
+      ForceManager* forceMan_ {nullptr};
 
-      RNEMDPrivilegedAxis rnemdPrivilegedAxis_;
       std::string rnemdAxisLabel_;
 
       // Object selection for specifying a particular species:
@@ -180,8 +188,6 @@ namespace OpenMD {
       SelectionEvaluator evaluatorB_;
       SelectionManager seleManA_;
       SelectionManager seleManB_;
-      SelectionManager commonA_;
-      SelectionManager commonB_;
       bool hasSelectionA_ {false};
       bool hasSelectionB_ {false};
 
@@ -193,10 +199,7 @@ namespace OpenMD {
       unsigned int nBins_ {0};
 
       RealType binWidth_;
-      RealType slabWidth_;
 
-      RealType slabACenter_;
-      RealType slabBCenter_;
       RealType sphereARadius_;
       RealType sphereBRadius_;
       RealType areaA_;
@@ -209,9 +212,11 @@ namespace OpenMD {
 
       RealType dividingArea_;
 
-      RealType kineticFlux_ {0.0};                   // target or desired *flux*
-      Vector3d momentumFluxVector_ {V3Zero};         // target or desired *flux*
-      Vector3d angularMomentumFluxVector_ {V3Zero};  // target or desired *flux*
+      // target or desired *flux*
+      RealType kineticFlux_ {0.0};
+      RealType particleFlux_ {0.0};
+      Vector3d momentumFluxVector_ {V3Zero};
+      Vector3d angularMomentumFluxVector_ {V3Zero};
 
       RealType exchangeTime_ {}, runTime_ {}, statusTime_ {};
 

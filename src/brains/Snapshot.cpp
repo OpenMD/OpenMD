@@ -446,7 +446,7 @@ namespace OpenMD {
     return frameData.reciprocalPotential;
   }
 
-  void Snapshot::setSelfPotential(potVec sp) { frameData.selfPotentials = sp; }
+  void Snapshot::setSelfPotentials(potVec sp) { frameData.selfPotentials = sp; }
 
   potVec Snapshot::getSelfPotentials() { return frameData.selfPotentials; }
 
@@ -460,7 +460,7 @@ namespace OpenMD {
     return frameData.selfPotential;
   }
 
-  void Snapshot::setLongRangePotential(potVec lrPot) {
+  void Snapshot::setLongRangePotentials(potVec lrPot) {
     frameData.lrPotentials = lrPot;
   }
 

@@ -92,7 +92,7 @@ namespace OpenMD {
   public:
     enum ObjectType { otAtom, otDAtom, otRigidBody };
 
-    virtual ~StuntDouble();
+    virtual ~StuntDouble() = default;
 
     /**
      * Returns the global index of this stuntDouble.
@@ -121,6 +121,7 @@ namespace OpenMD {
     int getGlobalIntegrableObjectIndex() {
       return globalIntegrableObjectIndex_;
     }
+
     void setGlobalIntegrableObjectIndex(int index) {
       globalIntegrableObjectIndex_ = index;
     }
@@ -422,9 +423,7 @@ namespace OpenMD {
     /**
      * Returns system Center of Mass velocity for stuntDouble frame from
      * snapshot
-     *
      */
-
     Vector3d getCOMvel() {
       return (snapshotMan_->getCurrentSnapshot())->getCOMvel();
     }
@@ -432,7 +431,6 @@ namespace OpenMD {
     /**
      * Returns system Center of Mass angular momentum for stuntDouble frame from
      * snapshot
-     *
      */
     Vector3d getCOMw() {
       return (snapshotMan_->getCurrentSnapshot())->getCOMw();
@@ -440,7 +438,6 @@ namespace OpenMD {
 
     /**
      * Returns system Center of Mass for stuntDouble frame from snapshot
-     *
      */
     Vector3d getCOM(int snapshotNo) {
       return (snapshotMan_->getSnapshot(snapshotNo))->getCOM();
@@ -449,9 +446,7 @@ namespace OpenMD {
     /**
      * Returns system Center of Mass velocity for stuntDouble frame from
      * snapshot
-     *
      */
-
     Vector3d getCOMvel(int snapshotNo) {
       return (snapshotMan_->getSnapshot(snapshotNo))->getCOMvel();
     }
@@ -459,7 +454,6 @@ namespace OpenMD {
     /**
      * Returns system Center of Mass angular momentum for stuntDouble frame from
      * snapshot
-     *
      */
     Vector3d getCOMw(int snapshotNo) {
       return (snapshotMan_->getSnapshot(snapshotNo))->getCOMw();
@@ -1455,8 +1449,22 @@ namespace OpenMD {
           .density[localIndex_] += dens;
     }
 
-    /** Set the force of this stuntDouble to zero */
+    /**
+     * Set the properties of this stuntDouble to zero
+     */
     void zeroForcesAndTorques();
+
+    /**
+     * Linearly combines the properties from two different snapshots
+     *
+     * @param snapA The properties from this snapshot are multiplied by \c multA
+     * @param snapB The properties from this snapshot are multiplied by \c multB
+     * @param multA Multiplier for the properties in \c snapA
+     * @param multB Multiplier for the properties in \c snapB
+     */
+    void combineForcesAndTorques(Snapshot* snapA, Snapshot* snapB,
+                                 RealType multA, RealType multB);
+
     /**
      * Returns the inertia tensor of this stuntDouble
      * @return the inertia tensor of this stuntDouble
@@ -1472,8 +1480,8 @@ namespace OpenMD {
     /**
      * Tests the  if this stuntDouble is a  linear rigidbody
      *
-     * @return true if this stuntDouble is a  linear rigidbody, otherwise return
-     * false
+     * @return true if this stuntDouble is a  linear rigidbody, otherwise
+     * return false
      * @note atom and directional atom will always return false
      *
      * @see #linearAxis
@@ -1481,8 +1489,8 @@ namespace OpenMD {
     bool isLinear() { return linear_; }
 
     /**
-     * Returns the linear axis of the rigidbody, atom and directional atom will
-     * always return -1
+     * Returns the linear axis of the rigidbody, atom and directional atom
+     * will always return -1
      *
      * @return the linear axis of the rigidbody
      *

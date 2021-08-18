@@ -78,7 +78,8 @@
 namespace OpenMD {
   namespace RNEMD {
 
-    VSSMethod::VSSMethod(SimInfo* info) : RNEMD {info} {
+    VSSMethod::VSSMethod(SimInfo* info, ForceManager* forceMan) :
+        RNEMD {info, forceMan} {
       rnemdMethodLabel_ = "VSS";
 
       RNEMDParameters* rnemdParams = info->getSimParams()->getRNEMDParameters();

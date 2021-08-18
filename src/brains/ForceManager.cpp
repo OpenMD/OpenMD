@@ -548,12 +548,12 @@ namespace OpenMD {
     snap->setInversionPotential(0.0);
 
     potVec zeroPot(0.0);
-    snap->setLongRangePotential(zeroPot);
+    snap->setLongRangePotentials(zeroPot);
 
     snap->setExcludedPotentials(zeroPot);
     if (doPotentialSelection_) snap->setSelectionPotentials(zeroPot);
 
-    snap->setSelfPotential(0.0);
+    snap->setSelfPotentials(0.0);
     snap->setRestraintPotential(0.0);
     snap->setRawPotential(0.0);
 
@@ -600,7 +600,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     Molecule::BondIterator bondIter;
-    ;
+
     Molecule::BendIterator bendIter;
     Molecule::TorsionIterator torsionIter;
     Molecule::InversionIterator inversionIter;
@@ -1052,10 +1052,10 @@ namespace OpenMD {
     fDecomp_->collectSelfData();
 
     longRangePotential = fDecomp_->getPairwisePotential();
-    curSnapshot->setLongRangePotential(longRangePotential);
+    curSnapshot->setLongRangePotentials(longRangePotential);
 
     selfPotential = fDecomp_->getSelfPotential();
-    curSnapshot->setSelfPotential(selfPotential);
+    curSnapshot->setSelfPotentials(selfPotential);
 
     curSnapshot->setExcludedPotentials(fDecomp_->getExcludedSelfPotential() +
                                        fDecomp_->getExcludedPotential());
@@ -1161,7 +1161,7 @@ namespace OpenMD {
     snap->setInversionPotential(0.0);
 
     potVec zeroPot(0.0);
-    snap->setLongRangePotential(zeroPot);
+    snap->setLongRangePotentials(zeroPot);
     snap->setExcludedPotentials(zeroPot);
     if (doPotentialSelection_) snap->setSelectionPotentials(zeroPot);
 
@@ -1777,10 +1777,10 @@ namespace OpenMD {
     fDecomp_->collectSelfData();
 
     longRangePotential = fDecomp_->getPairwisePotential();
-    curSnapshot->setLongRangePotential(longRangePotential);
+    curSnapshot->setLongRangePotentials(longRangePotential);
 
     selfPotential = fDecomp_->getSelfPotential();
-    curSnapshot->setSelfPotential(selfPotential);
+    curSnapshot->setSelfPotentials(selfPotential);
 
     curSnapshot->setExcludedPotentials(fDecomp_->getExcludedSelfPotential() +
                                        fDecomp_->getExcludedPotential());

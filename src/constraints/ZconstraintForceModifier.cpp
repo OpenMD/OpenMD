@@ -61,8 +61,8 @@ namespace OpenMD {
   ZConstraintForceModifier::ZConstraintForceModifier(SimInfo* info) :
       ForceModifier {info}, infiniteTime {1e31} {
     Globals* simParam = info_->getSimParams();
-    currSnapshot_  = info_->getSnapshotManager()->getCurrentSnapshot();
-    currZconsTime_ = currSnapshot_->getTime();
+    currSnapshot_     = info_->getSnapshotManager()->getCurrentSnapshot();
+    currZconsTime_    = currSnapshot_->getTime();
 
     if (simParam->haveDt()) {
       dt_ = simParam->getDt();
@@ -173,7 +173,7 @@ namespace OpenMD {
     MPI_Allreduce(MPI_IN_PLACE, &totMassUnconsMols_, 1, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
 #endif
-    
+
     // Zero out the velocities of center of mass of unconstrained
     // molecules and the velocities of center of mass of every single
     // z-constrained molecueles
@@ -290,8 +290,7 @@ namespace OpenMD {
   }
 
   void ZConstraintForceModifier::modifyForces() {
-
-    currSnapshot_     = info_->getSnapshotManager()->getCurrentSnapshot();
+    currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
     if (usingZconsGap_) { updateZPos(); }
 
@@ -415,7 +414,7 @@ namespace OpenMD {
     // molecules)
 
     RealType pzMovingMols = 0.0;
-    
+
     for (i = movingZMols_.begin(); i != movingZMols_.end(); ++i) {
       mol    = i->mol;
       comVel = mol->getComVel();
@@ -480,7 +479,7 @@ namespace OpenMD {
     RealType totalFZ(0.0);
 
     // Calculate the total z-contraint force on the fixed molecules:
-    
+
     std::list<ZconstraintMol>::iterator i;
     Molecule* mol;
     StuntDouble* sd;
@@ -494,36 +493,35 @@ namespace OpenMD {
            sd = mol->nextIntegrableObject(ii)) {
         i->fz += (sd->getFrc())[whichDirection];
       }
-      
+
       totalFZ += i->fz;
     }
 
 #ifdef IS_MPI
-    // collect the total z-constraint force   
+    // collect the total z-constraint force
     MPI_Allreduce(MPI_IN_PLACE, &totalFZ, 1, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
 #endif
-	    
+
     // apply negative force to fixed z-constrained molecules:
     for (i = fixedZMols_.begin(); i != fixedZMols_.end(); ++i) {
       mol = i->mol;
 
       for (sd = mol->beginIntegrableObject(ii); sd != NULL;
            sd = mol->nextIntegrableObject(ii)) {
-	
-	Vector3d force(0.0);
+        Vector3d force(0.0);
         force[whichDirection] = -getZFOfFixedZMols(mol, sd, i->fz);
 
         sd->addFrc(force);
       }
     }
-    
+
     // modify the forces of the currently moving z-constrained
     // molecules so that system stays fixed:
     for (i = movingZMols_.begin(); i != movingZMols_.end(); ++i) {
       mol = i->mol;
 
-      Vector3d force(0.0);	  
+      Vector3d force(0.0);
       force[whichDirection] = -getZFOfMovingMols(mol, totalFZ);
 
       for (sd = mol->beginIntegrableObject(ii); sd != NULL;
@@ -569,12 +567,12 @@ namespace OpenMD {
 
 #ifdef IS_MPI
     MPI_Allreduce(MPI_IN_PLACE, &haveMoving, 1, MPI_INT, MPI_SUM,
-		  MPI_COMM_WORLD);
+                  MPI_COMM_WORLD);
 #endif
 
     return haveMoving > 0;
   }
-  
+
   /// Applies a restraint force to the molecules which are not at
   /// their specified positions.
   void ZConstraintForceModifier::doHarmonic() {
@@ -586,20 +584,20 @@ namespace OpenMD {
     StuntDouble* sd;
     Molecule::IntegrableObjectIterator ii;
     Molecule* mol;
-    
+
     RealType pe = currSnapshot_->getPotentialEnergy();
     currSnapshot_->setRawPotential(pe);
-    
+
     for (i = movingZMols_.begin(); i != movingZMols_.end(); ++i) {
-      mol = i->mol;
-      Vector3d com  = mol->getCom();
+      mol             = i->mol;
+      Vector3d com    = mol->getCom();
       RealType resPos = usingSMD_ ? i->cantPos : i->param.zTargetPos;
-      Vector3d d = com - Vector3d(0.0, 0.0, resPos);
+      Vector3d d      = com - Vector3d(0.0, 0.0, resPos);
       currSnapshot_->wrapVector(d);
 
       RealType diff = d[whichDirection];
 
-      restPot +=  0.5 * i->param.kz * diff * diff;
+      restPot += 0.5 * i->param.kz * diff * diff;
 
       RealType harmonicF = -(i->param.kz * diff);
       totalFZ += harmonicF;
@@ -618,16 +616,18 @@ namespace OpenMD {
     MPI_Allreduce(MPI_IN_PLACE, &totalFZ, 1, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
 #endif
-    
-    currSnapshot_->setRestraintPotential(restPot);
+
+    RealType rp = currSnapshot_->getRestraintPotential();
+    currSnapshot_->setRestraintPotential(rp + restPot);
+
     currSnapshot_->setPotentialEnergy(pe + restPot);
-    
+
     // modify the forces of unconstrained molecules
     std::vector<Molecule*>::iterator j;
     for (j = unzconsMols_.begin(); j != unzconsMols_.end(); ++j) {
-      mol = *j;
+      mol                   = *j;
       force[whichDirection] = getHFOfUnconsMols(mol, totalFZ);
-        
+
       for (sd = mol->beginIntegrableObject(ii); sd != NULL;
            sd = mol->nextIntegrableObject(ii)) {
         sd->addFrc(force);

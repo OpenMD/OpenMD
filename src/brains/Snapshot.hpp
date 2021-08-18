@@ -59,7 +59,6 @@ namespace OpenMD {
    * FrameData is a structure for holding system-wide dynamic data
    * about the simulation.
    */
-
   struct FrameData {
     int id;               /**< identification number of the snapshot */
     RealType currentTime; /**< current time */
@@ -210,7 +209,7 @@ namespace OpenMD {
 
     RealType getShortRangePotential();
 
-    void setLongRangePotential(const potVec lrPot);
+    void setLongRangePotentials(const potVec lrPot);
     RealType getLongRangePotential();
     potVec getLongRangePotentials();
 
@@ -220,7 +219,7 @@ namespace OpenMD {
     void setSurfacePotential(const RealType sp);
     RealType getSurfacePotential();
 
-    void setSelfPotential(const potVec sp);
+    void setSelfPotentials(const potVec sp);
     RealType getSelfPotential();
     potVec getSelfPotentials();
 
@@ -345,5 +344,8 @@ namespace OpenMD {
   };
 
   typedef DataStorage(Snapshot::*DataStoragePointer);
+
+  // translation from typedef into using:
+  // using DataStoragePointer = DataStorage Snapshot::*;
 }  // namespace OpenMD
 #endif  // BRAINS_SNAPSHOT_HPP

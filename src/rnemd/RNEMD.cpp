@@ -77,10 +77,11 @@
 namespace OpenMD {
   namespace RNEMD {
 
-    RNEMD::RNEMD(SimInfo* info) :
-        info_(info), evaluator_(info_), seleMan_(info_), evaluatorA_(info_),
-        evaluatorB_(info_), seleManA_(info_), seleManB_(info_), commonA_(info_),
-        commonB_(info_), outputEvaluator_(info_), outputSeleMan_(info_) {
+    RNEMD::RNEMD(SimInfo* info, ForceManager* forceMan) :
+        info_(info), forceMan_(forceMan), evaluator_(info_), seleMan_(info_),
+        evaluatorA_(info_), evaluatorB_(info_), seleManA_(info_),
+        seleManB_(info_), commonA_(info_), commonB_(info_),
+        outputEvaluator_(info_), outputSeleMan_(info_) {
       trialCount_     = 0;
       failTrialCount_ = 0;
       failRootCount_  = 0;
@@ -106,6 +107,7 @@ namespace OpenMD {
       stringToFluxType["Ly"]         = rnemdLy;
       stringToFluxType["Lz"]         = rnemdLz;
       stringToFluxType["Lvector"]    = rnemdLvector;
+      stringToFluxType["Particle"]   = rnemdParticle;
       stringToFluxType["KE+Px"]      = rnemdKePx;
       stringToFluxType["KE+Py"]      = rnemdKePy;
       stringToFluxType["KE+Pvector"] = rnemdKePvector;
@@ -485,11 +487,9 @@ namespace OpenMD {
 #ifdef IS_MPI
       if (worldRank == 0) {
 #endif
-
         writeOutputFile();
 
         rnemdFile_.close();
-
 #ifdef IS_MPI
       }
 #endif
@@ -511,6 +511,7 @@ namespace OpenMD {
     void RNEMD::doRNEMD() {
       if (!doRNEMD_) return;
       trialCount_++;
+      hmat_ = currentSnap_->getHmat();
 
       // dynamic object evaluators:
       evaluator_.loadScriptString(rnemdObjectSelection_);
@@ -538,6 +539,20 @@ namespace OpenMD {
       momentumTarget_ = momentumFluxVector_ * exchangeTime_ * area;
       angularMomentumTarget_ =
           angularMomentumFluxVector_ * exchangeTime_ * area;
+      particleTarget_ = particleFlux_ * exchangeTime_ * area;
+
+      if (std::fabs(particleTarget_) > 1.0) {
+        sprintf(painCave.errMsg,
+                "RNEMD: The current particleFlux,\n"
+                "\t\t%f\n"
+                "\thas resulted in a target particle exchange of %f.\n"
+                "\tThis is equivalent to moving more than one particle\n"
+                "\tduring each exchange.  Please reduce your particleFlux.\n",
+                particleFlux_, particleTarget_);
+        painCave.isFatal  = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
+      }
 
       this->doRNEMDImpl(commonA_, commonB_);
     }
@@ -827,11 +842,13 @@ namespace OpenMD {
         RealType Jz(0.0);
         Vector3d JzP(V3Zero);
         Vector3d JzL(V3Zero);
+        RealType Jpart(0.0);
 
         if (time >= info_->getSimParams()->getDt()) {
           Jz  = kineticExchange_ / (time * avgArea) / Constants::energyConvert;
           JzP = momentumExchange_ / (time * avgArea);
           JzL = angularMomentumExchange_ / (time * avgArea);
+          Jpart = particleExchange_ / (time * avgArea);
         }
 
         rnemdFile_
@@ -864,6 +881,9 @@ namespace OpenMD {
                    << " (amu/A/fs^2)\n";
         rnemdFile_ << "#  angular momentum = " << angularMomentumFluxVector_
                    << " (amu/A^2/fs^2)\n";
+        rnemdFile_ << "#          particle = " << particleFlux_
+                   << " (particles/A^2/fs)\n";
+
         rnemdFile_ << "# Target one-time exchanges:\n";
         rnemdFile_ << "#          kinetic = "
                    << kineticTarget_ / Constants::energyConvert
@@ -872,6 +892,8 @@ namespace OpenMD {
                    << " (amu*A/fs)\n";
         rnemdFile_ << "#  angular momentum = " << angularMomentumTarget_
                    << " (amu*A^2/fs)\n";
+        rnemdFile_ << "#          particle = " << particleTarget_
+                   << " (particles)\n";
         rnemdFile_ << "# Actual exchange totals:\n";
         rnemdFile_ << "#          kinetic = "
                    << kineticExchange_ / Constants::energyConvert
@@ -880,10 +902,15 @@ namespace OpenMD {
                    << " (amu*A/fs)\n";
         rnemdFile_ << "#  angular momentum = " << angularMomentumExchange_
                    << " (amu*A^2/fs)\n";
+        rnemdFile_ << "#         particles = " << particleExchange_
+                   << " (particles)\n";
+
         rnemdFile_ << "# Actual flux:\n";
         rnemdFile_ << "#          kinetic = " << Jz << " (kcal/mol/A^2/fs)\n";
         rnemdFile_ << "#          momentum = " << JzP << " (amu/A/fs^2)\n";
         rnemdFile_ << "#  angular momentum = " << JzL << " (amu/A^2/fs^2)\n";
+        rnemdFile_ << "#          particle = " << Jpart
+                   << " (particles/A^2/fs)\n";
         rnemdFile_ << "# Exchange statistics:\n";
         rnemdFile_ << "#               attempted = " << trialCount_ << "\n";
         rnemdFile_ << "#                  failed = " << failTrialCount_ << "\n";
@@ -980,6 +1007,10 @@ namespace OpenMD {
       kineticFlux_ = kineticFlux * Constants::energyConvert;
     }
 
+    void RNEMD::setParticleFlux(RealType particleFlux) {
+      particleFlux_ = particleFlux;
+    }
+
     void RNEMD::setMomentumFluxVector(
         const std::vector<RealType>& momentumFluxVector) {
       if (momentumFluxVector.size() != 3) {
@@ -1054,7 +1085,8 @@ namespace OpenMD {
 
       if (printSlabCenterWarning) {
         sprintf(painCave.errMsg,
-                "slabAcenter was set to %0.2f. In the wrapped coordinates\n"
+                "The given slab center was set to %0.2f. In the wrapped "
+                "coordinates\n"
                 "\t[-Hmat/2, +Hmat/2], this has been remapped to %0.2f.\n",
                 slabCenter, tempSlabCenter[rnemdPrivilegedAxis_]);
         painCave.isFatal  = 0;

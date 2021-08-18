@@ -80,7 +80,8 @@
 namespace OpenMD {
   namespace RNEMD {
 
-    NIVSMethod::NIVSMethod(SimInfo* info) : RNEMD {info} {
+    NIVSMethod::NIVSMethod(SimInfo* info, ForceManager* forceMan) :
+        RNEMD {info, forceMan} {
       rnemdMethodLabel_ = "NIVS";
 
       RNEMDParameters* rnemdParams = info->getSimParams()->getRNEMDParameters();

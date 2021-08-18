@@ -352,7 +352,8 @@ namespace OpenMD {
 #endif
 
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    currSnapshot_->setRestraintPotential(restPot);
+    RealType rp   = currSnapshot_->getRestraintPotential();
+    currSnapshot_->setRestraintPotential(rp + restPot);
 
     RealType pe = currSnapshot_->getPotentialEnergy();
     currSnapshot_->setRawPotential(pe);

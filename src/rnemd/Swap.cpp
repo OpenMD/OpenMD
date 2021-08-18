@@ -80,7 +80,8 @@
 namespace OpenMD {
   namespace RNEMD {
 
-    SwapMethod::SwapMethod(SimInfo* info) : RNEMD {info} {
+    SwapMethod::SwapMethod(SimInfo* info, ForceManager* forceMan) :
+        RNEMD {info, forceMan} {
       rnemdMethodLabel_ = "Swap";
 
       RNEMDParameters* rnemdParams = info->getSimParams()->getRNEMDParameters();

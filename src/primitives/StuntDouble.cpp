@@ -52,6 +52,7 @@
 
 #include "primitives/StuntDouble.hpp"
 
+#include <cassert>
 #include <memory>
 
 namespace OpenMD {
@@ -61,8 +62,6 @@ namespace OpenMD {
       linearAxis_(-1), globalIndex_(-1), globalIntegrableObjectIndex_(-1),
       localIndex_(-1) {}
 
-  StuntDouble::~StuntDouble() {}
-
   void StuntDouble::zeroForcesAndTorques() {
     int sl = (snapshotMan_->getCurrentSnapshot()->*storage_).getStorageLayout();
 
@@ -71,7 +70,68 @@ namespace OpenMD {
     if (sl & DataStorage::dslParticlePot) setParticlePot(0.0);
     if (sl & DataStorage::dslFlucQForce) setFlucQFrc(0.0);
     if (sl & DataStorage::dslElectricField) setElectricField(V3Zero);
+    if (sl & DataStorage::dslSitePotential) setSitePotential(0.0);
   }
+
+  void StuntDouble::combineForcesAndTorques(Snapshot* snapA, Snapshot* snapB,
+                                            RealType multA, RealType multB) {
+    int sl = (snapshotMan_->getCurrentSnapshot()->*storage_).getStorageLayout();
+
+    assert(sl == (snapA->*storage_).getStorageLayout());
+    assert(sl == (snapB->*storage_).getStorageLayout());
+
+    if (sl & DataStorage::dslForce) {
+      Vector3d forceA = (snapA->*storage_).force[localIndex_];
+      Vector3d forceB = (snapB->*storage_).force[localIndex_];
+
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).force[localIndex_] =
+          multA * forceA + multB * forceB;
+    }
+
+    if (sl & DataStorage::dslTorque) {
+      Vector3d torqueA = (snapA->*storage_).torque[localIndex_];
+      Vector3d torqueB = (snapB->*storage_).torque[localIndex_];
+
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).torque[localIndex_] =
+          multA * torqueA + multB * torqueB;
+    }
+
+    if (sl & DataStorage::dslParticlePot) {
+      RealType particlePotA = (snapA->*storage_).particlePot[localIndex_];
+      RealType particlePotB = (snapB->*storage_).particlePot[localIndex_];
+
+      ((snapshotMan_->getCurrentSnapshot())->*storage_)
+          .particlePot[localIndex_] =
+          multA * particlePotA + multB * particlePotB;
+    }
+
+    if (sl & DataStorage::dslFlucQForce) {
+      RealType flucQFrcA = (snapA->*storage_).flucQFrc[localIndex_];
+      RealType flucQFrcB = (snapB->*storage_).flucQFrc[localIndex_];
+
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).flucQFrc[localIndex_] =
+          multA * flucQFrcA + multB * flucQFrcB;
+    }
+
+    if (sl & DataStorage::dslElectricField) {
+      Vector3d electricFieldA = (snapA->*storage_).electricField[localIndex_];
+      Vector3d electricFieldB = (snapB->*storage_).electricField[localIndex_];
+
+      ((snapshotMan_->getCurrentSnapshot())->*storage_)
+          .electricField[localIndex_] =
+          multA * electricFieldA + multB * electricFieldB;
+    }
+
+    if (sl & DataStorage::dslSitePotential) {
+      RealType sitePotentialA = (snapA->*storage_).sitePotential[localIndex_];
+      RealType sitePotentialB = (snapB->*storage_).sitePotential[localIndex_];
+
+      ((snapshotMan_->getCurrentSnapshot())->*storage_)
+          .sitePotential[localIndex_] =
+          multA * sitePotentialA + multB * sitePotentialB;
+    }
+  }
+
   void StuntDouble::addProperty(std::shared_ptr<GenericData> genData) {
     properties_.addProperty(genData);
   }

@@ -255,7 +255,7 @@ namespace OpenMD {
       Snapshot* snap     = info_->getSnapshotManager()->getCurrentSnapshot();
       longRangePotential = snap->getLongRangePotentials();
       longRangePotential[ELECTROSTATIC_FAMILY] += fPot;
-      snap->setLongRangePotential(longRangePotential);
+      snap->setLongRangePotentials(longRangePotential);
     }
   }
 }  // namespace OpenMD
