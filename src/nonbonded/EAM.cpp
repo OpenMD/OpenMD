@@ -81,50 +81,86 @@ namespace OpenMD {
 
   // Zhou functional form with switching functions
 
-  RealType EAM::ZhouPhiCoreCore(RealType r, RealType re, RealType A,
-                                RealType alpha, RealType kappa) {
-    return (A * exp(-alpha * (r / re - 1.0))) /
-           (1.0 + fastPower(r / re - kappa, 20));
-  }
-
-  RealType EAM::ZhouPhiCoreValence(RealType r, RealType re, RealType B,
-                                   RealType beta, RealType lambda) {
-    return -(B * exp(-beta * (r / re - 1.0))) /
-           (1.0 + fastPower(r / re - lambda, 20));
-  }
-
-  RealType EAM::ZhouPhi(RealType r, RealType re, RealType A, RealType B,
-                        RealType alpha, RealType beta, RealType kappa,
-                        RealType lambda) {
-    return ZhouPhiCoreCore(r, re, A, alpha, kappa) +
-           ZhouPhiCoreValence(r, re, B, beta, lambda);
-  }
-
-  RealType EAM::ZhouRho(RealType r, RealType re, RealType fe, RealType beta,
-                        RealType lambda) {
-    return (fe * exp(-beta * (r / re - 1.0))) /
-           (1.0 + fastPower(r / re - lambda, 20));
-  }
+  // RealType EAM::ZhouPhiCoreCore(RealType r, RealType re, RealType A,
+  // RealType alpha, RealType kappa) {
+  // return (A * exp(-alpha * (r / re - 1.0))) /
+  // (1.0 + fastPower(r / re - kappa, 20));
+  // }
+  //
+  // RealType EAM::ZhouPhiCoreValence(RealType r, RealType re, RealType B,
+  // RealType beta, RealType lambda) {
+  // return -(B * exp(-beta * (r / re - 1.0))) /
+  // (1.0 + fastPower(r / re - lambda, 20));
+  // }
+  //
+  // RealType EAM::ZhouPhi(RealType r, RealType re, RealType A, RealType B,
+  // RealType alpha, RealType beta, RealType kappa,
+  // RealType lambda) {
+  // return ZhouPhiCoreCore(r, re, A, alpha, kappa) +
+  // ZhouPhiCoreValence(r, re, B, beta, lambda);
+  // }
+  //
+  // RealType EAM::ZhouRho(RealType r, RealType re, RealType fe, RealType beta,
+  // RealType lambda) {
+  // return (fe * exp(-beta * (r / re - 1.0))) /
+  // (1.0 + fastPower(r / re - lambda, 20));
+  // }
 
   // Zhou functional form without switching functions
 
-  RealType EAM::PhiCoreCore(RealType r, RealType re, RealType A,
-                            RealType alpha) {
-    return (A * exp(-alpha * (r / re - 1.0)));
+  RealType EAM::PhiCoreCore(RealType r, RealType re, RealType A, RealType alpha,
+                            RealType kappa) {
+    if (mixMeth_ == eamDream2) {
+      RealType a     = 0.02;
+      RealType sigma = 1;
+      return (A * exp(-alpha * (r / re - 1.0)) +
+              a * fastPower(sigma / (r + 1e-5), 30));
+    }
+
+    else if ((mixMeth_ == eamDream1) || (mixMeth_ == eamJohnson)) {
+      return (A * exp(-alpha * (r / re - 1.0))) /
+             (1.0 + fastPower(r / re - kappa, 20));
+    }
+
+    else
+      return 0;
   }
 
   RealType EAM::PhiCoreValence(RealType r, RealType re, RealType B,
-                               RealType beta) {
-    return -(B * exp(-beta * (r / re - 1.0)));
+                               RealType beta, RealType lambda) {
+    if (mixMeth_ == eamDream2) {
+      return -(B * exp(-beta * (r / re - 1.0)));
+    }
+
+    else if ((mixMeth_ == eamDream1) || (mixMeth_ == eamJohnson)) {
+      return -(B * exp(-beta * (r / re - 1.0))) /
+             (1.0 + fastPower(r / re - lambda, 20));
+    }
+
+    else
+      return 0;
   }
 
   RealType EAM::Phi(RealType r, RealType re, RealType A, RealType B,
-                    RealType alpha, RealType beta) {
-    return PhiCoreCore(r, re, A, alpha) + PhiCoreValence(r, re, B, beta);
+                    RealType alpha, RealType beta, RealType kappa,
+                    RealType lambda) {
+    return PhiCoreCore(r, re, A, alpha, kappa) +
+           PhiCoreValence(r, re, B, beta, lambda);
   }
 
-  RealType EAM::Rho(RealType r, RealType re, RealType fe, RealType beta) {
-    return (fe * exp(-beta * (r / re - 1.0)));
+  RealType EAM::Rho(RealType r, RealType re, RealType fe, RealType beta,
+                    RealType lambda) {
+    if (mixMeth_ == eamDream2) {
+      return (fe * exp(-beta * (r / re - 1.0)));
+    }
+
+    else if ((mixMeth_ == eamDream1) || (mixMeth_ == eamJohnson)) {
+      return (fe * exp(-beta * (r / re - 1.0))) /
+             (1.0 + fastPower(r / re - lambda, 20));
+    }
+
+    else
+      return 0;
   }
 
   RealType EAM::gFunc(RealType q, RealType nV, RealType nM) {
@@ -385,13 +421,14 @@ namespace OpenMD {
 
         if (r < data1.rcut) {
           rha = data1.rho->getValueAt(r);
+
           // pha = ZhouPhi(r, re1, A1, B1, alpha1, beta1, kappa1, lambda1);
-          pha = Phi(r, re1, A1, B1, alpha1, beta1);
+          pha = Phi(r, re1, A1, B1, alpha1, beta1, kappa1, lambda1);
         }
         if (r < data2.rcut) {
           rhb = data2.rho->getValueAt(r);
           // phb =  ZhouPhi(r, re2, A2, B2, alpha2, beta2, kappa2, lambda2);
-          phb = Phi(r, re2, A2, B2, alpha2, beta2);
+          phb = Phi(r, re2, A2, B2, alpha2, beta2, kappa2, lambda2);
         }
 
         if (r < data1.rcut) phab = phab + 0.5 * (rhb / rha) * pha;
@@ -415,7 +452,6 @@ namespace OpenMD {
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
     string EAMMixMeth        = fopts.getEAMMixingMethod();
     toUpper(EAMMixMeth);
-
     if (EAMMixMeth == "JOHNSON")
       mixMeth_ = eamJohnson;
     else if (EAMMixMeth == "DREAM1")
@@ -516,7 +552,6 @@ namespace OpenMD {
           RealType A     = eamit->getA();
           RealType Ci    = eamit->getCi();
           RealType Cj    = eamit->getCj();
-
           addExplicitInteraction(at1, at2, re, alpha, A, Ci, Cj);
         }
       }
@@ -565,9 +600,10 @@ namespace OpenMD {
       RealType dr      = eamAtomData.rcut / (RealType)(Nr - 1);
       RealType r;
 
-      int Nrho        = 3000;
-      RealType rhomax = max(900.0, max(2.0 * rhoe, Rho(0.0, re, fe, beta)));
-      RealType drho   = rhomax / (RealType)(Nrho - 1);
+      int Nrho = 3000;
+      RealType rhomax =
+          max(900.0, max(2.0 * rhoe, Rho(0.0, re, fe, beta, lambda)));
+      RealType drho = rhomax / (RealType)(Nrho - 1);
       RealType rho;
       RealType phiCC, phiCV;
 
@@ -582,9 +618,9 @@ namespace OpenMD {
       for (int i = 0; i < Nr; i++) {
         r = RealType(i) * dr;
         rvals.push_back(r);
-        rhovals.push_back(Rho(r, re, fe, beta));
-        phiCC = PhiCoreCore(r, re, A, alpha);
-        phiCV = PhiCoreValence(r, re, B, beta);
+        rhovals.push_back(Rho(r, re, fe, beta, lambda));
+        phiCC = PhiCoreCore(r, re, A, alpha, kappa);
+        phiCV = PhiCoreValence(r, re, B, beta, lambda);
         ccvals.push_back(phiCC);
         cvvals.push_back(phiCV);
       }
@@ -666,9 +702,9 @@ namespace OpenMD {
       for (int i = 0; i < Nr; i++) {
         r = RealType(i) * dr;
         rvals.push_back(r);
-        rhovals.push_back(Rho(r, re, fe, beta));
-        phiCC = PhiCoreCore(r, re, A, alpha);
-        phiCV = PhiCoreValence(r, re, B, beta);
+        rhovals.push_back(Rho(r, re, fe, beta, lambda));
+        phiCC = PhiCoreCore(r, re, A, alpha, kappa);
+        phiCV = PhiCoreValence(r, re, B, beta, lambda);
         ccvals.push_back(phiCC);
         cvvals.push_back(phiCV);
       }
@@ -683,15 +719,14 @@ namespace OpenMD {
       break;
     }
     case eamZhou2005Oxygen: {
-      RealType re     = ea.getRe();
-      RealType fe     = ea.get_fe();
-      RealType A      = ea.getA();
-      RealType B      = ea.getB();
-      RealType alpha  = ea.getAlpha();
-      RealType beta   = ea.getBeta();
-      RealType kappa  = ea.getKappa();
-      RealType lambda = ea.getLambda();
-
+      RealType re                           = ea.getRe();
+      RealType fe                           = ea.get_fe();
+      RealType A                            = ea.getA();
+      RealType B                            = ea.getB();
+      RealType alpha                        = ea.getAlpha();
+      RealType beta                         = ea.getBeta();
+      RealType kappa                        = ea.getKappa();
+      RealType lambda                       = ea.getLambda();
       RealType gamma                        = ea.getGamma();
       RealType nu                           = ea.getNu();
       std::vector<RealType> OrhoLimits      = ea.getOrhoLimits();
@@ -709,7 +744,7 @@ namespace OpenMD {
 
       int Nrho = 3000;
       // RealType rhomax = max(800.0, ZhouRho(0.0, re, fe, gamma, nu));
-      RealType rhomax = max(800.0, Rho(0.0, re, fe, gamma));
+      RealType rhomax = max(800.0, Rho(0.0, re, fe, gamma, nu));
       RealType drho   = rhomax / (RealType)(Nrho - 1);
       RealType rho, phiCC, phiCV;
 
@@ -724,9 +759,9 @@ namespace OpenMD {
       for (int i = 0; i < Nr; i++) {
         r = RealType(i) * dr;
         rvals.push_back(r);
-        rhovals.push_back(Rho(r, re, fe, gamma));
-        phiCC = PhiCoreCore(r, re, A, alpha);
-        phiCV = PhiCoreValence(r, re, B, beta);
+        rhovals.push_back(Rho(r, re, fe, gamma, nu));
+        phiCC = PhiCoreCore(r, re, A, alpha, kappa);
+        phiCV = PhiCoreValence(r, re, B, beta, lambda);
         ccvals.push_back(phiCC);
         cvvals.push_back(phiCV);
       }
@@ -888,7 +923,7 @@ namespace OpenMD {
     for (int i = 0; i < Nr; i++) {
       r = RealType(i) * dr;
       rVals.push_back(r);
-      phiVals.push_back(Phi(r, re, A, B, alpha, beta));
+      phiVals.push_back(Phi(r, re, A, B, alpha, beta, kappa, lambda));
     }
     cs->addPoints(rVals, phiVals);
     mixer.phi           = cs;
@@ -952,7 +987,11 @@ namespace OpenMD {
     for (int i = 0; i < Nr; i++) {
       r = RealType(i) * dr;
       rVals.push_back(r);
-      phiCC = PhiCoreCore(r, re, A, alpha);
+      // for Dream2 and EAMOxide explicit potential we dont care about kappa
+      // but it is needed while calling PhiCoreCore. So, lets define it as 0
+      // its value however is not used in calculation
+      RealType kappa = 0;
+      phiCC          = PhiCoreCore(r, re, A, alpha, kappa);
       phiVals.push_back(phiCC);
     }
 
@@ -1222,8 +1261,7 @@ namespace OpenMD {
     }
     drhoidr = si * drha;
     drhojdr = sj * drhb;
-
-    dudr = drhojdr * idat.dfrho1 + drhoidr * idat.dfrho2 + dvpdr;
+    dudr    = drhojdr * idat.dfrho1 + drhoidr * idat.dfrho2 + dvpdr;
 
     idat.f1 += rhat * dudr;
 
