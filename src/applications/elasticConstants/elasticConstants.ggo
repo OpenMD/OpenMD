@@ -1,5 +1,5 @@
-# Input file for gengetopt. This file generates thermalizerCmd.cpp and 
-# thermalizerCmd.hpp for parsing command line arguments using getopt and
+# Input file for gengetopt. This file generates elasticConstantsCmd.cpp and 
+# elasticConstantsCmd.hpp for parsing command line arguments using getopt and
 # getoptlong.  gengetopt is available from:
 #
 #     http://www.gnu.org/software/gengetopt/gengetopt.html
