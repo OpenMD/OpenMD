@@ -313,8 +313,6 @@ namespace OpenMD {
 
 #ifdef IS_MPI
       int worldRank {};
-      MPI_Status status;
-
       MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
 
       if (worldRank == 0) {

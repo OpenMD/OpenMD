@@ -78,9 +78,9 @@ namespace OpenMD {
   namespace RNEMD {
 
     RNEMD::RNEMD(SimInfo* info, ForceManager* forceMan) :
-        info_(info), forceMan_(forceMan), evaluator_(info_), seleMan_(info_),
-        evaluatorA_(info_), evaluatorB_(info_), seleManA_(info_),
-        seleManB_(info_), commonA_(info_), commonB_(info_),
+        info_(info), commonA_(info_), commonB_(info_), forceMan_(forceMan),
+        evaluator_(info_), seleMan_(info_), evaluatorA_(info_),
+        evaluatorB_(info_), seleManA_(info_), seleManB_(info_),
         outputEvaluator_(info_), outputSeleMan_(info_) {
       trialCount_     = 0;
       failTrialCount_ = 0;
