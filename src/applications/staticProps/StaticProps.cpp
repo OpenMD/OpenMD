@@ -104,6 +104,7 @@
 #include "applications/staticProps/TetrahedralityParamDens.hpp"
 #include "applications/staticProps/TetrahedralityParamXYZ.hpp"
 #include "applications/staticProps/TetrahedralityParamZ.hpp"
+#include "applications/staticProps/TetrahedralityParamR.hpp"
 #include "applications/staticProps/VelocityZ.hpp"
 
 using namespace OpenMD;
@@ -398,6 +399,29 @@ int main(int argc, char* argv[]) {
       analyser = Utils::make_unique<TetrahedralityParamZ>(
           info, dumpFileName, sele1, sele2, args_info.rcut_arg,
           args_info.nbins_arg, privilegedAxis);
+    } else {
+      sprintf(painCave.errMsg,
+              "A cutoff radius (rcut) must be specified when calculating "
+              "Tetrahedrality "
+              "Parameters");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+  } else if (args_info.tet_param_r_given) {
+    if (args_info.rcut_given) {
+      if (args_info.sele3_given) {
+        analyser = Utils::make_unique<TetrahedralityParamR>(
+            info, dumpFileName, sele1, sele2, sele3, args_info.rcut_arg,
+            maxLen, nrbins);
+      } else {
+        sprintf(painCave.errMsg,
+                "Selection3 (--sele3) must be given when calculating "
+                "Tetrahedrality Parameter Qk(r)");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal  = 1;
+        simError();
+      }        
     } else {
       sprintf(painCave.errMsg,
               "A cutoff radius (rcut) must be specified when calculating "
