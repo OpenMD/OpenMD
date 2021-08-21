@@ -285,6 +285,17 @@ int main(int argc, char* argv[]) {
         info, dumpFileName, sele1, sele2, args_info.OOcut_arg,
         args_info.thetacut_arg, args_info.OHcut_arg, args_info.nzbins_arg,
         privilegedAxis);
+  } else if (args_info.jumptimeR_given) {
+    if (args_info.sele3_given) {      
+      corrFunc = Utils::make_unique<HBondJumpR>(
+          info, dumpFileName, sele1, sele2, args_info.sele3_arg, args_info.OOcut_arg,
+	  args_info.thetacut_arg, args_info.OHcut_arg, args_info.nbins_arg);
+    } else {
+      sprintf(painCave.errMsg, "--sele3 must be set if --jumptimeR is set\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
   } else if (args_info.persistence_given) {
     corrFunc = Utils::make_unique<HBondPersistence>(
         info, dumpFileName, sele1, sele2, args_info.OOcut_arg,
