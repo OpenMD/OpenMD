@@ -33,7 +33,9 @@ option	"input"		i	"input dump file"                           string typestr="fi
 option	"output"	o	"output file name"                          string typestr="filename"         optional
 option	"sele1"		-	"select first stuntdouble set"	            string typestr="selection script" optional
 option  "sele2"         -       "select second stuntdouble set (if sele2 is not set, use script from sele1)" string typestr="selection script"      optional
+option  "sele3"         -       "select third stuntdouble set" string typestr="selection script"      optional
 option  "order"         -       "Lengendre Polynomial Order"                int                               optional
+option  "nbins"         n       "Number of bins"                          int     default="100"             optional
 option  "nzbins"        z       "Number of Z bins"                          int     default="100"             optional
 # option  "memory"        m       "Available memory (defaults to 2G)"         string  typestr="memory specification" default="2G" optional
 option  "rcut"          c       "cutoff radius (angstroms)"                 double                            optional
@@ -71,6 +73,7 @@ groupoption "bondcorr"     b  "Bond extension correlation function" group="corre
 groupoption "freqfluccorr" f  "Frequency Fluctuation correlation function" group="correlation function"
 groupoption "jumptime"     j  "Hydrogen bond jump time correlation function" group = "correlation function"
 groupoption "jumptimeZ"    -  "Hydrogen bond jump time correlation function binned by Z" group = "correlation function"
+groupoption "jumptimeR"    -  "Hydrogen bond jump time correlation function binned by R around a third selection" group = "correlation function"
 groupoption "persistence"  -  "Hydrogen bond persistence correlation function" group = "correlation function"
 groupoption "pjcorr"       -  "Momentum - Angular Momentum cross correlation function" group = "correlation function"
 groupoption "ftcorr"       -  "Force - Torque cross correlation function" group = "correlation function"

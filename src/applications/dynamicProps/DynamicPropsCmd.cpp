@@ -39,7 +39,9 @@ const char *gengetopt_args_info_help[] = {
   "  -o, --output=filename         output file name",
   "      --sele1=selection script  select first stuntdouble set",
   "      --sele2=selection script  select second stuntdouble set (if sele2 is not\n                                  set, use script from sele1)",
+  "      --sele3=selection script  select third stuntdouble set",
   "      --order=INT               Lengendre Polynomial Order",
+  "  -n, --nbins=INT               Number of bins  (default=`100')",
   "  -z, --nzbins=INT              Number of Z bins  (default=`100')",
   "  -c, --rcut=DOUBLE             cutoff radius (angstroms)",
   "      --OOcut=DOUBLE            Oxygen-Oxygen cutoff radius (angstroms)\n                                  (default=`3.5')",
@@ -55,11 +57,11 @@ const char *gengetopt_args_info_help[] = {
   "      --rcorrZ                  mean squared displacement binned by Z",
   "  -v, --vcorr                   velocity correlation function",
   "      --vcorrZ                  velocity correlation function along z-axis",
-  "      --vcorrR                  velocity correlation function projected radially",
-  "      --vaOutProdcorr           Velocity - Velocity auto outer product correlation\n                                  function",
-  "      --waOutProdcorr           Angular Velocity - Angular Velocity auto outer product correlation\n                                  function",
-  "      --vwOutProdcorr           Velocity - Angular Velocity outer product correlation\n                                  function",
-  "      --wvOutProdcorr           Angular Velocity - Velocity outer product correlation\n                                  function",
+  "      --vcorrR                  velocity correlation function projected\n                                  radially",
+  "      --vaOutProdcorr           Velocity - Velocity auto outer product\n                                  correlation function",
+  "      --waOutProdcorr           Angular Velocity - Angular Velocity auto outer\n                                  product correlation function",
+  "      --vwOutProdcorr           Velocity - Angular Velocity outer product\n                                  correlation function",
+  "      --wvOutProdcorr           Angular Velocity - Velocity outer product\n                                  correlation function",
   "  -w, --wcorr                   charge velocity correlation function",
   "  -d, --dcorr                   dipole correlation function",
   "  -l, --lcorr                   Lengendre correlation function",
@@ -67,18 +69,19 @@ const char *gengetopt_args_info_help[] = {
   "      --cohZ                    Lengendre correlation function for OH bond\n                                  vectors binned by Z",
   "  -M, --sdcorr                  System dipole correlation function",
   "      --r_rcorr                 Radial msd",
-  "      --thetacorr               Angular msd [Cos(theta)]",
+  "      --thetacorr               Angular msd",
   "      --drcorr                  Directional msd for particles with unit vectors",
   "      --stresscorr              Stress tensor correlation function",
   "  -b, --bondcorr                Bond extension correlation function",
   "  -f, --freqfluccorr            Frequency Fluctuation correlation function",
   "  -j, --jumptime                Hydrogen bond jump time correlation function",
   "      --jumptimeZ               Hydrogen bond jump time correlation function\n                                  binned by Z",
+  "      --jumptimeR               Hydrogen bond jump time correlation function\n                                  binned by R around a third selection",
   "      --persistence             Hydrogen bond persistence correlation function",
   "      --pjcorr                  Momentum - Angular Momentum cross correlation\n                                  function",
   "      --ftcorr                  Force - Torque cross correlation function",
   "      --ckcorr                  Charge - Kinetic energy cross correlation\n                                  function",
-  "      --cscorr                  Charge - Orientation order parameter\n                                  [Cos(theta)] cross correlation function",
+  "      --cscorr                  Charge - Orientation order parameter\n                                  (Cos\theta) cross correlation function",
   "      --facorr                  Force - Force auto correlation function",
   "      --tfcorr                  Torque - Force Cross correlation function",
   "      --tacorr                  Torque auto correlation function",
@@ -122,7 +125,9 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->output_given = 0 ;
   args_info->sele1_given = 0 ;
   args_info->sele2_given = 0 ;
+  args_info->sele3_given = 0 ;
   args_info->order_given = 0 ;
+  args_info->nbins_given = 0 ;
   args_info->nzbins_given = 0 ;
   args_info->rcut_given = 0 ;
   args_info->OOcut_given = 0 ;
@@ -138,6 +143,10 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->vcorr_given = 0 ;
   args_info->vcorrZ_given = 0 ;
   args_info->vcorrR_given = 0 ;
+  args_info->vaOutProdcorr_given = 0 ;
+  args_info->waOutProdcorr_given = 0 ;
+  args_info->vwOutProdcorr_given = 0 ;
+  args_info->wvOutProdcorr_given = 0 ;
   args_info->wcorr_given = 0 ;
   args_info->dcorr_given = 0 ;
   args_info->lcorr_given = 0 ;
@@ -152,6 +161,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->freqfluccorr_given = 0 ;
   args_info->jumptime_given = 0 ;
   args_info->jumptimeZ_given = 0 ;
+  args_info->jumptimeR_given = 0 ;
   args_info->persistence_given = 0 ;
   args_info->pjcorr_given = 0 ;
   args_info->ftcorr_given = 0 ;
@@ -164,10 +174,6 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->dispZ_given = 0 ;
   args_info->current_given = 0 ;
   args_info->ddisp_given = 0 ;
-  args_info->vaOutProdcorr_given = 0 ;
-  args_info->waOutProdcorr_given = 0 ;
-  args_info->vwOutProdcorr_given = 0 ;
-  args_info->wvOutProdcorr_given = 0 ;
   args_info->correlation_function_group_counter = 0 ;
 }
 
@@ -183,7 +189,11 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->sele1_orig = NULL;
   args_info->sele2_arg = NULL;
   args_info->sele2_orig = NULL;
+  args_info->sele3_arg = NULL;
+  args_info->sele3_orig = NULL;
   args_info->order_orig = NULL;
+  args_info->nbins_arg = 100;
+  args_info->nbins_orig = NULL;
   args_info->nzbins_arg = 100;
   args_info->nzbins_orig = NULL;
   args_info->rcut_orig = NULL;
@@ -201,7 +211,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->dipoleY_orig = NULL;
   args_info->dipoleZ_arg = -1.0;
   args_info->dipoleZ_orig = NULL;
-
+  
 }
 
 static
@@ -215,53 +225,56 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->output_help = gengetopt_args_info_help[3] ;
   args_info->sele1_help = gengetopt_args_info_help[4] ;
   args_info->sele2_help = gengetopt_args_info_help[5] ;
-  args_info->order_help = gengetopt_args_info_help[6] ;
-  args_info->nzbins_help = gengetopt_args_info_help[7] ;
-  args_info->rcut_help = gengetopt_args_info_help[8] ;
-  args_info->OOcut_help = gengetopt_args_info_help[9] ;
-  args_info->thetacut_help = gengetopt_args_info_help[10] ;
-  args_info->OHcut_help = gengetopt_args_info_help[11] ;
-  args_info->privilegedAxis_help = gengetopt_args_info_help[12] ;
-  args_info->dipoleX_help = gengetopt_args_info_help[13] ;
-  args_info->dipoleY_help = gengetopt_args_info_help[14] ;
-  args_info->dipoleZ_help = gengetopt_args_info_help[15] ;
-  args_info->selecorr_help = gengetopt_args_info_help[17] ;
-  args_info->rcorr_help = gengetopt_args_info_help[18] ;
-  args_info->rcorrZ_help = gengetopt_args_info_help[19] ;
-  args_info->vcorr_help = gengetopt_args_info_help[20] ;
-  args_info->vcorrZ_help = gengetopt_args_info_help[21] ;
-  args_info->vcorrR_help = gengetopt_args_info_help[22] ;
-  args_info->vaOutProdcorr_help = gengetopt_args_info_help[23] ;
-  args_info->waOutProdcorr_help = gengetopt_args_info_help[24] ;
-  args_info->vwOutProdcorr_help = gengetopt_args_info_help[25] ;
-  args_info->wvOutProdcorr_help = gengetopt_args_info_help[26] ;
-  args_info->wcorr_help = gengetopt_args_info_help[27] ;
-  args_info->dcorr_help = gengetopt_args_info_help[28] ;
-  args_info->lcorr_help = gengetopt_args_info_help[29] ;
-  args_info->lcorrZ_help = gengetopt_args_info_help[30] ;
-  args_info->cohZ_help = gengetopt_args_info_help[31] ;
-  args_info->sdcorr_help = gengetopt_args_info_help[32] ;
-  args_info->r_rcorr_help = gengetopt_args_info_help[33] ;
-  args_info->thetacorr_help = gengetopt_args_info_help[34] ;
-  args_info->drcorr_help = gengetopt_args_info_help[35] ;
-  args_info->stresscorr_help = gengetopt_args_info_help[36] ;
-  args_info->bondcorr_help = gengetopt_args_info_help[37] ;
-  args_info->freqfluccorr_help = gengetopt_args_info_help[38] ;
-  args_info->jumptime_help = gengetopt_args_info_help[39] ;
-  args_info->jumptimeZ_help = gengetopt_args_info_help[40] ;
-  args_info->persistence_help = gengetopt_args_info_help[41] ;
-  args_info->pjcorr_help = gengetopt_args_info_help[42] ;
-  args_info->ftcorr_help = gengetopt_args_info_help[43] ;
-  args_info->ckcorr_help = gengetopt_args_info_help[44] ;
-  args_info->cscorr_help = gengetopt_args_info_help[45] ;
-  args_info->facorr_help = gengetopt_args_info_help[46] ;
-  args_info->tfcorr_help = gengetopt_args_info_help[47] ;
-  args_info->tacorr_help = gengetopt_args_info_help[48] ;
-  args_info->disp_help = gengetopt_args_info_help[49] ;
-  args_info->dispZ_help = gengetopt_args_info_help[50] ;
-  args_info->current_help = gengetopt_args_info_help[51] ;
-  args_info->ddisp_help = gengetopt_args_info_help[52] ;
-
+  args_info->sele3_help = gengetopt_args_info_help[6] ;
+  args_info->order_help = gengetopt_args_info_help[7] ;
+  args_info->nbins_help = gengetopt_args_info_help[8] ;
+  args_info->nzbins_help = gengetopt_args_info_help[9] ;
+  args_info->rcut_help = gengetopt_args_info_help[10] ;
+  args_info->OOcut_help = gengetopt_args_info_help[11] ;
+  args_info->thetacut_help = gengetopt_args_info_help[12] ;
+  args_info->OHcut_help = gengetopt_args_info_help[13] ;
+  args_info->privilegedAxis_help = gengetopt_args_info_help[14] ;
+  args_info->dipoleX_help = gengetopt_args_info_help[15] ;
+  args_info->dipoleY_help = gengetopt_args_info_help[16] ;
+  args_info->dipoleZ_help = gengetopt_args_info_help[17] ;
+  args_info->selecorr_help = gengetopt_args_info_help[19] ;
+  args_info->rcorr_help = gengetopt_args_info_help[20] ;
+  args_info->rcorrZ_help = gengetopt_args_info_help[21] ;
+  args_info->vcorr_help = gengetopt_args_info_help[22] ;
+  args_info->vcorrZ_help = gengetopt_args_info_help[23] ;
+  args_info->vcorrR_help = gengetopt_args_info_help[24] ;
+  args_info->vaOutProdcorr_help = gengetopt_args_info_help[25] ;
+  args_info->waOutProdcorr_help = gengetopt_args_info_help[26] ;
+  args_info->vwOutProdcorr_help = gengetopt_args_info_help[27] ;
+  args_info->wvOutProdcorr_help = gengetopt_args_info_help[28] ;
+  args_info->wcorr_help = gengetopt_args_info_help[29] ;
+  args_info->dcorr_help = gengetopt_args_info_help[30] ;
+  args_info->lcorr_help = gengetopt_args_info_help[31] ;
+  args_info->lcorrZ_help = gengetopt_args_info_help[32] ;
+  args_info->cohZ_help = gengetopt_args_info_help[33] ;
+  args_info->sdcorr_help = gengetopt_args_info_help[34] ;
+  args_info->r_rcorr_help = gengetopt_args_info_help[35] ;
+  args_info->thetacorr_help = gengetopt_args_info_help[36] ;
+  args_info->drcorr_help = gengetopt_args_info_help[37] ;
+  args_info->stresscorr_help = gengetopt_args_info_help[38] ;
+  args_info->bondcorr_help = gengetopt_args_info_help[39] ;
+  args_info->freqfluccorr_help = gengetopt_args_info_help[40] ;
+  args_info->jumptime_help = gengetopt_args_info_help[41] ;
+  args_info->jumptimeZ_help = gengetopt_args_info_help[42] ;
+  args_info->jumptimeR_help = gengetopt_args_info_help[43] ;
+  args_info->persistence_help = gengetopt_args_info_help[44] ;
+  args_info->pjcorr_help = gengetopt_args_info_help[45] ;
+  args_info->ftcorr_help = gengetopt_args_info_help[46] ;
+  args_info->ckcorr_help = gengetopt_args_info_help[47] ;
+  args_info->cscorr_help = gengetopt_args_info_help[48] ;
+  args_info->facorr_help = gengetopt_args_info_help[49] ;
+  args_info->tfcorr_help = gengetopt_args_info_help[50] ;
+  args_info->tacorr_help = gengetopt_args_info_help[51] ;
+  args_info->disp_help = gengetopt_args_info_help[52] ;
+  args_info->dispZ_help = gengetopt_args_info_help[53] ;
+  args_info->current_help = gengetopt_args_info_help[54] ;
+  args_info->ddisp_help = gengetopt_args_info_help[55] ;
+  
 }
 
 void
@@ -320,7 +333,7 @@ void
 cmdline_parser_params_init(struct cmdline_parser_params *params)
 {
   if (params)
-    {
+    { 
       params->override = 0;
       params->initialize = 1;
       params->check_required = 1;
@@ -332,9 +345,9 @@ cmdline_parser_params_init(struct cmdline_parser_params *params)
 struct cmdline_parser_params *
 cmdline_parser_params_create(void)
 {
-  struct cmdline_parser_params *params =
+  struct cmdline_parser_params *params = 
     (struct cmdline_parser_params *)malloc(sizeof(struct cmdline_parser_params));
-  cmdline_parser_params_init(params);
+  cmdline_parser_params_init(params);  
   return params;
 }
 
@@ -361,7 +374,10 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->sele1_orig));
   free_string_field (&(args_info->sele2_arg));
   free_string_field (&(args_info->sele2_orig));
+  free_string_field (&(args_info->sele3_arg));
+  free_string_field (&(args_info->sele3_orig));
   free_string_field (&(args_info->order_orig));
+  free_string_field (&(args_info->nbins_orig));
   free_string_field (&(args_info->nzbins_orig));
   free_string_field (&(args_info->rcut_orig));
   free_string_field (&(args_info->OOcut_orig));
@@ -371,8 +387,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->dipoleX_orig));
   free_string_field (&(args_info->dipoleY_orig));
   free_string_field (&(args_info->dipoleZ_orig));
-
-
+  
+  
   for (i = 0; i < args_info->inputs_num; ++i)
     free (args_info->inputs [i]);
 
@@ -424,7 +440,7 @@ write_into_file(FILE *outfile, const char *opt, const char *arg, const char *val
   int found = -1;
   if (arg) {
     if (values) {
-      found = check_possible_values(arg, values);
+      found = check_possible_values(arg, values);      
     }
     if (found >= 0)
       fprintf(outfile, "%s=\"%s\" # %s\n", opt, arg, values[found]);
@@ -459,8 +475,12 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "sele1", args_info->sele1_orig, 0);
   if (args_info->sele2_given)
     write_into_file(outfile, "sele2", args_info->sele2_orig, 0);
+  if (args_info->sele3_given)
+    write_into_file(outfile, "sele3", args_info->sele3_orig, 0);
   if (args_info->order_given)
     write_into_file(outfile, "order", args_info->order_orig, 0);
+  if (args_info->nbins_given)
+    write_into_file(outfile, "nbins", args_info->nbins_orig, 0);
   if (args_info->nzbins_given)
     write_into_file(outfile, "nzbins", args_info->nzbins_orig, 0);
   if (args_info->rcut_given)
@@ -491,6 +511,14 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "vcorrZ", 0, 0 );
   if (args_info->vcorrR_given)
     write_into_file(outfile, "vcorrR", 0, 0 );
+  if (args_info->vaOutProdcorr_given)
+    write_into_file(outfile, "vaOutProdcorr", 0, 0 );
+  if (args_info->waOutProdcorr_given)
+    write_into_file(outfile, "waOutProdcorr", 0, 0 );
+  if (args_info->vwOutProdcorr_given)
+    write_into_file(outfile, "vwOutProdcorr", 0, 0 );
+  if (args_info->wvOutProdcorr_given)
+    write_into_file(outfile, "wvOutProdcorr", 0, 0 );
   if (args_info->wcorr_given)
     write_into_file(outfile, "wcorr", 0, 0 );
   if (args_info->dcorr_given)
@@ -519,6 +547,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "jumptime", 0, 0 );
   if (args_info->jumptimeZ_given)
     write_into_file(outfile, "jumptimeZ", 0, 0 );
+  if (args_info->jumptimeR_given)
+    write_into_file(outfile, "jumptimeR", 0, 0 );
   if (args_info->persistence_given)
     write_into_file(outfile, "persistence", 0, 0 );
   if (args_info->pjcorr_given)
@@ -543,15 +573,7 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "current", 0, 0 );
   if (args_info->ddisp_given)
     write_into_file(outfile, "ddisp", 0, 0 );
-  if (args_info->vaOutProdcorr_given)
-    write_into_file(outfile, "vaOutProdcorr", 0, 0 );
-  if (args_info->waOutProdcorr_given)
-    write_into_file(outfile, "waOutProdcorr", 0, 0 );
-  if (args_info->vwOutProdcorr_given)
-    write_into_file(outfile, "vwOutProdcorr", 0, 0 );
-  if (args_info->wvOutProdcorr_given)
-    write_into_file(outfile, "wvOutProdcorr", 0, 0 );
-
+  
 
   i = EXIT_SUCCESS;
   return i;
@@ -603,13 +625,17 @@ reset_group_correlation_function(struct gengetopt_args_info *args_info)
 {
   if (! args_info->correlation_function_group_counter)
     return;
-
+  
   args_info->selecorr_given = 0 ;
   args_info->rcorr_given = 0 ;
   args_info->rcorrZ_given = 0 ;
   args_info->vcorr_given = 0 ;
   args_info->vcorrZ_given = 0 ;
   args_info->vcorrR_given = 0 ;
+  args_info->vaOutProdcorr_given = 0 ;
+  args_info->waOutProdcorr_given = 0 ;
+  args_info->vwOutProdcorr_given = 0 ;
+  args_info->wvOutProdcorr_given = 0 ;
   args_info->wcorr_given = 0 ;
   args_info->dcorr_given = 0 ;
   args_info->lcorr_given = 0 ;
@@ -624,6 +650,7 @@ reset_group_correlation_function(struct gengetopt_args_info *args_info)
   args_info->freqfluccorr_given = 0 ;
   args_info->jumptime_given = 0 ;
   args_info->jumptimeZ_given = 0 ;
+  args_info->jumptimeR_given = 0 ;
   args_info->persistence_given = 0 ;
   args_info->pjcorr_given = 0 ;
   args_info->ftcorr_given = 0 ;
@@ -636,10 +663,6 @@ reset_group_correlation_function(struct gengetopt_args_info *args_info)
   args_info->dispZ_given = 0 ;
   args_info->current_given = 0 ;
   args_info->ddisp_given = 0 ;
-  args_info->vaOutProdcorr_given = 0 ;
-  args_info->waOutProdcorr_given = 0 ;
-  args_info->vwOutProdcorr_given = 0 ;
-  args_info->wvOutProdcorr_given = 0 ;
 
   args_info->correlation_function_group_counter = 0;
 }
@@ -665,7 +688,7 @@ cmdline_parser2 (int argc, char **argv, struct gengetopt_args_info *args_info, i
 {
   int result;
   struct cmdline_parser_params params;
-
+  
   params.override = override;
   params.initialize = initialize;
   params.check_required = check_required;
@@ -700,13 +723,13 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
       fprintf (stderr, "%s: '--input' ('-i') option required%s\n", prog_name, (additional_error ? additional_error : ""));
       error_occurred = 1;
     }
-
+  
   if (args_info->correlation_function_group_counter == 0)
     {
       fprintf (stderr, "%s: %d options of group correlation function were given. One is required%s.\n", prog_name, args_info->correlation_function_group_counter, (additional_error ? additional_error : ""));
       error_occurred = 1;
     }
-
+  
 
   /* checks for dependences among options */
 
@@ -726,7 +749,7 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
  *
  */
 
-/*
+/* 
  * we must include anything we need since this file is not thought to be
  * inserted in a file already using getopt.h
  *
@@ -1261,7 +1284,7 @@ static int getopt_internal_r(int argc, char *const *argv, const char *optstring,
 		return -1;
 	d->custom_optarg = NULL;
 
-	/*
+	/* 
 	 * This is a big difference with GNU getopt, since optind == 0
 	 * means initialization while here 1 means first call.
 	 */
@@ -1328,7 +1351,7 @@ static char *package_name = 0;
  */
 static
 int update_arg(void *field, char **orig_field,
-               unsigned int *field_given, unsigned int *prev_given,
+               unsigned int *field_given, unsigned int *prev_given, 
                char *value, const char *possible_values[],
                const char *default_value,
                cmdline_parser_arg_type arg_type,
@@ -1349,11 +1372,11 @@ int update_arg(void *field, char **orig_field,
   if (!multiple_option && prev_given && (*prev_given || (check_ambiguity && *field_given)))
     {
       if (short_opt != '-')
-        fprintf (stderr, "%s: `--%s' (`-%c') option given more than once%s\n",
+        fprintf (stderr, "%s: `--%s' (`-%c') option given more than once%s\n", 
                package_name, long_opt, short_opt,
                (additional_error ? additional_error : ""));
       else
-        fprintf (stderr, "%s: `--%s' option given more than once%s\n",
+        fprintf (stderr, "%s: `--%s' option given more than once%s\n", 
                package_name, long_opt,
                (additional_error ? additional_error : ""));
       return 1; /* failure */
@@ -1362,16 +1385,16 @@ int update_arg(void *field, char **orig_field,
   if (possible_values && (found = check_possible_values((value ? value : default_value), possible_values)) < 0)
     {
       if (short_opt != '-')
-        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s' (`-%c')%s\n",
+        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s' (`-%c')%s\n", 
           package_name, (found == -2) ? "ambiguous" : "invalid", value, long_opt, short_opt,
           (additional_error ? additional_error : ""));
       else
-        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s'%s\n",
+        fprintf (stderr, "%s: %s argument, \"%s\", for option `--%s'%s\n", 
           package_name, (found == -2) ? "ambiguous" : "invalid", value, long_opt,
           (additional_error ? additional_error : ""));
       return 1; /* failure */
     }
-
+    
   if (field_given && *field_given && ! override)
     return 0;
   if (prev_given)
@@ -1445,7 +1468,7 @@ cmdline_parser_internal (
 
   int error_occurred = 0;
   struct gengetopt_args_info local_args_info;
-
+  
   int override;
   int initialize;
   int check_required;
@@ -1455,9 +1478,9 @@ cmdline_parser_internal (
   int optind;
   int opterr;
   int optopt;
-
+  
   package_name = argv[0];
-
+  
   /* TODO: Why is this here? It is not used anywhere. */
   override = params->override;
   FIX_UNUSED(override);
@@ -1490,7 +1513,9 @@ cmdline_parser_internal (
         { "output",	1, NULL, 'o' },
         { "sele1",	1, NULL, 0 },
         { "sele2",	1, NULL, 0 },
+        { "sele3",	1, NULL, 0 },
         { "order",	1, NULL, 0 },
+        { "nbins",	1, NULL, 'n' },
         { "nzbins",	1, NULL, 'z' },
         { "rcut",	1, NULL, 'c' },
         { "OOcut",	1, NULL, 0 },
@@ -1506,6 +1531,10 @@ cmdline_parser_internal (
         { "vcorr",	0, NULL, 'v' },
         { "vcorrZ",	0, NULL, 0 },
         { "vcorrR",	0, NULL, 0 },
+        { "vaOutProdcorr",	0, NULL, 0 },
+        { "waOutProdcorr",	0, NULL, 0 },
+        { "vwOutProdcorr",	0, NULL, 0 },
+        { "wvOutProdcorr",	0, NULL, 0 },
         { "wcorr",	0, NULL, 'w' },
         { "dcorr",	0, NULL, 'd' },
         { "lcorr",	0, NULL, 'l' },
@@ -1520,6 +1549,7 @@ cmdline_parser_internal (
         { "freqfluccorr",	0, NULL, 'f' },
         { "jumptime",	0, NULL, 'j' },
         { "jumptimeZ",	0, NULL, 0 },
+        { "jumptimeR",	0, NULL, 0 },
         { "persistence",	0, NULL, 0 },
         { "pjcorr",	0, NULL, 0 },
         { "ftcorr",	0, NULL, 0 },
@@ -1532,10 +1562,6 @@ cmdline_parser_internal (
         { "dispZ",	0, NULL, 0 },
         { "current",	0, NULL, 0 },
         { "ddisp",	0, NULL, 0 },
-        { "vaOutProdcorr",	0, NULL, 0 },
-        { "waOutProdcorr",	0, NULL, 0 },
-        { "vwOutProdcorr",	0, NULL, 0 },
-        { "wvOutProdcorr",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -1544,7 +1570,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVi:o:z:c:srvwdlMbfj", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVi:o:n:z:c:srvwdlMbfj", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1566,788 +1592,831 @@ cmdline_parser_internal (
           exit (EXIT_SUCCESS);
 
         case 'i':	/* input dump file.  */
-
-
-          if (update_arg( (void *)&(args_info->input_arg),
+        
+        
+          if (update_arg( (void *)&(args_info->input_arg), 
                &(args_info->input_orig), &(args_info->input_given),
               &(local_args_info.input_given), optarg, 0, 0, ARG_STRING,
               check_ambiguity, override, 0, 0,
               "input", 'i',
               additional_error))
             goto failure;
-
+        
           break;
         case 'o':	/* output file name.  */
-
-
-          if (update_arg( (void *)&(args_info->output_arg),
+        
+        
+          if (update_arg( (void *)&(args_info->output_arg), 
                &(args_info->output_orig), &(args_info->output_given),
               &(local_args_info.output_given), optarg, 0, 0, ARG_STRING,
               check_ambiguity, override, 0, 0,
               "output", 'o',
               additional_error))
             goto failure;
-
+        
+          break;
+        case 'n':	/* Number of bins.  */
+        
+        
+          if (update_arg( (void *)&(args_info->nbins_arg), 
+               &(args_info->nbins_orig), &(args_info->nbins_given),
+              &(local_args_info.nbins_given), optarg, 0, "100", ARG_INT,
+              check_ambiguity, override, 0, 0,
+              "nbins", 'n',
+              additional_error))
+            goto failure;
+        
           break;
         case 'z':	/* Number of Z bins.  */
-
-
-          if (update_arg( (void *)&(args_info->nzbins_arg),
+        
+        
+          if (update_arg( (void *)&(args_info->nzbins_arg), 
                &(args_info->nzbins_orig), &(args_info->nzbins_given),
               &(local_args_info.nzbins_given), optarg, 0, "100", ARG_INT,
               check_ambiguity, override, 0, 0,
               "nzbins", 'z',
               additional_error))
             goto failure;
-
+        
           break;
         case 'c':	/* cutoff radius (angstroms).  */
-
-
-          if (update_arg( (void *)&(args_info->rcut_arg),
+        
+        
+          if (update_arg( (void *)&(args_info->rcut_arg), 
                &(args_info->rcut_orig), &(args_info->rcut_given),
               &(local_args_info.rcut_given), optarg, 0, 0, ARG_DOUBLE,
               check_ambiguity, override, 0, 0,
               "rcut", 'c',
               additional_error))
             goto failure;
-
+        
           break;
         case 's':	/* selection correlation function.  */
-
+        
           if (args_info->correlation_function_group_counter && override)
             reset_group_correlation_function (args_info);
           args_info->correlation_function_group_counter += 1;
-
-          if (update_arg( 0 ,
+        
+          if (update_arg( 0 , 
                0 , &(args_info->selecorr_given),
               &(local_args_info.selecorr_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "selecorr", 's',
               additional_error))
             goto failure;
-
+        
           break;
         case 'r':	/* mean squared displacement.  */
-
+        
           if (args_info->correlation_function_group_counter && override)
             reset_group_correlation_function (args_info);
           args_info->correlation_function_group_counter += 1;
-
-          if (update_arg( 0 ,
+        
+          if (update_arg( 0 , 
                0 , &(args_info->rcorr_given),
               &(local_args_info.rcorr_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "rcorr", 'r',
               additional_error))
             goto failure;
-
+        
           break;
         case 'v':	/* velocity correlation function.  */
-
+        
           if (args_info->correlation_function_group_counter && override)
             reset_group_correlation_function (args_info);
           args_info->correlation_function_group_counter += 1;
-
-          if (update_arg( 0 ,
+        
+          if (update_arg( 0 , 
                0 , &(args_info->vcorr_given),
               &(local_args_info.vcorr_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "vcorr", 'v',
               additional_error))
             goto failure;
-
+        
           break;
         case 'w':	/* charge velocity correlation function.  */
-
+        
           if (args_info->correlation_function_group_counter && override)
             reset_group_correlation_function (args_info);
           args_info->correlation_function_group_counter += 1;
-
-          if (update_arg( 0 ,
+        
+          if (update_arg( 0 , 
                0 , &(args_info->wcorr_given),
               &(local_args_info.wcorr_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "wcorr", 'w',
               additional_error))
             goto failure;
-
+        
           break;
         case 'd':	/* dipole correlation function.  */
-
+        
           if (args_info->correlation_function_group_counter && override)
             reset_group_correlation_function (args_info);
           args_info->correlation_function_group_counter += 1;
-
-          if (update_arg( 0 ,
+        
+          if (update_arg( 0 , 
                0 , &(args_info->dcorr_given),
               &(local_args_info.dcorr_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "dcorr", 'd',
               additional_error))
             goto failure;
-
+        
           break;
         case 'l':	/* Lengendre correlation function.  */
-
+        
           if (args_info->correlation_function_group_counter && override)
             reset_group_correlation_function (args_info);
           args_info->correlation_function_group_counter += 1;
-
-          if (update_arg( 0 ,
+        
+          if (update_arg( 0 , 
                0 , &(args_info->lcorr_given),
               &(local_args_info.lcorr_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "lcorr", 'l',
               additional_error))
             goto failure;
-
+        
           break;
         case 'M':	/* System dipole correlation function.  */
-
+        
           if (args_info->correlation_function_group_counter && override)
             reset_group_correlation_function (args_info);
           args_info->correlation_function_group_counter += 1;
-
-          if (update_arg( 0 ,
+        
+          if (update_arg( 0 , 
                0 , &(args_info->sdcorr_given),
               &(local_args_info.sdcorr_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "sdcorr", 'M',
               additional_error))
             goto failure;
-
+        
           break;
         case 'b':	/* Bond extension correlation function.  */
-
+        
           if (args_info->correlation_function_group_counter && override)
             reset_group_correlation_function (args_info);
           args_info->correlation_function_group_counter += 1;
-
-          if (update_arg( 0 ,
+        
+          if (update_arg( 0 , 
                0 , &(args_info->bondcorr_given),
               &(local_args_info.bondcorr_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "bondcorr", 'b',
               additional_error))
             goto failure;
-
+        
           break;
         case 'f':	/* Frequency Fluctuation correlation function.  */
-
+        
           if (args_info->correlation_function_group_counter && override)
             reset_group_correlation_function (args_info);
           args_info->correlation_function_group_counter += 1;
-
-          if (update_arg( 0 ,
+        
+          if (update_arg( 0 , 
                0 , &(args_info->freqfluccorr_given),
               &(local_args_info.freqfluccorr_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "freqfluccorr", 'f',
               additional_error))
             goto failure;
-
+        
           break;
         case 'j':	/* Hydrogen bond jump time correlation function.  */
-
+        
           if (args_info->correlation_function_group_counter && override)
             reset_group_correlation_function (args_info);
           args_info->correlation_function_group_counter += 1;
-
-          if (update_arg( 0 ,
+        
+          if (update_arg( 0 , 
                0 , &(args_info->jumptime_given),
               &(local_args_info.jumptime_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "jumptime", 'j',
               additional_error))
             goto failure;
-
+        
           break;
 
         case 0:	/* Long option with no short option */
           /* select first stuntdouble set.  */
           if (strcmp (long_options[option_index].name, "sele1") == 0)
           {
-
-
-            if (update_arg( (void *)&(args_info->sele1_arg),
+          
+          
+            if (update_arg( (void *)&(args_info->sele1_arg), 
                  &(args_info->sele1_orig), &(args_info->sele1_given),
                 &(local_args_info.sele1_given), optarg, 0, 0, ARG_STRING,
                 check_ambiguity, override, 0, 0,
                 "sele1", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* select second stuntdouble set (if sele2 is not set, use script from sele1).  */
           else if (strcmp (long_options[option_index].name, "sele2") == 0)
           {
-
-
-            if (update_arg( (void *)&(args_info->sele2_arg),
+          
+          
+            if (update_arg( (void *)&(args_info->sele2_arg), 
                  &(args_info->sele2_orig), &(args_info->sele2_given),
                 &(local_args_info.sele2_given), optarg, 0, 0, ARG_STRING,
                 check_ambiguity, override, 0, 0,
                 "sele2", '-',
                 additional_error))
               goto failure;
-
+          
+          }
+          /* select third stuntdouble set.  */
+          else if (strcmp (long_options[option_index].name, "sele3") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->sele3_arg), 
+                 &(args_info->sele3_orig), &(args_info->sele3_given),
+                &(local_args_info.sele3_given), optarg, 0, 0, ARG_STRING,
+                check_ambiguity, override, 0, 0,
+                "sele3", '-',
+                additional_error))
+              goto failure;
+          
           }
           /* Lengendre Polynomial Order.  */
           else if (strcmp (long_options[option_index].name, "order") == 0)
           {
-
-
-            if (update_arg( (void *)&(args_info->order_arg),
+          
+          
+            if (update_arg( (void *)&(args_info->order_arg), 
                  &(args_info->order_orig), &(args_info->order_given),
                 &(local_args_info.order_given), optarg, 0, 0, ARG_INT,
                 check_ambiguity, override, 0, 0,
                 "order", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* Oxygen-Oxygen cutoff radius (angstroms).  */
           else if (strcmp (long_options[option_index].name, "OOcut") == 0)
           {
-
-
-            if (update_arg( (void *)&(args_info->OOcut_arg),
+          
+          
+            if (update_arg( (void *)&(args_info->OOcut_arg), 
                  &(args_info->OOcut_orig), &(args_info->OOcut_given),
                 &(local_args_info.OOcut_given), optarg, 0, "3.5", ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "OOcut", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* HOO cutoff angle (degrees).  */
           else if (strcmp (long_options[option_index].name, "thetacut") == 0)
           {
-
-
-            if (update_arg( (void *)&(args_info->thetacut_arg),
+          
+          
+            if (update_arg( (void *)&(args_info->thetacut_arg), 
                  &(args_info->thetacut_orig), &(args_info->thetacut_given),
                 &(local_args_info.thetacut_given), optarg, 0, "30", ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "thetacut", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* Oxygen-Hydrogen cutoff radius (angstroms).  */
           else if (strcmp (long_options[option_index].name, "OHcut") == 0)
           {
-
-
-            if (update_arg( (void *)&(args_info->OHcut_arg),
+          
+          
+            if (update_arg( (void *)&(args_info->OHcut_arg), 
                  &(args_info->OHcut_orig), &(args_info->OHcut_given),
                 &(local_args_info.OHcut_given), optarg, 0, "2.45", ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "OHcut", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* which axis is special for spatial analysis (default = z axis).  */
           else if (strcmp (long_options[option_index].name, "privilegedAxis") == 0)
           {
-
-
-            if (update_arg( (void *)&(args_info->privilegedAxis_arg),
+          
+          
+            if (update_arg( (void *)&(args_info->privilegedAxis_arg), 
                  &(args_info->privilegedAxis_orig), &(args_info->privilegedAxis_given),
                 &(local_args_info.privilegedAxis_given), optarg, cmdline_parser_privilegedAxis_values, "z", ARG_ENUM,
                 check_ambiguity, override, 0, 0,
                 "privilegedAxis", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* X-component of the dipole with respect to body frame.  */
           else if (strcmp (long_options[option_index].name, "dipoleX") == 0)
           {
-
-
-            if (update_arg( (void *)&(args_info->dipoleX_arg),
+          
+          
+            if (update_arg( (void *)&(args_info->dipoleX_arg), 
                  &(args_info->dipoleX_orig), &(args_info->dipoleX_given),
                 &(local_args_info.dipoleX_given), optarg, 0, "0.0", ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "dipoleX", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* Y-component of the dipole with respect to body frame.  */
           else if (strcmp (long_options[option_index].name, "dipoleY") == 0)
           {
-
-
-            if (update_arg( (void *)&(args_info->dipoleY_arg),
+          
+          
+            if (update_arg( (void *)&(args_info->dipoleY_arg), 
                  &(args_info->dipoleY_orig), &(args_info->dipoleY_given),
                 &(local_args_info.dipoleY_given), optarg, 0, "0.0", ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "dipoleY", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* Z-component of the dipole with respect to body frame.  */
           else if (strcmp (long_options[option_index].name, "dipoleZ") == 0)
           {
-
-
-            if (update_arg( (void *)&(args_info->dipoleZ_arg),
+          
+          
+            if (update_arg( (void *)&(args_info->dipoleZ_arg), 
                  &(args_info->dipoleZ_orig), &(args_info->dipoleZ_given),
                 &(local_args_info.dipoleZ_given), optarg, 0, "-1.0", ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "dipoleZ", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* mean squared displacement binned by Z.  */
           else if (strcmp (long_options[option_index].name, "rcorrZ") == 0)
           {
-
+          
             if (args_info->correlation_function_group_counter && override)
               reset_group_correlation_function (args_info);
             args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
+          
+            if (update_arg( 0 , 
                  0 , &(args_info->rcorrZ_given),
                 &(local_args_info.rcorrZ_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "rcorrZ", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* velocity correlation function along z-axis.  */
           else if (strcmp (long_options[option_index].name, "vcorrZ") == 0)
           {
-
+          
             if (args_info->correlation_function_group_counter && override)
               reset_group_correlation_function (args_info);
             args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
+          
+            if (update_arg( 0 , 
                  0 , &(args_info->vcorrZ_given),
                 &(local_args_info.vcorrZ_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "vcorrZ", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* velocity correlation function projected radially.  */
           else if (strcmp (long_options[option_index].name, "vcorrR") == 0)
           {
-
+          
             if (args_info->correlation_function_group_counter && override)
               reset_group_correlation_function (args_info);
             args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
+          
+            if (update_arg( 0 , 
                  0 , &(args_info->vcorrR_given),
                 &(local_args_info.vcorrR_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "vcorrR", '-',
                 additional_error))
               goto failure;
-
-          }
-          /* Lengendre correlation function binned by Z.  */
-          else if (strcmp (long_options[option_index].name, "lcorrZ") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->lcorrZ_given),
-                &(local_args_info.lcorrZ_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "lcorrZ", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Lengendre correlation function for OH bond vectors binned by Z.  */
-          else if (strcmp (long_options[option_index].name, "cohZ") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->cohZ_given),
-                &(local_args_info.cohZ_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "cohZ", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Radial msd.  */
-          else if (strcmp (long_options[option_index].name, "r_rcorr") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->r_rcorr_given),
-                &(local_args_info.r_rcorr_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "r_rcorr", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Angular msd.  */
-          else if (strcmp (long_options[option_index].name, "thetacorr") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->thetacorr_given),
-                &(local_args_info.thetacorr_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "thetacorr", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Directional msd for particles with unit vectors.  */
-          else if (strcmp (long_options[option_index].name, "drcorr") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->drcorr_given),
-                &(local_args_info.drcorr_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "drcorr", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Stress tensor correlation function.  */
-          else if (strcmp (long_options[option_index].name, "stresscorr") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->stresscorr_given),
-                &(local_args_info.stresscorr_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "stresscorr", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Hydrogen bond jump time correlation function binned by Z.  */
-          else if (strcmp (long_options[option_index].name, "jumptimeZ") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->jumptimeZ_given),
-                &(local_args_info.jumptimeZ_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "jumptimeZ", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Hydrogen bond persistence correlation function.  */
-          else if (strcmp (long_options[option_index].name, "persistence") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->persistence_given),
-                &(local_args_info.persistence_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "persistence", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Momentum - Angular Momentum cross correlation function.  */
-          else if (strcmp (long_options[option_index].name, "pjcorr") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->pjcorr_given),
-                &(local_args_info.pjcorr_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "pjcorr", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Force - Torque cross correlation function.  */
-          else if (strcmp (long_options[option_index].name, "ftcorr") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->ftcorr_given),
-                &(local_args_info.ftcorr_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "ftcorr", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Charge - Kinetic energy cross correlation function.  */
-          else if (strcmp (long_options[option_index].name, "ckcorr") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->ckcorr_given),
-                &(local_args_info.ckcorr_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "ckcorr", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Charge - Orientation order parameter (Cos\theta) cross correlation function.  */
-          else if (strcmp (long_options[option_index].name, "cscorr") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->cscorr_given),
-                &(local_args_info.cscorr_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "cscorr", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Force - Force auto correlation function.  */
-          else if (strcmp (long_options[option_index].name, "facorr") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->facorr_given),
-                &(local_args_info.facorr_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "facorr", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Torque - Force Cross correlation function.  */
-          else if (strcmp (long_options[option_index].name, "tfcorr") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->tfcorr_given),
-                &(local_args_info.tfcorr_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "tfcorr", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Torque auto correlation function.  */
-          else if (strcmp (long_options[option_index].name, "tacorr") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->tacorr_given),
-                &(local_args_info.tacorr_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "tacorr", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Displacement correlation function.  */
-          else if (strcmp (long_options[option_index].name, "disp") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->disp_given),
-                &(local_args_info.disp_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "disp", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Displacement correlation function binned by Z.  */
-          else if (strcmp (long_options[option_index].name, "dispZ") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->dispZ_given),
-                &(local_args_info.dispZ_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "dispZ", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Current density auto correlation function.  */
-          else if (strcmp (long_options[option_index].name, "current") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->current_given),
-                &(local_args_info.current_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "current", '-',
-                additional_error))
-              goto failure;
-
-          }
-          /* Collective Dipole displacement function (Helfand moment of Current Density).  */
-          else if (strcmp (long_options[option_index].name, "ddisp") == 0)
-          {
-
-            if (args_info->correlation_function_group_counter && override)
-              reset_group_correlation_function (args_info);
-            args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
-                 0 , &(args_info->ddisp_given),
-                &(local_args_info.ddisp_given), optarg, 0, 0, ARG_NO,
-                check_ambiguity, override, 0, 0,
-                "ddisp", '-',
-                additional_error))
-              goto failure;
-
+          
           }
           /* Velocity - Velocity auto outer product correlation function.  */
           else if (strcmp (long_options[option_index].name, "vaOutProdcorr") == 0)
           {
-
+          
             if (args_info->correlation_function_group_counter && override)
               reset_group_correlation_function (args_info);
             args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
+          
+            if (update_arg( 0 , 
                  0 , &(args_info->vaOutProdcorr_given),
                 &(local_args_info.vaOutProdcorr_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "vaOutProdcorr", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* Angular Velocity - Angular Velocity auto outer product correlation function.  */
           else if (strcmp (long_options[option_index].name, "waOutProdcorr") == 0)
           {
-
+          
             if (args_info->correlation_function_group_counter && override)
               reset_group_correlation_function (args_info);
             args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
+          
+            if (update_arg( 0 , 
                  0 , &(args_info->waOutProdcorr_given),
                 &(local_args_info.waOutProdcorr_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "waOutProdcorr", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* Velocity - Angular Velocity outer product correlation function.  */
           else if (strcmp (long_options[option_index].name, "vwOutProdcorr") == 0)
           {
-
+          
             if (args_info->correlation_function_group_counter && override)
               reset_group_correlation_function (args_info);
             args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
+          
+            if (update_arg( 0 , 
                  0 , &(args_info->vwOutProdcorr_given),
                 &(local_args_info.vwOutProdcorr_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "vwOutProdcorr", '-',
                 additional_error))
               goto failure;
-
+          
           }
           /* Angular Velocity - Velocity outer product correlation function.  */
           else if (strcmp (long_options[option_index].name, "wvOutProdcorr") == 0)
           {
-
+          
             if (args_info->correlation_function_group_counter && override)
               reset_group_correlation_function (args_info);
             args_info->correlation_function_group_counter += 1;
-
-            if (update_arg( 0 ,
+          
+            if (update_arg( 0 , 
                  0 , &(args_info->wvOutProdcorr_given),
                 &(local_args_info.wvOutProdcorr_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "wvOutProdcorr", '-',
                 additional_error))
               goto failure;
-
+          
           }
-
+          /* Lengendre correlation function binned by Z.  */
+          else if (strcmp (long_options[option_index].name, "lcorrZ") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->lcorrZ_given),
+                &(local_args_info.lcorrZ_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "lcorrZ", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Lengendre correlation function for OH bond vectors binned by Z.  */
+          else if (strcmp (long_options[option_index].name, "cohZ") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->cohZ_given),
+                &(local_args_info.cohZ_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "cohZ", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Radial msd.  */
+          else if (strcmp (long_options[option_index].name, "r_rcorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->r_rcorr_given),
+                &(local_args_info.r_rcorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "r_rcorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Angular msd.  */
+          else if (strcmp (long_options[option_index].name, "thetacorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->thetacorr_given),
+                &(local_args_info.thetacorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "thetacorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Directional msd for particles with unit vectors.  */
+          else if (strcmp (long_options[option_index].name, "drcorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->drcorr_given),
+                &(local_args_info.drcorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "drcorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Stress tensor correlation function.  */
+          else if (strcmp (long_options[option_index].name, "stresscorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->stresscorr_given),
+                &(local_args_info.stresscorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "stresscorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Hydrogen bond jump time correlation function binned by Z.  */
+          else if (strcmp (long_options[option_index].name, "jumptimeZ") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->jumptimeZ_given),
+                &(local_args_info.jumptimeZ_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "jumptimeZ", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Hydrogen bond jump time correlation function binned by R around a third selection.  */
+          else if (strcmp (long_options[option_index].name, "jumptimeR") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->jumptimeR_given),
+                &(local_args_info.jumptimeR_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "jumptimeR", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Hydrogen bond persistence correlation function.  */
+          else if (strcmp (long_options[option_index].name, "persistence") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->persistence_given),
+                &(local_args_info.persistence_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "persistence", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Momentum - Angular Momentum cross correlation function.  */
+          else if (strcmp (long_options[option_index].name, "pjcorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->pjcorr_given),
+                &(local_args_info.pjcorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "pjcorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Force - Torque cross correlation function.  */
+          else if (strcmp (long_options[option_index].name, "ftcorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->ftcorr_given),
+                &(local_args_info.ftcorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "ftcorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Charge - Kinetic energy cross correlation function.  */
+          else if (strcmp (long_options[option_index].name, "ckcorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->ckcorr_given),
+                &(local_args_info.ckcorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "ckcorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Charge - Orientation order parameter (Cos\theta) cross correlation function.  */
+          else if (strcmp (long_options[option_index].name, "cscorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->cscorr_given),
+                &(local_args_info.cscorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "cscorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Force - Force auto correlation function.  */
+          else if (strcmp (long_options[option_index].name, "facorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->facorr_given),
+                &(local_args_info.facorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "facorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Torque - Force Cross correlation function.  */
+          else if (strcmp (long_options[option_index].name, "tfcorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->tfcorr_given),
+                &(local_args_info.tfcorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "tfcorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Torque auto correlation function.  */
+          else if (strcmp (long_options[option_index].name, "tacorr") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->tacorr_given),
+                &(local_args_info.tacorr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "tacorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Displacement correlation function.  */
+          else if (strcmp (long_options[option_index].name, "disp") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->disp_given),
+                &(local_args_info.disp_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "disp", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Displacement correlation function binned by Z.  */
+          else if (strcmp (long_options[option_index].name, "dispZ") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->dispZ_given),
+                &(local_args_info.dispZ_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "dispZ", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Current density auto correlation function.  */
+          else if (strcmp (long_options[option_index].name, "current") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->current_given),
+                &(local_args_info.current_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "current", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Collective Dipole displacement function (Helfand moment of Current Density).  */
+          else if (strcmp (long_options[option_index].name, "ddisp") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->ddisp_given),
+                &(local_args_info.ddisp_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "ddisp", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          
           break;
         case '?':	/* Invalid option.  */
           /* `getopt_long' already printed an error message.  */
@@ -2364,7 +2433,7 @@ cmdline_parser_internal (
       fprintf (stderr, "%s: %d options of group correlation function were given. One is required%s.\n", argv[0], args_info->correlation_function_group_counter, (additional_error ? additional_error : ""));
       error_occurred = 1;
     }
-
+  
 
 
   if (check_required)
@@ -2396,7 +2465,7 @@ cmdline_parser_internal (
   return 0;
 
 failure:
-
+  
   cmdline_parser_release (&local_args_info);
   return (EXIT_FAILURE);
 }
