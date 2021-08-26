@@ -43,6 +43,7 @@ option  "OOcut"         -       "Oxygen-Oxygen cutoff radius (angstroms)"   doub
 option  "thetacut"      -       "HOO cutoff angle (degrees)"                double  default="30"              optional
 option  "OHcut"         -       "Oxygen-Hydrogen cutoff radius (angstroms)" double  default="2.45"            optional
 option  "privilegedAxis" -     "which axis is special for spatial analysis (default = z axis)" values="x","y","z" enum default="z" optional
+option	"length"	-	"maximum length"	                   double	default="100" optional  
 option "dipoleX"       -       "X-component of the dipole with respect to body frame" default="0.0" double optional
 option "dipoleY"       -       "Y-component of the dipole with respect to body frame" default="0.0" double optional
 option "dipoleZ"       -       "Z-component of the dipole with respect to body frame" default="-1.0" double optional

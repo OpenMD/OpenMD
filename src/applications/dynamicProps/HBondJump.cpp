@@ -749,10 +749,11 @@ namespace OpenMD {
 
   HBondJumpR::HBondJumpR(SimInfo* info, const std::string& filename,
                          const std::string& sele1, const std::string& sele2,
-                         const std::string& sele3, double OOcut,
-			 double thetaCut, double OHcut, int nRBins) :
+                         const std::string& sele3, RealType OOcut,
+			 RealType thetaCut, RealType OHcut, RealType len, 
+                         int nRBins) :
       HBondJump(info, filename, sele1, sele2, OOcut, thetaCut, OHcut),
-      nRBins_(nRBins), seleMan3_(info_), selectionScript3_(sele3),
+      len_(len), nRBins_(nRBins), seleMan3_(info_), selectionScript3_(sele3),
       evaluator3_(info_)  {
     
     setCorrFuncType("HBondJumpR");
@@ -768,15 +769,12 @@ namespace OpenMD {
       std::fill(counts_[i].begin(), counts_[i].end(), 0);
     }
     
-    Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-    RealType maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) / 2.0;
-    deltaR_ = maxLen / nRBins_;
-
     evaluator3_.loadScriptString(selectionScript3_);
     if (!evaluator3_.isDynamic()) {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
     }
 
+    deltaR_ = len_ / nRBins_;
   }
 
   void HBondJumpR::findHBonds(int frame) {
@@ -788,7 +786,7 @@ namespace OpenMD {
     std::vector<Atom*>::iterator hbai;
     Atom* hba;
     Vector3d dPos, hPos, aPos, pos;
-    int hInd, index, aInd, rBin;
+    int hInd, index, aInd;
     StuntDouble* sd3;
     Vector3d vec;
     RealType r;

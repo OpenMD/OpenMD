@@ -168,6 +168,13 @@ int main(int argc, char* argv[]) {
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
 
+  RealType maxLen;
+  if (args_info.length_given) {
+    maxLen = args_info.length_arg;
+  } else {
+    maxLen = 100.0;
+  }
+
   std::unique_ptr<DynamicProperty> corrFunc {nullptr};
 
   if (args_info.sdcorr_given) {
@@ -288,8 +295,9 @@ int main(int argc, char* argv[]) {
   } else if (args_info.jumptimeR_given) {
     if (args_info.sele3_given) {      
       corrFunc = Utils::make_unique<HBondJumpR>(
-          info, dumpFileName, sele1, sele2, args_info.sele3_arg, args_info.OOcut_arg,
-	  args_info.thetacut_arg, args_info.OHcut_arg, args_info.nbins_arg);
+          info, dumpFileName, sele1, sele2, args_info.sele3_arg, 
+          args_info.OOcut_arg, args_info.thetacut_arg, args_info.OHcut_arg, 
+          maxLen, args_info.nbins_arg);
     } else {
       sprintf(painCave.errMsg, "--sele3 must be set if --jumptimeR is set\n");
       painCave.severity = OPENMD_ERROR;

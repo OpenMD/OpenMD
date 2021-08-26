@@ -80,6 +80,9 @@ struct gengetopt_args_info
   enum enum_privilegedAxis privilegedAxis_arg;	/**< @brief which axis is special for spatial analysis (default = z axis) (default='z').  */
   char * privilegedAxis_orig;	/**< @brief which axis is special for spatial analysis (default = z axis) original value given at command line.  */
   const char *privilegedAxis_help; /**< @brief which axis is special for spatial analysis (default = z axis) help description.  */
+  double length_arg;	/**< @brief maximum length (default='100').  */
+  char * length_orig;	/**< @brief maximum length original value given at command line.  */
+  const char *length_help; /**< @brief maximum length help description.  */
   double dipoleX_arg;	/**< @brief X-component of the dipole with respect to body frame (default='0.0').  */
   char * dipoleX_orig;	/**< @brief X-component of the dipole with respect to body frame original value given at command line.  */
   const char *dipoleX_help; /**< @brief X-component of the dipole with respect to body frame help description.  */
@@ -142,6 +145,7 @@ struct gengetopt_args_info
   unsigned int thetacut_given ;	/**< @brief Whether thetacut was given.  */
   unsigned int OHcut_given ;	/**< @brief Whether OHcut was given.  */
   unsigned int privilegedAxis_given ;	/**< @brief Whether privilegedAxis was given.  */
+  unsigned int length_given ;	/**< @brief Whether length was given.  */
   unsigned int dipoleX_given ;	/**< @brief Whether dipoleX was given.  */
   unsigned int dipoleY_given ;	/**< @brief Whether dipoleY was given.  */
   unsigned int dipoleZ_given ;	/**< @brief Whether dipoleZ was given.  */
