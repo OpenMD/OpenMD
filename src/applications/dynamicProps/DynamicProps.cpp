@@ -292,7 +292,7 @@ int main(int argc, char* argv[]) {
         privilegedAxis);
   } else if (args_info.jumptimeR_given) {
     if (args_info.sele3_given) {
-      corrFunc = Utils::make_unique<HBondJumpR>(
+      corrFunc = std::make_unique<HBondJumpR>(
           info, dumpFileName, sele1, sele2, args_info.sele3_arg,
           args_info.OOcut_arg, args_info.thetacut_arg, args_info.OHcut_arg,
           maxLen, args_info.nbins_arg);
