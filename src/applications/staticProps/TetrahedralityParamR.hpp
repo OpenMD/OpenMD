@@ -100,11 +100,11 @@ namespace OpenMD {
     SelectionManager seleMan1_;
     SelectionManager seleMan2_;
     SelectionManager seleMan3_;
+    RealType len_;
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
     SelectionEvaluator evaluator3_;
     RealType rCut_;
-    RealType len_;
     RealType deltaR_;
     int nBins_;
     std::vector<RealType> sliceQ_;

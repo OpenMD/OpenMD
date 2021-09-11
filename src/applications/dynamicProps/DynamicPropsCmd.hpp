@@ -53,9 +53,15 @@ struct gengetopt_args_info
   char * sele2_arg;	/**< @brief select second stuntdouble set (if sele2 is not set, use script from sele1).  */
   char * sele2_orig;	/**< @brief select second stuntdouble set (if sele2 is not set, use script from sele1) original value given at command line.  */
   const char *sele2_help; /**< @brief select second stuntdouble set (if sele2 is not set, use script from sele1) help description.  */
+  char * sele3_arg;	/**< @brief select third stuntdouble set.  */
+  char * sele3_orig;	/**< @brief select third stuntdouble set original value given at command line.  */
+  const char *sele3_help; /**< @brief select third stuntdouble set help description.  */
   int order_arg;	/**< @brief Lengendre Polynomial Order.  */
   char * order_orig;	/**< @brief Lengendre Polynomial Order original value given at command line.  */
   const char *order_help; /**< @brief Lengendre Polynomial Order help description.  */
+  int nbins_arg;	/**< @brief Number of bins (default='100').  */
+  char * nbins_orig;	/**< @brief Number of bins original value given at command line.  */
+  const char *nbins_help; /**< @brief Number of bins help description.  */
   int nzbins_arg;	/**< @brief Number of Z bins (default='100').  */
   char * nzbins_orig;	/**< @brief Number of Z bins original value given at command line.  */
   const char *nzbins_help; /**< @brief Number of Z bins help description.  */
@@ -74,6 +80,9 @@ struct gengetopt_args_info
   enum enum_privilegedAxis privilegedAxis_arg;	/**< @brief which axis is special for spatial analysis (default = z axis) (default='z').  */
   char * privilegedAxis_orig;	/**< @brief which axis is special for spatial analysis (default = z axis) original value given at command line.  */
   const char *privilegedAxis_help; /**< @brief which axis is special for spatial analysis (default = z axis) help description.  */
+  double length_arg;	/**< @brief maximum length (default='100').  */
+  char * length_orig;	/**< @brief maximum length original value given at command line.  */
+  const char *length_help; /**< @brief maximum length help description.  */
   double dipoleX_arg;	/**< @brief X-component of the dipole with respect to body frame (default='0.0').  */
   char * dipoleX_orig;	/**< @brief X-component of the dipole with respect to body frame original value given at command line.  */
   const char *dipoleX_help; /**< @brief X-component of the dipole with respect to body frame help description.  */
@@ -89,6 +98,10 @@ struct gengetopt_args_info
   const char *vcorr_help; /**< @brief velocity correlation function help description.  */
   const char *vcorrZ_help; /**< @brief velocity correlation function along z-axis help description.  */
   const char *vcorrR_help; /**< @brief velocity correlation function projected radially help description.  */
+  const char *vaOutProdcorr_help; /**< @brief Velocity - Velocity auto outer product correlation function help description.  */
+  const char *waOutProdcorr_help; /**< @brief Angular Velocity - Angular Velocity auto outer product correlation function help description.  */
+  const char *vwOutProdcorr_help; /**< @brief Velocity - Angular Velocity outer product correlation function help description.  */
+  const char *wvOutProdcorr_help; /**< @brief Angular Velocity - Velocity outer product correlation function help description.  */
   const char *wcorr_help; /**< @brief charge velocity correlation function help description.  */
   const char *dcorr_help; /**< @brief dipole correlation function help description.  */
   const char *lcorr_help; /**< @brief Lengendre correlation function help description.  */
@@ -103,6 +116,7 @@ struct gengetopt_args_info
   const char *freqfluccorr_help; /**< @brief Frequency Fluctuation correlation function help description.  */
   const char *jumptime_help; /**< @brief Hydrogen bond jump time correlation function help description.  */
   const char *jumptimeZ_help; /**< @brief Hydrogen bond jump time correlation function binned by Z help description.  */
+  const char *jumptimeR_help; /**< @brief Hydrogen bond jump time correlation function binned by R around a third selection help description.  */
   const char *persistence_help; /**< @brief Hydrogen bond persistence correlation function help description.  */
   const char *pjcorr_help; /**< @brief Momentum - Angular Momentum cross correlation function help description.  */
   const char *ftcorr_help; /**< @brief Force - Torque cross correlation function help description.  */
@@ -115,25 +129,23 @@ struct gengetopt_args_info
   const char *dispZ_help; /**< @brief Displacement correlation function binned by Z help description.  */
   const char *current_help; /**< @brief Current density auto correlation function help description.  */
   const char *ddisp_help; /**< @brief Collective Dipole displacement function (Helfand moment of Current Density) help description.  */
-  const char *vaOutProdcorr_help; /**< @brief Velocity - Velocity auto outer product correlation function help description.  */
-  const char *waOutProdcorr_help; /**< @brief Angular Velocity - Angular Velocity auto outer product correlation function help description.  */
-  const char *vwOutProdcorr_help; /**< @brief Velocity - Angular Velocity outer product correlation function help description.  */
-  const char *wvOutProdcorr_help; /**< @brief Angular Velocity - Velocity outer product correlation function help description.  */
-
-
+  
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int input_given ;	/**< @brief Whether input was given.  */
   unsigned int output_given ;	/**< @brief Whether output was given.  */
   unsigned int sele1_given ;	/**< @brief Whether sele1 was given.  */
   unsigned int sele2_given ;	/**< @brief Whether sele2 was given.  */
+  unsigned int sele3_given ;	/**< @brief Whether sele3 was given.  */
   unsigned int order_given ;	/**< @brief Whether order was given.  */
+  unsigned int nbins_given ;	/**< @brief Whether nbins was given.  */
   unsigned int nzbins_given ;	/**< @brief Whether nzbins was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
   unsigned int OOcut_given ;	/**< @brief Whether OOcut was given.  */
   unsigned int thetacut_given ;	/**< @brief Whether thetacut was given.  */
   unsigned int OHcut_given ;	/**< @brief Whether OHcut was given.  */
   unsigned int privilegedAxis_given ;	/**< @brief Whether privilegedAxis was given.  */
+  unsigned int length_given ;	/**< @brief Whether length was given.  */
   unsigned int dipoleX_given ;	/**< @brief Whether dipoleX was given.  */
   unsigned int dipoleY_given ;	/**< @brief Whether dipoleY was given.  */
   unsigned int dipoleZ_given ;	/**< @brief Whether dipoleZ was given.  */
@@ -143,6 +155,10 @@ struct gengetopt_args_info
   unsigned int vcorr_given ;	/**< @brief Whether vcorr was given.  */
   unsigned int vcorrZ_given ;	/**< @brief Whether vcorrZ was given.  */
   unsigned int vcorrR_given ;	/**< @brief Whether vcorrR was given.  */
+  unsigned int vaOutProdcorr_given ;	/**< @brief Whether vaOutProdcorr was given.  */
+  unsigned int waOutProdcorr_given ;	/**< @brief Whether waOutProdcorr was given.  */
+  unsigned int vwOutProdcorr_given ;	/**< @brief Whether vwOutProdcorr was given.  */
+  unsigned int wvOutProdcorr_given ;	/**< @brief Whether wvOutProdcorr was given.  */
   unsigned int wcorr_given ;	/**< @brief Whether wcorr was given.  */
   unsigned int dcorr_given ;	/**< @brief Whether dcorr was given.  */
   unsigned int lcorr_given ;	/**< @brief Whether lcorr was given.  */
@@ -157,6 +173,7 @@ struct gengetopt_args_info
   unsigned int freqfluccorr_given ;	/**< @brief Whether freqfluccorr was given.  */
   unsigned int jumptime_given ;	/**< @brief Whether jumptime was given.  */
   unsigned int jumptimeZ_given ;	/**< @brief Whether jumptimeZ was given.  */
+  unsigned int jumptimeR_given ;	/**< @brief Whether jumptimeR was given.  */
   unsigned int persistence_given ;	/**< @brief Whether persistence was given.  */
   unsigned int pjcorr_given ;	/**< @brief Whether pjcorr was given.  */
   unsigned int ftcorr_given ;	/**< @brief Whether ftcorr was given.  */
@@ -169,11 +186,6 @@ struct gengetopt_args_info
   unsigned int dispZ_given ;	/**< @brief Whether dispZ was given.  */
   unsigned int current_given ;	/**< @brief Whether current was given.  */
   unsigned int ddisp_given ;	/**< @brief Whether ddisp was given.  */
-  unsigned int vaOutProdcorr_given ;	/**< @brief Whether vaOutProdcorr was given.  */
-  unsigned int waOutProdcorr_given ;	/**< @brief Whether waOutProdcorr was given.  */
-  unsigned int vwOutProdcorr_given ;	/**< @brief Whether vwOutProdcorr was given.  */
-  unsigned int wvOutProdcorr_given ;	/**< @brief Whether wvOutProdcorr was given.  */
-
 
   char **inputs ; /**< @brief unnamed options (options without names) */
   unsigned inputs_num ; /**< @brief unnamed options number */
@@ -265,7 +277,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure
+ * Initializes all the fields a cmdline_parser_params structure 
  * to their default values
  * @param params the structure to initialize
  */

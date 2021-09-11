@@ -48,6 +48,8 @@
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 
+#define HONKING_LARGE_VALUE 1.0e10
+
 namespace OpenMD {
 
   class HBondJump : public TimeCorrFunc<RealType> {
@@ -116,6 +118,31 @@ namespace OpenMD {
     unsigned int nZBins_;
     int axis_;
     std::string axisLabel_;
+  };
+
+  class HBondJumpR : public HBondJump {
+  public:
+    HBondJumpR(SimInfo* info, const std::string& filename,
+               const std::string& sele1, const std::string& sele2,
+               const std::string& sele3, double OOCut, RealType thetaCut,
+               RealType OHCut, RealType len, int nRbins);
+    virtual int registerHydrogen(int frame, int hIndex);
+    virtual void findHBonds(int frame);
+    virtual void correlation();
+    virtual void postCorrelate();
+    virtual void writeCorrelate();
+
+  private:
+    RealType len_;
+    unsigned int nRBins_;
+    RealType deltaR_;
+    SelectionManager seleMan3_;
+    std::string selectionScript3_;
+    SelectionEvaluator evaluator3_;
+
+    std::vector<std::vector<RealType>> histogram_;
+    std::vector<std::vector<int>> counts_;
+    std::vector<std::vector<int>> rbin_;
   };
 }  // namespace OpenMD
 
