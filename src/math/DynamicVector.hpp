@@ -342,7 +342,7 @@ namespace OpenMD {
     void getSubVector(size_type beginning, VectorType& v) {
       assert(beginning + v.size() - 1 <= this->size());
 
-      for (size_type i = 0; i < v.size(); ++i)
+      for (size_type i {}; i < v.size(); ++i)
         v(i) = (*this)[beginning + i];
     }
 
@@ -439,7 +439,7 @@ namespace OpenMD {
     Real tmp;
     tmp = 0;
     assert(v1.size() == v2.size());
-    for (auto i = 0; i < v1.size(); i++)
+    for (typename DynamicVector<Real>::size_type i {}; i < v1.size(); i++)
       tmp += v1[i] * v2[i];
 
     return tmp;

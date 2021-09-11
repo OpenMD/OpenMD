@@ -46,6 +46,7 @@
 #ifndef OPENMD_UTILS_TRIM_HPP
 #define OPENMD_UTILS_TRIM_HPP
 
+#include <algorithm>
 #include <locale>
 #include <string>
 

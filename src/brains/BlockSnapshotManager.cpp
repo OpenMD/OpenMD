@@ -254,9 +254,9 @@ namespace OpenMD {
 
   std::vector<int> BlockSnapshotManager::getActiveBlocks() {
     std::vector<int> result;
-    std::copy_if(activeBlocks_.begin(), activeBlocks_.end(),
-                 std::back_inserter(result),
-                 std::bind(std::not_equal_to<int>(), placeholders::_1, -1));
+    std::copy_if(
+        activeBlocks_.begin(), activeBlocks_.end(), std::back_inserter(result),
+        std::bind(std::not_equal_to<int>(), std::placeholders::_1, -1));
     return result;
   }
 

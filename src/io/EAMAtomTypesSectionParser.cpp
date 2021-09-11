@@ -45,6 +45,9 @@
 
 #include "io/EAMAtomTypesSectionParser.hpp"
 
+#include <functional>
+#include <string>
+
 #include "brains/ForceField.hpp"
 #include "types/AtomType.hpp"
 #include "types/EAMAdapter.hpp"
@@ -329,9 +332,9 @@ namespace OpenMD {
             delete ppfStream;
 
             // Convert to eV using energy unit scaling in force field:
-            std::transform(
-                F.begin(), F.end(), F.begin(),
-                std::bind(std::multiplies<RealType>(), eus_, placeholders::_1));
+            std::transform(F.begin(), F.end(), F.begin(),
+                           std::bind(std::multiplies<RealType>(), eus_,
+                                     std::placeholders::_1));
 
             ea.makeOxygenFuncfl(re, fe, alpha, beta, A, B, kappa, lambda, drho,
                                 nrho, F);
@@ -434,7 +437,7 @@ namespace OpenMD {
     // Convert to kcal/mol using energy unit scaling in force field:
     std::transform(
         F.begin(), F.end(), F.begin(),
-        std::bind(std::multiplies<RealType>(), eus_, placeholders::_1));
+        std::bind(std::multiplies<RealType>(), eus_, std::placeholders::_1));
 
     ea.makeFuncfl(latticeConstant, lattice, nrho, drho, nr, dr, rcut, Z, rho,
                   F);

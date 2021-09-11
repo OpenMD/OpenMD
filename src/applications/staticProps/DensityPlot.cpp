@@ -165,7 +165,7 @@ namespace OpenMD {
     int nProcessed = nFrames / step_;
     std::transform(
         density_.begin(), density_.end(), density_.begin(),
-        std::bind(std::divides<RealType>(), placeholders::_1, nProcessed));
+        std::bind(std::divides<RealType>(), std::placeholders::_1, nProcessed));
     writeDensity();
   }
 

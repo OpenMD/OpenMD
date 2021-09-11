@@ -253,14 +253,15 @@ namespace OpenMD {
   void MoleculeStamp::checkBends() {
     std::ostringstream oss;
     for (std::size_t i = 0; i < getNBends(); ++i) {
-      BendStamp* bendStamp         = getBendStamp(i);
-      std::vector<int> bendAtoms   = bendStamp->getMembers();
-      std::vector<int>::iterator j = std::find_if(
-          bendAtoms.begin(), bendAtoms.end(),
-          std::bind(std::greater<int>(), placeholders::_1, getNAtoms() - 1));
+      BendStamp* bendStamp       = getBendStamp(i);
+      std::vector<int> bendAtoms = bendStamp->getMembers();
+      std::vector<int>::iterator j =
+          std::find_if(bendAtoms.begin(), bendAtoms.end(),
+                       std::bind(std::greater<int>(), std::placeholders::_1,
+                                 getNAtoms() - 1));
       std::vector<int>::iterator k =
           std::find_if(bendAtoms.begin(), bendAtoms.end(),
-                       std::bind(std::less<int>(), placeholders::_1, 0));
+                       std::bind(std::less<int>(), std::placeholders::_1, 0));
 
       if (j != bendAtoms.end() || k != bendAtoms.end()) {
         oss << "Error in Molecule " << getName() << " : atoms of bend"
@@ -417,12 +418,13 @@ namespace OpenMD {
     for (std::size_t i = 0; i < getNTorsions(); ++i) {
       TorsionStamp* torsionStamp    = getTorsionStamp(i);
       std::vector<int> torsionAtoms = torsionStamp->getMembers();
-      std::vector<int>::iterator j  = std::find_if(
-          torsionAtoms.begin(), torsionAtoms.end(),
-          std::bind(std::greater<int>(), placeholders::_1, getNAtoms() - 1));
+      std::vector<int>::iterator j =
+          std::find_if(torsionAtoms.begin(), torsionAtoms.end(),
+                       std::bind(std::greater<int>(), std::placeholders::_1,
+                                 getNAtoms() - 1));
       std::vector<int>::iterator k =
           std::find_if(torsionAtoms.begin(), torsionAtoms.end(),
-                       std::bind(std::less<int>(), placeholders::_1, 0));
+                       std::bind(std::less<int>(), std::placeholders::_1, 0));
 
       if (j != torsionAtoms.end() || k != torsionAtoms.end()) {
         oss << "Error in Molecule " << getName() << ": atoms of torsion"
@@ -573,12 +575,13 @@ namespace OpenMD {
       inversionAtoms.insert(inversionAtoms.begin(),
                             inversionStamp->getCenter());
 
-      std::vector<int>::iterator j = std::find_if(
-          inversionAtoms.begin(), inversionAtoms.end(),
-          std::bind(std::greater<int>(), placeholders::_1, getNAtoms() - 1));
+      std::vector<int>::iterator j =
+          std::find_if(inversionAtoms.begin(), inversionAtoms.end(),
+                       std::bind(std::greater<int>(), std::placeholders::_1,
+                                 getNAtoms() - 1));
       std::vector<int>::iterator k =
           std::find_if(inversionAtoms.begin(), inversionAtoms.end(),
-                       std::bind(std::less<int>(), placeholders::_1, 0));
+                       std::bind(std::less<int>(), std::placeholders::_1, 0));
 
       if (j != inversionAtoms.end() || k != inversionAtoms.end()) {
         oss << "Error in Molecule " << getName() << ": atoms of inversion"
@@ -702,11 +705,12 @@ namespace OpenMD {
     }
 
     for (std::size_t i = 0; i < getNRigidBodies(); ++i) {
-      RigidBodyStamp* rbStamp      = getRigidBodyStamp(i);
-      std::vector<int> rigidAtoms  = rbStamp->getMembers();
-      std::vector<int>::iterator j = std::find_if(
-          rigidAtoms.begin(), rigidAtoms.end(),
-          std::bind(std::greater<int>(), placeholders::_1, getNAtoms() - 1));
+      RigidBodyStamp* rbStamp     = getRigidBodyStamp(i);
+      std::vector<int> rigidAtoms = rbStamp->getMembers();
+      std::vector<int>::iterator j =
+          std::find_if(rigidAtoms.begin(), rigidAtoms.end(),
+                       std::bind(std::greater<int>(), std::placeholders::_1,
+                                 getNAtoms() - 1));
       if (j != rigidAtoms.end()) {
         oss << "Error in Molecule " << getName();
         throw OpenMDException(oss.str());
@@ -726,9 +730,10 @@ namespace OpenMD {
     for (std::size_t i = 0; i < getNCutoffGroups(); ++i) {
       CutoffGroupStamp* cutoffGroupStamp = getCutoffGroupStamp(i);
       std::vector<int> cutoffGroupAtoms  = cutoffGroupStamp->getMembers();
-      std::vector<int>::iterator j       = std::find_if(
-          cutoffGroupAtoms.begin(), cutoffGroupAtoms.end(),
-          std::bind(std::greater<int>(), placeholders::_1, getNAtoms() - 1));
+      std::vector<int>::iterator j =
+          std::find_if(cutoffGroupAtoms.begin(), cutoffGroupAtoms.end(),
+                       std::bind(std::greater<int>(), std::placeholders::_1,
+                                 getNAtoms() - 1));
       if (j != cutoffGroupAtoms.end()) {
         std::ostringstream oss;
         oss << "Error in Molecule " << getName() << ": cutoffGroup"
