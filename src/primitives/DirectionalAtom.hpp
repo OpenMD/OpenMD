@@ -55,6 +55,7 @@
 
 #include "primitives/Atom.hpp"
 #include "types/AtomType.hpp"
+
 namespace OpenMD {
   class DirectionalAtom : public Atom {
   public:
@@ -105,4 +106,5 @@ namespace OpenMD {
     Mat3x3d quadrupole_;  // body fixed quadrupole tensor
   };
 }  // namespace OpenMD
+
 #endif  // PRIMITIVES_DIRECTIONALATOM_HPP

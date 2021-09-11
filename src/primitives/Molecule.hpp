@@ -83,19 +83,19 @@ namespace OpenMD {
       Atom* donatedHydrogen;
     };
 
-    typedef std::vector<Atom*>::iterator AtomIterator;
-    typedef std::vector<Bond*>::iterator BondIterator;
-    typedef std::vector<Bend*>::iterator BendIterator;
-    typedef std::vector<Torsion*>::iterator TorsionIterator;
-    typedef std::vector<Inversion*>::iterator InversionIterator;
-    typedef std::vector<RigidBody*>::iterator RigidBodyIterator;
-    typedef std::vector<CutoffGroup*>::iterator CutoffGroupIterator;
-    typedef std::vector<StuntDouble*>::iterator IntegrableObjectIterator;
-    typedef std::vector<ConstraintPair*>::iterator ConstraintPairIterator;
-    typedef std::vector<ConstraintElem*>::iterator ConstraintElemIterator;
-    typedef std::vector<Atom*>::iterator FluctuatingChargeIterator;
-    typedef std::vector<HBondDonor*>::iterator HBondDonorIterator;
-    typedef std::vector<Atom*>::iterator HBondAcceptorIterator;
+    using AtomIterator              = std::vector<Atom*>::iterator;
+    using BondIterator              = std::vector<Bond*>::iterator;
+    using BendIterator              = std::vector<Bend*>::iterator;
+    using TorsionIterator           = std::vector<Torsion*>::iterator;
+    using InversionIterator         = std::vector<Inversion*>::iterator;
+    using RigidBodyIterator         = std::vector<RigidBody*>::iterator;
+    using CutoffGroupIterator       = std::vector<CutoffGroup*>::iterator;
+    using IntegrableObjectIterator  = std::vector<StuntDouble*>::iterator;
+    using ConstraintPairIterator    = std::vector<ConstraintPair*>::iterator;
+    using ConstraintElemIterator    = std::vector<ConstraintElem*>::iterator;
+    using FluctuatingChargeIterator = std::vector<Atom*>::iterator;
+    using HBondDonorIterator        = std::vector<HBondDonor*>::iterator;
+    using HBondAcceptorIterator     = std::vector<Atom*>::iterator;
 
     Molecule(int stampId, int globalIndex, const std::string& molName,
              int region);
@@ -428,6 +428,6 @@ namespace OpenMD {
     PropertyMap properties_;
     bool constrainTotalCharge_;
   };
-
 }  // namespace OpenMD
+
 #endif  //

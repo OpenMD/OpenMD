@@ -59,7 +59,6 @@
 #include "io/DumpWriter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/Constants.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/ProgressBar.hpp"
 #include "utils/simError.h"
 
@@ -122,7 +121,7 @@ int main(int argc, char* argv[]) {
   oldHmat          = oldSnap->getHmat();
 
   // ProgressBarPtr progressBar {nullptr};
-  // progressBar = Utils::make_unique<ProgressBar>();
+  // progressBar = std::make_unique<ProgressBar>();
 
   ofstream eos;
   eos.open(outFileName.c_str());

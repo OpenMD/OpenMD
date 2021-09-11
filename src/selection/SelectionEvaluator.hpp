@@ -46,6 +46,7 @@
 #ifndef SELECTION_SELECTIONEVALUATOR_HPP
 #define SELECTION_SELECTIONEVALUATOR_HPP
 
+#include <any>
 #include <fstream>
 #include <map>
 #include <string>
@@ -61,6 +62,7 @@
 #include "selection/SelectionSet.hpp"
 #include "selection/SelectionToken.hpp"
 #include "utils/StringUtils.hpp"
+
 namespace OpenMD {
 
   /**
@@ -164,7 +166,7 @@ namespace OpenMD {
     void compareProperty(Molecule* mol, SelectionSet& bs, int property,
                          int comparator, float comparisonValue, int frame);
     SelectionSet nameInstruction(const std::string& name);
-    SelectionSet indexInstruction(const boost::any& value);
+    SelectionSet indexInstruction(const std::any& value);
     SelectionSet expression(const std::vector<Token>& tokens, int pc);
     SelectionSet expression(const std::vector<Token>& tokens, int pc,
                             int frame);
@@ -184,16 +186,16 @@ namespace OpenMD {
 
     void unrecognizedCommand(const Token& token) {
       evalError("unrecognized command:" +
-                boost::any_cast<std::string>(token.value));
+                std::any_cast<std::string>(token.value));
     }
 
     void unrecognizedExpression() { evalError("unrecognized expression"); }
 
-    void unrecognizedAtomProperty(int property) {
+    void unrecognizedAtomProperty(int) {
       evalError("unrecognized atom property");
     }
 
-    void unrecognizedMoleculeProperty(int property) {
+    void unrecognizedMoleculeProperty(int) {
       evalError("unrecognized molecule property");
     }
 
@@ -243,7 +245,7 @@ namespace OpenMD {
     IndexFinder indexFinder;
     vector<int> nObjects;
 
-    typedef std::map<std::string, boost::any> VariablesType;
+    using VariablesType = std::map<std::string, std::any>;
     VariablesType variables;
 
     bool isDynamic_ {false};

@@ -45,9 +45,11 @@
 
 #ifndef APPLICATION_HYDRODYNAMICS_COMPOSITESHAPE_HPP
 #define APPLICATION_HYDRODYNAMICS_COMPOSITESHAPE_HPP
+
 #include <vector>
 
 #include "hydrodynamics/Shape.hpp"
+
 namespace OpenMD {
   /**
    * @class CompositeShape
@@ -66,6 +68,6 @@ namespace OpenMD {
   private:
     std::vector<Shape*> shapes_;
   };
-
 }  // namespace OpenMD
+
 #endif

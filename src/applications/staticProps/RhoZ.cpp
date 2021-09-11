@@ -53,6 +53,7 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   RhoZ::RhoZ(SimInfo* info, const std::string& filename,

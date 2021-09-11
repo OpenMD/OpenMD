@@ -45,6 +45,7 @@
 
 #ifndef TYPES_MOLECULESTAMP_HPP
 #define TYPES_MOLECULESTAMP_HPP
+
 #include <utility>
 #include <vector>
 
@@ -166,6 +167,6 @@ namespace OpenMD {
     int nintegrable_;
     int region_;
   };
-
 }  // namespace OpenMD
+
 #endif

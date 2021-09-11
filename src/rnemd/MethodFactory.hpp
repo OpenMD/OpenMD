@@ -43,8 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef RNEMDMETHODS_METHODFACTORY_HPP
-#define RNEMDMETHODS_METHODFACTORY_HPP
+#ifndef OPENMD_RNEMD_METHODFACTORY_HPP
+#define OPENMD_RNEMD_METHODFACTORY_HPP
 
 #include <memory>
 #include <string>
@@ -56,34 +56,31 @@
 #include "rnemd/Swap.hpp"
 #include "rnemd/VSS.hpp"
 #include "utils/CI_String.hpp"
-#include "utils/MemoryUtils.hpp"
 
-namespace OpenMD {
-  namespace RNEMD {
+namespace OpenMD::RNEMD {
 
-    class MethodFactory {
-    public:
-      explicit MethodFactory(const std::string& methodStr) :
-          methodStr_ {Utils::traits_cast<Utils::ci_char_traits>(methodStr)} {}
+  class MethodFactory {
+  public:
+    explicit MethodFactory(const std::string& methodStr) :
+        methodStr_ {Utils::traits_cast<Utils::ci_char_traits>(methodStr)} {}
 
-      std::unique_ptr<RNEMD> create(SimInfo* info, ForceManager* forceMan) {
-        if (methodStr_ == "Swap")
-          return Utils::make_unique<SwapMethod>(info, forceMan);
+    std::unique_ptr<RNEMD> create(SimInfo* info, ForceManager* forceMan) {
+      if (methodStr_ == "Swap")
+        return std::make_unique<SwapMethod>(info, forceMan);
 
-        else if (methodStr_ == "NIVS")
-          return Utils::make_unique<NIVSMethod>(info, forceMan);
+      else if (methodStr_ == "NIVS")
+        return std::make_unique<NIVSMethod>(info, forceMan);
 
-        else if (methodStr_ == "SPF")
-          return Utils::make_unique<SPFMethod>(info, forceMan);
+      else if (methodStr_ == "SPF")
+        return std::make_unique<SPFMethod>(info, forceMan);
 
-        else
-          return Utils::make_unique<VSSMethod>(info, forceMan);
-      }
+      else
+        return std::make_unique<VSSMethod>(info, forceMan);
+    }
 
-    private:
-      const Utils::ci_string methodStr_;
-    };
-  }  // namespace RNEMD
-}  // namespace OpenMD
+  private:
+    const Utils::ci_string methodStr_;
+  };
+}  // namespace OpenMD::RNEMD
 
-#endif  // RNEMDMETHODS_METHODFACTORY_HPP
+#endif  // OPENMD_RNEMD_METHODFACTORY_HPP

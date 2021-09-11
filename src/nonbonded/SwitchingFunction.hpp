@@ -76,4 +76,5 @@ namespace OpenMD {
     CubicSplinePtr switchSpline_;
   };
 }  // namespace OpenMD
+
 #endif

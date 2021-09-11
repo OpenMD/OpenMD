@@ -48,6 +48,7 @@
 #include "brains/ForceField.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   ChargeAtomTypesSectionParser::ChargeAtomTypesSectionParser(

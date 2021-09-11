@@ -158,6 +158,6 @@ namespace OpenMD {
     NonBondedInteractionType& operator=(const NonBondedInteractionType& nbit);
     PropertyMap properties_;
   };
-
 }  // namespace OpenMD
+
 #endif  // TYPES_NONBONDEDINTERACTIONTYPE_HPP

@@ -53,7 +53,6 @@
 #include "icosahedralBuilderCmd.hpp"
 #include "io/DumpWriter.hpp"
 #include "utils/MoLocator.hpp"
-#include "utils/Tuple.hpp"
 
 using namespace OpenMD;
 using namespace std;

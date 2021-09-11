@@ -46,6 +46,7 @@
 #include "io/SectionParser.hpp"
 
 #include "utils/Trim.hpp"
+
 namespace OpenMD {
 
   void SectionParser::parse(std::istream& input, ForceField& ff, int lineNo) {
@@ -54,7 +55,7 @@ namespace OpenMD {
     std::string line, filteredLine;
     while (input.getline(buffer, bufferSize)) {
       ++lineNo;
-      line = trimLeftCopy(buffer);
+      line = Utils::trimLeftCopy(buffer);
       // a line begins with "//" is comment
       // let's also call lines starting with # and ! as comments
       if (isEndSection(line)) {

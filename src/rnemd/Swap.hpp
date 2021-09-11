@@ -50,17 +50,14 @@
 #include "rnemd/RNEMD.hpp"
 #include "selection/SelectionManager.hpp"
 
-namespace OpenMD {
-  namespace RNEMD {
+namespace OpenMD::RNEMD {
 
-    class SwapMethod : public RNEMD {
-    public:
-      explicit SwapMethod(SimInfo* info, ForceManager* forceMan);
+  class SwapMethod : public RNEMD {
+  public:
+    explicit SwapMethod(SimInfo* info, ForceManager* forceMan);
 
-      void doRNEMDImpl(SelectionManager& smanA,
-                       SelectionManager& smanB) override;
-    };
-  }  // namespace RNEMD
-}  // namespace OpenMD
+    void doRNEMDImpl(SelectionManager& smanA, SelectionManager& smanB) override;
+  };
+}  // namespace OpenMD::RNEMD
 
 #endif  // OPENMD_RNEMD_SWAP_HPP

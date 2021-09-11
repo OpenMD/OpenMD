@@ -54,6 +54,7 @@
 #define INTEGRATORS_NPTF_HPP
 
 #include "integrators/NPT.hpp"
+
 namespace OpenMD {
 
   class NPTf : public NPT {
@@ -86,7 +87,6 @@ namespace OpenMD {
     Mat3x3d prevEta;
     Mat3x3d vScale;
   };
-
 }  // namespace OpenMD
 
 #endif  // INTEGRATORS_NPTF_HPP

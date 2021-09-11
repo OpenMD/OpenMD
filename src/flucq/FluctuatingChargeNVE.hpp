@@ -69,7 +69,6 @@ namespace OpenMD {
     Snapshot* snap {nullptr};
     Thermo thermo;
   };
-
 }  // namespace OpenMD
 
 #endif

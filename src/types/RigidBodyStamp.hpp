@@ -71,4 +71,5 @@ namespace OpenMD {
     std::vector<int> members_;
   };
 }  // namespace OpenMD
+
 #endif

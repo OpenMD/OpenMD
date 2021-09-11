@@ -164,6 +164,6 @@ namespace OpenMD {
     std::size_t size_;
     int storageLayout_;
   };
-
 }  // namespace OpenMD
+
 #endif  // BRAINS_DATASTORAGE_HPP

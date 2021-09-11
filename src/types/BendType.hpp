@@ -52,6 +52,7 @@
 
 #ifndef TYPES_BENDTYPE_HPP
 #define TYPES_BENDTYPE_HPP
+
 #include <config.h>
 
 namespace OpenMD {
@@ -73,6 +74,6 @@ namespace OpenMD {
   protected:
     RealType theta0_;
   };
-
 }  // namespace OpenMD
+
 #endif  // TYPES_BENDTYPE_HPP

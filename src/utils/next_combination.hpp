@@ -56,6 +56,7 @@
 #include <iostream>
 #include <iterator>
 #include <vector>
+
 namespace OpenMD {
 
   /**
@@ -155,4 +156,5 @@ namespace OpenMD {
   }  // end next_combination
 
 }  // namespace OpenMD
+
 #endif  // UTILS_NEXT_COMBINATION_HPP

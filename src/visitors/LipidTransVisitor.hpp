@@ -53,6 +53,7 @@
 #include "selection/SelectionManager.hpp"
 #include "visitors/AtomData.hpp"
 #include "visitors/BaseVisitor.hpp"
+
 namespace OpenMD {
 
   class LipidTransVisitor : public BaseVisitor {
@@ -82,4 +83,5 @@ namespace OpenMD {
     Vector3d origin_;
   };
 }  // namespace OpenMD
+
 #endif

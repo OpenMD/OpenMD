@@ -58,7 +58,6 @@
 #include "rnemd/RNEMD.hpp"
 #include "rnemd/SPFForceManager.hpp"
 #include "utils/CI_String.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -134,8 +133,7 @@ namespace OpenMD {
 
     // Create a default a velocitizer: If the subclass wants to use
     // a different velocitizer, use setVelocitizer
-    // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    velocitizer_ = Utils::make_unique<Velocitizer>(info);
+    velocitizer_ = std::make_unique<Velocitizer>(info);
 
     if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
       useRNEMD = simParams->getRNEMDParameters()->getUseRNEMD();
@@ -273,8 +271,7 @@ namespace OpenMD {
     statWriter = createStatWriter();
     dumpWriter->writeDumpAndEor();
 
-    // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    progressBar = Utils::make_unique<ProgressBar>();
+    progressBar = std::make_unique<ProgressBar>();
 
     // save statistics, before writeStat,  we must save statistics
     saveConservedQuantity();

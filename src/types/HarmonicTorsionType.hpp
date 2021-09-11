@@ -110,4 +110,5 @@ namespace OpenMD {
   }
 
 }  // namespace OpenMD
+
 #endif  // TYPES_HARMONICTORSIONTYPE_HPP

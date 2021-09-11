@@ -190,7 +190,6 @@ namespace OpenMD {
     }
     RealType zAve = zSum / zBox_.size();
 
-    std::vector<RealType>::iterator j;
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
       rdfStream << "#VelocityZ\n";
@@ -217,5 +216,4 @@ namespace OpenMD {
 
     rdfStream.close();
   }
-
 }  // namespace OpenMD

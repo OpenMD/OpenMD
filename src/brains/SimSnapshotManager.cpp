@@ -47,6 +47,7 @@
 
 #include "brains/SimInfo.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   SimSnapshotManager::SimSnapshotManager(SimInfo* info, int storageLayout) :
@@ -96,7 +97,7 @@ namespace OpenMD {
 
   int SimSnapshotManager::getCapacity() { return 2; }
 
-  void SimSnapshotManager::setCapacity(int capacity) {
+  void SimSnapshotManager::setCapacity(int) {
     // give warning message
     sprintf(painCave.errMsg,
             "SimSnapshotManager error: can not set capacity for "

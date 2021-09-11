@@ -225,6 +225,7 @@ namespace OpenMD {
     }
     return tokens;
   }
+
   void StringTokenizer::convertFortranNumber(std::string& fortranNumber) {
     std::string::iterator i;
     for (i = fortranNumber.begin(); i != fortranNumber.end(); ++i) {
@@ -245,5 +246,4 @@ namespace OpenMD {
 
     return result;
   }
-
 }  // namespace OpenMD

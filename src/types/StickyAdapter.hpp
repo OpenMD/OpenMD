@@ -64,7 +64,8 @@ namespace OpenMD {
     RealType rup;
     bool isPower;
   };
-  typedef SimpleTypeData<StickyAtypeParameters> StickyAtypeData;
+
+  using StickyAtypeData = SimpleTypeData<StickyAtypeParameters>;
 
   class StickyAdapter {
   public:
@@ -88,4 +89,5 @@ namespace OpenMD {
     StickyAtypeParameters getStickyParam();
   };
 }  // namespace OpenMD
+
 #endif

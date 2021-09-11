@@ -62,7 +62,7 @@ namespace OpenMD {
                       const RealType dipoleY, const RealType dipoleZ,
                       int nzbins, int axis = 2);
     void processFrame(int frame);
-    void processStuntDouble(StuntDouble* sd, int bin) {};
+    void processStuntDouble(StuntDouble*, int) {};
 
   protected:
     OutputData* orderS_;

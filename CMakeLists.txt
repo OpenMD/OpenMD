@@ -2,7 +2,7 @@
 project(OpenMD CXX)
 cmake_minimum_required(VERSION 3.12)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
@@ -83,6 +83,8 @@ endif()
 include(CheckCXXCompilerFlag)
 include(CheckIncludeFileCXX)
 include(CheckCXXSymbolExists)
+
+# add_compile_options(-pedantic-errors -Wall  -Wextra) # -Werror
 
 if ( CMAKE_COMPILER_IS_GNUCXX )
     add_definitions("-Wall")
@@ -546,7 +548,6 @@ src/utils/PropertyMap.cpp
 src/utils/RandNumGen.cpp
 src/utils/StringTokenizer.cpp
 src/utils/StringUtils.cpp
-src/utils/Trim.cpp
 src/utils/Utility.cpp
 src/utils/wildcards.cpp
 src/visitors/AtomNameVisitor.cpp

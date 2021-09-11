@@ -76,7 +76,6 @@ namespace OpenMD {
       return new ConcreteOptimization();
     }
   };
-
 }  // namespace OpenMD
 
 #endif  // OPTIMIZATIONS_OPTIMIZATIONCREATOR_HPP

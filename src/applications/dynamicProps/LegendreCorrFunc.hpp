@@ -68,4 +68,5 @@ namespace OpenMD {
     std::vector<std::vector<RotMat3x3d>> rotMats_;
   };
 }  // namespace OpenMD
+
 #endif

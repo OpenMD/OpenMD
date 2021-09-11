@@ -66,7 +66,6 @@ namespace OpenMD {
   private:
     Bond* bond_;
   };
-
 }  // namespace OpenMD
 
 #endif

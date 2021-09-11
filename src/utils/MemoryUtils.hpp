@@ -57,68 +57,53 @@
 #include <type_traits>
 #include <utility>
 
-namespace OpenMD {
-  namespace Utils {
+namespace OpenMD::Utils {
+  namespace details {
 
-    // Remove in favor of std::make_unique<> when we switch to C++14
-    template<typename T, typename... TArgs,
-             typename = typename std::enable_if<!std::is_array<T>::value>::type>
-    std::unique_ptr<T> make_unique(TArgs&&... args) {
-      return std::unique_ptr<T> {new T(std::forward<TArgs>(args)...)};
+    template<typename, typename = std::void_t<>>
+    struct is_container : std::false_type {};
+
+    template<typename T>
+    struct is_container<T, std::void_t<typename T::value_type,
+                                       typename T::reference,
+                                       typename T::const_reference,
+                                       typename T::iterator,
+                                       typename T::const_iterator,
+                                       typename T::difference_type,
+                                       typename T::size_type,
+                                       decltype(std::declval<T>().begin()),
+                                       decltype(std::declval<T>().end()),
+                                       decltype(std::declval<T>().cbegin()),
+                                       decltype(std::declval<T>().cend()),
+                                       decltype(std::declval<T>().max_size()),
+                                       decltype(std::declval<T>().empty())>> : std::true_type {};
+
+    // Convenience variable template for ease-of-use
+    template<typename T>
+    constexpr bool is_container_v = is_container<T>::value;
+
+    template<typename T>
+    void lifted_deleter(T val) {
+      delete val;
     }
 
-    namespace details {
+    template<typename T1, typename T2>
+    void lifted_deleter(std::pair<T1, T2>& val) {
+      lifted_deleter(val.second);
+    }
+  }  // namespace details
 
-      // Remove in favor of std::void_t<> when we switch to C++17
-      template<typename...>
-      using void_t = void;
-
-      template<typename, typename = void_t<>>
-      struct is_container : std::integral_constant<bool, false> {};
-
-      template<typename T>
-      struct is_container<T, void_t<typename T::value_type,
-                                    typename T::reference,
-                                    typename T::const_reference,
-                                    typename T::iterator,
-                                    typename T::const_iterator,
-                                    typename T::difference_type,
-                                    typename T::size_type,
-                                    decltype(std::declval<T>().begin()),
-                                    decltype(std::declval<T>().end()),
-                                    decltype(std::declval<T>().cbegin()),
-                                    decltype(std::declval<T>().cend()),
-                                    decltype(std::declval<T>().max_size()),
-                                    decltype(std::declval<T>().empty())>> : std::integral_constant<bool, true> {};
-
-      template<typename T>
-      void lifted_deleter(T val) {
-        delete val;
-      }
-
-      template<typename T1, typename T2>
-      void lifted_deleter(std::pair<T1, T2>& val) {
-        lifted_deleter(val.second);
-      }
-    }  // namespace details
-
-    // Base case - Combine using constexpr-if when we switch to C++17
-    template<typename Container,
-             typename = typename std::enable_if<!details::is_container<typename Container::value_type>::value>::type>
-    void deletePointers(Container& container) {
+  // Recursively deallocate the previously allocated memory from each container
+  template<typename Container>
+  void deletePointers(Container& container) {
+    if constexpr(details::is_container_v<typename Container::value_type>) {
+      for (auto& elem : container)
+        deletePointers(elem);
+    } else {
       for (auto& elem : container)
         details::lifted_deleter(elem);
     }
-
-    // Recursively deallocate the previously allocated memory from each container
-    template<typename Container,
-             typename = typename std::enable_if<details::is_container<typename Container::value_type>::value>::type,
-             typename = int /* Dummy parameter to allow multiple default template parameters in overloads */>
-    void deletePointers(Container& containerOfContainers) {
-      for (auto& container : containerOfContainers)
-        deletePointers(container);
-    }
-  }  // namespace Utils
-}  // namespace OpenMD
+  }
+}  // namespace OpenMD::Utils
 
 #endif  // OPENMD_UTILS_MEMORYUTILS_HPP

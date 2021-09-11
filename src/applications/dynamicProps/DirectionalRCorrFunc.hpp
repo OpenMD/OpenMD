@@ -48,6 +48,7 @@
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "math/Vector3.hpp"
+
 namespace OpenMD {
 
   class DirectionalRCorrFunc : public ObjectACF<Vector3d> {
@@ -63,6 +64,6 @@ namespace OpenMD {
     std::vector<std::vector<Vector3d>> positions_;
     std::vector<std::vector<RotMat3x3d>> rotMats_;
   };
-
 }  // namespace OpenMD
+
 #endif

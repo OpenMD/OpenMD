@@ -48,6 +48,7 @@
 
 #include <iostream>
 #include <vector>
+
 namespace OpenMD {
 
   /**
@@ -188,6 +189,6 @@ namespace OpenMD {
 
     std::vector<bool> bitset_;
   };
-
 }  // namespace OpenMD
+
 #endif

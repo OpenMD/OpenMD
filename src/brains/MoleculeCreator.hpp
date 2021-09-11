@@ -62,6 +62,7 @@
 #include "types/InversionStamp.hpp"
 #include "types/RigidBodyStamp.hpp"
 #include "types/TorsionStamp.hpp"
+
 namespace OpenMD {
 
   /**
@@ -76,7 +77,7 @@ namespace OpenMD {
 
   protected:
     /** Create an atom by its stamp */
-    virtual Atom* createAtom(ForceField* ff, Molecule* mol, AtomStamp* stamp,
+    virtual Atom* createAtom(ForceField* ff, Molecule*, AtomStamp* stamp,
                              LocalIndexManager* localIndexMan);
     virtual RigidBody* createRigidBody(MoleculeStamp* molStamp, Molecule* mol,
                                        RigidBodyStamp* rbStamp,
@@ -94,11 +95,11 @@ namespace OpenMD {
     virtual CutoffGroup* createCutoffGroup(Molecule* mol,
                                            CutoffGroupStamp* stamp,
                                            LocalIndexManager* localIndexMan);
-    virtual CutoffGroup* createCutoffGroup(Molecule* mol, Atom* atom,
+    virtual CutoffGroup* createCutoffGroup(Molecule*, Atom* atom,
                                            LocalIndexManager* localIndexMan);
     virtual void createConstraintPair(Molecule* mol);
     virtual void createConstraintElem(Molecule* mol);
   };
-
 }  // namespace OpenMD
+
 #endif  // BRAINS_MOLECULECREATOR_HPP

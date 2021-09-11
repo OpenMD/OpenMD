@@ -51,8 +51,7 @@
 
 namespace OpenMD {
 
-  bool HydrodynamicsModel::calcHydroProps(Shape* shape, RealType viscosity,
-                                          RealType temperature) {
+  bool HydrodynamicsModel::calcHydroProps(Shape*, RealType, RealType) {
     return false;
   }
 

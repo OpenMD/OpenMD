@@ -50,6 +50,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 
 #include "brains/ForceManager.hpp"
@@ -71,7 +72,6 @@
 #include "optimization/Method.hpp"
 #include "optimization/OptimizationFactory.hpp"
 #include "optimization/Problem.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/StringUtils.hpp"
 
 using namespace OpenMD;
@@ -85,8 +85,9 @@ using namespace JAMA;
 template<typename Real>
 class Vector6 : public Vector<Real, 6> {
 public:
-  typedef Real ElemType;
-  typedef Real* ElemPoinerType;
+  using ElemType       = Real;
+  using ElemPoinerType = Real*;
+
   Vector6() : Vector<Real, 6>() {}
 
   /** Constructs and initializes a Vector6d from individual coordinates */
@@ -111,7 +112,7 @@ public:
   }
 };
 
-typedef Vector6<RealType> Vector6d;
+using Vector6d = Vector6<RealType>;
 
 RealType slope(const std::vector<RealType>& x, const std::vector<RealType>& y) {
   // for (size_t i = 0; i < x.size(); i++) {
@@ -560,8 +561,7 @@ int main(int argc, char* argv[]) {
   Globals* simParams     = info->getSimParams();
   ForceManager* forceMan = new ForceManager(info);
 
-  // Remove in favor of std::make_unique<> when we switch to C++14 and above
-  std::unique_ptr<Velocitizer> veloSet {Utils::make_unique<Velocitizer>(info)};
+  std::unique_ptr<Velocitizer> veloSet {std::make_unique<Velocitizer>(info)};
 
   forceMan->initialize();
   info->update();

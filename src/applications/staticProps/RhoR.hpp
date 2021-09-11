@@ -47,6 +47,7 @@
 #define APPLICATIONS_STATICPROPS_RHOR_HPP
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+
 namespace OpenMD {
 
   class RhoR : public StaticAnalyser {
@@ -80,6 +81,6 @@ namespace OpenMD {
     std::vector<int> histogram_;
     std::vector<RealType> avgRhoR_;
   };
-
 }  // namespace OpenMD
+
 #endif

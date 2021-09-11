@@ -77,6 +77,6 @@ namespace OpenMD {
     std::ostream* output_;
     bool createRestFile_;
   };
-
 }  // namespace OpenMD
+
 #endif

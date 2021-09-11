@@ -77,4 +77,5 @@ namespace OpenMD {
     std::vector<AtomType*> outputTypes_;
   };
 }  // namespace OpenMD
+
 #endif

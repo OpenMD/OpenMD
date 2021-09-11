@@ -59,6 +59,7 @@
 #include <list>
 #include <string>
 #include <vector>
+
 namespace OpenMD {
 
   /**
@@ -144,16 +145,16 @@ namespace OpenMD {
   };
 
   /** BoolGenericData is a generic data type contains a bool variable */
-  typedef SimpleTypeData<bool> BoolGenericData;
+  using BoolGenericData = SimpleTypeData<bool>;
 
   /** IntGenericData is a generic data type contains an integer variable */
-  typedef SimpleTypeData<int> IntGenericData;
+  using IntGenericData = SimpleTypeData<int>;
 
   /** FloatGenericData is a generic data type contains a float variable */
-  typedef SimpleTypeData<float> FloatGenericData;
+  using FloatGenericData = SimpleTypeData<float>;
 
   /** DoubleGenericData is a generic data type contains a RealType variable */
-  typedef SimpleTypeData<RealType> DoubleGenericData;
+  using DoubleGenericData = SimpleTypeData<RealType>;
 
   /**
    * @typedef StringGenericData
@@ -176,7 +177,7 @@ namespace OpenMD {
    *
    * @endcode
    */
-  typedef SimpleTypeData<std::string> StringGenericData;
+  using StringGenericData = SimpleTypeData<std::string>;
 
   /**
    * @class STLContainerTypeData
@@ -188,7 +189,7 @@ namespace OpenMD {
   template<typename ElemDataType>
   class VectorTypeData : public GenericData {
   public:
-    typedef VectorTypeData<ElemDataType> SelfType;
+    using SelfType = VectorTypeData<ElemDataType>;
 
     VectorTypeData(const std::string& id) : GenericData(id) {}
 
@@ -209,19 +210,19 @@ namespace OpenMD {
    * @typedef IntVectorGenericData
    * A generic data type contains a  std::vector<int> variable.
    */
-  typedef VectorTypeData<int> IntVectorGenericData;
+  using IntVectorGenericData = VectorTypeData<int>;
 
   /**
    * @typedef IntVectorGenericData
    * A generic data type contains a  std::vector<float> variable.
    */
-  typedef VectorTypeData<float> FloatVectorGenericData;
+  using FloatVectorGenericData = VectorTypeData<float>;
 
   /**
    * @typedef IntVectorGenericData
    * A generic data type contains a  std::vector<RealType> variable.
    */
-  typedef VectorTypeData<RealType> DoubleVectorGenericData;
+  using DoubleVectorGenericData = VectorTypeData<RealType>;
 
   /**
    * @typedef StringVectorGenericData
@@ -250,7 +251,7 @@ namespace OpenMD {
    *  }
    * @endcode
    */
-  typedef VectorTypeData<std::string> StringVectorGenericData;
-
+  using StringVectorGenericData = VectorTypeData<std::string>;
 }  // namespace OpenMD
+
 #endif  // UTIL _GENERICDATA_HPP

@@ -50,6 +50,7 @@
 #include "io/SectionParser.hpp"
 #include "types/AtomType.hpp"
 #include "types/ShapeAtomType.hpp"
+
 namespace OpenMD {
 
   /**
@@ -66,7 +67,6 @@ namespace OpenMD {
                         AtomType* at);
     ForceFieldOptions& options_;
   };
-
 }  // namespace OpenMD
 
 #endif  // IO_SHAPEATOMTYPESSECTIONPARSER_HPP

@@ -47,6 +47,7 @@
 
 #include <cstdlib>
 #include <cstring>
+
 namespace OpenMD {
 
   ConstraintStamp::ConstraintStamp() {

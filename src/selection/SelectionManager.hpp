@@ -533,6 +533,6 @@ namespace OpenMD {
     std::vector<Inversion*> inversions_;
     std::vector<Molecule*> molecules_;
   };
-
 }  // namespace OpenMD
+
 #endif

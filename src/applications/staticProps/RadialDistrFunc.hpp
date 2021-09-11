@@ -98,14 +98,14 @@ namespace OpenMD {
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2) = 0;
     virtual void processHistogram() {}
 
-    virtual void validateSelection1(SelectionManager& sman) {}
-    virtual void validateSelection2(SelectionManager& sman) {}
+    virtual void validateSelection1(SelectionManager&) {}
+    virtual void validateSelection2(SelectionManager&) {}
     virtual void writeRdf() = 0;
 
     int nPairs_;
     int nSelected1_;
     int nSelected2_;
   };
-
 }  // namespace OpenMD
+
 #endif

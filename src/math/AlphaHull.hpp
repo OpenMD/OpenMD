@@ -105,4 +105,5 @@ namespace OpenMD {
     std::vector<Triangle> Triangles_;
   };
 }  // namespace OpenMD
+
 #endif

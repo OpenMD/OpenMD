@@ -45,6 +45,7 @@
 
 #ifndef VISITORS_BASEVISITOR_HPP
 #define VISITORS_BASEVISITOR_HPP
+
 #include <cstdio>
 #include <iostream>
 #include <string>
@@ -63,13 +64,13 @@ namespace OpenMD {
   class BaseVisitor {
   public:
     virtual ~BaseVisitor() {}
-    virtual void visit(Atom* atom) {}
-    virtual void visit(DirectionalAtom* datom) {}
-    virtual void visit(RigidBody* rb) {}
-    virtual void visit(Bond* bond) {}
-    virtual void visit(Bend* bend) {}
-    virtual void visit(Torsion* torsion) {}
-    virtual void visit(Inversion* inversion) {}
+    virtual void visit(Atom*) {}
+    virtual void visit(DirectionalAtom*) {}
+    virtual void visit(RigidBody*) {}
+    virtual void visit(Bond*) {}
+    virtual void visit(Bend*) {}
+    virtual void visit(Torsion*) {}
+    virtual void visit(Inversion*) {}
 
     virtual void update() {}
 
@@ -97,6 +98,6 @@ namespace OpenMD {
 
     std::string visitorName;
   };
-
 }  // namespace OpenMD
+
 #endif

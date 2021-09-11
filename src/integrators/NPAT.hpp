@@ -54,6 +54,7 @@
 #define INTEGRATORS_NPAT_HPP
 
 #include "integrators/NPT.hpp"
+
 namespace OpenMD {
 
   /**
@@ -92,7 +93,6 @@ namespace OpenMD {
     Mat3x3d vScale_;
     unsigned int axis_;
   };
-
 }  // namespace OpenMD
 
 #endif  // INTEGRATORS_NPTF_HPP

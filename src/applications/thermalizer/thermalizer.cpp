@@ -50,6 +50,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 
 #include "brains/ForceManager.hpp"
@@ -61,7 +62,6 @@
 #include "io/DumpReader.hpp"
 #include "io/DumpWriter.hpp"
 #include "thermalizerCmd.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/StringUtils.hpp"
 
 using namespace OpenMD;
@@ -112,8 +112,7 @@ int main(int argc, char* argv[]) {
   // Important utility classes for computing system properties:
   Thermo thermo(info);
 
-  // Remove in favor of std::make_unique<> when we switch to C++14 and above
-  std::unique_ptr<Velocitizer> veloSet {Utils::make_unique<Velocitizer>(info)};
+  std::unique_ptr<Velocitizer> veloSet {std::make_unique<Velocitizer>(info)};
 
   ForceManager* forceMan = new ForceManager(info);
 

@@ -66,4 +66,5 @@ namespace OpenMD {
     std::vector<std::vector<bool>> selected2_;
   };
 }  // namespace OpenMD
+
 #endif

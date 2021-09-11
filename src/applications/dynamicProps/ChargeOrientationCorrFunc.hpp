@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_DYNAMICPROPS_CHARGEORIENTATIONCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_CHARGEORIENTATIONCORRFUNC_HPP
+
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace OpenMD {
@@ -81,4 +82,5 @@ namespace OpenMD {
     RealType propertyTemp;
   };
 }  // namespace OpenMD
+
 #endif

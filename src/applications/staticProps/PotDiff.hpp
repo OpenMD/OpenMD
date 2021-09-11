@@ -49,6 +49,7 @@
 
 #ifndef APPLICATIONS_STATICPROPS_POTDIFF_HPP
 #define APPLICATIONS_STATICPROPS_POTDIFF_HPP
+
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"

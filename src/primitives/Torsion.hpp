@@ -145,6 +145,6 @@ namespace OpenMD {
 
     RealType potential_;
   };
-
 }  // namespace OpenMD
+
 #endif  // PRIMITIVES_TORSION_HPP

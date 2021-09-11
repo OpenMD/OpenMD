@@ -92,7 +92,7 @@ namespace OpenMD {
   const static int BUCKINGHAM_INTERACTION         = (1 << 10);
   const static int INVERSEPOWERSERIES_INTERACTION = (1 << 11);
 
-  typedef Vector<RealType, N_INTERACTION_FAMILIES> potVec;
+  using potVec = Vector<RealType, N_INTERACTION_FAMILIES>;
 
   /**
    * The InteractionData struct.
@@ -252,6 +252,6 @@ namespace OpenMD {
     virtual ~HydrogenBondingInteraction() {}
     virtual InteractionFamily getFamily() { return HYDROGENBONDING_FAMILY; }
   };
-
 }  // namespace OpenMD
+
 #endif

@@ -128,4 +128,5 @@ namespace OpenMD {
   */
 
 }  // namespace OpenMD
+
 #endif  // TYPES_POLYNOMIALINVERSIONTYPE_HPP

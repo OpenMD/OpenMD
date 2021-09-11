@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
 #define APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
+
 #include <config.h>
 
 #include <vector>
@@ -75,4 +76,5 @@ namespace OpenMD {
     std::ofstream osq;
   };
 }  // namespace OpenMD
+
 #endif /*NANOVOLUME_HPP_*/

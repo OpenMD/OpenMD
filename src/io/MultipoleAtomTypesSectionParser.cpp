@@ -211,5 +211,4 @@ namespace OpenMD {
       simError();
     }
   }
-
 }  // namespace OpenMD

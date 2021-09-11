@@ -90,4 +90,5 @@ namespace OpenMD {
     bool initialized_;
   };
 }  // namespace OpenMD
+
 #endif

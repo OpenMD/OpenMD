@@ -48,6 +48,7 @@
 
 #include "constraints/ConstraintElem.hpp"
 #include "primitives/StuntDouble.hpp"
+
 namespace OpenMD {
 
   /**
@@ -86,7 +87,6 @@ namespace OpenMD {
     RealType force_;
     bool printForce_;
   };
-
 }  // namespace OpenMD
 
 #endif

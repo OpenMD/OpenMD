@@ -99,5 +99,4 @@ namespace OpenMD {
 
     return o;
   }
-
 }  // namespace OpenMD

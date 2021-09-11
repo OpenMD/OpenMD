@@ -68,20 +68,19 @@
 #include "types/InversionType.hpp"
 #include "types/NonBondedInteractionType.hpp"
 #include "types/TorsionType.hpp"
-#include "utils/Tuple.hpp"
 #include "utils/TypeContainer.hpp"
 
 namespace OpenMD {
 
   class ForceField {
   public:
-    typedef TypeContainer<AtomType, 1> AtomTypeContainer;
-    typedef TypeContainer<BondType, 2> BondTypeContainer;
-    typedef TypeContainer<BendType, 3> BendTypeContainer;
-    typedef TypeContainer<TorsionType, 4> TorsionTypeContainer;
-    typedef TypeContainer<InversionType, 4> InversionTypeContainer;
-    typedef TypeContainer<NonBondedInteractionType, 2>
-        NonBondedInteractionTypeContainer;
+    using AtomTypeContainer      = TypeContainer<AtomType, 1>;
+    using BondTypeContainer      = TypeContainer<BondType, 2>;
+    using BendTypeContainer      = TypeContainer<BendType, 3>;
+    using TorsionTypeContainer   = TypeContainer<TorsionType, 4>;
+    using InversionTypeContainer = TypeContainer<InversionType, 4>;
+    using NonBondedInteractionTypeContainer =
+        TypeContainer<NonBondedInteractionType, 2>;
 
     ForceField(std::string ffName);
 
@@ -185,4 +184,5 @@ namespace OpenMD {
     std::string forceFieldFileName_;
   };
 }  // namespace OpenMD
+
 #endif

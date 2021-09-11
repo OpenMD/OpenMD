@@ -47,6 +47,7 @@
 
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   ZConsReader::ZConsReader(SimInfo* info) : info_(info) {

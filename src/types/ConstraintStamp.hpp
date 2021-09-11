@@ -84,4 +84,5 @@ namespace OpenMD {
     int b;
   };
 }  // namespace OpenMD
+
 #endif

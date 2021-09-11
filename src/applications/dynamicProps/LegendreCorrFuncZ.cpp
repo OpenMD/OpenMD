@@ -190,7 +190,7 @@ namespace OpenMD {
     }
   }
 
-  void LegendreCorrFuncZ::validateSelection(SelectionManager& seleMan) {
+  void LegendreCorrFuncZ::validateSelection(SelectionManager&) {
     StuntDouble* sd;
     int i;
     for (sd = seleMan1_.beginSelected(i); sd != NULL;

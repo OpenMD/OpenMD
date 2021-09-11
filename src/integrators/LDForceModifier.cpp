@@ -47,6 +47,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <random>
 
 #include "brains/ForceModifier.hpp"
@@ -58,7 +59,6 @@
 #include "types/LennardJonesAdapter.hpp"
 #include "utils/Constants.hpp"
 #include "utils/ElementsTable.hpp"
-#include "utils/MemoryUtils.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -70,8 +70,7 @@ namespace OpenMD {
     RealType dt = simParams_->getDt();
     dt2_        = dt * 0.5;
 
-    // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    veloMunge_ = Utils::make_unique<Velocitizer>(info_);
+    veloMunge_ = std::make_unique<Velocitizer>(info_);
 
     sphericalBoundaryConditions_ = false;
     if (simParams_->getUseSphericalBoundaryConditions()) {

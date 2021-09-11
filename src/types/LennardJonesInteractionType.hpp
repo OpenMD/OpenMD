@@ -73,4 +73,5 @@ namespace OpenMD {
     RealType epsilon;
   };
 }  // namespace OpenMD
+
 #endif

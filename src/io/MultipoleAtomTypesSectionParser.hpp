@@ -66,4 +66,5 @@ namespace OpenMD {
     ForceFieldOptions& options_;
   };
 }  // namespace OpenMD
+
 #endif

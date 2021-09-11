@@ -48,6 +48,7 @@
 
 #include "lattice/shapedLattice.hpp"
 #include "math/Vector3.hpp"
+
 namespace OpenMD {
   /**
    * Implements a spherical lattice

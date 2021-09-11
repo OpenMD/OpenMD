@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAMXYZ_HPP
 #define APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAMXYZ_HPP
+
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
@@ -109,4 +110,5 @@ namespace OpenMD {
     std::vector<std::vector<std::vector<RealType>>> hist_;
   };
 }  // namespace OpenMD
+
 #endif

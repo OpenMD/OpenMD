@@ -119,4 +119,5 @@ namespace OpenMD {
   }
 
 }  // namespace OpenMD
+
 #endif  // TYPES_POLYNOMIALBONDTYPE_HPP

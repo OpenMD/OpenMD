@@ -55,6 +55,7 @@
 
 #include "types/HarmonicBendType.hpp"
 #include "types/HarmonicBondType.hpp"
+
 namespace OpenMD {
   /**
    * @class UreyBradleyBendType
@@ -81,6 +82,6 @@ namespace OpenMD {
   private:
     HarmonicBondType hbt_;
   };
-
 }  // namespace OpenMD
+
 #endif  // TYPES_UREYBRADLEYBENDTYPE_HPP

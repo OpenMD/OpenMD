@@ -79,7 +79,6 @@ namespace OpenMD {
     LatticeBuilder(const std::string& ident) : LatticeCreator(ident) {}
     virtual Lattice* create() const { return new ConcreteLattice(); }
   };
-
 }  // namespace OpenMD
 
 #endif  // USETHEFORCE_FORCEFIELDCREATOR_HPP

@@ -52,6 +52,7 @@
 
 #ifndef UTIL_GENERICFACTORY_HPP
 #define UTIL_GENERICFACTORY_HPP
+
 #include <cassert>
 #include <map>
 #include <string>
@@ -80,7 +81,7 @@ namespace OpenMD {
    * };
    *
    * //instantiating a new object factory
-   * typedef GenericFactory<Shape> ShapeFactory;
+   * using ShapeFactory = GenericFactory<Shape>;
    *
    * //Line class
    * class Line : public Shape{
@@ -127,7 +128,7 @@ namespace OpenMD {
    * };
    *
    * //instantiating a new object factory
-   * typedef GenericFactory<Shape> ShapeFactory;
+   * using ShapeFactory = GenericFactory<Shape>;
    *
    * //Line class
    * class Line : public Shape{
@@ -156,8 +157,8 @@ namespace OpenMD {
            typename Creator = Object* (*)()>
   class GenericFactory {
   public:
-    typedef GenericFactory<Object, IdentType, Creator> FactoryType;
-    typedef std::map<IdentType, Creator> CreatorMapType;
+    using FactoryType    = GenericFactory<Object, IdentType, Creator>;
+    using CreatorMapType = std::map<IdentType, Creator>;
 
     /**
      * Returns an instance of object factory
@@ -254,6 +255,6 @@ namespace OpenMD {
 #define REGISTER_CREATOR(factory, ident, concreteObject) \
   const bool registered##concreteObject =                \
       factory::getInstance()->registerCreator(ident, create##concreteObject);
-
 }  // namespace OpenMD
+
 #endif  // UTIL_GENERICFACTORY_HPP

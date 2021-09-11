@@ -47,6 +47,7 @@
 #define APPLICATIONS_STATICPROPS_GOFXYZ_HPP
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+
 namespace OpenMD {
 
   class GofXyz : public RadialDistrFunc {
@@ -79,6 +80,6 @@ namespace OpenMD {
 
     std::map<int, RotMat3x3d> rotMats_;
   };
-
 }  // namespace OpenMD
+
 #endif

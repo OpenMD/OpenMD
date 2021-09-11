@@ -78,6 +78,6 @@ namespace OpenMD {
   private:
     RealType k_;
   };
-
 }  // namespace OpenMD
+
 #endif  // TYPES_HARMONICSINEBENDTYPE_HPP

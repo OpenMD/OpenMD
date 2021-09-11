@@ -94,4 +94,5 @@ namespace OpenMD {
     RealType currConstraintTime_;
   };
 }  // namespace OpenMD
+
 #endif

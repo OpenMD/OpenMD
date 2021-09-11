@@ -98,7 +98,7 @@ namespace OpenMD {
     }
   }
 
-  bool ApproximationModel::calcHydroProps(Shape* shape, RealType viscosity,
+  bool ApproximationModel::calcHydroProps(Shape*, RealType viscosity,
                                           RealType temperature) {
     HydroProp* cr  = new HydroProp();
     HydroProp* cd  = new HydroProp();

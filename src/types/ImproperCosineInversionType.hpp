@@ -52,6 +52,7 @@
 
 #ifndef TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
 #define TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -85,6 +86,6 @@ namespace OpenMD {
     ImproperCosineInversionType(
         std::vector<ImproperCosineInversionParameter>& parameters);
   };
-
 }  // namespace OpenMD
+
 #endif  // TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP

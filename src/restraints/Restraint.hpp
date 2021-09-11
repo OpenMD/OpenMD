@@ -72,7 +72,7 @@ namespace OpenMD {
       rtSwingY       = 16
     };
 
-    typedef std::pair<RealType, RealType> RealPair;
+    using RealPair = std::pair<RealType, RealType>;
 
     Restraint() :
         twist0_(0.0), swingX0_(0.0), swingY0_(0.0), posZ0_(0.0),
@@ -189,6 +189,7 @@ namespace OpenMD {
     std::map<int, RealPair> restInfo_;
   };
 
-  typedef SimpleTypeData<Restraint*> RestraintData;
+  using RestraintData = SimpleTypeData<Restraint*>;
 }  // namespace OpenMD
+
 #endif

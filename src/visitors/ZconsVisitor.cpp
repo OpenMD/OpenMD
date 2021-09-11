@@ -51,6 +51,7 @@
 #include "primitives/Molecule.hpp"
 #include "types/ZconsStamp.hpp"
 #include "utils/StringUtils.hpp"
+
 namespace OpenMD {
 
   ZConsVisitor::ZConsVisitor(SimInfo* info) :

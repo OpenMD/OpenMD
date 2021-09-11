@@ -45,6 +45,7 @@
 
 #ifndef VISITORS_ATOMNAMEVISITOR_HPP
 #define VISITORS_ATOMNAMEVISITOR_HPP
+
 #include <map>
 #include <string>
 

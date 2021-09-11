@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAMR_HPP
 #define APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAMR_HPP
+
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
@@ -84,8 +85,8 @@ namespace OpenMD {
   public:
     TetrahedralityParamR(SimInfo* info, const std::string& filename,
                          const std::string& sele1, const std::string& sele2,
-                         const std::string& sele3,
-                         RealType rCut, RealType len, int nrbins);
+                         const std::string& sele3, RealType rCut, RealType len,
+                         int nrbins);
 
     virtual void process();
 
@@ -110,4 +111,5 @@ namespace OpenMD {
     std::vector<int> sliceCount_;
   };
 }  // namespace OpenMD
+
 #endif

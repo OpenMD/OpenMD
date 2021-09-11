@@ -47,6 +47,7 @@
 #define APPLICATIONS_STATICPROPS_GOFRANGLE_HPP
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+
 namespace OpenMD {
 
   class GofRAngle : public RadialDistrFunc {
@@ -144,6 +145,6 @@ namespace OpenMD {
     virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2,
                                    StuntDouble* sd3);
   };
-
 }  // namespace OpenMD
+
 #endif

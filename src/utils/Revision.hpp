@@ -1,5 +1,6 @@
 #ifndef UTILS_REVISION_HPP
 #define UTILS_REVISION_HPP
+
 #include <string>
 
 extern "C" {

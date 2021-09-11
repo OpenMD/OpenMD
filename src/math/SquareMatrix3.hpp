@@ -52,6 +52,7 @@
 
 #ifndef MATH_SQUAREMATRIX3_HPP
 #define MATH_SQUAREMATRIX3_HPP
+
 #include <config.h>
 
 #include <cmath>
@@ -61,13 +62,14 @@
 #include "Quaternion.hpp"
 #include "SquareMatrix.hpp"
 #include "Vector3.hpp"
+
 namespace OpenMD {
 
   template<typename Real>
   class SquareMatrix3 : public SquareMatrix<Real, 3> {
   public:
-    typedef Real ElemType;
-    typedef Real* ElemPoinerType;
+    using ElemType       = Real;
+    using ElemPoinerType = Real*;
 
     /** default constructor */
     SquareMatrix3() : SquareMatrix<Real, 3>() {}
@@ -592,10 +594,10 @@ namespace OpenMD {
     return result;
   }
 
-  typedef SquareMatrix3<RealType> Mat3x3d;
-  typedef SquareMatrix3<RealType> RotMat3x3d;
+  using Mat3x3d    = SquareMatrix3<RealType>;
+  using RotMat3x3d = SquareMatrix3<RealType>;
 
   const Mat3x3d M3Zero(0.0);
-
 }  // namespace OpenMD
+
 #endif  // MATH_SQUAREMATRIX3_HPP

@@ -52,7 +52,9 @@
 
 #ifndef TYPES_TORSIONTYPE_HPP
 #define TYPES_TORSIONTYPE_HPP
+
 #include <config.h>
+
 namespace OpenMD {
 
   /**
@@ -65,6 +67,6 @@ namespace OpenMD {
     virtual void calcForce(RealType cosPhi, RealType& V,
                            RealType& dVdCosPhi) = 0;
   };
-
 }  // namespace OpenMD
+
 #endif  // TYPES_TORSIONTYPE_HPP

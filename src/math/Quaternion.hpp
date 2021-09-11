@@ -52,6 +52,7 @@
 
 #ifndef MATH_QUATERNION_HPP
 #define MATH_QUATERNION_HPP
+
 #include <config.h>
 
 #include <cmath>
@@ -624,6 +625,7 @@ namespace OpenMD {
            equal(lhs[2], rhs[2]) && equal(lhs[3], rhs[3]);
   }
 
-  typedef Quaternion<RealType> Quat4d;
+  using Quat4d = Quaternion<RealType>;
 }  // namespace OpenMD
+
 #endif  // MATH_QUATERNION_HPP

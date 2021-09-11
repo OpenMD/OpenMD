@@ -85,6 +85,6 @@ namespace OpenMD {
     std::vector<RealType> bincenter_;
     std::vector<RealType> histList_;
   };
-
 }  // namespace OpenMD
+
 #endif

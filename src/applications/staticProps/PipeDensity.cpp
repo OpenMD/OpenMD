@@ -167,7 +167,6 @@ namespace OpenMD {
   }
 
   void PipeDensity::writeDensity() {
-    std::vector<RealType>::iterator j;
     std::ofstream rdfStream(outputFilename_.c_str());
 
     if (rdfStream.is_open()) {
@@ -192,5 +191,4 @@ namespace OpenMD {
 
     rdfStream.close();
   }
-
 }  // namespace OpenMD

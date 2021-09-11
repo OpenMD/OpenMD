@@ -52,17 +52,14 @@
 #include "rnemd/RNEMD.hpp"
 #include "selection/SelectionManager.hpp"
 
-namespace OpenMD {
-  namespace RNEMD {
+namespace OpenMD::RNEMD {
 
-    class NIVSMethod : public RNEMD {
-    public:
-      explicit NIVSMethod(SimInfo* info, ForceManager* forceMan);
+  class NIVSMethod : public RNEMD {
+  public:
+    explicit NIVSMethod(SimInfo* info, ForceManager* forceMan);
 
-      void doRNEMDImpl(SelectionManager& smanA,
-                       SelectionManager& smanB) override;
-    };
-  }  // namespace RNEMD
-}  // namespace OpenMD
+    void doRNEMDImpl(SelectionManager& smanA, SelectionManager& smanB) override;
+  };
+}  // namespace OpenMD::RNEMD
 
 #endif  // OPENMD_RNEMD_NIVS_HPP

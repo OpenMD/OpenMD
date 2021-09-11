@@ -58,37 +58,35 @@
 
 using namespace std;
 namespace OpenMD {
-  TetrahedralityParamR::TetrahedralityParamR( SimInfo* info,
-                                              const std::string& filename,
-                                              const std::string& sele1,
-                                              const std::string& sele2,
-                                              const std::string& sele3,
-                                              RealType rCut, RealType len,
-                                              int nrbins) :
-    StaticAnalyser(info, filename, nrbins),
-    selectionScript1_(sele1), selectionScript2_(sele2), selectionScript3_(sele3),
-    seleMan1_(info), seleMan2_(info), seleMan3_(info), len_(len),
-    evaluator1_(info), evaluator2_(info), evaluator3_(info), nBins_(nrbins) {
+  TetrahedralityParamR::TetrahedralityParamR(
+      SimInfo* info, const std::string& filename, const std::string& sele1,
+      const std::string& sele2, const std::string& sele3, RealType rCut,
+      RealType len, int nrbins) :
+      StaticAnalyser(info, filename, nrbins),
+      selectionScript1_(sele1), selectionScript2_(sele2),
+      selectionScript3_(sele3), seleMan1_(info), seleMan2_(info),
+      seleMan3_(info), evaluator1_(info), evaluator2_(info), evaluator3_(info),
+      len_(len), nBins_(nrbins) {
     setAnalysisType("Tetrahedrality Parameter(r)");
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
-    
+
     evaluator2_.loadScriptString(sele2);
     if (!evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }
-    
+
     evaluator3_.loadScriptString(sele3);
     if (!evaluator3_.isDynamic()) {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
     }
-    
+
     // Set up cutoff radius:
     rCut_ = rCut;
-    
+
     deltaR_ = len_ / nBins_;
 
     // fixed number of bins
@@ -117,7 +115,7 @@ namespace OpenMD {
     int isd2;
     int isd3;
     bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);
     int nFrames = reader.getNFrames();
@@ -137,7 +135,7 @@ namespace OpenMD {
       if (evaluator3_.isDynamic()) {
         seleMan3_.setSelectionSet(evaluator3_.evaluate());
       }
-      
+
       // outer loop is over the selected StuntDoubles:
       for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
            sd = seleMan1_.nextSelected(isd1)) {
@@ -198,21 +196,20 @@ namespace OpenMD {
 
         if (nang > 0) {
           RealType shortest = HONKING_LARGE_VALUE;
-          
+
           // loop over selection 3 to find closest atom in selection 3:
           for (sd3 = seleMan3_.beginSelected(isd3); sd3 != NULL;
-               sd3 = seleMan3_.nextSelected(isd3)) {  
-
+               sd3 = seleMan3_.nextSelected(isd3)) {
             vec = sd->getPos() - sd3->getPos();
-            
+
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(vec);
-            
+
             r = vec.length();
-            
+
             if (r < shortest) shortest = r;
-          }     
-          
+          }
+
           int whichBin = int(shortest / deltaR_);
           if (whichBin < int(nBins_)) {
             sliceQ_[whichBin] += Qk;
@@ -226,7 +223,7 @@ namespace OpenMD {
 
   void TetrahedralityParamR::writeQr() {
     Revision rev;
-    std::ofstream qRstream((getOutputFileName() + "Qr").c_str());   
+    std::ofstream qRstream((getOutputFileName() + "Qr").c_str());
     if (qRstream.is_open()) {
       qRstream << "# " << getAnalysisType() << "\n";
       qRstream << "# OpenMD " << rev.getFullRevision() << "\n";
@@ -237,7 +234,8 @@ namespace OpenMD {
       if (!paramString_.empty())
         qRstream << "# parameters: " << paramString_ << "\n";
 
-      qRstream << "#distance" << "\tQk\n";
+      qRstream << "#distance"
+               << "\tQk\n";
       for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
         RealType Rval = (i + 0.5) * deltaR_;
         if (sliceCount_[i] != 0) {

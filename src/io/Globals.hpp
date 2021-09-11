@@ -64,7 +64,7 @@
 namespace OpenMD {
   class Globals : public DataHolder {
   public:
-    typedef std::pair<int, int> intPair;
+    using intPair = std::pair<int, int>;
 
     Globals();
     virtual ~Globals();
@@ -201,4 +201,5 @@ namespace OpenMD {
     MinimizerParameters* minimizerPars_;
   };
 }  // namespace OpenMD
+
 #endif

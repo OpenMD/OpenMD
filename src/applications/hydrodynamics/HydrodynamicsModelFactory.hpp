@@ -52,13 +52,12 @@
 
 #ifndef APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODELFACTORY_HPP
 #define APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODELFACTORY_HPP
+
 #include <cassert>
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
-
-#include "utils/any.hpp"
 
 namespace OpenMD {
 
@@ -75,9 +74,9 @@ namespace OpenMD {
    */
   class HydrodynamicsModelFactory {
   public:
-    typedef std::map<std::string, HydrodynamicsModelCreator*> CreatorMapType;
-    typedef std::vector<std::string> IdentVectorType;
-    typedef std::vector<std::string>::iterator IdentVectorIterator;
+    using CreatorMapType  = std::map<std::string, HydrodynamicsModelCreator*>;
+    using IdentVectorType = std::vector<std::string>;
+    using IdentVectorIterator = std::vector<std::string>::iterator;
 
     ~HydrodynamicsModelFactory();
 
@@ -135,4 +134,5 @@ namespace OpenMD {
   std::ostream& operator<<(std::ostream& o, HydrodynamicsModelFactory& factory);
 
 }  // namespace OpenMD
+
 #endif  // INTEGRATORS_INTEGRATORFACTORY_HPP

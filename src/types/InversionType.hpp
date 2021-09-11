@@ -52,7 +52,9 @@
 
 #ifndef TYPES_INVERSIONTYPE_HPP
 #define TYPES_INVERSIONTYPE_HPP
+
 #include <config.h>
+
 namespace OpenMD {
 
   enum InversionKey {
@@ -73,6 +75,6 @@ namespace OpenMD {
                            RealType& dVdCosPhi) = 0;
     virtual InversionKey getKey()               = 0;
   };
-
 }  // namespace OpenMD
+
 #endif  // TYPES_INVERSIONTYPE_HPP

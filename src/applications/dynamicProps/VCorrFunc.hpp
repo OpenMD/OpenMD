@@ -47,6 +47,7 @@
 #define APPLICATIONS_DYNAMICPROPS_VCORRFUNC_HPP
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
+
 namespace OpenMD {
 
   class VCorrFunc : public ObjectACF<RealType> {
@@ -81,6 +82,6 @@ namespace OpenMD {
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
     std::vector<std::vector<RealType>> velocities_;
   };
-
 }  // namespace OpenMD
+
 #endif

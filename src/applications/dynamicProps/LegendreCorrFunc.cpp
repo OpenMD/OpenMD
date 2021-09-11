@@ -104,7 +104,7 @@ namespace OpenMD {
     return Vector3d(ux, uy, uz);
   }
 
-  void LegendreCorrFunc::validateSelection(SelectionManager& seleMan) {
+  void LegendreCorrFunc::validateSelection(SelectionManager&) {
     StuntDouble* sd;
     int i;
     for (sd = seleMan1_.beginSelected(i); sd != NULL;

@@ -217,7 +217,7 @@ namespace OpenMD {
           RigidBody* rigidbody = static_cast<RigidBody*>(sd);
           vector<Atom*> atomList;
           atomList = rigidbody->getAtoms();
-          vector<Atom*>::iterator atom_iterator;
+
           for (size_t i = 0; i < atomList.size(); ++i) {
             Atom* atom                   = atomList[i];
             AtomType* atomType           = atom->getAtomType();

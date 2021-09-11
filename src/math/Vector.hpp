@@ -58,23 +58,17 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+
 namespace OpenMD {
 
-  static const RealType epsilon = 0.000001;
+  static constexpr RealType epsilon = 0.000001;
 
   template<typename T>
   inline bool equal(T e1, T e2) {
-    return e1 == e2;
-  }
-
-  // template<>
-  // inline bool equal(float e1, float e2) {
-  //  return fabs(e1 - e2) < epsilon;
-  //}
-
-  template<>
-  inline bool equal(RealType e1, RealType e2) {
-    return fabs(e1 - e2) < epsilon;
+    if constexpr (std::is_same_v<T, RealType>)
+      return std::fabs(e1 - e2) < epsilon;
+    else
+      return e1 == e2;
   }
 
   /**
@@ -84,8 +78,8 @@ namespace OpenMD {
   template<typename Real, unsigned int Dim>
   class Vector {
   public:
-    typedef Real ElemType;
-    typedef Real* ElemPoinerType;
+    using ElemType       = Real;
+    using ElemPoinerType = Real*;
 
     /** default constructor */
     inline Vector() {
@@ -579,4 +573,5 @@ namespace OpenMD {
   }
 
 }  // namespace OpenMD
+
 #endif

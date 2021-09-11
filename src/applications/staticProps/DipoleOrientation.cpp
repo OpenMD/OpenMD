@@ -105,7 +105,7 @@ namespace OpenMD {
     data_.push_back(orderSCos_);
   }
 
-  void DipoleOrientation::processFrame(int istep) {
+  void DipoleOrientation::processFrame(int) {
     RealType z;
 
     hmat_ = currentSnapshot_->getHmat();

@@ -45,6 +45,7 @@
 
 #ifndef LATTICE_FCCLATTICE_HPP
 #define LATTICE_FCCLATTICE_HPP
+
 #include <string>
 #include <vector>
 
@@ -57,6 +58,6 @@ namespace OpenMD {
     FCCLattice();
     virtual void update();
   };
-
 }  // namespace OpenMD
+
 #endif

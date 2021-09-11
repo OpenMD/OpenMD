@@ -80,7 +80,6 @@ namespace OpenMD {
       return new ConcreteIntegrator(info);
     }
   };
-
 }  // namespace OpenMD
 
 #endif  // INTEGRATORS_INTEGRATORCREATOR_HPP

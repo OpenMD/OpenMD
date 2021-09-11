@@ -72,4 +72,5 @@ namespace OpenMD {
     std::vector<RealType> regionChargeMass_;
   };
 }  // namespace OpenMD
+
 #endif

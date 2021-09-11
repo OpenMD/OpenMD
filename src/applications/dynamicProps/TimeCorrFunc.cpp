@@ -45,9 +45,10 @@
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 
+#include <memory>
+
 #include "math/DynamicVector.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/Revision.hpp"
 #include "utils/simError.h"
 
@@ -100,8 +101,7 @@ namespace OpenMD {
     sele1ToIndex_.resize(nFrames_);
     if (uniqueSelections_) { sele2ToIndex_.resize(nFrames_); }
 
-    // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    progressBar_ = Utils::make_unique<ProgressBar>();
+    progressBar_ = std::make_unique<ProgressBar>();
   }
 
   template<typename T>
@@ -387,7 +387,7 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   }
 
   template<typename T>
-  void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {}
+  void TimeCorrFunc<T>::validateSelection(SelectionManager&) {}
 
   template<typename T>
   void TimeCorrFunc<T>::writeCorrelate() {
@@ -636,5 +636,4 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   template class MoleculeCCF<RealType>;
   template class MoleculeCCF<Vector3d>;
   template class MoleculeCCF<Mat3x3d>;
-
 }  // namespace OpenMD

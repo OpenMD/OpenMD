@@ -45,6 +45,8 @@
 
 #ifndef SELECTION_SELECTIONCOMPILER_HPP
 #define SELECTION_SELECTIONCOMPILER_HPP
+
+#include <any>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -139,7 +141,7 @@ namespace OpenMD {
     bool clauseChemObjName();
     bool clauseIndex();
     Token tokenNext();
-    boost::any valuePeek();
+    std::any valuePeek();
     int tokPeek();
 
     bool addTokenToPostfix(const Token& token);
@@ -182,12 +184,12 @@ namespace OpenMD {
     bool commaExpected() { return compileError("comma expected"); }
 
     bool unrecognizedExpressionToken() {
-      boost::any tmp = valuePeek();
+      std::any tmp = valuePeek();
       std::string tokenStr;
 
       try {
-        tokenStr = boost::any_cast<std::string>(tmp);
-      } catch (const boost::bad_any_cast&) {
+        tokenStr = std::any_cast<std::string>(tmp);
+      } catch (const std::bad_any_cast&) {
         return compileError("any_cast error");
       }
 
@@ -230,6 +232,6 @@ namespace OpenMD {
 
     // std::vector<Token> compiledTokens_;
   };
-
 }  // namespace OpenMD
+
 #endif

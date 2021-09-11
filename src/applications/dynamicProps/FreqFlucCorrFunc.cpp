@@ -95,7 +95,7 @@ namespace OpenMD {
     return (ue_[frame1][id1] - mean) * (ue_[frame2][id2] - mean);
   }
 
-  void FreqFlucCorrFunc::validateSelection(SelectionManager& seleMan) {
+  void FreqFlucCorrFunc::validateSelection(SelectionManager&) {
     StuntDouble* sd;
     int i;
     for (sd = seleMan1_.beginSelected(i); sd != NULL;

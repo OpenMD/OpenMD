@@ -56,6 +56,7 @@
 #include "types/MorseInteractionType.hpp"
 #include "types/RepulsivePowerInteractionType.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   NonBondedInteractionsSectionParser::NonBondedInteractionsSectionParser(

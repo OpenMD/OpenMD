@@ -66,7 +66,6 @@ namespace OpenMD {
     virtual void moveB();
     virtual RealType calcConservedQuantity();
   };
-
 }  // namespace OpenMD
 
 #endif

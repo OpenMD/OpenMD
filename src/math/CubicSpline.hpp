@@ -49,6 +49,7 @@
 #include <config.h>
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 using namespace std;
@@ -59,9 +60,10 @@ namespace OpenMD {
     CubicSpline();
     virtual ~CubicSpline() {}
     void addPoint(const RealType xp, const RealType yp);
-    void addPoints(const vector<RealType>& xps, const vector<RealType>& yps);
+    void addPoints(const std::vector<RealType>& xps,
+                   const std::vector<RealType>& yps);
     RealType getValueAt(const RealType& t);
-    pair<RealType, RealType> getLimits();
+    std::pair<RealType, RealType> getLimits();
     void getValueAt(const RealType& t, RealType& v);
     void getValueAndDerivativeAt(const RealType& t, RealType& v, RealType& d);
     RealType getSpacing();
@@ -76,11 +78,11 @@ namespace OpenMD {
     bool generated;
     RealType dx, dt;
     int n, j;
-    vector<RealType> x_;
-    vector<RealType> y_;
-    vector<RealType> b;
-    vector<RealType> c;
-    vector<RealType> d;
+    std::vector<RealType> x_;
+    std::vector<RealType> y_;
+    std::vector<RealType> b;
+    std::vector<RealType> c;
+    std::vector<RealType> d;
   };
 
   class Comparator {

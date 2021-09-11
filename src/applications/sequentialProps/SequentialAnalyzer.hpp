@@ -121,4 +121,5 @@ namespace OpenMD {
     std::string paramString_;
   };
 }  // namespace OpenMD
+
 #endif

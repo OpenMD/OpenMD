@@ -73,4 +73,5 @@ namespace OpenMD {
     std::string outputFilename_;
   };
 }  // namespace OpenMD
+
 #endif

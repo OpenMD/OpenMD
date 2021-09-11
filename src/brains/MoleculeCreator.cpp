@@ -231,8 +231,7 @@ namespace OpenMD {
     return mol;
   }
 
-  Atom* MoleculeCreator::createAtom(ForceField* ff, Molecule* mol,
-                                    AtomStamp* stamp,
+  Atom* MoleculeCreator::createAtom(ForceField* ff, Molecule*, AtomStamp* stamp,
                                     LocalIndexManager* localIndexMan) {
     AtomType* atomType;
     Atom* atom;
@@ -645,7 +644,7 @@ namespace OpenMD {
   }
 
   CutoffGroup* MoleculeCreator::createCutoffGroup(
-      Molecule* mol, Atom* atom, LocalIndexManager* localIndexMan) {
+      Molecule*, Atom* atom, LocalIndexManager* localIndexMan) {
     CutoffGroup* cg;
     cg = new CutoffGroup();
     cg->addAtom(atom);

@@ -92,6 +92,6 @@ namespace OpenMD {
     std::vector<int> count_;
     std::vector<std::vector<RealType>> histogram_;
   };
-
 }  // namespace OpenMD
+
 #endif

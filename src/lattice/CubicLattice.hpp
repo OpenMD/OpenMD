@@ -45,6 +45,7 @@
 
 #ifndef LATTICE_CUBICLATTICE_HPP
 #define LATTICE_CUBICLATTICE_HPP
+
 #include <string>
 #include <vector>
 
@@ -66,6 +67,6 @@ namespace OpenMD {
   protected:
     RealType latticeParam;
   };
-
 }  // namespace OpenMD
+
 #endif

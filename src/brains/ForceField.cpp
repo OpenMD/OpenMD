@@ -53,6 +53,7 @@
 #include "brains/ForceField.hpp"
 
 #include <algorithm>
+#include <tuple>
 
 #include "io/AtomTypesSectionParser.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
@@ -307,7 +308,7 @@ namespace OpenMD {
       int kk = 0;
       int IKscore;
 
-      std::vector<tuple3<int, int, std::vector<std::string>>> foundBends;
+      std::vector<std::tuple<int, int, std::vector<std::string>>> foundBends;
 
       for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
         ii = 0;
@@ -323,7 +324,7 @@ namespace OpenMD {
 
             BendType* bendType = bendTypeCont_.find(myKeys);
             if (bendType) {
-              foundBends.push_back(make_tuple3(jj, IKscore, myKeys));
+              foundBends.push_back(std::make_tuple(jj, IKscore, myKeys));
             }
             kk++;
           }
@@ -334,7 +335,7 @@ namespace OpenMD {
 
       if (!foundBends.empty()) {
         std::sort(foundBends.begin(), foundBends.end());
-        std::vector<std::string> theKeys = foundBends[0].third;
+        std::vector<std::string> theKeys = std::get<2>(foundBends[0]);
 
         BendType* bestType = bendTypeCont_.find(theKeys);
         return bestType;
@@ -398,7 +399,7 @@ namespace OpenMD {
       int ILscore;
       int JKscore;
 
-      std::vector<tuple3<int, int, std::vector<std::string>>> foundTorsions;
+      std::vector<std::tuple<int, int, std::vector<std::string>>> foundTorsions;
 
       for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
         kk = 0;
@@ -418,7 +419,8 @@ namespace OpenMD {
 
               TorsionType* torsionType = torsionTypeCont_.find(myKeys);
               if (torsionType) {
-                foundTorsions.push_back(make_tuple3(JKscore, ILscore, myKeys));
+                foundTorsions.push_back(
+                    std::make_tuple(JKscore, ILscore, myKeys));
               }
               ll++;
             }
@@ -431,7 +433,7 @@ namespace OpenMD {
 
       if (!foundTorsions.empty()) {
         std::sort(foundTorsions.begin(), foundTorsions.end());
-        std::vector<std::string> theKeys = foundTorsions[0].third;
+        std::vector<std::string> theKeys = std::get<2>(foundTorsions[0]);
 
         TorsionType* bestType = torsionTypeCont_.find(theKeys);
         return bestType;
@@ -496,7 +498,8 @@ namespace OpenMD {
       int Iscore;
       int JKLscore;
 
-      std::vector<tuple3<int, int, std::vector<std::string>>> foundInversions;
+      std::vector<std::tuple<int, int, std::vector<std::string>>>
+          foundInversions;
 
       for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
         kk = 0;
@@ -518,7 +521,7 @@ namespace OpenMD {
                   inversionTypeCont_.permutedFindSkippingFirstElement(myKeys);
               if (inversionType) {
                 foundInversions.push_back(
-                    make_tuple3(Iscore, JKLscore, myKeys));
+                    std::make_tuple(Iscore, JKLscore, myKeys));
               }
               ll++;
             }
@@ -531,7 +534,7 @@ namespace OpenMD {
 
       if (!foundInversions.empty()) {
         std::sort(foundInversions.begin(), foundInversions.end());
-        std::vector<std::string> theKeys = foundInversions[0].third;
+        std::vector<std::string> theKeys = std::get<2>(foundInversions[0]);
 
         InversionType* bestType =
             inversionTypeCont_.permutedFindSkippingFirstElement(theKeys);

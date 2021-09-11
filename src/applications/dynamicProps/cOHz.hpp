@@ -81,6 +81,6 @@ namespace OpenMD {
     std::vector<std::vector<int>> counts_;
     std::vector<std::vector<int>> zbin_;
   };
-
 }  // namespace OpenMD
+
 #endif

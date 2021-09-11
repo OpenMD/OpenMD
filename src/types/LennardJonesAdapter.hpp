@@ -59,7 +59,7 @@ namespace OpenMD {
     RealType epsilon;
     bool isSoft;
   };
-  typedef SimpleTypeData<LJAtypeParameters> LJAtypeData;
+  using LJAtypeData = SimpleTypeData<LJAtypeParameters>;
 
   class LennardJonesAdapter {
   public:
@@ -77,4 +77,5 @@ namespace OpenMD {
     LJAtypeParameters getLJParam();
   };
 }  // namespace OpenMD
+
 #endif

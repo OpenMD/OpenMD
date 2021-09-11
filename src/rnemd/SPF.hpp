@@ -51,27 +51,24 @@
 #include "rnemd/SPFForceManager.hpp"
 #include "selection/SelectionManager.hpp"
 
-namespace OpenMD {
-  namespace RNEMD {
+namespace OpenMD::RNEMD {
 
-    class SPFMethod : public RNEMD {
-    public:
-      explicit SPFMethod(SimInfo* info, ForceManager* forceMan);
+  class SPFMethod : public RNEMD {
+  public:
+    explicit SPFMethod(SimInfo* info, ForceManager* forceMan);
 
-      void doRNEMDImpl(SelectionManager& smanA,
-                       SelectionManager& smanB) override;
+    void doRNEMDImpl(SelectionManager& smanA, SelectionManager& smanB) override;
 
-    private:
-      void updateLambda();
-      void selectMolecule();
+  private:
+    void updateLambda();
+    void selectMolecule();
 
-      RealType lambda_ {};
-      SPFForceManager* forceManager_ {nullptr};
-      SelectionManager sourceSman_;
-      RealType targetSlabCenter_ {};
-      bool hasMovingMolecule_ {false};
-    };
-  }  // namespace RNEMD
-}  // namespace OpenMD
+    RealType lambda_ {};
+    SPFForceManager* forceManager_ {nullptr};
+    SelectionManager sourceSman_;
+    RealType targetSlabCenter_ {};
+    bool hasMovingMolecule_ {false};
+  };
+}  // namespace OpenMD::RNEMD
 
 #endif  // OPENMD_RNEMD_SPF_HPP

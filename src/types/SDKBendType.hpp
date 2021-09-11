@@ -67,4 +67,5 @@ namespace OpenMD {
     ShiftedMieBondType smbt_;
   };
 }  // namespace OpenMD
+
 #endif

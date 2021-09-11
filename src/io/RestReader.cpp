@@ -64,7 +64,6 @@
 #include "primitives/Molecule.hpp"
 #include "restraints/MolecularRestraint.hpp"
 #include "restraints/ObjectRestraint.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/StringTokenizer.hpp"
 #include "utils/simError.h"
 

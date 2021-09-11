@@ -117,4 +117,5 @@ namespace OpenMD {
     std::string name_;
   };
 }  // namespace OpenMD
+
 #endif  // PRIMITIVES_BOND_HPP

@@ -61,7 +61,7 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".comVel");
   }
 
-  void COMVel::doFrame(int frame) {
+  void COMVel::doFrame(int) {
     StuntDouble* sd;
     int i;
 

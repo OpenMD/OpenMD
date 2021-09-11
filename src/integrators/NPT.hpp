@@ -155,7 +155,6 @@ namespace OpenMD {
   protected:
     int maxIterNum_;
   };
-
 }  // namespace OpenMD
 
 #endif  // INTEGRATORS_NPT_HPP

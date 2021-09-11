@@ -45,8 +45,13 @@
 
 #ifndef TYPES_TORSIONSTAMP_HPP
 #define TYPES_TORSIONSTAMP_HPP
+
+#include <string>
+#include <tuple>
+#include <vector>
+
 #include "types/DataHolder.hpp"
-#include "utils/Tuple.hpp"
+
 namespace OpenMD {
   class TorsionStamp : public DataHolder {
     DeclareParameter(GhostVectorSource, int);
@@ -58,6 +63,7 @@ namespace OpenMD {
     int getMemberAt(int index) { return members_.at(index); }
     int getNMembers() { return members_.size(); }
     std::vector<int> getMembers() { return members_; }
+
     void setMembers(const std::vector<int>& members) {
       members_ = members;
       if (members_.size() < 3 || members_.size() > 4) {
@@ -68,21 +74,24 @@ namespace OpenMD {
       }
     }
 
-    void setMembers(IntTuple4 tuple) {
-      members_.push_back(tuple.first);
-      members_.push_back(tuple.second);
-      members_.push_back(tuple.third);
-      members_.push_back(tuple.fourth);
+    void setMembers(const std::tuple<int, int, int, int>& tuple) {
+      auto [first, second, third, fourth] = tuple;
+
+      members_.push_back(first);
+      members_.push_back(second);
+      members_.push_back(third);
+      members_.push_back(fourth);
     }
+
     void overrideType(std::string type, std::vector<RealType> pars) {
       orType_      = type;
       orPars_      = pars;
       hasOverride_ = true;
     }
+
     virtual void validate();
     bool hasOverride() { return hasOverride_; }
     std::string getOverrideType() { return orType_; }
-
     std::vector<RealType> getOverridePars() { return orPars_; }
 
   private:
@@ -92,4 +101,5 @@ namespace OpenMD {
     std::vector<RealType> orPars_;
   };
 }  // namespace OpenMD
+
 #endif

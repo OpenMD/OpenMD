@@ -58,10 +58,11 @@
 #include "primitives/DirectionalAtom.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "types/AtomStamp.hpp"
+
 namespace OpenMD {
   class RigidBody : public StuntDouble {
   public:
-    typedef std::vector<Atom*>::iterator AtomIterator;
+    using AtomIterator = std::vector<Atom*>::iterator;
 
     RigidBody();
 
@@ -227,7 +228,6 @@ namespace OpenMD {
     std::vector<Vector3d> refCoords_;
     std::vector<RotMat3x3d> refOrients_;
   };
-
 }  // namespace OpenMD
 
 #endif  // PRIMITIVES_RIGIDBODY_HPP

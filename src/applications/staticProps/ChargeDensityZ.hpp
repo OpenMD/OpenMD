@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_STATICPROPS_CHARGEDENSITYZ_HPP
 #define APPLICATIONS_STATICPROPS_CHARGEDENSITYZ_HPP
+
 #include <map>
 #include <set>
 
@@ -107,7 +108,6 @@ namespace OpenMD {
     std::map<int, RealType> vanderRUsingGlobalIndex_;
     std::map<int, std::string> atomNameGlobalIndex_;
   };
-
 }  // namespace OpenMD
 
 #endif

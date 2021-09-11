@@ -52,6 +52,7 @@
 
 #ifndef TYPES_CHARMMTORSIONTYPE_HPP
 #define TYPES_CHARMMTORSIONTYPE_HPP
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -84,6 +85,6 @@ namespace OpenMD {
   public:
     CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters);
   };
-
 }  // namespace OpenMD
+
 #endif  // TYPES_CHARMMTORSIONTYPE_HPP

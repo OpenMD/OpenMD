@@ -92,4 +92,5 @@ namespace OpenMD {
     int endNz_;
   };
 }  // namespace OpenMD
+
 #endif /* LATTICE_SHAPEDLATTICE_HPP */

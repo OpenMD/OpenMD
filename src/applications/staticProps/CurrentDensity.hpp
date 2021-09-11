@@ -87,4 +87,5 @@ namespace OpenMD {
     std::string axisLabel_;
   };
 }  // namespace OpenMD
+
 #endif

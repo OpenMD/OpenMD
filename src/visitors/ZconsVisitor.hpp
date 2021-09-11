@@ -91,6 +91,6 @@ namespace OpenMD {
     Snapshot* currSnapshot_;
     std::map<int, int> zatomToZmol_;
   };
-
 }  // namespace OpenMD
+
 #endif  // _ZCONS_VISITOR_H_

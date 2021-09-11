@@ -62,6 +62,6 @@ namespace OpenMD {
   private:
     std::string msg_;
   };
-
 }  // namespace OpenMD
+
 #endif

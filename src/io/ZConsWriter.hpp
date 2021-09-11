@@ -73,6 +73,6 @@ namespace OpenMD {
     SimInfo* info_ {nullptr};
     std::ofstream output_;
   };
-
 }  // namespace OpenMD
+
 #endif

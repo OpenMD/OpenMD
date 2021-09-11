@@ -64,6 +64,6 @@ namespace OpenMD {
     RealType sigma_;
     Shape* shape_;
   };
-
 }  // namespace OpenMD
+
 #endif

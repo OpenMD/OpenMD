@@ -45,7 +45,11 @@
 
 #include "selection/SelectionCompiler.hpp"
 
+#include <any>
+#include <string>
+
 #include "utils/StringUtils.hpp"
+
 namespace OpenMD {
 
   bool SelectionCompiler::compile(const std::string& filename,
@@ -120,13 +124,13 @@ namespace OpenMD {
         // if (lookingAtDecimal((tokCommand & Token::negnums) != 0)) {
         if (lookingAtDecimal((tokCommand) != 0)) {
           float value = lexi_cast<float>(script.substr(ichToken, cchToken));
-          ltoken.push_back(Token(Token::decimal, boost::any(value)));
+          ltoken.push_back(Token(Token::decimal, std::any(value)));
           continue;
         }
         // if (lookingAtInteger((tokCommand & Token::negnums) != 0)) {
         if (lookingAtInteger((tokCommand) != 0)) {
           int val = lexi_cast<int>(script.substr(ichToken, cchToken));
-          ltoken.push_back(Token(Token::integer, boost::any(val)));
+          ltoken.push_back(Token(Token::integer, std::any(val)));
           continue;
         }
       }
@@ -134,7 +138,7 @@ namespace OpenMD {
       if (lookingAtLookupToken()) {
         std::string ident = script.substr(ichToken, cchToken);
         Token token;
-        Token* pToken = TokenMap::getInstance()->getToken(ident);
+        Token* pToken = TokenMap::getInstance().getToken(ident);
         if (pToken != NULL) {
           token = *pToken;
         } else {
@@ -455,9 +459,9 @@ namespace OpenMD {
     return atokenInfix[itokenInfix++];
   }
 
-  boost::any SelectionCompiler::valuePeek() {
+  std::any SelectionCompiler::valuePeek() {
     if (itokenInfix == atokenInfix.size()) {
-      return boost::any();
+      return std::any();
     } else {
       return atokenInfix[itokenInfix].value;
     }
@@ -552,14 +556,14 @@ namespace OpenMD {
 
     float val;
     if (tokenValue.value.type() == typeid(int)) {
-      val = boost::any_cast<int>(tokenValue.value);
+      val = std::any_cast<int>(tokenValue.value);
     } else if (tokenValue.value.type() == typeid(float)) {
-      val = boost::any_cast<float>(tokenValue.value);
+      val = std::any_cast<float>(tokenValue.value);
     } else {
       return false;
     }
 
-    boost::any floatVal;
+    std::any floatVal;
     floatVal = val;
     return addTokenToPostfix(
         Token(tokenComparator.tok, tokenAtomProperty.tok, floatVal));
@@ -571,7 +575,7 @@ namespace OpenMD {
       return leftParenthesisExpected();
     }
 
-    boost::any distance;
+    std::any distance;
     Token tokenDistance = tokenNext();  // distance
     switch (tokenDistance.tok) {
     case Token::integer:
@@ -603,7 +607,7 @@ namespace OpenMD {
       return leftParenthesisExpected();
     }
 
-    boost::any alpha;
+    std::any alpha;
     Token tokenAlpha = tokenNext();  // alpha
     switch (tokenAlpha.tok) {
     case Token::integer:
@@ -625,7 +629,7 @@ namespace OpenMD {
     Token token = tokenNext();
     if (token.tok == Token::identifier &&
         token.value.type() == typeid(std::string)) {
-      std::string name = boost::any_cast<std::string>(token.value);
+      std::string name = std::any_cast<std::string>(token.value);
       if (isNameValid(name)) {
         return addTokenToPostfix(Token(Token::name, name));
       } else {
@@ -660,27 +664,26 @@ namespace OpenMD {
   bool SelectionCompiler::clauseIndex() {
     Token token = tokenNext();
     if (token.tok == Token::integer) {
-      int index = boost::any_cast<int>(token.value);
+      int index = std::any_cast<int>(token.value);
       int tok   = tokPeek();
       if (tok == Token::to) {
         tokenNext();
         tok = tokPeek();
         if (tok != Token::integer) { return numberExpected(); }
 
-        boost::any intVal = tokenNext().value;
-        int first         = index;
+        std::any intVal = tokenNext().value;
+        int first       = index;
         if (intVal.type() != typeid(int)) { return false; }
-        int second = boost::any_cast<int>(intVal);
+        int second = std::any_cast<int>(intVal);
 
         return addTokenToPostfix(
-            Token(Token::index, boost::any(std::make_pair(first, second))));
+            Token(Token::index, std::any(std::make_pair(first, second))));
 
       } else {
-        return addTokenToPostfix(Token(Token::index, boost::any(index)));
+        return addTokenToPostfix(Token(Token::index, std::any(index)));
       }
     } else {
       return numberExpected();
     }
   }
-
 }  // namespace OpenMD

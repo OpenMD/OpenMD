@@ -82,7 +82,6 @@ namespace OpenMD {
       return new ConcreteHydrodynamicsModel(sd, info);
     }
   };
-
 }  // namespace OpenMD
 
 #endif  // INTEGRATORS_INTEGRATORCREATOR_HPP

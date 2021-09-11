@@ -58,6 +58,7 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+
 namespace OpenMD {
 
   /**
@@ -194,6 +195,7 @@ namespace OpenMD {
      * @return all of the tokens
      */
     std::vector<std::string> getAllTokens();
+
     /**
      * Returns the remaining unparsed string
      * @return the remaining unparsed string
@@ -221,7 +223,6 @@ namespace OpenMD {
     std::string::const_iterator currentPos_;
     std::string::const_iterator end_;
   };
-
 }  // namespace OpenMD
 
 #endif  // UTIL_STRINGTOKENIZER_HPP

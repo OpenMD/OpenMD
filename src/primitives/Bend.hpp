@@ -131,4 +131,5 @@ namespace OpenMD {
     std::string name_;
   };
 }  // namespace OpenMD
+
 #endif  // PRIMITIVES_BEND_HPP

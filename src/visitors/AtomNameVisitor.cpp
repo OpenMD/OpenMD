@@ -50,7 +50,6 @@
 
 #include "brains/SimInfo.hpp"
 #include "utils/StringTokenizer.hpp"
-#include "utils/Trim.hpp"
 
 namespace OpenMD {
   AtomNameVisitor::AtomNameVisitor(SimInfo* info) : BaseVisitor(), info_(info) {

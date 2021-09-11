@@ -51,19 +51,18 @@
 #define CLUSTERS_ICOSAHEDRON_HPP
 
 #include <string>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 #include "math/Vector3.hpp"
-#include "utils/Tuple.hpp"
 
-using namespace std;
 namespace OpenMD {
 
-  //! Create the Mackay icosahedron structure.
   /*!
-        (Heavily modified from code from Yanting Wang date 07/21/2003)
-    */
-
+   * Create the Mackay icosahedron structure.
+   *  (Heavily modified from code from Yanting Wang date 07/21/2003)
+   */
   class Icosahedron {
   public:
     //! Default constructor
@@ -74,18 +73,18 @@ namespace OpenMD {
     int getNpoints(int nShells);
 
     //! Get the generated points in an icosahedron with nShells shells.
-    vector<Vector3d> getPoints(int nShells);
+    std::vector<Vector3d> getPoints(int nShells);
 
   protected:
     //! Create nth layer particles.
-    vector<Vector3d> ih(int n);
+    std::vector<Vector3d> ih(int n);
     //! Calculate number of particles on the nth layer.
     int np(int n);
 
-    vector<Vector3d> Points;
-    vector<pair<int, int>> Edges;
-    vector<tuple3<int, int, int>> Facets;
-    vector<Vector3d> Basis;  // Basis vectors of the edges
+    std::vector<Vector3d> Points;
+    std::vector<std::pair<int, int>> Edges;
+    std::vector<std::tuple<int, int, int>> Facets;
+    std::vector<Vector3d> Basis;  // Basis vectors of the edges
   };
 }  // namespace OpenMD
 

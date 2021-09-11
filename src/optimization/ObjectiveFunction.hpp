@@ -23,6 +23,7 @@
 
 #ifndef optimization_objectivefunction_h
 #define optimization_objectivefunction_h
+
 #include <config.h>
 
 #include "math/DynamicVector.hpp"

@@ -114,6 +114,7 @@ namespace OpenMD {
         strengthFuncs;  // The strength functions
   };
 
-  typedef SimpleTypeData<ShapeAtomType*> ShapeAtypeData;
+  using ShapeAtypeData = SimpleTypeData<ShapeAtomType*>;
 }  // namespace OpenMD
+
 #endif

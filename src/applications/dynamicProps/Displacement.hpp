@@ -47,6 +47,7 @@
 #define APPLICATIONS_DYNAMICPROPS_DISPLACEMENT_HPP
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
+
 namespace OpenMD {
 
   class Displacement : public ObjectACF<Vector3d> {
@@ -89,6 +90,6 @@ namespace OpenMD {
     int axis_;
     std::string axisLabel_;
   };
-
 }  // namespace OpenMD
+
 #endif

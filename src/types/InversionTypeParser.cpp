@@ -45,6 +45,8 @@
 
 #include "types/InversionTypeParser.hpp"
 
+#include <string>
+
 #include "types/AmberImproperTorsionType.hpp"
 #include "types/HarmonicInversionType.hpp"
 #include "types/ImproperCosineInversionType.hpp"
@@ -73,7 +75,7 @@ namespace OpenMD {
     std::vector<RealType>::iterator it;
     for (it = pars.begin(); it != pars.end(); ++it) {
       line.append("\t");
-      line.append(OpenMD::to_string(*it));
+      line.append(std::to_string(*it));
     }
 
     return parseLine(line);

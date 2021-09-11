@@ -47,6 +47,7 @@
 #define HYDRODYNAMICS_ANALYTICALMODEL_HPP
 
 #include "applications/hydrodynamics/HydrodynamicsModel.hpp"
+
 namespace OpenMD {
 
   class AnalyticalModel : public HydrodynamicsModel {
@@ -58,4 +59,5 @@ namespace OpenMD {
     virtual void writeBeads(std::ostream& os);
   };
 }  // namespace OpenMD
+
 #endif

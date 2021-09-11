@@ -118,8 +118,8 @@ namespace OpenMD {
       std::vector<BaseAccumulator*> accumulatorArray2d;
     };
 
-    typedef bitset<ENDINDEX - BEGININDEX> StatsBitSet;
-    typedef map<std::string, StatsIndex> StatsMapType;
+    using StatsBitSet  = std::bitset<ENDINDEX - BEGININDEX>;
+    using StatsMapType = std::map<std::string, StatsIndex>;
 
     Stats(SimInfo* info);
     virtual ~Stats();
@@ -166,4 +166,5 @@ namespace OpenMD {
     StatsMapType statsMap_;
   };
 }  // namespace OpenMD
+
 #endif

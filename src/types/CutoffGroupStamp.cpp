@@ -49,6 +49,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+
 namespace OpenMD {
   CutoffGroupStamp::CutoffGroupStamp() {
     deprecatedKeywords_.insert("nMembers");

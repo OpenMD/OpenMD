@@ -158,7 +158,7 @@ namespace OpenMD {
   }
 
   template<class T>
-  void Field<T>::processFrame(int istep) {
+  void Field<T>::processFrame(int) {
     Mat3x3d box;
     Mat3x3d invBox;
     int di, dj, dk;

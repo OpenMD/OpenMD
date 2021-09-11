@@ -138,6 +138,6 @@ namespace OpenMD {
 
     RealType potential_;
   };
-
 }  // namespace OpenMD
+
 #endif  // PRIMITIVES_INVERSION_HPP

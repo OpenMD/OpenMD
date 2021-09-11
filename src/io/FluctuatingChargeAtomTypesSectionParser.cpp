@@ -50,7 +50,6 @@
 #include "types/AtomType.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
-#include "utils/Tuple.hpp"
 #include "utils/simError.h"
 
 using namespace std;

@@ -48,54 +48,39 @@
 
 #include <algorithm>
 #include <cctype>
-#include <functional>
 #include <locale>
+
 namespace OpenMD {
-
-  /** tolower functor */
-  struct toLowerFunctor : public std::unary_function<char, char> {
-    toLowerFunctor(const std::locale& loc) : loc_(loc) {}
-    char operator()(char c) const { return std::tolower(c, loc_); }
-
-  private:
-    std::locale loc_;
-  };
-
-  /** toupper functor */
-  struct toUpperFunctor : public std::unary_function<char, char> {
-    toUpperFunctor(const std::locale& loc) : loc_(loc) {}
-    char operator()(char c) const { return std::toupper(c, loc_); }
-
-  private:
-    std::locale loc_;
-  };
 
   template<typename Container>
   void toLower(Container& cont, const std::locale& loc = std::locale()) {
-    std::transform(cont.begin(), cont.end(), cont.begin(), toLowerFunctor(loc));
+    std::transform(cont.begin(), cont.end(), cont.begin(),
+                   [&loc](char c) { return std::tolower(c, loc); });
   }
 
   template<typename Container>
   Container toLowerCopy(const Container& cont,
-                        const std::locale& loc = std::locale()) {
-    Container result(cont);
+                        const std::locale& = std::locale()) {
+    Container result {cont};
     toLower(result);
+
     return result;
   }
 
   template<typename Container>
   void toUpper(Container& cont, const std::locale& loc = std::locale()) {
-    std::transform(cont.begin(), cont.end(), cont.begin(), toUpperFunctor(loc));
+    std::transform(cont.begin(), cont.end(), cont.begin(),
+                   [&loc](char c) { return std::tolower(c, loc); });
   }
 
   template<typename Container>
   Container toUpperCopy(const Container& cont,
-                        const std::locale& loc = std::locale()) {
-    Container result(cont);
+                        const std::locale& = std::locale()) {
+    Container result {cont};
     toUpper(result);
+
     return result;
   }
-
 }  // namespace OpenMD
 
 #endif

@@ -58,7 +58,7 @@ namespace OpenMD {
   struct DirectionalAtypeParameters {
     Mat3x3d I;
   };
-  typedef SimpleTypeData<DirectionalAtypeParameters> DirectionalAtypeData;
+  using DirectionalAtypeData = SimpleTypeData<DirectionalAtypeParameters>;
 
   class DirectionalAdapter {
   public:
@@ -75,4 +75,5 @@ namespace OpenMD {
     DirectionalAtypeParameters getDirectionalParam();
   };
 }  // namespace OpenMD
+
 #endif

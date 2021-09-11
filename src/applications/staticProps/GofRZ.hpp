@@ -47,6 +47,7 @@
 #define APPLICATIONS_STATICPROPS_GOFRZ_HPP
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+
 namespace OpenMD {
 
   class GofRZ : public RadialDistrFunc {
@@ -85,4 +86,5 @@ namespace OpenMD {
     int yaxis_;
   };
 }  // namespace OpenMD
+
 #endif

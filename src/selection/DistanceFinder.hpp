@@ -45,6 +45,7 @@
 
 #ifndef SELECTION_DISTANCEFINDER_HPP
 #define SELECTION_DISTANCEFINDER_HPP
+
 #include "brains/SimInfo.hpp"
 #include "primitives/Bend.hpp"
 #include "primitives/Bond.hpp"
@@ -52,6 +53,7 @@
 #include "primitives/StuntDouble.hpp"
 #include "primitives/Torsion.hpp"
 #include "selection/SelectionSet.hpp"
+
 namespace OpenMD {
 
   class DistanceFinder {
@@ -70,6 +72,6 @@ namespace OpenMD {
     std::vector<Molecule*> molecules_;
     vector<int> nObjects_;
   };
-
 }  // namespace OpenMD
+
 #endif

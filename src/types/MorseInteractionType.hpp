@@ -91,4 +91,5 @@ namespace OpenMD {
     MorseType interactionType;
   };
 }  // namespace OpenMD
+
 #endif

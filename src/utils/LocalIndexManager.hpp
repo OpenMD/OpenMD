@@ -52,6 +52,7 @@
 
 #ifndef UTILS_LOCALINDEXMANAGER_HPP
 #define UTILS_LOCALINDEXMANAGER_HPP
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -68,7 +69,8 @@ namespace OpenMD {
   class IndexListContainer {
   public:
     static const int MAX_INTEGER = 2147483647;
-    typedef std::list<std::pair<int, int>>::iterator IndexListContainerIterator;
+
+    using IndexListContainerIterator = std::list<std::pair<int, int>>::iterator;
 
     IndexListContainer(int minIndex = 0, int maxIndex = MAX_INTEGER) :
         maxIndex_(maxIndex) {
@@ -219,6 +221,7 @@ namespace OpenMD {
         }
       }
     }
+
     int maxIndex_;
     std::list<std::pair<int, int>> indexContainer_;
   };
@@ -359,6 +362,6 @@ namespace OpenMD {
     IndexListContainer torsionIndexContainer_;
     IndexListContainer inversionIndexContainer_;
   };
-
 }  // namespace OpenMD
+
 #endif  // UTILS_LOCALINDEXMANAGER_HPP

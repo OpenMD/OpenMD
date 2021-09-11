@@ -76,4 +76,5 @@ namespace OpenMD {
     RealType k;
   };
 }  // namespace OpenMD
+
 #endif

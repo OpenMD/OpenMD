@@ -112,7 +112,6 @@ namespace OpenMD {
     AtomType* atomType_;
     RealType chargeMass_;
   };
-
 }  // namespace OpenMD
 
 #endif  // PRIMITIVES_ATOM_HPP

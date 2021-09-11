@@ -47,6 +47,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <functional>
 #include <iterator>
 #include <string>
 
@@ -54,19 +55,10 @@
 #include <mpi.h>
 #endif
 
-#include "utils/Algorithm.hpp"
-
 namespace OpenMD {
+
   int OpenMDBitSet::countBits() {
-#ifdef __RWSTD
-    // For the compiler(Sun, MSVC6.0) binding with RougeWave STL Library, we
-    // need to use old-style std::count which is error-prone.
-    int count = 0;
-    std::count(bitset_.begin(), bitset_.end(), true, count);
-    return count;
-#else
     return std::count(bitset_.begin(), bitset_.end(), true);
-#endif
   }
 
   void OpenMDBitSet::flip(int fromIndex, int toIndex) {
@@ -165,7 +157,7 @@ namespace OpenMD {
   void OpenMDBitSet::xorOperator(const OpenMDBitSet& bs) {
     assert(size() == bs.size());
     std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(),
-                   bitset_.begin(), OpenMD::logical_xor<bool>());
+                   bitset_.begin(), std::bit_xor<bool>());
   }
 
   void OpenMDBitSet::setBits(int fromIndex, int toIndex, bool value) {
@@ -240,7 +232,8 @@ namespace OpenMD {
                   MPI_COMM_WORLD);
 
     std::transform(bsInt.begin(), bsInt.end(),
-                   std::back_inserter(result.bitset_), to_bool<int>());
+                   std::back_inserter(result.bitset_),
+                   [](int val) { return val != 0; });
 #else
 
     // Not in MPI?  Just return a copy of the current bitset:

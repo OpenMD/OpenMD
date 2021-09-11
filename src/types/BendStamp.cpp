@@ -47,6 +47,7 @@
 
 #include <cstdlib>
 #include <cstring>
+
 namespace OpenMD {
 
   BendStamp::BendStamp() : hasOverride_(false) {

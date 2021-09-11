@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_SEQUENTIALPROPS_CENTEROFMASS_HPP
 #define APPLICATIONS_SEQUENTIALPROPS_CENTEROFMASS_HPP
+
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 
 using namespace std;

@@ -94,7 +94,7 @@ class SimplePreprocessor {
             char buffer[bufferSize];
             while(myStream.getline(buffer, bufferSize)) {
               ++lineNo;
-              std::string line = trimLeftCopy(buffer);
+              std::string line = Utils::trimLeftCopy(buffer);
               if (!line.empty() && line[0] == '#') {
                     StringTokenizer tokenizer(line.substr(1, line.length()));
                     std::vector<std::string> tokens = tokenizer.getAllTokens();

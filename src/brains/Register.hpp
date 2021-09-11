@@ -61,4 +61,5 @@ namespace OpenMD {
   void registerAll();
 
 }  // namespace OpenMD
+
 #endif

@@ -63,7 +63,6 @@ namespace OpenMD {
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
     ForceFieldOptions& options_;
   };
-
 }  // namespace OpenMD
 
 #endif  // IO_SCATOMTYPESSECTIONPARSER_HPP

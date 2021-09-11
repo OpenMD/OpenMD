@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_STATICPROPS_HBONDGEOMETRIC_HPP
 #define APPLICATIONS_STATICPROPS_HBONDGEOMETRIC_HPP
+
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"

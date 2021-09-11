@@ -156,4 +156,5 @@ namespace OpenMD {
     SnapshotManager* snapshotMan_;
   };
 }  // namespace OpenMD
+
 #endif  // PRIMITIVES_CUTOFFGROUP_HPP

@@ -49,6 +49,7 @@
 #include "io/ForceFieldOptions.hpp"
 #include "io/SectionParser.hpp"
 #include "types/AtomType.hpp"
+
 namespace OpenMD {
 
   class PolarizableAtomTypesSectionParser : public SectionParser {
@@ -60,4 +61,5 @@ namespace OpenMD {
     ForceFieldOptions& options_;
   };
 }  // namespace OpenMD
+
 #endif

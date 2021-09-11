@@ -44,6 +44,8 @@
  */
 #include "types/BendTypeParser.hpp"
 
+#include <string>
+
 #include "io/BendTypesSectionParser.hpp"
 #include "types/CosineBendType.hpp"
 #include "types/CosineSeriesBendType.hpp"
@@ -80,7 +82,7 @@ namespace OpenMD {
     std::vector<RealType>::iterator it;
     for (it = pars.begin(); it != pars.end(); ++it) {
       line.append("\t");
-      line.append(OpenMD::to_string(*it));
+      line.append(std::to_string(*it));
     }
     // Assume all overrides know about our functional forms:
     return parseLine(line, 1.0);

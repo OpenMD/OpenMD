@@ -94,7 +94,6 @@ namespace OpenMD {
     Utils::RandNumGenPtr randNumGen_ {nullptr};
     std::normal_distribution<RealType> forceDistribution_;
   };
-
 }  // namespace OpenMD
 
 #endif

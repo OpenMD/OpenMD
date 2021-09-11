@@ -102,6 +102,6 @@ namespace OpenMD {
     RealType k1_;
     RealType k0_;
   };
-
 }  // namespace OpenMD
+
 #endif  // TYPES_QUADRATICBONDTYPE_HPP

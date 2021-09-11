@@ -45,10 +45,12 @@
 
 #ifndef IO_PARAMCONSTRAINT_HPP
 #define IO_PARAMCONSTRAINT_HPP
+
 #include <sstream>
 
 #include "utils/CaseConversion.hpp"
 #include "utils/StringTokenizer.hpp"
+
 namespace OpenMD {
   /**
    * This class allows to recognize constraint predicates, so that they can be
@@ -378,4 +380,5 @@ namespace OpenMD {
 
   EqualIgnoreCaseConstraint isEqualIgnoreCase(std::string str);
 }  // namespace OpenMD
+
 #endif

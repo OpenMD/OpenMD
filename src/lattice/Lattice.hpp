@@ -88,7 +88,6 @@ namespace OpenMD {
     std::vector<Vector3d> cellSitesOrt;
     Vector3d cellLen;
   };
-
 }  // namespace OpenMD
 
 #endif

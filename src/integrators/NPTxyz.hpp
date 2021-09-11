@@ -66,7 +66,6 @@ namespace OpenMD {
     virtual RealType calcConservedQuantity();
     virtual void loadEta();
   };
-
 }  // namespace OpenMD
 
 #endif  // INTEGRATORS_NPTXYZ_HPP

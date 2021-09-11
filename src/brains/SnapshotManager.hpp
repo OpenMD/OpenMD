@@ -102,6 +102,6 @@ namespace OpenMD {
     Snapshot* currentSnapshot_;
     Snapshot* previousSnapshot_;
   };
-
 }  // namespace OpenMD
+
 #endif  // BRAINS_SNAPSHOTMANAGER_HPP

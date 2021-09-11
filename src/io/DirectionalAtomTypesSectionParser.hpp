@@ -48,6 +48,7 @@
 
 #include "io/ForceFieldOptions.hpp"
 #include "io/SectionParser.hpp"
+
 namespace OpenMD {
 
   class DirectionalAtomTypesSectionParser : public SectionParser {
@@ -59,4 +60,5 @@ namespace OpenMD {
     ForceFieldOptions& options_;
   };
 }  // namespace OpenMD
+
 #endif

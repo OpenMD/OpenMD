@@ -45,6 +45,7 @@
 
 #ifndef APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
 #define APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
+
 #include <vector>
 
 #include "hydrodynamics/HydroProp.hpp"
@@ -98,7 +99,6 @@ namespace OpenMD {
     HydroProp* com_;
     std::vector<BeadParam> beads_;
   };
-
 }  // namespace OpenMD
 
 #endif

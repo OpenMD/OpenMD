@@ -82,6 +82,7 @@
   =========================================================================*/
 #ifndef MATH_LU_HPP
 #define MATH_LU_HPP
+
 #include <limits>
 
 namespace OpenMD {
@@ -95,7 +96,8 @@ namespace OpenMD {
    */
   template<class MatrixType>
   bool invertMatrix(MatrixType& A, MatrixType& AI) {
-    typedef typename MatrixType::ElemType Real;
+    using Real = typename MatrixType::ElemType;
+
     if (A.getNRow() != A.getNCol() || A.getNRow() != AI.getNRow() ||
         A.getNCol() != AI.getNCol()) {
       return false;
@@ -184,7 +186,8 @@ namespace OpenMD {
   template<class MatrixType>
   int LUFactorLinearSystem(MatrixType& A, int* index, int size,
                            typename MatrixType::ElemPoinerType tmpSize) {
-    typedef typename MatrixType::ElemType Real;
+    using Real = typename MatrixType::ElemType;
+
     int i, j, k;
     int maxI = 0;
     Real largest, temp1, temp2, sum;
@@ -275,7 +278,8 @@ namespace OpenMD {
   template<class MatrixType>
   void LUSolveLinearSystem(MatrixType& A, int* index,
                            typename MatrixType::ElemPoinerType x, int size) {
-    typedef typename MatrixType::ElemType Real;
+    using Real = typename MatrixType::ElemType;
+
     int i, j, ii, idx;
     Real sum;
     //

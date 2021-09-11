@@ -60,9 +60,9 @@
 #include <cstring>
 
 #ifdef SINGLE_PRECISION
-typedef std::complex<float> ComplexType;
+using ComplexType = std::complex<float>;
 #else
-typedef std::complex<double> ComplexType;
+using ComplexType = std::complex<double>;
 #endif
 
 namespace OpenMD {

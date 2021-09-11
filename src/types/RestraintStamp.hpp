@@ -47,6 +47,7 @@
 #define TYPES_RESTRAINTSTAMP_HPP
 
 #include "types/DataHolder.hpp"
+
 namespace OpenMD {
   class RestraintStamp : public DataHolder {
     DeclareParameter(Type, std::string);
@@ -69,4 +70,5 @@ namespace OpenMD {
     virtual void validate();
   };
 }  // namespace OpenMD
+
 #endif

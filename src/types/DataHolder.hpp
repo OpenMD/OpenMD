@@ -58,6 +58,7 @@
 #include "utils/ParameterManager.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   class DataHolder {
@@ -104,7 +105,7 @@ namespace OpenMD {
     }
 
   protected:
-    typedef std::map<std::string, ParameterBase*> ParamMap;
+    using ParamMap = std::map<std::string, ParameterBase*>;
 
     ParamMap parameters_;
     std::set<std::string> deprecatedKeywords_;
@@ -113,6 +114,6 @@ namespace OpenMD {
     DataHolder(const DataHolder&);
     DataHolder& operator=(const DataHolder&);
   };
-
 }  // namespace OpenMD
+
 #endif

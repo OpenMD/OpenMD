@@ -50,7 +50,6 @@
 #include "brains/SnapshotManager.hpp"
 #include "nonbonded/InteractionManager.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
-#include "utils/Tuple.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -214,4 +213,5 @@ namespace OpenMD {
     vector<Vector3d> saved_CG_positions_;
   };
 }  // namespace OpenMD
+
 #endif

@@ -53,7 +53,6 @@
 #include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/any.hpp"
 
 namespace OpenMD {
 

@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_STATICPROPS_P2ORDERPARAMETER_HPP
 #define APPLICATIONS_STATICPROPS_P2ORDERPARAMETER_HPP
+
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"

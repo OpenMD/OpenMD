@@ -45,6 +45,7 @@
 
 #ifndef OPTIMIZATION_OPTIMIZATIONFACTORY_HPP
 #define OPTIMIZATION_OPTIMIZATIONFACTORY_HPP
+
 #include <cassert>
 #include <iostream>
 #include <map>
@@ -59,6 +60,7 @@ namespace OpenMD {
   // forward declaration
   class OptimizationCreator;
   class SimInfo;
+
   /**
    * @class OptimizationFactory
    * Factory pattern and Singleton Pattern are used to define an interface for
@@ -66,11 +68,9 @@ namespace OpenMD {
    */
   class OptimizationFactory {
   public:
-    typedef std::map<std::string, OptimizationCreator*> CreatorMapType;
-    typedef std::vector<std::string> IdentVectorType;
-    typedef std::vector<std::string>::iterator IdentVectorIterator;
-
-    ~OptimizationFactory();
+    using CreatorMapType      = std::map<std::string, OptimizationCreator*>;
+    using IdentVectorType     = std::vector<std::string>;
+    using IdentVectorIterator = std::vector<std::string>::iterator;
 
     /**
      * Returns an instance of Optimization factory
@@ -95,7 +95,9 @@ namespace OpenMD {
      * is removed, otherwise return false
      * @param id the identification of the concrete object
      */
+
     bool unregisterOptimization(const std::string& id);
+
     /**
      * Looks up the type identifier in the internal map. If it is found, it
      * invokes the corresponding creator for the type identifier and returns its
@@ -116,12 +118,16 @@ namespace OpenMD {
 
   private:
     OptimizationFactory() = default;
+    ~OptimizationFactory();
+
+    OptimizationFactory(const OptimizationFactory&) = delete;
+    OptimizationFactory& operator=(const OptimizationFactory&) = delete;
 
     CreatorMapType creatorMap_;
   };
 
   /** write out all of the type identifiers to an output stream */
   std::ostream& operator<<(std::ostream& o, OptimizationFactory& factory);
-
 }  // namespace OpenMD
+
 #endif  // OPTIMIZATIONS_OPTIMIZATIONFACTORY_HPP

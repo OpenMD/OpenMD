@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_STATICPROPS_MULTIPOLESUM_HPP
 #define APPLICATIONS_STATICPROPS_MULTIPOLESUM_HPP
+
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
@@ -74,6 +75,6 @@ namespace OpenMD {
     SelectionManager seleMan1_;
     SelectionEvaluator evaluator1_;
   };
-
 }  // namespace OpenMD
+
 #endif

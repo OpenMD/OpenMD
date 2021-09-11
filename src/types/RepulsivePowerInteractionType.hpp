@@ -77,4 +77,5 @@ namespace OpenMD {
     int nRep;
   };
 }  // namespace OpenMD
+
 #endif

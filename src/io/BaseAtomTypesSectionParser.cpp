@@ -50,6 +50,7 @@
 #include "brains/ForceField.hpp"
 #include "types/AtomType.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   BaseAtomTypesSectionParser::BaseAtomTypesSectionParser() {

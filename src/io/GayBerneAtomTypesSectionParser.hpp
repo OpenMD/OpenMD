@@ -48,6 +48,7 @@
 
 #include "io/ForceFieldOptions.hpp"
 #include "io/SectionParser.hpp"
+
 namespace OpenMD {
 
   class GayBerneAtomTypesSectionParser : public SectionParser {
@@ -58,7 +59,6 @@ namespace OpenMD {
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
     ForceFieldOptions& options_;
   };
-
 }  // namespace OpenMD
 
 #endif  // IO_GAYBERNEATOMTYPESECTIONPARSER_HPP

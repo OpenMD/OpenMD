@@ -78,11 +78,11 @@ namespace OpenMD {
 
     virtual int getCapacity();
 
-    virtual void setCapacity(int capacity);
+    virtual void setCapacity(int);
 
   private:
     SimInfo* info_ {nullptr};
   };
-
 }  // namespace OpenMD
+
 #endif  // BRAINS_SIMSNAPSHOTMANAGER_HPP

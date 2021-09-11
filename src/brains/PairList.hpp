@@ -101,7 +101,6 @@ namespace OpenMD {
     std::vector<int> pairList_;
     bool modified_;
   };
-
 }  // namespace OpenMD
 
 #endif  // __PAIRLIST_H__

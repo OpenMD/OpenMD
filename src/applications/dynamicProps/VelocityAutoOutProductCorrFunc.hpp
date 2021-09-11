@@ -69,4 +69,5 @@ namespace OpenMD {
     Vector3d propertyTemp;
   };
 }  // namespace OpenMD
+
 #endif

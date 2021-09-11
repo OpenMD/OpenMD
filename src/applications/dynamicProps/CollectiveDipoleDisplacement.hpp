@@ -107,4 +107,5 @@ namespace OpenMD {
     std::vector<Vector3d> CRrot_;
   };
 }  // namespace OpenMD
+
 #endif

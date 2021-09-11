@@ -116,8 +116,7 @@ namespace OpenMD {
       density->accumulator.push_back(new Accumulator());
     addOutputDataAt(density, DENSITY);
 
-    activity = new OutputData;
-    ;
+    activity               = new OutputData;
     activity->units        = "unitless";
     activity->title        = "Activity";
     activity->dataType     = odtArray2d;

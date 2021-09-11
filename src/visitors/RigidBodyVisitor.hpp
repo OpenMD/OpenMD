@@ -45,6 +45,7 @@
 
 #ifndef VISITORS_RIGIDBODYVISITOR_HPP
 #define VISITORS_RIGIDBODYVISITOR_HPP
+
 #include <iostream>
 #include <set>
 #include <string>
@@ -99,7 +100,6 @@ namespace OpenMD {
 
     virtual const std::string toString();
   };
-
 }  // namespace OpenMD
 
 #endif

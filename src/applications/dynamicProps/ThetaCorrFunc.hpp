@@ -60,6 +60,6 @@ namespace OpenMD {
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
     std::vector<std::vector<Vector3d>> coords_;
   };
-
 }  // namespace OpenMD
+
 #endif

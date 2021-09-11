@@ -59,6 +59,6 @@ namespace OpenMD {
     virtual void moveA() = 0;
     virtual void moveB() = 0;
   };
-
 }  // namespace OpenMD
+
 #endif  // INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP

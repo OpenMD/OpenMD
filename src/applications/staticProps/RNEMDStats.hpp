@@ -64,7 +64,7 @@ namespace OpenMD {
     RNEMDZ(SimInfo* info, const std::string& filename, const std::string& sele,
            int nzbins, int axis = 2);
     void processFrame(int frame);
-    void processStuntDouble(StuntDouble* sd, int bin) {}
+    void processStuntDouble(StuntDouble*, int) {}
 
   protected:
     enum OutputFields {
@@ -81,9 +81,8 @@ namespace OpenMD {
       ENDINDEX
     };
 
-    typedef std::bitset<ENDINDEX - BEGININDEX> OutputBitSet;
+    using OutputBitSet = std::bitset<ENDINDEX - BEGININDEX>;
 
-    int outputTypeCount_;
     std::vector<AtomType*> outputTypes_;
 
     OutputData* temperature;
@@ -103,7 +102,7 @@ namespace OpenMD {
     RNEMDR(SimInfo* info, const std::string& filename, const std::string& sele,
            int nrbins);
     void processFrame(int frame);
-    void processStuntDouble(StuntDouble* sd, int bin) {}
+    void processStuntDouble(StuntDouble*, int) {}
 
   protected:
     enum OutputFields {
@@ -115,7 +114,7 @@ namespace OpenMD {
       ENDINDEX
     };
 
-    typedef std::bitset<ENDINDEX - BEGININDEX> OutputBitSet;
+    using OutputBitSet = std::bitset<ENDINDEX - BEGININDEX>;
 
     OutputData* temperature;
     OutputData* angularVelocity;
@@ -129,7 +128,7 @@ namespace OpenMD {
     RNEMDRTheta(SimInfo* info, const std::string& filename,
                 const std::string& sele, int nrbins, int nanglebins);
     void processFrame(int frame);
-    void processStuntDouble(StuntDouble* sd, int bin) {}
+    void processStuntDouble(StuntDouble*, int) {}
     std::pair<int, int> getBins(Vector3d pos);
     void writeOutput();
 
@@ -141,7 +140,7 @@ namespace OpenMD {
       ENDINDEX
     };
 
-    typedef std::bitset<ENDINDEX - BEGININDEX> OutputBitSet;
+    using OutputBitSet = std::bitset<ENDINDEX - BEGININDEX>;
 
     int nAngleBins_;
     Vector3d fluxVector_;

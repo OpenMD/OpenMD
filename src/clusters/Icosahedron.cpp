@@ -45,7 +45,7 @@
 
 #include "clusters/Icosahedron.hpp"
 
-using namespace std;
+#include <tuple>
 
 namespace OpenMD {
 
@@ -120,32 +120,31 @@ namespace OpenMD {
     //
     // Initialize 20 facets
     //
+    Facets.push_back(std::make_tuple(0, 1, 2));
+    Facets.push_back(std::make_tuple(0, 2, 4));
+    Facets.push_back(std::make_tuple(0, 4, 5));
+    Facets.push_back(std::make_tuple(0, 5, 6));
+    Facets.push_back(std::make_tuple(0, 1, 6));
 
-    Facets.push_back(make_tuple3(0, 1, 2));
-    Facets.push_back(make_tuple3(0, 2, 4));
-    Facets.push_back(make_tuple3(0, 4, 5));
-    Facets.push_back(make_tuple3(0, 5, 6));
-    Facets.push_back(make_tuple3(0, 1, 6));
+    Facets.push_back(std::make_tuple(10, 3, 7));
+    Facets.push_back(std::make_tuple(10, 3, 8));
+    Facets.push_back(std::make_tuple(10, 8, 11));
+    Facets.push_back(std::make_tuple(10, 9, 11));
+    Facets.push_back(std::make_tuple(10, 7, 9));
 
-    Facets.push_back(make_tuple3(10, 3, 7));
-    Facets.push_back(make_tuple3(10, 3, 8));
-    Facets.push_back(make_tuple3(10, 8, 11));
-    Facets.push_back(make_tuple3(10, 9, 11));
-    Facets.push_back(make_tuple3(10, 7, 9));
+    Facets.push_back(std::make_tuple(1, 2, 7));
+    Facets.push_back(std::make_tuple(1, 7, 9));
+    Facets.push_back(std::make_tuple(1, 6, 9));
 
-    Facets.push_back(make_tuple3(1, 2, 7));
-    Facets.push_back(make_tuple3(1, 7, 9));
-    Facets.push_back(make_tuple3(1, 6, 9));
+    Facets.push_back(std::make_tuple(8, 5, 11));
+    Facets.push_back(std::make_tuple(8, 4, 5));
+    Facets.push_back(std::make_tuple(8, 3, 4));
 
-    Facets.push_back(make_tuple3(8, 5, 11));
-    Facets.push_back(make_tuple3(8, 4, 5));
-    Facets.push_back(make_tuple3(8, 3, 4));
+    Facets.push_back(std::make_tuple(2, 3, 7));
+    Facets.push_back(std::make_tuple(2, 3, 4));
 
-    Facets.push_back(make_tuple3(2, 3, 7));
-    Facets.push_back(make_tuple3(2, 3, 4));
-
-    Facets.push_back(make_tuple3(11, 5, 6));
-    Facets.push_back(make_tuple3(11, 6, 9));
+    Facets.push_back(std::make_tuple(11, 5, 6));
+    Facets.push_back(std::make_tuple(11, 6, 9));
   }
 
   int Icosahedron::getNpoints(int n) {
@@ -174,7 +173,7 @@ namespace OpenMD {
     }
   }
 
-  vector<Vector3d> Icosahedron::ih(int n) {
+  std::vector<Vector3d> Icosahedron::ih(int n) {
     if (n < 0) return Points;
 
     if (n == 0) {
@@ -187,19 +186,18 @@ namespace OpenMD {
     //
     // Generate edge particles
     //
-
-    for (vector<Vector3d>::iterator i = Basis.begin(); i != Basis.end(); ++i) {
+    for (std::vector<Vector3d>::iterator i = Basis.begin(); i != Basis.end();
+         ++i) {
       Points.push_back((*i) * RealType(n));
     }
 
     //
     // Generate side particles
     //
-
     if (n < 2) return Points;
 
-    for (vector<pair<int, int>>::iterator i = Edges.begin(); i != Edges.end();
-         ++i) {
+    for (std::vector<std::pair<int, int>>::iterator i = Edges.begin();
+         i != Edges.end(); ++i) {
       Vector3d e1 = Basis[(*i).first] * RealType(n);
       Vector3d e2 = Basis[(*i).second] * RealType(n);
 
@@ -211,14 +209,12 @@ namespace OpenMD {
     //
     // Generate body particles
     //
-
     if (n < 3) return Points;
 
-    for (vector<tuple3<int, int, int>>::iterator i = Facets.begin();
-         i != Facets.end(); ++i) {
-      Vector3d e1 = Basis[(*i).first] * RealType(n);
-      Vector3d e2 = Basis[(*i).second] * RealType(n);
-      Vector3d e3 = Basis[(*i).third] * RealType(n);
+    for (const auto& [first, second, third] : Facets) {
+      Vector3d e1 = Basis[first] * RealType(n);
+      Vector3d e2 = Basis[second] * RealType(n);
+      Vector3d e3 = Basis[third] * RealType(n);
 
       for (int j = 1; j <= n - 2; j++) {
         Vector3d v1 = e1 + (e2 - e1) * RealType(j + 1) / RealType(n);
@@ -229,10 +225,11 @@ namespace OpenMD {
         }
       }
     }
+
     return Points;
   }
 
-  vector<Vector3d> Icosahedron::getPoints(int nshells) {
+  std::vector<Vector3d> Icosahedron::getPoints(int nshells) {
     // generate the coordinates
     for (int i = 0; i <= nshells; i++)
       ih(i);

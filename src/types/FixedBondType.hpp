@@ -67,11 +67,11 @@ namespace OpenMD {
     FixedBondType(RealType r0) : BondType(r0) {}
     virtual ~FixedBondType() {}
 
-    virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
+    virtual void calcForce(RealType, RealType& V, RealType& dVdr) {
       V    = 0.0;
       dVdr = 0.0;
     }
   };
-
 }  // namespace OpenMD
+
 #endif  // TYPES_FIXEDBONDTYPE_HPP

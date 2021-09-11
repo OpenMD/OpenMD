@@ -47,6 +47,7 @@
 
 #include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 #include "utils/MemoryUtils.hpp"
+
 namespace OpenMD {
 
   CompositeShape::~CompositeShape() { Utils::deletePointers(shapes_); }
@@ -85,8 +86,7 @@ namespace OpenMD {
     return boundary;
   }
 
-  HydroProp* CompositeShape::getHydroProp(RealType viscosity,
-                                          RealType temperature) {
+  HydroProp* CompositeShape::getHydroProp(RealType, RealType) {
     HydroProp* props = new HydroProp();
     props->setCOR(V3Zero);
     sprintf(painCave.errMsg,

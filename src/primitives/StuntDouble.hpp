@@ -63,6 +63,7 @@
 #include "math/Vector3.hpp"
 #include "utils/PropertyMap.hpp"
 #include "visitors/BaseVisitor.hpp"
+
 namespace OpenMD {
 
   /**
@@ -1511,7 +1512,7 @@ namespace OpenMD {
     virtual std::string getType() = 0;
 
     /** Sets the name of this stuntDouble*/
-    virtual void setType(const std::string& name) {}
+    virtual void setType(const std::string&) {}
 
     /**
      * Converts a lab fixed vector to a body fixed vector.
@@ -1602,6 +1603,6 @@ namespace OpenMD {
   private:
     PropertyMap properties_;
   };
-
 }  // namespace OpenMD
+
 #endif  // PRIMITIVES_STUNTDOUBLE_HPP

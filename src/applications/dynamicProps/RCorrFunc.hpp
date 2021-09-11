@@ -47,6 +47,7 @@
 #define APPLICATIONS_DYNAMICPROPS_RCORRFUNC_HPP
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
+
 namespace OpenMD {
 
   class RCorrFunc : public ObjectACF<RealType> {
@@ -72,9 +73,7 @@ namespace OpenMD {
     virtual void correlateFrames(int frame1, int frame2, int timeBin);
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2,
                                  int timeBin);
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {
-      return -1;
-    }
+    virtual RealType calcCorrVal(int, int, int, int) { return -1; }
     virtual void postCorrelate();
     virtual void writeCorrelate();
 
@@ -100,6 +99,6 @@ namespace OpenMD {
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
     std::vector<std::vector<RealType>> positions_;
   };
-
 }  // namespace OpenMD
+
 #endif

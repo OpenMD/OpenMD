@@ -81,4 +81,5 @@ namespace OpenMD {
     Stats* stats_;
   };
 }  // namespace OpenMD
+
 #endif

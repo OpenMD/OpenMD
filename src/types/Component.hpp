@@ -45,8 +45,10 @@
 
 #ifndef TYPES_COMPONENT_HPP
 #define TYPES_COMPONENT_HPP
+
 #include "types/DataHolder.hpp"
 #include "types/MoleculeStamp.hpp"
+
 namespace OpenMD {
   class Component : public DataHolder {
     DeclareParameter(Type, std::string);
@@ -65,4 +67,5 @@ namespace OpenMD {
     MoleculeStamp* moleculeStamp_;
   };
 }  // namespace OpenMD
+
 #endif

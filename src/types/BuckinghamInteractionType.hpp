@@ -116,4 +116,5 @@ namespace OpenMD {
     BuckinghamType interactionType;
   };
 }  // namespace OpenMD
+
 #endif

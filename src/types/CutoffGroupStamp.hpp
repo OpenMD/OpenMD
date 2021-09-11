@@ -45,7 +45,9 @@
 
 #ifndef TYPES_CUTOFFGROUPSTAMP_HPP
 #define TYPES_CUTOFFGROUPSTAMP_HPP
+
 #include "types/DataHolder.hpp"
+
 namespace OpenMD {
   class CutoffGroupStamp : public DataHolder {
   public:
@@ -63,4 +65,5 @@ namespace OpenMD {
     std::vector<int> members_;
   };
 }  // namespace OpenMD
+
 #endif

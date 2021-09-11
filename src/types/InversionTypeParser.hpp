@@ -97,7 +97,6 @@ namespace OpenMD {
     InversionTypeEnum getInversionTypeEnum(const std::string& str);
     std::map<std::string, InversionTypeEnum> stringToEnumMap_;
   };
-
 }  // namespace OpenMD
 
 #endif

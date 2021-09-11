@@ -86,4 +86,5 @@ namespace OpenMD {
     std::vector<Vector3d> refPos_;
   };
 }  // namespace OpenMD
+
 #endif

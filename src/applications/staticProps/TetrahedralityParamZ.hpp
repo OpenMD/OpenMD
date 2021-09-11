@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAMZ_HPP
 #define APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAMZ_HPP
+
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
@@ -108,4 +109,5 @@ namespace OpenMD {
     std::string axisLabel_;
   };
 }  // namespace OpenMD
+
 #endif

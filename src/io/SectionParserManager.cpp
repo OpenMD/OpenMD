@@ -76,7 +76,7 @@ namespace OpenMD {
     while (input.getline(buffer, bufferSize)) {
       ++lineNo;
 
-      std::string line = trimLeftCopy(buffer);
+      std::string line = Utils::trimLeftCopy(buffer);
       // a line begins with "//" is a comment line
       if (line.empty() ||
           (line.size() >= 2 && line[0] == '/' && line[1] == '/')) {

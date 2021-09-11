@@ -80,4 +80,5 @@ namespace OpenMD {
     std::vector<RealType> coefficients;
   };
 }  // namespace OpenMD
+
 #endif

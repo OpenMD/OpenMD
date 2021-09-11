@@ -53,7 +53,7 @@
 
 namespace OpenMD {
 
-  typedef std::list<std::pair<BaseVisitor*, int>>::iterator VisitorIterator;
+  using VisitorIterator = std::list<std::pair<BaseVisitor*, int>>::iterator;
 
   class CompositeVisitor : public BaseVisitor {
   public:
@@ -75,6 +75,6 @@ namespace OpenMD {
   protected:
     std::list<std::pair<BaseVisitor*, int>> visitorList;
   };
-
 }  // namespace OpenMD
+
 #endif  //_COMPOSITEVISITOR_H_

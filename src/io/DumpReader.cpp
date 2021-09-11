@@ -63,7 +63,6 @@
 
 #include "brains/Thermo.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/StringTokenizer.hpp"
 #include "utils/simError.h"
 
@@ -85,14 +84,11 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();
       }
-
 #ifdef IS_MPI
     }
     strcpy(checkPointMsg, "Dump file opened for reading successfully.");
     errorCheckPoint();
 #endif
-
-    return;
   }
 
   DumpReader::~DumpReader() {
@@ -107,8 +103,6 @@ namespace OpenMD {
     strcpy(checkPointMsg, "Dump file closed successfully.");
     errorCheckPoint();
 #endif
-
-    return;
   }
 
   int DumpReader::getNFrames(void) {

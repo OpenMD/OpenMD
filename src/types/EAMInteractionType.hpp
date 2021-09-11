@@ -128,4 +128,5 @@ namespace OpenMD {
     EAMiType interactionType_;
   };
 }  // namespace OpenMD
+
 #endif

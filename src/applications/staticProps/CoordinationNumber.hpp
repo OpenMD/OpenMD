@@ -136,6 +136,6 @@ namespace OpenMD {
 
     virtual RealType computeCoordination(int a, vector<vector<int>> neighbors);
   };
-
 }  // namespace OpenMD
+
 #endif

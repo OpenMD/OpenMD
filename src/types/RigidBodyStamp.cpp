@@ -49,6 +49,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+
 namespace OpenMD {
 
   RigidBodyStamp::RigidBodyStamp(int index) : index_(index) {

@@ -52,6 +52,7 @@
 
 #include "brains/SimInfo.hpp"
 #include "constraints/ZconsStruct.hpp"
+
 namespace OpenMD {
 
   /**
@@ -77,6 +78,6 @@ namespace OpenMD {
     std::vector<ZconsData> fixedZmolData_;
     const static int MAXBUFFERSIZE = 2000;
   };
-
 }  // namespace OpenMD
+
 #endif

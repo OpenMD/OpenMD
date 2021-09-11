@@ -47,57 +47,58 @@
 #define OPENMD_RNEMD_SPFFORCEMANAGER_HPP
 
 #include "brains/ForceManager.hpp"
+#include "brains/SimInfo.hpp"
+#include "brains/Snapshot.hpp"
+#include "math/Vector3.hpp"
+#include "primitives/Molecule.hpp"
 
-namespace OpenMD {
-  namespace RNEMD {
+namespace OpenMD::RNEMD {
 
-    class SPFForceManager : public ForceManager {
-    public:
-      SPFForceManager(SimInfo* info);
-      ~SPFForceManager();
+  class SPFForceManager : public ForceManager {
+  public:
+    SPFForceManager(SimInfo* info);
+    ~SPFForceManager();
 
-      void setSelectedMolecule(Molecule* selectedMolecule,
-                               Vector3d newPosition);
+    void setSelectedMolecule(Molecule* selectedMolecule, Vector3d newPosition);
 
-      RealType getDeltaU() const { return potentialB_ - potentialA_; }
+    RealType getDeltaU() const { return potentialB_ - potentialA_; }
 
-      void updateLambda(RealType lambda) { lambda_ = lambda; }
+    void updateLambda(RealType lambda) { lambda_ = lambda; }
 
-      void acceptGhost() {
-        *currentSnapshot_ = *ghostSnapshot_;
+    void acceptGhost() {
+      *currentSnapshot_ = *ghostSnapshot_;
 
-        currentSnapshot_->clearDerivedProperties();
-        ghostSnapshot_->clearDerivedProperties();
-      }
+      currentSnapshot_->clearDerivedProperties();
+      ghostSnapshot_->clearDerivedProperties();
+    }
 
-    private:
-      void calcForces() override;
+  private:
+    void calcForces() override;
 
-      void updatePotentials();
-      void updateLongRangePotentials();
-      void updateShortRangePotentials();
-      void updateSelfPotentials();
-      void updateExcludedPotentials();
-      void updateRestraintPotentials();
-      void updateSelectionPotentials();
-      void updateVirialTensor();
+    void updatePotentials();
+    void updateLongRangePotentials();
+    void updateShortRangePotentials();
+    void updateSelfPotentials();
+    void updateExcludedPotentials();
+    void updateRestraintPotentials();
+    void updateSelectionPotentials();
+    void updateVirialTensor();
 
-      template<typename T>
-      T linearCombination(T current, T ghost) {
-        return T {(1.0 - lambda_) * current + lambda_ * ghost};
-      }
+    template<typename T>
+    T linearCombination(T current, T ghost) {
+      return T {(1.0 - lambda_) * current + lambda_ * ghost};
+    }
 
-      Snapshot* currentSnapshot_;
-      Snapshot* ghostSnapshot_;
+    Snapshot* currentSnapshot_;
+    Snapshot* ghostSnapshot_;
 
-      Molecule* selectedMolecule_;
+    Molecule* selectedMolecule_;
 
-      RealType potentialA_ {};
-      RealType potentialB_ {};
+    RealType potentialA_ {};
+    RealType potentialB_ {};
 
-      RealType lambda_;
-    };
-  }  // namespace RNEMD
-}  // namespace OpenMD
+    RealType lambda_;
+  };
+}  // namespace OpenMD::RNEMD
 
 #endif  // OPENMD_RNEMD_SPFFORCEMANAGER_HPP

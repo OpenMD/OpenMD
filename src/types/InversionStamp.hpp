@@ -45,8 +45,9 @@
 
 #ifndef TYPES_INVERSIONSTAMP_HPP
 #define TYPES_INVERSIONSTAMP_HPP
+
 #include "types/DataHolder.hpp"
-#include "utils/Tuple.hpp"
+
 namespace OpenMD {
   class InversionStamp : public DataHolder {
     DeclareParameter(GhostVectorSource, int);
@@ -101,4 +102,5 @@ namespace OpenMD {
     std::vector<RealType> orPars_;
   };
 }  // namespace OpenMD
+
 #endif

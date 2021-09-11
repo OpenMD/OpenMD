@@ -43,157 +43,84 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef UTILS_TRIM_HPP
-#define UTILS_TRIM_HPP
+#ifndef OPENMD_UTILS_TRIM_HPP
+#define OPENMD_UTILS_TRIM_HPP
 
-#include <cctype>
+#include <locale>
 #include <string>
 
-#include "utils/Predicate.hpp"
-
-/**
- * @file Trim.hpp
- * Defines trim algorithms. Trim algorithms are used to remove trailing and
- * leading spaces from a string.
- */
-namespace OpenMD {
-
-  /**
-   * Remove all leading spaces in-place. The supplied predicate is used to
-   * determine which characters are considered spaces
-   * @param str An input sequence
-   * @param pred The unary predicate identifying spaces
-   *
-   * @code
-   * std::string str = "  acb  trimLeftIf test case"
-   * trimLeftIf(str, pred() || isFromRange('a', 'c'));
-   * std::cout << str << std::endl; //print "trimLeft test case"
-   *
-   * @endcode
-   */
-  template<typename P>
-  void trimLeftIf(std::string& str, P pred) {
-    std::string::iterator i = str.begin();
-
-    for (; i != str.end(); ++i) {
-      if (!pred(*i)) { break; }
-    }
-
-    str.erase(str.begin(), i);
-  }
-
-  /**
-   * Remove all trailing spaces in-place. The supplied predicate is used to
-   * determine which characters are considered spaces
-   * @param str An input sequence
-   * @param pred The unary predicate identifying spaces
-   */
-  template<typename P>
-  void trimRightIf(std::string& str, P pred) {
-    std::string::iterator i = str.end();
-
-    for (; i != str.begin();) {
-      if (!pred(*(--i))) {
-        ++i;
-        break;
-      }
-    }
-
-    str.erase(i, str.end());
-  }
-
-  /**
-   *Remove all leading and trailing spaces in-place. The supplied predicate is
-   *used to determine which characters are considered spaces
-   * @param str An input sequence
-   * @param pred The unary predicate identifying spaces
-   */
-  template<typename P>
-  void trimIf(std::string& str, P pred) {
-    trimLeftIf(str, pred);
-    trimRightIf(str, pred);
-  }
-
-  /**
-   * Remove all leading spaces from the input. The supplied predicate is used to
-   * determine which characters are considered spaces
-   * @return A trimmed copy of the input
-   * @param input An input sequence
-   * @param pred The unary predicate identifying spaces
-   */
-  template<typename P>
-  std::string trimLeftCopyIf(const std::string& input, P pred) {
-    std::string result(input);
-    trimLeftIf(result, pred);
-    return result;
-  }
-
-  /**
-   * Remove all trailing spaces from the input. The supplied predicate is used
-   * to determine which characters are considered spaces
-   * @return A trimmed copy of the input
-   * @param input An input sequence
-   * @param pred The unary predicate identifying spaces
-   */
-  template<typename P>
-  std::string trimRightCopyIf(const std::string& input, P pred) {
-    std::string result(input);
-    trimRightIf(result, pred);
-    return result;
-  }
-
-  /**
-   * Remove all leading and trailing spaces from the input. The supplied
-   * predicate is used to determine which characters are considered spaces
-   * @return A trimmed copy of the input
-   * @param input An input sequence
-   * @param pred The unary predicate identifying spaces
-   */
-  template<typename P>
-  std::string trimCopyIf(const std::string& input, P pred) {
-    std::string result(input);
-    trimIf(result, pred);
-    return result;
-  }
+namespace OpenMD::Utils {
 
   /**
    * Remove all leading spaces in-place.
    * @param str An input sequence
+   * @param loc The locale to use, defaults to std::locale
    */
-  void trimLeft(std::string& str);
+  inline void trimLeft(std::string& str,
+                       const std::locale& loc = std::locale()) {
+    str.erase(str.begin(),
+              std::find_if(str.begin(), str.end(),
+                           [&loc](auto ch) { return !std::isspace(ch, loc); }));
+  }
 
   /**
    * Remove all trailing spaces in-place.
    * @param str An input sequence
+   * @param loc The locale to use, defaults to std::locale
    */
-  void trimRight(std::string& str);
+  inline void trimRight(std::string& str,
+                        const std::locale& loc = std::locale()) {
+    str.erase(std::find_if(str.rbegin(), str.rend(),
+                           [&loc](auto ch) { return !std::isspace(ch, loc); })
+                  .base(),
+              str.end());
+  }
 
   /**
-   *Remove all leading and trailing spaces in-place
+   * Remove all leading and trailing spaces in-place
    * @param str An input sequence
+   * @param loc The locale to use, defaults to std::locale
    */
-  void trim(std::string& str);
+  inline void trim(std::string& str, const std::locale& loc = std::locale()) {
+    trimLeft(str, loc);
+    trimRight(str, loc);
+  }
 
   /**
    * Remove all leading spaces from the input.
    * @return A trimmed copy of the input
-   * @param input An input sequence
+   * @param str An input sequence
+   * @param loc The locale to use, defaults to std::locale
    */
-  std::string trimLeftCopy(const std::string& input);
+  inline std::string trimLeftCopy(std::string str,
+                                  const std::locale& loc = std::locale()) {
+    trimLeft(str, loc);
+    return str;
+  }
 
   /**
    * Remove all trailing spaces from the input.
    * @return A trimmed copy of the input
-   * @param input An input sequence
+   * @param str An input sequence
+   * @param loc The locale to use, defaults to std::locale
    */
-  std::string trimRightCopy(const std::string& input);
+  inline std::string trimRightCopy(std::string str,
+                                   const std::locale& loc = std::locale()) {
+    trimRight(str, loc);
+    return str;
+  }
 
   /**
-   *Remove all leading and trailing spaces from the input.
+   * Remove all leading and trailing spaces from the input.
    * @return A trimmed copy of the input
-   * @param input An input sequence
+   * @param str An input sequence
+   * @param loc The locale to use, defaults to std::locale
    */
-  std::string trimCopy(const std::string& input);
+  inline std::string trimCopy(std::string str,
+                              const std::locale& loc = std::locale()) {
+    trim(str, loc);
+    return str;
+  }
+}  // namespace OpenMD::Utils
 
-}  // namespace OpenMD
-#endif  // UTILS_TRIM_HPP
+#endif  // OPENMD_UTILS_TRIM_HPP

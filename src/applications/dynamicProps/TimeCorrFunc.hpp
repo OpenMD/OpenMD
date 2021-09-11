@@ -163,10 +163,10 @@ namespace OpenMD {
     virtual int computeProperty1(int frame, StuntDouble* sd) = 0;
     virtual int computeProperty1(int frame, Bond* bond)      = 0;
 
-    virtual void computeProperty2(int frame) {}
-    virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty2(int frame, Bond* bond) { return -1; }
+    virtual void computeProperty2(int) {}
+    virtual int computeProperty2(int, Molecule*) { return -1; }
+    virtual int computeProperty2(int, StuntDouble*) { return -1; }
+    virtual int computeProperty2(int, Bond*) { return -1; }
   };
 
   template<typename T>
@@ -198,16 +198,16 @@ namespace OpenMD {
     virtual void computeProperty1(int frame)      = 0;
     virtual T calcCorrVal(int frame1, int frame2) = 0;
 
-    virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty1(int frame, Bond* bond) { return -1; }
+    virtual int computeProperty1(int, Molecule*) { return -1; }
+    virtual int computeProperty1(int, StuntDouble*) { return -1; }
+    virtual int computeProperty1(int, Bond*) { return -1; }
 
-    virtual void computeProperty2(int frame) {}
-    virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty2(int frame, Bond* bond) { return -1; }
+    virtual void computeProperty2(int) {}
+    virtual int computeProperty2(int, Molecule*) { return -1; }
+    virtual int computeProperty2(int, StuntDouble*) { return -1; }
+    virtual int computeProperty2(int, Bond*) { return -1; }
 
-    T calcCorrVal(int frame1, int frame2, int id1, int id2) { return T(0.0); }
+    T calcCorrVal(int, int, int, int) { return T(0.0); }
   };
 
   template<typename T>
@@ -222,15 +222,15 @@ namespace OpenMD {
     virtual void computeProperty2(int frame)      = 0;
     virtual T calcCorrVal(int frame1, int frame2) = 0;
 
-    virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty1(int frame, Bond* bond) { return -1; }
+    virtual int computeProperty1(int, Molecule*) { return -1; }
+    virtual int computeProperty1(int, StuntDouble*) { return -1; }
+    virtual int computeProperty1(int, Bond*) { return -1; }
 
-    virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty2(int frame, Bond* bond) { return -1; }
+    virtual int computeProperty2(int, Molecule*) { return -1; }
+    virtual int computeProperty2(int, StuntDouble*) { return -1; }
+    virtual int computeProperty2(int, Bond*) { return -1; }
 
-    T calcCorrVal(int frame1, int frame2, int id1, int id2) { return T(0.0); }
+    T calcCorrVal(int, int, int, int) { return T(0.0); }
   };
 
   template<typename T>
@@ -244,16 +244,16 @@ namespace OpenMD {
     virtual int computeProperty1(int frame, StuntDouble* sd)        = 0;
     virtual T calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
 
-    virtual void computeProperty1(int frame) { return; }
-    virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty1(int frame, Bond* bond) { return -1; }
+    virtual void computeProperty1(int) { return; }
+    virtual int computeProperty1(int, Molecule*) { return -1; }
+    virtual int computeProperty1(int, Bond*) { return -1; }
 
-    virtual void computeProperty2(int frame) { return; }
-    virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty2(int frame, Bond* bond) { return -1; }
+    virtual void computeProperty2(int) { return; }
+    virtual int computeProperty2(int, Molecule*) { return -1; }
+    virtual int computeProperty2(int, StuntDouble*) { return -1; }
+    virtual int computeProperty2(int, Bond*) { return -1; }
 
-    virtual T calcCorrVal(int frame1, int frame2) { return T(0.0); }
+    virtual T calcCorrVal(int, int) { return T(0.0); }
   };
 
   template<typename T>
@@ -268,15 +268,15 @@ namespace OpenMD {
     virtual int computeProperty2(int frame, StuntDouble* sd)        = 0;
     virtual T calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
 
-    virtual void computeProperty1(int frame) { return; }
-    virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty1(int frame, Bond* bond) { return -1; }
+    virtual void computeProperty1(int) { return; }
+    virtual int computeProperty1(int, Molecule*) { return -1; }
+    virtual int computeProperty1(int, Bond*) { return -1; }
 
-    virtual void computeProperty2(int frame) {}
-    virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty2(int frame, Bond* bond) { return -1; }
+    virtual void computeProperty2(int) {}
+    virtual int computeProperty2(int, Molecule*) { return -1; }
+    virtual int computeProperty2(int, Bond*) { return -1; }
 
-    virtual T calcCorrVal(int frame1, int frame2) { return T(0.0); }
+    virtual T calcCorrVal(int, int) { return T(0.0); }
   };
 
   template<typename T>
@@ -290,16 +290,16 @@ namespace OpenMD {
     virtual int computeProperty1(int frame, Molecule* mol)          = 0;
     virtual T calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
 
-    virtual void computeProperty1(int frame) { return; }
-    virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty1(int frame, Bond* bond) { return -1; }
+    virtual void computeProperty1(int) { return; }
+    virtual int computeProperty1(int, StuntDouble*) { return -1; }
+    virtual int computeProperty1(int, Bond*) { return -1; }
 
-    virtual void computeProperty2(int frame) { return; }
-    virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty2(int frame, Bond* bond) { return -1; }
+    virtual void computeProperty2(int) { return; }
+    virtual int computeProperty2(int, Molecule*) { return -1; }
+    virtual int computeProperty2(int, StuntDouble*) { return -1; }
+    virtual int computeProperty2(int, Bond*) { return -1; }
 
-    virtual T calcCorrVal(int frame1, int frame2) { return T(0.0); }
+    virtual T calcCorrVal(int, int) { return T(0.0); }
   };
 
   template<typename T>
@@ -314,16 +314,16 @@ namespace OpenMD {
     virtual int computeProperty2(int frame, Molecule* mol)          = 0;
     virtual T calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
 
-    virtual void computeProperty1(int frame) { return; }
-    virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty1(int frame, Bond* bond) { return -1; }
+    virtual void computeProperty1(int) { return; }
+    virtual int computeProperty1(int, StuntDouble*) { return -1; }
+    virtual int computeProperty1(int, Bond*) { return -1; }
 
-    virtual void computeProperty2(int frame) {}
-    virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty2(int frame, Bond* bond) { return -1; }
+    virtual void computeProperty2(int) {}
+    virtual int computeProperty2(int, StuntDouble*) { return -1; }
+    virtual int computeProperty2(int, Bond*) { return -1; }
 
-    virtual T calcCorrVal(int frame1, int frame2) { return T(0.0); }
+    virtual T calcCorrVal(int, int) { return T(0.0); }
   };
-
 }  // namespace OpenMD
+
 #endif

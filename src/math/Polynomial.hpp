@@ -83,15 +83,16 @@ namespace OpenMD {
   template<typename Real>
   class Polynomial {
   public:
-    typedef Polynomial<Real> PolynomialType;
-    typedef int ExponentType;
-    typedef Real CoefficientType;
-    typedef std::map<ExponentType, CoefficientType> PolynomialPairMap;
-    typedef typename PolynomialPairMap::iterator iterator;
-    typedef typename PolynomialPairMap::const_iterator const_iterator;
+    using PolynomialType    = Polynomial<Real>;
+    using ExponentType      = int;
+    using CoefficientType   = Real;
+    using PolynomialPairMap = std::map<ExponentType, CoefficientType>;
+    using iterator          = typename PolynomialPairMap::iterator;
+    using const_iterator    = typename PolynomialPairMap::const_iterator;
 
     Polynomial() {}
     Polynomial(Real v) { setCoefficient(0, v); }
+
     /**
      * Calculates the value of this Polynomial evaluated at the given x value.
      * @return The value of this Polynomial evaluates at the given x value
@@ -176,11 +177,9 @@ namespace OpenMD {
     }
 
     iterator begin() { return polyPairMap_.begin(); }
-
     const_iterator begin() const { return polyPairMap_.begin(); }
 
     iterator end() { return polyPairMap_.end(); }
-
     const_iterator end() const { return polyPairMap_.end(); }
 
     iterator find(ExponentType exponent) { return polyPairMap_.find(exponent); }
@@ -242,7 +241,6 @@ namespace OpenMD {
       return *this;
     }
 
-    // PolynomialType& operator *= (const Real v)
     PolynomialType& operator*=(const Real v) {
       typename Polynomial<Real>::const_iterator i;
       // Polynomial<Real> result;
@@ -640,7 +638,7 @@ namespace OpenMD {
     return true;
   }
 
-  typedef Polynomial<RealType> DoublePolynomial;
-
+  using DoublePolynomial = Polynomial<RealType>;
 }  // namespace OpenMD
+
 #endif  // MATH_POLYNOMIAL_HPP

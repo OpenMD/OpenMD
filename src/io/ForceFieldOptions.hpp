@@ -45,6 +45,7 @@
 
 #ifndef IO_FORCEFIELDOPTIONS_HPP
 #define IO_FORCEFIELDOPTIONS_HPP
+
 #include "io/ParamConstraint.hpp"
 #include "types/DataHolder.hpp"
 #include "utils/ParameterManager.hpp"
@@ -139,9 +140,9 @@ namespace OpenMD {
     }
 
   private:
-    typedef std::map<std::string, ParameterBase*> ParamMap;
+    using ParamMap = std::map<std::string, ParameterBase*>;
     ParamMap parameters_;
   };
-
 }  // namespace OpenMD
+
 #endif

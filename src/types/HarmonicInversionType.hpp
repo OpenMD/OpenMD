@@ -96,4 +96,5 @@ namespace OpenMD {
   }
 
 }  // namespace OpenMD
+
 #endif  // TYPES_HARMONICINVERSIONTYPE_HPP

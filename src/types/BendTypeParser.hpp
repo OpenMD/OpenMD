@@ -45,6 +45,7 @@
 
 #ifndef TYPES_BENDTYPEPARSER_HPP
 #define TYPES_BENDTYPEPARSER_HPP
+
 #include <map>
 #include <string>
 #include <vector>

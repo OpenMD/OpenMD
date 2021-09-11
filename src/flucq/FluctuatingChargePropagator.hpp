@@ -67,8 +67,8 @@ namespace OpenMD {
     virtual void applyConstraints();
     virtual void moveB() = 0;
 
-    virtual void PositionStep(RealType dt) {}
-    virtual void VelocityStep(RealType dt) {}
+    virtual void PositionStep(RealType) {}
+    virtual void VelocityStep(RealType) {}
 
     virtual void setForceManager(ForceManager* forceMan);
 

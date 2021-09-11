@@ -47,6 +47,7 @@
 #define APPLICATIONS_STATICPROPS_ANGLER_HPP
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+
 namespace OpenMD {
 
   class AngleR : public StaticAnalyser {
@@ -78,6 +79,6 @@ namespace OpenMD {
     std::vector<RealType> avgAngleR_;
     std::vector<int> count_;
   };
-
 }  // namespace OpenMD
+
 #endif

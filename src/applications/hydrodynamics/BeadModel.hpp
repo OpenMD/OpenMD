@@ -59,7 +59,6 @@ namespace OpenMD {
     virtual bool createBeads(std::vector<BeadParam>& beads);
     bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);
   };
-
 }  // namespace OpenMD
 
 #endif

@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_SEQUENTIALPROPS_COMVEL_HPP
 #define APPLICATIONS_SEQUENTIALPROPS_COMVEL_HPP
+
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 
 using namespace std;

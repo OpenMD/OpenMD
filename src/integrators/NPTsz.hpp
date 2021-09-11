@@ -68,7 +68,6 @@ namespace OpenMD {
 
     unsigned int axis_, axis1_, axis2_;
   };
-
 }  // namespace OpenMD
 
 #endif

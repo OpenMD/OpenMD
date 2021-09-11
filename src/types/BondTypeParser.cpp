@@ -45,6 +45,8 @@
 
 #include "types/BondTypeParser.hpp"
 
+#include <string>
+
 #include "types/CubicBondType.hpp"
 #include "types/FixedBondType.hpp"
 #include "types/HarmonicBondType.hpp"
@@ -75,7 +77,7 @@ namespace OpenMD {
     std::vector<RealType>::iterator it;
     for (it = pars.begin(); it != pars.end(); ++it) {
       line.append("\t");
-      line.append(OpenMD::to_string(*it));
+      line.append(std::to_string(*it));
     }
     // assume all overrides know about our functional forms:
     return parseLine(line, 1.0);

@@ -215,7 +215,7 @@ namespace OpenMD {
     }
   }
 
-  void COHZ::validateSelection(SelectionManager& seleMan) {
+  void COHZ::validateSelection(SelectionManager&) {
     Molecule* mol;
     int i;
     for (mol = seleMan1_.beginSelectedMolecule(i); mol != NULL;

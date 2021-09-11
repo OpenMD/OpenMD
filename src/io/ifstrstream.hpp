@@ -84,17 +84,17 @@ namespace OpenMD {
   class ifstrstream : public std::basic_istream<char, std::char_traits<char>> {
   public:
     // traits
-    typedef char char_type;
-    typedef std::char_traits<char>::int_type int_type;
-    typedef std::char_traits<char>::pos_type pos_type;
-    typedef std::char_traits<char>::off_type off_type;
-    typedef std::char_traits<char> traits_type;
+    using char_type   = char;
+    using int_type    = std::char_traits<char>::int_type;
+    using pos_type    = std::char_traits<char>::pos_type;
+    using off_type    = std::char_traits<char>::off_type;
+    using traits_type = std::char_traits<char>;
 
-    typedef std::basic_ios<char, std::char_traits<char>> _Basic_ios;
-    typedef std::basic_istream<char, std::char_traits<char>> _Base;
-    typedef std::basic_streambuf<char, std::char_traits<char>> _Buf;
-    typedef std::basic_stringbuf<char, std::char_traits<char>> _StringBuf;
-    typedef std::basic_filebuf<char, std::char_traits<char>> _FileBuf;
+    using _Basic_ios = std::basic_ios<char, std::char_traits<char>>;
+    using _Base      = std::basic_istream<char, std::char_traits<char>>;
+    using _Buf       = std::basic_streambuf<char, std::char_traits<char>>;
+    using _StringBuf = std::basic_stringbuf<char, std::char_traits<char>>;
+    using _FileBuf   = std::basic_filebuf<char, std::char_traits<char>>;
 
     static const int FileNotExists = -1;
     static const int FileIOError   = -2;
@@ -176,4 +176,5 @@ namespace OpenMD {
     bool isRead;                   /** file opened flag */
   };
 }  // namespace OpenMD
+
 #endif

@@ -1,5 +1,6 @@
 #ifndef OPTIMIZATION_STATUSFUNCTION_HPP
 #define OPTIMIZATION_STATUSFUNCTION_HPP
+
 #include <config.h>
 
 #include "brains/Stats.hpp"
@@ -10,15 +11,15 @@ namespace OpenMD {
   class StatusFunction {
   public:
     virtual ~StatusFunction() {}
-    virtual void writeStatus(int functionCount, int gradientCount,
-                             const DynamicVector<RealType>& x, RealType f) {}
+    virtual void writeStatus(int, int, const DynamicVector<RealType>&,
+                             RealType) {}
   };
 
   //! No status
   class NoStatus : public StatusFunction {
   public:
-    virtual void writeStatus(int functionCount, int gradientCount,
-                             const DynamicVector<RealType>& x, RealType f) {};
+    virtual void writeStatus(int, int, const DynamicVector<RealType>&,
+                             RealType) {};
   };
 
   class DumpStatusFunction : public StatusFunction {
@@ -33,8 +34,8 @@ namespace OpenMD {
       statWriter = new StatWriter(info_->getStatFileName(), stats);
     }
 
-    virtual void writeStatus(int functionCount, int gradientCount,
-                             const DynamicVector<RealType>& x, RealType f) {
+    virtual void writeStatus(int functionCount, int,
+                             const DynamicVector<RealType>&, RealType) {
       Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
       curSnapshot->setTime(functionCount);
       stats->collectStats();
@@ -55,4 +56,5 @@ namespace OpenMD {
     StatWriter* statWriter;
   };
 }  // namespace OpenMD
+
 #endif

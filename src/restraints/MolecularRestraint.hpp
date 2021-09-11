@@ -92,4 +92,5 @@ namespace OpenMD {
     Vector3d refCom_;
   };
 }  // namespace OpenMD
+
 #endif

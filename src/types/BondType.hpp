@@ -52,6 +52,7 @@
 
 #ifndef TYPES_BONDTYPE_HPP
 #define TYPES_BONDTYPE_HPP
+
 #include <config.h>
 
 namespace OpenMD {
@@ -73,6 +74,6 @@ namespace OpenMD {
   protected:
     RealType r0; /**equilibrium bond length< */
   };
-
 }  // namespace OpenMD
+
 #endif  // TYPES_BONDTYPE_HPP

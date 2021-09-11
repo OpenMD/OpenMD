@@ -103,4 +103,5 @@ namespace OpenMD {
     std::vector<RealType> orPars_;
   };
 }  // namespace OpenMD
+
 #endif

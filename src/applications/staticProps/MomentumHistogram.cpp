@@ -58,6 +58,7 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   MomentumHistogram::MomentumHistogram(SimInfo* info,

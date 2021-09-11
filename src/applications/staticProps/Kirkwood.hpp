@@ -47,6 +47,7 @@
 #define APPLICATIONS_STATICPROPS_KIRKWOOD_HPP
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+
 namespace OpenMD {
 
   class Kirkwood : public RadialDistrFunc {
@@ -84,4 +85,5 @@ namespace OpenMD {
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
   };
 }  // namespace OpenMD
+
 #endif

@@ -45,6 +45,7 @@
 
 #ifndef HYDRODYNAMICS_SHAPE_HPP
 #define HYDRODYNAMICS_SHAPE_HPP
+
 #include <utility>
 
 #include "hydrodynamics/HydroProp.hpp"
@@ -63,4 +64,5 @@ namespace OpenMD {
                                     RealType temperature)  = 0;
   };
 }  // namespace OpenMD
+
 #endif

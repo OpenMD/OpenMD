@@ -47,6 +47,7 @@
 #define APPLICATIONS_STATICPROPS_TWODGOFR_HPP
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+
 namespace OpenMD {
 
   class TwoDGofR : public RadialDistrFunc {
@@ -75,6 +76,6 @@ namespace OpenMD {
     std::vector<int> histogram_;
     std::vector<RealType> avgTwoDGofR_;
   };
-
 }  // namespace OpenMD
+
 #endif

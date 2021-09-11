@@ -45,6 +45,7 @@
 
 #ifndef APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP
 #define APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP
+
 #include "hydrodynamics/Shape.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/ElementsTable.hpp"
@@ -60,6 +61,6 @@ namespace OpenMD {
     static Shape* internalCreateShape(DirectionalAtom* datom);
     static Shape* internalCreateShape(RigidBody* rb);
   };
-
 }  // namespace OpenMD
+
 #endif

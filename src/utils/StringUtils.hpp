@@ -52,6 +52,7 @@
 
 #ifndef UTILS_STRINGUTILS_HPP
 #define UTILS_STRINGUTILS_HPP
+
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -67,21 +68,6 @@ namespace OpenMD {
   std::string UpperCase(const std::string& S);
 
   /**
-   * Converts a string to lower case
-   * @param S
-   */
-  std::string LowerCase(const std::string& S);
-
-  /**
-   * Removes left and right spaces from a string
-   *
-   * @param str  String to trim
-   *
-   * @return  char* to the trimed string
-   */
-  char* trimSpaces(char* str);
-
-  /**
    * Finds the location of the string "begin <startText>" in an input stream.
    * @param theStream
    * @param startText
@@ -89,14 +75,6 @@ namespace OpenMD {
    * @return the line number of the block within the theStream
    */
   int findBegin(std::istream& theStream, const char* startText);
-
-  /**
-   * Counts the number of tokens on line which are delimited by the characters
-   * listed in delimiters
-   * @param line
-   * @param delimiters
-   */
-  int countTokens(char* line, char* delimiters);
 
   /**
    * discovers whether or not the line contains the "end" token
@@ -141,22 +119,12 @@ namespace OpenMD {
     return ret;
   }
 
-  template<typename T>
-  std::string to_string(T value) {
-    std::ostringstream os;
-    os << value;
-    return os.str();
-  }
-
   bool isInteger(const std::string& str);
 
   std::string OpenMD_itoa(int value, unsigned int base = 10);
 
   /**@todo need implementation */
   std::string getPrefix(const std::string& str);
-
-  /**@todo need implementation */
-  std::string getSuffix(const std::string& str);
 
   template<class ContainerType>
   std::string containerToString(const ContainerType& cont) {
@@ -174,6 +142,6 @@ namespace OpenMD {
     oss << ")";
     return oss.str();
   }
-  unsigned long long memparse(char* ptr, char** retptr);
 }  // namespace OpenMD
+
 #endif

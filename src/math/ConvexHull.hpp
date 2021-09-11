@@ -84,4 +84,5 @@ namespace OpenMD {
     std::vector<Triangle> Triangles_;
   };
 }  // namespace OpenMD
+
 #endif /*MATH_CONVEXHULL_HPP_*/

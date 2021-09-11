@@ -45,6 +45,7 @@
 
 #ifndef LATTICE_BCCLATTICE_HPP
 #define LATTICE_BCCLATTICE_HPP
+
 #include <string>
 #include <vector>
 
@@ -57,6 +58,6 @@ namespace OpenMD {
     BCCLattice();
     virtual void update();
   };
-
 }  // namespace OpenMD
+
 #endif

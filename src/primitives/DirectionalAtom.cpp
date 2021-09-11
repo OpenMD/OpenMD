@@ -48,6 +48,7 @@
 #include "types/DirectionalAdapter.hpp"
 #include "types/MultipoleAdapter.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   DirectionalAtom::DirectionalAtom(AtomType* dAtomType) : Atom(dAtomType) {

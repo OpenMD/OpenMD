@@ -45,8 +45,10 @@
 
 #ifndef HYDRODYNAMICS_HYDROPROP_HPP
 #define HYDRODYNAMICS_HYDROPROP_HPP
+
 #include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
+
 namespace OpenMD {
 
   /**

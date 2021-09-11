@@ -45,11 +45,12 @@
 
 #include "selection/SelectionToken.hpp"
 
+#include <string>
+
 namespace OpenMD {
 
   Token Token::tokenExpressionBegin =
       Token(Token::expressionBegin, std::string("expressionBegin"));
   Token Token::tokenExpressionEnd =
       Token(Token::expressionEnd, std::string("expressionEnd"));
-
 }  // namespace OpenMD

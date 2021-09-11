@@ -78,4 +78,5 @@ namespace OpenMD {
     std::ofstream output_;
   };
 }  // namespace OpenMD
+
 #endif

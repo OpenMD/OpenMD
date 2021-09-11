@@ -45,17 +45,16 @@
 
 #ifndef UTILS_UTILITY_HPP
 #define UTILS_UTILITY_HPP
+
 #include <config.h>
 
 #include <cmath>
+#include <string>
 #include <vector>
 
-#include "utils/next_combination.hpp"
-
-using namespace std;
 namespace OpenMD {
   inline RealType roundMe(const RealType& x) {
-    return (x >= 0) ? floor(x + 0.5) : ceil(x - 0.5);
+    return (x >= 0) ? std::floor(x + 0.5) : std::ceil(x - 0.5);
   }
 
   /**
@@ -98,8 +97,10 @@ namespace OpenMD {
    * //H C N
    * @endcode
    */
-  bool replaceWithWildCard(vector<vector<string>::iterator>& cont,
-                           vector<string>& sequence, vector<string>& result,
-                           const string& wildCard = "X");
+  bool replaceWithWildCard(
+      std::vector<std::vector<std::string>::iterator>& cont,
+      std::vector<std::string>& sequence, std::vector<std::string>& result,
+      const std::string& wildCard = "X");
 }  // namespace OpenMD
+
 #endif

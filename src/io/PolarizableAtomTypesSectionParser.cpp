@@ -48,6 +48,7 @@
 #include "brains/ForceField.hpp"
 #include "types/PolarizableAdapter.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   PolarizableAtomTypesSectionParser::PolarizableAtomTypesSectionParser(

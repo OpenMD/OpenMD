@@ -45,15 +45,17 @@
 
 #ifndef BRAINS_BLOCKSNAPSHOTMANAGER_HPP
 #define BRAINS_BLOCKSNAPSHOTMANAGER_HPP
+
 #include <vector>
 
 #include "brains/SnapshotManager.hpp"
+
 namespace OpenMD {
 
   class SimInfo;
   class DumpReader;
 
-  typedef std::pair<int, int> SnapshotBlock;
+  using SnapshotBlock = std::pair<int, int>;
 
   /**
    * @class BlockSnapshotManager
@@ -121,7 +123,6 @@ namespace OpenMD {
     int nframes_;
     int nSnapshotPerBlock_;
   };
-
 }  // namespace OpenMD
 
 #endif

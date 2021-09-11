@@ -45,6 +45,12 @@
 
 #include "utils/Utility.hpp"
 
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "utils/next_combination.hpp"
+
 namespace OpenMD {
 
   bool replaceWithWildCard(
@@ -68,7 +74,5 @@ namespace OpenMD {
     }
 
     return hasMoreCombination;
-
-  }  // end replaceWildCard
-
+  }
 }  // namespace OpenMD

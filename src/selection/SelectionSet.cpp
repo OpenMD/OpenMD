@@ -54,8 +54,6 @@
 #include <mpi.h>
 #endif
 
-#include "utils/Algorithm.hpp"
-
 namespace OpenMD {
 
   SelectionSet::SelectionSet(std::vector<int> nbits) {

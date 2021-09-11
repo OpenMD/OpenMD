@@ -50,6 +50,7 @@
 #include <vector>
 
 #include "types/DataHolder.hpp"
+
 namespace OpenMD {
 
   class AtomStamp : public DataHolder {
@@ -71,8 +72,8 @@ namespace OpenMD {
     RealType getEulerPsi() { return orientation_[2]; }
     int getIndex() { return index_; }
     virtual void validate();
-    typedef std::set<int>::iterator AtomIter;
-    typedef std::vector<int>::iterator BondIter;
+    using AtomIter = std::set<int>::iterator;
+    using BondIter = std::vector<int>::iterator;
     int getFirstBondedAtom(AtomIter& ai) {
       ai = bondedAtoms_.begin();
       return ai != bondedAtoms_.end() ? *ai : -1;
@@ -110,6 +111,6 @@ namespace OpenMD {
     std::vector<int> bonds_;
     std::set<int> bondedAtoms_;
   };
-
 }  // namespace OpenMD
+
 #endif

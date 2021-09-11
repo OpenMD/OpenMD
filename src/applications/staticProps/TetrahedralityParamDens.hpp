@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAMDENS_HPP
 #define APPLICATIONS_STATICPROPS_TETRAHEDRALITYPARAMDENS_HPP
+
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
@@ -109,4 +110,5 @@ namespace OpenMD {
     std::vector<int> sliceCount_;
   };
 }  // namespace OpenMD
+
 #endif

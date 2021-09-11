@@ -119,6 +119,6 @@ namespace OpenMD {
     RealType minDistance_;
     RealType probe_;
   };
-
 }  // namespace OpenMD
+
 #endif

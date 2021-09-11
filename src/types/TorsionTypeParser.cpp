@@ -45,6 +45,8 @@
 
 #include "types/TorsionTypeParser.hpp"
 
+#include <string>
+
 #include "types/CharmmTorsionType.hpp"
 #include "types/CubicTorsionType.hpp"
 #include "types/HarmonicTorsionType.hpp"
@@ -77,7 +79,7 @@ namespace OpenMD {
     std::vector<RealType>::iterator it;
     for (it = pars.begin(); it != pars.end(); ++it) {
       line.append("\t");
-      line.append(OpenMD::to_string(*it));
+      line.append(std::to_string(*it));
     }
 
     return parseLine(line);

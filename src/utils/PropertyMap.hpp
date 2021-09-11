@@ -149,7 +149,6 @@ namespace OpenMD {
     /** prevent copy assignment */
     PropertyMap& operator=(const PropertyMap&);
   };
-
 }  // namespace OpenMD
 
 #endif  // UTIL_PROPERTYMAP_HPP

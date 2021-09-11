@@ -105,4 +105,5 @@ namespace OpenMD {
     std::vector<std::shared_ptr<AtomInfo>> data;
   };
 }  // namespace OpenMD
+
 #endif  // VISITOR_ATOMDATA_HPP

@@ -54,6 +54,7 @@
 #define INTEGRATORS_NPRT_HPP
 
 #include "integrators/NPT.hpp"
+
 namespace OpenMD {
 
   /**
@@ -93,7 +94,6 @@ namespace OpenMD {
     RealType surfaceTension_;
     unsigned int axis_, axis1_, axis2_;
   };
-
 }  // namespace OpenMD
 
 #endif  // INTEGRATORS_NPTF_HPP

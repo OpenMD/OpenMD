@@ -54,6 +54,7 @@
 #define INTEGRATORS_NPTI_HPP
 
 #include "integrators/NPT.hpp"
+
 namespace OpenMD {
 
   class NPTi : public NPT {
@@ -84,7 +85,6 @@ namespace OpenMD {
     RealType prevEta;
     RealType vScale;
   };
-
 }  // namespace OpenMD
 
 #endif  // INTEGRATORS_NPTI_HPP

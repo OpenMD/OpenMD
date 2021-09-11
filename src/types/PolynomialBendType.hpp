@@ -52,6 +52,7 @@
 
 #ifndef TYPES_POLYNOMIALBENDTYPE_HPP
 #define TYPES_POLYNOMIALBENDTYPE_HPP
+
 #include <iostream>
 
 #include "math/Polynomial.hpp"
@@ -118,4 +119,5 @@ namespace OpenMD {
     return os;
   }
 }  // namespace OpenMD
+
 #endif  // TYPES_POLYNOMIALBENDTYPE_HPP

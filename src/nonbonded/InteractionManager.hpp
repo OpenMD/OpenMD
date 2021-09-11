@@ -137,4 +137,5 @@ namespace OpenMD {
     vector<int> sHash_;
   };
 }  // namespace OpenMD
+
 #endif

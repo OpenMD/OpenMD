@@ -141,4 +141,5 @@ namespace OpenMD {
     }
   };
 }  // namespace OpenMD
+
 #endif

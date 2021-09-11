@@ -68,14 +68,14 @@ namespace OpenMD {
   template<class ElemType, int SIZE>
   class TypeContainer {
   public:
-    typedef ElemType* ElemPtr;
-    typedef std::vector<std::string> KeyType;
-    typedef typename KeyType::iterator KeyTypeIterator;
-    typedef std::pair<int, ElemPtr> ValueType;
-    typedef typename std::map<KeyType, ValueType> MapType;
-    typedef typename std::map<KeyType, ValueType>::iterator MapTypeIterator;
-    typedef typename MapType::value_type value_type;
-    typedef typename std::vector<int> MutableValues;
+    using ElemPtr         = ElemType*;
+    using KeyType         = std::vector<std::string>;
+    using KeyTypeIterator = typename KeyType::iterator;
+    using ValueType       = std::pair<int, ElemPtr>;
+    using MapType         = typename std::map<KeyType, ValueType>;
+    using MapTypeIterator = typename std::map<KeyType, ValueType>::iterator;
+    using value_type      = typename MapType::value_type;
+    using MutableValues   = typename std::vector<int>;
 
     TypeContainer() : index_(0) {}
 
@@ -205,7 +205,6 @@ namespace OpenMD {
     int index_;
     MapType data_;
   };
-
 }  // namespace OpenMD
 
 #endif  // UTILS_TYPECONTAINER_HPP

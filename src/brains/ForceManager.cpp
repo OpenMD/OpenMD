@@ -53,6 +53,7 @@
 #include "brains/ForceManager.hpp"
 
 #define __OPENMD_C
+
 #include <cstdio>
 #include <iomanip>
 #include <iostream>

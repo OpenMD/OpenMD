@@ -52,6 +52,7 @@
 
 #ifndef MATH_DYNAMICRECTMATRIX_HPP
 #define MATH_DYNAMICRECTMATRIX_HPP
+
 #include <cmath>
 
 #include "math/DynamicVector.hpp"
@@ -66,9 +67,9 @@ namespace OpenMD {
   template<typename Real>
   class DynamicRectMatrix {
   public:
-    typedef Real ElemType;
-    typedef Real* ElemPoinerType;
-    typedef DynamicRectMatrix<Real> SelfType;
+    using ElemType       = Real;
+    using ElemPoinerType = Real*;
+    using SelfType       = DynamicRectMatrix<Real>;
 
     /** default constructor */
     DynamicRectMatrix() {
@@ -77,7 +78,7 @@ namespace OpenMD {
       data_ = NULL;
     }
 
-    DynamicRectMatrix(int nrow, int ncol) {
+    DynamicRectMatrix(unsigned int nrow, unsigned int ncol) {
       allocate(nrow, ncol);
 
       for (unsigned int i = 0; i < nrow_; i++)
@@ -86,14 +87,14 @@ namespace OpenMD {
     }
 
     /** Constructs and initializes every element of this matrix to a scalar */
-    DynamicRectMatrix(int nrow, int ncol, Real s) {
+    DynamicRectMatrix(unsigned int nrow, unsigned int ncol, Real s) {
       allocate(nrow, ncol);
       for (unsigned int i = 0; i < nrow_; i++)
         for (unsigned int j = 0; j < ncol_; j++)
           this->data_[i][j] = s;
     }
 
-    DynamicRectMatrix(int nrow, int ncol, Real* array) {
+    DynamicRectMatrix(unsigned int nrow, unsigned int ncol, Real* array) {
       allocate(nrow, ncol);
       for (unsigned int i = 0; i < nrow_; i++)
         for (unsigned int j = 0; j < ncol_; j++)
@@ -453,7 +454,7 @@ namespace OpenMD {
     unsigned int ncol_;
 
   private:
-    void allocate(int nrow, int ncol) {
+    void allocate(unsigned int nrow, unsigned int ncol) {
       nrow_ = (unsigned int)nrow;
       ncol_ = (unsigned int)ncol;
       data_ = new Real*[nrow_];
@@ -557,8 +558,8 @@ namespace OpenMD {
                                            const DynamicRectMatrix<Real>& m2) {
     assert(m1.getNCol() == m2.getNRow());
     unsigned int sameDim = m1.getNCol();
-    int nrow             = m1.getNRow();
-    int ncol             = m2.getNCol();
+    unsigned int nrow    = m1.getNRow();
+    unsigned int ncol    = m2.getNCol();
     DynamicRectMatrix<Real> result(nrow, ncol);
     for (unsigned int i = 0; i < nrow; i++)
       for (unsigned int j = 0; j < ncol; j++)
@@ -577,8 +578,8 @@ namespace OpenMD {
   template<typename Real>
   inline DynamicVector<Real> operator*(const DynamicRectMatrix<Real>& m,
                                        const DynamicVector<Real>& v) {
-    int nrow = m.getNRow();
-    int ncol = m.getNCol();
+    unsigned int nrow = m.getNRow();
+    unsigned int ncol = m.getNCol();
     assert(ncol == v.size());
     DynamicVector<Real> result(nrow);
 
@@ -621,4 +622,5 @@ namespace OpenMD {
     return o;
   }
 }  // namespace OpenMD
+
 #endif  // MATH_RECTMATRIX_HPP

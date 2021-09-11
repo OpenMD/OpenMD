@@ -149,4 +149,5 @@ namespace OpenMD {
     SelfData sdat;
   };
 }  // namespace OpenMD
+
 #endif  // BRAINS_FORCEMANAGER_HPP

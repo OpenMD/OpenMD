@@ -45,6 +45,7 @@
 
 #ifndef SELECTION_HULLFINDER_HPP
 #define SELECTION_HULLFINDER_HPP
+
 #include "brains/SimInfo.hpp"
 #include "math/Hull.hpp"
 #include "math/Triangle.hpp"
@@ -84,4 +85,5 @@ namespace OpenMD {
     void setAlpha(RealType alpha);
   };
 }  // namespace OpenMD
+
 #endif

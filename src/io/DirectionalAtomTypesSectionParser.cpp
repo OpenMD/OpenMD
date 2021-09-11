@@ -48,6 +48,7 @@
 #include "brains/ForceField.hpp"
 #include "types/DirectionalAdapter.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   DirectionalAtomTypesSectionParser::DirectionalAtomTypesSectionParser(

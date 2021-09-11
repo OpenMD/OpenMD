@@ -45,7 +45,11 @@
 
 #include "selection/SelectionEvaluator.hpp"
 
+#include <any>
+#include <map>
 #include <stack>
+#include <string>
+#include <utility>
 
 #include "io/ifstrstream.hpp"
 #include "primitives/Atom.hpp"
@@ -221,14 +225,13 @@ namespace OpenMD {
         //  break;
       case Token::name:
         stack.push(
-            nameInstruction(boost::any_cast<std::string>(instruction.value)));
+            nameInstruction(std::any_cast<std::string>(instruction.value)));
         break;
       case Token::index:
         stack.push(indexInstruction(instruction.value));
         break;
       case Token::identifier:
-        stack.push(
-            lookupValue(boost::any_cast<std::string>(instruction.value)));
+        stack.push(lookupValue(std::any_cast<std::string>(instruction.value)));
         break;
       case Token::opLT:
       case Token::opLE:
@@ -296,14 +299,13 @@ namespace OpenMD {
         //  break;
       case Token::name:
         stack.push(
-            nameInstruction(boost::any_cast<std::string>(instruction.value)));
+            nameInstruction(std::any_cast<std::string>(instruction.value)));
         break;
       case Token::index:
         stack.push(indexInstruction(instruction.value));
         break;
       case Token::identifier:
-        stack.push(
-            lookupValue(boost::any_cast<std::string>(instruction.value)));
+        stack.push(lookupValue(std::any_cast<std::string>(instruction.value)));
         break;
       case Token::opLT:
       case Token::opLE:
@@ -327,7 +329,7 @@ namespace OpenMD {
       const Token& instruction) {
     int comparator        = instruction.tok;
     int property          = instruction.intValue;
-    float comparisonValue = boost::any_cast<float>(instruction.value);
+    float comparisonValue = std::any_cast<float>(instruction.value);
     SelectionSet bs       = createSelectionSets();
     bs.clearAll();
 
@@ -359,7 +361,7 @@ namespace OpenMD {
       const Token& instruction, int frame) {
     int comparator        = instruction.tok;
     int property          = instruction.intValue;
-    float comparisonValue = boost::any_cast<float>(instruction.value);
+    float comparisonValue = std::any_cast<float>(instruction.value);
     SelectionSet bs       = createSelectionSets();
     bs.clearAll();
 
@@ -702,12 +704,12 @@ namespace OpenMD {
 
   void SelectionEvaluator::withinInstruction(const Token& instruction,
                                              SelectionSet& bs) {
-    boost::any withinSpec = instruction.value;
+    std::any withinSpec = instruction.value;
     float distance(0.0);
     if (withinSpec.type() == typeid(float)) {
-      distance = boost::any_cast<float>(withinSpec);
+      distance = std::any_cast<float>(withinSpec);
     } else if (withinSpec.type() == typeid(int)) {
-      distance = boost::any_cast<int>(withinSpec);
+      distance = std::any_cast<int>(withinSpec);
     } else {
       evalError("casting error in withinInstruction");
       bs.clearAll();
@@ -718,12 +720,12 @@ namespace OpenMD {
 
   void SelectionEvaluator::withinInstruction(const Token& instruction,
                                              SelectionSet& bs, int frame) {
-    boost::any withinSpec = instruction.value;
+    std::any withinSpec = instruction.value;
     float distance(0.0);
     if (withinSpec.type() == typeid(float)) {
-      distance = boost::any_cast<float>(withinSpec);
+      distance = std::any_cast<float>(withinSpec);
     } else if (withinSpec.type() == typeid(int)) {
-      distance = boost::any_cast<int>(withinSpec);
+      distance = std::any_cast<int>(withinSpec);
     } else {
       evalError("casting error in withinInstruction");
       bs.clearAll();
@@ -736,12 +738,12 @@ namespace OpenMD {
       const Token& instruction) {
     SelectionSet bs = createSelectionSets();
 
-    boost::any alphaSpec = instruction.value;
+    std::any alphaSpec = instruction.value;
     float alpha(0.0);
     if (alphaSpec.type() == typeid(float)) {
-      alpha = boost::any_cast<float>(alphaSpec);
+      alpha = std::any_cast<float>(alphaSpec);
     } else if (alphaSpec.type() == typeid(int)) {
-      alpha = boost::any_cast<int>(alphaSpec);
+      alpha = std::any_cast<int>(alphaSpec);
     } else {
       evalError("casting error in alphaHullInstruction");
       bs.clearAll();
@@ -761,12 +763,12 @@ namespace OpenMD {
       const Token& instruction, int frame) {
     SelectionSet bs = createSelectionSets();
 
-    boost::any alphaSpec = instruction.value;
+    std::any alphaSpec = instruction.value;
     float alpha(0.0);
     if (alphaSpec.type() == typeid(float)) {
-      alpha = boost::any_cast<float>(alphaSpec);
+      alpha = std::any_cast<float>(alphaSpec);
     } else if (alphaSpec.type() == typeid(int)) {
-      alpha = boost::any_cast<int>(alphaSpec);
+      alpha = std::any_cast<int>(alphaSpec);
     } else {
       evalError("casting error in alphaHullInstruction");
       bs.clearAll();
@@ -785,7 +787,7 @@ namespace OpenMD {
   void SelectionEvaluator::define() {
     assert(statement.size() >= 3);
 
-    std::string variable = boost::any_cast<std::string>(statement[1].value);
+    std::string variable = std::any_cast<std::string>(statement[1].value);
 
     variables.insert(
         VariablesType::value_type(variable, expression(statement, 2)));
@@ -804,8 +806,7 @@ namespace OpenMD {
         int tok = statement[1].tok;
         if (tok == Token::identifier ||
             (tok & Token::predefinedset) == Token::predefinedset) {
-          std::string variable =
-              boost::any_cast<std::string>(statement[1].value);
+          std::string variable = std::any_cast<std::string>(statement[1].value);
           variables.insert(VariablesType::value_type(variable, statement));
 
         } else {
@@ -830,14 +831,14 @@ namespace OpenMD {
   }
 
   SelectionSet SelectionEvaluator::lookupValue(const std::string& variable) {
-    SelectionSet bs                               = createSelectionSets();
-    std::map<std::string, boost::any>::iterator i = variables.find(variable);
+    SelectionSet bs                             = createSelectionSets();
+    std::map<std::string, std::any>::iterator i = variables.find(variable);
 
     if (i != variables.end()) {
       if (i->second.type() == typeid(SelectionSet)) {
-        return boost::any_cast<SelectionSet>(i->second);
+        return std::any_cast<SelectionSet>(i->second);
       } else if (i->second.type() == typeid(std::vector<Token>)) {
-        bs = expression(boost::any_cast<std::vector<Token>>(i->second), 2);
+        bs        = expression(std::any_cast<std::vector<Token>>(i->second), 2);
         i->second = bs; /**@todo fixme */
         return bs.parallelReduce();
       }
@@ -891,11 +892,11 @@ namespace OpenMD {
     return bs.parallelReduce();
   }
 
-  SelectionSet SelectionEvaluator::indexInstruction(const boost::any& value) {
+  SelectionSet SelectionEvaluator::indexInstruction(const std::any& value) {
     SelectionSet bs = createSelectionSets();
 
     if (value.type() == typeid(int)) {
-      int index = boost::any_cast<int>(value);
+      int index = std::any_cast<int>(value);
       if (index < 0 || index >= bs.bitsets_[STUNTDOUBLE].size()) {
         invalidIndex(index);
       } else {
@@ -903,7 +904,7 @@ namespace OpenMD {
       }
     } else if (value.type() == typeid(std::pair<int, int>)) {
       std::pair<int, int> indexRange =
-          boost::any_cast<std::pair<int, int>>(value);
+          std::any_cast<std::pair<int, int>>(value);
       assert(indexRange.first <= indexRange.second);
       if (indexRange.first < 0 ||
           indexRange.second >= bs.bitsets_[STUNTDOUBLE].size()) {
@@ -1011,5 +1012,4 @@ namespace OpenMD {
     if (fqa.isFluctuatingCharge()) { charge += atom->getFlucQPos(frame); }
     return charge;
   }
-
 }  // namespace OpenMD

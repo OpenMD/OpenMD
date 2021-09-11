@@ -45,6 +45,7 @@
 
 #ifndef LATTICE_SCLATTICE_HPP
 #define LATTICE_SCLATTICE_HPP
+
 #include <string>
 #include <vector>
 
@@ -57,6 +58,6 @@ namespace OpenMD {
     SCLattice();
     virtual void update();
   };
-
 }  // namespace OpenMD
+
 #endif

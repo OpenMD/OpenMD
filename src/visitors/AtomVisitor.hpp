@@ -85,6 +85,6 @@ namespace OpenMD {
 
     virtual const std::string toString();
   };
-
 }  // namespace OpenMD
+
 #endif

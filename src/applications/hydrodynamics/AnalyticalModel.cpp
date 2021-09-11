@@ -48,6 +48,7 @@
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "math/LU.hpp"
+
 namespace OpenMD {
 
   bool AnalyticalModel::calcHydroProps(Shape* shape, RealType viscosity,

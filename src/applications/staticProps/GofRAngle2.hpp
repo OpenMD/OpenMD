@@ -47,6 +47,7 @@
 #define APPLICATIONS_STATICPROPS_GOFRANGLE2_HPP
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+
 namespace OpenMD {
 
   class GofRAngle2 : public RadialDistrFunc {
@@ -85,6 +86,6 @@ namespace OpenMD {
     std::vector<std::vector<std::vector<int>>> histogram_;
     std::vector<std::vector<std::vector<RealType>>> avgGofr_;
   };
-
 }  // namespace OpenMD
+
 #endif

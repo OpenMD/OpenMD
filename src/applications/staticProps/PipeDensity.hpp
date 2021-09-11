@@ -79,6 +79,6 @@ namespace OpenMD {
     std::vector<std::vector<std::vector<StuntDouble*>>> sliceSDLists_;
     std::vector<std::vector<RealType>> density_;
   };
-
 }  // namespace OpenMD
+
 #endif

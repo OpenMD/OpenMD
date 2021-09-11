@@ -228,4 +228,5 @@ namespace OpenMD {
     }
   };
 }  // namespace OpenMD
+
 #endif  // MATH_REALSYMMETRICTRIDIAGONAL_HPP

@@ -45,6 +45,7 @@
 
 #ifndef INTEGRATOR_LANGEVINHULLDYNAMICS_HPP
 #define INTEGRATOR_LANGEVINHULLDYNAMICS_HPP
+
 #include <map>
 #include <vector>
 
@@ -60,6 +61,6 @@ namespace OpenMD {
     virtual void moveB();
     virtual RealType calcConservedQuantity();
   };
-
 }  // namespace OpenMD
+
 #endif

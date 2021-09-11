@@ -69,4 +69,5 @@ namespace OpenMD {
     virtual Molecule* getMoleculeByGlobalIndex() = 0;
   };
 }  // namespace OpenMD
+
 #endif

@@ -102,4 +102,5 @@ namespace OpenMD {
     TreeNodePtr root_ {nullptr};
   };
 }  // namespace OpenMD
+
 #endif

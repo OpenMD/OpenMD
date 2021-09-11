@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_SEQUENTIALPROPS_CONTACTANGLE2_HPP
 #define APPLICATIONS_SEQUENTIALPROPS_CONTACTANGLE2_HPP
+
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 
 using namespace std;

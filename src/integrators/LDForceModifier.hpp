@@ -115,4 +115,5 @@ namespace OpenMD {
     std::unique_ptr<Velocitizer> veloMunge_ {nullptr};
   };
 }  // namespace OpenMD
+
 #endif  // INTEGRATOR_LDFORCEMODIFIER_HPP

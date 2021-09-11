@@ -88,6 +88,6 @@ namespace OpenMD {
     Electrostatic* electrostatic_;
     Vector3d EF_;
   };
-
 }  // namespace OpenMD
+
 #endif

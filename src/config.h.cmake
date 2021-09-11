@@ -41,7 +41,7 @@
 #cmakedefine HAVE_STRNCASECMP 1
 
 /* define if fftw3.h exists */
-#cmakedefine HAVE_FFTW3_H 1 
+#cmakedefine HAVE_FFTW3_H 1
 
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine HAVE_LIBZ 1
@@ -74,17 +74,17 @@
 #undef size_t
 
 #ifdef SINGLE_PRECISION
-typedef float RealType;
+using RealType = float;
 #ifdef IS_MPI
 #define MPI_REALTYPE MPI_FLOAT
 #define MPI_REALTYPE_INT MPI_FLOAT_INT
 #endif
 #else
-typedef double RealType;
+using RealType = double;
 #ifdef IS_MPI
 #define MPI_REALTYPE MPI_DOUBLE
 #define MPI_REALTYPE_INT MPI_DOUBLE_INT
 #endif
 #endif
 
-#endif // __CONFIG_H
+#endif  // __CONFIG_H

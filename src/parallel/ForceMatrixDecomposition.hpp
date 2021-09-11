@@ -186,6 +186,6 @@ namespace OpenMD {
     vector<int> regionCol;
 #endif
   };
-
 }  // namespace OpenMD
+
 #endif

@@ -47,8 +47,6 @@
 
 namespace OpenMD {
 
-  TokenMap* TokenMap::instance_ = NULL;
-
   TokenMap::TokenMap() {
     tokenMap_.insert(TokenMapType::value_type(
         "define", Token(Token::define, std::string("define"))));
@@ -138,6 +136,4 @@ namespace OpenMD {
 
     return i != tokenMap_.end() ? &(i->second) : NULL;
   }
-
-  TokenMap::~TokenMap() { tokenMap_.clear(); }
 }  // namespace OpenMD

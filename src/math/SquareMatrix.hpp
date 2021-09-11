@@ -66,8 +66,8 @@ namespace OpenMD {
   template<typename Real, int Dim>
   class SquareMatrix : public RectMatrix<Real, Dim, Dim> {
   public:
-    typedef Real ElemType;
-    typedef Real* ElemPoinerType;
+    using ElemType       = Real;
+    using ElemPoinerType = Real*;
 
     /** default constructor */
     SquareMatrix() {
@@ -442,6 +442,7 @@ namespace OpenMD {
     return 1;
   }
 
-  typedef SquareMatrix<RealType, 6> Mat6x6d;
+  using Mat6x6d = SquareMatrix<RealType, 6>;
 }  // namespace OpenMD
+
 #endif  // MATH_SQUAREMATRIX_HPP

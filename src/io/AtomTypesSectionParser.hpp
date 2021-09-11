@@ -47,6 +47,7 @@
 #define IO_ATOMTYPESSECTIONPARSER_HPP
 
 #include "io/SectionParser.hpp"
+
 namespace OpenMD {
 
   /**
@@ -60,7 +61,6 @@ namespace OpenMD {
   private:
     void parseLine(ForceField& ff, const std::string& line, int lineNo);
   };
-
 }  // namespace OpenMD
 
 #endif  // IO_ATOMTYPESSECTIONPARSER_HPP

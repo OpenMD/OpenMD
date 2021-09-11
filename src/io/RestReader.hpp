@@ -68,7 +68,6 @@ namespace OpenMD {
         info_(info),
         stuntDoubleIndex_(stuntDoubleIndex), filename_(filename) {
 #ifdef IS_MPI
-
       if (worldRank == 0) {
 #endif
 
@@ -81,16 +80,12 @@ namespace OpenMD {
           painCave.isFatal = 1;
           simError();
         }
-
 #ifdef IS_MPI
       }
 
       strcpy(checkPointMsg, "Reference file opened for reading successfully.");
       errorCheckPoint();
-
 #endif
-
-      return;
     }
 
     void readReferenceStructure(void);
@@ -131,7 +126,6 @@ namespace OpenMD {
     const static int bufferSize = 4096;
     char buffer[bufferSize];
   };
-
 }  // namespace OpenMD
 
 #endif  // IO_RESTREADER_HPP

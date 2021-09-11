@@ -104,6 +104,6 @@ namespace OpenMD {
     bool doSiteData_;
     bool createDumpFile_;
   };
-
 }  // namespace OpenMD
+
 #endif  //#define IO_DUMPWRITER_HPP

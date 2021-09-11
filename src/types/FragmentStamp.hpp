@@ -45,7 +45,9 @@
 
 #ifndef TYES_FRAGMENTSTAMP_HPP
 #define TYES_FRAGMENTSTAMP_HPP
+
 #include "types/DataHolder.hpp"
+
 namespace OpenMD {
   class FragmentStamp : public DataHolder {
     DeclareParameter(Name, std::string);
@@ -59,4 +61,5 @@ namespace OpenMD {
     int index_;
   };
 }  // namespace OpenMD
+
 #endif

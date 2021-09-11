@@ -101,7 +101,7 @@ namespace OpenMD {
     virtual std::string getName() = 0;
 
     /** Sets the name of this ShortRangeInteraction*/
-    virtual void setName(const std::string& name) {}
+    virtual void setName(const std::string&) {}
 
     /**
      * <p>
@@ -184,6 +184,6 @@ namespace OpenMD {
   private:
     PropertyMap properties_;
   };
-
 }  // namespace OpenMD
+
 #endif  // PRIMITIVES_STUNTDOUBLE_HPP

@@ -52,11 +52,13 @@
 
 #ifndef INTEGRATORS_INTEGRATORFACTORY_HPP
 #define INTEGRATORS_INTEGRATORFACTORY_HPP
+
 #include <cassert>
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
+
 namespace OpenMD {
 
   // forward declaration
@@ -70,11 +72,9 @@ namespace OpenMD {
    */
   class IntegratorFactory {
   public:
-    typedef std::map<std::string, IntegratorCreator*> CreatorMapType;
-    typedef std::vector<std::string> IdentVectorType;
-    typedef std::vector<std::string>::iterator IdentVectorIterator;
-
-    ~IntegratorFactory();
+    using CreatorMapType      = std::map<std::string, IntegratorCreator*>;
+    using IdentVectorType     = std::vector<std::string>;
+    using IdentVectorIterator = std::vector<std::string>::iterator;
 
     /**
      * Returns an instance of Integrator factory
@@ -101,6 +101,7 @@ namespace OpenMD {
      * @param id the identification of the concrete object
      */
     bool unregisterIntegrator(const std::string& id);
+
     /**
      * Looks up the type identifier in the internal map. If it is found, it
      * invokes the corresponding creator for the type identifier and returns its
@@ -120,6 +121,10 @@ namespace OpenMD {
 
   private:
     IntegratorFactory() = default;
+    ~IntegratorFactory();
+
+    IntegratorFactory(const IntegratorFactory&) = delete;
+    IntegratorFactory& operator=(const IntegratorFactory&) = delete;
 
     CreatorMapType creatorMap_;
   };
@@ -128,4 +133,5 @@ namespace OpenMD {
   std::ostream& operator<<(std::ostream& o, IntegratorFactory& factory);
 
 }  // namespace OpenMD
+
 #endif  // INTEGRATORS_INTEGRATORFACTORY_HPP

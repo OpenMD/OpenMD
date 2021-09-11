@@ -69,42 +69,6 @@ namespace OpenMD {
     return uc;
   }
 
-  std::string LowerCase(const std::string& S) {
-    std::string lc = S;
-    unsigned int n = lc.size();
-    for (unsigned int j = 0; j < n; j++) {
-      char sj = lc[j];
-      if (sj >= 'A' && sj <= 'Z') lc[j] = (char)(sj + ('a' - 'A'));
-    }
-    return lc;
-  }
-
-  char* trimSpaces(char* str) {
-    size_t len;
-    char *right, *left;
-
-    if (strlen(str) == 0) return (str);
-
-    /* Trim whitespace from left side */
-    for (left = str; isspace(*left); left++)
-      ;
-
-    /* Trim whitespace from right side */
-    if ((len = strlen(left))) {
-      right = left + (len - 1);
-
-      while (isspace(*right)) {
-        *right = '\0';
-        right--;
-      }
-    }
-
-    /* Only do the str copy if there were spaces to the left */
-    if (left != str) strcpy(str, left);
-
-    return (str);
-  }
-
   int findBegin(std::istream& theStream, const char* startText) {
     const int MAXLEN = 1024;
     char readLine[MAXLEN];
@@ -154,25 +118,6 @@ namespace OpenMD {
       }
     }
     return lineNum;
-  }
-
-  int countTokens(char* line, char* delimiters) {
-    /* PURPOSE: RETURN A COUNT OF THE NUMBER OF TOKENS ON THE LINE. */
-
-    char* working_line; /* WORKING COPY OF LINE. */
-    int ntokens;        /* NUMBER OF TOKENS FOUND IN LINE. */
-    char* strtok_ptr;   /* POINTER FOR STRTOK. */
-
-    strtok_ptr = working_line = strdup(line);
-
-    ntokens = 0;
-    while (strtok(strtok_ptr, delimiters) != NULL) {
-      ntokens++;
-      strtok_ptr = NULL;
-    }
-
-    free(working_line);
-    return (ntokens);
   }
 
   int isEndLine(char* line) {
@@ -226,10 +171,6 @@ namespace OpenMD {
     return str.substr(0, str.rfind('.'));
   }
 
-  std::string getSuffix(const std::string& str) {
-    return str.substr(0, str.find('.'));
-  }
-
   bool isInteger(const std::string& str) {
     bool result = false;
 
@@ -257,37 +198,4 @@ namespace OpenMD {
     else
       return pos - str1.begin();
   }
-
-  /**
-   *    memparse - parse a string with mem suffixes into a number
-   *    @param ptr: Where parse begins
-   *    @param retptr: (output) Pointer to next char after parse completes
-   *
-   *    Parses a string into a number.  The number stored at ptr is
-   *    potentially suffixed with %K (for kilobytes, or 1024 bytes),
-   *    %M (for megabytes, or 1048576 bytes), or %G (for gigabytes, or
-   *    1073741824).  If the number is suffixed with K, M, or G, then
-   *    the return value is the number multiplied by one kilobyte, one
-   *    megabyte, or one gigabyte, respectively.
-   */
-  unsigned long long memparse(char* ptr, char** retptr) {
-    unsigned long long ret = strtoull(ptr, retptr, 0);
-
-    switch (**retptr) {
-    case 'G':
-    case 'g':
-      ret <<= 10;
-    case 'M':
-    case 'm':
-      ret <<= 10;
-    case 'K':
-    case 'k':
-      ret <<= 10;
-      (*retptr)++;
-    default:
-      break;
-    }
-    return ret;
-  }
-
 }  // namespace OpenMD

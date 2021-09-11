@@ -137,6 +137,6 @@ namespace OpenMD {
     Vector3d a_, b_;
     RealType g_, cpsi_;
   };
-
 }  // namespace OpenMD
+
 #endif

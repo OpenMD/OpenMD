@@ -65,38 +65,44 @@ struct ParameterTraits;
 // string
 template<>
 struct ParameterTraits<std::string> {
-  typedef std::string RepType;  // Representation type of the value
+  using RepType = std::string;  // Representation type of the value
 
   template<typename T>
-  static bool convert(T v, RepType& r) {
+  static bool convert(T, RepType&) {
     return false;
   }  // !NB everything is ok
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(RepType v, RepType& r) {
     r = v;
     return true;
   }
+
   static std::string getParamType() { return "string"; }
 };
 // bool
 template<>
 struct ParameterTraits<bool> {
-  typedef bool RepType;
+  using RepType = bool;
+
   template<typename T>
   static bool convert(T, RepType&) {
     return false;
   }
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(std::string v, RepType& r) {
     OpenMD::toLower(v);
     bool result = false;
@@ -110,102 +116,122 @@ struct ParameterTraits<bool> {
 
     return result;
   }
+
   static std::string getParamType() { return "bool"; }
 };
 
 // int
 template<>
 struct ParameterTraits<int> {
-  typedef int RepType;
+  using RepType = int;
+
   template<typename T>
   static bool convert(T, RepType&) {
     return false;
   }
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(RepType v, RepType& r) {
     r = v;
     return true;
   }
+
   static std::string getParamType() { return "int"; }
 };
 
 // int
 template<>
 struct ParameterTraits<unsigned long int> {
-  typedef unsigned long int RepType;
+  using RepType = unsigned long int;
+
   template<typename T>
   static bool convert(T, RepType&) {
     return false;
   }
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(RepType v, RepType& r) {
     r = v;
     return true;
   }
+
   static bool convert(int v, RepType& r) {
     r = static_cast<unsigned long int>(v);
     return true;
   }
+
   static std::string getParamType() { return "unsigned long int"; }
 };
 
 // RealType
 template<>
 struct ParameterTraits<RealType> {
-  typedef RealType RepType;
+  using RepType = RealType;
+
   template<typename T>
   static bool convert(T, RepType&) {
     return false;
   }
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(RepType v, RepType& r) {
     r = v;
     return true;
   }
+
   static bool convert(int v, RepType& r) {
     r = static_cast<RealType>(v);
     return true;
   }
+
   static bool convert(unsigned long int v, RepType& r) {
     r = static_cast<RealType>(v);
     return true;
   }
+
   static std::string getParamType() { return "RealType"; }
 };
 
 // Pair of ints
 template<>
 struct ParameterTraits<std::pair<int, int>> {
-  typedef std::pair<int, int> RepType;
+  using RepType = std::pair<int, int>;
+
   template<typename T>
   static bool convert(T, RepType&) {
     return false;
   }
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(RepType v, RepType& r) {
     r = v;
     return true;
   }
+
   static bool convert(std::string v, RepType& r) {
     OpenMD::StringTokenizer tokenizer(v, " ;,\t\n\r");
     if (tokenizer.countTokens() == 2) {
@@ -222,26 +248,31 @@ struct ParameterTraits<std::pair<int, int>> {
     }
     return false;
   }
+
   static std::string getParamType() { return "std::pair<int, int>"; }
 };
 
 template<>
 struct ParameterTraits<std::vector<RealType>> {
-  typedef std::vector<RealType> RepType;
+  using RepType = std::vector<RealType>;
+
   template<typename T>
   static bool convert(T, RepType&) {
     return false;
   }
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(RepType v, RepType& r) {
     r = v;
     return true;
   }
+
   static bool convert(std::string v, RepType& r) {
     std::cerr << "calling tokenizer\n";
     OpenMD::StringTokenizer tokenizer(v, " ();,\t\n\r");
@@ -253,6 +284,7 @@ struct ParameterTraits<std::vector<RealType>> {
     }
     return true;
   }
+
   static std::string getParamType() { return "std::vector<RealType>"; }
 };
 
@@ -286,7 +318,8 @@ protected:
 template<class ParamType>
 class Parameter : public ParameterBase {
 public:
-  typedef ParameterTraits<ParamType> ValueType;
+  using ValueType = ParameterTraits<ParamType>;
+
   void setDefaultValue(const ParamType& value) {
     data_         = value;
     defaultValue_ = true;

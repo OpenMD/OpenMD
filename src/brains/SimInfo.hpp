@@ -93,7 +93,7 @@ namespace OpenMD {
    */
   class SimInfo {
   public:
-    typedef std::map<int, Molecule*>::iterator MoleculeIterator;
+    using MoleculeIterator = std::map<int, Molecule*>::iterator;
 
     /**
      * Constructor of SimInfo
@@ -676,6 +676,6 @@ namespace OpenMD {
      */
     std::vector<int> molToProcMap_;
   };
-
 }  // namespace OpenMD
+
 #endif  // BRAINS_SIMMODEL_HPP

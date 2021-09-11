@@ -78,9 +78,9 @@ namespace OpenMD {
    */
   class SectionParserManager {
   public:
-    typedef std::list<SectionParserContext> SectionParserContextList;
-    typedef SectionParserContextList::iterator iterator;
-    typedef SectionParserContextList::const_iterator const_iterator;
+    using SectionParserContextList = std::list<SectionParserContext>;
+    using iterator                 = SectionParserContextList::iterator;
+    using const_iterator           = SectionParserContextList::const_iterator;
 
     SectionParserManager() : beginPriority_(0), priorityDifference_(100) {}
     ~SectionParserManager();
@@ -104,6 +104,6 @@ namespace OpenMD {
 
     SectionParserContextList sectionParsers_;
   };
-
 }  // namespace OpenMD
+
 #endif  // IO_SECTIONPARSERMANAGER_HPP

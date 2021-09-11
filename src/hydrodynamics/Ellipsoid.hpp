@@ -45,8 +45,10 @@
 
 #ifndef HYDRODYNAMICS_ELLIPSOID_HPP
 #define HYDRODYNAMICS_ELLIPSOID_HPP
+
 #include "hydrodynamics/Shape.hpp"
 #include "math/SquareMatrix3.hpp"
+
 namespace OpenMD {
 
   /** @class Ellipsoid

@@ -126,9 +126,9 @@ namespace OpenMD {
     RealType F0;
   };
 
-  typedef SimpleTypeData<EAMParameters> EAMData;
-  typedef SimpleTypeData<FuncflParameters> FuncflData;
-  typedef SimpleTypeData<ZhouParameters> ZhouData;
+  using EAMData    = SimpleTypeData<EAMParameters>;
+  using FuncflData = SimpleTypeData<FuncflParameters>;
+  using ZhouData   = SimpleTypeData<ZhouParameters>;
 
   class EAMAdapter {
   public:
@@ -219,6 +219,6 @@ namespace OpenMD {
     FuncflParameters getFuncflParam();
     ZhouParameters getZhouParam();
   };
-
 }  // namespace OpenMD
+
 #endif

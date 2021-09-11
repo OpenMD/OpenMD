@@ -63,6 +63,6 @@ namespace OpenMD {
     std::vector<Vector3d> sysDipoles_;
     Thermo* thermo_;
   };
-
 }  // namespace OpenMD
+
 #endif

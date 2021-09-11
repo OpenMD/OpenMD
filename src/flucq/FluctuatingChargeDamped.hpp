@@ -82,7 +82,6 @@ namespace OpenMD {
 
     Snapshot* snap {nullptr};
   };
-
 }  // namespace OpenMD
 
 #endif

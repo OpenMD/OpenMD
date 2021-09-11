@@ -48,9 +48,9 @@
 #include <functional>
 #include <iostream>
 #include <sstream>
+#include <tuple>
 
 #include "utils/MemoryUtils.hpp"
-#include "utils/Tuple.hpp"
 
 using namespace std;
 
@@ -325,8 +325,8 @@ namespace OpenMD {
       }
     }
 
-    std::set<IntTuple3> allBends;
-    std::set<IntTuple3>::iterator iter;
+    std::set<std::tuple<int, int, int>> allBends;
+    std::set<std::tuple<int, int, int>>::iterator iter;
     for (std::size_t i = 0; i < getNBends(); ++i) {
       BendStamp* bendStamp  = getBendStamp(i);
       std::vector<int> bend = bendStamp->getMembers();
@@ -350,13 +350,12 @@ namespace OpenMD {
         if (j != bend.end()) { bend.insert(j, ghostIndex); }
       }
 
-      IntTuple3 bendTuple(bend[0], bend[1], bend[2]);
+      std::tuple<int, int, int> bendTuple {bend[0], bend[1], bend[2]};
+      auto [first, second, third] = bendTuple;
 
-      // make sure bendTuple.first is always less than or equal to
-      // bendTuple.third
-      if (bendTuple.first > bendTuple.third) {
-        std::swap(bendTuple.first, bendTuple.third);
-      }
+      // make sure the first element of bendTuple is always less than or equal
+      // to the third element of bendTuple
+      if (first > third) { std::swap(first, third); }
 
       iter = allBends.find(bendTuple);
       if (iter != allBends.end()) {
@@ -382,10 +381,9 @@ namespace OpenMD {
            c     = atomA->getNextBondedAtom(ai)) {
         if (b == c) continue;
 
-        IntTuple3 newBend(c, a, b);
-        if (newBend.first > newBend.third) {
-          std::swap(newBend.first, newBend.third);
-        }
+        std::tuple<int, int, int> newBend {c, a, b};
+        auto [first, second, third] = newBend;
+        if (first > third) { std::swap(first, third); }
 
         if (allBends.find(newBend) == allBends.end()) {
           allBends.insert(newBend);
@@ -400,10 +398,10 @@ namespace OpenMD {
            c     = atomB->getNextBondedAtom(ai)) {
         if (a == c) continue;
 
-        IntTuple3 newBend(a, b, c);
-        if (newBend.first > newBend.third) {
-          std::swap(newBend.first, newBend.third);
-        }
+        std::tuple<int, int, int> newBend {a, b, c};
+        auto [first, second, third] = newBend;
+        if (first > third) { std::swap(first, third); }
+
         if (allBends.find(newBend) == allBends.end()) {
           allBends.insert(newBend);
           BendStamp* newBendStamp = new BendStamp();
@@ -457,8 +455,9 @@ namespace OpenMD {
       }
     }
 
-    std::set<IntTuple4> allTorsions;
-    std::set<IntTuple4>::iterator iter;
+    std::set<std::tuple<int, int, int, int>> allTorsions;
+    std::set<std::tuple<int, int, int, int>>::iterator iter;
+
     for (std::size_t i = 0; i < getNTorsions(); ++i) {
       TorsionStamp* torsionStamp = getTorsionStamp(i);
       std::vector<int> torsion   = torsionStamp->getMembers();
@@ -469,10 +468,13 @@ namespace OpenMD {
         if (j != torsion.end()) { torsion.insert(j, ghostIndex); }
       }
 
-      IntTuple4 torsionTuple(torsion[0], torsion[1], torsion[2], torsion[3]);
-      if (torsionTuple.first > torsionTuple.fourth) {
-        std::swap(torsionTuple.first, torsionTuple.fourth);
-        std::swap(torsionTuple.second, torsionTuple.third);
+      std::tuple<int, int, int, int> torsionTuple {torsion[0], torsion[1],
+                                                   torsion[2], torsion[3]};
+      auto [first, second, third, fourth] = torsionTuple;
+
+      if (first > fourth) {
+        std::swap(first, fourth);
+        std::swap(second, third);
       }
 
       iter = allTorsions.find(torsionTuple);
@@ -505,13 +507,16 @@ namespace OpenMD {
              d     = atomC->getNextBondedAtom(ai3)) {
           if (d == b) continue;
 
-          IntTuple4 newTorsion(a, b, c, d);
+          std::tuple<int, int, int, int> newTorsion {a, b, c, d};
+          auto [first, second, third, fourth] = newTorsion;
+
           // make sure the first element is always less than or equal
           // to the fourth element in IntTuple4
-          if (newTorsion.first > newTorsion.fourth) {
-            std::swap(newTorsion.first, newTorsion.fourth);
-            std::swap(newTorsion.second, newTorsion.third);
+          if (first > fourth) {
+            std::swap(first, fourth);
+            std::swap(second, third);
           }
+
           if (allTorsions.find(newTorsion) == allTorsions.end()) {
             allTorsions.insert(newTorsion);
             TorsionStamp* newTorsionStamp = new TorsionStamp();
@@ -611,29 +616,25 @@ namespace OpenMD {
       }
     }
 
-    std::set<IntTuple4> allInversions;
-    std::set<IntTuple4>::iterator iter;
+    std::set<std::tuple<int, int, int, int>> allInversions;
+    std::set<std::tuple<int, int, int, int>>::iterator iter;
     for (std::size_t i = 0; i < getNInversions(); ++i) {
       InversionStamp* inversionStamp = getInversionStamp(i);
       int cent                       = inversionStamp->getCenter();
       std::vector<int> inversion     = inversionStamp->getSatellites();
 
-      IntTuple4 inversionTuple(cent, inversion[0], inversion[1], inversion[2]);
+      std::tuple<int, int, int, int> inversionTuple {
+          cent, inversion[0], inversion[1], inversion[2]};
+      auto [first, second, third, fourth] = inversionTuple;
 
       // In OpenMD, the Central atom in an inversion comes first, and
       // has a special position.  The other three atoms can come in
       // random order, and should be sorted in increasing numerical
       // order to check for duplicates.  This requires three pairwise
       // swaps:
-
-      if (inversionTuple.third > inversionTuple.fourth)
-        std::swap(inversionTuple.third, inversionTuple.fourth);
-
-      if (inversionTuple.second > inversionTuple.third)
-        std::swap(inversionTuple.second, inversionTuple.third);
-
-      if (inversionTuple.third > inversionTuple.fourth)
-        std::swap(inversionTuple.third, inversionTuple.fourth);
+      if (third > fourth) std::swap(third, fourth);
+      if (second > third) std::swap(second, third);
+      if (third > fourth) std::swap(third, fourth);
 
       iter = allInversions.find(inversionTuple);
       if (iter == allInversions.end()) {
@@ -663,17 +664,14 @@ namespace OpenMD {
         if (satellites.size() == 3) {
           int cent = ai->getIndex();
           std::sort(satellites.begin(), satellites.end());
-          IntTuple4 newInversion(cent, satellites[0], satellites[1],
-                                 satellites[2]);
 
-          if (newInversion.third > newInversion.fourth)
-            std::swap(newInversion.third, newInversion.fourth);
+          std::tuple<int, int, int, int> newInversion {
+              cent, satellites[0], satellites[1], satellites[2]};
+          auto [first, second, third, fourth] = newInversion;
 
-          if (newInversion.second > newInversion.third)
-            std::swap(newInversion.second, newInversion.third);
-
-          if (newInversion.third > newInversion.fourth)
-            std::swap(newInversion.third, newInversion.fourth);
+          if (third > fourth) std::swap(third, fourth);
+          if (second > third) std::swap(second, third);
+          if (third > fourth) std::swap(third, fourth);
 
           if (allInversions.find(newInversion) == allInversions.end()) {
             allInversions.insert(newInversion);
@@ -918,5 +916,4 @@ namespace OpenMD {
 
     return jointAtomIndexPair;
   }
-
 }  // namespace OpenMD

@@ -50,6 +50,7 @@
 
 #include "lattice/shapedLattice.hpp"
 #include "math/Vector3.hpp"
+
 namespace OpenMD {
   /**
    * Implements a spherically-capped rod-shaped lattice

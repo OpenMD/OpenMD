@@ -46,8 +46,11 @@
 #ifndef UTILS_GRID3D_HPP
 #define UTILS_GRID3D_HPP
 
-using namespace std;
+#include <cassert>
+#include <vector>
+
 namespace OpenMD {
+
   /**
    * @class Grid3d
    * A generic 3d grid class
@@ -59,6 +62,7 @@ namespace OpenMD {
         dim1_(dim1), dim2_(dim2), dim3_(dim3) {
       data_.resize(dim1_ * dim2_ * dim3_);
     }
+
     Elem& operator()(unsigned int i, unsigned int j, unsigned int k) {
       int index = isValidGrid(i, j, k);
       assert(index != -1);
@@ -72,9 +76,9 @@ namespace OpenMD {
       return data_[index];
     }
 
-    vector<Elem> getAllNeighbors(unsigned int i, unsigned int j,
-                                 unsigned int k) {
-      vector<Elem> result;
+    std::vector<Elem> getAllNeighbors(unsigned int i, unsigned int j,
+                                      unsigned int k) {
+      std::vector<Elem> result;
       int index;
       index = isValidGrid(i - 1, j, k);
       if (index != -1) result.push_back(data_[index]);
@@ -106,7 +110,8 @@ namespace OpenMD {
     unsigned int dim1_;
     unsigned int dim2_;
     unsigned int dim3_;
-    vector<Elem> data_;
+    std::vector<Elem> data_;
   };
 }  // namespace OpenMD
+
 #endif

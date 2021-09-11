@@ -45,8 +45,10 @@
 
 #ifndef UTILS_MULTISTREAMBUF_HPP
 #define UTILS_MULTISTREAMBUF_HPP
+
 #include <streambuf>
 #include <vector>
+
 namespace OpenMD {
 
   /**
@@ -64,14 +66,13 @@ namespace OpenMD {
    *    myOs << "hello world";
    * @endcode
    */
-
   template<class CharT, class Traits = std::char_traits<CharT>>
   class basic_teebuf : public std::basic_streambuf<CharT, Traits> {
   public:
-    typedef std::basic_streambuf<CharT, Traits> streambuf_type;
-    typedef Traits traits_type;
-    typedef CharT char_type;
-    typedef typename traits_type::int_type int_type;
+    using streambuf_type = std::basic_streambuf<CharT, Traits>;
+    using traits_type    = Traits;
+    using char_type      = CharT;
+    using int_type       = typename traits_type::int_type;
 
     template<typename ForwardIterator>
     basic_teebuf(ForwardIterator begin, ForwardIterator end) :
@@ -113,7 +114,7 @@ namespace OpenMD {
     std::vector<streambuf_type*> buffers_;
   };
 
-  typedef basic_teebuf<char> TeeBuf;
-
+  using TeeBuf = basic_teebuf<char>;
 }  // namespace OpenMD
+
 #endif

@@ -61,7 +61,6 @@ namespace OpenMD {
     void rotateStep(int axes1, int axes2, RealType angle, Vector3d& ji,
                     RotMat3x3d& A);
   };
-
 }  // namespace OpenMD
 
 #endif  // INTEGRATORS_DLM_HPP

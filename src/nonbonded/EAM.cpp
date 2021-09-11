@@ -1325,5 +1325,4 @@ namespace OpenMD {
 
     return cut;
   }
-
 }  // namespace OpenMD

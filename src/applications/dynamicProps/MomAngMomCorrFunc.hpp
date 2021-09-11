@@ -47,6 +47,7 @@
 #define APPLICATIONS_DYNAMICPROPS_MOMANGMOMCORRFUNC_HPP
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
+
 namespace OpenMD {
 
   class MomAngMomCorrFunc : public ObjectCCF<RealType> {
@@ -64,4 +65,5 @@ namespace OpenMD {
     std::vector<std::vector<Vector3d>> js_;
   };
 }  // namespace OpenMD
+
 #endif

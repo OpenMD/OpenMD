@@ -65,7 +65,7 @@ namespace OpenMD {
     void parse(std::istream& input, ForceField& ff, int lineNo);
 
     const std::string& getSectionName() const { return sectionName_; }
-    virtual void validateSection(ForceField& ff) {}
+    virtual void validateSection(ForceField&) {}
 
   protected:
     void setSectionName(const std::string& sectionName) {
@@ -80,7 +80,6 @@ namespace OpenMD {
 
     std::string sectionName_;
   };
-
 }  // namespace OpenMD
 
 #endif  // IO_SECTIONPARSER_HPP

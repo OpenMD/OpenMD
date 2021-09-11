@@ -75,4 +75,5 @@ namespace OpenMD {
     RealType propertyTemp;
   };
 }  // namespace OpenMD
+
 #endif

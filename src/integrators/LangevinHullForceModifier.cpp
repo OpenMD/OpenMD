@@ -49,6 +49,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <random>
 #include <string>
 
@@ -62,7 +63,6 @@
 #include "math/ConvexHull.hpp"
 #include "math/Triangle.hpp"
 #include "utils/Constants.hpp"
-#include "utils/MemoryUtils.hpp"
 
 using namespace std;
 
@@ -71,9 +71,7 @@ namespace OpenMD {
   LangevinHullForceModifier::LangevinHullForceModifier(SimInfo* info) :
       ForceModifier {info} {
     simParams_ = info->getSimParams();
-
-    // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    veloMunge = Utils::make_unique<Velocitizer>(info);
+    veloMunge  = std::make_unique<Velocitizer>(info);
 
     // Create Hull, Convex Hull for now, other options later.
 

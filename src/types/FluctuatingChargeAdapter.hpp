@@ -49,7 +49,6 @@
 #include "math/Polynomial.hpp"
 #include "types/AtomType.hpp"
 #include "utils/GenericData.hpp"
-#include "utils/Tuple.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -68,7 +67,7 @@ namespace OpenMD {
     RealType slaterZeta;    /** off-diagonal Slater exponent */
     DoublePolynomial vself; /** Polynomial representation of self potential */
   };
-  typedef SimpleTypeData<FluctuatingAtypeParameters> FluctuatingAtypeData;
+  using FluctuatingAtypeData = SimpleTypeData<FluctuatingAtypeParameters>;
 
   class FluctuatingChargeAdapter {
   public:
@@ -104,4 +103,5 @@ namespace OpenMD {
     FluctuatingAtypeParameters getFluctuatingChargeParam();
   };
 }  // namespace OpenMD
+
 #endif

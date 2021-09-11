@@ -45,10 +45,15 @@
 
 #ifndef APPLICATIONS_STATICPROPS_SCDRDERPARAMETER_HPP
 #define APPLICATIONS_STATICPROPS_SCDRDERPARAMETER_HPP
+
+#include <string>
+#include <tuple>
+#include <vector>
+
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "utils/Tuple.hpp"
+
 namespace OpenMD {
   class SCDElem {
   public:
@@ -66,7 +71,7 @@ namespace OpenMD {
     std::string sele3_;
     bool usePeriodicBoundaryConditions_;
 
-    typedef tuple3<StuntDouble*, StuntDouble*, StuntDouble*> SDTuple3;
+    using SDTuple3 = std::tuple<StuntDouble*, StuntDouble*, StuntDouble*>;
 
     std::vector<SDTuple3> tuples_;
   };

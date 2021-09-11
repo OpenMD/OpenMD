@@ -129,4 +129,5 @@ namespace OpenMD {
   }
 
 }  // namespace OpenMD
+
 #endif  // TYPES_TRAPPETORSIONTYPE_HPP

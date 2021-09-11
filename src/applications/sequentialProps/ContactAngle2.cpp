@@ -80,7 +80,7 @@ namespace OpenMD {
     setParameterString(paramString);
   }
 
-  void ContactAngle2::doFrame(int frame) {
+  void ContactAngle2::doFrame(int) {
     StuntDouble* sd;
     int i;
 

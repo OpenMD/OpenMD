@@ -45,6 +45,7 @@
 
 #ifndef IO_TORSIONTYPESSECTIONPARSER_HPP
 #define IO_TORSIONTYPESSECTIONPARSER_HPP
+
 #include "io/ForceFieldOptions.hpp"
 #include "io/SectionParser.hpp"
 
@@ -62,7 +63,6 @@ namespace OpenMD {
     void parseLine(ForceField& ff, const std::string& line, int lineNo);
     ForceFieldOptions& options_;
   };
-
 }  // namespace OpenMD
 
 #endif  // IO_TORSIONTYPESSECTIONPARSER_HPP

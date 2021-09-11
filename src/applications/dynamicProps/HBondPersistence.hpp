@@ -47,6 +47,7 @@
 #define APPLICATIONS_DYNAMICPROPS_HBONDPERSISTENCE_HPP
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
+
 namespace OpenMD {
 
   class HBondPersistence : public TimeCorrFunc<RealType> {
@@ -59,19 +60,17 @@ namespace OpenMD {
     virtual void correlation();
     virtual void computeFrame(int istep);
 
-    virtual void computeProperty1(int frame) { return; }
-    virtual void computeProperty2(int frame) { return; }
-    virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty1(int frame, Bond* bond) { return -1; }
-    virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty2(int frame, Bond* bond) { return -1; }
+    virtual void computeProperty1(int) { return; }
+    virtual void computeProperty2(int) { return; }
+    virtual int computeProperty1(int, Molecule*) { return -1; }
+    virtual int computeProperty1(int, StuntDouble*) { return -1; }
+    virtual int computeProperty1(int, Bond*) { return -1; }
+    virtual int computeProperty2(int, Molecule*) { return -1; }
+    virtual int computeProperty2(int, StuntDouble*) { return -1; }
+    virtual int computeProperty2(int, Bond*) { return -1; }
 
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2) {
-      return 0.0;
-    }
-    virtual RealType calcCorrVal(int frame1, int frame2) { return 0.0; }
+    virtual RealType calcCorrVal(int, int, int, int) { return 0.0; }
+    virtual RealType calcCorrVal(int, int) { return 0.0; }
 
     virtual void postCorrelate();
 
@@ -83,6 +82,6 @@ namespace OpenMD {
     RealType thetaCut_;
     RealType OHCut_;
   };
-
 }  // namespace OpenMD
+
 #endif

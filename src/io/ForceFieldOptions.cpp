@@ -43,6 +43,7 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 #define __OPENMD_C
+
 #include "io/ForceFieldOptions.hpp"
 
 namespace OpenMD {

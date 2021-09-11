@@ -47,6 +47,7 @@
 #define APPLICATIONS_STATICPROPS_GOFZ_HPP
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+
 namespace OpenMD {
 
   class GofZ : public RadialDistrFunc {
@@ -70,6 +71,6 @@ namespace OpenMD {
     int axis_;
     std::string axisLabel_;
   };
-
 }  // namespace OpenMD
+
 #endif

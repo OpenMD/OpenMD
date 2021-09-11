@@ -348,4 +348,5 @@ namespace OpenMD {
   // translation from typedef into using:
   // using DataStoragePointer = DataStorage Snapshot::*;
 }  // namespace OpenMD
+
 #endif  // BRAINS_SNAPSHOT_HPP

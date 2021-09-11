@@ -52,11 +52,13 @@
 
 #ifndef LATTICE_LATTICEFACTORY_HPP
 #define LATTICE_LATTICEFACTORY_HPP
+
 #include <cassert>
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
+
 namespace OpenMD {
 
   // forward declaration
@@ -69,11 +71,9 @@ namespace OpenMD {
    */
   class LatticeFactory {
   public:
-    typedef std::map<std::string, LatticeCreator*> CreatorMapType;
-    typedef std::vector<std::string> IdentVectorType;
-    typedef std::vector<std::string>::iterator IdentVectorIterator;
-
-    ~LatticeFactory();
+    using CreatorMapType      = std::map<std::string, LatticeCreator*>;
+    using IdentVectorType     = std::vector<std::string>;
+    using IdentVectorIterator = std::vector<std::string>::iterator;
 
     /**
      * Returns an instance of Lattice factory
@@ -117,6 +117,10 @@ namespace OpenMD {
 
   private:
     LatticeFactory() = default;
+    ~LatticeFactory();
+
+    LatticeFactory(const LatticeFactory&) = delete;
+    LatticeFactory& operator=(const LatticeFactory&) = delete;
 
     CreatorMapType creatorMap_;
   };
@@ -125,4 +129,5 @@ namespace OpenMD {
   std::ostream& operator<<(std::ostream& o, LatticeFactory& factory);
 
 }  // namespace OpenMD
+
 #endif  // USETHEFORCE_FORCEFIELDFACTORY_HPP

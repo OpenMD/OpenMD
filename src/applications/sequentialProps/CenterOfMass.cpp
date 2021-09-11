@@ -62,7 +62,7 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".com");
   }
 
-  void CenterOfMass::doFrame(int frame) {
+  void CenterOfMass::doFrame(int) {
     StuntDouble* sd;
     int i;
 

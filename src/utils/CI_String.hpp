@@ -51,61 +51,59 @@
 #include <iostream>
 #include <string>
 
-namespace OpenMD {
-  namespace Utils {
+namespace OpenMD::Utils {
 
-    struct ci_char_traits : public std::char_traits<char> {
-      static int compare(const char* s1_, const char* s2_,
-                         std::size_t count_) noexcept {
-        while (count_-- != 0) {
-          if (std::toupper(*s1_) < std::toupper(*s2_)) return -1;
-          if (std::toupper(*s1_) > std::toupper(*s2_)) return 1;
+  struct ci_char_traits : public std::char_traits<char> {
+    static int compare(const char* s1_, const char* s2_,
+                       std::size_t count_) noexcept {
+      while (count_-- != 0) {
+        if (std::toupper(*s1_) < std::toupper(*s2_)) return -1;
+        if (std::toupper(*s1_) > std::toupper(*s2_)) return 1;
 
-          ++s1_;
-          ++s2_;
-        }
-
-        return 0;
+        ++s1_;
+        ++s2_;
       }
 
-      static const char* find(const char* p_, std::size_t count_,
-                              const char& ch_) noexcept {
-        const auto CH {std::toupper(ch_)};
-
-        while (count_-- != 0) {
-          if (std::toupper(*p_) == CH) return p_;
-
-          ++p_;
-        }
-
-        return nullptr;
-      }
-
-      static bool eq(char a, char b) noexcept {
-        return std::toupper(a) == std::toupper(b);
-      }
-
-      static bool lt(char a, char b) noexcept {
-        return std::toupper(a) < std::toupper(b);
-      }
-    };
-
-    template<class OutputTraits, class InputTraits>
-    inline std::basic_string<char, OutputTraits> traits_cast(
-        const std::basic_string<char, InputTraits>& input) noexcept {
-      std::basic_string<char, OutputTraits> ouput {input.data(), input.size()};
-      return ouput;
+      return 0;
     }
 
-    inline std::ostream& operator<<(
-        std::ostream& os, const std::basic_string<char, ci_char_traits>& str) {
-      os << str.c_str();
-      return os;
+    static const char* find(const char* p_, std::size_t count_,
+                            const char& ch_) noexcept {
+      const auto CH {std::toupper(ch_)};
+
+      while (count_-- != 0) {
+        if (std::toupper(*p_) == CH) return p_;
+
+        ++p_;
+      }
+
+      return nullptr;
     }
 
-    // Type alias for case-insensitive strings
-    using ci_string = std::basic_string<char, ci_char_traits>;
-  }  // namespace Utils
-}  // namespace OpenMD
+    static bool eq(char a, char b) noexcept {
+      return std::toupper(a) == std::toupper(b);
+    }
+
+    static bool lt(char a, char b) noexcept {
+      return std::toupper(a) < std::toupper(b);
+    }
+  };
+
+  template<class OutputTraits, class InputTraits>
+  inline std::basic_string<char, OutputTraits> traits_cast(
+      const std::basic_string<char, InputTraits>& input) noexcept {
+    std::basic_string<char, OutputTraits> ouput {input.data(), input.size()};
+    return ouput;
+  }
+
+  inline std::ostream& operator<<(
+      std::ostream& os, const std::basic_string<char, ci_char_traits>& str) {
+    os << str.c_str();
+    return os;
+  }
+
+  // Type alias for case-insensitive strings
+  using ci_string = std::basic_string<char, ci_char_traits>;
+}  // namespace OpenMD::Utils
 
 #endif

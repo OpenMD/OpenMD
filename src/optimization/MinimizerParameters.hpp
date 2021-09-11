@@ -65,4 +65,5 @@ namespace OpenMD {
     virtual void validate();
   };
 }  // namespace OpenMD
+
 #endif

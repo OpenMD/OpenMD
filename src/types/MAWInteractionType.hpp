@@ -97,4 +97,5 @@ namespace OpenMD {
     RealType cb1;
   };
 }  // namespace OpenMD
+
 #endif

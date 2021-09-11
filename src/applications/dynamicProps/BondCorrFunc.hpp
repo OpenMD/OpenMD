@@ -47,6 +47,7 @@
 #define APPLICATIONS_DYNAMICPROPS_BONDCORRFUNC_HPP
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
+
 namespace OpenMD {
 
   class BondCorrFunc : public AutoCorrFunc<RealType> {
@@ -58,18 +59,19 @@ namespace OpenMD {
     virtual int computeProperty1(int frame, Bond* bond);
     virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
 
-    virtual void computeProperty1(int frame) { return; }
-    virtual int computeProperty1(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty1(int frame, StuntDouble* sd) { return -1; }
+    virtual void computeProperty1(int) { return; }
+    virtual int computeProperty1(int, Molecule*) { return -1; }
+    virtual int computeProperty1(int, StuntDouble*) { return -1; }
 
-    virtual void computeProperty2(int frame) { return; }
-    virtual int computeProperty2(int frame, Molecule* mol) { return -1; }
-    virtual int computeProperty2(int frame, StuntDouble* sd) { return -1; }
-    virtual int computeProperty2(int frame, Bond* bond) { return -1; }
+    virtual void computeProperty2(int) { return; }
+    virtual int computeProperty2(int, Molecule*) { return -1; }
+    virtual int computeProperty2(int, StuntDouble*) { return -1; }
+    virtual int computeProperty2(int, Bond*) { return -1; }
 
-    virtual RealType calcCorrVal(int frame1, int frame2) { return 0.0; }
+    virtual RealType calcCorrVal(int, int) { return 0.0; }
 
     std::vector<std::vector<RealType>> delta_;
   };
 }  // namespace OpenMD
+
 #endif

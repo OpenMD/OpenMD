@@ -64,12 +64,12 @@ namespace OpenMD {
    * @class Vector3 Vector3.hpp "math/Vector3.hpp"
    * @brief
    */
-
   template<typename Real>
   class Vector3 : public Vector<Real, 3> {
   public:
-    typedef Real ElemType;
-    typedef Real* ElemPoinerType;
+    using ElemType       = Real;
+    using ElemPoinerType = Real*;
+
     Vector3() : Vector<Real, 3>() {}
 
     /** Constructs and initializes a Vector3 from x, y, z coordinates */
@@ -156,15 +156,14 @@ namespace OpenMD {
     return (p.z() * s.y() + p.y()) * s.x() + p.x();
   }
 
-  typedef Vector3<int> Vector3i;
+  using Vector3i = Vector3<int>;
 
-  typedef Vector3<RealType> Vector3d;
+  using Vector3d = Vector3<RealType>;
 
   const Vector3d V3Zero(0.0, 0.0, 0.0);
   const Vector3d V3X(1.0, 0.0, 0.0);
   const Vector3d V3Y(0.0, 1.0, 0.0);
   const Vector3d V3Z(0.0, 0.0, 1.0);
-
 }  // namespace OpenMD
 
 #endif

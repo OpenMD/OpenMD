@@ -65,7 +65,7 @@ namespace OpenMD {
       stats_(stats) {
 #ifdef IS_MPI
     if (worldRank == 0) {
-#endif  // is_mpi
+#endif
 
       statfile_.open(filename.c_str(), std::ios::out | std::ios::trunc);
 
@@ -100,19 +100,19 @@ namespace OpenMD {
 
     sprintf(checkPointMsg, "Sucessfully opened output file for stating.\n");
     errorCheckPoint();
-#endif  // is_mpi
+#endif
   }
 
   StatWriter::~StatWriter() {
 #ifdef IS_MPI
     if (worldRank == 0) {
-#endif  // is_mpi
+#endif
 
       statfile_.close();
 
 #ifdef IS_MPI
     }
-#endif  // is_mpi
+#endif
   }
 
   void StatWriter::writeTitle() {
@@ -120,7 +120,7 @@ namespace OpenMD {
 
 #ifdef IS_MPI
     if (worldRank == 0) {
-#endif  // is_mpi
+#endif
 
       // write revision
       statfile_ << version << std::endl;
@@ -136,13 +136,13 @@ namespace OpenMD {
 
 #ifdef IS_MPI
     }
-#endif  // is_mpi
+#endif
   }
 
   void StatWriter::writeStat() {
 #ifdef IS_MPI
     if (worldRank == 0) {
-#endif  // is_mpi
+#endif
 
       Stats::StatsBitSet mask = stats_->getStatsMask();
       statfile_.precision(stats_->getPrecision());
@@ -176,7 +176,7 @@ namespace OpenMD {
 #ifdef IS_MPI
     }
     errorCheckPoint();
-#endif  // is_mpi
+#endif
   }
 
   void StatWriter::writeReal(int i) {

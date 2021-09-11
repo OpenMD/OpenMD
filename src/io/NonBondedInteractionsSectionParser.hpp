@@ -45,6 +45,7 @@
 
 #ifndef IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
 #define IO_NONBONDEDINTERACTIONSSECTIONPARSER_HPP
+
 #include <map>
 
 #include "io/ForceFieldOptions.hpp"
@@ -83,7 +84,6 @@ namespace OpenMD {
     RealType eus_;   //!< Energy unit scaling
     RealType dus_;   //!< Distance unit scaling
   };
-
 }  // namespace OpenMD
 
 #endif

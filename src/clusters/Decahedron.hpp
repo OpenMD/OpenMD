@@ -136,7 +136,6 @@ namespace OpenMD {
   private:
     int T_;  // number of truncated planes snipped from top and bottom
   };
-
 }  // namespace OpenMD
 
 #endif

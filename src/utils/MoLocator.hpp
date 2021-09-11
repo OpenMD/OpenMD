@@ -77,4 +77,5 @@ namespace OpenMD {
     unsigned int nIntegrableObjects;
   };
 }  // namespace OpenMD
+
 #endif

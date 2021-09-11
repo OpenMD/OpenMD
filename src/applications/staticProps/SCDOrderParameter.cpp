@@ -45,6 +45,10 @@
 
 #include "applications/staticProps/SCDOrderParameter.hpp"
 
+#include <string>
+#include <tuple>
+#include <vector>
+
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
@@ -119,20 +123,19 @@ namespace OpenMD {
          sd1 != NULL && sd2 != NULL && sd3 != NULL;
          sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j),
         sd3 = seleMan3_.nextSelected(k)) {
-      tuples_.push_back(make_tuple3(sd1, sd2, sd3));
+      tuples_.push_back(std::make_tuple(sd1, sd2, sd3));
     }
   }
 
   RealType SCDElem::calcSCD(Snapshot* snapshot) {
-    std::vector<SDTuple3>::iterator i;
     Vector3d normal(0.0, 0.0, 1.0);
     RealType scd = 0.0;
-    for (i = tuples_.begin(); i != tuples_.end(); ++i) {
-      // Egberts B. and Berendsen H.J.C, J.Chem.Phys. 89(6), 3718-3732, 1988
 
-      Vector3d zAxis = i->third->getPos() - i->first->getPos();
+    for (auto& [first, second, third] : tuples_) {
+      // Egberts B. and Berendsen H.J.C, J.Chem.Phys. 89(6), 3718-3732, 1988
+      Vector3d zAxis = third->getPos() - first->getPos();
       if (usePeriodicBoundaryConditions_) snapshot->wrapVector(zAxis);
-      Vector3d v12 = i->second->getPos() - i->first->getPos();
+      Vector3d v12 = second->getPos() - first->getPos();
       if (usePeriodicBoundaryConditions_) snapshot->wrapVector(v12);
       Vector3d xAxis = cross(v12, zAxis);
       Vector3d yAxis = cross(zAxis, xAxis);
@@ -146,7 +149,9 @@ namespace OpenMD {
       RealType syy       = 0.5 * (3 * cosThetaY * cosThetaY - 1.0);
       scd += 2.0 / 3.0 * sxx + 1.0 / 3.0 * syy;
     }
+
     scd /= tuples_.size();
+
     return scd;
   }
 

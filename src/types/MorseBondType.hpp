@@ -49,6 +49,7 @@
 #include <cmath>
 
 #include "types/BondType.hpp"
+
 namespace OpenMD {
 
   /**
@@ -101,4 +102,5 @@ namespace OpenMD {
     RealType beta;
   };
 }  // namespace OpenMD
+
 #endif

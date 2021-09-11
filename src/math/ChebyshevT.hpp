@@ -115,6 +115,6 @@ namespace OpenMD {
 
     int maxPower_;
   };
-
 }  // namespace OpenMD
+
 #endif  // MATH_CHEBYSHEVT_HPP

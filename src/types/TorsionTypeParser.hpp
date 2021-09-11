@@ -45,6 +45,7 @@
 
 #ifndef TYPES_TORSIONTYPEPARSER_HPP
 #define TYPES_TORSIONTYPEPARSER_HPP
+
 #include <map>
 #include <string>
 #include <vector>

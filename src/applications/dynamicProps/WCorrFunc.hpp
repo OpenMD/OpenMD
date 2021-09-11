@@ -47,6 +47,7 @@
 #define APPLICATIONS_DYNAMICPROPS_WCORRFUNC_HPP
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
+
 namespace OpenMD {
 
   class WCorrFunc : public ObjectACF<RealType> {
@@ -61,6 +62,6 @@ namespace OpenMD {
 
     std::vector<std::vector<RealType>> charge_velocities_;
   };
-
 }  // namespace OpenMD
+
 #endif

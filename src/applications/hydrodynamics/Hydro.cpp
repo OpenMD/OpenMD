@@ -58,9 +58,9 @@
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
+
 using namespace OpenMD;
 
 struct SDShape {
@@ -216,7 +216,6 @@ int main(int argc, char* argv[]) {
 
   outputHydro.close();
 
-  // Utils::deletePointers(shapes);
   delete info;
 }
 

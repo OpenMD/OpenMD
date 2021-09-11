@@ -45,6 +45,7 @@
 
 #ifndef APPLICATIONS_STATICPROPS_BOPOFR_HPP
 #define APPLICATIONS_STATICPROPS_BOPOFR_HPP
+
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/SphericalHarmonic.hpp"
 #include "math/Vector3.hpp"

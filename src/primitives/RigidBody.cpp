@@ -49,6 +49,7 @@
 
 #include "utils/Constants.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   RigidBody::RigidBody() :

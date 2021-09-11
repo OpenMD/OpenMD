@@ -71,8 +71,8 @@ namespace OpenMD {
    * Basic Accumulator class for numbers.
    */
   class Accumulator : public BaseAccumulator {
-    typedef RealType ElementType;
-    typedef RealType ResultType;
+    using ElementType = RealType;
+    using ResultType  = RealType;
 
   public:
     Accumulator() : BaseAccumulator() { this->clear(); }
@@ -200,8 +200,8 @@ namespace OpenMD {
   };
 
   class VectorAccumulator : public BaseAccumulator {
-    typedef Vector3d ElementType;
-    typedef Vector3d ResultType;
+    using ElementType = Vector3d;
+    using ResultType  = Vector3d;
 
   public:
     VectorAccumulator() : BaseAccumulator() { this->clear(); }
@@ -392,8 +392,8 @@ namespace OpenMD {
   };
 
   class PotVecAccumulator : public BaseAccumulator {
-    typedef potVec ElementType;
-    typedef potVec ResultType;
+    using ElementType = potVec;
+    using ResultType  = potVec;
 
   public:
     PotVecAccumulator() : BaseAccumulator() { this->clear(); }
@@ -584,8 +584,8 @@ namespace OpenMD {
   };
 
   class MatrixAccumulator : public BaseAccumulator {
-    typedef Mat3x3d ElementType;
-    typedef Mat3x3d ResultType;
+    using ElementType = Mat3x3d;
+    using ResultType  = Mat3x3d;
 
   public:
     MatrixAccumulator() : BaseAccumulator() { this->clear(); }
@@ -698,7 +698,6 @@ namespace OpenMD {
     ResultType Avg2_;
     ResultType Total_;
   };
-
 }  // namespace OpenMD
 
 #endif

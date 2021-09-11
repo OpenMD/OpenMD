@@ -46,29 +46,34 @@
 #ifndef SELECTION_TOKENMAP_HPP
 #define SELECTION_TOKENMAP_HPP
 
+#include <map>
+#include <string>
+
 #include "selection/SelectionToken.hpp"
 
 namespace OpenMD {
 
   class TokenMap {
   public:
-    typedef std::map<std::string, Token> TokenMapType;
-    static TokenMap* getInstance() {
-      if (instance_ == NULL) { instance_ = new TokenMap(); }
+    using TokenMapType = std::map<std::string, Token>;
 
-      return instance_;
+    static TokenMap& getInstance() {
+      static TokenMap instance {};
+
+      return instance;
     }
 
     Token* getToken(const std::string& ident);
 
   private:
     TokenMap();
-    ~TokenMap();
+    ~TokenMap() = default;
 
-    static TokenMap* instance_;
+    TokenMap(const TokenMap&) = delete;
+    TokenMap& operator=(const TokenMap&) = delete;
 
     TokenMapType tokenMap_;
   };
-
 }  // namespace OpenMD
+
 #endif

@@ -198,6 +198,6 @@ namespace OpenMD {
     // void setBits(std::vector<int> fromIndex, std::vector<int> toIndex, bool
     // value);
   };
-
 }  // namespace OpenMD
+
 #endif

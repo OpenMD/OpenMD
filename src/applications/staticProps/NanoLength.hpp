@@ -55,7 +55,7 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 
-typedef std::pair<RealType, int> evIndex;
+using evIndex = std::pair<RealType, int>;
 
 namespace OpenMD {
   class NanoLength : public StaticAnalyser {
@@ -76,4 +76,5 @@ namespace OpenMD {
     std::ofstream osq;
   };
 }  // namespace OpenMD
+
 #endif

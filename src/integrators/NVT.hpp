@@ -102,7 +102,6 @@ namespace OpenMD {
     std::vector<Vector3d> oldVel_;
     std::vector<Vector3d> oldJi_;
   };
-
 }  // namespace OpenMD
 
 #endif  // INTEGRATOR_NVT_HPP

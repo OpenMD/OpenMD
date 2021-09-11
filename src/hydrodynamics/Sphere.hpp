@@ -45,6 +45,7 @@
 
 #ifndef HYDRODYNAMICS_SPHERE_HPP
 #define HYDRODYNAMICS_SPHERE_HPP
+
 #include "hydrodynamics/Shape.hpp"
 #include "math/Vector3.hpp"
 
@@ -64,6 +65,6 @@ namespace OpenMD {
     Vector3d origin_;
     RealType radius_;
   };
-
 }  // namespace OpenMD
+
 #endif

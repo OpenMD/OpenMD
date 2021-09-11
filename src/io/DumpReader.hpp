@@ -58,6 +58,7 @@
 
 #include "brains/SimInfo.hpp"
 #include "primitives/StuntDouble.hpp"
+
 namespace OpenMD {
 
   /**
@@ -107,7 +108,6 @@ namespace OpenMD {
     const static int bufferSize = 4096;
     char buffer[bufferSize];
   };
-
 }  // namespace OpenMD
 
 #endif  // IO_DUMPREADER_HPP

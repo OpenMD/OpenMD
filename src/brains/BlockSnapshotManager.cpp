@@ -47,15 +47,14 @@
 
 #include <algorithm>
 #include <functional>
-//#include "utils/residentMem.h"
-//#include "utils/physmem.h"
+#include <iostream>
+#include <string>
+
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
-#include "utils/Algorithm.hpp"
-
-using namespace std;
 
 namespace OpenMD {
+
   BlockSnapshotManager::BlockSnapshotManager(SimInfo* info,
                                              const std::string& filename,
                                              int storageLayout,
@@ -92,7 +91,7 @@ namespace OpenMD {
     // in memory at the same time:
     nSnapshotPerBlock_ = int(frameCapacity) / blockCapacity_;
     if (nSnapshotPerBlock_ <= 0) {
-      std::cerr << "not enough memory to hold two configs!" << std::endl;
+      std::cerr << "not enough memory to hold two configs!\n";
     }
     reader_     = new DumpReader(info, filename);
     nframes_    = reader_->getNFrames();
@@ -110,9 +109,8 @@ namespace OpenMD {
     snapshots_.insert(snapshots_.begin(), nframes_,
                       static_cast<Snapshot*>(NULL));
 
-    std::cout << "-----------------------------------------------------"
-              << std::endl;
-    std::cout << "BlockSnapshotManager memory report:" << std::endl;
+    std::cout << "-----------------------------------------------------\n";
+    std::cout << "BlockSnapshotManager memory report:\n";
     std::cout << "\n";
     // std::cout << "  Physical Memory available:\t" << (unsigned long)physMem
     // << " bytes"
@@ -161,17 +159,8 @@ namespace OpenMD {
   }
 
   int BlockSnapshotManager::getNActiveBlocks() {
-#ifdef __RWSTD
-    int count = 0;
-    std::count_if(activeBlocks_.begin(), activeBlocks_.end(),
-                  std::bind(std::not_equal_to<int>(), placeholders::_1, -1),
-                  count);
-    return count;
-#else
-    return std::count_if(
-        activeBlocks_.begin(), activeBlocks_.end(),
-        std::bind(std::not_equal_to<int>(), placeholders::_1, -1));
-#endif
+    return std::count_if(activeBlocks_.begin(), activeBlocks_.end(),
+                         [](int val) { return val != -1; });
   }
 
   bool BlockSnapshotManager::loadBlock(int block) {
@@ -265,9 +254,9 @@ namespace OpenMD {
 
   std::vector<int> BlockSnapshotManager::getActiveBlocks() {
     std::vector<int> result;
-    OpenMD::copy_if(activeBlocks_.begin(), activeBlocks_.end(),
-                    std::back_inserter(result),
-                    std::bind(std::not_equal_to<int>(), placeholders::_1, -1));
+    std::copy_if(activeBlocks_.begin(), activeBlocks_.end(),
+                 std::back_inserter(result),
+                 std::bind(std::not_equal_to<int>(), placeholders::_1, -1));
     return result;
   }
 

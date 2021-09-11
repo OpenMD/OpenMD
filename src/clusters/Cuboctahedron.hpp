@@ -126,7 +126,6 @@ namespace OpenMD {
     TruncatedCube(std::string lattice, int cells, int planes) :
         Cuboctahedron(lattice, cells, planes) {}
   };
-
 }  // namespace OpenMD
 
 #endif

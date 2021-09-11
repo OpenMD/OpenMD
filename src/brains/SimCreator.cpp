@@ -88,7 +88,7 @@
 #include "types/SuttonChenAdapter.hpp"
 #include "utils/RandNumGen.hpp"
 #include "utils/Revision.hpp"
-#include "utils/StringUtils.hpp"
+#include "utils/Trim.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -282,7 +282,7 @@ namespace OpenMD {
 
       mdFile_.getline(buffer, bufferSize);
       ++lineNo;
-      std::string line = trimLeftCopy(buffer);
+      std::string line = Utils::trimLeftCopy(buffer);
       std::size_t i    = CaseInsensitiveFind(line, "<OpenMD");
       if (i == string::npos) {
         // try the older file strings to see if that works:
@@ -324,7 +324,7 @@ namespace OpenMD {
       while (mdFile_.getline(buffer, bufferSize)) {
         ++lineNo;
 
-        std::string line = trimLeftCopy(buffer);
+        std::string line = Utils::trimLeftCopy(buffer);
         if (metaDataBlockStart == -1) {
           std::size_t i = CaseInsensitiveFind(line, "<MetaData>");
           if (i != string::npos) {
@@ -368,7 +368,7 @@ namespace OpenMD {
 
       for (int i = 0; i < metaDataBlockEnd - metaDataBlockStart - 1; ++i) {
         mdFile_.getline(buffer, bufferSize);
-        std::string line = trimLeftCopy(buffer);
+        std::string line = Utils::trimLeftCopy(buffer);
         std::size_t j =
             CaseInsensitiveFind(line, "## Last run using OpenMD Version");
         if (j != string::npos) {

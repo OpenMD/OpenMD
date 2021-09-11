@@ -125,4 +125,5 @@ namespace OpenMD {
     RealType potS_;
   };
 }  // namespace OpenMD
+
 #endif

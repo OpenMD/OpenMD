@@ -62,6 +62,6 @@ namespace OpenMD {
 
     std::vector<std::vector<Vector3d>> dipoles_;
   };
-
 }  // namespace OpenMD
+
 #endif

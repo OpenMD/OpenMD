@@ -47,6 +47,7 @@
 #define APPLICATIONS_STATICPROPS_GOFR_HPP
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
+
 namespace OpenMD {
 
   class GofR : public RadialDistrFunc {
@@ -76,6 +77,6 @@ namespace OpenMD {
     std::vector<RealType> sumGofr1_;
     std::vector<RealType> sumGofr2_;
   };
-
 }  // namespace OpenMD
+
 #endif

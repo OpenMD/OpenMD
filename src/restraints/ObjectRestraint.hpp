@@ -89,4 +89,5 @@ namespace OpenMD {
     Vector3d torque_;
   };
 }  // namespace OpenMD
+
 #endif

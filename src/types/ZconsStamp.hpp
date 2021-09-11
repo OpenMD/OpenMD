@@ -47,6 +47,7 @@
 #define TYPES_ZCONSTAMP_HPP
 
 #include "types/DataHolder.hpp"
+
 namespace OpenMD {
   class ZConsStamp : public DataHolder {
     DeclareParameter(MolIndex, int);
@@ -60,4 +61,5 @@ namespace OpenMD {
     virtual void validate();
   };
 }  // namespace OpenMD
+
 #endif  // __ZCONSTAMP_H__

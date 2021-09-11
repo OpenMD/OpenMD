@@ -52,6 +52,7 @@
 
 #ifndef MATH_RECTMATRIX_HPP
 #define MATH_RECTMATRIX_HPP
+
 #include <cmath>
 
 #include "Vector.hpp"
@@ -65,8 +66,8 @@ namespace OpenMD {
   template<typename Real, unsigned int Row, unsigned int Col>
   class RectMatrix {
   public:
-    typedef Real ElemType;
-    typedef Real* ElemPoinerType;
+    using ElemType       = Real;
+    using ElemPoinerType = Real*;
 
     /** default constructor */
     RectMatrix() {
@@ -666,4 +667,5 @@ namespace OpenMD {
     return o;
   }
 }  // namespace OpenMD
+
 #endif  // MATH_RECTMATRIX_HPP

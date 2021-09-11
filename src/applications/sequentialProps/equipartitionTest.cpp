@@ -62,7 +62,7 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".temp");
   }
 
-  void Equipartition::doFrame(int frame) {
+  void Equipartition::doFrame(int) {
     StuntDouble* sd;
     int i;
 

@@ -49,6 +49,7 @@
 #include "types/AtomType.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   OptionSectionParser::OptionSectionParser(ForceFieldOptions& options) :
@@ -56,7 +57,7 @@ namespace OpenMD {
     setSectionName("Options");
   }
 
-  void OptionSectionParser::parseLine(ForceField& ff, const std::string& line,
+  void OptionSectionParser::parseLine(ForceField&, const std::string& line,
                                       int lineNo) {
     StringTokenizer tokenizer(line);
 
@@ -76,7 +77,7 @@ namespace OpenMD {
     }
   }
 
-  void OptionSectionParser::validateSection(ForceField& ff) {
+  void OptionSectionParser::validateSection(ForceField&) {
     options_.validateOptions();
   }
 

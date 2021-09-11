@@ -51,6 +51,7 @@
 #include "primitives/StuntDouble.hpp"
 #include "utils/GenericData.hpp"
 #include "utils/simError.h"
+
 namespace OpenMD {
 
   /**
@@ -726,7 +727,6 @@ namespace OpenMD {
     std::shared_ptr<BoolGenericData> moved_;
     std::shared_ptr<BoolGenericData> moving_;
   };
-
 }  // namespace OpenMD
 
 #endif

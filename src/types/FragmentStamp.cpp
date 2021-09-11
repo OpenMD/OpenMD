@@ -43,6 +43,7 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 #include "types/FragmentStamp.hpp"
+
 namespace OpenMD {
   FragmentStamp::FragmentStamp(int index) : index_(index) {
     DefineParameter(Name, "name");

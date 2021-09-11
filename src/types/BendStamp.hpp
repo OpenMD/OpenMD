@@ -46,8 +46,12 @@
 #ifndef TYPES_BENDSTAMP_HPP
 #define TYPES_BENDSTAMP_HPP
 
+#include <string>
+#include <tuple>
+#include <vector>
+
 #include "types/DataHolder.hpp"
-#include "utils/Tuple.hpp"
+
 namespace OpenMD {
 
   class BendStamp : public DataHolder {
@@ -60,6 +64,7 @@ namespace OpenMD {
     int getMemberAt(int index) { return members_.at(index); }
     int getNMembers() { return members_.size(); }
     std::vector<int> getMembers() { return members_; }
+
     void setMembers(const std::vector<int>& members) {
       members_ = members;
       if (members_.size() < 2 || members_.size() > 3) {
@@ -70,16 +75,20 @@ namespace OpenMD {
       }
     }
 
-    void setMembers(IntTuple3 tuple) {
-      members_.push_back(tuple.first);
-      members_.push_back(tuple.second);
-      members_.push_back(tuple.third);
+    void setMembers(const std::tuple<int, int, int>& tuple) {
+      auto [first, second, third] = tuple;
+
+      members_.push_back(first);
+      members_.push_back(second);
+      members_.push_back(third);
     }
+
     void overrideType(std::string type, std::vector<RealType> pars) {
       orType_      = type;
       orPars_      = pars;
       hasOverride_ = true;
     }
+
     virtual void validate();
     bool hasOverride() { return hasOverride_; }
     std::string getOverrideType() { return orType_; }
@@ -93,4 +102,5 @@ namespace OpenMD {
     std::vector<RealType> orPars_;
   };
 }  // namespace OpenMD
+
 #endif
