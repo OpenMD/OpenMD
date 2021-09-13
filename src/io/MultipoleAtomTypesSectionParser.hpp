@@ -63,7 +63,6 @@ namespace OpenMD {
                      int lineNo);
     void parseQuadrupole(StringTokenizer& tokenizer,
                          Vector3d& quadrupoleMoments, int lineNo);
-    ForceFieldOptions& options_;
   };
 }  // namespace OpenMD
 

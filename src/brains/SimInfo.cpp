@@ -783,7 +783,7 @@ namespace OpenMD {
     return atomTypes;
   }
 
-  int getGlobalCountOfType(AtomType* atype) {
+  int getGlobalCountOfType(AtomType*) {
     /*
     set<AtomType*> atypes = getSimulatedAtomTypes();
     map<AtomType*, int> counts_;
@@ -1023,7 +1023,7 @@ namespace OpenMD {
     }
   }
 
-  ostream& operator<<(ostream& o, SimInfo& info) { return o; }
+  ostream& operator<<(ostream& o, SimInfo&) { return o; }
 
   StuntDouble* SimInfo::getIOIndexToIntegrableObject(int index) {
     if (index >= int(IOIndexToIntegrableObject.size())) {

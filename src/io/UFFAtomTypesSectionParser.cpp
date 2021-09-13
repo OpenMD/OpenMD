@@ -113,7 +113,7 @@ namespace OpenMD {
     }
   }
 
-  void UFFAtomTypesSectionParser::validateSection(ForceField& ff) {
+  void UFFAtomTypesSectionParser::validateSection(ForceField&) {
     // ForceField::AtomTypeContainer* atomTypes = ff.getAtomTypes();
     // ForceField::AtomTypeContainer::MapTypeIterator i;
     // AtomType* at;

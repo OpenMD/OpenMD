@@ -61,7 +61,7 @@ namespace OpenMD {
     storageLayout_ = info->getStorageLayout();
   }
 
-  void BaseAtomVisitor::visit(RigidBody* rb) {
+  void BaseAtomVisitor::visit(RigidBody*) {
     // vector<Atom*> myAtoms;
     // vector<Atom*>::iterator atomIter;
 

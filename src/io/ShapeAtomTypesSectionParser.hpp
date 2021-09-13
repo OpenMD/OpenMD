@@ -65,7 +65,6 @@ namespace OpenMD {
 
     void parseShapeFile(ForceField& ff, std::string& shapeFileName,
                         AtomType* at);
-    ForceFieldOptions& options_;
   };
 }  // namespace OpenMD
 

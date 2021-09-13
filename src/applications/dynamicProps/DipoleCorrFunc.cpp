@@ -76,7 +76,7 @@ namespace OpenMD {
     return dot(v1, v2) / (v1.length() * v2.length());
   }
 
-  void DipoleCorrFunc::validateSelection(SelectionManager& seleMan) {
+  void DipoleCorrFunc::validateSelection(SelectionManager&) {
     StuntDouble* sd;
     int i;
     for (sd = seleMan1_.beginSelected(i); sd != NULL;

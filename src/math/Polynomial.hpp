@@ -194,21 +194,6 @@ namespace OpenMD {
       return deg;
     }
 
-    PolynomialType& operator=(const PolynomialType& p) {
-      if (this != &p)  // protect against invalid self-assignment
-      {
-        typename Polynomial<Real>::const_iterator i;
-
-        polyPairMap_.clear();  // clear out the old map
-
-        for (i = p.begin(); i != p.end(); ++i) {
-          this->setCoefficient(i->first, i->second);
-        }
-      }
-      // by convention, always return *this
-      return *this;
-    }
-
     PolynomialType& operator+=(const PolynomialType& p) {
       typename Polynomial<Real>::const_iterator i;
 

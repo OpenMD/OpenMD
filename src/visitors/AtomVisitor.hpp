@@ -60,8 +60,8 @@ namespace OpenMD {
   class BaseAtomVisitor : public BaseVisitor {
   public:
     using BaseVisitor::visit;
-    virtual void visit(Atom* atom) {}
-    virtual void visit(DirectionalAtom* datom) {}
+    virtual void visit(Atom*) {}
+    virtual void visit(DirectionalAtom*) {}
     virtual void visit(RigidBody* rb);
     void setVisited(Atom* atom);
     bool isVisited(Atom* atom);
@@ -81,7 +81,7 @@ namespace OpenMD {
 
     virtual void visit(Atom* atom);
     virtual void visit(DirectionalAtom* datom);
-    virtual void visit(RigidBody* rb) {}
+    virtual void visit(RigidBody*) {}
 
     virtual const std::string toString();
   };

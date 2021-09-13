@@ -52,8 +52,7 @@
 namespace OpenMD {
 
   MultipoleAtomTypesSectionParser::MultipoleAtomTypesSectionParser(
-      ForceFieldOptions& options) :
-      options_(options) {
+      ForceFieldOptions&) {
     setSectionName("MultipoleAtomTypes");
   }
 

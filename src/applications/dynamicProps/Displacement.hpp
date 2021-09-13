@@ -71,11 +71,9 @@ namespace OpenMD {
     virtual void computeFrame(int frame);
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual void correlateFrames(int frame1, int frame2, int timeBin);
-    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2,
-                                 int timeBin);
-    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2) {
-      return Vector3d(0.0);
-    }
+    Vector3d calcCorrValImpl(int frame1, int frame2, int id1, int id2,
+                             int timeBin);
+    virtual Vector3d calcCorrVal(int, int, int, int) { return Vector3d(0.0); }
 
     virtual void postCorrelate();
     virtual void writeCorrelate();

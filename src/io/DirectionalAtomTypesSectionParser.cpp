@@ -52,8 +52,7 @@
 namespace OpenMD {
 
   DirectionalAtomTypesSectionParser::DirectionalAtomTypesSectionParser(
-      ForceFieldOptions& options) :
-      options_(options) {
+      ForceFieldOptions&) {
     setSectionName("DirectionalAtomTypes");
   }
 

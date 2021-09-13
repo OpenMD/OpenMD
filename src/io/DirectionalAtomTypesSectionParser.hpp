@@ -57,7 +57,6 @@ namespace OpenMD {
 
   private:
     void virtual parseLine(ForceField& ff, const std::string& line, int lineNo);
-    ForceFieldOptions& options_;
   };
 }  // namespace OpenMD
 

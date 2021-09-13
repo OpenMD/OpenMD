@@ -309,7 +309,7 @@ namespace OpenMD {
     setAnalysisType("FCC Bond Order Parameter(r)");
   }
 
-  void FCCOfR::collectHistogram(std::vector<RealType> q,
+  void FCCOfR::collectHistogram(std::vector<RealType>,
                                 std::vector<ComplexType> what,
                                 RealType distCOM) {
     if (distCOM < len_) {

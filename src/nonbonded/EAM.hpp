@@ -184,7 +184,7 @@ namespace OpenMD {
     set<AtomType*> simTypes_;
     RealType pre11_;
     RealType eamRcut_;
-    RealType oss_;
+    // RealType oss_;
     Vector3d rhat;
 
     EAMMixingMethod mixMeth_;

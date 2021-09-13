@@ -369,7 +369,7 @@ namespace OpenMD {
 
   void EAMAtomTypesSectionParser::parseFuncflFile(ForceField& ff, EAMAdapter ea,
                                                   const string& funcflFile,
-                                                  int ident) {
+                                                  int) {
     ifstrstream* ppfStream = ff.openForceFieldFile(funcflFile);
     const int bufferSize   = 65535;
     char buffer[bufferSize];

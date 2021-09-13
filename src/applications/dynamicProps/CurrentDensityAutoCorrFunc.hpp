@@ -62,7 +62,7 @@ namespace OpenMD {
     virtual void correlateFrames(int frame1, int frame2, int timeBin);
     virtual void postCorrelate();
     virtual void writeCorrelate();
-    virtual RealType calcCorrVal(int frame1, int frame2) { return -1; }
+    virtual RealType calcCorrVal(int, int) { return -1; }
 
     Thermo* thermo_;
 

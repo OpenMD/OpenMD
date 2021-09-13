@@ -74,8 +74,8 @@ namespace OpenMD {
       visitorName = "LipidHeadVisitor";
     }
 
-    virtual void visit(Atom* atom) {}
-    virtual void visit(DirectionalAtom* datom) {}
+    virtual void visit(Atom*) {}
+    virtual void visit(DirectionalAtom*) {}
     virtual void visit(RigidBody* rb);
 
     void addLipidHeadName(const std::string& name);
@@ -94,8 +94,8 @@ namespace OpenMD {
       visitorName = "RBCOMVisitor";
     }
 
-    virtual void visit(Atom* atom) {}
-    virtual void visit(DirectionalAtom* datom) {}
+    virtual void visit(Atom*) {}
+    virtual void visit(DirectionalAtom*) {}
     virtual void visit(RigidBody* rb);
 
     virtual const std::string toString();

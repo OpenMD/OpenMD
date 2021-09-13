@@ -51,9 +51,7 @@
 
 namespace OpenMD {
 
-  InversionTypesSectionParser::InversionTypesSectionParser(
-      ForceFieldOptions& options) :
-      options_(options) {
+  InversionTypesSectionParser::InversionTypesSectionParser(ForceFieldOptions&) {
     setSectionName("InversionTypes");
   }
 

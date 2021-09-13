@@ -86,7 +86,7 @@ namespace OpenMD {
     return Vector3d(rsq, rpar2, rperp2);
   }
 
-  void DirectionalRCorrFunc::validateSelection(SelectionManager& seleMan) {
+  void DirectionalRCorrFunc::validateSelection(SelectionManager&) {
     StuntDouble* sd;
     int i;
     for (sd = seleMan1_.beginSelected(i); sd != NULL;

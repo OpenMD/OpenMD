@@ -199,12 +199,13 @@ namespace OpenMD {
 
       if (i1 == s1.end() || i2 == s2.end()) break;
 
-      calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin(), timeBin);
+      calcCorrValImpl(frame1, frame2, i1 - s1.begin(), i2 - s2.begin(),
+                      timeBin);
     }
   }
 
-  Vector3d DisplacementZ::calcCorrVal(int frame1, int frame2, int id1, int id2,
-                                      int timeBin) {
+  Vector3d DisplacementZ::calcCorrValImpl(int frame1, int frame2, int id1,
+                                          int id2, int timeBin) {
     int zBin1 = zBins_[frame1][id1];
     int zBin2 = zBins_[frame2][id2];
 

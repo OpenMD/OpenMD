@@ -68,9 +68,9 @@ namespace OpenMD {
       sites_      = std::make_shared<AtomData>();
     }
 
-    void visit(Atom* atom) {}
+    void visit(Atom*) {}
     void visit(DirectionalAtom* datom);
-    void visit(RigidBody* rb) {}
+    void visit(RigidBody*) {}
 
     const std::string toString();
 

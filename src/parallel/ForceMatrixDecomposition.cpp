@@ -912,42 +912,41 @@ namespace OpenMD {
    * We need to exclude some overcounted interactions that result from
    * the parallel decomposition.
    */
-  bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2, int cg1,
-                                              int cg2) {
-    int unique_id_1, unique_id_2;
-
 #ifdef IS_MPI
+  bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2, int, int) {
     // in MPI, we have to look up the unique IDs for each atom
-    unique_id_1 = AtomRowToGlobal[atom1];
-    unique_id_2 = AtomColToGlobal[atom2];
-    // group1 = cgRowToGlobal[cg1];
-    // group2 = cgColToGlobal[cg2];
-#else
-    unique_id_1 = AtomLocalToGlobal[atom1];
-    unique_id_2 = AtomLocalToGlobal[atom2];
-    int group1  = cgLocalToGlobal[cg1];
-    int group2  = cgLocalToGlobal[cg2];
-#endif
+    int unique_id_1 = AtomRowToGlobal[atom1];
+    int unique_id_2 = AtomColToGlobal[atom2];
 
     if (unique_id_1 == unique_id_2) return true;
 
-#ifdef IS_MPI
     // this prevents us from doing the pair on multiple processors
     if (unique_id_1 < unique_id_2) {
       if ((unique_id_1 + unique_id_2) % 2 == 0) return true;
     } else {
       if ((unique_id_1 + unique_id_2) % 2 == 1) return true;
     }
-#endif
-
-#ifndef IS_MPI
-    if (group1 == group2) {
-      if (unique_id_1 < unique_id_2) return true;
-    }
-#endif
 
     return false;
   }
+
+#else
+  bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2, int cg1,
+                                              int cg2) {
+    int unique_id_1 = AtomLocalToGlobal[atom1];
+    int unique_id_2 = AtomLocalToGlobal[atom2];
+    int group1 = cgLocalToGlobal[cg1];
+    int group2 = cgLocalToGlobal[cg2];
+
+    if (unique_id_1 == unique_id_2) return true;
+
+    if (group1 == group2) {
+      if (unique_id_1 < unique_id_2) return true;
+    }
+
+    return false;
+  }
+#endif
 
   /**
    * We need to handle the interactions for atoms who are involved in
@@ -1601,7 +1600,7 @@ namespace OpenMD {
       // include all groups here.
       for (int j1 = 0; j1 < nGroups_; j1++) {
         point[j1] = len;
-        rs        = snap_->cgData.position[j1];
+        rs = snap_->cgData.position[j1];
         // include self group interactions j2 == j1
         for (int j2 = j1; j2 < nGroups_; j2++) {
           dr = snap_->cgData.position[j2] - rs;

@@ -68,6 +68,7 @@ namespace OpenMD {
     setLabelString("<vz(0).vz(t)>");
     velocities_.resize(nFrames_);
   }
+
   VCorrFuncR::VCorrFuncR(SimInfo* info, const std::string& filename,
                          const std::string& sele1, const std::string& sele2) :
       ObjectACF<RealType>(info, filename, sele1, sele2,
@@ -87,6 +88,7 @@ namespace OpenMD {
     velocities_[frame].push_back(sd->getVel());
     return velocities_[frame].size() - 1;
   }
+
   RealType VCorrFunc::calcCorrVal(int frame1, int frame2, int id1, int id2) {
     RealType v2 = dot(velocities_[frame1][id1], velocities_[frame2][id2]);
     return v2;
@@ -96,6 +98,7 @@ namespace OpenMD {
     velocities_[frame].push_back(sd->getVel().z());
     return velocities_[frame].size() - 1;
   }
+
   RealType VCorrFuncZ::calcCorrVal(int frame1, int frame2, int id1, int id2) {
     RealType v2 = velocities_[frame1][id1] * velocities_[frame2][id2];
     return v2;
@@ -111,6 +114,7 @@ namespace OpenMD {
     velocities_[frame].push_back(vel);
     return velocities_[frame].size() - 1;
   }
+
   RealType VCorrFuncR::calcCorrVal(int frame1, int frame2, int id1, int id2) {
     RealType v2;
     v2 = velocities_[frame1][id1] * velocities_[frame2][id2];

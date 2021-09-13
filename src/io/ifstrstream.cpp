@@ -188,10 +188,10 @@ namespace OpenMD {
    * \param checkFilename Flags indicating checking the file name in parallel
    * \todo use try - catch syntax to make the program more readable
    */
+#ifdef IS_MPI
   bool ifstrstream::internalOpen(const char* filename,
                                  std::ios_base::openmode mode,
                                  bool checkFilename) {
-#ifdef IS_MPI
     // int commStatus;
     long fileSize;
     char* fbuf;
@@ -304,15 +304,20 @@ namespace OpenMD {
       }
     }
 
+    this->clear();
+    return true;
+  }
 #else
+  bool ifstrstream::internalOpen(const char* filename,
+                                 std::ios_base::openmode mode, bool) {
     // in single version, fall back to ifstream
     if (!internalFileBuf_.open(filename, mode)) {
       this->setstate(std::ios_base::failbit);
       return false;
     }
 
-#endif
     this->clear();
     return true;
   }
+#endif
 }  // namespace OpenMD

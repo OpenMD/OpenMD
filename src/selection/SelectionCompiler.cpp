@@ -312,7 +312,7 @@ namespace OpenMD {
     return cchToken > 0;
   }
 
-  bool SelectionCompiler::lookingAtDecimal(bool allowNegative) {
+  bool SelectionCompiler::lookingAtDecimal(bool) {
     if (ichToken == cchScript) { return false; }
 
     int ichT = ichToken;

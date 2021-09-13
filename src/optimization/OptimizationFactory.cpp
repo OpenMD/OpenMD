@@ -65,7 +65,7 @@ namespace OpenMD {
   }
 
   QuantLib::OptimizationMethod* OptimizationFactory::createOptimization(
-      const std::string& id, SimInfo* info) {
+      const std::string& id, SimInfo*) {
     CreatorMapType::iterator i = creatorMap_.find(id);
     if (i != creatorMap_.end()) {
       // invoke functor to create object

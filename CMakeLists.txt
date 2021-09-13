@@ -84,14 +84,11 @@ include(CheckCXXCompilerFlag)
 include(CheckIncludeFileCXX)
 include(CheckCXXSymbolExists)
 
-# add_compile_options(-pedantic-errors -Wall  -Wextra) # -Werror
-
-if ( CMAKE_COMPILER_IS_GNUCXX )
-    add_definitions("-Wall")
-endif ( CMAKE_COMPILER_IS_GNUCXX )
 if ( MSVC )
-    add_definitions("/W3 /DNOMINMAX")
-endif ( MSVC )
+  add_compile_options("/W4 /Wall /DNOMINMAX /WX")
+else()
+  add_compile_options(-pedantic-errors -Wall -Wextra -Werror)
+endif ()
 
 # OpenMD version number.
 set (VERSION_MAJOR "2")

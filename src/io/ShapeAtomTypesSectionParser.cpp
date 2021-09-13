@@ -59,9 +59,7 @@
 
 namespace OpenMD {
 
-  ShapeAtomTypesSectionParser::ShapeAtomTypesSectionParser(
-      ForceFieldOptions& options) :
-      options_(options) {
+  ShapeAtomTypesSectionParser::ShapeAtomTypesSectionParser(ForceFieldOptions&) {
     setSectionName("ShapeAtomTypes");
   }
 
@@ -96,7 +94,7 @@ namespace OpenMD {
     }
   }
 
-  void ShapeAtomTypesSectionParser::parseShapeFile(ForceField& ff,
+  void ShapeAtomTypesSectionParser::parseShapeFile(ForceField&,
                                                    std::string& shapeFileName,
                                                    AtomType* at) {
     const int bufferSize = 65535;

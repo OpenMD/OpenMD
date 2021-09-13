@@ -1385,8 +1385,7 @@ namespace OpenMD {
     }
   }
 
-  RealType Electrostatic::getSuggestedCutoffRadius(
-      pair<AtomType*, AtomType*> atypes) {
+  RealType Electrostatic::getSuggestedCutoffRadius(pair<AtomType*, AtomType*>) {
     // This seems to work moderately well as a default.  There's no
     // inherent scale for 1/r interactions that we can standardize.
     // 12 angstroms seems to be a reasonably good guess for most

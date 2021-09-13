@@ -184,7 +184,7 @@ namespace OpenMD {
     return ssResult;
   }
 
-  SelectionSet HullFinder::findHull(int frame) {
+  SelectionSet HullFinder::findHull(int) {
     SelectionSet ssResult(nObjects_);
 #ifdef HAVE_QHULL
     surfaceMesh_->computeHull(localSites_);
@@ -219,5 +219,4 @@ namespace OpenMD {
 
     return ssResult;
   }
-
 }  // namespace OpenMD

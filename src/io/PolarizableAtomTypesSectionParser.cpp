@@ -52,8 +52,7 @@
 namespace OpenMD {
 
   PolarizableAtomTypesSectionParser::PolarizableAtomTypesSectionParser(
-      ForceFieldOptions& options) :
-      options_(options) {
+      ForceFieldOptions&) {
     setSectionName("PolarizableAtomTypes");
   }
 

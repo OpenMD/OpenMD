@@ -80,7 +80,6 @@ namespace OpenMD {
     // form.
 
     void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    ForceFieldOptions& options_;
   };
 }  // namespace OpenMD
 

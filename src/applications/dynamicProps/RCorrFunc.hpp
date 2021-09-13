@@ -71,8 +71,8 @@ namespace OpenMD {
     virtual void computeFrame(int frame);
     virtual int computeProperty1(int frame, StuntDouble* sd);
     virtual void correlateFrames(int frame1, int frame2, int timeBin);
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2,
-                                 int timeBin);
+    RealType calcCorrValImpl(int frame1, int frame2, int id1, int id2,
+                             int timeBin);
     virtual RealType calcCorrVal(int, int, int, int) { return -1; }
     virtual void postCorrelate();
     virtual void writeCorrelate();
