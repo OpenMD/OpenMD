@@ -70,7 +70,7 @@ namespace OpenMD {
   template<typename Container>
   void toUpper(Container& cont, const std::locale& loc = std::locale()) {
     std::transform(cont.begin(), cont.end(), cont.begin(),
-                   [&loc](char c) { return std::tolower(c, loc); });
+                   [&loc](char c) { return std::toupper(c, loc); });
   }
 
   template<typename Container>

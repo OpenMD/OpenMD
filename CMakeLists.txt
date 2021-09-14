@@ -84,11 +84,14 @@ include(CheckCXXCompilerFlag)
 include(CheckIncludeFileCXX)
 include(CheckCXXSymbolExists)
 
-if ( MSVC )
+if(WIN32)
   add_compile_options("/W4 /Wall /DNOMINMAX /WX")
 else()
   add_compile_options(-pedantic-errors -Wall -Wextra -Werror)
-endif ()
+
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    add_compile_options(-Wno-cast-function-type -Wno-clobbered)
+endif()
 
 # OpenMD version number.
 set (VERSION_MAJOR "2")

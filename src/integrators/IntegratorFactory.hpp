@@ -131,7 +131,6 @@ namespace OpenMD {
 
   /** write out all of the type identifiers to an output stream */
   std::ostream& operator<<(std::ostream& o, IntegratorFactory& factory);
-
 }  // namespace OpenMD
 
 #endif  // INTEGRATORS_INTEGRATORFACTORY_HPP
