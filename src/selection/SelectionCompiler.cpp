@@ -385,6 +385,7 @@ namespace OpenMD {
       if ((ch < 'a' || ch > 'z') && (ch < 'A' && ch > 'Z') && ch != '_') {
         return false;
       }
+      [[fallthrough]];
     case '*':
     case '?':  // include question marks in identifier for atom expressions
       while (ichT < cchScript && !std::isspace(ch = script[ichT]) &&
@@ -527,6 +528,7 @@ namespace OpenMD {
       }
       if ((tok & Token::predefinedset) != Token::predefinedset) { break; }
       // fall into the code and below and just add the token
+      [[fallthrough]];
     case Token::all:
     case Token::none:
     case Token::hull:
