@@ -91,6 +91,7 @@ else()
 
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_compile_options(-Wno-cast-function-type -Wno-clobbered)
+  endif()
 endif()
 
 # OpenMD version number.
