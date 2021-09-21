@@ -206,31 +206,18 @@ namespace OpenMD {
 
     int storageLayout = info_->getSnapshotManager()->getStorageLayout();
 
-    if (storageLayout & DataStorage::dslPosition) {
-      needPos_ = true;
-    } else {
-      needPos_ = false;
-    }
-
-    if (storageLayout & DataStorage::dslVelocity) {
-      needVel_ = true;
-    } else {
-      needVel_ = false;
-    }
-
-    if (storageLayout & DataStorage::dslAmat ||
-        storageLayout & DataStorage::dslDipole ||
-        storageLayout & DataStorage::dslQuadrupole) {
-      needQuaternion_ = true;
-    } else {
-      needQuaternion_ = false;
-    }
-
-    if (storageLayout & DataStorage::dslAngularMomentum) {
-      needAngMom_ = true;
-    } else {
-      needAngMom_ = false;
-    }
+    needPos_ = (storageLayout & DataStorage::dslPosition) ? true : false;
+    needVel_ = (storageLayout & DataStorage::dslVelocity) ? true : false;
+    needQuaternion_ = (storageLayout & DataStorage::dslAmat ||
+		       storageLayout & DataStorage::dslDipole ||
+		       storageLayout & DataStorage::dslQuadrupole) ? true : false;
+    needAngMom_ = (storageLayout &
+		   DataStorage::dslAngularMomentum) ? true : false;
+    
+    // some dump files contain the efield, but we should only parse
+    // and set the field if we have actually allocated memory for it
+    readField_ = (storageLayout &
+		  DataStorage::dslElectricField) ? true : false;
 
     readSet(whichFrame);
 
@@ -488,7 +475,8 @@ namespace OpenMD {
         eField[0] = tokenizer.nextTokenAsDouble();
         eField[1] = tokenizer.nextTokenAsDouble();
         eField[2] = tokenizer.nextTokenAsDouble();
-        sd->setElectricField(eField);
+	// only set the field if we have allocated memory for it
+	if (readField_) sd->setElectricField(eField);
         break;
       }
       case 's': {
