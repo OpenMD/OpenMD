@@ -599,7 +599,7 @@ namespace OpenMD {
         eField[0] = tokenizer.nextTokenAsDouble();
         eField[1] = tokenizer.nextTokenAsDouble();
         eField[2] = tokenizer.nextTokenAsDouble();
-        sd->setElectricField(eField);
+	if (readField_) sd->setElectricField(eField);
         break;
       }
       case 's': {
