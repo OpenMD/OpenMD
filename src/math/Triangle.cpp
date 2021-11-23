@@ -109,8 +109,6 @@ Mat3x3d Triangle::computeHydrodynamicTensor(RealType viscosity) {
                    viscosity) +
       hydro_tensor(centroid_, centroid_, vertices_[2], vertices_[0], s2,
                    viscosity);
-
-  // Hinv *= getArea();
   return H.inverse();
 }
 
@@ -119,13 +117,12 @@ Mat3x3d Triangle::hydro_tensor(const Vector3d& ri, const Vector3d& rj0,
                                RealType s, RealType viscosity) {
   Vector3d v2 = (rj0 + rj1 + rj2) / RealType(3.0);  // sub-centroid
   Vector3d dr = ri - v2;  // real centroid to sub-centroid
-  RealType l2 = RealType(1.0) / dr.lengthSquare();
+  RealType ri2 = RealType(1.0) / dr.lengthSquare();
 
   Mat3x3d G;
-  G = (SquareMatrix3<RealType>::identity() + outProduct(dr, dr) * l2) *
-      RealType(sqrt(l2));
+  G = (SquareMatrix3<RealType>::identity() + outProduct(dr, dr) * ri2) *
+      RealType(sqrt(ri2));
 
-  G *= 0.125 / 3.14159285358979;
-  G *= s / viscosity;
+  G *= 1.0 / (8.0 * 3.14159285358979 * viscosity);
   return G;
 }
