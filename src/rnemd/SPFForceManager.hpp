@@ -46,6 +46,10 @@
 #ifndef OPENMD_RNEMD_SPFFORCEMANAGER_HPP
 #define OPENMD_RNEMD_SPFFORCEMANAGER_HPP
 
+#include <config.h>
+
+#include <cmath>
+
 #include "brains/ForceManager.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/Snapshot.hpp"
@@ -57,47 +61,58 @@ namespace OpenMD::RNEMD {
   class SPFForceManager : public ForceManager {
   public:
     SPFForceManager(SimInfo* info);
-    ~SPFForceManager();
 
-    void setSelectedMolecule(Molecule* selectedMolecule, Vector3d newPosition);
+    void setSelectedMolecule(Molecule* selectedMolecule, Vector3d newCom);
+    bool updateLambda(RealType& particleTarget, RealType& deltaLambda);
 
-    RealType getDeltaU() const { return potentialB_ - potentialA_; }
-
-    void updateLambda(RealType lambda) { lambda_ = lambda; }
-
-    void acceptGhost() {
-      *currentSnapshot_ = *ghostSnapshot_;
-
-      currentSnapshot_->clearDerivedProperties();
-      ghostSnapshot_->clearDerivedProperties();
+    RealType getScaledDeltaU(RealType d_lambda) const {
+      return -(f_lambda(lambda_ + d_lambda) - f_lambda(lambda_)) *
+             (potentialSink_ - potentialSource_);
     }
+
+    Molecule* getSelectedMolecule() const { return selectedMolecule_; }
+    Snapshot* getTemporarySourceSnapshot() const {
+      return temporarySourceSnapshot_;
+    }
+    Snapshot* getTemporarySinkSnapshot() const {
+      return temporarySinkSnapshot_;
+    }
+
+    void combineForcesAndTorques();
+    void updatePotentials();
+    void updateVirialTensor();
+
+    RealType f_lambda(RealType lambda) const { return std::pow(lambda, k_); }
 
   private:
     void calcForces() override;
 
-    void updatePotentials();
     void updateLongRangePotentials();
     void updateShortRangePotentials();
     void updateSelfPotentials();
     void updateExcludedPotentials();
     void updateRestraintPotentials();
     void updateSelectionPotentials();
-    void updateVirialTensor();
 
     template<typename T>
-    T linearCombination(T current, T ghost) {
-      return T {(1.0 - lambda_) * current + lambda_ * ghost};
+    T linearCombination(T quantityA, T quantityB) {
+      RealType result = f_lambda(lambda_);
+
+      return T {(1.0 - result) * quantityA + result * quantityB};
     }
 
-    Snapshot* currentSnapshot_;
-    Snapshot* ghostSnapshot_;
+    Snapshot* currentSnapshot_ {nullptr};
+    Snapshot* temporarySourceSnapshot_ {nullptr};
+    Snapshot* temporarySinkSnapshot_ {nullptr};
 
-    Molecule* selectedMolecule_;
+    Molecule* selectedMolecule_ {nullptr};
+    Vector3d currentSinkCom_ {};
 
-    RealType potentialA_ {};
-    RealType potentialB_ {};
+    RealType lambda_ {};
+    const unsigned int k_ {3};
 
-    RealType lambda_;
+    RealType potentialSource_ {};
+    RealType potentialSink_ {};
   };
 }  // namespace OpenMD::RNEMD
 

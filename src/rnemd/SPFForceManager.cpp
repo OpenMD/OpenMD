@@ -45,50 +45,37 @@
 
 #include "rnemd/SPFForceManager.hpp"
 
+#include <config.h>
+
 #include <vector>
 
 #include "brains/ForceManager.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/Snapshot.hpp"
+#include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
 
 namespace OpenMD::RNEMD {
 
   SPFForceManager::SPFForceManager(SimInfo* info) :
-      ForceManager(info), lambda_ {0.0} {
+      ForceManager {info}, lambda_ {}, potentialSource_ {}, potentialSink_ {} {
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
-    int nAtoms        = info_->getNAtoms();
-    int nRigidBodies  = info_->getNRigidBodies();
-    int nCutoffGroups = info_->getNCutoffGroups();
-    int storageLayout = info_->getSnapshotManager()->getStorageLayout();
-
-    bool usePBC = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-    ghostSnapshot_  = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
-                                  storageLayout, usePBC);
-    *ghostSnapshot_ = *currentSnapshot_;
-    ghostSnapshot_->clearDerivedProperties();
   }
 
-  SPFForceManager::~SPFForceManager() { delete ghostSnapshot_; }
-
   void SPFForceManager::calcForces() {
-    // current is at t+dt,  previous is at t, ghost is at t
-    // we want forces from current(t+dt) and ghost(t+dt)
-    int index {};
-    StuntDouble* sd;
-    Molecule::IntegrableObjectIterator j;
-
-    std::vector<Vector3d> deltas;
-    std::vector<Vector3d> previous;
-
-    ForceManager::calcForces();  // current snapshot
-    potentialA_ = currentSnapshot_->getPotentialEnergy();
+    // Current snapshot with selected molecule in source slab
+    ForceManager::calcForces();
+    potentialSource_ = currentSnapshot_->getPotentialEnergy();
 
     if (selectedMolecule_) {
+      Vector3d prevSourceCom    = selectedMolecule_->getPrevCom();
+      Vector3d currentSourceCom = selectedMolecule_->getCom();
+
+      Vector3d delta = currentSourceCom - prevSourceCom;
+
       int nAtoms        = info_->getNAtoms();
       int nRigidBodies  = info_->getNRigidBodies();
       int nCutoffGroups = info_->getNCutoffGroups();
@@ -96,80 +83,102 @@ namespace OpenMD::RNEMD {
 
       bool usePBC = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-      Snapshot* tempSnapshot = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
+      temporarySourceSnapshot_ = new Snapshot(
+          nAtoms, nRigidBodies, nCutoffGroups, storageLayout, usePBC);
+
+      temporarySinkSnapshot_ = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
                                             storageLayout, usePBC);
 
-      // save delta from propagated current and previous:
-      for (sd = selectedMolecule_->beginIntegrableObject(j); sd != NULL;
-           sd = selectedMolecule_->nextIntegrableObject(j)) {
-        deltas.push_back(sd->getPos() - sd->getPrevPos());
-      }
-
-      *tempSnapshot     = *currentSnapshot_;
-      *currentSnapshot_ = *ghostSnapshot_;
-
+      *temporarySourceSnapshot_ = *currentSnapshot_;
       currentSnapshot_->clearDerivedProperties();
 
-      // get position of tagged molecule from previous ghost
-      for (sd = selectedMolecule_->beginIntegrableObject(j); sd != NULL;
-           sd = selectedMolecule_->nextIntegrableObject(j)) {
-        previous.push_back(sd->getPos());
-      }
+      currentSinkCom_ += delta;
+      selectedMolecule_->setCom(currentSinkCom_);
 
-      // propagate the delta in position into the ghost
-      for (sd = selectedMolecule_->beginIntegrableObject(j); sd != NULL;
-           sd = selectedMolecule_->nextIntegrableObject(j)) {
-        sd->setPos(previous[index] + deltas[index]);
-        index++;
-      }
+      // Current snapshot with selected molecule in sink slab
+      ForceManager::calcForces();
+      potentialSink_ = currentSnapshot_->getPotentialEnergy();
 
-      ForceManager::calcForces();  // ghost snapshot
-      potentialB_ = currentSnapshot_->getPotentialEnergy();
-
-      *ghostSnapshot_   = *currentSnapshot_;
-      *currentSnapshot_ = *tempSnapshot;
-
+      *temporarySinkSnapshot_ = *currentSnapshot_;
       currentSnapshot_->clearDerivedProperties();
 
-      // calculate lambda-averaged forces on all atoms and potentials
-      SimInfo::MoleculeIterator mi;
-      Molecule* mol;
-      Molecule::IntegrableObjectIterator ii;
-
-      // now scale forces and torques of all the sds
-      for (mol = info_->beginMolecule(mi); mol != NULL;
-           mol = info_->nextMolecule(mi)) {
-        for (sd = mol->beginIntegrableObject(ii); sd != NULL;
-             sd = mol->nextIntegrableObject(ii)) {
-          sd->combineForcesAndTorques(currentSnapshot_, ghostSnapshot_,
-                                      1 - lambda_, lambda_);
-        }
-      }
-
+      combineForcesAndTorques();
       updatePotentials();
       updateVirialTensor();
 
-      delete tempSnapshot;
+      selectedMolecule_->setCom(currentSourceCom);
     } else {
-      potentialB_ = currentSnapshot_->getPotentialEnergy();
+      potentialSink_ = currentSnapshot_->getPotentialEnergy();
     }
   }
 
   void SPFForceManager::setSelectedMolecule(Molecule* selectedMolecule,
-                                            Vector3d newPosition) {
-    Snapshot tempSnapshot = *currentSnapshot_;
-    *currentSnapshot_     = *ghostSnapshot_;
-
+                                            Vector3d newCom) {
     if (selectedMolecule) {
-      // tagged molecule should be pushed from rnemd
-      Vector3d delta = newPosition - selectedMolecule->getCom();
-      selectedMolecule->moveCom(delta);
       selectedMolecule_ = selectedMolecule;
+      currentSinkCom_   = newCom;
     } else {
       selectedMolecule_ = nullptr;
     }
-    *ghostSnapshot_   = *currentSnapshot_;
-    *currentSnapshot_ = tempSnapshot;
+  }
+
+  bool SPFForceManager::updateLambda(RealType& particleTarget,
+                                     RealType& deltaLambda) {
+    bool updateSelectedMolecule {false};
+
+    // std::cerr << currentSnapshot_->getTime() << " fs\n";
+    // std::cerr << "lambda:           " << lambda_ << '\n';
+    // std::cerr << "potential source: "
+    //           << temporarySourceSnapshot_->getPotentialEnergy() << '\n';
+    // std::cerr << "potential sink:   "
+    //           << temporarySinkSnapshot_->getPotentialEnergy() << '\n';
+
+    lambda_ += std::fabs(particleTarget);
+
+    if (f_lambda(lambda_ + std::fabs(particleTarget)) > 1.0 &&
+        f_lambda(lambda_) < 1.0) {
+      deltaLambda = particleTarget -
+                    (f_lambda(lambda_ + std::fabs(particleTarget)) - 1.0);
+    } else {
+      deltaLambda = particleTarget;
+    }
+
+    currentSnapshot_->clearDerivedProperties();
+
+    combineForcesAndTorques();
+    updatePotentials();
+    updateVirialTensor();
+
+    if (f_lambda(lambda_) > 1.0 || std::fabs(f_lambda(lambda_) - 1.0) < 1e-6) {
+      // particleTarget = 1.0 - f_lambda(lambda_ - std::fabs(particleTarget));
+      lambda_ = 0.0;
+
+      selectedMolecule_->setCom(currentSinkCom_);
+      updateSelectedMolecule = true;
+    }
+
+    return updateSelectedMolecule;
+  }
+
+  void SPFForceManager::combineForcesAndTorques() {
+    // Calculate lambda-averaged forces on all atoms and potentials:
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::IntegrableObjectIterator ii;
+    StuntDouble* sd;
+
+    RealType result = f_lambda(lambda_);
+
+    // Now scale forces and torques of all the sds
+    for (mol = info_->beginMolecule(mi); mol != NULL;
+         mol = info_->nextMolecule(mi)) {
+      for (sd = mol->beginIntegrableObject(ii); sd != NULL;
+           sd = mol->nextIntegrableObject(ii)) {
+        sd->combineForcesAndTorques(temporarySourceSnapshot_,
+                                    temporarySinkSnapshot_, 1.0 - result,
+                                    result);
+      }
+    }
   }
 
   void SPFForceManager::updatePotentials() {
@@ -179,96 +188,89 @@ namespace OpenMD::RNEMD {
     updateExcludedPotentials();
     updateRestraintPotentials();
     if (doPotentialSelection_) updateSelectionPotentials();
-
-    // Defer potentialEnergy calculation until it is needed
-    currentSnapshot_->hasPotentialEnergy = false;
   }
 
   void SPFForceManager::updateLongRangePotentials() {
     potVec longRangePotentials =
-        linearCombination(currentSnapshot_->getLongRangePotentials(),
-                          ghostSnapshot_->getLongRangePotentials());
+        linearCombination(temporarySourceSnapshot_->getLongRangePotentials(),
+                          temporarySinkSnapshot_->getLongRangePotentials());
     currentSnapshot_->setLongRangePotentials(longRangePotentials);
 
     RealType reciprocalPotential =
-        linearCombination(currentSnapshot_->getReciprocalPotential(),
-                          ghostSnapshot_->getReciprocalPotential());
+        linearCombination(temporarySourceSnapshot_->getReciprocalPotential(),
+                          temporarySinkSnapshot_->getReciprocalPotential());
     currentSnapshot_->setReciprocalPotential(reciprocalPotential);
 
     RealType surfacePotential =
-        linearCombination(currentSnapshot_->getSurfacePotential(),
-                          ghostSnapshot_->getSurfacePotential());
+        linearCombination(temporarySourceSnapshot_->getSurfacePotential(),
+                          temporarySinkSnapshot_->getSurfacePotential());
     currentSnapshot_->setSurfacePotential(surfacePotential);
-
-    // Defer longRangePotential calculation until it is needed
-    currentSnapshot_->hasLongRangePotential = false;
   }
 
   void SPFForceManager::updateShortRangePotentials() {
     RealType bondPotential =
-        linearCombination(currentSnapshot_->getBondPotential(),
-                          ghostSnapshot_->getBondPotential());
+        linearCombination(temporarySourceSnapshot_->getBondPotential(),
+                          temporarySinkSnapshot_->getBondPotential());
     currentSnapshot_->setBondPotential(bondPotential);
 
     RealType bendPotential =
-        linearCombination(currentSnapshot_->getBendPotential(),
-                          ghostSnapshot_->getBendPotential());
+        linearCombination(temporarySourceSnapshot_->getBendPotential(),
+                          temporarySinkSnapshot_->getBendPotential());
     currentSnapshot_->setBendPotential(bendPotential);
 
     RealType torsionPotential =
-        linearCombination(currentSnapshot_->getTorsionPotential(),
-                          ghostSnapshot_->getTorsionPotential());
+        linearCombination(temporarySourceSnapshot_->getTorsionPotential(),
+                          temporarySinkSnapshot_->getTorsionPotential());
     currentSnapshot_->setTorsionPotential(torsionPotential);
 
     RealType inversionPotential =
-        linearCombination(currentSnapshot_->getInversionPotential(),
-                          ghostSnapshot_->getInversionPotential());
+        linearCombination(temporarySourceSnapshot_->getInversionPotential(),
+                          temporarySinkSnapshot_->getInversionPotential());
     currentSnapshot_->setInversionPotential(inversionPotential);
-
-    // Defer shortRangePotential calculation until it is needed
-    currentSnapshot_->hasShortRangePotential = false;
   }
 
   void SPFForceManager::updateSelfPotentials() {
     potVec selfPotentials =
-        linearCombination(currentSnapshot_->getSelfPotentials(),
-                          ghostSnapshot_->getSelfPotentials());
+        linearCombination(temporarySourceSnapshot_->getSelfPotentials(),
+                          temporarySinkSnapshot_->getSelfPotentials());
     currentSnapshot_->setSelfPotentials(selfPotentials);
-
-    // Defer selfPotential calculation until it is needed
-    currentSnapshot_->hasSelfPotential = false;
   }
 
   void SPFForceManager::updateExcludedPotentials() {
     potVec excludedPotentials =
-        linearCombination(currentSnapshot_->getExcludedPotentials(),
-                          ghostSnapshot_->getExcludedPotentials());
+        linearCombination(temporarySourceSnapshot_->getExcludedPotentials(),
+                          temporarySinkSnapshot_->getExcludedPotentials());
     currentSnapshot_->setExcludedPotentials(excludedPotentials);
-
-    currentSnapshot_->hasExcludedPotential = false;
   }
 
   void SPFForceManager::updateRestraintPotentials() {
     RealType restraintPotential =
-        linearCombination(currentSnapshot_->getRestraintPotential(),
-                          ghostSnapshot_->getRestraintPotential());
+        linearCombination(temporarySourceSnapshot_->getRestraintPotential(),
+                          temporarySinkSnapshot_->getRestraintPotential());
     currentSnapshot_->setRestraintPotential(restraintPotential);
   }
 
   void SPFForceManager::updateSelectionPotentials() {
     potVec selectionPotentials =
-        linearCombination(currentSnapshot_->getSelectionPotentials(),
-                          ghostSnapshot_->getSelectionPotentials());
+        linearCombination(temporarySourceSnapshot_->getSelectionPotentials(),
+                          temporarySinkSnapshot_->getSelectionPotentials());
     currentSnapshot_->setSelectionPotentials(selectionPotentials);
   }
 
   void SPFForceManager::updateVirialTensor() {
-    Mat3x3d virialTensor = linearCombination(
-        currentSnapshot_->getVirialTensor(), ghostSnapshot_->getVirialTensor());
+    Mat3x3d virialTensor =
+        linearCombination(temporarySourceSnapshot_->getVirialTensor(),
+                          temporarySinkSnapshot_->getVirialTensor());
     currentSnapshot_->setVirialTensor(virialTensor);
 
-    // Defer pressure and pressureTensor calculations until they are needed
-    currentSnapshot_->hasPressureTensor = false;
-    currentSnapshot_->hasPressure       = false;
+    Mat3x3d pressureTensor =
+        linearCombination(temporarySourceSnapshot_->getPressureTensor(),
+                          temporarySinkSnapshot_->getPressureTensor());
+    currentSnapshot_->setPressureTensor(pressureTensor);
+
+    RealType pressure =
+        linearCombination(temporarySourceSnapshot_->getPressure(),
+                          temporarySinkSnapshot_->getPressure());
+    currentSnapshot_->setPressure(pressure);
   }
 }  // namespace OpenMD::RNEMD

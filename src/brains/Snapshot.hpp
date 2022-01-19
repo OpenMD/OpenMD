@@ -336,7 +336,6 @@ namespace OpenMD {
     bool hasInertiaTensor;
     bool hasGyrationalVolume;
     bool hasHullVolume;
-    bool hasConservedQuantity;
     bool hasBoundingBox;
 
   private:

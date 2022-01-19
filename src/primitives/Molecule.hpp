@@ -347,6 +347,14 @@ namespace OpenMD {
     RealType getMass();
 
     /**
+     * Returns the center of mass position of this molecule in
+     * the previous snapshot
+     *
+     * @return the center of mass position of this molecule.
+     */
+    Vector3d getPrevCom();
+
+    /**
      * Returns the current center of mass position of this molecule.
      *
      * @return the center of mass position of this molecule.
@@ -361,6 +369,9 @@ namespace OpenMD {
      * @param snapshotNo
      */
     Vector3d getCom(int snapshotNo);
+
+    /** Sets the center of this molecule */
+    void setCom(const Vector3d& newCom);
 
     /** Moves the center of this molecule */
     void moveCom(const Vector3d& delta);

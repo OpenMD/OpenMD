@@ -69,16 +69,14 @@
 namespace OpenMD {
 
   DumpReader::DumpReader(SimInfo* info, const std::string& filename) :
-      info_(info), filename_(filename), isScanned_(false), nframes_(0),
+      info_(info), filename_(filename), isScanned_(false),
+      nframes_(0), inFile_ {std::ifstream(filename.c_str(),
+                                          ifstream::in | ifstream::binary)},
       needCOMprops_(false) {
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
-
-      inFile_ =
-          new std::ifstream(filename_.c_str(), ifstream::in | ifstream::binary);
-
-      if (inFile_->fail()) {
+      if (inFile_.fail()) {
         sprintf(painCave.errMsg, "DumpReader: Cannot open file: %s\n",
                 filename_.c_str());
         painCave.isFatal = 1;
@@ -93,13 +91,6 @@ namespace OpenMD {
 
   DumpReader::~DumpReader() {
 #ifdef IS_MPI
-    if (worldRank == 0) {
-#endif
-
-      delete inFile_;
-
-#ifdef IS_MPI
-    }
     strcpy(checkPointMsg, "Dump file closed successfully.");
     errorCheckPoint();
 #endif
@@ -117,19 +108,19 @@ namespace OpenMD {
 
 #ifdef IS_MPI
     if (worldRank == 0) {
-#endif  // is_mpi
+#endif
 
-      currPos                     = inFile_->tellg();
+      currPos                     = inFile_.tellg();
       prevPos                     = currPos;
       bool foundOpenSnapshotTag   = false;
       bool foundClosedSnapshotTag = false;
 
       int lineNo = 0;
-      while (inFile_->getline(buffer, bufferSize)) {
+      while (inFile_.getline(buffer, bufferSize)) {
         ++lineNo;
 
         std::string line = buffer;
-        currPos          = inFile_->tellg();
+        currPos          = inFile_.tellg();
         if (line.find("<Snapshot>") != std::string::npos) {
           if (foundOpenSnapshotTag) {
             sprintf(painCave.errMsg,
@@ -247,10 +238,10 @@ namespace OpenMD {
     std::string line;
 
 #ifndef IS_MPI
-    inFile_->clear();
-    inFile_->seekg(framePos_[whichFrame]);
+    inFile_.clear();
+    inFile_.seekg(framePos_[whichFrame]);
 
-    std::istream& inputStream = *inFile_;
+    std::istream& inputStream = inFile_;
 #else
 
     int primaryNode = 0;
@@ -258,10 +249,10 @@ namespace OpenMD {
     if (worldRank == primaryNode) {
       std::string sendBuffer;
 
-      inFile_->clear();
-      inFile_->seekg(framePos_[whichFrame]);
+      inFile_.clear();
+      inFile_.seekg(framePos_[whichFrame]);
 
-      while (inFile_->getline(buffer, bufferSize)) {
+      while (inFile_.getline(buffer, bufferSize)) {
         line = buffer;
         sendBuffer += line;
         sendBuffer += '\n';

@@ -63,7 +63,7 @@
 #if defined(HAVE_QHULL)
 #include "integrators/LangevinHullDynamics.hpp"
 #endif
-
+#include "integrators/SPFDynamics.hpp"
 #include "lattice/BCCLattice.hpp"
 #include "lattice/FCCLattice.hpp"
 #include "lattice/LatticeCreator.hpp"
@@ -116,6 +116,8 @@ namespace OpenMD {
 #endif
     IntegratorFactory::getInstance().registerIntegrator(
         new IntegratorBuilder<LangevinPiston>("LANGEVINPISTON"));
+    IntegratorFactory::getInstance().registerIntegrator(
+        new IntegratorBuilder<SPFDynamics>("SPF"));
   }
 
   void registerOptimizers() {

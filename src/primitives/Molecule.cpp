@@ -277,12 +277,31 @@ namespace OpenMD {
     return mass;
   }
 
+  Vector3d Molecule::getPrevCom() {
+    StuntDouble* sd;
+    std::vector<StuntDouble*>::iterator i;
+    Vector3d com {};
+    RealType totalMass {};
+    RealType mass {};
+
+    for (sd = beginIntegrableObject(i); sd != NULL;
+         sd = nextIntegrableObject(i)) {
+      mass = sd->getMass();
+      totalMass += mass;
+      com += sd->getPrevPos() * mass;
+    }
+
+    com /= totalMass;
+
+    return com;
+  }
+
   Vector3d Molecule::getCom() {
     StuntDouble* sd;
     std::vector<StuntDouble*>::iterator i;
-    Vector3d com;
-    RealType totalMass = 0;
-    RealType mass;
+    Vector3d com {};
+    RealType totalMass {};
+    RealType mass {};
 
     for (sd = beginIntegrableObject(i); sd != NULL;
          sd = nextIntegrableObject(i)) {
@@ -299,9 +318,9 @@ namespace OpenMD {
   Vector3d Molecule::getCom(int snapshotNo) {
     StuntDouble* sd;
     std::vector<StuntDouble*>::iterator i;
-    Vector3d com;
-    RealType totalMass = 0;
-    RealType mass;
+    Vector3d com {};
+    RealType totalMass {};
+    RealType mass {};
 
     for (sd = beginIntegrableObject(i); sd != NULL;
          sd = nextIntegrableObject(i)) {
@@ -313,6 +332,11 @@ namespace OpenMD {
     com /= totalMass;
 
     return com;
+  }
+
+  void Molecule::setCom(const Vector3d& newCom) {
+    Vector3d delta = newCom - getCom();
+    moveCom(delta);
   }
 
   void Molecule::moveCom(const Vector3d& delta) {

@@ -183,7 +183,6 @@ namespace OpenMD {
     hasInertiaTensor              = false;
     hasGyrationalVolume           = false;
     hasHullVolume                 = false;
-    hasConservedQuantity          = false;
     hasBoundingBox                = false;
   }
 
@@ -395,16 +394,32 @@ namespace OpenMD {
 
   void Snapshot::setTime(RealType time) { frameData.currentTime = time; }
 
-  void Snapshot::setBondPotential(RealType bp) { frameData.bondPotential = bp; }
+  void Snapshot::setBondPotential(RealType bp) {
+    frameData.bondPotential = bp;
+    hasShortRangePotential  = false;
+    hasPotentialEnergy      = false;
+    hasTotalEnergy          = false;
+  }
 
-  void Snapshot::setBendPotential(RealType bp) { frameData.bendPotential = bp; }
+  void Snapshot::setBendPotential(RealType bp) {
+    frameData.bendPotential = bp;
+    hasShortRangePotential  = false;
+    hasPotentialEnergy      = false;
+    hasTotalEnergy          = false;
+  }
 
   void Snapshot::setTorsionPotential(RealType tp) {
     frameData.torsionPotential = tp;
+    hasShortRangePotential     = false;
+    hasPotentialEnergy         = false;
+    hasTotalEnergy             = false;
   }
 
   void Snapshot::setInversionPotential(RealType ip) {
     frameData.inversionPotential = ip;
+    hasShortRangePotential       = false;
+    hasPotentialEnergy           = false;
+    hasTotalEnergy               = false;
   }
 
   RealType Snapshot::getBondPotential() { return frameData.bondPotential; }
@@ -426,12 +441,17 @@ namespace OpenMD {
       frameData.shortRangePotential += frameData.torsionPotential;
       frameData.shortRangePotential += frameData.inversionPotential;
       hasShortRangePotential = true;
+      hasPotentialEnergy     = false;
+      hasTotalEnergy         = false;
     }
     return frameData.shortRangePotential;
   }
 
   void Snapshot::setSurfacePotential(RealType sp) {
     frameData.surfacePotential = sp;
+    hasLongRangePotential      = false;
+    hasPotentialEnergy         = false;
+    hasTotalEnergy             = false;
   }
 
   RealType Snapshot::getSurfacePotential() {
@@ -440,13 +460,20 @@ namespace OpenMD {
 
   void Snapshot::setReciprocalPotential(RealType rp) {
     frameData.reciprocalPotential = rp;
+    hasLongRangePotential         = false;
+    hasPotentialEnergy            = false;
   }
 
   RealType Snapshot::getReciprocalPotential() {
     return frameData.reciprocalPotential;
   }
 
-  void Snapshot::setSelfPotentials(potVec sp) { frameData.selfPotentials = sp; }
+  void Snapshot::setSelfPotentials(potVec sp) {
+    frameData.selfPotentials = sp;
+    hasSelfPotential         = false;
+    hasPotentialEnergy       = false;
+    hasTotalEnergy           = false;
+  }
 
   potVec Snapshot::getSelfPotentials() { return frameData.selfPotentials; }
 
@@ -455,13 +482,18 @@ namespace OpenMD {
       for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
         frameData.selfPotential += frameData.selfPotentials[i];
       }
-      hasSelfPotential = true;
+      hasSelfPotential   = true;
+      hasPotentialEnergy = false;
+      hasTotalEnergy     = false;
     }
     return frameData.selfPotential;
   }
 
   void Snapshot::setLongRangePotentials(potVec lrPot) {
     frameData.lrPotentials = lrPot;
+    hasLongRangePotential  = false;
+    hasPotentialEnergy     = false;
+    hasTotalEnergy         = false;
   }
 
   RealType Snapshot::getLongRangePotential() {
@@ -472,6 +504,8 @@ namespace OpenMD {
       frameData.longRangePotential += frameData.reciprocalPotential;
       frameData.longRangePotential += frameData.surfacePotential;
       hasLongRangePotential = true;
+      hasPotentialEnergy    = false;
+      hasTotalEnergy        = false;
     }
     return frameData.longRangePotential;
   }
@@ -485,6 +519,7 @@ namespace OpenMD {
       frameData.potentialEnergy += this->getSelfPotential();
       frameData.potentialEnergy += this->getExcludedPotential();
       hasPotentialEnergy = true;
+      hasTotalEnergy     = false;
     }
     return frameData.potentialEnergy;
   }
@@ -492,10 +527,14 @@ namespace OpenMD {
   void Snapshot::setPotentialEnergy(const RealType pe) {
     frameData.potentialEnergy = pe;
     hasPotentialEnergy        = true;
+    hasTotalEnergy            = false;
   }
 
   void Snapshot::setExcludedPotentials(potVec exPot) {
     frameData.excludedPotentials = exPot;
+    hasExcludedPotential         = false;
+    hasPotentialEnergy           = false;
+    hasTotalEnergy               = false;
   }
 
   potVec Snapshot::getExcludedPotentials() {
@@ -508,6 +547,8 @@ namespace OpenMD {
         frameData.excludedPotential += frameData.excludedPotentials[i];
       }
       hasExcludedPotential = true;
+      hasPotentialEnergy   = false;
+      hasTotalEnergy       = false;
     }
     return frameData.excludedPotential;
   }
@@ -547,30 +588,37 @@ namespace OpenMD {
   RealType Snapshot::getKineticEnergy() { return frameData.kineticEnergy; }
 
   void Snapshot::setTranslationalKineticEnergy(RealType tke) {
-    hasTranslationalKineticEnergy  = true;
     frameData.translationalKinetic = tke;
+    hasTranslationalKineticEnergy  = true;
+    hasKineticEnergy               = false;
+    hasTotalEnergy                 = false;
   }
 
   void Snapshot::setRotationalKineticEnergy(RealType rke) {
-    hasRotationalKineticEnergy  = true;
     frameData.rotationalKinetic = rke;
+    hasRotationalKineticEnergy  = true;
+    hasKineticEnergy            = false;
+    hasTotalEnergy              = false;
   }
 
   void Snapshot::setElectronicKineticEnergy(RealType eke) {
-    hasElectronicKineticEnergy  = true;
     frameData.electronicKinetic = eke;
+    hasElectronicKineticEnergy  = true;
+    hasKineticEnergy            = false;
+    hasTotalEnergy              = false;
   }
 
   void Snapshot::setKineticEnergy(RealType ke) {
-    hasKineticEnergy        = true;
     frameData.kineticEnergy = ke;
+    hasKineticEnergy        = true;
+    hasTotalEnergy          = false;
   }
 
   RealType Snapshot::getTotalEnergy() { return frameData.totalEnergy; }
 
   void Snapshot::setTotalEnergy(RealType te) {
-    hasTotalEnergy        = true;
     frameData.totalEnergy = te;
+    hasTotalEnergy        = true;
   }
 
   RealType Snapshot::getConservedQuantity() {
@@ -578,7 +626,6 @@ namespace OpenMD {
   }
 
   void Snapshot::setConservedQuantity(RealType cq) {
-    hasConservedQuantity        = true;
     frameData.conservedQuantity = cq;
   }
 

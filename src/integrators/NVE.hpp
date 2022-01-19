@@ -61,7 +61,7 @@ namespace OpenMD {
   public:
     NVE(SimInfo* info);
 
-  private:
+  protected:
     virtual void moveA();
     virtual void moveB();
     virtual RealType calcConservedQuantity();

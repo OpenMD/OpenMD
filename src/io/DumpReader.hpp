@@ -65,26 +65,24 @@ namespace OpenMD {
    * @class DumpReader DumpReader.hpp "io/DumpReader.hpp"
    * @todo get rid of more junk code from DumpReader
    */
-  class DumpReader {
+  class DumpReader final {
   public:
     DumpReader(SimInfo* info, const std::string& filename);
-    // DumpReader(SimInfo * info, istream & is);
-
-    virtual ~DumpReader();
+    ~DumpReader();
 
     /** Returns the number of frames in the dump file*/
     int getNFrames();
 
     void setNeedCOMprops(bool ncp) { needCOMprops_ = ncp; }
 
-    virtual void readFrame(int whichFrame);
+    void readFrame(int whichFrame);
 
   protected:
     void scanFile();
     void readSet(int whichFrame);
-    virtual void parseDumpLine(const std::string&);
-    virtual void parseSiteLine(const std::string&);
-    virtual void readFrameProperties(std::istream& inputStream);
+    void parseDumpLine(const std::string&);
+    void parseSiteLine(const std::string&);
+    void readFrameProperties(std::istream& inputStream);
     int readStuntDoubles(std::istream& inputStream);
     void readSiteData(std::istream& inputStream);
 
@@ -95,7 +93,7 @@ namespace OpenMD {
 
     int nframes_;
 
-    std::istream* inFile_;
+    std::ifstream inFile_;
 
     std::vector<std::streampos> framePos_;
 

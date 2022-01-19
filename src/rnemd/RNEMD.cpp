@@ -162,7 +162,8 @@ namespace OpenMD::RNEMD {
     runTime_    = simParams->getRunTime();
     statusTime_ = simParams->getStatusTime();
 
-    rnemdObjectSelection_ = rnemdParams->getObjectSelection();
+    rnemdObjectSelection_   = rnemdParams->getObjectSelection();
+    currentObjectSelection_ = rnemdObjectSelection_;
 
     bool hasSlabWidth     = rnemdParams->haveSlabWidth();
     bool hasSlabACenter   = rnemdParams->haveSlabACenter();
@@ -446,7 +447,7 @@ namespace OpenMD::RNEMD {
     }
 
     // Static object evaluators
-    evaluator_.loadScriptString(rnemdObjectSelection_);
+    evaluator_.loadScriptString(currentObjectSelection_);
     if (!evaluator_.isDynamic())
       seleMan_.setSelectionSet(evaluator_.evaluate());
 
@@ -471,7 +472,7 @@ namespace OpenMD::RNEMD {
               "\tis only %d.  This is almost certainly not what you want\n"
               "\tto do.  A likely cause of this is forgetting the _RB_0\n"
               "\tselector in the selection script!\n",
-              rnemdObjectSelection_.c_str(), selectionCount, nIntegrable);
+              currentObjectSelection_.c_str(), selectionCount, nIntegrable);
       painCave.isFatal  = 0;
       painCave.severity = OPENMD_WARNING;
       simError();
@@ -510,7 +511,7 @@ namespace OpenMD::RNEMD {
     hmat_ = currentSnap_->getHmat();
 
     // dynamic object evaluators:
-    evaluator_.loadScriptString(rnemdObjectSelection_);
+    evaluator_.loadScriptString(currentObjectSelection_);
     if (evaluator_.isDynamic()) seleMan_.setSelectionSet(evaluator_.evaluate());
 
     evaluatorA_.loadScriptString(selectionA_);
@@ -855,6 +856,9 @@ namespace OpenMD::RNEMD {
       rnemdFile_ << "#    exchangeTime = " << exchangeTime_ << ";\n";
       rnemdFile_ << "#    objectSelection = \"" << rnemdObjectSelection_
                  << "\";\n";
+      // if (rnemdFluxType_ == particleFlux_)
+      rnemdFile_ << "#    currentObjectSelection = \""
+                 << currentObjectSelection_ << "\";\n";
       rnemdFile_ << "#    selectionA = \"" << selectionA_ << "\";\n";
       rnemdFile_ << "#    selectionB = \"" << selectionB_ << "\";\n";
       rnemdFile_ << "#    outputSelection = \"" << outputSelection_ << "\";\n";

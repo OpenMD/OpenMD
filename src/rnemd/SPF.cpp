@@ -45,12 +45,10 @@
 
 #include "rnemd/SPF.hpp"
 
-#include <algorithm>
+#include <config.h>
+
 #include <cmath>
-#include <map>
-#include <set>
-#include <sstream>
-#include <string>
+#include <random>
 #include <vector>
 
 #ifdef IS_MPI
@@ -58,27 +56,22 @@
 #endif
 
 #include "brains/ForceManager.hpp"
-#include "brains/Thermo.hpp"
-#include "io/Globals.hpp"
-#include "math/ConvexHull.hpp"
-#include "math/Polynomial.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "math/Vector.hpp"
+#include "brains/SimInfo.hpp"
 #include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "rnemd/RNEMD.hpp"
 #include "rnemd/RNEMDParameters.hpp"
 #include "rnemd/SPFForceManager.hpp"
-#include "types/FixedChargeAdapter.hpp"
-#include "types/FluctuatingChargeAdapter.hpp"
-#include "utils/Accumulator.hpp"
+#include "selection/SelectionManager.hpp"
 #include "utils/Constants.hpp"
+#include "utils/RandNumGen.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD::RNEMD {
 
   SPFMethod::SPFMethod(SimInfo* info, ForceManager* forceMan) :
-      RNEMD {info, forceMan}, sourceSman_ {info} {
+      RNEMD {info, forceMan} {
     rnemdMethodLabel_ = "SPF";
 
     if (SPFForceManager* spfForceManager =
@@ -135,15 +128,15 @@ namespace OpenMD::RNEMD {
       setParticleFlux(0.0);
     }
 
-    selectMolecule();
+    selectNewMolecule();
   }
 
   void SPFMethod::doRNEMDImpl(SelectionManager& smanA,
                               SelectionManager& smanB) {
-    // First kick will succeed
-    if (!hasMovingMolecule_) { selectMolecule(); }
-
     if (!doRNEMD_) return;
+
+    failedLastTrial_ = false;
+
     int selei;
     int selej;
 
@@ -209,11 +202,14 @@ namespace OpenMD::RNEMD {
     bool successfulExchange = false;
 
     if ((M_a > 0.0) && (M_b > 0.0) &&
-        hasMovingMolecule_) {  // both slabs are not empty
+        forceManager_->getSelectedMolecule()) {  // both slabs are not empty
       Vector3d v_a = P_a / M_a;
       Vector3d v_b = P_b / M_b;
 
-      RealType numerator = forceManager_->getDeltaU() * particleTarget_ *
+      RealType tempParticleTarget =
+          (particleTarget_ != deltaLambda_) ? deltaLambda_ : particleTarget_;
+
+      RealType numerator = forceManager_->getScaledDeltaU(tempParticleTarget) *
                            Constants::energyConvert;
 
       RealType denominator = K_a + K_b;
@@ -225,27 +221,47 @@ namespace OpenMD::RNEMD {
       if (a2 > 0.0) {
         RealType a = std::sqrt(a2);
 
-        if ((a > 0.9) && (a < 1.1)) {  // restrict scaling coefficients
+        std::cout << a << std::endl;
+
+        if ((a > 0.999) && (a < 1.001)) {  // restrict scaling coefficients
           std::vector<StuntDouble*>::iterator sdi;
           Vector3d vel;
 
           for (sdi = binA.begin(); sdi != binA.end(); ++sdi) {
-            vel = ((*sdi)->getVel() - v_a) * a;
+            vel = ((*sdi)->getVel() - v_a) * a + v_a;
 
             (*sdi)->setVel(vel);
           }
 
           for (sdi = binB.begin(); sdi != binB.end(); ++sdi) {
-            vel = ((*sdi)->getVel() - v_b) * a;
+            vel = ((*sdi)->getVel() - v_b) * a + v_b;
 
             (*sdi)->setVel(vel);
           }
 
+          currentSnap_->hasTranslationalKineticEnergy = false;
+          currentSnap_->hasKineticEnergy              = false;
+          currentSnap_->hasTotalEnergy                = false;
+
+          RealType deltaLambda = particleTarget_;
+
+          bool updateSelectedMolecule =
+              forceManager_->updateLambda(deltaLambda, deltaLambda_);
+
+          if (updateSelectedMolecule) this->selectNewMolecule();
+
           successfulExchange = true;
-          particleExchange_ += particleTarget_;
-          updateLambda();
+          particleExchange_ += deltaLambda;
         }
       }
+    }
+
+    if (!forceManager_->getSelectedMolecule()) {
+      selectNewMolecule();
+      deltaLambda_ = particleTarget_;
+      failTrialCount_++;
+      failedLastTrial_ = true;
+      return;
     }
 
     if (successfulExchange != true) {
@@ -257,46 +273,26 @@ namespace OpenMD::RNEMD {
       painCave.severity = OPENMD_INFO;
       simError();
       failTrialCount_++;
-    }
-
-    // First kick will fail
-    // if (!hasMovingMolecule_) { selectMolecule(); }
-  }
-
-  void SPFMethod::updateLambda() {
-    lambda_ += std::fabs(particleTarget_);
-
-    if (lambda_ > 1.0) {
-      lambda_ -= 1.0;
-      forceManager_->updateLambda(lambda_);
-      forceManager_->acceptGhost();
-
-      selectMolecule();
-    } else if (std::fabs(lambda_ - 1.0) < 1e-6) {
-      lambda_ = 0.0;
-      forceManager_->updateLambda(lambda_);
-      forceManager_->acceptGhost();
-
-      selectMolecule();
-    } else {
-      forceManager_->updateLambda(lambda_);
+      failedLastTrial_ = true;
     }
   }
 
-  void SPFMethod::selectMolecule() {
+  void SPFMethod::selectNewMolecule() {
+    SelectionManager sourceSman {info_};
+    RealType targetSlabCenter {};
+
     // The sign of our flux determines which slab is the source and which is
     // the sink
     if (particleTarget_ > 0.0) {
-      sourceSman_       = commonA_;
-      targetSlabCenter_ = slabBCenter_;
+      sourceSman       = commonA_;
+      targetSlabCenter = slabBCenter_;
     } else {
-      sourceSman_       = commonB_;
-      targetSlabCenter_ = slabACenter_;
+      sourceSman       = commonB_;
+      targetSlabCenter = slabACenter_;
     }
 
-    if (sourceSman_.getMoleculeSelectionCount() == 0) {
-      hasMovingMolecule_ = false;
-      forceManager_->setSelectedMolecule(NULL, V3Zero);
+    if (sourceSman.getMoleculeSelectionCount() == 0) {
+      forceManager_->setSelectedMolecule(nullptr, V3Zero);
       return;
     }
 
@@ -312,7 +308,7 @@ namespace OpenMD::RNEMD {
     if (worldRank == 0) {
 #endif
       std::uniform_int_distribution<> selectedMoleculeDistribution {
-          0, sourceSman_.getMoleculeSelectionCount() - 1};
+          0, sourceSman.getMoleculeSelectionCount() - 1};
 
       whichSelectedID = selectedMoleculeDistribution(*randNumGen);
 #ifdef IS_MPI
@@ -321,28 +317,30 @@ namespace OpenMD::RNEMD {
     MPI_Bcast(&whichSelectedID, 1, MPI_INT, 0, MPI_COMM_WORLD);
 #endif
 
-    selectedMolecule = sourceSman_.nthSelectedMolecule(whichSelectedID);
+    selectedMolecule = sourceSman.nthSelectedMolecule(whichSelectedID);
 
     if (selectedMolecule) {
+      int globalSelectedID = selectedMolecule->getGlobalIndex();
+
+      currentObjectSelection_ =
+          rnemdObjectSelection_ + " && ! " + std::to_string(globalSelectedID);
+
       int axis0 = (rnemdPrivilegedAxis_ + 1) % 3;
       int axis1 = (rnemdPrivilegedAxis_ + 2) % 3;
       int axis2 = rnemdPrivilegedAxis_;
 
       std::uniform_real_distribution<RealType> distr0 {0, hmat_(axis0, axis0)};
       std::uniform_real_distribution<RealType> distr1 {0, hmat_(axis1, axis1)};
-
-      std::normal_distribution<RealType> distr2 {targetSlabCenter_,
+      std::normal_distribution<RealType> distr2 {targetSlabCenter,
                                                  0.25 * slabWidth_};
 
-      Vector3d newPosition {V3Zero};
+      Vector3d newCom {V3Zero};
 
-      newPosition[axis0] = distr0(*randNumGen);
-      newPosition[axis1] = distr1(*randNumGen);
-      newPosition[axis2] = distr2(*randNumGen);
+      newCom[axis0] = distr0(*randNumGen);
+      newCom[axis1] = distr1(*randNumGen);
+      newCom[axis2] = distr2(*randNumGen);
 
-      forceManager_->setSelectedMolecule(selectedMolecule, newPosition);
+      forceManager_->setSelectedMolecule(selectedMolecule, newCom);
     }
-
-    hasMovingMolecule_ = true;
   }
 }  // namespace OpenMD::RNEMD

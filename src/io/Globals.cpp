@@ -241,7 +241,8 @@ namespace OpenMD {
             isEqualIgnoreCase("NPRT") || isEqualIgnoreCase("NPGT") ||
             isEqualIgnoreCase("NGammaT") || isEqualIgnoreCase("NGT") ||
             isEqualIgnoreCase("LANGEVINHULL") || isEqualIgnoreCase("LHULL") ||
-            isEqualIgnoreCase("SMIPD") || isEqualIgnoreCase("LANGEVINPISTON"));
+            isEqualIgnoreCase("SMIPD") || isEqualIgnoreCase("LANGEVINPISTON") ||
+            isEqualIgnoreCase("SPF"));
     CheckParameter(Dt, isPositive());
     CheckParameter(RunTime, isPositive());
     CheckParameter(FinalConfig, isNotEmpty());

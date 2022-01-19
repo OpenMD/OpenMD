@@ -43,30 +43,20 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef OPENMD_RNEMD_SPF_HPP
-#define OPENMD_RNEMD_SPF_HPP
+#ifndef INTEGRATORS_SPFDYNAMICS_HPP
+#define INTEGRATORS_SPFDYNAMICS_HPP
 
-#include "brains/ForceManager.hpp"
 #include "brains/SimInfo.hpp"
-#include "rnemd/RNEMD.hpp"
-#include "rnemd/SPFForceManager.hpp"
-#include "selection/SelectionManager.hpp"
+#include "integrators/NVE.hpp"
 
-namespace OpenMD::RNEMD {
+namespace OpenMD {
 
-  class SPFMethod : public RNEMD {
+  class SPFDynamics : public NVE {
   public:
-    explicit SPFMethod(SimInfo* info, ForceManager* forceMan);
+    explicit SPFDynamics(SimInfo* info) : NVE {info} {}
 
-    void doRNEMDImpl(SelectionManager& smanA, SelectionManager& smanB) override;
-
-  private:
-    void selectNewMolecule();
-
-    RealType deltaLambda_ {};
-
-    SPFForceManager* forceManager_ {nullptr};
+    void postStep() override;
   };
-}  // namespace OpenMD::RNEMD
+}  // namespace OpenMD
 
-#endif  // OPENMD_RNEMD_SPF_HPP
+#endif

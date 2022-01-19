@@ -90,7 +90,7 @@ else()
   add_compile_options(-pedantic-errors -Wall -Wextra -Werror)
 
   if(CMAKE_COMPILER_IS_GNUCXX)
-    add_compile_options(-Wno-cast-function-type -Wno-clobbered)
+    add_compile_options(-Wno-unused-parameter -Wno-cast-function-type -Wno-clobbered)
   endif()
 endif()
 
@@ -176,7 +176,7 @@ check_cxx_symbol_exists(strncasecmp   "string.h"   HAVE_STRNCASECMP)
 option(FORMAT_OPENMD "Builds specified libraries while also formatting the code." OFF)
 
 if (FORMAT_OPENMD AND NOT WIN32)
-  find_program(formatter clang-format HINTS /opt/local/libexec/llvm-10/bin/)
+  find_program(formatter clang-format HINTS /opt/local/libexec/llvm-11/bin/)
 
   if (NOT formatter_NOTFOUND)
     message(STATUS "Formatting OpenMD")
@@ -420,6 +420,7 @@ src/integrators/NPTsz.cpp
 src/integrators/NPTxyz.cpp
 src/integrators/NVE.cpp
 src/integrators/NVT.cpp
+src/integrators/SPFDynamics.cpp
 src/integrators/VelocityVerletIntegrator.cpp
 src/io/AtomTypesSectionParser.cpp
 src/io/BaseAtomTypesSectionParser.cpp

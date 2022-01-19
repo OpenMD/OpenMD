@@ -139,13 +139,12 @@ namespace OpenMD {
     Thermo thermo;
 
     Snapshot* snap {nullptr};
+    ProgressBarPtr progressBar {nullptr};
 
   private:
     virtual RealType calcConservedQuantity() = 0;
     virtual DumpWriter* createDumpWriter();
     virtual StatWriter* createStatWriter();
-
-    ProgressBarPtr progressBar {nullptr};
   };
 }  // namespace OpenMD
 

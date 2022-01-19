@@ -51,6 +51,7 @@
 #include "utils/Revision.hpp"
 
 namespace OpenMD {
+
   HBondJump::HBondJump(SimInfo* info, const std::string& filename,
                        const std::string& sele1, const std::string& sele2,
                        double OOcut, double thetaCut, double OHcut) :
@@ -762,9 +763,7 @@ namespace OpenMD {
     counts_.resize(nTimeBins_);
     for (unsigned int i = 0; i < nTimeBins_; i++) {
       histogram_[i].resize(nRBins_);
-      std::fill(histogram_[i].begin(), histogram_[i].end(), 0.0);
       counts_[i].resize(nRBins_);
-      std::fill(counts_[i].begin(), counts_[i].end(), 0);
     }
 
     evaluator3_.loadScriptString(selectionScript3_);
@@ -898,7 +897,8 @@ namespace OpenMD {
 
     // If this hydrogen wasn't already registered, register it:
     if (GIDtoH_[frame][hIndex] == -1) {
-      index                  = hydrogen_[frame].size();
+      index = hydrogen_[frame].size();
+
       GIDtoH_[frame][hIndex] = index;
       hydrogen_[frame].push_back(hIndex);
       acceptor_[frame].push_back(-1);
@@ -925,7 +925,7 @@ namespace OpenMD {
   void HBondJumpR::correlation() {
     std::vector<int> s1;
     std::vector<int>::iterator i1;
-    int index1, index2, gid, aInd1, aInd2, rBin;
+    int index1, index2, gid, aInd1, aInd2;
 
     for (int i = 0; i < nFrames_; ++i) {
       RealType time1 = times_[i];
@@ -961,38 +961,39 @@ namespace OpenMD {
           index2 = GIDtoH_[j][gid];
 
           if (selected_[i][index1]) {
-            rBin = rbin_[i][index1];
-            counts_[timeBin][rBin]++;
+            if (int rBin {rbin_[i][index1]}; rBin != -1) {
+              counts_[timeBin][rBin]++;
 
-            if (acceptor_[i][index1] == -1) {
-              aInd1 = lastAcceptor_[i][index1];
-            } else {
-              aInd1 = acceptor_[i][index1];
-            }
+              if (acceptor_[i][index1] == -1) {
+                aInd1 = lastAcceptor_[i][index1];
+              } else {
+                aInd1 = acceptor_[i][index1];
+              }
 
-            if (acceptor_[j][index2] == -1) {
-              aInd2 = lastAcceptor_[j][index2];
-            } else {
-              aInd2 = acceptor_[j][index2];
-            }
+              if (acceptor_[j][index2] == -1) {
+                aInd2 = lastAcceptor_[j][index2];
+              } else {
+                aInd2 = acceptor_[j][index2];
+              }
 
-            // aInd1 = acceptor_[i][index1];
-            // aInd2 = acceptor_[j][index2];
+              // aInd1 = acceptor_[i][index1];
+              // aInd2 = acceptor_[j][index2];
 
-            if (aInd1 != aInd2) {
-              // different acceptor so nA(0) . nB(t) = 1
-              histogram_[timeBin][rBin] += 1;
-            } else {
-              // same acceptor, but we need to look at the start frames
-              // for these H-bonds to make sure it is the same H-bond:
-              if (acceptorStartFrame_[i][index1] !=
-                  acceptorStartFrame_[j][index2]) {
-                // different start frame, so this is considered a
-                // different H-bond:
+              if (aInd1 != aInd2) {
+                // different acceptor so nA(0) . nB(t) = 1
                 histogram_[timeBin][rBin] += 1;
               } else {
-                // same start frame, so this is considered the same H-bond:
-                histogram_[timeBin][rBin] += 0;
+                // same acceptor, but we need to look at the start frames
+                // for these H-bonds to make sure it is the same H-bond:
+                if (acceptorStartFrame_[i][index1] !=
+                    acceptorStartFrame_[j][index2]) {
+                  // different start frame, so this is considered a
+                  // different H-bond:
+                  histogram_[timeBin][rBin] += 1;
+                } else {
+                  // same start frame, so this is considered the same H-bond:
+                  histogram_[timeBin][rBin] += 0;
+                }
               }
             }
           }

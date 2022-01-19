@@ -55,7 +55,6 @@ namespace OpenMD {
     VelocityVerletIntegrator(SimInfo* info);
     virtual void step();
 
-  private:
     virtual void moveA() = 0;
     virtual void moveB() = 0;
   };
