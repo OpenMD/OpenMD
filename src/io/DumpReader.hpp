@@ -102,6 +102,7 @@ namespace OpenMD {
     bool needQuaternion_;
     bool needAngMom_;
     bool needCOMprops_;
+    bool readField_;
 
     const static int bufferSize = 4096;
     char buffer[bufferSize];

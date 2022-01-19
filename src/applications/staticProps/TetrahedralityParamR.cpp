@@ -223,7 +223,7 @@ namespace OpenMD {
 
   void TetrahedralityParamR::writeQr() {
     Revision rev;
-    std::ofstream qRstream((getOutputFileName() + "Qr").c_str());
+    std::ofstream qRstream(outputFilename_.c_str());   
     if (qRstream.is_open()) {
       qRstream << "# " << getAnalysisType() << "\n";
       qRstream << "# OpenMD " << rev.getFullRevision() << "\n";
@@ -246,7 +246,7 @@ namespace OpenMD {
 
     } else {
       sprintf(painCave.errMsg, "TetrahedralityParamR: unable to open %s\n",
-              (getOutputFileName() + "Qr").c_str());
+              outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

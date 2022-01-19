@@ -12,7 +12,7 @@ forceField = "LJ";
 targetTemp = 83.86;
 tauThermostat = 1e3;
 cutoffRadius = 9.0;
-ensemble = "NVE";
+ensemble = "SPF";
 seed = 8675309;
 
 RNEMD
@@ -31,10 +31,10 @@ RNEMD
 }
 
 dt = 1.0;
-runTime = 1e4;
+runTime = 1e5;
 
-sampleTime = 100;
-statusTime = 100;
+sampleTime = 1;
+statusTime = 1;
 
 ## Last run using OpenMD version: 2.7, revision: 94a62bfa4bf43b9e8fc201aab04a8d4e09540e08
   </MetaData>
