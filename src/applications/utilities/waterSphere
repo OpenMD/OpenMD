@@ -1,0 +1,944 @@
+#!@PERL_EXECUTABLE@
+
+# program that builds spheres of water
+
+# author    = "Dan Gezelter
+# copyright = "Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved."
+# license   = "OpenMD"
+
+use Getopt::Std;
+use List::Util qw[min max];
+
+
+$tolerance = 1.0E-8;
+$mass = 2.99151E-23; # mass of H2O in grams
+$cm3ToAng3 = 1E24;   # convert cm^3 to angstroms^3
+$densityConvert = $mass*$cm3ToAng3;
+$lattice = 0;
+$density = 1.0;
+$doRandomize = 0;
+$cutoff = 9;
+$rcut = 3.2;
+$alpha = 0.18;
+$invalidWater = 0;
+$waterCase = -1;
+$nothingSelected = 1;
+
+# get our options
+getopts('hmrvd:l:c:o:w:O:I:');
+
+# just to test opt_h
+$opt_h = "true" if $#ARGV >= 0;
+
+# our option output
+if ($opt_h){
+    print "waterSphere: builds spheres of water\n\n";
+    print "usage: waterSphere [-hmrv] [-d density] [-l lattice] [-n # waters]\n";
+    print "\t[-o file name] [-w water name] \n\n";
+    print "  -h : show this message\n";
+    print "  -m : print out a water.inc file (file with all water models)\n";
+    print "  -r : randomize orientations\n";
+    print "  -v : verbose output\n\n";
+    print "  -d real    : density in g/cm^3\n";
+    print "                 (default: 1)\n";
+    print "  -l integer : 0 - face centered cubic, 1 - simple cubic\n";
+    print "                 (default: 0)\n";
+
+
+    print "  -c real    : default overlap cutoff in angstroms\n";
+    print "                 (default: 3.3)\n";
+    print "  -o char    : output file name\n";
+    print "                 (default: freshWater.omd)\n";
+    print "  -w char    : name of the water stunt double\n";
+    print "                 (default: SPCE)\n";
+    print "  -R real    : outer radius of the water sphere\n";
+    print "  -I real    : inner radius of the water sphere\n";
+    print "Note: you can only use values of -O that are smaller\n";
+    print "      than the derived radius for a given density and\n";
+    print "      number of molecules.\n\n";
+    print "Example:\n";
+    die   "   waterSphere -d 0.997 -I 20 -O 40 -w SSD_RF -o ssdrfWater.omd\n";
+}
+
+# set some variables to be used in the code
+if (defined($opt_o)){
+  $fileName = $opt_o;
+  $nothingSelected = 0;
+} else {
+    $fileName = 'freshWater.omd';
+}
+if ($opt_m){
+  die "Error: $fileName cannot be \"water.inc\"\n       Please choose a different name\n" if $fileName eq 'water.inc';
+  $waterFileHandle = 'WATERMD';
+  $nothingSelected = 0;
+} else {
+  $waterFileHandle = 'OUTFILE';
+}
+if ($opt_r){
+  $doRandomize = $opt_r;
+  $nothingSelected = 0;
+}
+
+if (defined($opt_d)){
+  $nothingSelected = 0;
+  if ($opt_d =~ /^[0-9]/) {
+    $density = $opt_d;
+  } else {
+    die "Error: the value for '-d' ($opt_d) is not a valid number\n       Please choose a positive real # value\n";
+  }
+}
+if (defined($opt_c)){
+  $nothingSelected = 0;
+  if ($opt_c =~ /^[0-9]/) {
+    $rcut = $opt_c;
+  } else {
+    die "Error: the value for '-c' ($opt_c) is not a valid number\n       Please choose a positive real # value\n";
+  }
+}
+
+if (defined($opt_w)){
+  $waterName = $opt_w;
+  $nothingSelected = 0;
+} else {
+  $waterName = 'SPCE';
+}
+validateWater();
+if ($invalidWater == 1){
+  print "Warning: \'$waterName\' is not a recognized water model name.\n";
+  print "         Use the \'-m\' option to generate a \'water.inc\' with the\n";
+  print "         recognized water model geometries.\n\n";
+}
+if ($waterName eq 'DPD') {
+  # DPD waters are stand-ins for 4 water molecules
+  $density = $density * 0.25;
+}
+if ($waterName eq 'CG2') {
+  # CG2 waters are stand-ins for 2 water molecules
+  $density = $density * 0.5;
+}
+
+if (defined($opt_l)){
+  $nothingSelected = 0;
+  if ($opt_l =~ /^[0-9]/) {
+    $lattice = $opt_l;
+    if ($lattice != 0 && $lattice != 1){
+      die "Error: the '-l' value ($opt_l) is not a valid number\n       Please choose 0 or 1\n";
+    }
+  } else {
+    die "Error: the '-l' value ($opt_l) is not a valid number\n       Please choose 0 or 1\n";
+  }
+}
+if (defined($opt_O)){
+  $nothingSelected = 0;
+  if ($opt_O =~ /^[0-9]/) {
+    $boxx = 2*$opt_O;
+    $boxy = 2*$opt_O;
+    $boxz = 2*$opt_O;
+    $outer = $opt_O;
+  } else {
+    die "Error: the value for '-O' ($opt_O) is not a valid number\n       Please choose a positive real # value\n";
+  } 
+} else {
+   die "Error: the outer radius of the sphere '-O' must be set\n";
+}
+if (defined($opt_I)){
+  $nothingSelected = 0;
+  if ($opt_I =~ /^[0-9]/) {
+    $inner = $opt_I;
+  } else {
+    die "Error: the value for '-I' ($opt_I) is not a valid number\n       Please choose a positive real # value\n";
+  }
+} else {
+  $inner = 0;
+}
+
+if ($nothingSelected == 1) {
+    die "(For help, use the \'-h\' option.)\n";
+}
+
+# open the file writer
+open(OUTFILE, ">./$fileName") || die "Error: can't open file $fileName\n";
+
+# check to set magic lattice numbers
+if ($lattice == 0){
+  $a = (4*18.01/(0.602*$density))**(1.0/3.0);
+  $acut = $rcut * sqrt(2.0);
+  if ($acut > $a) {
+     $a = $acut;
+     $newDensity = 4.0*18.01/(0.602*$a**3);
+     print "using density of $newDensity to match cutoff value ($rcut)\n";
+  }
+} elsif ($lattice == 1){
+  $a = (18.01/(0.602*$density))**(1.0/3.0);
+  $acut = $rcut;
+  if ($acut > $a) {
+     $a = $acut;
+     $newDensity = 18.01/(0.602*$a**3);
+     print "using density of $newDensity to match cutoff value ($rcut)\n";
+  }
+}
+$nxFloat = $boxx/$a;
+$nx = int($nxFloat + $nxFloat/abs($nxFloat*2));
+$nyFloat = $boxy/$a;
+$ny = int($nyFloat + $nyFloat/abs($nyFloat*2));
+$nzFloat = $boxz/$a;
+$nz = int($nzFloat + $nzFloat/abs($nzFloat*2));
+
+$anew = min($boxx/$nx, $boxy/$ny, $boxz/$nz);
+
+if ($anew < $acut) {
+ $anew = $acut;
+}
+
+$nxFloat = $boxx/$anew;
+$nx = int($nxFloat + $nxFloat/abs($nxFloat*2));
+$nyFloat = $boxy/$anew;
+$ny = int($nyFloat + $nyFloat/abs($nyFloat*2));
+$nzFloat = $boxz/$anew;
+$nz = int($nzFloat + $nzFloat/abs($nzFloat*2));
+
+if ($lattice == 0) {
+  $nMol = 4 * $nx * $ny * $nz;
+} else {
+  $nMol = $nx * $ny * $nz;
+}
+
+$newDensity = $nMol * $densityConvert / ($boxx*$boxy*$boxz);
+
+if (abs($newDensity-$density) > $tolerance) {
+  print "Resetting density to $newDensity to make chosen sphere radius work out\n";
+}
+$cellLengthX = $boxx/$nx;
+$cellLengthY = $boxy/$ny;
+$cellLengthZ = $boxz/$nz;
+
+$cell2X = $cellLengthX*0.5;
+$cell2Y = $cellLengthY*0.5;
+$cell2Z = $cellLengthZ*0.5;
+
+if ($lattice == 0) {
+# build the unit cell
+# molecule 0
+  $xCorr[0] = 0.0;
+  $yCorr[0] = 0.0;
+  $zCorr[0] = 0.0;
+# molecule 1
+  $xCorr[1] = 0.0;
+  $yCorr[1] = $cell2Y;
+  $zCorr[1] = $cell2Z;
+# molecule 2
+  $xCorr[2] = $cell2X;
+  $yCorr[2] = $cell2Y;
+  $zCorr[2] = 0.0;
+# molecule 3
+  $xCorr[3] = $cell2X;
+  $yCorr[3] = 0.0;
+  $zCorr[3] = $cell2Z;
+# assemble the lattice
+  $counter = 0;
+  for ($z = -$nz / 2; $z < $nz / 2; $z++) {
+    for ($y = -$ny / 2; $y < $ny / 2; $y++) {
+      for ($x = -$nx / 2; $x < $nx / 2; $x++) {
+	for ($uc = 0; $uc < 4; $uc++) {
+          $xtest = $xCorr[$uc] + $cellLengthX*$x;
+	  $ytest = $yCorr[$uc] + $cellLengthY*$y;
+	  $ztest = $zCorr[$uc] + $cellLengthZ*$z;
+          $rtest = sqrt($xtest*$xtest + $ytest*$ytest + $ztest*$ztest);
+          if (($rtest > $inner) && ($rtest < $outer)) {
+	  	  $xCorr[$counter] = $xCorr[$uc] + $cellLengthX*$x;
+		  $yCorr[$counter] = $yCorr[$uc] + $cellLengthY*$y;
+	  	  $zCorr[$counter] = $zCorr[$uc] + $cellLengthZ*$z;
+          	  $counter++;
+          }
+	}
+      }
+    }
+  }
+
+} elsif ($lattice == 1) {
+  # build the unit cell
+  # molecule 0
+  $xCorr[0] = $cell2X;
+  $yCorr[0] = $cell2Y;
+  $zCorr[0] = $cell2Z;
+#assemble the lattice
+  $counter = 0;
+  for ($z = -$nz / 2; $z < $nz / 2; $z++) {
+    for ($y = -$ny / 2; $y < $ny / 2; $y++) {
+      for ($x = -$nx / 2; $x < $nx / 2; $x++) {
+          $xtest = $xCorr[0] + $cellLengthX*$x;
+	  $ytest = $yCorr[0] + $cellLengthY*$y;
+	  $ztest = $zCorr[0] + $cellLengthZ*$z;
+          $rtest = sqrt($xtest*$xtest + $ytest*$ytest + $ztest*$ztest);
+          if (($rtest > $inner) && ($rtest < $outer)) {
+	  	  $xCorr[$counter] = $xCorr[0] + $cellLengthX*$x;
+		  $yCorr[$counter] = $yCorr[0] + $cellLengthY*$y;
+	  	  $zCorr[$counter] = $zCorr[0] + $cellLengthZ*$z;
+          	  $counter++;
+          }
+      }
+    }
+  }
+}
+$nMol = $counter;
+
+writeOutFile();
+print "The water box \"$fileName\" was generated.\n";
+
+if ($opt_m){
+  printWaterMD();
+  print "The file \"water.inc\" was generated for inclusion in \"$fileName\"\n";
+}
+
+
+
+# this marks the end of the main program, below is subroutines
+
+sub acos {
+  my ($rad) = @_;
+  my $ret = atan2(sqrt(1 - $rad*$rad), $rad);
+  return $ret;
+}
+
+sub writeOutFile {
+  # write out the header
+  print OUTFILE "<OpenMD version=1>\n";
+  findCutoff();
+  printMetaData();
+  printFrameData();
+  print OUTFILE "    <StuntDoubles>\n";
+
+  # shift the box center to the origin and write out the coordinates
+  for ($i = 0; $i < $nMol; $i++) {
+    #$xCorr[$i] -= 0.5*$boxx;
+    #$yCorr[$i] -= 0.5*$boxy;
+    #$zCorr[$i] -= 0.5*$boxz;
+
+    $q0 = 1.0;
+    $q1 = 0.0;
+    $q2 = 0.0;
+    $q3 = 0.0;
+
+    if ($doRandomize == 1){
+      $cosTheta = 2.0*rand() - 1.0;
+      $theta = acos($cosTheta);
+      $phi = 2.0*3.14159265359*rand();
+      $psi = 2.0*3.14159265359*rand();
+
+      $q0 = cos(0.5*$theta)*cos(0.5*($phi + $psi));
+      $q1 = sin(0.5*$theta)*cos(0.5*($phi - $psi));
+      $q2 = sin(0.5*$theta)*sin(0.5*($phi - $psi));
+      $q3 = cos(0.5*$theta)*sin(0.5*($phi + $psi));
+    }
+
+    print OUTFILE "$i\tpq\t$xCorr[$i] $yCorr[$i] $zCorr[$i] ";
+    print OUTFILE "$q0 $q1 $q2 $q3\n";
+  }
+
+  print OUTFILE "    </StuntDoubles>\n  </Snapshot>\n</OpenMD>\n";
+}
+
+sub printMetaData {
+  print OUTFILE "  <MetaData>\n";
+
+# print the water model or includes
+  if ($opt_m){
+    print OUTFILE "#include \"water.inc\"";
+  } else {
+    printWaterModel();
+  }
+  printFakeWater() if $invalidWater == 1;
+
+# now back to the metaData output
+  print OUTFILE "\n\ncomponent{
+  type = \"$waterName\";
+  nMol = $nMol;
+}
+
+ensemble = \"LangevinHull\";
+forceField = \"Water\";
+electrostaticSummationMethod = \"shifted_force\";
+electrostaticScreeningMethod = \"damped\";
+cutoffRadius = $cutoff;
+switchingRadius = $cutoff;
+dampingAlpha = $alpha;
+usePeriodicBoundaryConditions = \"false\";
+
+targetTemp = 300;
+targetPressure = 1.0;
+viscosity =  0.00890;
+
+tauThermostat = 1e3;
+tauBarostat = 1e4;
+
+dt = 2.0;
+runTime = 1e3;
+
+tempSet = \"true\";
+thermalTime = 10;
+sampleTime = 100;
+statusTime = 2;
+  </MetaData>\n";
+}
+
+sub findCutoff {
+  if ($boxy < $boxx) {
+    $bm = $boxy;
+  } else {
+    $bm = $boxx;
+  }
+  if ($boxz < $bm) {
+    $bm = $boxz;
+  }
+  $boxLength2 = 0.5*$bm;
+  if ($boxLength2 > $cutoff){
+    # the default is good
+  } else {
+    $cutoff = int($boxLength2);
+  }
+}
+
+sub printFrameData {
+print OUTFILE
+"  <Snapshot>
+    <FrameData>
+        Time: 0
+        Hmat: {{ $boxx, 0, 0 }, { 0, $boxy, 0 }, { 0, 0, $boxz }}
+    </FrameData>\n";
+}
+
+sub printWaterMD {
+  open(WATERMD, ">./water.inc") || die "Error: can't open file water.inc\n";
+  $waterFileHandle = 'WATERMD';
+
+  print WATERMD "#ifndef _WATER_INC_\n#define _WATER_INC_\n";
+  printCl();
+  printNa();
+  printSSD_E();
+  printSSD_RF();
+  printSSD();
+  printSSDQ();
+  printSSDQO();
+  printSSD1();
+  printTRED();
+  printTIP3P();
+  printTIP4P();
+  printTIP4PIce();
+  printTIP4PEw();
+  printTIP4P2005();
+  printTIP5P();
+  printTIP5PE();
+  printNE6();
+  printSPCE();
+  printSPC();
+  printSPCHW();
+  printDPD();
+  printCG2();
+  print WATERMD "\n\n#endif";
+}
+
+sub printCl {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"Cl-\";
+
+  atom[0]{
+    type = \"Cl-\";
+    position(0.0, 0.0, 0.0);
+  }
+}"
+}
+
+sub printNa {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"Na+\";
+
+  atom[0]{
+    type = \"Na+\";
+    position(0.0, 0.0, 0.0);
+  }
+}"
+}
+
+sub printSSD_E {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"SSD_E\";
+
+  atom[0]{
+    type = \"SSD_E\";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+}"
+}
+
+sub printSSD_RF {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"SSD_RF\";
+
+  atom[0]{
+    type = \"SSD_RF\";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+}"
+}
+
+sub printSSD {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"SSD\";
+
+  atom[0]{
+    type = \"SSD\";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+}"
+}
+
+sub printSSDQ {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"SSDQ\";
+
+  atom[0]{
+    type = \"SSDQ\";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+}"
+}
+
+sub printSSDQO {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"SSDQO\";
+
+  atom[0]{
+    type = \"SSDQO\";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+}"
+}
+
+sub printSSD1 {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"SSD1\";
+
+  atom[0]{
+    type = \"SSD1\";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+}"
+}
+
+sub printTRED {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"TRED\";
+
+  atom[0]{
+    type = \"TRED\";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+  atom[1]{
+    type = \"EP_TRED\";
+    position( 0.0, 0.0, 0.5 );
+  }
+
+  rigidBody[0]{
+    members(0, 1);
+  }
+
+}"
+}
+
+sub printTIP3P {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"TIP3P\";
+
+  atom[0]{
+    type = \"O_TIP3P\";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = \"H_TIP3P\";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = \"H_TIP3P\";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2);
+  }
+
+}"
+}
+
+sub printTIP4P {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"TIP4P\";
+
+  atom[0]{
+    type = \"O_TIP4P\";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = \"H_TIP4P\";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = \"H_TIP4P\";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = \"EP_TIP4P\";
+    position( 0.0, 0.0, 0.08444 );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2, 3);
+  }
+
+}"
+}
+
+sub printTIP4PIce {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"TIP4P-Ice\";
+
+  atom[0]{
+    type = \"O_TIP4P-Ice\";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = \"H_TIP4P-Ice\";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = \"H_TIP4P-Ice\";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = \"EP_TIP4P-Ice\";
+    position( 0.0, 0.0, 0.09214 );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2, 3);
+  }
+
+}"
+}
+
+sub printTIP4PEw {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"TIP4P-Ew\";
+
+  atom[0]{
+    type = \"O_TIP4P-Ew\";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = \"H_TIP4P-Ew\";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = \"H_TIP4P-Ew\";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = \"EP_TIP4P-Ew\";
+    position( 0.0, 0.0, 0.05944 );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2, 3);
+  }
+
+}"
+}
+
+sub printTIP4P2005 {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"TIP4P-2005\";
+
+  atom[0]{
+    type = \"O_TIP4P-2005\";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = \"H_TIP4P-2005\";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = \"H_TIP4P-2005\";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = \"EP_TIP4P-2005\";
+    position( 0.0, 0.0, 0.08904 );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2, 3);
+  }
+
+}"
+}
+
+sub printTIP5P {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"TIP5P\";
+
+  atom[0]{
+    type = \"O_TIP5P\";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = \"H_TIP5P\";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = \"H_TIP5P\";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = \"EP_TIP5P\";
+    position( 0.57154, 0.0, -0.46971 );
+  }
+  atom[4]{
+    type = \"EP_TIP5P\";
+    position( -0.57154, 0.0, -0.46971 );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2, 3, 4);
+  }
+
+}"
+}
+
+sub printTIP5PE {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"TIP5P-E\";
+
+  atom[0]{
+    type = \"O_TIP5P-E\";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = \"H_TIP5P\";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = \"H_TIP5P\";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = \"EP_TIP5P\";
+    position( 0.57154, 0.0, -0.46971 );
+  }
+  atom[4]{
+    type = \"EP_TIP5P\";
+    position( -0.57154, 0.0, -0.46971 );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2, 3, 4);
+  }
+
+}"
+}
+
+sub printNE6 {
+    print $waterFileHandle "\n\nmolecule{
+  name = \"NE6\";
+
+  atom[0]{
+    type = \"O_NE6\";
+    position( 0.0, 0.0, 0.0 );
+  }
+  atom[1]{
+    type = \"H_NE6\";
+    position( 0.0, 0.576029, 0.79283665 );
+  }
+  atom[2]{
+    type = \"H_NE6\";
+    position( 0.0, -0.576029, 0.79283665 );
+  }
+  atom[3]{
+    type = \"EP_NE6\";
+    position( 0.0, 0.23, 0.0 );
+  }
+  atom[4]{
+    type = \"LP_NE6\";
+    position( 0.732813007, -0.50364843, 0.0  );
+  }
+  atom[5]{
+    type = \"LP_NE6\";
+    position( -0.732813007, -0.50364843, 0.0  );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2, 3, 4, 5);
+  }
+}"
+}
+
+sub printSPCE {
+print $waterFileHandle "\n\nmolecule{
+  name = \"SPCE\";
+
+  atom[0]{
+    type = \"O_SPCE\";
+    position( 0.0, 0.0, -0.06461 );
+  }
+  atom[1]{
+    type = \"H_SPCE\";
+    position( 0.0, 0.81649, 0.51275 );
+  }
+  atom[2]{
+    type = \"H_SPCE\";
+    position( 0.0, -0.81649, 0.51275 );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2);
+  }
+
+}"
+}
+
+sub printSPC {
+print $waterFileHandle "\n\nmolecule{
+  name = \"SPC\";
+
+  atom[0]{
+    type = \"O_SPC\";
+    position( 0.0, 0.0, -0.06461 );
+  }
+  atom[1]{
+    type = \"H_SPC\";
+    position( 0.0, 0.81649, 0.51275 );
+  }
+  atom[2]{
+    type = \"H_SPC\";
+    position( 0.0, -0.81649, 0.51275 );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2);
+  }
+
+}"
+}
+
+
+sub printSPCHW {
+print $waterFileHandle "\n\nmolecule{
+  name = \"SPC-HW\";
+
+  atom[0]{
+    type = \"O_SPC-HW\";
+    position( 0.0, 0.0, -0.06461 );
+  }
+  atom[1]{
+    type = \"D_SPC-HW\";
+    position( 0.0, 0.81649, 0.51275 );
+  }
+  atom[2]{
+    type = \"D_SPC-HW\";
+    position( 0.0, -0.81649, 0.51275 );
+  }
+
+  rigidBody[0]{
+    members(0, 1, 2);
+  }
+
+}"
+}
+
+sub printDPD {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"DPD\";
+
+  atom[0]{
+    type = \"DPD\";
+    position(0.0, 0.0, 0.0);
+  }
+}"
+}
+
+sub printCG2 {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"CG2\";
+
+  atom[0]{
+    type = \"CG2\";
+    position(0.0, 0.0, 0.0);
+  }
+}"
+}
+
+sub printFakeWater {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"$waterName\";
+
+  atom[0]{
+    type = \"$waterName\";
+    position(0.0, 0.0, 0.0);
+  }
+}"
+}
+
+
+sub validateWater {
+  if    ($waterName eq 'Cl-')      { $waterCase = 0;    }
+  elsif ($waterName eq 'Na+')      { $waterCase = 1;    }
+  elsif ($waterName eq 'SSD_E')    { $waterCase = 2;    }
+  elsif ($waterName eq 'SSD_RF')   { $waterCase = 3;    }
+  elsif ($waterName eq 'SSD')      { $waterCase = 4;    }
+  elsif ($waterName eq 'SSD1')     { $waterCase = 5;    }
+  elsif ($waterName eq 'TIP3P')    { $waterCase = 6;    }
+  elsif ($waterName eq 'TIP4P')    { $waterCase = 7;    }
+  elsif ($waterName eq 'TIP4P-Ew') { $waterCase = 8;    }
+  elsif ($waterName eq 'TIP5P')    { $waterCase = 9;    }
+  elsif ($waterName eq 'TIP5P-E')  { $waterCase = 10;   }
+  elsif ($waterName eq 'SPCE')     { $waterCase = 11;   }
+  elsif ($waterName eq 'SPC')      { $waterCase = 12;   }
+  elsif ($waterName eq 'DPD')      { $waterCase = 13;   }
+  elsif ($waterName eq 'CG2')      { $waterCase = 14;   }
+  elsif ($waterName eq 'SSDQ')     { $waterCase = 15;   }
+  elsif ($waterName eq 'SSDQO')    { $waterCase = 16;   }
+  elsif ($waterName eq 'TIP4P-Ice'){ $waterCase = 17;	}
+  elsif ($waterName eq 'TIP4P-2005'){ $switchCase = 18; }
+  elsif ($waterName eq 'SPC-HW')   { $waterCase == 19;	}
+  elsif ($waterName eq 'NE6')	   { $waterCase == 20;  }
+  else                             { $invalidWater = 1; }
+}
+
+sub printWaterModel {
+  if    ($waterCase == 0)  { printCl();      }
+  elsif ($waterCase == 1)  { printNa();      }
+  elsif ($waterCase == 2)  { printSSD_E();   }
+  elsif ($waterCase == 3)  { printSSD_RF();  }
+  elsif ($waterCase == 4)  { printSSD();     }
+  elsif ($waterCase == 5)  { printSSD1();    }
+  elsif ($waterCase == 6)  { printTIP3P();   }
+  elsif ($waterCase == 7)  { printTIP4P();   }
+  elsif ($waterCase == 8)  { printTIP4PEw(); }
+  elsif ($waterCase == 9)  { printTIP5P();   }
+  elsif ($waterCase == 10) { printTIP5PE();  }
+  elsif ($waterCase == 11) { printSPCE();    }
+  elsif ($waterCase == 12) { printSPC();     }
+  elsif ($waterCase == 13) { printDPD();     }
+  elsif ($waterCase == 14) { printCG2();     }
+  elsif ($waterCase == 15) { printSSDQ();    }
+  elsif ($waterCase == 16) { printSSDQO();   }
+  elsif	($waterCase == 17) { printTIP4PIce();}
+  elsif ($waterCase == 18) { printTIP4P2005();}
+  elsif ($waterCase == 19) { printSPCHW();   }
+  elsif ($waterCase == 20) { printNE6();     }
+}

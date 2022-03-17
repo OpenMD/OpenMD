@@ -529,6 +529,7 @@ src/types/InversionTypeParser.cpp
 src/types/LennardJonesAdapter.cpp
 src/types/MoleculeStamp.cpp
 src/types/MultipoleAdapter.cpp
+src/types/NodesStamp.cpp
 src/types/NonBondedInteractionType.cpp
 src/types/PolarizableAdapter.cpp
 src/types/RestraintStamp.cpp
@@ -959,6 +960,7 @@ ENDIF(Python3_Interpreter_FOUND)
 set(PERL_FILES
 src/applications/utilities/solvator
 src/applications/utilities/waterBoxer
+src/applications/utilities/waterSphere
 doc/git2cl
 )
 
