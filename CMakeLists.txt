@@ -521,7 +521,6 @@ src/types/DirectionalAdapter.cpp
 src/types/EAMAdapter.cpp
 src/types/FixedChargeAdapter.cpp
 src/types/FluctuatingChargeAdapter.cpp
-src/types/FragmentStamp.cpp
 src/types/GayBerneAdapter.cpp
 src/types/ImproperCosineInversionType.cpp
 src/types/InversionStamp.cpp
