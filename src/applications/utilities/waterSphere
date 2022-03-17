@@ -1,5 +1,7 @@
 #!@PERL_EXECUTABLE@
 
+#!/usr/bin/perl
+
 # program that builds spheres of water
 
 # author    = "Dan Gezelter
@@ -236,11 +238,12 @@ if ($lattice == 0) {
   $zCorr[3] = $cell2Z;
 # assemble the lattice
   $counter = 0;
-  for ($z = -$nz / 2; $z < $nz / 2; $z++) {
-    for ($y = -$ny / 2; $y < $ny / 2; $y++) {
-      for ($x = -$nx / 2; $x < $nx / 2; $x++) {
-	for ($uc = 0; $uc < 4; $uc++) {
+  for ($z = -$nz; $z < $nz ; $z++) {
+    for ($y = -$ny; $y < $ny; $y++) {
+      for ($x = -$nx; $x < $nx; $x++) {
+	for ($uc = 0; $uc < 4; $uc++) {   
           $xtest = $xCorr[$uc] + $cellLengthX*$x;
+          print "$x $xCorr[$uc] + $cellLengthX*$x  $xtest \n";
 	  $ytest = $yCorr[$uc] + $cellLengthY*$y;
 	  $ztest = $zCorr[$uc] + $cellLengthZ*$z;
           $rtest = sqrt($xtest*$xtest + $ytest*$ytest + $ztest*$ztest);
@@ -263,9 +266,9 @@ if ($lattice == 0) {
   $zCorr[0] = $cell2Z;
 #assemble the lattice
   $counter = 0;
-  for ($z = -$nz / 2; $z < $nz / 2; $z++) {
-    for ($y = -$ny / 2; $y < $ny / 2; $y++) {
-      for ($x = -$nx / 2; $x < $nx / 2; $x++) {
+  for ($z = -$nz; $z < $nz; $z++) {
+    for ($y = -$ny; $y < $ny; $y++) {
+      for ($x = -$nx; $x < $nx; $x++) {
           $xtest = $xCorr[0] + $cellLengthX*$x;
 	  $ytest = $yCorr[0] + $cellLengthY*$y;
 	  $ztest = $zCorr[0] + $cellLengthZ*$z;
@@ -308,11 +311,8 @@ sub writeOutFile {
   printFrameData();
   print OUTFILE "    <StuntDoubles>\n";
 
-  # shift the box center to the origin and write out the coordinates
+  # write out the coordinates
   for ($i = 0; $i < $nMol; $i++) {
-    #$xCorr[$i] -= 0.5*$boxx;
-    #$yCorr[$i] -= 0.5*$boxy;
-    #$zCorr[$i] -= 0.5*$boxz;
 
     $q0 = 1.0;
     $q1 = 0.0;
