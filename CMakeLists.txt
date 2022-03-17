@@ -529,7 +529,6 @@ src/types/InversionTypeParser.cpp
 src/types/LennardJonesAdapter.cpp
 src/types/MoleculeStamp.cpp
 src/types/MultipoleAdapter.cpp
-src/types/NodesStamp.cpp
 src/types/NonBondedInteractionType.cpp
 src/types/PolarizableAdapter.cpp
 src/types/RestraintStamp.cpp
