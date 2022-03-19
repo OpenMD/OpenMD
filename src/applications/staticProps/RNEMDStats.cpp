@@ -355,6 +355,12 @@ namespace OpenMD {
           }
         }
       }
+      if (seleMan_.isSelected(mol)) {
+        Vector3d pos = mol->getCom();
+        binNo        = getBin(pos);
+        int constraints = mol->getNConstraintPairs();
+        binDOF[binNo] -= constraints;
+      }
     }
 
     for (unsigned int i = 0; i < nBins_; i++) {
@@ -471,9 +477,8 @@ namespace OpenMD {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
-    StuntDouble* sd;
     int i;
-
+    int binNo;
     RealType mass;
     Vector3d vel;
     Vector3d rPos;
@@ -482,7 +487,6 @@ namespace OpenMD {
     Mat3x3d I;
     RealType r2;
 
-    std::vector<int> binDOF(nBins_, 0);
     std::vector<int> binCount(nBins_, 0);
     std::vector<RealType> binMass(nBins_, 0.0);
     std::vector<Vector3d> binP(nBins_, V3Zero);
@@ -490,70 +494,90 @@ namespace OpenMD {
     std::vector<Vector3d> binL(nBins_, V3Zero);
     std::vector<Mat3x3d> binI(nBins_);
     std::vector<RealType> binKE(nBins_, 0.0);
+    std::vector<int> binDOF(nBins_, 0);
+    
+    SimInfo::MoleculeIterator miter;
+    std::vector<StuntDouble*>::iterator iiter;
+    std::vector<AtomType*>::iterator at;
+    Molecule* mol;
+    StuntDouble* sd;
+    AtomType* atype;
 
     // loop over the selected atoms:
-    for (sd = seleMan_.beginSelected(i); sd != NULL;
-         sd = seleMan_.nextSelected(i)) {
-      // figure out where that object is:
-      int binNo = getBin(sd->getPos());
+    for (mol = info_->beginMolecule(miter); mol != NULL;
+         mol = info_->nextMolecule(miter)) {
+      for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
+           sd = mol->nextIntegrableObject(iiter)) {
+        if (seleMan_.isSelected(sd)) {
 
-      if (binNo >= 0 && binNo < int(nBins_)) {
-        mass = sd->getMass();
-        vel  = sd->getVel();
-        rPos = sd->getPos() - coordinateOrigin_;
-        KE   = 0.5 * mass * vel.lengthSquare();
-        L    = mass * cross(rPos, vel);
-        I    = outProduct(rPos, rPos) * mass;
-        r2   = rPos.lengthSquare();
-        I(0, 0) += mass * r2;
-        I(1, 1) += mass * r2;
-        I(2, 2) += mass * r2;
-
-        binCount[binNo]++;
-        binMass[binNo] += mass;
-        binP[binNo] += mass * vel;
-        binKE[binNo] += KE;
-        binI[binNo] += I;
-        binL[binNo] += L;
-        binDOF[binNo] += 3;
-
-        if (sd->isDirectional()) {
-          Vector3d angMom = sd->getJ();
-          Mat3x3d Ia      = sd->getI();
-          if (sd->isLinear()) {
-            int i = sd->linearAxis();
-            int j = (i + 1) % 3;
-            int k = (i + 2) % 3;
-            binKE[binNo] += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) +
-                                   angMom[k] * angMom[k] / Ia(k, k));
-            binDOF[binNo] += 2;
-          } else {
-            binKE[binNo] += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
-                                   angMom[1] * angMom[1] / Ia(1, 1) +
-                                   angMom[2] * angMom[2] / Ia(2, 2));
+          // figure out where that object is:
+          binNo = getBin(sd->getPos());
+          
+          if (binNo >= 0 && binNo < int(nBins_)) {
+            mass = sd->getMass();
+            vel  = sd->getVel();
+            rPos = sd->getPos() - coordinateOrigin_;
+            KE   = 0.5 * mass * vel.lengthSquare();
+            L    = mass * cross(rPos, vel);
+            I    = outProduct(rPos, rPos) * mass;
+            r2   = rPos.lengthSquare();
+            I(0, 0) += mass * r2;
+            I(1, 1) += mass * r2;
+            I(2, 2) += mass * r2;
+            
+            binCount[binNo]++;
+            binMass[binNo] += mass;
+            binP[binNo] += mass * vel;
+            binKE[binNo] += KE;
+            binI[binNo] += I;
+            binL[binNo] += L;
             binDOF[binNo] += 3;
+            
+            if (sd->isDirectional()) {
+              Vector3d angMom = sd->getJ();
+              Mat3x3d Ia      = sd->getI();
+              if (sd->isLinear()) {
+                int i = sd->linearAxis();
+                int j = (i + 1) % 3;
+                int k = (i + 2) % 3;
+                binKE[binNo] += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) +
+                                       angMom[k] * angMom[k] / Ia(k, k));
+                binDOF[binNo] += 2;
+              } else {
+                binKE[binNo] += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
+                                       angMom[1] * angMom[1] / Ia(1, 1) +
+                                       angMom[2] * angMom[2] / Ia(2, 2));
+                binDOF[binNo] += 3;
+              }
+            }
           }
         }
       }
+      if (seleMan_.isSelected(mol)) {
+        Vector3d pos = mol->getCom();
+        binNo        = getBin(pos);
+        int constraints = mol->getNConstraintPairs();
+        binDOF[binNo] -= constraints;
+      }      
     }
-
+    
     for (unsigned int i = 0; i < nBins_; i++) {
       RealType r, rinner, router, den(0.0), binVolume(0.0), temp(0.0);
       Vector3d omega(0.0);
-
+      
       r      = (((RealType)i + 0.5) * binWidth_);
       rinner = (RealType)i * binWidth_;
       router = (RealType)(i + 1) * binWidth_;
       binVolume =
-          (4.0 * Constants::PI * (pow(router, 3) - pow(rinner, 3))) / 3.0;
-
+        (4.0 * Constants::PI * (pow(router, 3) - pow(rinner, 3))) / 3.0;
+      
       dynamic_cast<Accumulator*>(data_[R]->accumulator[i])->add(r);
-
+      
       // For the following properties, zero should be added if the selected
       //   species is not present in the bin
       den = binMass[i] * Constants::densityConvert / binVolume;
       dynamic_cast<Accumulator*>(data_[DENSITY]->accumulator[i])->add(den);
-
+      
       if (binDOF[i] > 0) {
         // The calculations of the following properties are undefined if
         //   the selected species is not found in the bin

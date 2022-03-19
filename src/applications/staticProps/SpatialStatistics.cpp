@@ -76,16 +76,19 @@ namespace OpenMD {
   SpatialStatistics::~SpatialStatistics() {
     // Here we need to delete the accumulators...
     for (auto& data : data_) {
-      if (!data->accumulatorArray2d.empty())
-        Utils::deletePointers(data->accumulatorArray2d);
-      else
-        Utils::deletePointers(data->accumulator);
+      // Avoid deleting data that wasn't actually written to
+      if (data) {
+        if (!data->accumulatorArray2d.empty())
+          Utils::deletePointers(data->accumulatorArray2d);
+        else
+          Utils::deletePointers(data->accumulator);
+      }
     }
-
+    
     // ...and the output data
     std::vector<OutputData*>::iterator i;
     OutputData* outputData;
-
+    
     for (outputData = beginOutputData(i); outputData;
          outputData = nextOutputData(i)) {
       delete outputData;
