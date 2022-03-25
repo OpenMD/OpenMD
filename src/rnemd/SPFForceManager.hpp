@@ -65,6 +65,12 @@ namespace OpenMD::RNEMD {
     void setSelectedMolecule(Molecule* selectedMolecule, Vector3d newCom);
     bool updateLambda(RealType& particleTarget, RealType& deltaLambda);
 
+    bool getHasSelectedMolecule() const { return hasSelectedMolecule_; }
+
+    void setHasSelectedMolecule(bool hasSelectedMolecule) {
+      hasSelectedMolecule_ = hasSelectedMolecule;
+    }
+
     RealType getScaledDeltaU(RealType d_lambda) const {
       return -(f_lambda(lambda_ + d_lambda) - f_lambda(lambda_)) *
              (potentialSink_ - potentialSource_);
@@ -105,11 +111,13 @@ namespace OpenMD::RNEMD {
     Snapshot* temporarySourceSnapshot_ {nullptr};
     Snapshot* temporarySinkSnapshot_ {nullptr};
 
+    bool hasSelectedMolecule_ {false};
+
     Molecule* selectedMolecule_ {nullptr};
     Vector3d currentSinkCom_ {};
 
     RealType lambda_ {};
-    const unsigned int k_ {3};
+    int k_ {};
 
     RealType potentialSource_ {};
     RealType potentialSink_ {};

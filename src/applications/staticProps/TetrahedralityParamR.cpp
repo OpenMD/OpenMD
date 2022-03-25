@@ -223,7 +223,7 @@ namespace OpenMD {
 
   void TetrahedralityParamR::writeQr() {
     Revision rev;
-    std::ofstream qRstream(outputFilename_.c_str());   
+    std::ofstream qRstream(outputFilename_.c_str());
     if (qRstream.is_open()) {
       qRstream << "# " << getAnalysisType() << "\n";
       qRstream << "# OpenMD " << rev.getFullRevision() << "\n";

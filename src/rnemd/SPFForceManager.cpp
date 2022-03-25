@@ -63,6 +63,8 @@ namespace OpenMD::RNEMD {
   SPFForceManager::SPFForceManager(SimInfo* info) :
       ForceManager {info}, lambda_ {}, potentialSource_ {}, potentialSink_ {} {
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+
+    k_ = info_->getSimParams()->getRNEMDParameters()->getSPFScalingPower();
   }
 
   void SPFForceManager::calcForces() {
@@ -70,11 +72,16 @@ namespace OpenMD::RNEMD {
     ForceManager::calcForces();
     potentialSource_ = currentSnapshot_->getPotentialEnergy();
 
-    if (selectedMolecule_) {
-      Vector3d prevSourceCom    = selectedMolecule_->getPrevCom();
-      Vector3d currentSourceCom = selectedMolecule_->getCom();
+    if (hasSelectedMolecule_) {
+      Vector3d prevSourceCom {}, currentSourceCom {}, delta {};
 
-      Vector3d delta = currentSourceCom - prevSourceCom;
+      // Only the processor with the selected molecule should do this step:
+      if (selectedMolecule_) {
+        prevSourceCom    = selectedMolecule_->getPrevCom();
+        currentSourceCom = selectedMolecule_->getCom();
+
+        delta = currentSourceCom - prevSourceCom;
+      }
 
       int nAtoms        = info_->getNAtoms();
       int nRigidBodies  = info_->getNRigidBodies();
@@ -92,8 +99,11 @@ namespace OpenMD::RNEMD {
       *temporarySourceSnapshot_ = *currentSnapshot_;
       currentSnapshot_->clearDerivedProperties();
 
-      currentSinkCom_ += delta;
-      selectedMolecule_->setCom(currentSinkCom_);
+      // Only the processor with the selected molecule should do this step:
+      if (selectedMolecule_) {
+        currentSinkCom_ += delta;
+        selectedMolecule_->setCom(currentSinkCom_);
+      }
 
       // Current snapshot with selected molecule in sink slab
       ForceManager::calcForces();
@@ -106,7 +116,8 @@ namespace OpenMD::RNEMD {
       updatePotentials();
       updateVirialTensor();
 
-      selectedMolecule_->setCom(currentSourceCom);
+      // Only the processor with the selected molecule should do this step:
+      if (selectedMolecule_) { selectedMolecule_->setCom(currentSourceCom); }
     } else {
       potentialSink_ = currentSnapshot_->getPotentialEnergy();
     }
@@ -126,35 +137,32 @@ namespace OpenMD::RNEMD {
                                      RealType& deltaLambda) {
     bool updateSelectedMolecule {false};
 
-    // std::cerr << currentSnapshot_->getTime() << " fs\n";
-    // std::cerr << "lambda:           " << lambda_ << '\n';
-    // std::cerr << "potential source: "
-    //           << temporarySourceSnapshot_->getPotentialEnergy() << '\n';
-    // std::cerr << "potential sink:   "
-    //           << temporarySinkSnapshot_->getPotentialEnergy() << '\n';
+    if (hasSelectedMolecule_) {
+      lambda_ += std::fabs(particleTarget);
 
-    lambda_ += std::fabs(particleTarget);
+      if (f_lambda(lambda_ + std::fabs(particleTarget)) > 1.0 &&
+          f_lambda(lambda_) < 1.0) {
+        deltaLambda = particleTarget -
+                      (f_lambda(lambda_ + std::fabs(particleTarget)) - 1.0);
+      } else {
+        deltaLambda = particleTarget;
+      }
 
-    if (f_lambda(lambda_ + std::fabs(particleTarget)) > 1.0 &&
-        f_lambda(lambda_) < 1.0) {
-      deltaLambda = particleTarget -
-                    (f_lambda(lambda_ + std::fabs(particleTarget)) - 1.0);
-    } else {
-      deltaLambda = particleTarget;
-    }
+      currentSnapshot_->clearDerivedProperties();
 
-    currentSnapshot_->clearDerivedProperties();
+      combineForcesAndTorques();
+      updatePotentials();
+      updateVirialTensor();
 
-    combineForcesAndTorques();
-    updatePotentials();
-    updateVirialTensor();
+      if (f_lambda(lambda_) > 1.0 ||
+          std::fabs(f_lambda(lambda_) - 1.0) < 1e-6) {
+        lambda_ = 0.0;
 
-    if (f_lambda(lambda_) > 1.0 || std::fabs(f_lambda(lambda_) - 1.0) < 1e-6) {
-      // particleTarget = 1.0 - f_lambda(lambda_ - std::fabs(particleTarget));
-      lambda_ = 0.0;
+        // Only the processor with the selected molecule should do this step:
+        if (selectedMolecule_) { selectedMolecule_->setCom(currentSinkCom_); }
 
-      selectedMolecule_->setCom(currentSinkCom_);
-      updateSelectedMolecule = true;
+        updateSelectedMolecule = true;
+      }
     }
 
     return updateSelectedMolecule;

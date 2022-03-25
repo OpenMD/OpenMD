@@ -2,3 +2,5 @@ build
 openmd.spec
 .DS_STORE
 .*.swp
+
+samples/RNEMD/spf/*

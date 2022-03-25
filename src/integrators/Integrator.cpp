@@ -58,6 +58,7 @@
 #include "rnemd/RNEMD.hpp"
 #include "rnemd/SPFForceManager.hpp"
 #include "utils/CI_String.hpp"
+#include "utils/CaseConversion.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -142,6 +143,13 @@ namespace OpenMD {
         // ForceManager will only be changed if SPF-RNEMD is enabled
         if (Utils::traits_cast<Utils::ci_char_traits>(
                 simParams->getRNEMDParameters()->getMethod()) == "SPF") {
+          if (toUpperCopy(simParams->getEnsemble()) != "SPF") {
+            sprintf(painCave.errMsg,
+                    "The SPF RNEMD method requires the SPF Ensemble.\n");
+            painCave.isFatal = 1;
+            simError();
+          }
+
           forceMan_ = new RNEMD::SPFForceManager(info);
         }
 

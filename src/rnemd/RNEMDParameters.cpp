@@ -83,9 +83,10 @@ namespace OpenMD::RNEMD {
     DefineOptionalParameter(OutputSelection, "outputSelection");
     DefineOptionalParameter(OutputFields, "outputFields");
     DefineOptionalParameter(DividingArea, "dividingArea");
-
     DefineOptionalParameterWithDefaultValue(PrivilegedAxis, "privilegedAxis",
                                             "z");
+    DefineOptionalParameterWithDefaultValue(SPFScalingPower, "spfScalingPower",
+                                            3);
   }
 
   void RNEMDParameters::validate() {

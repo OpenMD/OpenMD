@@ -202,7 +202,7 @@ namespace OpenMD::RNEMD {
     bool successfulExchange = false;
 
     if ((M_a > 0.0) && (M_b > 0.0) &&
-        forceManager_->getSelectedMolecule()) {  // both slabs are not empty
+        forceManager_->getHasSelectedMolecule()) {  // both slabs are not empty
       Vector3d v_a = P_a / M_a;
       Vector3d v_b = P_b / M_b;
 
@@ -220,8 +220,6 @@ namespace OpenMD::RNEMD {
 
       if (a2 > 0.0) {
         RealType a = std::sqrt(a2);
-
-        std::cout << a << std::endl;
 
         if ((a > 0.999) && (a < 1.001)) {  // restrict scaling coefficients
           std::vector<StuntDouble*>::iterator sdi;
@@ -256,7 +254,7 @@ namespace OpenMD::RNEMD {
       }
     }
 
-    if (!forceManager_->getSelectedMolecule()) {
+    if (!forceManager_->getHasSelectedMolecule()) {
       selectNewMolecule();
       deltaLambda_ = particleTarget_;
       failTrialCount_++;
@@ -264,7 +262,7 @@ namespace OpenMD::RNEMD {
       return;
     }
 
-    if (successfulExchange != true) {
+    if (!successfulExchange) {
       sprintf(painCave.errMsg,
               "SPF exchange NOT performed - roots that solve\n"
               "\tthe constraint equations may not exist or there may be\n"
@@ -299,11 +297,16 @@ namespace OpenMD::RNEMD {
     int whichSelectedID {};
     Molecule* selectedMolecule;
 
+    bool hasSelectedMolecule {false};
+
     Utils::RandNumGenPtr randNumGen = info_->getRandomNumberGenerator();
 
 #ifdef IS_MPI
-    int worldRank {};
+    int worldRank {}, size {};
+
     MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Status ierr;
 
     if (worldRank == 0) {
 #endif
@@ -319,28 +322,53 @@ namespace OpenMD::RNEMD {
 
     selectedMolecule = sourceSman.nthSelectedMolecule(whichSelectedID);
 
-    if (selectedMolecule) {
-      int globalSelectedID = selectedMolecule->getGlobalIndex();
+    int globalSelectedID = -1;
 
+    if (selectedMolecule) {
+      globalSelectedID = selectedMolecule->getGlobalIndex();
+
+#ifdef IS_MPI
+      for (int i {}; i < size; ++i) {
+        if (i != worldRank)
+          MPI_Send(&globalSelectedID, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+      }
+    } else {
+      MPI_Recv(&globalSelectedID, 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD,
+               &ierr);
+#endif
+    }
+
+    if (globalSelectedID > 0) {
       currentObjectSelection_ =
           rnemdObjectSelection_ + " && ! " + std::to_string(globalSelectedID);
 
       int axis0 = (rnemdPrivilegedAxis_ + 1) % 3;
       int axis1 = (rnemdPrivilegedAxis_ + 2) % 3;
       int axis2 = rnemdPrivilegedAxis_;
+#ifdef IS_MPI
+      if (info_->getMolToProc(globalSelectedID) == worldRank) {
+#endif
+        std::uniform_real_distribution<RealType> distr0 {0,
+                                                         hmat_(axis0, axis0)};
+        std::uniform_real_distribution<RealType> distr1 {0,
+                                                         hmat_(axis1, axis1)};
+        std::normal_distribution<RealType> distr2 {targetSlabCenter,
+                                                   0.25 * slabWidth_};
 
-      std::uniform_real_distribution<RealType> distr0 {0, hmat_(axis0, axis0)};
-      std::uniform_real_distribution<RealType> distr1 {0, hmat_(axis1, axis1)};
-      std::normal_distribution<RealType> distr2 {targetSlabCenter,
-                                                 0.25 * slabWidth_};
+        Vector3d newCom {V3Zero};
 
-      Vector3d newCom {V3Zero};
+        newCom[axis0] = distr0(*randNumGen);
+        newCom[axis1] = distr1(*randNumGen);
+        newCom[axis2] = distr2(*randNumGen);
+        forceManager_->setSelectedMolecule(selectedMolecule, newCom);
 
-      newCom[axis0] = distr0(*randNumGen);
-      newCom[axis1] = distr1(*randNumGen);
-      newCom[axis2] = distr2(*randNumGen);
+#ifdef IS_MPI
+      }
+#endif
 
-      forceManager_->setSelectedMolecule(selectedMolecule, newCom);
+      hasSelectedMolecule = true;
     }
+
+    forceManager_->setHasSelectedMolecule(hasSelectedMolecule);
   }
 }  // namespace OpenMD::RNEMD

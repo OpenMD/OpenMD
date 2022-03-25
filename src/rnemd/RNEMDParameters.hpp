@@ -81,6 +81,7 @@ namespace OpenMD::RNEMD {
     DeclareParameter(OutputBinWidth, RealType);
     DeclareParameter(OutputFields, std::string);
     DeclareParameter(PrivilegedAxis, std::string);
+    DeclareParameter(SPFScalingPower, int);
 
   public:
     RNEMDParameters();

@@ -191,18 +191,19 @@ namespace OpenMD {
 
     int storageLayout = info_->getSnapshotManager()->getStorageLayout();
 
-    needPos_ = (storageLayout & DataStorage::dslPosition) ? true : false;
-    needVel_ = (storageLayout & DataStorage::dslVelocity) ? true : false;
+    needPos_        = (storageLayout & DataStorage::dslPosition) ? true : false;
+    needVel_        = (storageLayout & DataStorage::dslVelocity) ? true : false;
     needQuaternion_ = (storageLayout & DataStorage::dslAmat ||
-		       storageLayout & DataStorage::dslDipole ||
-		       storageLayout & DataStorage::dslQuadrupole) ? true : false;
-    needAngMom_ = (storageLayout &
-		   DataStorage::dslAngularMomentum) ? true : false;
-    
+                       storageLayout & DataStorage::dslDipole ||
+                       storageLayout & DataStorage::dslQuadrupole) ?
+                          true :
+                          false;
+    needAngMom_ =
+        (storageLayout & DataStorage::dslAngularMomentum) ? true : false;
+
     // some dump files contain the efield, but we should only parse
     // and set the field if we have actually allocated memory for it
-    readField_ = (storageLayout &
-		  DataStorage::dslElectricField) ? true : false;
+    readField_ = (storageLayout & DataStorage::dslElectricField) ? true : false;
 
     readSet(whichFrame);
 
@@ -460,8 +461,8 @@ namespace OpenMD {
         eField[0] = tokenizer.nextTokenAsDouble();
         eField[1] = tokenizer.nextTokenAsDouble();
         eField[2] = tokenizer.nextTokenAsDouble();
-	// only set the field if we have allocated memory for it
-	if (readField_) sd->setElectricField(eField);
+        // only set the field if we have allocated memory for it
+        if (readField_) sd->setElectricField(eField);
         break;
       }
       case 's': {
@@ -584,7 +585,7 @@ namespace OpenMD {
         eField[0] = tokenizer.nextTokenAsDouble();
         eField[1] = tokenizer.nextTokenAsDouble();
         eField[2] = tokenizer.nextTokenAsDouble();
-	if (readField_) sd->setElectricField(eField);
+        if (readField_) sd->setElectricField(eField);
         break;
       }
       case 's': {

@@ -43,13 +43,6 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-/**
- * @file NVE.cpp
- * @author tlin
- * @date 11/08/2004
- * @version 1.0
- */
-
 #include "integrators/SPFDynamics.hpp"
 
 #include <config.h>
@@ -62,8 +55,6 @@ namespace OpenMD {
 
   void SPFDynamics::postStep() {
     RealType difference;
-
-    // saveConservedQuantity();
 
     if (needVelocityScaling) {
       difference = snap->getTime() - currThermal;
@@ -81,6 +72,7 @@ namespace OpenMD {
         rnemd_->doRNEMD();
         currRNEMD += RNEMD_exchangeTime;
       }
+
       rnemd_->collectData();
 
       if (RNEMD::SPFForceManager* spfForceManager =
