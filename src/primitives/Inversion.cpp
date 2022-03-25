@@ -104,12 +104,14 @@ namespace OpenMD {
       inversionType_->calcForce(cos_phi, potential_, dVdcosPhi);
       break;
     case itAngle:
+      
       RealType phi = acos(cos_phi);
       RealType dVdPhi;
       inversionType_->calcForce(phi, potential_, dVdPhi);
       RealType sin_phi = sqrt(1.0 - cos_phi * cos_phi);
       if (fabs(sin_phi) < 1.0E-6) { sin_phi = 1.0E-6; }
-      dVdcosPhi = dVdPhi / sin_phi;
+      dVdcosPhi = - dVdPhi / sin_phi;
+
       break;
     }
 

@@ -85,11 +85,11 @@ namespace OpenMD {
           Utils::deletePointers(data->accumulator);
       }
     }
-
+    
     // ...and the output data
     std::vector<OutputData*>::iterator i;
     OutputData* outputData;
-
+    
     for (outputData = beginOutputData(i); outputData;
          outputData = nextOutputData(i)) {
       delete outputData;

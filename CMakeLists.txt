@@ -964,6 +964,7 @@ ENDIF(Python3_Interpreter_FOUND)
 set(PERL_FILES
 src/applications/utilities/solvator
 src/applications/utilities/waterBoxer
+src/applications/utilities/waterSphere
 doc/git2cl
 )
 
