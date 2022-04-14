@@ -433,8 +433,9 @@ namespace OpenMD {
   }
 
   RNEMDR::RNEMDR(SimInfo* info, const std::string& filename,
-                 const std::string& sele, int nrbins) :
-      ShellStatistics(info, filename, sele, nrbins) {
+                 const std::string& sele, const std::string& comsele,
+                 int nrbins) :
+    ShellStatistics(info, filename, sele, comsele, nrbins) {
     setOutputName(getPrefix(filename) + ".rnemdR");
 
     data_.resize(RNEMDR::ENDINDEX);
@@ -468,6 +469,10 @@ namespace OpenMD {
     for (unsigned int i = 0; i < nBins_; i++)
       density->accumulator.push_back(new Accumulator());
     addOutputDataAt(density, DENSITY);
+
+    outputMask_.set(TEMPERATURE);
+    outputMask_.set(ANGULARVELOCITY);
+    outputMask_.set(DENSITY);     
   }
 
   void RNEMDR::processFrame(int istep) {
@@ -594,9 +599,9 @@ namespace OpenMD {
   }
 
   RNEMDRTheta::RNEMDRTheta(SimInfo* info, const std::string& filename,
-                           const std::string& sele, int nrbins,
-                           int nangleBins) :
-      ShellStatistics(info, filename, sele, nrbins),
+                           const std::string& sele, const std::string& comsele,
+                           int nrbins, int nangleBins) :
+    ShellStatistics(info, filename, sele, comsele, nrbins),
       nAngleBins_(nangleBins) {
     Globals* simParams                  = info->getSimParams();
     RNEMD::RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();

@@ -103,8 +103,10 @@ namespace OpenMD {
   class ShellStatistics : public SpatialStatistics {
   public:
     ShellStatistics(SimInfo* info, const std::string& filename,
-                    const std::string& sele, int nbins);
+                    const std::string& sele, const std::string& comsele,
+                    int nbins);
 
+    virtual void processFrame(int frame);
     virtual int getBin(Vector3d pos);
     void setCoordinateOrigin(Vector3d co) { coordinateOrigin_ = co; }
     void setBinWidth(RealType bw) { binWidth_ = bw; }
@@ -113,6 +115,10 @@ namespace OpenMD {
     OutputData* r_;
     Vector3d coordinateOrigin_;
     RealType binWidth_;
+    std::string comSele_;
+    SelectionManager comSeleMan_;
+    SelectionEvaluator comEvaluator_;
+
   };
 }  // namespace OpenMD
 

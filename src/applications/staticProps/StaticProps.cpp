@@ -120,6 +120,7 @@ int main(int argc, char* argv[]) {
   std::string sele1;
   std::string sele2;
   std::string sele3;
+  std::string comsele;
 
   // check the first selection argument, or set it to the environment
   // variable, or failing that, set it to "select all"
@@ -156,6 +157,11 @@ int main(int argc, char* argv[]) {
 
   if (args_info.sele3_given) sele3 = args_info.sele3_arg;
 
+  // check the comsele selection argument, which is only set if
+  // requested by the user
+
+  if (args_info.comsele_given) comsele = args_info.comsele_arg;
+  
   bool batchMode(false);
   if (args_info.scd_given) {
     if (args_info.sele1_given && args_info.sele2_given &&
@@ -587,10 +593,11 @@ int main(int argc, char* argv[]) {
     analyser = Utils::make_unique<RNEMDZ>(info, dumpFileName, sele1,
                                           args_info.nbins_arg, privilegedAxis);
   } else if (args_info.rnemdr_given) {
-    analyser = Utils::make_unique<RNEMDR>(info, dumpFileName, sele1, nrbins);
+      analyser = Utils::make_unique<RNEMDR>(info, dumpFileName, sele1, comsele,
+                                            nrbins);
   } else if (args_info.rnemdrt_given) {
     analyser = Utils::make_unique<RNEMDRTheta>(info, dumpFileName, sele1,
-                                               nrbins, nanglebins);
+                                               comsele, nrbins, nanglebins);
   } else if (args_info.nitrile_given) {
     analyser = Utils::make_unique<NitrileFrequencyMap>(
         info, dumpFileName, sele1, args_info.nbins_arg);
