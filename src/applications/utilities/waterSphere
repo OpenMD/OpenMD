@@ -1,7 +1,5 @@
 #!@PERL_EXECUTABLE@
 
-#!/usr/bin/perl
-
 # program that builds spheres of water
 
 # author    = "Dan Gezelter
@@ -218,39 +216,42 @@ $cell2X = $cellLengthX*0.5;
 $cell2Y = $cellLengthY*0.5;
 $cell2Z = $cellLengthZ*0.5;
 
+$centerx = 0.5 * $boxx;
+$centery = 0.5 * $boxy;
+$centerz = 0.5 * $boxz;
+
 if ($lattice == 0) {
 # build the unit cell
 # molecule 0
-  $xCorr[0] = 0.0;
-  $yCorr[0] = 0.0;
-  $zCorr[0] = 0.0;
+  $xref[0] = 0.0;
+  $yref[0] = 0.0;
+  $zref[0] = 0.0;
 # molecule 1
-  $xCorr[1] = 0.0;
-  $yCorr[1] = $cell2Y;
-  $zCorr[1] = $cell2Z;
+  $xref[1] = 0.0;
+  $yref[1] = $cell2Y;
+  $zref[1] = $cell2Z;
 # molecule 2
-  $xCorr[2] = $cell2X;
-  $yCorr[2] = $cell2Y;
-  $zCorr[2] = 0.0;
+  $xref[2] = $cell2X;
+  $yref[2] = $cell2Y;
+  $zref[2] = 0.0;
 # molecule 3
-  $xCorr[3] = $cell2X;
-  $yCorr[3] = 0.0;
-  $zCorr[3] = $cell2Z;
+  $xref[3] = $cell2X;
+  $yref[3] = 0.0;
+  $zref[3] = $cell2Z;
 # assemble the lattice
   $counter = 0;
-  for ($z = -$nz; $z < $nz ; $z++) {
-    for ($y = -$ny; $y < $ny; $y++) {
-      for ($x = -$nx; $x < $nx; $x++) {
+  for ($z = 0; $z < $nz ; $z++) {
+    for ($y = 0; $y < $ny; $y++) {
+      for ($x = 0; $x < $nx; $x++) {
 	for ($uc = 0; $uc < 4; $uc++) {   
-          $xtest = $xCorr[$uc] + $cellLengthX*$x;
-          print "$x $xCorr[$uc] + $cellLengthX*$x  $xtest \n";
-	  $ytest = $yCorr[$uc] + $cellLengthY*$y;
-	  $ztest = $zCorr[$uc] + $cellLengthZ*$z;
+          $xtest = $xref[$uc] + $cellLengthX*$x - $centerx;
+	  $ytest = $yref[$uc] + $cellLengthY*$y - $centery;
+	  $ztest = $zref[$uc] + $cellLengthZ*$z - $centerz;
           $rtest = sqrt($xtest*$xtest + $ytest*$ytest + $ztest*$ztest);
           if (($rtest > $inner) && ($rtest < $outer)) {
-	  	  $xCorr[$counter] = $xCorr[$uc] + $cellLengthX*$x;
-		  $yCorr[$counter] = $yCorr[$uc] + $cellLengthY*$y;
-	  	  $zCorr[$counter] = $zCorr[$uc] + $cellLengthZ*$z;
+	  	  $xCorr[$counter] = $xref[$uc] + $cellLengthX*$x - $centerx;
+		  $yCorr[$counter] = $yref[$uc] + $cellLengthY*$y - $centery;
+	  	  $zCorr[$counter] = $zref[$uc] + $cellLengthZ*$z - $centerz;
           	  $counter++;
           }
 	}
@@ -261,22 +262,22 @@ if ($lattice == 0) {
 } elsif ($lattice == 1) {
   # build the unit cell
   # molecule 0
-  $xCorr[0] = $cell2X;
-  $yCorr[0] = $cell2Y;
-  $zCorr[0] = $cell2Z;
+  $xref[0] = $cell2X;
+  $yref[0] = $cell2Y;
+  $zref[0] = $cell2Z;
 #assemble the lattice
   $counter = 0;
-  for ($z = -$nz; $z < $nz; $z++) {
-    for ($y = -$ny; $y < $ny; $y++) {
-      for ($x = -$nx; $x < $nx; $x++) {
-          $xtest = $xCorr[0] + $cellLengthX*$x;
-	  $ytest = $yCorr[0] + $cellLengthY*$y;
-	  $ztest = $zCorr[0] + $cellLengthZ*$z;
+  for ($z = 0; $z < $nz ; $z++) {
+    for ($y = 0; $y < $ny; $y++) {
+      for ($x = 0; $x < $nx; $x++) {
+          $xtest = $xref[0] + $cellLengthX*$x - $centerx;
+	  $ytest = $yref[0] + $cellLengthY*$y - $centery;
+	  $ztest = $zref[0] + $cellLengthZ*$z - $centerz;
           $rtest = sqrt($xtest*$xtest + $ytest*$ytest + $ztest*$ztest);
           if (($rtest > $inner) && ($rtest < $outer)) {
-	  	  $xCorr[$counter] = $xCorr[0] + $cellLengthX*$x;
-		  $yCorr[$counter] = $yCorr[0] + $cellLengthY*$y;
-	  	  $zCorr[$counter] = $zCorr[0] + $cellLengthZ*$z;
+	  	  $xCorr[$counter] = $xref[0] + $cellLengthX*$x - $centerx;
+		  $yCorr[$counter] = $yref[0] + $cellLengthY*$y - $centery;
+	  	  $zCorr[$counter] = $zref[0] + $cellLengthZ*$z - $centerz;
           	  $counter++;
           }
       }
