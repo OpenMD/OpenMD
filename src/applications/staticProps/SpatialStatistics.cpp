@@ -186,8 +186,8 @@ namespace OpenMD {
   ShellStatistics::ShellStatistics(SimInfo* info, const std::string& filename,
                                    const std::string& sele,
                                    const std::string& comsele, int nbins) :
-    SpatialStatistics(info, filename, sele, nbins), comSele_(comsele),
-    comSeleMan_(info), comEvaluator_(info), coordinateOrigin_(V3Zero) {
+    SpatialStatistics(info, filename, sele, nbins), coordinateOrigin_(V3Zero), 
+    comSele_(comsele), comSeleMan_(info), comEvaluator_(info) {
     
     binWidth_ = 1.0;
 

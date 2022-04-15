@@ -482,7 +482,6 @@ namespace OpenMD {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
-    int i;
     int binNo;
     RealType mass;
     Vector3d vel;
@@ -506,7 +505,6 @@ namespace OpenMD {
     std::vector<AtomType*>::iterator at;
     Molecule* mol;
     StuntDouble* sd;
-    AtomType* atype;
 
     // loop over the selected atoms:
     for (mol = info_->beginMolecule(miter); mol != NULL;
