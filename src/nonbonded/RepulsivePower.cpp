@@ -144,9 +144,33 @@ namespace OpenMD {
     mixer.sigmai  = 1.0 / mixer.sigma;
     mixer.nRep    = nRep;
 
-    int rptid1 = RPtids[atype1->getIdent()];
-    int rptid2 = RPtids[atype2->getIdent()];
     int nRP    = RPtypes.size();
+    int atid1 = atype1->getIdent();
+    int atid2 = atype2->getIdent();
+    int rptid1, rptid2;
+
+    pair<set<int>::iterator, bool> ret;
+    ret = RPtypes.insert(atid1);
+    if (ret.second == false) {
+      // already had this type in the MieMap, just get the mietid:
+      rptid1 = RPtids[atid1];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      rptid1        = nRP;
+      RPtids[atid1] = nRP;
+      nRP++;
+    }
+
+    ret = RPtypes.insert(atid2);
+    if (ret.second == false) {
+      // already had this type in the MieMap, just get the mietid:
+      rptid2 = RPtids[atid2];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      rptid2        = nRP;
+      RPtids[atid2] = nRP;
+      nRP++;
+    }
 
     MixingMap.resize(nRP);
     MixingMap[rptid1].resize(nRP);

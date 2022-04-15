@@ -146,10 +146,34 @@ namespace OpenMD {
     RealType m = RealType(mAtt);
 
     mixer.nmScale = n * pow(n / m, m / (n - m)) / (n - m);
-
-    int mietid1 = MieTids[atype1->getIdent()];
-    int mietid2 = MieTids[atype2->getIdent()];
+    
     int nMie    = MieTypes.size();
+    int atid1 = atype1->getIdent();
+    int atid2 = atype2->getIdent();
+    int mietid1, mietid2;
+
+    pair<set<int>::iterator, bool> ret;
+    ret = MieTypes.insert(atid1);
+    if (ret.second == false) {
+      // already had this type in the MieMap, just get the mietid:
+      mietid1 = MieTids[atid1];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      mietid1        = nMie;
+      MieTids[atid1] = nMie;
+      nMie++;
+    }
+
+    ret = MieTypes.insert(atid2);
+    if (ret.second == false) {
+      // already had this type in the MieMap, just get the mietid:
+      mietid2 = MieTids[atid2];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      mietid2        = nMie;
+      MieTids[atid2] = nMie;
+      nMie++;
+    }
 
     MixingMap.resize(nMie);
     MixingMap[mietid1].resize(nMie);
