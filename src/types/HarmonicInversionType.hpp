@@ -68,6 +68,7 @@ namespace OpenMD {
 
     virtual void calcForce(RealType phi, RealType& V, RealType& dVdPhi) {
       RealType dp = phi - phi0_;
+
       V      = 0.5 * d0_ * dp * dp;
       dVdPhi = d0_ * dp;
     }

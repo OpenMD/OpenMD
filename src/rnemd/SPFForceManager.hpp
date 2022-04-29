@@ -47,10 +47,12 @@
 #include <config.h>
 
 #include <cmath>
+#include <memory>
 
 #include "brains/ForceManager.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/Snapshot.hpp"
+#include "brains/Thermo.hpp"
 #include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
 
@@ -104,6 +106,8 @@ namespace OpenMD::RNEMD {
 
       return T {(1.0 - result) * quantityA + result * quantityB};
     }
+
+    std::unique_ptr<Thermo> thermo_ {nullptr};
 
     Snapshot* currentSnapshot_ {nullptr};
     Snapshot* temporarySourceSnapshot_ {nullptr};

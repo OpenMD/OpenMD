@@ -267,6 +267,10 @@ namespace OpenMD {
           .velocity[localIndex_];
     }
 
+    Vector3d getVel(Snapshot* snapshot) {
+      return (snapshot->*storage_).velocity[localIndex_];
+    }
+
     /**
      * Sets  the previous velocity of this stuntDouble
      * @param vel  new velocity

@@ -46,8 +46,10 @@
 #include <config.h>
 
 #include <vector>
+#include <memory>
 
 #include "brains/ForceManager.hpp"
+#include "brains/Thermo.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/Snapshot.hpp"
 #include "math/SquareMatrix3.hpp"
@@ -60,6 +62,8 @@ namespace OpenMD::RNEMD {
 
   SPFForceManager::SPFForceManager(SimInfo* info) :
       ForceManager {info}, lambda_ {}, potentialSource_ {}, potentialSink_ {} {
+
+    thermo_ = std::make_unique<Thermo>(info);
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
     k_ = info_->getSimParams()->getRNEMDParameters()->getSPFScalingPower();
@@ -270,13 +274,13 @@ namespace OpenMD::RNEMD {
     currentSnapshot_->setVirialTensor(virialTensor);
 
     Mat3x3d pressureTensor =
-        linearCombination(temporarySourceSnapshot_->getPressureTensor(),
-                          temporarySinkSnapshot_->getPressureTensor());
+        linearCombination(thermo_->getPressureTensor(temporarySourceSnapshot_),
+                          thermo_->getPressureTensor(temporarySinkSnapshot_));
     currentSnapshot_->setPressureTensor(pressureTensor);
 
     RealType pressure =
-        linearCombination(temporarySourceSnapshot_->getPressure(),
-                          temporarySinkSnapshot_->getPressure());
+        linearCombination(thermo_->getPressure(temporarySourceSnapshot_),
+                          thermo_->getPressure(temporarySinkSnapshot_));
     currentSnapshot_->setPressure(pressure);
   }
 }  // namespace OpenMD::RNEMD

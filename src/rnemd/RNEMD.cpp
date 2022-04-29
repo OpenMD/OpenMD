@@ -692,10 +692,9 @@ namespace OpenMD::RNEMD {
 
         // we need to subtract out degrees of freedom from constraints
         // belonging to in molecules in this bin:
-        
         if (seleMan_.isSelected(mol)) {
-          Vector3d pos = mol->getCom();
-          binNo        = getBin(pos);
+          Vector3d pos    = mol->getCom();
+          binNo           = getBin(pos);
           int constraints = mol->getNConstraintPairs();
           binDOF[binNo] -= constraints;
         }

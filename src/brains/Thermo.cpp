@@ -422,6 +422,23 @@ namespace OpenMD {
     return snap->getPressure();
   }
 
+  RealType Thermo::getPressure(Snapshot* snap) {
+    if (!snap->hasPressure) {
+      // Relies on the calculation of the full molecular pressure tensor
+      Mat3x3d tensor;
+      RealType pressure;
+
+      tensor = getPressureTensor(snap);
+
+      pressure = Constants::pressureConvert *
+                 (tensor(0, 0) + tensor(1, 1) + tensor(2, 2)) / 3.0;
+
+      snap->setPressure(pressure);
+    }
+
+    return snap->getPressure();
+  }
+
   Mat3x3d Thermo::getPressureTensor() {
     // returns pressure tensor in units amu*fs^-2*Ang^-1
     // routine derived via viral theorem description in:
@@ -444,6 +461,46 @@ namespace OpenMD {
              sd = mol->nextIntegrableObject(j)) {
           mass = sd->getMass();
           vcom = sd->getVel();
+          p_tens += mass * outProduct(vcom, vcom);
+        }
+      }
+
+#ifdef IS_MPI
+      MPI_Allreduce(MPI_IN_PLACE, p_tens.getArrayPointer(), 9, MPI_REALTYPE,
+                    MPI_SUM, MPI_COMM_WORLD);
+#endif
+
+      RealType volume      = this->getVolume();
+      Mat3x3d virialTensor = snap->getVirialTensor();
+
+      pressureTensor =
+          (p_tens + Constants::energyConvert * virialTensor) / volume;
+
+      snap->setPressureTensor(pressureTensor);
+    }
+    return snap->getPressureTensor();
+  }
+
+  Mat3x3d Thermo::getPressureTensor(Snapshot* snap) {
+    // returns pressure tensor in units amu*fs^-2*Ang^-1
+    // routine derived via viral theorem description in:
+    // Paci, E. and Marchi, M. J.Phys.Chem. 1996, 100, 4314-4322
+    if (!snap->hasPressureTensor) {
+      Mat3x3d pressureTensor;
+      Mat3x3d p_tens(0.0);
+      RealType mass;
+      Vector3d vcom;
+
+      SimInfo::MoleculeIterator i;
+      vector<StuntDouble*>::iterator j;
+      Molecule* mol;
+      StuntDouble* sd;
+      for (mol = info_->beginMolecule(i); mol != NULL;
+           mol = info_->nextMolecule(i)) {
+        for (sd = mol->beginIntegrableObject(j); sd != NULL;
+             sd = mol->nextIntegrableObject(j)) {
+          mass = sd->getMass();
+          vcom = sd->getVel(snap);
           p_tens += mass * outProduct(vcom, vcom);
         }
       }
