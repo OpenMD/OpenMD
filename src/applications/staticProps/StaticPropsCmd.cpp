@@ -128,6 +128,7 @@ const char *gengetopt_args_info_help[] = {
   "  -q, --net_charge              computes an average charge profile of the\n                                  selected atom",
   "  -J, --current_density         computes the current density for the selected\n                                  atom",
   "      --chargez                 computes the charge distribution along selected\n                                  axis and selected atom",
+  "      --charger                 computes the charge density as a function of\n                                  the radius and selected atom",
   "      --charge_density_z        computes the continuous charge distribution\n                                  along selected axis and selected atom",
   "      --countz                  computes the number of selected atoms  along\n                                  selected axis",
   "  -M, --momentum_distribution   computes the momentum distribution for the\n                                  selected atom",
@@ -261,6 +262,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->net_charge_given = 0 ;
   args_info->current_density_given = 0 ;
   args_info->chargez_given = 0 ;
+  args_info->charger_given = 0 ;
   args_info->charge_density_z_given = 0 ;
   args_info->countz_given = 0 ;
   args_info->momentum_distribution_given = 0 ;
@@ -439,11 +441,12 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->net_charge_help = gengetopt_args_info_help[92] ;
   args_info->current_density_help = gengetopt_args_info_help[93] ;
   args_info->chargez_help = gengetopt_args_info_help[94] ;
-  args_info->charge_density_z_help = gengetopt_args_info_help[95] ;
-  args_info->countz_help = gengetopt_args_info_help[96] ;
-  args_info->momentum_distribution_help = gengetopt_args_info_help[97] ;
-  args_info->dipole_orientation_help = gengetopt_args_info_help[98] ;
-  args_info->order_prob_help = gengetopt_args_info_help[99] ;
+  args_info->charger_help = gengetopt_args_info_help[95] ;
+  args_info->charge_density_z_help = gengetopt_args_info_help[96] ;
+  args_info->countz_help = gengetopt_args_info_help[97] ;
+  args_info->momentum_distribution_help = gengetopt_args_info_help[98] ;
+  args_info->dipole_orientation_help = gengetopt_args_info_help[99] ;
+  args_info->order_prob_help = gengetopt_args_info_help[100] ;
   
 }
 
@@ -848,6 +851,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "current_density", 0, 0 );
   if (args_info->chargez_given)
     write_into_file(outfile, "chargez", 0, 0 );
+  if (args_info->charger_given)
+    write_into_file(outfile, "charger", 0, 0 );
   if (args_info->charge_density_z_given)
     write_into_file(outfile, "charge_density_z", 0, 0 );
   if (args_info->countz_given)
@@ -963,6 +968,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->net_charge_given = 0 ;
   args_info->current_density_given = 0 ;
   args_info->chargez_given = 0 ;
+  args_info->charger_given = 0 ;
   args_info->charge_density_z_given = 0 ;
   args_info->countz_given = 0 ;
   args_info->momentum_distribution_given = 0 ;
@@ -1910,6 +1916,7 @@ cmdline_parser_internal (
         { "net_charge",	0, NULL, 'q' },
         { "current_density",	0, NULL, 'J' },
         { "chargez",	0, NULL, 0 },
+        { "charger",	0, NULL, 0 },
         { "charge_density_z",	0, NULL, 0 },
         { "countz",	0, NULL, 0 },
         { "momentum_distribution",	0, NULL, 'M' },
@@ -3372,6 +3379,23 @@ cmdline_parser_internal (
                 &(local_args_info.chargez_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "chargez", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* computes the charge density as a function of the radius and selected atom.  */
+          else if (strcmp (long_options[option_index].name, "charger") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->charger_given),
+                &(local_args_info.charger_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "charger", '-',
                 additional_error))
               goto failure;
           

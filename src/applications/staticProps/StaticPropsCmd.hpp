@@ -215,6 +215,7 @@ struct gengetopt_args_info
   const char *net_charge_help; /**< @brief computes an average charge profile of the selected atom help description.  */
   const char *current_density_help; /**< @brief computes the current density for the selected atom help description.  */
   const char *chargez_help; /**< @brief computes the charge distribution along selected axis and selected atom help description.  */
+  const char *charger_help; /**< @brief computes the charge density as a function of the radius and selected atom help description.  */
   const char *charge_density_z_help; /**< @brief computes the continuous charge distribution along selected axis and selected atom help description.  */
   const char *countz_help; /**< @brief computes the number of selected atoms  along selected axis help description.  */
   const char *momentum_distribution_help; /**< @brief computes the momentum distribution for the selected atom help description.  */
@@ -315,6 +316,7 @@ struct gengetopt_args_info
   unsigned int net_charge_given ;	/**< @brief Whether net_charge was given.  */
   unsigned int current_density_given ;	/**< @brief Whether current_density was given.  */
   unsigned int chargez_given ;	/**< @brief Whether chargez was given.  */
+  unsigned int charger_given ;	/**< @brief Whether charger was given.  */
   unsigned int charge_density_z_given ;	/**< @brief Whether charge_density_z was given.  */
   unsigned int countz_given ;	/**< @brief Whether countz was given.  */
   unsigned int momentum_distribution_given ;	/**< @brief Whether momentum_distribution was given.  */

@@ -792,6 +792,7 @@ src/applications/staticProps/DensityHistogram.cpp
 src/applications/staticProps/MomentumHistogram.cpp
 src/applications/staticProps/ChargeHistogram.cpp
 src/applications/staticProps/CurrentDensity.cpp
+src/applications/staticProps/ChargeR.cpp
 src/applications/staticProps/ChargeZ.cpp
 src/applications/staticProps/PositionZ.cpp
 src/applications/staticProps/DipoleOrientation.cpp

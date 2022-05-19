@@ -83,6 +83,7 @@
 #include "applications/staticProps/ChargeDensityZ.hpp"
 #include "applications/staticProps/ChargeHistogram.hpp"
 #include "applications/staticProps/ChargeZ.hpp"
+#include "applications/staticProps/ChargeR.hpp"
 #include "applications/staticProps/CoordinationNumber.hpp"
 #include "applications/staticProps/CurrentDensity.hpp"
 #include "applications/staticProps/DensityHistogram.hpp"
@@ -563,6 +564,9 @@ int main(int argc, char* argv[]) {
   } else if (args_info.chargez_given) {
     analyser = Utils::make_unique<ChargeZ>(info, dumpFileName, sele1,
                                            args_info.nbins_arg, privilegedAxis);
+  } else if (args_info.charger_given) {
+    analyser = Utils::make_unique<ChargeR>(info, dumpFileName, sele1,
+                                           maxLen, args_info.nbins_arg);
   } else if (args_info.charge_density_z_given) {
     analyser = Utils::make_unique<ChargeDensityZ>(
         info, dumpFileName, sele1, args_info.nbins_arg, vRadius,
