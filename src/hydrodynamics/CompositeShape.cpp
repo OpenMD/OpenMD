@@ -43,9 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "applications/hydrodynamics/CompositeShape.hpp"
-
-#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
+#include "hydrodynamics/CompositeShape.hpp"
+#include "hydrodynamics/HydrodynamicsModel.hpp"
 #include "utils/MemoryUtils.hpp"
 namespace OpenMD {
 
@@ -88,7 +87,7 @@ namespace OpenMD {
   HydroProp* CompositeShape::getHydroProp(RealType viscosity,
                                           RealType temperature) {
     HydroProp* props = new HydroProp();
-    props->setCOR(V3Zero);
+    props->setCenterOfResistance(V3Zero);
     sprintf(painCave.errMsg,
             "CompositeShape was asked to return an analytic HydroProps.\n");
     painCave.severity = OPENMD_ERROR;

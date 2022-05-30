@@ -43,9 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "applications/hydrodynamics/RoughShell.hpp"
-
-#include "applications/hydrodynamics/ShapeBuilder.hpp"
+#include "hydrodynamics/RoughShell.hpp"
+#include "hydrodynamics/ShapeBuilder.hpp"
 #include "brains/SimInfo.hpp"
 
 namespace OpenMD {

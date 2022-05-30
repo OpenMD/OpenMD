@@ -43,8 +43,7 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "applications/hydrodynamics/BeadModel.hpp"
-
+#include "hydrodynamics/BeadModel.hpp"
 #include "types/LennardJonesAdapter.hpp"
 
 namespace OpenMD {

@@ -42,12 +42,12 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-#include "applications/hydrodynamics/AnalyticalModel.hpp"
-
-#include "applications/hydrodynamics/CompositeShape.hpp"
+#include "hydrodynamics/AnalyticalModel.hpp"
+#include "hydrodynamics/CompositeShape.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "math/LU.hpp"
+
 namespace OpenMD {
 
   bool AnalyticalModel::calcHydroProps(Shape* shape, RealType viscosity,

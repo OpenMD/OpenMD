@@ -43,23 +43,23 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP
-#define APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP
-#include "hydrodynamics/Shape.hpp"
-#include "primitives/Molecule.hpp"
+#ifndef HYDRODYNAMICS_BEADMODEL_HPP
+#define HYDRODYNAMICS_BEADMODEL_HPP
+
+#include "hydrodynamics/ApproximationModel.hpp"
 #include "utils/ElementsTable.hpp"
 
 namespace OpenMD {
 
-  class ShapeBuilder {
+  class BeadModel : public ApproximationModel {
   public:
-    static Shape* createShape(StuntDouble* sd);
+    BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
 
   private:
-    static Shape* internalCreateShape(Atom* atom);
-    static Shape* internalCreateShape(DirectionalAtom* datom);
-    static Shape* internalCreateShape(RigidBody* rb);
+    virtual bool createBeads(std::vector<BeadParam>& beads);
+    bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);
   };
 
 }  // namespace OpenMD
+
 #endif

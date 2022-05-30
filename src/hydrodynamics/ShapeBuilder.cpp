@@ -42,9 +42,8 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-#include "applications/hydrodynamics/ShapeBuilder.hpp"
-
-#include "applications/hydrodynamics/CompositeShape.hpp"
+#include "hydrodynamics/ShapeBuilder.hpp"
+#include "hydrodynamics/CompositeShape.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "types/GayBerneAdapter.hpp"

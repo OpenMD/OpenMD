@@ -52,10 +52,10 @@ namespace OpenMD {
   /**
    * @class HydroProp HydroProp.hpp "hydrodynamics/HydroProp.hpp"
    * Container for information about the hydrodynamic behavior of objects
-   * undergoing Langevin dynamics.
+   * interacting with surroundings.
    * @note the units for the center of resistance (a location) are in Angstroms
    *
-   * @note the units of Xi, the resistance tensor are:
+   * @note the units of the resistance tensor are:
    *    Xitt (Translation-translation) : kcal fs mol^-1 Angstroms^-2
    *    Xirt (Rotation-translation) : kcal fs mol^-1 Angstroms^-1 radians^-1
    *    Xitr (Translation-rotation) : kcal fs mol^-1 Angstroms^-1 radians^-1
@@ -77,36 +77,40 @@ namespace OpenMD {
     HydroProp(const std::string& frictionLine);
 
     void complete();
-    void setCOR(Vector3d cor) {
+    
+    void setCenterOfResistance(Vector3d cor) {
       cor_   = cor;
       hasCOR = true;
     }
-    void setXi(Mat6x6d Xi) {
+    Vector3d getCenterOfResistance() { return cor_; }
+    
+    void setResistanceTensor(Mat6x6d Xi) {
       Xi_   = Xi;
       hasXi = true;
+      complete();
     }
-    void setD(Mat6x6d D) { D_ = D; }
-    void setName(std::string name) { name_ = name; }
+    Mat6x6d getResistanceTensor() { return Xi_; }
+    
+    void setDiffusionTensor(Mat6x6d D) { D_ = D; }
+    Mat6x6d getDiffusionTensor() { return D_; }
 
-    Vector3d getCOR() { return cor_; }
-    Mat3x3d getXitt() { return Xitt_; }
-    Mat3x3d getXitr() { return Xitr_; }
-    Mat3x3d getXirt() { return Xirt_; }
-    Mat3x3d getXirr() { return Xirr_; }
-    Mat6x6d getS() { return S_; }
-    Mat6x6d getD() { return D_; }
-    Mat6x6d getXi() { return Xi_; }
+    void setName(std::string name) { name_ = name; }
     std::string getName() { return name_; }
+       
+    Mat3x3d getPitchMatrix();
+    RealType getScalarPitch();
+    
+    Mat3x3d getXitt();
+    Mat3x3d getXitr();
+    Mat3x3d getXirt();
+    Mat3x3d getXirr();
+    Mat6x6d getS() { return S_; }
 
   private:
     std::string name_;
     Vector3d cor_;
     Mat6x6d Xi_;
     Mat6x6d D_;
-    Mat3x3d Xitt_;
-    Mat3x3d Xirt_;  // Xirrt == Xirtr
-    Mat3x3d Xitr_;
-    Mat3x3d Xirr_;
     Mat6x6d S_;
     bool hasCOR;
     bool hasXi;

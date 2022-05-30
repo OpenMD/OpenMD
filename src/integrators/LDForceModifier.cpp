@@ -270,7 +270,7 @@ namespace OpenMD {
 
       if (i != hydroPropMap_.end()) {
         // Center of Resistance:
-        moment->rcr = i->second->getCOR();
+        moment->rcr = i->second->getCenterOfResistance();
       } else {
         sprintf(painCave.errMsg,
                 "LDForceManager createMomentData: Couldn't find HydroProp for\n"

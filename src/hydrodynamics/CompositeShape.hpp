@@ -43,23 +43,29 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
+#ifndef HYDRODYNAMICS_COMPOSITESHAPE_HPP
+#define HYDRODYNAMICS_COMPOSITESHAPE_HPP
+#include <vector>
 
-#include "applications/hydrodynamics/ApproximationModel.hpp"
-#include "utils/ElementsTable.hpp"
-
+#include "hydrodynamics/Shape.hpp"
 namespace OpenMD {
-
-  class BeadModel : public ApproximationModel {
+  /**
+   * @class CompositeShape
+   * Combine composite pattern and visitor pattern
+   */
+  class CompositeShape : public Shape {
   public:
-    BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
+    CompositeShape() {}
+    virtual ~CompositeShape();
+    virtual bool isInterior(Vector3d pos);
+    virtual std::pair<Vector3d, Vector3d> getBoundingBox();
+    virtual bool hasAnalyticalSolution() { return false; }
+    virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature);
+    void addShape(Shape* s) { shapes_.push_back(s); }
 
   private:
-    virtual bool createBeads(std::vector<BeadParam>& beads);
-    bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);
+    std::vector<Shape*> shapes_;
   };
 
 }  // namespace OpenMD
-
 #endif

@@ -43,27 +43,58 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATION_HYDRODYNAMICS_ROUGHSHELL_HPP
-#define APPLICATION_HYDRODYNAMICS_ROUGHSHELL_HPP
+#ifndef HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
+#define HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
+#include <vector>
 
-#include "applications/hydrodynamics/ApproximationModel.hpp"
-#include "applications/hydrodynamics/CompositeShape.hpp"
-#include "utils/Grid3d.hpp"
+#include "hydrodynamics/HydroProp.hpp"
+#include "math/DynamicRectMatrix.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
+#include "primitives/Molecule.hpp"
 
 namespace OpenMD {
 
-  class RoughShell : public ApproximationModel {
+  struct BeadParam {
+    std::string atomName;
+    Vector3d pos;
+    RealType mass;  // to compute center of mass in ApproximationModel.cpp
+    RealType radius;
+  };
+
+  class Shape;
+  class Sphere;
+  class Ellipsoid;
+  class CompositeShape;
+
+  class HydrodynamicsModel {
   public:
-    RoughShell(StuntDouble* sd, SimInfo* info);
-    virtual ~RoughShell() { delete shape_; }
-    void setSigma(RealType sigma) { sigma_ = sigma; }
-    RealType getSigma() { return sigma_; }
+    HydrodynamicsModel(StuntDouble* sd, SimInfo* info) : sd_(sd), info_(info) {}
+    virtual ~HydrodynamicsModel() = default;
+
+    virtual bool calcHydroProps(Shape* shape, RealType viscosity,
+                                RealType temperature);
+
+    virtual void init() {};
+    virtual void writeBeads(std::ostream& os) = 0;
+    void writeHydroProps(std::ostream& os);
+
+    void setCR(HydroProp* cr) { cr_ = cr; }
+    void setCD(HydroProp* cd) { cd_ = cd; }
+    void setCOM(HydroProp* com) { com_ = com; }
+    std::string getStuntDoubleName() { return sd_->getType(); }
+
+  protected:
+    StuntDouble* sd_;
+    SimInfo* info_ {nullptr};
 
   private:
-    virtual bool createBeads(vector<BeadParam>& beads);
-    RealType sigma_;
-    Shape* shape_;
+    HydroProp* cr_;
+    HydroProp* cd_;
+    HydroProp* com_;
+    std::vector<BeadParam> beads_;
   };
 
 }  // namespace OpenMD
+
 #endif

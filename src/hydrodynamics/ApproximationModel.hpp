@@ -43,19 +43,39 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef HYDRODYNAMICS_ANALYTICALMODEL_HPP
-#define HYDRODYNAMICS_ANALYTICALMODEL_HPP
+#ifndef HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
+#define HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
 
-#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
+#include <vector>
+
+#include "hydrodynamics/HydrodynamicsModel.hpp"
+#include "math/DynamicRectMatrix.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
+#include "primitives/Molecule.hpp"
+#include "utils/any.hpp"
+
 namespace OpenMD {
 
-  class AnalyticalModel : public HydrodynamicsModel {
+  class Shape;
+  class ApproximationModel : public HydrodynamicsModel {
   public:
-    AnalyticalModel(StuntDouble* sd, SimInfo* info) :
-        HydrodynamicsModel(sd, info) {}
+    ApproximationModel(StuntDouble* sd, SimInfo* info);
+
     virtual bool calcHydroProps(Shape* shape, RealType viscosity,
                                 RealType temperature);
+    virtual void init();
     virtual void writeBeads(std::ostream& os);
+
+  private:
+    virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
+
+    bool calcHydroPropsAtCRandAtCDandAtCOM(std::vector<BeadParam>& beads,
+                                           RealType viscosity,
+                                           RealType temperature, HydroProp* cr,
+                                           HydroProp* cd, HydroProp* coM);
+    std::vector<BeadParam> beads_;
   };
 }  // namespace OpenMD
+
 #endif

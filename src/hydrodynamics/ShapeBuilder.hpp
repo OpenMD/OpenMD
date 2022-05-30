@@ -43,39 +43,23 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATION_HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
-
-#include <vector>
-
-#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
-#include "math/DynamicRectMatrix.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "math/Vector3.hpp"
+#ifndef HYDRODYNAMICS_SHAPEBUILDER_HPP
+#define HYDRODYNAMICS_SHAPEBUILDER_HPP
+#include "hydrodynamics/Shape.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/any.hpp"
+#include "utils/ElementsTable.hpp"
 
 namespace OpenMD {
 
-  class Shape;
-  class ApproximationModel : public HydrodynamicsModel {
+  class ShapeBuilder {
   public:
-    ApproximationModel(StuntDouble* sd, SimInfo* info);
-
-    virtual bool calcHydroProps(Shape* shape, RealType viscosity,
-                                RealType temperature);
-    virtual void init();
-    virtual void writeBeads(std::ostream& os);
+    static Shape* createShape(StuntDouble* sd);
 
   private:
-    virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
-
-    bool calcHydroPropsAtCRandAtCDandAtCOM(std::vector<BeadParam>& beads,
-                                           RealType viscosity,
-                                           RealType temperature, HydroProp* cr,
-                                           HydroProp* cd, HydroProp* coM);
-    std::vector<BeadParam> beads_;
+    static Shape* internalCreateShape(Atom* atom);
+    static Shape* internalCreateShape(DirectionalAtom* datom);
+    static Shape* internalCreateShape(RigidBody* rb);
   };
-}  // namespace OpenMD
 
+}  // namespace OpenMD
 #endif

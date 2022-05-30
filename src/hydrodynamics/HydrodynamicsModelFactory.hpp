@@ -50,8 +50,8 @@
  * @version 1.0
  */
 
-#ifndef APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODELFACTORY_HPP
-#define APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODELFACTORY_HPP
+#ifndef HYDRODYNAMICS_HYDRODYNAMICSMODELFACTORY_HPP
+#define HYDRODYNAMICS_HYDRODYNAMICSMODELFACTORY_HPP
 #include <cassert>
 #include <iostream>
 #include <map>
@@ -135,4 +135,4 @@ namespace OpenMD {
   std::ostream& operator<<(std::ostream& o, HydrodynamicsModelFactory& factory);
 
 }  // namespace OpenMD
-#endif  // INTEGRATORS_INTEGRATORFACTORY_HPP
+#endif
