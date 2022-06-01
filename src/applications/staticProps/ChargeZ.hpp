@@ -82,6 +82,7 @@ namespace OpenMD {
     std::vector<std::vector<StuntDouble*>> sliceSDLists_;
     std::vector<RealType> sliceSDCount_;
     std::vector<RealType> zBox_;
+    std::vector<RealType> areas_;
     std::vector<RealType> chargeZ_;
     int axis_;
     std::string axisLabel_;
