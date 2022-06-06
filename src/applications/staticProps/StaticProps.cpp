@@ -94,6 +94,8 @@
 #include "applications/staticProps/MomentumHistogram.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
+#include "applications/staticProps/NumberZ.hpp"
+#include "applications/staticProps/NumberR.hpp"
 #include "applications/staticProps/OrderParameterProbZ.hpp"
 #include "applications/staticProps/PositionZ.hpp"
 #include "applications/staticProps/PotDiff.hpp"
@@ -566,6 +568,12 @@ int main(int argc, char* argv[]) {
                                            args_info.nbins_arg, privilegedAxis);
   } else if (args_info.charger_given) {
     analyser = Utils::make_unique<ChargeR>(info, dumpFileName, sele1,
+                                           maxLen, args_info.nbins_arg);
+  } else if (args_info.numberz_given) {
+    analyser = Utils::make_unique<NumberZ>(info, dumpFileName, sele1,
+                                           args_info.nbins_arg, privilegedAxis);
+  } else if (args_info.numberr_given) {
+    analyser = Utils::make_unique<NumberR>(info, dumpFileName, sele1,
                                            maxLen, args_info.nbins_arg);
   } else if (args_info.charge_density_z_given) {
     analyser = Utils::make_unique<ChargeDensityZ>(

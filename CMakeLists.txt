@@ -764,6 +764,8 @@ src/applications/staticProps/MultipoleSum.cpp
 src/applications/staticProps/NanoLength.cpp
 src/applications/staticProps/NanoVolume.cpp
 src/applications/staticProps/NitrileFrequencyMap.cpp
+src/applications/staticProps/NumberR.cpp
+src/applications/staticProps/NumberZ.cpp
 src/applications/staticProps/ObjectCount.cpp
 src/applications/staticProps/P2OrderParameter.cpp
 src/applications/staticProps/PipeDensity.cpp
