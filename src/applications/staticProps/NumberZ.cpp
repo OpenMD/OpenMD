@@ -163,9 +163,9 @@ namespace OpenMD {
       rdfStream << "#" << axisLabel_ << "\tnumber\n";
       RealType binNumber;
       for (unsigned int i = 0; i < numberZ_.size(); ++i) {
-        RealType z = zAve * (i + 0.5) / numberZ_.size();
+        RealType z = zAve * (i + 0.5) / nBins_;
 
-        RealType volSlice = areaAve * zAve / zBox_.size(); 
+        RealType volSlice = areaAve * zAve / nBins_; 
 
         binNumber = numberZ_[i] / (volSlice * nProcessed_);
 
