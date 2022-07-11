@@ -77,13 +77,13 @@ namespace OpenMD {
       common_             = seleMan1_ & seleMan2_;
       sele1_minus_common_ = seleMan1_ - common_;
       sele2_minus_common_ = seleMan2_ - common_;
-
-      nSelected1_    = seleMan1_.getSelectionCount();
-      nSelected2_    = seleMan2_.getSelectionCount();
-      int nIntersect = common_.getSelectionCount();
+      nSelected1_         = seleMan1_.getSelectionCount();
+      nSelected2_         = seleMan2_.getSelectionCount();
+      int nIntersect      = common_.getSelectionCount();
 
       nPairs_[11] = nSelected1_ * (nSelected1_ - 1) / 2;
-      nPairs_[12] = nSelected1_ * nSelected2_ - (nIntersect + 1) * nIntersect / 2;
+      nPairs_[12] =
+          nSelected1_ * nSelected2_ - (nIntersect + 1) * nIntersect / 2;
       nPairs_[22] = nSelected2_ * (nSelected2_ - 1) / 2;
     }
   }
@@ -154,7 +154,8 @@ namespace OpenMD {
       int nIntersect      = common_.getSelectionCount();
 
       nPairs_[11] = nSelected1_ * (nSelected1_ - 1) / 2;
-      nPairs_[12] = nSelected1_ * nSelected2_ - (nIntersect + 1) * nIntersect / 2;
+      nPairs_[12] =
+          nSelected1_ * nSelected2_ - (nIntersect + 1) * nIntersect / 2;
       nPairs_[22] = nSelected2_ * (nSelected2_ - 1) / 2;
     }
 
