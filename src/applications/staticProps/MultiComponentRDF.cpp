@@ -59,6 +59,8 @@ namespace OpenMD {
       selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info),
       evaluator2_(info), seleMan1_(info), seleMan2_(info),
       sele1_minus_common_(info), sele2_minus_common_(info), common_(info) {
+    nPairs_.resize(MaxPairs);
+
     evaluator1_.loadScriptString(sele1);
     evaluator2_.loadScriptString(sele2);
 
@@ -71,21 +73,23 @@ namespace OpenMD {
       validateSelection2(seleMan2_);
     }
 
-    if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
-      // If all selections are static, we can precompute the number
-      // of real pairs.
-      common_             = seleMan1_ & seleMan2_;
-      sele1_minus_common_ = seleMan1_ - common_;
-      sele2_minus_common_ = seleMan2_ - common_;
-      nSelected1_         = seleMan1_.getSelectionCount();
-      nSelected2_         = seleMan2_.getSelectionCount();
-      int nIntersect      = common_.getSelectionCount();
+    // If all selections are static, we can precompute the number
+    // of real pairs.
+    if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) { calcNPairs(); }
+  }
 
-      nPairs_[11] = nSelected1_ * (nSelected1_ - 1) / 2;
-      nPairs_[12] =
-          nSelected1_ * nSelected2_ - (nIntersect + 1) * nIntersect / 2;
-      nPairs_[22] = nSelected2_ * (nSelected2_ - 1) / 2;
-    }
+  void MultiComponentRDF::calcNPairs() {
+    common_             = seleMan1_ & seleMan2_;
+    sele1_minus_common_ = seleMan1_ - common_;
+    sele2_minus_common_ = seleMan2_ - common_;
+    nSelected1_         = seleMan1_.getSelectionCount();
+    nSelected2_         = seleMan2_.getSelectionCount();
+    int nIntersect      = common_.getSelectionCount();
+
+    nPairs_[OneOne] = nSelected1_ * (nSelected1_ - 1) / 2;
+    nPairs_[OneTwo] =
+        nSelected1_ * nSelected2_ - (nIntersect + 1) * nIntersect / 2;
+    nPairs_[TwoTwo] = nSelected2_ * (nSelected2_ - 1) / 2;
   }
 
   void MultiComponentRDF::process() {
@@ -99,13 +103,48 @@ namespace OpenMD {
       reader.readFrame(i);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-      initializeHistogram();
+      initializeHistograms();
 
-      processSelections(seleMan1_, seleMan1_);
-      processSelections(seleMan1_, seleMan2_);
-      processSelections(seleMan2_, seleMan2_);
+      if (evaluator1_.isDynamic()) {
+        seleMan1_.setSelectionSet(evaluator1_.evaluate());
+        validateSelection1(seleMan1_);
+      }
+      if (evaluator2_.isDynamic()) {
+        seleMan2_.setSelectionSet(evaluator2_.evaluate());
+        validateSelection2(seleMan2_);
+      }
 
-      processHistogram();
+      // Selections may overlap, and we need a bit of logic to deal
+      // with this.
+      //
+      // |     s1    |
+      // | s1 -c | c |
+      //         | c | s2 - c |
+      //         |    s2      |
+      //
+      // s1 : Set of StuntDoubles in selection1
+      // s2 : Set of StuntDoubles in selection2
+      // c  : Intersection of selection1 and selection2
+      //
+      // When we loop over the pairs, we can divide the looping into 3
+      // stages:
+      //
+      // Stage 1 :     [s1-c]      [s2]
+      // Stage 2 :     [c]         [s2 - c]
+      // Stage 3 :     [c]         [c]
+      // Stages 1 and 2 are completely non-overlapping.
+      // Stage 3 is completely overlapping.
+
+      if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) { calcNPairs(); }
+
+      processNonOverlapping(sele1_minus_common_, seleMan2_, OneTwo);
+      processNonOverlapping(common_, sele2_minus_common_, OneTwo);
+
+      processOverlapping(common_, OneTwo);
+      processOverlapping(seleMan1_, OneOne);
+      processOverlapping(seleMan2_, TwoTwo);
+
+      processHistograms();
     }
 
     postProcess();
@@ -113,59 +152,9 @@ namespace OpenMD {
     writeRdf();
   }
 
-  void MultiComponentRDF::processSelections(SelectionManager& sman1,
-                                            SelectionManager& sman2) {
-    if (evaluator1_.isDynamic()) {
-      sman1.setSelectionSet(evaluator1_.evaluate());
-      validateSelection1(sman1);
-    }
-    if (evaluator2_.isDynamic()) {
-      sman2.setSelectionSet(evaluator2_.evaluate());
-      validateSelection2(sman2);
-    }
-
-    // Selections may overlap, and we need a bit of logic to deal
-    // with this.
-    //
-    // |     s1    |
-    // | s1 -c | c |
-    //         | c | s2 - c |
-    //         |    s2      |
-    //
-    // s1 : Set of StuntDoubles in selection1
-    // s2 : Set of StuntDoubles in selection2
-    // c  : Intersection of selection1 and selection2
-    //
-    // When we loop over the pairs, we can divide the looping into 3
-    // stages:
-    //
-    // Stage 1 :     [s1-c]      [s2]
-    // Stage 2 :     [c]         [s2 - c]
-    // Stage 3 :     [c]         [c]
-    // Stages 1 and 2 are completely non-overlapping.
-    // Stage 3 is completely overlapping.
-
-    if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) {
-      common_             = sman1 & sman2;
-      sele1_minus_common_ = sman1 - common_;
-      sele2_minus_common_ = sman2 - common_;
-      nSelected1_         = sman1.getSelectionCount();
-      nSelected2_         = sman2.getSelectionCount();
-      int nIntersect      = common_.getSelectionCount();
-
-      nPairs_[11] = nSelected1_ * (nSelected1_ - 1) / 2;
-      nPairs_[12] =
-          nSelected1_ * nSelected2_ - (nIntersect + 1) * nIntersect / 2;
-      nPairs_[22] = nSelected2_ * (nSelected2_ - 1) / 2;
-    }
-
-    processNonOverlapping(sele1_minus_common_, seleMan2_);
-    processNonOverlapping(common_, sele2_minus_common_);
-    processOverlapping(common_);
-  }
-
   void MultiComponentRDF::processNonOverlapping(SelectionManager& sman1,
-                                                SelectionManager& sman2) {
+                                                SelectionManager& sman2,
+                                                int pairIndex) {
     StuntDouble* sd1;
     StuntDouble* sd2;
     int i;
@@ -180,12 +169,13 @@ namespace OpenMD {
          sd1 = sman1.nextSelected(i)) {
       for (sd2 = sman2.beginSelected(j); sd2 != NULL;
            sd2 = sman2.nextSelected(j)) {
-        collectHistogram(sd1, sd2);
+        collectHistograms(sd1, sd2, pairIndex);
       }
     }
   }
 
-  void MultiComponentRDF::processOverlapping(SelectionManager& sman) {
+  void MultiComponentRDF::processOverlapping(SelectionManager& sman,
+                                             int pairIndex) {
     StuntDouble* sd1;
     StuntDouble* sd2;
     int i;
@@ -199,7 +189,7 @@ namespace OpenMD {
     for (sd1 = sman.beginSelected(i); sd1 != NULL; sd1 = sman.nextSelected(i)) {
       for (j = i, sd2 = sman.nextSelected(j); sd2 != NULL;
            sd2 = sman.nextSelected(j)) {
-        collectHistogram(sd1, sd2);
+        collectHistograms(sd1, sd2, pairIndex);
       }
     }
   }

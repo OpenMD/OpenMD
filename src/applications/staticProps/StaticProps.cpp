@@ -58,6 +58,7 @@
 #include "applications/staticProps/GofRZ.hpp"
 #include "applications/staticProps/GofXyz.hpp"
 #include "applications/staticProps/GofZ.hpp"
+#include "applications/staticProps/KirkwoodBuff.hpp"
 #include "applications/staticProps/NanoLength.hpp"
 #include "applications/staticProps/NanoVolume.hpp"
 #include "applications/staticProps/ObjectCount.hpp"
@@ -335,6 +336,19 @@ int main(int argc, char* argv[]) {
     } else {
       sprintf(painCave.errMsg,
               "A slab width (dz) must be specified when calculating TwoDGofR");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+  } else if (args_info.kirkwood_buff_given) {
+    if (args_info.sele1_given && args_info.sele2_given) {
+      analyser = std::make_unique<KirkwoodBuff>(info, dumpFileName, sele1,
+                                                sele2, maxLen, nrbins);
+    } else {
+      sprintf(
+          painCave.errMsg,
+          "Two selection scripts (--sele1 and --sele2) must be specified when "
+          "calculating Kirkwood Buff integrals");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

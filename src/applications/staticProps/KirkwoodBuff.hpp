@@ -41,75 +41,40 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATIONS_STATICPROPS_MULTICOMPONENTRDF_HPP
-#define APPLICATIONS_STATICPROPS_MULTICOMPONENTRDF_HPP
+#ifndef APPLICATIONS_STATICPROPS_KIRKWOODBUFF_HPP
+#define APPLICATIONS_STATICPROPS_KIRKWOODBUFF_HPP
 
-#include <string>
-#include <vector>
-
-#include "applications/staticProps/StaticAnalyser.hpp"
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
-#include "utils/Constants.hpp"
+#include "applications/staticProps/MultiComponentRDF.hpp"
 
 namespace OpenMD {
 
-  /**
-   * @class MultiComponentRDF
-   * @brief Multi-Component Radial Distribution Function
-   */
-  class MultiComponentRDF : public StaticAnalyser {
+  class KirkwoodBuff : public MultiComponentRDF {
   public:
-    MultiComponentRDF(SimInfo* info, const std::string& filename,
-                      const std::string& sele1, const std::string& sele2,
-                      unsigned int nbins);
+    KirkwoodBuff(SimInfo* info, const std::string& filename,
+                 const std::string& sele1, const std::string& sele2,
+                 RealType len, unsigned int nrbins);
 
-    void process();
-
-    enum PairIndicies { OneOne, OneTwo, TwoTwo, MaxPairs };
-
-  protected:
-    virtual void preProcess() {}
-    virtual void postProcess() {}
-
-    virtual void processNonOverlapping(SelectionManager& sman1,
-                                       SelectionManager& sman2, int pairIndex);
-    virtual void processOverlapping(SelectionManager& sman, int pairIndex);
-
-    std::vector<int> getNPairs() const { return nPairs_; }
-
-    int getNSelected1() const { return nSelected1_; }
-    int getNSelected2() const { return nSelected2_; }
-
-    Snapshot* currentSnapshot_;
-
-    std::string selectionScript1_;
-    std::string selectionScript2_;
-    int nProcessed_;
-    SelectionEvaluator evaluator1_;
-    SelectionEvaluator evaluator2_;
-
-    SelectionManager seleMan1_;
-    SelectionManager seleMan2_;
-    SelectionManager sele1_minus_common_;
-    SelectionManager sele2_minus_common_;
-    SelectionManager common_;
+    unsigned int getNRBins() const { return nRBins_; }
+    RealType getLength() const { return len_; }
 
   private:
-    void calcNPairs();
-
-    virtual void initializeHistograms() {}
+    virtual void initializeHistograms();
     virtual void collectHistograms(StuntDouble* sd1, StuntDouble* sd2,
-                                   int pairIndex) = 0;
-    virtual void processHistograms() {}
+                                   int pairIndex);
+    virtual void processHistograms();
+    virtual void postProcess();
 
-    virtual void validateSelection1(SelectionManager&) {}
-    virtual void validateSelection2(SelectionManager&) {}
-    virtual void writeRdf() = 0;
+    virtual void writeRdf();
 
-    std::vector<int> nPairs_;
-    int nSelected1_;
-    int nSelected2_;
+    RealType len_;
+    unsigned int nRBins_;
+    RealType deltaR_;
+    RealType meanVol_;
+
+    std::vector<std::vector<int>> histograms_;
+    std::vector<std::vector<RealType>> gofrs_;
+    std::vector<std::vector<RealType>> gCorr_;
+    std::vector<std::vector<RealType>> G_;
   };
 }  // namespace OpenMD
 

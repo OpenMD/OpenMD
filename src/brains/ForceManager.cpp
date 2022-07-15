@@ -1217,7 +1217,6 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     Molecule::BondIterator bondIter;
-    ;
     Molecule::BendIterator bendIter;
     Molecule::TorsionIterator torsionIter;
     Molecule::InversionIterator inversionIter;

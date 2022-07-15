@@ -760,6 +760,8 @@ src/applications/staticProps/GofRAngle2.cpp
 src/applications/staticProps/GofRZ.cpp
 src/applications/staticProps/GofXyz.cpp
 src/applications/staticProps/GofZ.cpp
+src/applications/staticProps/MultiComponentRDF.cpp
+src/applications/staticProps/KirkwoodBuff.cpp
 src/applications/staticProps/CoordinationNumber.cpp
 src/applications/staticProps/Hxy.cpp
 src/applications/staticProps/HBondGeometric.cpp
