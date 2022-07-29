@@ -168,7 +168,6 @@ namespace OpenMD {
       }
 
       statfile_ << std::endl;
-      statfile_.flush();
       statfile_.rdbuf()->pubsync();
 
 #ifdef IS_MPI

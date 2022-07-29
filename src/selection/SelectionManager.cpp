@@ -525,13 +525,13 @@ namespace OpenMD {
   Molecule* SelectionManager::nthSelectedMolecule(int& n) {
     int i;
 #ifdef IS_MPI
-    i = ss_.bitsets_[MOLECULE].nthOnBit(0, n);
+    i = ss_.bitsets_[MOLECULE].nthOnBit(n);
     if (i == -1) return NULL;
     // check that this processor owns this molecule
     if (molecules_[i] != NULL) return molecules_[i];
     return NULL;
 #else
-    i = ss_.bitsets_[MOLECULE].nthOnBit(0, n);
+    i = ss_.bitsets_[MOLECULE].nthOnBit(n);
     return i == -1 ? NULL : molecules_[i];
 #endif
   }
