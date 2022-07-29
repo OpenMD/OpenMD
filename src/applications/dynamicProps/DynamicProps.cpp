@@ -52,6 +52,7 @@
 #include "applications/dynamicProps/BondCorrFunc.hpp"
 #include "applications/dynamicProps/ChargeKineticCorrFunc.hpp"
 #include "applications/dynamicProps/ChargeOrientationCorrFunc.hpp"
+#include "applications/dynamicProps/CoMRCorrFunc.hpp"
 #include "applications/dynamicProps/CollectiveDipoleDisplacement.hpp"
 #include "applications/dynamicProps/CurrentDensityAutoCorrFunc.hpp"
 #include "applications/dynamicProps/DipoleCorrFunc.hpp"
@@ -312,6 +313,17 @@ int main(int argc, char* argv[]) {
   } else if (args_info.current_given) {
     corrFunc = std::make_unique<CurrentDensityAutoCorrFunc>(info, dumpFileName,
                                                             sele1, sele2);
+  } else if (args_info.comrcorr_given) {
+    if (args_info.sele1_given) {
+      corrFunc =
+          std::make_unique<CoMRCorrFunc>(info, dumpFileName, sele1, sele2);
+    } else {
+      sprintf(painCave.errMsg,
+              "--sele1 must be set for Center of Mass Rcorr\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
   } else if (args_info.ddisp_given) {
     corrFunc = std::make_unique<CollectiveDipoleDisplacement>(
         info, dumpFileName, sele1, sele2);

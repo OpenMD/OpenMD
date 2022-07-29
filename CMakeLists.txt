@@ -689,6 +689,7 @@ set (DYNAMICPROPSSOURCE
 src/applications/dynamicProps/ActionCorrFunc.cpp
 src/applications/dynamicProps/CollectiveDipoleDisplacement.cpp
 src/applications/dynamicProps/CurrentDensityAutoCorrFunc.cpp
+src/applications/dynamicProps/CoMRCorrFunc.cpp
 src/applications/dynamicProps/DipoleCorrFunc.cpp
 src/applications/dynamicProps/DirectionalRCorrFunc.cpp
 src/applications/dynamicProps/Displacement.cpp
