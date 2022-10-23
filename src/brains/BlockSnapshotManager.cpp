@@ -51,7 +51,6 @@
 //#include "utils/physmem.h"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
-#include "utils/Algorithm.hpp"
 
 using namespace std;
 
@@ -265,9 +264,9 @@ namespace OpenMD {
 
   std::vector<int> BlockSnapshotManager::getActiveBlocks() {
     std::vector<int> result;
-    OpenMD::copy_if(activeBlocks_.begin(), activeBlocks_.end(),
-                    std::back_inserter(result),
-                    std::bind(std::not_equal_to<int>(), placeholders::_1, -1));
+    std::copy_if(activeBlocks_.begin(), activeBlocks_.end(),
+		 std::back_inserter(result),
+		 std::bind(std::not_equal_to<int>(), placeholders::_1, -1));
     return result;
   }
 
