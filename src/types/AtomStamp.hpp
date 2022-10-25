@@ -98,6 +98,7 @@ namespace OpenMD {
     }
 
     bool hasOverride() { return hasOverride_; }
+    RealType getOverrideCharge() { return orCharge_; }
 
   private:
     Vector3d position_;

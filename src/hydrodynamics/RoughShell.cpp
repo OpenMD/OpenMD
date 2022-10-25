@@ -63,11 +63,11 @@ namespace OpenMD {
     bool interior;
   };
 
-  struct ExteriorFunctor : public std::unary_function<BeadLattice, bool> {
+  struct ExteriorFunctor {
     bool operator()(const BeadLattice& bead) { return !bead.interior; }
   };
 
-  struct InteriorFunctor : public std::unary_function<BeadLattice, bool> {
+  struct InteriorFunctor {
     bool operator()(const BeadLattice& bead) { return bead.interior; }
   };
 

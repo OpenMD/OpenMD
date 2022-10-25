@@ -243,7 +243,7 @@ namespace OpenMD {
     std::string mdRawData;
     int metaDataBlockStart = -1;
     int metaDataBlockEnd   = -1;
-    streamoff mdOffset;
+    streamoff mdOffset{};
     int mdFileVersion(2);
 
     // Create a string for embedding the version information in the MetaData
