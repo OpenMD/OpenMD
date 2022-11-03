@@ -82,7 +82,7 @@ namespace OpenMD {
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();
     if (nTokens < 3) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "NonBondedInteractionsSectionParser Error: Not enough tokens at "
               "line %d\n",
               lineNo);
@@ -106,7 +106,7 @@ namespace OpenMD {
     switch (nbit) {
     case MAW:
       if (nTokens != 5) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "NonBondedInteractionsSectionParser Error: Token number "
                 "mismatch at line "
                 "%d. 8 tokens expected.  \n",
@@ -125,7 +125,7 @@ namespace OpenMD {
 
     case ShiftedMorse:
       if (nTokens != 3) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "NonBondedInteractionsSectionParser Error: Token number "
                 "mismatch at line "
                 "%d. 6 tokens expected.  \n",
@@ -142,7 +142,7 @@ namespace OpenMD {
 
     case RepulsiveMorse:
       if (nTokens != 3) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "NonBondedInteractionsSectionParser Error: Token number "
                 "mismatch at line "
                 "%d. 6 tokens expected.  \n",
@@ -159,7 +159,7 @@ namespace OpenMD {
 
     case LennardJones:
       if (nTokens != 2) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "NonBondedInteractionsSectionParser Error: Token number "
                 "mismatch at line "
                 "%d. 5 tokens expected.  \n",
@@ -175,7 +175,7 @@ namespace OpenMD {
 
     case RepulsivePower:
       if (nTokens < 3) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "NonBondedInteractionsSectionParser Error: Token number "
                 "mismatch at line "
                 "%d. 6 tokens expected.  \n",
@@ -193,7 +193,7 @@ namespace OpenMD {
 
     case Mie:
       if (nTokens != 4) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "NonBondedInteractionsSectionParser Error: Token number "
                 "mismatch at line "
                 "%d. 7 tokens expected.  \n",
@@ -211,7 +211,7 @@ namespace OpenMD {
 
     case Buckingham:
       if (nTokens < 4) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "NonBondedInteractionsSectionParser Error: Not enough tokens "
                 "at line %d\n",
                 lineNo);
@@ -238,7 +238,7 @@ namespace OpenMD {
           interactionType =
               new BuckinghamInteractionType(A, B, C, btTraditional);
         } else {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "NonBondedInteractionsSectionParser Error: Unknown "
                   "Buckingham Type at "
                   "line %d\n",
@@ -251,7 +251,7 @@ namespace OpenMD {
 
     case EAMZhou:
       if (nTokens != 7) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "NonBondedInteractionsSectionParser Error: Token number "
                 "mismatch at line "
                 "%d. 10 tokens expected.  \n",
@@ -276,7 +276,7 @@ namespace OpenMD {
 
     case EAMOxides:
       if (nTokens != 5) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "NonBondedInteractionsSectionParser Error: Token number "
                 "mismatch at line "
                 "%d. 8 tokens expected.  \n",
@@ -298,7 +298,7 @@ namespace OpenMD {
 
     case InversePowerSeries:
       if (nTokens < 2 || nTokens % 2 != 0) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "NonBondedInteractionsSectionParser Error: Not enough tokens "
                 "at line %d\n",
                 lineNo);
@@ -321,7 +321,7 @@ namespace OpenMD {
 
     case Unknown:
     default:
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "NonBondedInteractionsSectionParser Error: Unknown Interaction "
               "Type at "
               "line %d\n",

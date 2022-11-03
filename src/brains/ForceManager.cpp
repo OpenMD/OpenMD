@@ -144,7 +144,7 @@ namespace OpenMD {
       rCut_ = simParams_->getCutoffRadius();
     } else {
       if (info_->usesElectrostaticAtoms()) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "ForceManager::setupCutoffs: No value was set for the "
                 "cutoffRadius.\n"
                 "\tOpenMD will use a default value of 12.0 angstroms"
@@ -159,7 +159,7 @@ namespace OpenMD {
           thisCut = interactionMan_->getSuggestedCutoffRadius((*i));
           rCut_   = max(thisCut, rCut_);
         }
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "ForceManager::setupCutoffs: No value was set for the "
                 "cutoffRadius.\n"
                 "\tOpenMD will use %lf angstroms.\n",
@@ -187,7 +187,7 @@ namespace OpenMD {
       map<string, CutoffMethod>::iterator i;
       i = stringToCutoffMethod.find(cutMeth);
       if (i == stringToCutoffMethod.end()) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "ForceManager::setupCutoffs: Could not find chosen "
                 "cutoffMethod %s\n"
                 "\tShould be one of: "
@@ -202,7 +202,7 @@ namespace OpenMD {
       }
     } else {
       if (mdFileVersion > 1) {
-        sprintf(painCave.errMsg, "ForceManager::setupCutoffs: No value was set "
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "ForceManager::setupCutoffs: No value was set "
                                  "for the cutoffMethod.\n"
                                  "\tOpenMD will use SHIFTED_FORCE.\n");
         painCave.isFatal  = 0;
@@ -214,7 +214,7 @@ namespace OpenMD {
         // (there should be no cutoffMethod, so we have to deduce it
         // from other data).
 
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "ForceManager::setupCutoffs : DEPRECATED FILE FORMAT!\n"
                 "\tOpenMD found a file which does not set a cutoffMethod.\n"
                 "\tOpenMD will attempt to deduce a cutoffMethod using the\n"
@@ -249,7 +249,7 @@ namespace OpenMD {
           if (myMethod == "SHIFTED_POTENTIAL" || myMethod == "SHIFTED_FORCE" ||
               myMethod == "TAYLOR_SHIFTED" || myMethod == "EWALD_FULL") {
             if (simParams_->haveSwitchingRadius()) {
-              sprintf(painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                       "ForceManager::setupCutoffs : DEPRECATED ERROR MESSAGE\n"
                       "\tA value was set for the switchingRadius\n"
                       "\teven though the electrostaticSummationMethod was\n"
@@ -262,7 +262,7 @@ namespace OpenMD {
           }
           if (abs(rCut_ - rSwitch_) < 0.0001) {
             if (cutoffMethod_ == SHIFTED_FORCE) {
-              sprintf(painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                       "ForceManager::setupCutoffs : DEPRECATED BEHAVIOR\n"
                       "\tcutoffRadius and switchingRadius are set to the\n"
                       "\tsame value.  OpenMD will use shifted force\n"
@@ -272,7 +272,7 @@ namespace OpenMD {
               simError();
             } else {
               cutoffMethod_ = SHIFTED_POTENTIAL;
-              sprintf(painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                       "ForceManager::setupCutoffs : DEPRECATED BEHAVIOR\n"
                       "\tcutoffRadius and switchingRadius are set to the\n"
                       "\tsame value.  OpenMD will use shifted potentials\n"
@@ -294,7 +294,7 @@ namespace OpenMD {
       if (simParams_->haveSwitchingRadius()) {
         rSwitch_ = simParams_->getSwitchingRadius();
         if (rSwitch_ > rCut_) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "ForceManager::setupCutoffs: switchingRadius (%f) is larger "
                   "than the cutoffRadius(%f)\n",
                   rSwitch_, rCut_);
@@ -304,7 +304,7 @@ namespace OpenMD {
         }
       } else {
         rSwitch_ = 0.85 * rCut_;
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "ForceManager::setupCutoffs: No value was set for the "
                 "switchingRadius.\n"
                 "\tOpenMD will use a default value of 85 percent of the "
@@ -329,7 +329,7 @@ namespace OpenMD {
               break;
             }
           }
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "ForceManager::setupCutoffs: the cutoffMethod (%s)\n"
                   "\tis not set to SWITCHED, so switchingRadius value\n"
                   "\twill be ignored for this simulation\n",
@@ -354,14 +354,13 @@ namespace OpenMD {
           sft_ = fifth_order_poly;
         } else {
           // throw error
-          sprintf(
-              painCave.errMsg,
-              "ForceManager::setupSwitching : Unknown switchingFunctionType. "
-              "(Input "
-              "file specified %s .)\n"
-              "\tswitchingFunctionType must be one of: "
-              "\"cubic\" or \"fifth_order_polynomial\".",
-              funcType.c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
+                   "ForceManager::setupSwitching : Unknown switchingFunctionType. "
+                   "(Input "
+                   "file specified %s .)\n"
+                   "\tswitchingFunctionType must be one of: "
+                   "\"cubic\" or \"fifth_order_polynomial\".",
+                   funcType.c_str());
           painCave.isFatal  = 1;
           painCave.severity = OPENMD_ERROR;
           simError();
@@ -413,7 +412,7 @@ namespace OpenMD {
               axis_ = 2;
           }
         } else {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "ForceManager::initialize : useSurfaceTerm was set true\n"
                   "\tbut no electrostatic atoms are present. OpenMD will\n"
                   "\tignore this setting.\n");

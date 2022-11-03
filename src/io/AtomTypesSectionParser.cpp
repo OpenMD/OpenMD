@@ -62,7 +62,7 @@ namespace OpenMD {
     // in AtomTypeSection, a line at least contains 2 tokens
     // atomTypeName and mass
     if (nTokens < 2) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "AtomTypesSectionParser Error: Not enough tokens at line %d\n",
               lineNo);
       painCave.isFatal = 1;
@@ -76,8 +76,7 @@ namespace OpenMD {
           dynamic_cast<AtomType*>(ff.getAtomType(baseAtomTypeName));
 
       if (baseAtomType == NULL) {
-        sprintf(
-            painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
             "AtomTypesSectionParser Error: Could not find matching base atom "
             "type to "
             "%s at line %d\n",

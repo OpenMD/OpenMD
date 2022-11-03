@@ -413,7 +413,7 @@ namespace OpenMD {
   std::string Field<RealType>::writeValue(RealType v) {
     std::stringstream str;
     if (std::isinf(v) || std::isnan(v)) {
-      sprintf(painCave.errMsg, "Field detected a numerical error.\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Field detected a numerical error.\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -426,7 +426,7 @@ namespace OpenMD {
     std::stringstream str;
     if (std::isinf(v[0]) || std::isnan(v[0]) || std::isinf(v[1]) ||
         std::isnan(v[1]) || std::isinf(v[2]) || std::isnan(v[2])) {
-      sprintf(painCave.errMsg, "Field detected a numerical error.\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Field detected a numerical error.\n");
       painCave.isFatal = 1;
       simError();
     }

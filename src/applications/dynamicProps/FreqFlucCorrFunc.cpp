@@ -105,8 +105,7 @@ namespace OpenMD {
         MultipoleAdapter ma = MultipoleAdapter(at);
 
         if (!ma.isDipole()) {
-          sprintf(
-              painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "FreqFlucCorrFunc::validateSelection Error: selection is not a "
               "RigidBody "
               "or does\n"

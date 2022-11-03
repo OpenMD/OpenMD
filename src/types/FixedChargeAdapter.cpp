@@ -58,7 +58,7 @@ namespace OpenMD {
 
   FixedChargeAtypeParameters FixedChargeAdapter::getFixedChargeParam() {
     if (!isFixedCharge()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "FixedChargeAdapter::getFixedChargeParam was passed an atomType "
               "(%s)\n"
               "\tthat does not appear to be a fixed charge atom.\n",
@@ -70,7 +70,7 @@ namespace OpenMD {
 
     std::shared_ptr<GenericData> data = at_->getPropertyByName(FCtypeID);
     if (data == nullptr) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "FixedChargeAdapter::getFixedChargeParam could not find fixed "
               "charge\n"
               "\tparameters for atomType %s.\n",
@@ -83,7 +83,7 @@ namespace OpenMD {
     std::shared_ptr<FixedChargeAtypeData> fcData =
         std::dynamic_pointer_cast<FixedChargeAtypeData>(data);
     if (fcData == nullptr) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "FixedChargeAdapter::getFixedChargeParam could not convert\n"
               "\tGenericData to FixedChargeAtypeData for atom type %s\n",
               at_->getName().c_str());

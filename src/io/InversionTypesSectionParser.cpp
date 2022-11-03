@@ -67,8 +67,7 @@ namespace OpenMD {
     int nTokens = tokenizer.countTokens();
 
     if (nTokens < 5) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "InversionTypesSectionParser Error: Not enough tokens at line %d\n",
           lineNo);
       painCave.isFatal = 1;
@@ -85,7 +84,7 @@ namespace OpenMD {
     try {
       inversionType = itParser.parseLine(remainder);
     } catch (OpenMDException& e) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "InversionTypesSectionParser Error: %s "
               "at line %d\n",
               e.what(), lineNo);

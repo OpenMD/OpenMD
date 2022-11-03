@@ -504,7 +504,7 @@ namespace OpenMD {
     writeOutput();
 
 #else
-    sprintf(painCave.errMsg, "Hxy: FFTW support was not compiled in!\n");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Hxy: FFTW support was not compiled in!\n");
     painCave.isFatal = 1;
     simError();
 

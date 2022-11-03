@@ -173,7 +173,7 @@ namespace OpenMD {
     }
     surfaceArea_ = surfaceMesh_->getArea();
 #else
-    sprintf(painCave.errMsg,
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "HullFinder : Hull calculation is not possible without libqhull.\n"
             "\tPlease rebuild OpenMD with qhull enabled.");
     painCave.severity = OPENMD_ERROR;
@@ -209,7 +209,7 @@ namespace OpenMD {
     volume_      = surfaceMesh_->getVolume();
 
 #else
-    sprintf(painCave.errMsg,
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "HullFinder : Hull calculation is not possible without libqhull.\n"
             "\tPlease rebuild OpenMD with qhull enabled.");
     painCave.severity = OPENMD_ERROR;

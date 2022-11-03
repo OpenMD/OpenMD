@@ -56,7 +56,7 @@ namespace OpenMD {
 
   GBAtypeParameters GayBerneAdapter::getGayBerneParam() {
     if (!isGayBerne()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "GayBerneAdapter::getGayBerneParam was passed an atomType (%s)\n"
               "\tthat does not appear to be a Gay-Berne atom.\n",
               at_->getName().c_str());
@@ -67,7 +67,7 @@ namespace OpenMD {
 
     std::shared_ptr<GenericData> data = at_->getPropertyByName(GBtypeID);
     if (data == nullptr) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "GayBerneAdapter::getGayBerneParam could not find Gay-Berne\n"
               "\tparameters for atomType %s.\n",
               at_->getName().c_str());
@@ -79,7 +79,7 @@ namespace OpenMD {
     std::shared_ptr<GBAtypeData> gbData =
         std::dynamic_pointer_cast<GBAtypeData>(data);
     if (gbData == nullptr) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "GayBerneAdapter::getGayBerneParam could not convert\n"
               "\tGenericData to GBAtypeData for atom type %s\n",
               at_->getName().c_str());

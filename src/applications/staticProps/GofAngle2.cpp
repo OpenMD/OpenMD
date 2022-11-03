@@ -204,7 +204,7 @@ namespace OpenMD {
     MultipoleAdapter ma2 = MultipoleAdapter(atype2);
 
     if (!sd1->isDirectional()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "GofAngle2: attempted to use a non-directional object: %s\n",
               sd1->getType().c_str());
       painCave.isFatal = 1;
@@ -212,7 +212,7 @@ namespace OpenMD {
     }
 
     if (!sd2->isDirectional()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "GofAngle2: attempted to use a non-directional object: %s\n",
               sd2->getType().c_str());
       painCave.isFatal = 1;
@@ -268,7 +268,7 @@ namespace OpenMD {
     r13.normalize();
 
     if (!sd2->isDirectional()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "GofAngle2: attempted to use a non-directional object: %s\n",
               sd2->getType().c_str());
       painCave.isFatal = 1;
@@ -326,7 +326,7 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg, "GofAngle2: unable to open %s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "GofAngle2: unable to open %s\n",
               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();

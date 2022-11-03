@@ -56,7 +56,7 @@ namespace OpenMD {
 
   UFFAtypeParameters UFFAdapter::getUFFParam() {
     if (!isUFF()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "UFFAdapter::getUFFParam was passed an atomType (%s)\n"
               "\tthat does not appear to be a UFF atom.\n",
               at_->getName().c_str());
@@ -67,7 +67,7 @@ namespace OpenMD {
 
     std::shared_ptr<GenericData> data = at_->getPropertyByName(UFFtypeID);
     if (data == nullptr) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "UFFAdapter::getUFFParam could not find UFF\n"
               "\tparameters for atomType %s.\n",
               at_->getName().c_str());
@@ -79,7 +79,7 @@ namespace OpenMD {
     std::shared_ptr<UFFAtypeData> uffData =
         std::dynamic_pointer_cast<UFFAtypeData>(data);
     if (uffData == NULL) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "UFFAdapter::getUFFParam could not convert\n"
               "\tGenericData to UFFAtypeData for atom type %s\n",
               at_->getName().c_str());

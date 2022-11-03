@@ -270,7 +270,7 @@ namespace OpenMD {
       return (1);
     } else if (strcasecmp(identifier, "Hl") == 0) {
       // ligand hydrogen -- found in some CIF PR#3048959.
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "ElementsTable warning.\n"
               "\tCannot understand the element label %s\n"
               "\tGuessing it's hydrogen\n",
@@ -329,7 +329,7 @@ namespace OpenMD {
       ifs.open(buffer.c_str());
 
       if (!(&ifs)->is_open()) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "ElementsTable error.\n"
                 "\tunable to open datafile %s \n",
                 filename_.c_str());
@@ -346,7 +346,7 @@ namespace OpenMD {
     if (ifs) ifs.close();
 
     if (GetSize() == 0) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "ElementsTable error.\n"
               "\tCannot initialize database %s \n",
               filename_.c_str());

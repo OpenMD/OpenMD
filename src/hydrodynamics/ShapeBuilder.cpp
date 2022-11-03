@@ -81,7 +81,7 @@ namespace OpenMD {
         }
       }
       if (obanum == 0) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
@@ -106,7 +106,7 @@ namespace OpenMD {
       if (obanum != 0) {
         currShape = new Sphere(datom->getPos(), etab.GetVdwRad(obanum));
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;

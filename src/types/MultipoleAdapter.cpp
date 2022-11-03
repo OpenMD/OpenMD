@@ -58,8 +58,7 @@ namespace OpenMD {
 
   MultipoleAtypeParameters MultipoleAdapter::getMultipoleParam() {
     if (!isMultipole()) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "MultipoleAdapter::getMultipoleParam was passed an atomType (%s)\n"
           "\tthat does not appear to be a Multipole atom.\n",
           at_->getName().c_str());
@@ -70,7 +69,7 @@ namespace OpenMD {
 
     std::shared_ptr<GenericData> data = at_->getPropertyByName(MultipoleTypeID);
     if (data == nullptr) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "MultipoleAdapter::getMultipoleParam could not find Multipole\n"
               "\tparameters for atomType %s.\n",
               at_->getName().c_str());
@@ -82,7 +81,7 @@ namespace OpenMD {
     std::shared_ptr<MultipoleAtypeData> multipoleData =
         std::dynamic_pointer_cast<MultipoleAtypeData>(data);
     if (multipoleData == nullptr) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "MultipoleAdapter::getMultipoleParam could not convert\n"
               "\tGenericData to MultipoleAtypeData for atom type %s\n",
               at_->getName().c_str());

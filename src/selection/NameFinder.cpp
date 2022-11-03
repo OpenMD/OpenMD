@@ -242,7 +242,7 @@ namespace OpenMD {
       } else {
         int internalIndex = lexi_cast<int>(names[1]);
         if (internalIndex < 0) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "NameFinder : Name %s.%s is an invalid name.\n",
                   names[0].c_str(), names[1].c_str());
           painCave.severity = OPENMD_WARNING;
@@ -259,7 +259,7 @@ namespace OpenMD {
       matchRigidAtoms(names[0], names[1], names[2], bs);
       break;
     default:
-      sprintf(painCave.errMsg, "NameFinder : Invalid Name %s.\n", name.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "NameFinder : Invalid Name %s.\n", name.c_str());
       painCave.severity = OPENMD_WARNING;
       painCave.isFatal  = 0;
       simError();

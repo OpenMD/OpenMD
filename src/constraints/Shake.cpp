@@ -78,7 +78,7 @@ namespace OpenMD {
         new ConstraintWriter(info_, constraintOutputFile_.c_str());
 
     if (!constraintWriter_) {
-      sprintf(painCave.errMsg, "Failed to create ConstraintWriter\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Failed to create ConstraintWriter\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -148,7 +148,7 @@ namespace OpenMD {
 
             switch (exeStatus) {
             case consFail:
-              sprintf(painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                       "Constraint failure in Shake::constrainA, "
                       "Constraint Fail\n");
               painCave.isFatal = 1;
@@ -166,7 +166,7 @@ namespace OpenMD {
               // move the elements
               break;
             default:
-              sprintf(painCave.errMsg, "ConstraintAlgorithm::doConstraint() "
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "ConstraintAlgorithm::doConstraint() "
                                        "Error: unrecognized status");
               painCave.isFatal = 1;
               simError();
@@ -195,7 +195,7 @@ namespace OpenMD {
     }  // end while
 
     if (!done) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "Constraint failure in Shake::constrainA, "
               "too many iterations: %d\n",
               iteration);

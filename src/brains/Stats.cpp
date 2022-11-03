@@ -518,7 +518,7 @@ namespace OpenMD {
       if (i != statsMap_.end()) {
         statsMask_.set(i->second);
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Stats::parseStatFileFormat: %s is not a recognized\n"
                 "\tstatFileFormat keyword.\n",
                 token.c_str());

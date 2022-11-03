@@ -65,7 +65,7 @@ namespace OpenMD {
     // in DirectionalAtomTypeSection, a line contains 4 tokens
 
     if (nTokens < 4) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "DirectionalAtomTypesSectionParser Error: Not enough tokens at "
               "line %d\n",
               lineNo);
@@ -77,7 +77,7 @@ namespace OpenMD {
       AtomType* atomType       = ff.getAtomType(atomTypeName);
 
       if (atomType == NULL) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "DirectionalAtomTypesSectionParser:: AtomType %s was not\n"
                 "\tdeclared in the BaseAtomTypes or AtomTypes before being\n"
                 "\tdeclared as a DirectionalAtomType!\n",

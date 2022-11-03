@@ -396,7 +396,7 @@ int main(int argc, char* argv[]) {
     if (args_info.inputs_num) {
       inputFileName = args_info.inputs[0];
     } else {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "No input file name was specified on the command line");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
@@ -597,7 +597,7 @@ int main(int argc, char* argv[]) {
         OptimizationFactory::getInstance().createOptimization("CG", info);
 
     if (minim == NULL) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "Optimization Factory can not create %s OptimizationMethod\n",
               miniPars->getMethod().c_str());
       painCave.isFatal = 1;

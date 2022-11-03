@@ -90,7 +90,7 @@ namespace OpenMD {
 
   void ApproximationModel::init() {
     if (!createBeads(beads_)) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "ApproximationModel::init() : Could not create beads\n");
       painCave.isFatal = 1;
       simError();
@@ -130,7 +130,7 @@ namespace OpenMD {
       for (std::size_t j = 0; j < nbeads; ++j) {
         // checking if the beads' radii are non-negative values.
         if (beads[i].radius < 0 || beads[j].radius < 0) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "There are beads with negative radius. Starting from index 0,\
  check bead (%lu) and/or bead (%lu).\n",
                   i, j);

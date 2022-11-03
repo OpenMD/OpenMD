@@ -50,7 +50,7 @@ namespace OpenMD {
   bool BeadModel::createBeads(std::vector<BeadParam>& beads) {
     if (sd_->isAtom()) {
       if (!createSingleBead(static_cast<Atom*>(sd_), beads)) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "BeadModel::createBeads Error: GayBerne and other "
                 "non-spherical atoms should use the RoughShell model\n");
         painCave.severity = OPENMD_ERROR;
@@ -64,7 +64,7 @@ namespace OpenMD {
       Atom* atom;
       for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
         if (!createSingleBead(atom, beads)) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "BeadModel::createBeads Error: GayBerne and other "
                   "non-spherical atoms should use the RoughShell model\n");
           painCave.severity = OPENMD_ERROR;
@@ -113,7 +113,7 @@ namespace OpenMD {
         }
       }
       if (obanum == 0) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;

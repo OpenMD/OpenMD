@@ -136,7 +136,7 @@ namespace OpenMD {
       }
 
       if (methodFluxMismatch) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "RNEMD: The current method,\n"
                 "\t\tVSS\n"
                 "\tcannot be used with the current flux type, %s\n",
@@ -147,7 +147,7 @@ namespace OpenMD {
       }
 
       if (!hasCorrectFlux) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "RNEMD: The current method, VSS, and flux type, %s,\n"
                 "\tdid not have the correct flux value specified. Options\n"
                 "\tinclude: kineticFlux, momentumFlux, angularMomentumFlux,\n"
@@ -499,7 +499,7 @@ namespace OpenMD {
       }
 
       if (successfulExchange != true) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "VSS exchange NOT performed - roots that solve\n"
                 "\tthe constraint equations may not exist or there may be\n"
                 "\tno selected objects in one or both slabs.\n");

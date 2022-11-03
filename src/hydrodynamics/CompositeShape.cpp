@@ -88,7 +88,7 @@ namespace OpenMD {
                                           RealType temperature) {
     HydroProp* props = new HydroProp();
     props->setCenterOfResistance(V3Zero);
-    sprintf(painCave.errMsg,
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "CompositeShape was asked to return an analytic HydroProps.\n");
     painCave.severity = OPENMD_ERROR;
     painCave.isFatal  = 1;

@@ -128,7 +128,7 @@ void NanoVolume::process() {
   osq.close();
 
 #else
-  sprintf(painCave.errMsg, "NanoVolume: qhull support was not compiled in!\n");
+  snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "NanoVolume: qhull support was not compiled in!\n");
   painCave.isFatal = 1;
   simError();
 #endif

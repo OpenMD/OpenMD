@@ -610,7 +610,7 @@ namespace OpenMD {
       std::vector<RealType> amf = rnemdParams->getAngularMomentumFluxVector();
 
       if (amf.size() != 3) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "RNEMDRTheta: Incorrect number of parameters specified for "
                 "angularMomentumFluxVector.\n"
                 "\tthere should be 3 parameters, but %lu were specified.\n",

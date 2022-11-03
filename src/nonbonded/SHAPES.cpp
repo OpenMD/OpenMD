@@ -89,7 +89,7 @@ namespace OpenMD {
       pair<map<int, ShapeAtomType*>::iterator, bool> ret;
       ret = ShapesMap.insert(pair<int, ShapeAtomType*>(atp.ident, atomType));
       if (ret.second == false) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "SHAPES already had a previous entry with ident %d\n",
                 atp.ident);
         painCave.severity = OPENMD_INFO;
@@ -104,7 +104,7 @@ namespace OpenMD {
       RealType d1 = getLJSigma(atomType) / sqrt(2.0);
       RealType e1 = getLJEpsilon(atomType);
     } else {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "SHAPES::addType was passed an atomType (%s) that does not\n"
               "\tappear to be a SHAPES or Lennard-Jones atom.\n",
               atomType->getName().c_str());
@@ -118,7 +118,7 @@ namespace OpenMD {
     // Do sanity checking on the AtomType we were passed before
     // building any data structures:
     if (!atomType->isLennardJones()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "SHAPES::getLJParam was passed an atomType (%s) that does not\n"
               "\tappear to be a Lennard-Jones atom.\n",
               atomType->getName().c_str());
@@ -129,7 +129,7 @@ namespace OpenMD {
 
     GenericData* data = atomType->getPropertyByName("LennardJones");
     if (data == NULL) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "SHAPES::getLJParam could not find Lennard-Jones\n"
               "\tparameters for atomType %s.\n",
               atomType->getName().c_str());
@@ -167,7 +167,7 @@ namespace OpenMD {
     std::map<int, AtomType*>::const_iterator it;
     it = SHAPESMap.find(atid);
     if (it == SHAPESMap.end()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "SHAPES::getGayBerneCut could not find atid %d in SHAPESMap\n",
               (atid));
       painCave.severity = OPENMD_ERROR;
