@@ -46,8 +46,14 @@
 #include "hydrodynamics/CompositeShape.hpp"
 #include "hydrodynamics/HydrodynamicsModel.hpp"
 #include "utils/MemoryUtils.hpp"
+#include "utils/simError.h"
+
 namespace OpenMD {
 
+  CompositeShape::CompositeShape() {
+    origin_ = V3Zero;
+  }
+  
   CompositeShape::~CompositeShape() { Utils::deletePointers(shapes_); }
 
   bool CompositeShape::isInterior(Vector3d pos) {
@@ -84,11 +90,10 @@ namespace OpenMD {
     return boundary;
   }
 
-  HydroProp* CompositeShape::getHydroProp(RealType viscosity,
-                                          RealType temperature) {
+  HydroProp* CompositeShape::getHydroProp(RealType viscosity) {
     HydroProp* props = new HydroProp();
     props->setCenterOfResistance(V3Zero);
-    sprintf(painCave.errMsg,
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "CompositeShape was asked to return an analytic HydroProps.\n");
     painCave.severity = OPENMD_ERROR;
     painCave.isFatal  = 1;

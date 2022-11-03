@@ -56,66 +56,49 @@
 namespace OpenMD {
 
   /**
-   * Reference:
-   * Beatriz Carrasco and Jose Gracia de la Torre; "Hydrodynamic Properties of
-   * Rigid Particles: Comparison of Different Modeling and Computational
-   * Procedures", Biophysical Journal, 75(6), 3044, 1999   //(Hydro framework)
+   * References:
    *
-   * Xiuquan Sun, Teng Lin, and J. Daniel Gezelter; "Langevin dynamics for rigid
-   * bodies of arbitrary shape", J. Chem. Phys. 128, 234107 (2008)   //(Hydro
-   *framework)
+   * For the General Hydro Framework:  
+   * Beatriz Carrasco and Jose Gracia de la Torre; "Hydrodynamic
+   * Properties of Rigid Particles: Comparison of Different Modeling
+   * and Computational Procedures", Biophysical Journal, 75(6), 3044,
+   * 1999
    *
-   * Beatriz Carrasco and Jose Garcia de la Torre and Peter Zipper; "Calculation
-   * of hydrodynamic properties of macromolecular bead models with overlapping
-   * spheres", Eur Biophys J (1999) 28: 510-515   //(overlapping beads and
-   *overlapping volume)
+   * Xiuquan Sun, Teng Lin, and J. Daniel Gezelter; "Langevin dynamics
+   * for rigid bodies of arbitrary shape", J. Chem. Phys. 128, 234107
+   * (2008)
    *
-   * http://mathworld.wolfram.com/Sphere-SphereIntersection.html  //(overlapping
-   *volume between two beads (spheres))
+   * For overlapping beads and overlapping volume: 
+   *
+   * Beatriz Carrasco and Jose Garcia de la Torre and Peter Zipper;
+   * "Calculation of hydrodynamic properties of macromolecular bead
+   * models with overlapping spheres", Eur Biophys J (1999) 28:
+   * 510-515
+   *
+   * For overlapping volume between two spherical beads:
+   * http://mathworld.wolfram.com/Sphere-SphereIntersection.html 
+   *
+   * For non-overlapping and overlapping translation-translation
+   * mobility tensors: 
    *
    * Zuk, P. J., E. Wajnryb, K. A. Mizerski, and P. Szymczak;
-   *“Rotne–Prager–Yamakawa Approximation for Different-Sized Particles in
-   *Application to Macromolecular Bead Models.”, Journal of Fluid Mechanics, 741
-   *(2014)   //(non-overlapping and overlapping translational-translational
-   *mobility tensors)
+   * “Rotne–Prager–Yamakawa Approximation for Different-Sized
+   * Particles in Application to Macromolecular Bead Models.”, Journal
+   * of Fluid Mechanics, 741 (2014) 
    *
-   * Steven Harvey and Jose Garcia de la Torre; "Coordinate Systems for Modeling
-   * the Hydrodynamic Resistance and Diffusion Coefficients of Irregularly
-   *Shaped Rigid Macromolecules", Macromolecules 1980 13 (4), 960-964  //(center
-   *of resistance and center of diffusion)
-   *
+   * For distinctions between centers of resistance and diffusion:
+   * Steven Harvey and Jose Garcia de la Torre; "Coordinate Systems
+   * for Modeling the Hydrodynamic Resistance and Diffusion
+   * Coefficients of Irregularly Shaped Rigid Macromolecules",
+   * Macromolecules 1980 13 (4), 960-964
    **/
-  ApproximationModel::ApproximationModel(StuntDouble* sd, SimInfo* info) :
-      HydrodynamicsModel(sd, info) {}
+  ApproximationModel::ApproximationModel() : HydrodynamicsModel() {}
 
-  void ApproximationModel::init() {
-    if (!createBeads(beads_)) {
-      sprintf(painCave.errMsg,
-              "ApproximationModel::init() : Could not create beads\n");
-      painCave.isFatal = 1;
-      simError();
-    }
-  }
-
-  bool ApproximationModel::calcHydroProps(Shape* shape, RealType viscosity,
-                                          RealType temperature) {
-    HydroProp* cr  = new HydroProp();
-    HydroProp* cd  = new HydroProp();
-    HydroProp* com = new HydroProp();
-    calcHydroPropsAtCRandAtCDandAtCOM(beads_, viscosity, temperature, cr, cd,
-                                      com);
-    setCR(cr);
-    setCD(cd);
-    setCOM(com);
-    return true;
-  }
-
-  bool ApproximationModel::calcHydroPropsAtCRandAtCDandAtCOM(
-      std::vector<BeadParam>& beads, RealType viscosity, RealType temperature,
-      HydroProp* cr, HydroProp* cd, HydroProp* com) {
+  HydroProp* ApproximationModel::calcHydroProps(Shape* shape,
+						RealType viscosity) {
     std::cout << "\n";
+    std::size_t nbeads = assignElements(shape);
 
-    unsigned int nbeads = beads.size();
     DynamicRectMatrix<RealType> B(3 * nbeads, 3 * nbeads);
     DynamicRectMatrix<RealType> C(3 * nbeads, 3 * nbeads);
     Mat3x3d I;
@@ -130,7 +113,7 @@ namespace OpenMD {
       for (std::size_t j = 0; j < nbeads; ++j) {
         // checking if the beads' radii are non-negative values.
         if (beads[i].radius < 0 || beads[j].radius < 0) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "There are beads with negative radius. Starting from index 0,\
  check bead (%lu) and/or bead (%lu).\n",
                   i, j);
@@ -335,31 +318,8 @@ namespace OpenMD {
     Xirrr = Xiorr - Uor * Xiott * Uor + Xiotr * Uor - Uor * Xiotr.transpose();
 
     // calculate Diffusion tensors at center of resistance
-    SquareMatrix<RealType, 6> Xir6x6;
-    SquareMatrix<RealType, 6> Dr6x6;
-
-    Xir6x6.setSubMatrix(0, 0, Xirtt);
-    Xir6x6.setSubMatrix(0, 3, Xirtr.transpose());
-    Xir6x6.setSubMatrix(3, 0, Xirtr);
-    Xir6x6.setSubMatrix(3, 3, Xirrr);
-
-    invertMatrix(Xir6x6, Dr6x6);  // Xir6x6 is modified during the inversion
-
-    RealType kt = Constants::kb * temperature;  // kt in kcal mol^-1
-
-    Dr6x6 *= kt;
-
-    Mat3x3d Drtt;
-    Mat3x3d Drtr;
-    Mat3x3d Drrt;
-    Mat3x3d Drrr;
-    Dr6x6.getSubMatrix(0, 0, Drtt);
-    Dr6x6.getSubMatrix(0, 3, Drrt);
-    Dr6x6.getSubMatrix(3, 0, Drtr);
-    Dr6x6.getSubMatrix(3, 3, Drrr);
-
-    // Write data to .hydro file
     Mat6x6d Xi;
+    Mat6x6d Dr;
 
     cr->setCenterOfResistance(ror);
 
@@ -370,7 +330,17 @@ namespace OpenMD {
 
     cr->setResistanceTensor(Xi);
 
-    cr->setDiffusionTensor(Dr6x6);
+    Dr = cr->getDiffusionTensor(temperature);
+    
+    Mat3x3d Drtt;
+    Mat3x3d Drrt;
+    Mat3x3d Drtr;
+    Mat3x3d Drrr;
+
+    Dr.getSubMatrix(0, 0, Drtt);
+    Dr.getSubMatrix(0, 3, Drrt);
+    Dr.getSubMatrix(3, 0, Drtr);
+    Dr.getSubMatrix(3, 3, Drrr);
 
     std::cout << "\n";
     std::cout << "-----------------------------------------\n";
@@ -411,100 +381,35 @@ namespace OpenMD {
 
     // calculate center of diffusion using the same arbitrary origin as above
     // (from the generated geometry file .xyz)
-    SquareMatrix<RealType, 6> Xio6x6;
-    SquareMatrix<RealType, 6> Do6x6;
 
-    Xio6x6.setSubMatrix(0, 0, Xiott);
-    Xio6x6.setSubMatrix(0, 3, Xiotr.transpose());
-    Xio6x6.setSubMatrix(3, 0, Xiotr);
-    Xio6x6.setSubMatrix(3, 3, Xiorr);
-
-    invertMatrix(Xio6x6, Do6x6);  // Xio6x6 is modified during the inversion
-
-    // (kt) in kcal mol^-1
-    Do6x6 *= kt;
-
-    Mat3x3d Dott;
-    Mat3x3d Dotr;
-    Mat3x3d Dort;
-    Mat3x3d Dorr;
-    Do6x6.getSubMatrix(0, 0, Dott);
-    Do6x6.getSubMatrix(0, 3, Dort);
-    Do6x6.getSubMatrix(3, 0, Dotr);
-    Do6x6.getSubMatrix(3, 3, Dorr);
-
-    // center of diffusion
-    tmp(0, 0) = Dorr(1, 1) + Dorr(2, 2);
-    tmp(0, 1) = -Dorr(0, 1);
-    tmp(0, 2) = -Dorr(0, 2);
-    tmp(1, 0) = -Dorr(0, 1);
-    tmp(1, 1) = Dorr(0, 0) + Dorr(2, 2);
-    tmp(1, 2) = -Dorr(1, 2);
-    tmp(2, 0) = -Dorr(0, 2);
-    tmp(2, 1) = -Dorr(1, 2);
-    tmp(2, 2) = Dorr(1, 1) + Dorr(0, 0);
-
-    // Vector3d tmpVec;
-    tmpVec[0] = Dotr(1, 2) - Dotr(2, 1);
-    tmpVec[1] = Dotr(2, 0) - Dotr(0, 2);
-    tmpVec[2] = Dotr(0, 1) - Dotr(1, 0);
-
-    // invert tmp Matrix
-    invertMatrix(tmp, tmpInv);
-
-    // center of difussion
-    Vector3d rod = tmpInv * tmpVec;
-
-    // calculate Diffusion Tensor at center of diffusion
-    Mat3x3d Uod;
-    Uod.setupSkewMat(rod);
-
-    Mat3x3d Ddtt;  // translational diffusion tensor at diffusion center
-    Mat3x3d Ddtr;  // rotational diffusion tensor at diffusion center
-    Mat3x3d Ddrr;  // translation-rotation coupling diffusion tensor at
-                   // diffusion tensor (which is symmetric)
-
-    Ddtt = Dott - Uod * Dorr * Uod + Dotr.transpose() * Uod - Uod * Dotr;
-    Ddrr = Dorr;
-    Ddtr = Dotr + Dorr * Uod;
-
-    SquareMatrix<RealType, 6> Dd;
-    Dd.setSubMatrix(0, 0, Ddtt);
-    Dd.setSubMatrix(0, 3, Ddtr.transpose());
-    Dd.setSubMatrix(3, 0, Ddtr);
-    Dd.setSubMatrix(3, 3, Ddrr);
-
-    SquareMatrix<RealType, 6> Xid;
-    invertMatrix(Dd, Xid);  // Dd is modified during the inversion
-
-    // D=(kt) Z^-1  ==>  (kt) (D^-1) = Z;  t=temperature; D^-1 = Xid
-    Xid *= kt;
-
+    Vector3d cod = cr->getCenterOfDiffusion(temperature);
+    Mat6x6d Xid = cr->getResistanceTensorAtPos(cod);
+       
     Mat3x3d Xidtt;
     Mat3x3d Xidrt;
     Mat3x3d Xidtr;
     Mat3x3d Xidrr;
+    
     Xid.getSubMatrix(0, 0, Xidtt);
     Xid.getSubMatrix(0, 3, Xidrt);
     Xid.getSubMatrix(3, 0, Xidtr);
     Xid.getSubMatrix(3, 3, Xidrr);
 
-    // Write data to .hydro file
-    Mat6x6d Did;
+    // calculate Diffusion Tensor at center of diffusion
+    Mat6x6d Dd = cr->getDiffusionTensorAtPos(cod, temperature);
+    
+    Mat3x3d Ddtt;
+    Mat3x3d Ddtr;
+    Mat3x3d Ddrt;
+    Mat3x3d Ddrr;
 
-    cd->setCenterOfResistance(rod);
-
-    cd->setResistanceTensor(Xid);
-
-    Did.setSubMatrix(0, 0, Ddtt);
-    Did.setSubMatrix(0, 3, Ddtr.transpose());
-    Did.setSubMatrix(3, 0, Ddtr);
-    Did.setSubMatrix(3, 3, Ddrr);
-
-    cd->setDiffusionTensor(Did);
+    Dd.getSubMatrix(0, 0, Ddtt);
+    Dd.getSubMatrix(0, 3, Ddrt);
+    Dd.getSubMatrix(3, 0, Ddtr);
+    Dd.getSubMatrix(3, 3, Ddrr);
 
     std::cout << "Center of diffusion: " << std::endl;
-    std::cout << rod << "\n" << std::endl;
+    std::cout << cod << "\n" << std::endl;
     std::cout << "-----------------------------------------\n\n";
     std::cout << "Diffusion tensor at center of diffusion \n " << std::endl;
     std::cout << "translation (A^2 / fs) :" << std::endl;
@@ -541,71 +446,53 @@ namespace OpenMD {
 
     refMolCom /= molMass;
 
-    Mat3x3d UoCOM;
-    UoCOM.setupSkewMat(refMolCom);
+    Mat6x6d Xim = cr->getResistanceTensorAtPos(refMolCom);
+    
+    Mat3x3d Ximtt;
+    Mat3x3d Ximrt;
+    Mat3x3d Ximtr;
+    Mat3x3d Ximrr;
+    
+    Xim.getSubMatrix(0, 0, Ximtt);
+    Xim.getSubMatrix(0, 3, Ximrt);
+    Xim.getSubMatrix(3, 0, Ximtr);
+    Xim.getSubMatrix(3, 3, Ximrr);
 
-    Mat3x3d Xicomtt;
-    Mat3x3d Xicomrr;
-    Mat3x3d Xicomtr;
+    // calculate Diffusion Tensor at center of diffusion
+    Mat6x6d Dm = cr->getDiffusionTensorAtPos(refMolCom, temperature);
+    
+    Mat3x3d Dmtt;
+    Mat3x3d Dmtr;
+    Mat3x3d Dmrt;
+    Mat3x3d Dmrr;
 
-    // Resistance tensors at the center of mass
-    Xicomtt = Xiott;
-    Xicomtr = (Xiotr - UoCOM * Xiott);
-    Xicomrr = Xiorr - UoCOM * Xiott * UoCOM + Xiotr * UoCOM -
-              UoCOM * Xiotr.transpose();
-
-    // calculate Diffusion Tensor at center of mass
-    Mat3x3d Dcomtt;  // translational diffusion tensor at center of mass
-    Mat3x3d Dcomtr;  // rotational diffusion tensor at center of mass
-    Mat3x3d Dcomrr;  // translation-rotation coupling diffusion tensor at center
-                     // of mass
-
-    Dcomtt =
-        Dott - UoCOM * Dorr * UoCOM + Dotr.transpose() * UoCOM - UoCOM * Dotr;
-    Dcomrr = Dorr;
-    Dcomtr = Dotr + Dorr * UoCOM;
-
-    // Write data to .hydro file
-    Mat6x6d Xcm, Dcm;
-
-    com->setCenterOfResistance(refMolCom);
-
-    Xcm.setSubMatrix(0, 0, Xicomtt);
-    Xcm.setSubMatrix(0, 3, Xicomtr.transpose());
-    Xcm.setSubMatrix(3, 0, Xicomtr);
-    Xcm.setSubMatrix(3, 3, Xicomrr);
-
-    com->setResistanceTensor(Xcm);
-
-    Dcm.setSubMatrix(0, 0, Dcomtt);
-    Dcm.setSubMatrix(0, 3, Dcomtr.transpose());
-    Dcm.setSubMatrix(3, 0, Dcomtr);
-    Dcm.setSubMatrix(3, 3, Dcomrr);
-
-    com->setDiffusionTensor(Dcm);
+    Dm.getSubMatrix(0, 0, Dmtt);
+    Dm.getSubMatrix(0, 3, Dmrt);
+    Dm.getSubMatrix(3, 0, Dmtr);
+    Dm.getSubMatrix(3, 3, Dmrr);
 
     std::cout << "Center of mass :" << std::endl;
     std::cout << refMolCom << "\n" << std::endl;
     std::cout << "-----------------------------------------\n\n";
     std::cout << "Resistance tensor at center of mass\n" << std::endl;
     std::cout << "translation [kcal.fs/(mol.A^2)]:" << std::endl;
-    std::cout << Xicomtt << std::endl;
+    std::cout << Ximtt << std::endl;
     std::cout << "rotation-translation [kcal.fs/(mol.A.radian)]:" << std::endl;
-    std::cout << Xicomtr.transpose() << std::endl;
+    std::cout << Ximtr.transpose() << std::endl;
     std::cout << "translation-rotation [kcal.fs/(mol.A.radian)]:" << std::endl;
-    std::cout << Xicomtr << std::endl;
+    std::cout << Ximtr << std::endl;
     std::cout << "rotation [kcal.fs/(mol.radian^2)]:" << std::endl;
-    std::cout << Xicomrr << std::endl;
+    std::cout << Ximrr << std::endl;
     std::cout << "-----------------------------------------\n\n";
     std::cout << "Diffusion tensor at center of mass\n" << std::endl;
     std::cout << "translation (A^2 / fs):" << std::endl;
-    std::cout << Dcomtt << std::endl;
+    std::cout << Dmtt << std::endl;
     std::cout << "rotation-translation (A.radian / fs):" << std::endl;
-    std::cout << Dcomtr.transpose() << std::endl;
+    std::cout << Dmtr.transpose() << std::endl;
     std::cout << "translation-rotation (A.radian / fs):" << std::endl;
-    std::cout << Dcomtr << std::endl;
+    std::cout << Dmtr << std::endl;
     std::cout << "rotation (radian^2 / fs):" << std::endl;
-    std::cout << Dcomrr << std::endl;
+    std::cout << Dmrr << std::endl;
 
     return true;
   }

@@ -63,12 +63,36 @@ namespace OpenMD {
     return currShape;
   }
 
+  Shape* ShapeBuilder::createShape(Molecule* mol) {
+    Molecule::IntegrableObjectIterator j;
+    StuntDouble* sd;
+
+    if (mol->getNAtoms() == 1) {
+       Shape* molShape = createShape(mol->getAtomAt(0));
+       return molShape;
+    } else {
+      CompositeShape* molShape = new CompositeShape();
+      for (sd = mol->beginIntegrableObject(j); sd != NULL;
+	   sd = mol->nextIntegrableObject(j)) {
+	Shape* currShape  = createShape(sd);
+	if (currShape != NULL) {	      
+	  molShape->addShape(currShape);
+	}
+      }
+      molShape->setName( mol->getType() );
+      return molShape;	   
+    }
+    return NULL;
+  }
+
   Shape* ShapeBuilder::internalCreateShape(Atom* atom) {
     AtomType* atomType      = atom->getAtomType();
     Shape* currShape        = NULL;
     LennardJonesAdapter lja = LennardJonesAdapter(atomType);
+    std::cerr << atom->getType() << "\n";
     if (lja.isLennardJones()) {
       currShape = new Sphere(atom->getPos(), lja.getSigma() / 2.0);
+      currShape->setName( atom->getType() );
     } else {
       int obanum(0);
       std::vector<AtomType*> atChain = atomType->allYourBase();
@@ -77,11 +101,12 @@ namespace OpenMD {
         obanum = etab.GetAtomicNum((*i)->getName().c_str());
         if (obanum != 0) {
           currShape = new Sphere(atom->getPos(), etab.GetVdwRad(obanum));
+	  currShape->setName( atom->getType() );
           break;
         }
       }
       if (obanum == 0) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
@@ -106,13 +131,14 @@ namespace OpenMD {
       if (obanum != 0) {
         currShape = new Sphere(datom->getPos(), etab.GetVdwRad(obanum));
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
       }
     }
+    currShape->setName( datom->getType() );
     return currShape;
   }
 
@@ -127,9 +153,11 @@ namespace OpenMD {
       } else if (atom->isAtom()) {
         currShape = internalCreateShape(static_cast<Atom*>(atom));
       }
-      if (currShape != NULL) compositeShape->addShape(currShape);
+      if (currShape != NULL) {
+	compositeShape->addShape(currShape);
+	compositeShape->setName( rb->getType() );
+      }
     }
-
     return compositeShape;
   }
 }  // namespace OpenMD
