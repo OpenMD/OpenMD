@@ -113,7 +113,7 @@ namespace OpenMD {
       for (std::size_t j = 0; j < nbeads; ++j) {
         // checking if the beads' radii are non-negative values.
         if (beads[i].radius < 0 || beads[j].radius < 0) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          sprintf(painCave.errMsg,
                   "There are beads with negative radius. Starting from index 0,\
  check bead (%lu) and/or bead (%lu).\n",
                   i, j);

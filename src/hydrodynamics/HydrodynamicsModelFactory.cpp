@@ -71,11 +71,11 @@ namespace OpenMD {
   }
 
   HydrodynamicsModel* HydrodynamicsModelFactory::createHydrodynamicsModel(
-      const std::string& id, StuntDouble* sd, SimInfo* info) {
+      const std::string& id) {
     CreatorMapType::iterator i = creatorMap_.find(id);
     if (i != creatorMap_.end()) {
       // invoke functor to create object
-      return (i->second)->create(sd, info);
+      return (i->second)->create();
     } else {
       return NULL;
     }

@@ -51,16 +51,28 @@
 #include "math/Vector3.hpp"
 
 namespace OpenMD {
-
+  class Sphere;
+  class Ellipsoid;
+  class CompositeShape;
+  class Mesh;
+  
   /** @class Shape*/
   class Shape {
   public:
     virtual ~Shape()                                       = default;
+    std::string getName(){ return name_; }
+    void setName(const std::string name) { name_ = name; }
     virtual bool isInterior(Vector3d pos)                  = 0;
     virtual std::pair<Vector3d, Vector3d> getBoundingBox() = 0;
     virtual bool hasAnalyticalSolution()                   = 0;
-    virtual HydroProp* getHydroProp(RealType viscosity,
-                                    RealType temperature)  = 0;
+    virtual HydroProp* getHydroProp(RealType viscosity)    = 0;
+    virtual Vector3d getOrigin()                           = 0;
+    virtual bool isComposite()                             = 0;
+    virtual bool isSpherical()                             = 0;
+    virtual bool isMesh()                                  = 0;
+    
+  private:
+    std::string name_;
   };
 }  // namespace OpenMD
 #endif

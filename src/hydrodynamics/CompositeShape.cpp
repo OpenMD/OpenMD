@@ -93,7 +93,7 @@ namespace OpenMD {
   HydroProp* CompositeShape::getHydroProp(RealType viscosity) {
     HydroProp* props = new HydroProp();
     props->setCenterOfResistance(V3Zero);
-    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+    sprintf(painCave.errMsg,
             "CompositeShape was asked to return an analytic HydroProps.\n");
     painCave.severity = OPENMD_ERROR;
     painCave.isFatal  = 1;

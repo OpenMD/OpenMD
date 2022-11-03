@@ -55,9 +55,15 @@ namespace OpenMD {
     Sphere(Vector3d origin, RealType radius);
     virtual bool isInterior(Vector3d pos);
     virtual std::pair<Vector3d, Vector3d> getBoundingBox();
+    
     virtual bool hasAnalyticalSolution() { return true; }
-    virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature);
+    virtual bool isComposite() { return false; }
+    virtual bool isSpherical() { return true; }
+    virtual bool isMesh() { return false; }
 
+    virtual HydroProp* getHydroProp(RealType viscosity);
+
+    virtual Vector3d getOrigin() { return origin_; }
     RealType getRadius() { return radius_; }
 
   private:

@@ -310,7 +310,7 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg, "GofRAngle: unable to open %s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "GofRAngle: unable to open %s\n",
               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
@@ -334,7 +334,7 @@ namespace OpenMD {
     Vector3d vec;
 
     if (!sd1->isDirectional()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "GofRTheta: attempted to use a non-directional object: %s\n",
               sd1->getType().c_str());
       painCave.isFatal = 1;
@@ -386,7 +386,7 @@ namespace OpenMD {
     Vector3d v1, v2;
 
     if (!sd1->isDirectional()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "GofROmega: attempted to use a non-directional object: %s\n",
               sd1->getType().c_str());
       painCave.isFatal = 1;
@@ -405,7 +405,7 @@ namespace OpenMD {
     }
 
     if (!sd2->isDirectional()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "GofROmega attempted to use a non-directional object: %s\n",
               sd2->getType().c_str());
       painCave.isFatal = 1;
@@ -441,7 +441,7 @@ namespace OpenMD {
     if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(v1);
 
     if (!sd2->isDirectional()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "GofROmega: attempted to use a non-directional object: %s\n",
               sd2->getType().c_str());
       painCave.isFatal = 1;

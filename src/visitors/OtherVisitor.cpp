@@ -98,20 +98,19 @@ namespace OpenMD {
     char buffer[65535];
     std::string result;
 
-    sprintf(
-        buffer,
+    snprintf(
+            buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    snprintf(buffer, 65535, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
-    sprintf(buffer,
+    snprintf(buffer, 65535,
             "Visitor Description: wrapping atoms back to periodic box\n");
     result += buffer;
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
@@ -190,29 +189,28 @@ namespace OpenMD {
     char buffer[65535];
     std::string result;
 
-    sprintf(buffer,
+    snprintf(buffer, 65535,
             "--------------------------------------------------------------\n");
     result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    snprintf(buffer, 65535, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 65535,
         "Visitor Description: replicate the atoms in different direction\n");
     result += buffer;
 
     // print the replicate direction
-    sprintf(buffer, "repeatX = %d:\n", replicateOpt[0]);
+    snprintf(buffer, 65535, "repeatX = %d:\n", replicateOpt[0]);
     result += buffer;
 
-    sprintf(buffer, "repeatY = %d:\n", replicateOpt[1]);
+    snprintf(buffer, 65535, "repeatY = %d:\n", replicateOpt[1]);
     result += buffer;
 
-    sprintf(buffer, "repeatZ = %d:\n", replicateOpt[2]);
+    snprintf(buffer, 65535, "repeatZ = %d:\n", replicateOpt[2]);
     result += buffer;
 
-    sprintf(buffer,
+    snprintf(buffer, 65535,
             "--------------------------------------------------------------\n");
     result += buffer;
 
@@ -288,40 +286,40 @@ namespace OpenMD {
     for (atomInfo = atomData->beginAtomInfo(i); atomInfo;
          atomInfo = atomData->nextAtomInfo(i)) {
       std::string line;
-      sprintf(buffer, "%s", atomInfo->atomTypeName.c_str());
+      snprintf(buffer, 1024, "%s", atomInfo->atomTypeName.c_str());
       line += buffer;
 
       if (doPositions_) {
-        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->pos[0],
+        snprintf(buffer, 1024, "%15.8f%15.8f%15.8f", atomInfo->pos[0],
                 atomInfo->pos[1], atomInfo->pos[2]);
         line += buffer;
       }
       if (doCharges_ && atomInfo->hasCharge) {
-        sprintf(buffer, "%15.8f", atomInfo->charge);
+        snprintf(buffer, 1024, "%15.8f", atomInfo->charge);
         line += buffer;
       }
       if (doVectors_ && atomInfo->hasVector) {
-        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->vec[0],
+        snprintf(buffer, 1024, "%15.8f%15.8f%15.8f", atomInfo->vec[0],
                 atomInfo->vec[1], atomInfo->vec[2]);
         line += buffer;
       }
       if (doVelocities_ && atomInfo->hasVelocity) {
-        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->vel[0],
+        snprintf(buffer, 1024, "%15.8f%15.8f%15.8f", atomInfo->vel[0],
                 atomInfo->vel[1], atomInfo->vel[2]);
         line += buffer;
       }
       if (doForces_ && atomInfo->hasForce) {
-        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->frc[0],
+        snprintf(buffer, 1024, "%15.8f%15.8f%15.8f", atomInfo->frc[0],
                 atomInfo->frc[1], atomInfo->frc[2]);
         line += buffer;
       }
       if (doElectricFields_ && atomInfo->hasElectricField) {
-        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->eField[0],
+        snprintf(buffer, 1024, "%15.8f%15.8f%15.8f", atomInfo->eField[0],
                 atomInfo->eField[1], atomInfo->eField[2]);
         line += buffer;
       }
       if (doGlobalIDs_) {
-        sprintf(buffer, "%10d", atomInfo->globalID);
+        snprintf(buffer, 1024, "%10d", atomInfo->globalID);
         line += buffer;
       }
 
@@ -347,7 +345,7 @@ namespace OpenMD {
     Snapshot* currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d box            = currSnapshot->getHmat();
 
-    sprintf(buffer,
+    snprintf(buffer, 1024,
             "%15.8f;%15.8f%15.8f%15.8f;%15.8f%15.8f%15.8f;%15.8f%15.8f%15.8f",
             currSnapshot->getTime(), box(0, 0), box(0, 1), box(0, 2), box(1, 0),
             box(1, 1), box(1, 2), box(2, 0), box(2, 1), box(2, 2));
@@ -366,21 +364,18 @@ namespace OpenMD {
     char buffer[65535];
     std::string result;
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    snprintf(buffer, 65535, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 65535,
         "Visitor Description: assemble the atom data and output xyz file\n");
     result += buffer;
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
@@ -438,20 +433,18 @@ namespace OpenMD {
     char buffer[65535];
     std::string result;
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
-    sprintf(buffer, "Visitor name: %s", visitorName.c_str());
+    snprintf(buffer, 65535, "Visitor name: %s", visitorName.c_str());
     result += buffer;
 
-    sprintf(buffer,
+    snprintf(buffer, 65535,
             "Visitor Description: prepare for operation of other vistors\n");
     result += buffer;
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
@@ -514,20 +507,18 @@ namespace OpenMD {
     char buffer[65535];
     std::string result;
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    snprintf(buffer, 65535, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
-    sprintf(buffer,
+    snprintf(buffer, 65535,
             "Visitor Description: Replace the atom type in water model\n");
     result += buffer;
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 

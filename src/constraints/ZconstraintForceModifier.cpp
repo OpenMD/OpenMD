@@ -67,7 +67,7 @@ namespace OpenMD {
     if (simParam->haveDt()) {
       dt_ = simParam->getDt();
     } else {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "ZconstraintForceManager Error: dt is not set\n");
       painCave.isFatal = 1;
       simError();
@@ -76,7 +76,7 @@ namespace OpenMD {
     if (simParam->haveZconsTime()) {
       zconsTime_ = simParam->getZconsTime();
     } else {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "ZconstraintForceManager error: If you use a ZConstraint,\n"
               "\tyou must set zconsTime.\n");
       painCave.isFatal = 1;
@@ -87,7 +87,7 @@ namespace OpenMD {
       zconsTol_ = simParam->getZconsTol();
     } else {
       zconsTol_ = 0.01;
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "ZconstraintForceManager Warning: Tolerance for z-constraint "
               "method is not specified.\n"
               "\tOpenMD will use a default value of %f.\n"
@@ -183,7 +183,7 @@ namespace OpenMD {
     fzOut = new ZConsWriter(info_, zconsOutput_.c_str());
 
     if (!fzOut) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "ZconstraintForceManager:: Failed to create ZConsWriter\n");
       painCave.isFatal = 1;
       simError();

@@ -193,8 +193,7 @@ namespace OpenMD {
     }
 
     if (nLinearAxis > 1) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "RigidBody error.\n"
           "\tOpenMD found more than one axis in this rigid body with a "
           "vanishing \n"
@@ -429,8 +428,7 @@ namespace OpenMD {
       pos          = getPos() + ref;
       return true;
     } else {
-      sprintf(
-          painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
           "%d is an invalid index. The current rigid body contans %lu atoms.\n",
           index, atoms_.size());
       painCave.isFatal = 0;
@@ -448,7 +446,7 @@ namespace OpenMD {
       pos          = getPos() + ref;
       return true;
     } else {
-      sprintf(painCave.errMsg, "Atom %d does not belong to rigid body %d.\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Atom %d does not belong to rigid body %d.\n",
               atom->getGlobalIndex(), getGlobalIndex());
       painCave.isFatal = 0;
       simError();
@@ -484,8 +482,7 @@ namespace OpenMD {
       return true;
 
     } else {
-      sprintf(
-          painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "Index %d is an invalid index, the current rigid body contains %lu "
           "atoms.\n",
           index, atoms_.size());
@@ -501,7 +498,7 @@ namespace OpenMD {
     if (i != atoms_.end()) {
       return getAtomVel(vel, i - atoms_.begin());
     } else {
-      sprintf(painCave.errMsg, "Atom %d does not belong to rigid body %d.\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Atom %d does not belong to rigid body %d.\n",
               atom->getGlobalIndex(), getGlobalIndex());
       painCave.isFatal = 0;
       simError();
@@ -514,8 +511,7 @@ namespace OpenMD {
       coor = refCoords_[index];
       return true;
     } else {
-      sprintf(
-          painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
           "Index %d is an invalid index, the current rigid body contains %lu "
           "atoms.\n",
           index, atoms_.size());
@@ -533,8 +529,9 @@ namespace OpenMD {
       coor = refCoords_[i - atoms_.begin()];
       return true;
     } else {
-      sprintf(painCave.errMsg, "Atom %d does not belong to rigid body %d.\n",
-              atom->getGlobalIndex(), getGlobalIndex());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Atom %d does not belong to rigid body %d.\n",
+               atom->getGlobalIndex(), getGlobalIndex());
       painCave.isFatal = 0;
       simError();
       return false;
@@ -548,7 +545,7 @@ namespace OpenMD {
     atoms_.push_back(at);
 
     if (!ats->havePosition()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "RigidBody error.\n"
               "\tAtom %s does not have a position specified.\n"
               "\tThis means RigidBody cannot set up reference coordinates.\n",
@@ -567,12 +564,11 @@ namespace OpenMD {
 
     if (at->isDirectional()) {
       if (!ats->haveOrientation()) {
-        sprintf(
-            painCave.errMsg,
-            "RigidBody error.\n"
-            "\tAtom %s does not have an orientation specified.\n"
-            "\tThis means RigidBody cannot set up reference orientations.\n",
-            ats->getType().c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RigidBody error.\n"
+                 "\tAtom %s does not have an orientation specified.\n"
+                 "\tThis means RigidBody cannot set up reference orientations.\n",
+                 ats->getType().c_str());
         painCave.isFatal = 1;
         simError();
       }

@@ -85,7 +85,7 @@ namespace OpenMD {
       MultipoleAdapter ma = MultipoleAdapter(at);
 
       if (!ma.isDipole()) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "DipoleCorrFunc::validateSelection Error: selected atoms do\n"
                 "\tnot have a dipole\n");
         painCave.isFatal = 1;

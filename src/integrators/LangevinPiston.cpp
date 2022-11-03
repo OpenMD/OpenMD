@@ -71,7 +71,7 @@ namespace OpenMD {
 
     // gamma_ has units of fs^-1
     if (!simParams->haveLangevinPistonDrag()) {
-      sprintf(painCave.errMsg, "To use the LangevinPiston integrator, you must "
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "To use the LangevinPiston integrator, you must "
                                "set langevinPistonDrag "
                                "(fs^-1).\n");
       painCave.severity = OPENMD_ERROR;
@@ -322,7 +322,7 @@ namespace OpenMD {
     scaleFactor = exp(dt * eta);
 
     if ((scaleFactor > 1.1) || (scaleFactor < 0.9)) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "LangevinPiston error: Attempting a Box scaling of more than 10 "
               "percent\n"
               " check your tauBarostat, as it is probably too small!\n"

@@ -90,7 +90,7 @@ namespace OpenMD {
     if (simParam->haveStatusTime()) {
       restTime_ = simParam->getStatusTime();
     } else {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "Restraint warning: If you use restraints without setting\n"
               "\tstatusTime, no restraint data will be written to the rest\n"
               "\tfile.\n");
@@ -112,7 +112,7 @@ namespace OpenMD {
         Vector3d refCom;
 
         if (!stamp[i]->haveMolIndex()) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "Restraint Error: A molecular restraint was specified\n"
                   "\twithout providing a value for molIndex.\n");
           painCave.isFatal = 1;
@@ -122,14 +122,14 @@ namespace OpenMD {
         }
 
         if (molIndex < 0) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "Restraint Error: A molecular restraint was specified\n"
                   "\twith a molIndex that was less than 0\n");
           painCave.isFatal = 1;
           simError();
         }
         if (molIndex >= info_->getNGlobalMolecules()) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "Restraint Error: A molecular restraint was specified with\n"
                   "\ta molIndex that was greater than the total number of "
                   "molecules\n");
@@ -152,8 +152,7 @@ namespace OpenMD {
             // If we were supposed to have it but got a null, then freak out.
 #endif
 
-            sprintf(
-                painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Restraint Error: A molecular restraint was specified, but\n"
                 "\tno molecule was found with global index %d.\n",
                 molIndex);
@@ -226,7 +225,7 @@ namespace OpenMD {
         std::string objectSelection;
 
         if (!stamp[i]->haveObjectSelection()) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "Restraint Error: An object restraint was specified\n"
                   "\twithout providing a selection script in the\n"
                   "\tobjectSelection variable.\n");
@@ -248,7 +247,7 @@ namespace OpenMD {
                       MPI_COMM_WORLD);
 #endif
 
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Restraint Info: The specified restraint objectSelection,\n"
                 "\t\t%s\n"
                 "\twill result in %d integrable objects being\n"
@@ -322,7 +321,7 @@ namespace OpenMD {
     restOutput_ = getPrefix(info_->getFinalConfigFileName()) + ".rest";
     restOut     = new RestWriter(info_, restOutput_.c_str(), restraints_);
     if (!restOut) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "Restraint error: Failed to create RestWriter\n");
       painCave.isFatal = 1;
       simError();
@@ -393,21 +392,21 @@ namespace OpenMD {
           // MolecularRestraint
           mRest = dynamic_cast<MolecularRestraint*>(restData->getData());
           if (mRest == NULL) {
-            sprintf(painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                     "Can not cast RestraintData to MolecularRestraint\n");
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();
           }
         } else {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "Can not cast GenericData to RestraintData\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
           simError();
         }
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Can not find Restraint for RestrainedObject\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
@@ -460,21 +459,21 @@ namespace OpenMD {
           // an ObjectRestraint:
           oRest = dynamic_cast<ObjectRestraint*>(restData->getData());
           if (oRest == NULL) {
-            sprintf(painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                     "Can not cast RestraintData to ObjectRestraint\n");
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();
           }
         } else {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "Can not cast GenericData to RestraintData\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
           simError();
         }
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Can not find Restraint for RestrainedObject\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;

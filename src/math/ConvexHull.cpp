@@ -111,7 +111,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
     exitcode      = qh_ERRnone;
     qh->NOerrexit = True;
   } else {
-    sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute convex hull");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "ConvexHull: Qhull failed to compute convex hull");
     painCave.isFatal = 1;
     simError();
   }
@@ -126,7 +126,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
     exitcode     = qh_ERRnone;
     qh NOerrexit = True;
   } else {
-    sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute convex hull");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "ConvexHull: Qhull failed to compute convex hull");
     painCave.isFatal = 1;
     simError();
   }
@@ -223,7 +223,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   qh_memfreeshort(&curlong, &totlong);
 #endif
   if (curlong || totlong) {
-    sprintf(painCave.errMsg,
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "ConvexHull: qhull internal warning:\n"
             "\tdid not free %d bytes of long memory (%d pieces)",
             totlong, curlong);
@@ -243,7 +243,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
     exitcode      = qh_ERRnone;
     qh->NOerrexit = True;
   } else {
-    sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute convex hull");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "ConvexHull: Qhull failed to compute convex hull");
     painCave.isFatal = 1;
     simError();
   }
@@ -259,7 +259,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
     exitcode = qh_ERRnone;
     qh NOerrexit = True; /* no more setjmp */
   } else {
-    sprintf(painCave.errMsg,
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "ConvexHull: Qhull failed to compute global convex hull");
     painCave.isFatal = 1;
     simError();
@@ -379,7 +379,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
   qh_memfreeshort(&curlong, &totlong);
 #endif
   if (curlong || totlong) {
-    sprintf(painCave.errMsg,
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "ConvexHull: qhull internal warning:\n"
             "\tdid not free %d bytes of long memory (%d pieces)",
             totlong, curlong);

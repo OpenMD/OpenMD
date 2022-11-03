@@ -774,7 +774,7 @@ namespace OpenMD {
       ffStream->open(forceFieldFilename.c_str());
 
       if (!ffStream->is_open()) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Error opening the force field parameter file:\n"
                 "\t%s\n"
                 "\tHave you tried setting the FORCE_PARAM_PATH environment "

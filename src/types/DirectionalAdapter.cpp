@@ -58,7 +58,7 @@ namespace OpenMD {
 
   DirectionalAtypeParameters DirectionalAdapter::getDirectionalParam() {
     if (!isDirectional()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "DirectionalAdapter::getDirectionalParam was passed an atomType "
               "(%s)\n"
               "\tthat does not appear to be a Directional atom.\n",
@@ -71,8 +71,7 @@ namespace OpenMD {
     std::shared_ptr<GenericData> data =
         at_->getPropertyByName(DirectionalTypeID);
     if (data == nullptr) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
           "DirectionalAdapter::getDirectionalParam could not find Directional\n"
           "\tparameters for atomType %s.\n",
           at_->getName().c_str());
@@ -84,7 +83,7 @@ namespace OpenMD {
     std::shared_ptr<DirectionalAtypeData> directionalData =
         std::dynamic_pointer_cast<DirectionalAtypeData>(data);
     if (directionalData == nullptr) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "DirectionalAdapter::getDirectionalParam could not convert\n"
               "\tGenericData to DirectionalAtypeData for atom type %s\n",
               at_->getName().c_str());

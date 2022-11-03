@@ -119,8 +119,7 @@ namespace OpenMD {
     }
     if (efSpec) {
       if (ef.size() != 3) {
-        sprintf(
-            painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "NitrileFrequencyMap: Incorrect number of parameters specified for "
             "uniformField.\n"
             "\tthere should be 3 parameters, but %lu were specified.\n",
@@ -210,7 +209,7 @@ namespace OpenMD {
           li = (*fi).second;
         } else {
           // throw error
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "NitrileFrequencyMap::process: Unknown atype requested.\n"
                   "\t(Selection specified %s .)\n",
                   name.c_str());
@@ -285,7 +284,7 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg, "NitrileFrequencyMap: unable to open %s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "NitrileFrequencyMap: unable to open %s\n",
               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();

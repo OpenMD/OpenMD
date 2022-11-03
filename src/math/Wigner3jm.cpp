@@ -199,7 +199,7 @@ namespace MATPACK {
         fmod(l1 + fabs(m1) + eps, one) >= eps + eps) {
       errflag = 1;
 
-      sprintf(painCave.errMsg, "%s: %s", "ThreeJSymbolM",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s: %s", "ThreeJSymbolM",
               "l1-abs(m1) less than zero or l1+abs(m1) not integer.");
       painCave.isFatal = 1;
       simError();
@@ -209,7 +209,7 @@ namespace MATPACK {
                -(l1) + l2 + l3 < -eps) {
       errflag = 2;
 
-      sprintf(painCave.errMsg, "%s: %s", "ThreeJSymbolM",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s: %s", "ThreeJSymbolM",
               "l1, l2, l3 do not satisfy triangular condition.");
       painCave.isFatal = 1;
       simError();
@@ -218,7 +218,7 @@ namespace MATPACK {
     } else if (fmod(l1 + l2 + l3 + eps, one) >= eps + eps) {
       errflag = 3;
 
-      sprintf(painCave.errMsg, "%s: %s", "ThreeJSymbolM",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s: %s", "ThreeJSymbolM",
               "l1+l2+l3 not integer.");
       painCave.isFatal = 1;
       simError();
@@ -234,7 +234,7 @@ namespace MATPACK {
     if (fmod(m2max - m2min + eps, one) >= eps + eps) {
       errflag = 4;
 
-      sprintf(painCave.errMsg, "%s: %s", "ThreeJSymbolM",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s: %s", "ThreeJSymbolM",
               "m2max-m2min not integer.");
       painCave.isFatal = 1;
       simError();
@@ -247,7 +247,7 @@ namespace MATPACK {
     //  Check error condition 5.
     errflag = 5;
 
-    sprintf(painCave.errMsg, "%s: %s", "ThreeJSymbolM",
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s: %s", "ThreeJSymbolM",
             "m2min greater than m2max.");
     painCave.isFatal = 1;
     simError();
@@ -271,7 +271,7 @@ namespace MATPACK {
     // Check error condition 6.
 
     errflag = 6;
-    sprintf(painCave.errMsg, "%s: %s", "ThreeJSymbolM",
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s: %s", "ThreeJSymbolM",
             "Dimension of result array for 3j coefficients too small.");
     painCave.isFatal = 1;
     simError();

@@ -43,35 +43,76 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include <config.h>
+#include "hydrodynamics/AtomicBeadModel.hpp"
+#include "hydrodynamics/Sphere.hpp"
+#include "hydrodynamics/CompositeShape.hpp"
 
-#include <functional>
 namespace OpenMD {
-
-  /**
-   * copy_if is one of the missing functions in STL.
-   * copy_if copies elements from the range [first, last) to the range [result,
-   * result + (last-first)), except that any element for which pred is false is
-   * not copied.
-   */
-  template<typename InputIterator, typename OutputIterator, typename Predicate>
-  OutputIterator copy_if(InputIterator first, InputIterator last,
-                         OutputIterator result, Predicate p) {
-    while (first != last) {
-      if (p(*first)) { *result++ = *first; }
-      ++first;
+  
+  std::size_t AtomicBeadModel::assignElements() {
+    if (shape_ != NULL ) {
+      if (shape_->isComposite()) {
+	createBeads( dynamic_cast<CompositeShape*>(shape_) );
+      } else {
+	if (shape_->isSpherical()) {
+	  createSingleBead( dynamic_cast<Sphere*>(shape_) );
+	} else {
+	  sprintf(painCave.errMsg,
+		  "AtomicBeadModel::assignElements Error: GayBerne and other non-spherical\n"
+		  "\tatoms should use the RoughShell or BoundaryElement models\n");
+	  painCave.severity = OPENMD_ERROR;
+	  painCave.isFatal  = 1;
+	  simError();
+	}
+      }
+      return elements_.size();
     }
-
-    return result;
+    return 0;
   }
-
-  template<typename T>
-  struct logical_xor : public std::binary_function<T, T, bool> {
-    T operator()(const T& x, const T& y) { return x ^ y; }
-  };
-
-  template<typename T>
-  struct to_bool : public std::unary_function<T, bool> {
-    bool operator()(const T& x) const { return x != 0; }
-  };
+  
+  void AtomicBeadModel::createBeads(Shape* shape) {
+    if (shape != NULL ) {
+      if (shape->isComposite()) {
+	std::cerr << "creating beads for " << shape->getName() << "\n";
+	std::vector<Shape*> shapes = dynamic_cast<CompositeShape*>(shape)->getShapes();
+	for (std::vector<Shape*>::iterator i = shapes.begin();
+	     i != shapes.end(); ++i) {
+	  if ( (*i)->isComposite() )
+	    createBeads( dynamic_cast<CompositeShape*>( (*i) ) );
+	  else {	      
+	    if (shape->isSpherical()) {
+	      createSingleBead( dynamic_cast<Sphere*>(shape_) );
+	    } else {
+	      sprintf(painCave.errMsg,
+		      "AtomicBeadModel::createBeads Error: GayBerne and other non-spherical\n"
+		      "\tatoms should use the RoughShell or BoundaryElement models\n");
+	      painCave.severity = OPENMD_ERROR;
+	      painCave.isFatal  = 1;
+	      simError();
+	    }
+	  }
+	}
+      } else {
+	if (shape->isSpherical()) {
+	  createSingleBead(dynamic_cast<Sphere*>(shape_));
+	} else {
+	  sprintf(painCave.errMsg,
+		  "AtomicBeadModel::createBeads Error2: GayBerne and other non-spherical\n"
+		  "\tatoms should use the RoughShell or BoundaryElement models\n");
+	  painCave.severity = OPENMD_ERROR;
+	  painCave.isFatal  = 1;
+	  simError();
+	}
+      }
+    }
+  }
+  
+  bool AtomicBeadModel::createSingleBead(Sphere* sphere) {
+    HydrodynamicsElement currBead;
+    currBead.name     = sphere->getName();
+    currBead.pos      = sphere->getOrigin();
+    currBead.radius   = sphere->getRadius();
+    elements_.push_back(currBead);
+    return true;
+  }
 }  // namespace OpenMD

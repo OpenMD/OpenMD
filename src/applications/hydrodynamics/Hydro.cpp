@@ -211,8 +211,7 @@ int main(int argc, char* argv[]) {
   if (simParams->haveViscosity()) {
     viscosity = simParams->getViscosity();
   } else {
-    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-             "viscosity must be set\n");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "viscosity must be set\n");
     painCave.isFatal = 1;
     simError();
   }
@@ -220,8 +219,7 @@ int main(int argc, char* argv[]) {
   if (simParams->haveTargetTemp()) {
     temperature = simParams->getTargetTemp();
   } else {
-    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-             "target temperature must be set\n");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "target temperature must be set\n");
     painCave.isFatal = 1;
     simError();
   }
@@ -303,8 +301,7 @@ int main(int argc, char* argv[]) {
       delete model;
 
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "Could not create HydrodynamicsModel\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Could not create HydrodynamicsModel\n");
       painCave.isFatal = 1;
       simError();
     }

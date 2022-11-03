@@ -341,7 +341,7 @@ static RealType factorial_list[171] = {1.,
 RealType SphericalHarmonic::Fact(int j) {
   if (j <= 170 && j >= 0) return factorial_list[j];
 
-  sprintf(painCave.errMsg, "Fact(j) for j >= 171\n");
+  snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Fact(j) for j >= 171\n");
   painCave.isFatal = 0;
   simError();
   return 0.;

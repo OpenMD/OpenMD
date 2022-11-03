@@ -360,7 +360,7 @@ namespace OpenMD {
         case eamUnknownMix:
         default:
 
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "EAM::getPhi hit a mixing method it doesn't know about!\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
@@ -496,7 +496,7 @@ namespace OpenMD {
         keys          = nbiTypes->getKeys(j);
         AtomType* at1 = forceField_->getAtomType(keys[0]);
         if (at1 == NULL) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "EAM::initialize could not find AtomType %s\n"
                   "\tfor %s - %s explicit interaction.\n",
                   keys[0].c_str(), keys[0].c_str(), keys[1].c_str());
@@ -507,7 +507,7 @@ namespace OpenMD {
 
         AtomType* at2 = forceField_->getAtomType(keys[1]);
         if (at2 == NULL) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "EAM::initialize could not find AtomType %s\n"
                   "\tfor %s - %s explicit interaction.\n",
                   keys[1].c_str(), keys[0].c_str(), keys[1].c_str());
@@ -519,7 +519,7 @@ namespace OpenMD {
         EAMInteractionType* eamit = dynamic_cast<EAMInteractionType*>(nbt);
 
         if (eamit == NULL) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "EAM::initialize could not convert NonBondedInteractionType\n"
                   "\tto EAMInteractionType for %s - %s interaction.\n",
                   at1->getName().c_str(), at2->getName().c_str());
@@ -786,7 +786,7 @@ namespace OpenMD {
     }
 
     case eamUnknown: {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "EAM::addType found an unknown EAM type for atomType %s\n",
               atomType->getName().c_str());
       painCave.severity = OPENMD_ERROR;
@@ -816,7 +816,7 @@ namespace OpenMD {
     pair<set<int>::iterator, bool> ret;
     ret = EAMtypes.insert(atid);
     if (ret.second == false) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "EAM already had a previous entry with ident %d\n", atid);
       painCave.severity = OPENMD_INFO;
       painCave.isFatal  = 0;

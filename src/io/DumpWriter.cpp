@@ -97,7 +97,7 @@ namespace OpenMD {
       dumpFile_ = createOStream(filename_);
 
       if (!dumpFile_) {
-        sprintf(painCave.errMsg, "Could not open \"%s\" for dump output.\n",
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Could not open \"%s\" for dump output.\n",
                 filename_.c_str());
         painCave.isFatal = 1;
         simError();
@@ -145,7 +145,7 @@ namespace OpenMD {
       dumpFile_ = createOStream(filename_);
 
       if (!dumpFile_) {
-        sprintf(painCave.errMsg, "Could not open \"%s\" for dump output.\n",
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Could not open \"%s\" for dump output.\n",
                 filename_.c_str());
         painCave.isFatal = 1;
         simError();
@@ -196,7 +196,7 @@ namespace OpenMD {
         dumpFile_ = createOStream(filename_);
 
         if (!dumpFile_) {
-          sprintf(painCave.errMsg, "Could not open \"%s\" for dump output.\n",
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Could not open \"%s\" for dump output.\n",
                   filename_.c_str());
           painCave.isFatal = 1;
           simError();
@@ -231,13 +231,13 @@ namespace OpenMD {
     RealType currentTime = s->getTime();
 
     if (std::isinf(currentTime) || std::isnan(currentTime)) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "DumpWriter detected a numerical error writing the time");
       painCave.isFatal = 1;
       simError();
     }
 
-    sprintf(buffer, "        Time: %.10g\n", currentTime);
+    snprintf(buffer, 1024, "        Time: %.10g\n", currentTime);
     os << buffer;
 
     Mat3x3d hmat;
@@ -246,7 +246,7 @@ namespace OpenMD {
     for (unsigned int i = 0; i < 3; i++) {
       for (unsigned int j = 0; j < 3; j++) {
         if (std::isinf(hmat(i, j)) || std::isnan(hmat(i, j))) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "DumpWriter detected a numerical error writing the box");
           painCave.isFatal = 1;
           simError();
@@ -254,8 +254,7 @@ namespace OpenMD {
       }
     }
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 1024,
         "        Hmat: {{ %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }, { "
         "%.10g, "
         "%.10g, %.10g }}\n",
@@ -267,12 +266,12 @@ namespace OpenMD {
 
     if (std::isinf(thermostat.first) || std::isnan(thermostat.first) ||
         std::isinf(thermostat.second) || std::isnan(thermostat.second)) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "DumpWriter detected a numerical error writing the thermostat");
       painCave.isFatal = 1;
       simError();
     }
-    sprintf(buffer, "  Thermostat: %.10g , %.10g\n", thermostat.first,
+    snprintf(buffer, 1024, "  Thermostat: %.10g , %.10g\n", thermostat.first,
             thermostat.second);
     os << buffer;
 
@@ -282,7 +281,7 @@ namespace OpenMD {
     for (unsigned int i = 0; i < 3; i++) {
       for (unsigned int j = 0; j < 3; j++) {
         if (std::isinf(eta(i, j)) || std::isnan(eta(i, j))) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "DumpWriter detected a numerical error writing the barostat");
           painCave.isFatal = 1;
           simError();
@@ -290,8 +289,7 @@ namespace OpenMD {
       }
     }
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 1024,
         "    Barostat: {{ %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }, { "
         "%.10g, "
         "%.10g, %.10g }}\n",
@@ -520,7 +518,7 @@ namespace OpenMD {
 
     if (std::isinf(pos[0]) || std::isnan(pos[0]) || std::isinf(pos[1]) ||
         std::isnan(pos[1]) || std::isinf(pos[2]) || std::isnan(pos[2])) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "DumpWriter detected a numerical error writing the position"
               " for object %d",
               index);
@@ -532,7 +530,7 @@ namespace OpenMD {
 
     if (std::isinf(vel[0]) || std::isnan(vel[0]) || std::isinf(vel[1]) ||
         std::isnan(vel[1]) || std::isinf(vel[2]) || std::isnan(vel[2])) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "DumpWriter detected a numerical error writing the velocity"
               " for object %d",
               index);
@@ -540,8 +538,8 @@ namespace OpenMD {
       simError();
     }
 
-    sprintf(tempBuffer, "%18.10g %18.10g %18.10g %13e %13e %13e", pos[0],
-            pos[1], pos[2], vel[0], vel[1], vel[2]);
+    snprintf(tempBuffer, 4096, "%18.10g %18.10g %18.10g %13e %13e %13e", pos[0],
+             pos[1], pos[2], vel[0], vel[1], vel[2]);
     line += tempBuffer;
 
     if (sd->isDirectional()) {
@@ -553,7 +551,7 @@ namespace OpenMD {
       if (std::isinf(q[0]) || std::isnan(q[0]) || std::isinf(q[1]) ||
           std::isnan(q[1]) || std::isinf(q[2]) || std::isnan(q[2]) ||
           std::isinf(q[3]) || std::isnan(q[3])) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "DumpWriter detected a numerical error writing the quaternion"
                 " for object %d",
                 index);
@@ -565,7 +563,7 @@ namespace OpenMD {
 
       if (std::isinf(ji[0]) || std::isnan(ji[0]) || std::isinf(ji[1]) ||
           std::isnan(ji[1]) || std::isinf(ji[2]) || std::isnan(ji[2])) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "DumpWriter detected a numerical error writing the angular"
                 " momentum for object %d",
                 index);
@@ -573,8 +571,9 @@ namespace OpenMD {
         simError();
       }
 
-      sprintf(tempBuffer, " %13e %13e %13e %13e %13e %13e %13e", q[0], q[1],
-              q[2], q[3], ji[0], ji[1], ji[2]);
+      snprintf(tempBuffer, 4096,
+               " %13e %13e %13e %13e %13e %13e %13e", q[0], q[1],
+               q[2], q[3], ji[0], ji[1], ji[2]);
       line += tempBuffer;
     }
 
@@ -583,14 +582,14 @@ namespace OpenMD {
       Vector3d frc = sd->getFrc();
       if (std::isinf(frc[0]) || std::isnan(frc[0]) || std::isinf(frc[1]) ||
           std::isnan(frc[1]) || std::isinf(frc[2]) || std::isnan(frc[2])) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "DumpWriter detected a numerical error writing the force"
                 " for object %d",
                 index);
         painCave.isFatal = 1;
         simError();
       }
-      sprintf(tempBuffer, " %13e %13e %13e", frc[0], frc[1], frc[2]);
+      snprintf(tempBuffer, 4096, " %13e %13e %13e", frc[0], frc[1], frc[2]);
       line += tempBuffer;
 
       if (sd->isDirectional()) {
@@ -598,19 +597,20 @@ namespace OpenMD {
         Vector3d trq = sd->getTrq();
         if (std::isinf(trq[0]) || std::isnan(trq[0]) || std::isinf(trq[1]) ||
             std::isnan(trq[1]) || std::isinf(trq[2]) || std::isnan(trq[2])) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "DumpWriter detected a numerical error writing the torque"
                   " for object %d",
                   index);
           painCave.isFatal = 1;
           simError();
         }
-        sprintf(tempBuffer, " %13e %13e %13e", trq[0], trq[1], trq[2]);
+        snprintf(tempBuffer, 4096, " %13e %13e %13e", trq[0], trq[1], trq[2]);
         line += tempBuffer;
       }
     }
 
-    sprintf(tempBuffer, "%10d %7s %s\n", index, type.c_str(), line.c_str());
+    snprintf(tempBuffer, 4096, "%10d %7s %s\n", index, type.c_str(),
+             line.c_str());
     return std::string(tempBuffer);
   }
 
@@ -624,10 +624,10 @@ namespace OpenMD {
     char tempBuffer[4096];
 
     if (sd->isRigidBody()) {
-      sprintf(tempBuffer, "%10d           ", ioIndex);
+      snprintf(tempBuffer, 4096, "%10d           ", ioIndex);
       id = std::string(tempBuffer);
     } else {
-      sprintf(tempBuffer, "%10d %10d", ioIndex, siteIndex);
+      snprintf(tempBuffer, 4096, "%10d %10d", ioIndex, siteIndex);
       id = std::string(tempBuffer);
     }
 
@@ -636,14 +636,14 @@ namespace OpenMD {
         type += "c";
         RealType fqPos = sd->getFlucQPos();
         if (std::isinf(fqPos) || std::isnan(fqPos)) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "DumpWriter detected a numerical error writing the"
                   " fluctuating charge for object %s",
                   id.c_str());
           painCave.isFatal = 1;
           simError();
         }
-        sprintf(tempBuffer, " %13e ", fqPos);
+        snprintf(tempBuffer, 4096, " %13e ", fqPos);
         line += tempBuffer;
       }
 
@@ -651,14 +651,14 @@ namespace OpenMD {
         type += "w";
         RealType fqVel = sd->getFlucQVel();
         if (std::isinf(fqVel) || std::isnan(fqVel)) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "DumpWriter detected a numerical error writing the"
                   " fluctuating charge velocity for object %s",
                   id.c_str());
           painCave.isFatal = 1;
           simError();
         }
-        sprintf(tempBuffer, " %13e ", fqVel);
+        snprintf(tempBuffer, 4096, " %13e ", fqVel);
         line += tempBuffer;
       }
 
@@ -667,14 +667,14 @@ namespace OpenMD {
           type += "g";
           RealType fqFrc = sd->getFlucQFrc();
           if (std::isinf(fqFrc) || std::isnan(fqFrc)) {
-            sprintf(painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                     "DumpWriter detected a numerical error writing the"
                     " fluctuating charge force for object %s",
                     id.c_str());
             painCave.isFatal = 1;
             simError();
           }
-          sprintf(tempBuffer, " %13e ", fqFrc);
+          snprintf(tempBuffer, 4096, " %13e ", fqFrc);
           line += tempBuffer;
         }
       }
@@ -687,14 +687,15 @@ namespace OpenMD {
         if (std::isinf(eField[0]) || std::isnan(eField[0]) ||
             std::isinf(eField[1]) || std::isnan(eField[1]) ||
             std::isinf(eField[2]) || std::isnan(eField[2])) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "DumpWriter detected a numerical error writing the electric"
                   " field for object %s",
                   id.c_str());
           painCave.isFatal = 1;
           simError();
         }
-        sprintf(tempBuffer, " %13e %13e %13e", eField[0], eField[1], eField[2]);
+        snprintf(tempBuffer, 4096, " %13e %13e %13e",
+                 eField[0], eField[1], eField[2]);
         line += tempBuffer;
       }
     }
@@ -704,14 +705,14 @@ namespace OpenMD {
         type += "s";
         RealType sPot = sd->getSitePotential();
         if (std::isinf(sPot) || std::isnan(sPot)) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "DumpWriter detected a numerical error writing the"
                   " site potential for object %s",
                   id.c_str());
           painCave.isFatal = 1;
           simError();
         }
-        sprintf(tempBuffer, " %13e ", sPot);
+        snprintf(tempBuffer, 4096, " %13e ", sPot);
         line += tempBuffer;
       }
     }
@@ -721,14 +722,14 @@ namespace OpenMD {
         type += "u";
         RealType particlePot = sd->getParticlePot();
         if (std::isinf(particlePot) || std::isnan(particlePot)) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "DumpWriter detected a numerical error writing the particle "
                   " potential for object %s",
                   id.c_str());
           painCave.isFatal = 1;
           simError();
         }
-        sprintf(tempBuffer, " %13e", particlePot);
+        snprintf(tempBuffer, 4096, " %13e", particlePot);
         line += tempBuffer;
       }
     }
@@ -738,19 +739,20 @@ namespace OpenMD {
         type += "d";
         RealType density = sd->getDensity();
         if (std::isinf(density) || std::isnan(density)) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "DumpWriter detected a numerical error writing the density "
                   " for object %s",
                   id.c_str());
           painCave.isFatal = 1;
           simError();
         }
-        sprintf(tempBuffer, " %13e", density);
+        snprintf(tempBuffer, 4096, " %13e", density);
         line += tempBuffer;
       }
     }
 
-    sprintf(tempBuffer, "%s %7s %s\n", id.c_str(), type.c_str(), line.c_str());
+    snprintf(tempBuffer, 4096, "%s %7s %s\n", id.c_str(), type.c_str(),
+             line.c_str());
     return std::string(tempBuffer);
   }
 

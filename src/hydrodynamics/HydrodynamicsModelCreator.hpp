@@ -62,8 +62,7 @@ namespace OpenMD {
     virtual ~HydrodynamicsModelCreator() = default;
     const std::string& getIdent() const { return ident_; }
 
-    virtual HydrodynamicsModel* create(StuntDouble* sd,
-                                       SimInfo* info) const = 0;
+    virtual HydrodynamicsModel* create() const = 0;
 
   private:
     std::string ident_;
@@ -78,8 +77,8 @@ namespace OpenMD {
   public:
     HydrodynamicsModelBuilder(const std::string& ident) :
         HydrodynamicsModelCreator(ident) {}
-    virtual HydrodynamicsModel* create(StuntDouble* sd, SimInfo* info) const {
-      return new ConcreteHydrodynamicsModel(sd, info);
+    virtual HydrodynamicsModel* create() const {
+      return new ConcreteHydrodynamicsModel();
     }
   };
 

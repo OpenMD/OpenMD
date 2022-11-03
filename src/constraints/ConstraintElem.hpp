@@ -66,9 +66,9 @@ namespace OpenMD {
                                    // exists, assign it to moved_
         moved_ = std::dynamic_pointer_cast<BoolGenericData>(movedData);
         if (moved_ == nullptr) {
-          sprintf(painCave.errMsg,
-                  "Generic Data with keyword Moved exists, however, it can not "
-                  "be casted to a BoolGenericData.\n");
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "Generic Data with keyword Moved exists, however, it can not "
+                   "be casted to a BoolGenericData.\n");
           painCave.isFatal = 1;
           ;
           simError();
@@ -84,9 +84,9 @@ namespace OpenMD {
       if (movingData != nullptr) {
         moving_ = std::dynamic_pointer_cast<BoolGenericData>(movingData);
         if (moving_ == nullptr) {
-          sprintf(painCave.errMsg,
-                  "Generic Data with keyword Moving exists, however, it can "
-                  "not be casted to a BoolGenericData.\n");
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "Generic Data with keyword Moving exists, however, it can "
+                   "not be casted to a BoolGenericData.\n");
           painCave.isFatal = 1;
           ;
           simError();

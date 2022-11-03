@@ -65,13 +65,11 @@ namespace OpenMD {
   // forward declaration
   class HydrodynamicsModel;
   class HydrodynamicsModelCreator;
-  class StuntDouble;
-  class SimInfo;
 
   /**
    * @class HydrodynamicsModelFactory
    * Factory pattern and Singleton Pattern are used to define an interface for
-   * creating an HydrodynamicsModel.
+    * creating an HydrodynamicsModel.
    */
   class HydrodynamicsModelFactory {
   public:
@@ -115,9 +113,7 @@ namespace OpenMD {
      * @param sd a pointer to the StuntDouble being modeled
      * @param info a pointer to the SimInfo object
      */
-    HydrodynamicsModel* createHydrodynamicsModel(const std::string& id,
-                                                 StuntDouble* sd,
-                                                 SimInfo* info);
+    HydrodynamicsModel* createHydrodynamicsModel(const std::string& id);
 
     /**
      *  Returns all of the registed  type identifiers

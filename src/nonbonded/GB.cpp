@@ -130,7 +130,7 @@ namespace OpenMD {
     pair<set<int>::iterator, bool> ret;
     ret = GBtypes.insert(atid);
     if (ret.second == false) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "GB already had a previous entry with ident %d\n", atid);
       painCave.severity = OPENMD_INFO;
       painCave.isFatal  = 0;
@@ -159,7 +159,7 @@ namespace OpenMD {
       eE1 = eX1;
       dw1 = 1.0;
     } else {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "GB::addType was passed an atomType (%s) that does not\n"
               "\tappear to be a Gay-Berne or Lennard-Jones atom.\n",
               atomType->getName().c_str());
@@ -194,7 +194,7 @@ namespace OpenMD {
         eE2 = eX2;
         dw2 = 1.0;
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "GB::addType found an atomType (%s) that does not\n"
                 "\tappear to be a Gay-Berne or Lennard-Jones atom.\n",
                 atype2->getName().c_str());

@@ -66,7 +66,7 @@ namespace OpenMD {
       output_.open(filename.c_str());
 
       if (!output_) {
-        sprintf(painCave.errMsg, "Could not open %s for z constrain output_ \n",
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Could not open %s for z constrain output_ \n",
                 filename.c_str());
         painCave.isFatal = 1;
         simError();

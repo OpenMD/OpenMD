@@ -52,29 +52,20 @@
 #include "math/DynamicRectMatrix.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
-#include "primitives/Molecule.hpp"
-#include "utils/any.hpp"
 
 namespace OpenMD {
 
   class Shape;
   class ApproximationModel : public HydrodynamicsModel {
   public:
-    ApproximationModel(StuntDouble* sd, SimInfo* info);
+    ApproximationModel();
 
-    virtual bool calcHydroProps(Shape* shape, RealType viscosity,
-                                RealType temperature);
-    virtual void init();
-    virtual void writeBeads(std::ostream& os);
-
-  private:
-    virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
-
-    bool calcHydroPropsAtCRandAtCDandAtCOM(std::vector<BeadParam>& beads,
-                                           RealType viscosity,
-                                           RealType temperature, HydroProp* cr,
-                                           HydroProp* cd, HydroProp* coM);
-    std::vector<BeadParam> beads_;
+    virtual HydroProp* calcHydroProps(Shape* shape, RealType viscosity);
+    virtual std::size_t assignElements(Shape* shape);
+    virtual Mat3x3d interactionTensor(std::size_t i, std::size_t j,
+				      RealType viscosity);
+    virtual void writeElements(std::ostream& os);
+    
   };
 }  // namespace OpenMD
 

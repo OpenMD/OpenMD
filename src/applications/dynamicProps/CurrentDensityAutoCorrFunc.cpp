@@ -183,7 +183,7 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "CurrentDensityAutoCorrFunc::writeCorrelate Error: failed to "
               "open %s\n",
               outputFilename_.c_str());

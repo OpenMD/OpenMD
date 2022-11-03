@@ -99,7 +99,7 @@ namespace OpenMD {
     pair<set<int>::iterator, bool> ret;
     ret = FQtypes.insert(atid);
     if (ret.second == false) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "FluctuatingChargeForces already had a previous fluctuating "
               "charge entry with ident %d\n",
               atid);

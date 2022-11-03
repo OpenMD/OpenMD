@@ -1027,7 +1027,7 @@ namespace OpenMD {
 
   StuntDouble* SimInfo::getIOIndexToIntegrableObject(int index) {
     if (index >= int(IOIndexToIntegrableObject.size())) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "SimInfo::getIOIndexToIntegrableObject Error: Integrable Object\n"
               "\tindex exceeds number of known objects!\n");
       painCave.isFatal = 1;

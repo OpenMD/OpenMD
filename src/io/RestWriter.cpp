@@ -87,7 +87,7 @@ namespace OpenMD {
         output_ = new std::ofstream(filename.c_str());
 
         if (!output_) {
-          sprintf(painCave.errMsg, "Could not open %s for restraint output.\n",
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Could not open %s for restraint output.\n",
                   filename.c_str());
           painCave.isFatal = 1;
           simError();

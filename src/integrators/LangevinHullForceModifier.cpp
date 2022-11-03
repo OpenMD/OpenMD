@@ -98,7 +98,7 @@ namespace OpenMD {
       break;
     case hullUnknown:
     default:
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "LangevinHallForceManager: Unknown Hull_Method was requested!\n");
       painCave.isFatal = 1;
       simError();
@@ -111,7 +111,7 @@ namespace OpenMD {
     /* Check that the simulation has target pressure and target
      temperature set */
     if (!simParams_->haveTargetTemp()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "LangevinHullForceManager: no targetTemp (K) was set.\n"
               "\tOpenMD is turning off the thermal coupling to the bath.\n");
       painCave.isFatal  = 0;
@@ -122,7 +122,7 @@ namespace OpenMD {
       targetTemp_ = simParams_->getTargetTemp();
 
       if (!simParams_->haveViscosity()) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "LangevinHullForceManager: no viscosity was set.\n"
                 "\tOpenMD is turning off the thermal coupling to the bath.\n");
         painCave.isFatal  = 0;
@@ -132,7 +132,7 @@ namespace OpenMD {
       } else {
         viscosity_ = simParams_->getViscosity();
         if (fabs(viscosity_) < 1e-6) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "LangevinHullDynamics: The bath viscosity was set lower\n"
                   "\tthan 1e-6 poise.  OpenMD is turning off the thermal\n"
                   "\tcoupling to the bath.\n");
@@ -144,7 +144,7 @@ namespace OpenMD {
       }
     }
     if (!simParams_->haveTargetPressure()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "LangevinHullForceManager: no targetPressure (atm) was set.\n"
               "\tOpenMD is turning off the pressure coupling to the bath.\n");
       painCave.isFatal  = 0;
@@ -157,7 +157,7 @@ namespace OpenMD {
           simParams_->getTargetPressure() / Constants::pressureConvert;
     }
     if (simParams_->getUsePeriodicBoundaryConditions()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "LangevinHallForceManager: You can't use the Langevin Hull\n"
               "\tintegrator with periodic boundary conditions turned on!\n");
       painCave.isFatal = 1;

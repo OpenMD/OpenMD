@@ -67,7 +67,7 @@ namespace OpenMD {
     // in AtomTypeSection, a line at least contains 8 tokens
     // atomTypeName and 7 different sticky parameters
     if (nTokens < 8) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "StickyAtomTypesSectionParser Error: Not enough "
               "tokens at line %d\n",
               lineNo);
@@ -92,7 +92,7 @@ namespace OpenMD {
         sa.makeSticky(w0, v0, v0p, rl, ru, rlp, rup, isPower);
 
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "StickyAtomTypesSectionParser Error: "
                 "Can not find matching AtomType %s\n",
                 atomTypeName.c_str());

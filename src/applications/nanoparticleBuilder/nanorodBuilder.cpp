@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg, "No input .omd file name was specified "
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "No input .omd file name was specified "
                              "on the command line");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
@@ -152,7 +152,7 @@ int main(int argc, char* argv[]) {
     // cerr << "vacancyPercent given" << "\n";
     if (args_info.vacancyPercent_arg < 0.0 ||
         args_info.vacancyPercent_arg > 100.0) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "vacancyPercent was set to a non-sensical value.");
       painCave.isFatal = 1;
       simError();
@@ -182,7 +182,7 @@ int main(int argc, char* argv[]) {
         std::size_t nTargets = vacancyTargets.size();
         vacancyTargets.resize((int)(vF * nTargets));
 
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Removing %d atoms from randomly-selected\n"
                 "\tsites between %lf and %lf.",
                 (int)vacancyTargets.size(), vIR, vOR);
@@ -200,7 +200,7 @@ int main(int argc, char* argv[]) {
         }
 
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Something is strange about the vacancy\n"
                 "\tinner or outer radii.  Check their values.");
         painCave.isFatal = 1;
@@ -225,7 +225,7 @@ int main(int argc, char* argv[]) {
   // cerr << "nComponents = " << nComponents << "\n";
 
   if (args_info.molFraction_given && args_info.shellRadius_given) {
-    sprintf(painCave.errMsg, "Specify either molFraction or shellRadius "
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Specify either molFraction or shellRadius "
                              "arguments, but not both!");
     painCave.isFatal = 1;
     simError();
@@ -247,7 +247,7 @@ int main(int argc, char* argv[]) {
       }
       molFractions.push_back(remainingFraction);
     } else {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "nanorodBuilder can't figure out molFractions "
               "for all of the components in the <MetaData> block.");
       painCave.isFatal = 1;
@@ -264,15 +264,14 @@ int main(int argc, char* argv[]) {
       }
       shellRadii.push_back(rodRadius);
     } else {
-      sprintf(
-          painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "nanorodBuilder can't figure out the\n"
           "\tshell radii for all of the components in the <MetaData> block.");
       painCave.isFatal = 1;
       simError();
     }
   } else {
-    sprintf(painCave.errMsg,
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "You have a multi-component <MetaData> block,\n"
             "\tbut have not specified either molFraction or shellRadius "
             "arguments.");
@@ -287,13 +286,13 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < nComponents; i++) {
       if (molFractions.at(i) < 0.0) {
-        sprintf(painCave.errMsg, "One of the requested molFractions was"
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "One of the requested molFractions was"
                                  " less than zero!");
         painCave.isFatal = 1;
         simError();
       }
       if (molFractions.at(i) > 1.0) {
-        sprintf(painCave.errMsg, "One of the requested molFractions was"
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "One of the requested molFractions was"
                                  " greater than one!");
         painCave.isFatal = 1;
         simError();
@@ -301,7 +300,7 @@ int main(int argc, char* argv[]) {
       totalFraction += molFractions.at(i);
     }
     if (abs(totalFraction - 1.0) > 1e-6) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "The sum of molFractions was not close enough to 1.0");
       painCave.isFatal = 1;
       simError();
@@ -322,7 +321,7 @@ int main(int argc, char* argv[]) {
       totalMolecules += nMol.at(i);
     }
     if (totalMolecules != nSites) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "Computed total number of molecules is not equal "
               "to the number of lattice sites!");
       painCave.isFatal = 1;
@@ -331,13 +330,13 @@ int main(int argc, char* argv[]) {
   } else {
     for (unsigned int i = 0; i < shellRadii.size(); i++) {
       if (shellRadii.at(i) > rodRadius + 1e-6) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "One of the shellRadius values exceeds the rod Radius.");
         painCave.isFatal = 1;
         simError();
       }
       if (shellRadii.at(i) <= 0.0) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "One of the shellRadius values is smaller than zero!");
         painCave.isFatal = 1;
         simError();
@@ -348,7 +347,7 @@ int main(int argc, char* argv[]) {
   vector<int> ids;
   if ((int)args_info.molFraction_given) {
     //  cerr << "molFraction given 2" << "\n";
-    sprintf(painCave.errMsg,
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "Creating a randomized spherically-capped nanorod.");
     painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
@@ -361,7 +360,7 @@ int main(int argc, char* argv[]) {
     std::shuffle(ids.begin(), ids.end(), gen);
 
   } else {
-    sprintf(painCave.errMsg, "Creating an fcc nanorod.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Creating an fcc nanorod.");
     painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
     simError();
@@ -462,7 +461,7 @@ int main(int argc, char* argv[]) {
   writer = new DumpWriter(NewInfo, outputFileName);
 
   if (writer == NULL) {
-    sprintf(painCave.errMsg, "Error in creating dumpwriter object ");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Error in creating dumpwriter object ");
     painCave.isFatal = 1;
     simError();
   }
@@ -474,7 +473,7 @@ int main(int argc, char* argv[]) {
   delete writer;
 
   // cleanup a by calling sim error.....
-  sprintf(painCave.errMsg,
+  snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "A new OpenMD file called \"%s\" has been "
           "generated.\n",
           outputFileName.c_str());
@@ -501,7 +500,7 @@ void createMdFile(const std::string& oldMdFileName,
     // correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
       if (i < nMol.size()) {
-        sprintf(buffer, "\tnMol = %i;", nMol.at(i));
+        snprintf(buffer, MAXLEN, "\tnMol = %i;", nMol.at(i));
         newMdFile << buffer << std::endl;
         i++;
       }
@@ -515,7 +514,7 @@ void createMdFile(const std::string& oldMdFileName,
   newMdFile.close();
 
   if (i != nMol.size()) {
-    sprintf(painCave.errMsg,
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "Couldn't replace the correct number of nMol\n"
             "\tstatements in component blocks.  Make sure that all\n"
             "\tcomponents in the template file have nMol=1");

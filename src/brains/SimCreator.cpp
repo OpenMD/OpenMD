@@ -158,21 +158,21 @@ namespace OpenMD {
     }
 
     catch (antlr::MismatchedCharException& e) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "Mismatched Character: %s in file %s at line %d, column %d\n",
               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
               e.getColumn());
       painCave.isFatal = 1;
       simError();
     } catch (antlr::MismatchedTokenException& e) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "Mismatched Token: %s in file %s at line %d, column %d\n",
               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
               e.getColumn());
       painCave.isFatal = 1;
       simError();
     } catch (antlr::NoViableAltForCharException& e) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "No Viable Alternative for Character: %s in file %s at line %d, "
               "column %d\n",
               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
@@ -180,7 +180,7 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     } catch (antlr::NoViableAltException& e) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "No Viable Alternative: %s in file %s at line %d, column %d\n",
               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
               e.getColumn());
@@ -189,7 +189,7 @@ namespace OpenMD {
     }
 
     catch (antlr::TokenStreamRecognitionException& e) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "Token Stream Recognition: %s in file %s at line %d, column %d\n",
               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
               e.getColumn());
@@ -198,35 +198,35 @@ namespace OpenMD {
     }
 
     catch (antlr::TokenStreamIOException& e) {
-      sprintf(painCave.errMsg, "Token Stream IO exception: %s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Token Stream IO exception: %s\n",
               e.getMessage().c_str());
       painCave.isFatal = 1;
       simError();
     }
 
     catch (antlr::TokenStreamException& e) {
-      sprintf(painCave.errMsg, "Token Stream exception: %s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Token Stream exception: %s\n",
               e.getMessage().c_str());
       painCave.isFatal = 1;
       simError();
     } catch (antlr::RecognitionException& e) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "Recognition exception: %s in file %s at line %d, column %d\n",
               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
               e.getColumn());
       painCave.isFatal = 1;
       simError();
     } catch (antlr::CharStreamException& e) {
-      sprintf(painCave.errMsg, "Character Stream exception: %s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Character Stream exception: %s\n",
               e.getMessage().c_str());
       painCave.isFatal = 1;
       simError();
     } catch (OpenMDException& e) {
-      sprintf(painCave.errMsg, "%s\n", e.what());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s\n", e.what());
       painCave.isFatal = 1;
       simError();
     } catch (std::exception& e) {
-      sprintf(painCave.errMsg, "parser exception: %s\n", e.what());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "parser exception: %s\n", e.what());
       painCave.isFatal = 1;
       simError();
     }
@@ -243,7 +243,7 @@ namespace OpenMD {
     std::string mdRawData;
     int metaDataBlockStart = -1;
     int metaDataBlockEnd   = -1;
-    streamoff mdOffset;
+    streamoff mdOffset{};
     int mdFileVersion(2);
 
     // Create a string for embedding the version information in the MetaData
@@ -274,7 +274,7 @@ namespace OpenMD {
       mdFile_.open(mdFileName.c_str(), ifstream::in | ifstream::binary);
 
       if (mdFile_.fail()) {
-        sprintf(painCave.errMsg, "SimCreator: Cannot open file: %s\n",
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "SimCreator: Cannot open file: %s\n",
                 mdFileName.c_str());
         painCave.isFatal = 1;
         simError();
@@ -291,7 +291,7 @@ namespace OpenMD {
 
       if (i == string::npos) {
         // still no luck!
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "SimCreator: File: %s is not a valid OpenMD file!\n",
                 mdFileName.c_str());
         painCave.isFatal = 1;
@@ -343,17 +343,16 @@ namespace OpenMD {
       }
 
       if (metaDataBlockStart == -1) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "SimCreator: File: %s did not contain a <MetaData> tag!\n",
                 mdFileName.c_str());
         painCave.isFatal = 1;
         simError();
       }
       if (metaDataBlockEnd == -1) {
-        sprintf(
-            painCave.errMsg,
-            "SimCreator: File: %s did not contain a closed MetaData block!\n",
-            mdFileName.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "SimCreator: File: %s did not contain a closed MetaData block!\n",
+                 mdFileName.c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -398,7 +397,7 @@ namespace OpenMD {
     ForceField* ff = new ForceField(simParams->getForceField());
 
     if (ff == NULL) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "ForceField Factory can not create %s force field\n",
               simParams->getForceField().c_str());
       painCave.isFatal = 1;
@@ -517,7 +516,7 @@ namespace OpenMD {
     MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
 
     if (nProcessors > nGlobalMols) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "nProcessors (%d) > nMol (%d)\n"
               "\tThe number of processors is larger than\n"
               "\tthe number of molecules.  This will not result in a \n"
@@ -573,8 +572,7 @@ namespace OpenMD {
             // and be done with it.
 
             if (loops > 100) {
-              sprintf(
-                  painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "There have been 100 attempts to assign molecule %d to an\n"
                   "\tunderworked processor, but there's no good place to\n"
                   "\tleave it. OpenMD is assigning it at random to processor "
@@ -640,7 +638,7 @@ namespace OpenMD {
     }
 
     info->setMolToProcMap(molToProcMap);
-    sprintf(checkPointMsg,
+    snprintf(checkPointMsg, MAX_SIM_ERROR_MSG_LENGTH, 
             "Successfully divided the molecules among the processors.\n");
     errorCheckPoint();
   }
@@ -984,10 +982,9 @@ namespace OpenMD {
       reader.readFrame(nframes - 1);
     } else {
       // invalid initial coordinate file
-      sprintf(
-          painCave.errMsg,
-          "Initial configuration file %s should at least contain one frame\n",
-          mdFileName.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Initial configuration file %s should at least contain one frame\n",
+               mdFileName.c_str());
       painCave.isFatal = 1;
       simError();
     }

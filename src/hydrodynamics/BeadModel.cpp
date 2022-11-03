@@ -97,7 +97,7 @@ namespace OpenMD {
   void BeadModel::checkElement(std::size_t i) {
     // checking if the radius is a non-negative value.
     if (elements_[i].radius < 0) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+      sprintf(painCave.errMsg,
 	      "BeadModel::checkElement: There is a bead with a negative radius.\n"
 	      "\tStarting from index 0, check bead (%lu).\n", i);
       painCave.isFatal = 1;

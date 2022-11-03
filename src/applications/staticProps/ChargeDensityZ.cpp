@@ -160,7 +160,7 @@ namespace OpenMD {
       for (StuntDouble* sd = seleMan_.beginSelected(kk); sd != NULL;
            sd              = seleMan_.nextSelected(kk)) {
         if (!sd->isAtom()) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "Can not calculate charge density distribution if it is not "
                   "atom\n");
           painCave.severity = OPENMD_ERROR;
@@ -311,7 +311,7 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg, "ChargeDensityZ: unable to open %s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "ChargeDensityZ: unable to open %s\n",
               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
@@ -393,7 +393,7 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg, "XYZ file: unable to open %s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "XYZ file: unable to open %s\n",
               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();

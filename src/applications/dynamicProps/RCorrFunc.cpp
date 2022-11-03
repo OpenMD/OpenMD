@@ -324,7 +324,7 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "RCorrFuncZ::writeCorrelate Error: fail to open %s\n",
               getOutputFileName().c_str());
       painCave.isFatal = 1;

@@ -78,9 +78,9 @@ namespace OpenMD {
         }
       } else if (deprecatedKeywords_.find(keyword) !=
                  deprecatedKeywords_.end()) {
-        sprintf(painCave.errMsg,
-                "%s keyword has been deprecated in OpenMD. Please update your "
-                ".omd file.\n",
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "%s keyword has been deprecated in OpenMD. Please update your "
+                 ".omd file.\n",
                 keyword.c_str());
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_WARNING;

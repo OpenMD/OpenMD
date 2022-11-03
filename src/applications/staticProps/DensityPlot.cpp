@@ -112,7 +112,7 @@ namespace OpenMD {
       for (StuntDouble* sd = seleMan_.beginSelected(k); sd != NULL;
            sd              = seleMan_.nextSelected(k)) {
         if (!sd->isAtom()) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "Can not calculate electron density if it is not atom\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
@@ -123,7 +123,7 @@ namespace OpenMD {
         std::shared_ptr<GenericData> data =
             atom->getAtomType()->getPropertyByName("nelectron");
         if (data == nullptr) {
-          sprintf(painCave.errMsg, "Can not find Parameters for nelectron\n");
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Can not find Parameters for nelectron\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
           simError();
@@ -132,7 +132,7 @@ namespace OpenMD {
         std::shared_ptr<DoubleGenericData> doubleData =
             std::dynamic_pointer_cast<DoubleGenericData>(data);
         if (doubleData == nullptr) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "Can not cast GenericData to DoubleGenericData\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
@@ -195,7 +195,7 @@ namespace OpenMD {
         ofs << i * deltaR_ - halfLen_ << "\t" << density_[i] << std::endl;
       }
     } else {
-      sprintf(painCave.errMsg, "DensityPlot: unable to open %s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DensityPlot: unable to open %s\n",
               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();

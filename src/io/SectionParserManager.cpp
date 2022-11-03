@@ -95,7 +95,7 @@ namespace OpenMD {
             i = std::find_if(sectionParsers_.begin(), sectionParsers_.end(),
                              SameSectionParserFunctor(section));
             if (i == sectionParsers_.end()) {
-              sprintf(painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                       "SectionParserManager Error: Can not find corresponding "
                       "section parser for %s\n",
                       section.c_str());
@@ -103,7 +103,7 @@ namespace OpenMD {
               simError();
             } else {
               if (i->isActive) {
-                sprintf(painCave.errMsg,
+                snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                         "SectionParserManager Error: Found multiple %s "
                         "sections\n",
                         section.c_str());
@@ -120,7 +120,7 @@ namespace OpenMD {
             if (sectionNameStack.top() == section) {
               sectionNameStack.pop();
             } else {
-              sprintf(painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                       "SectionParserManager Error: begin %s "
                       "and end %s do not match at line %d\n",
                       sectionNameStack.top().c_str(), section.c_str(), lineNo);
@@ -135,7 +135,7 @@ namespace OpenMD {
     }
 
     if (!sectionNameStack.empty()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "SectionParserManager Error: Stack is not empty\n");
       painCave.isFatal = 1;
       simError();

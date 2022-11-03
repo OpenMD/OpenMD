@@ -68,7 +68,7 @@ namespace OpenMD {
           // return true;
           return NULL;
         } else {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          sprintf(painCave.errMsg,
                   "Could not figure out what kind of shape this is!\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;

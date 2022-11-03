@@ -79,7 +79,7 @@ namespace OpenMD {
     }
 
     if (!simParams->haveTargetTemp()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "You can't use the NVT integrator without a targetTemp!\n");
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
@@ -90,7 +90,7 @@ namespace OpenMD {
 
     // We must set tauThermostat
     if (!simParams->haveTauThermostat()) {
-      sprintf(painCave.errMsg, "If you use the constant temperature\n"
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "If you use the constant temperature\n"
                                "\tintegrator, you must set tauThermostat.\n");
 
       painCave.severity = OPENMD_ERROR;
@@ -101,7 +101,7 @@ namespace OpenMD {
     }
 
     if (!simParams->haveTargetPressure()) {
-      sprintf(painCave.errMsg, "NPT error: You can't use the NPT integrator\n"
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "NPT error: You can't use the NPT integrator\n"
                                "   without a targetPressure!\n");
 
       painCave.isFatal = 1;
@@ -111,7 +111,7 @@ namespace OpenMD {
     }
 
     if (!simParams->haveTauBarostat()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "If you use the NPT integrator, you must set tauBarostat.\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
