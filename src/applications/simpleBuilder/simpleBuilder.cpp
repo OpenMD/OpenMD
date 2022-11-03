@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
   simpleLat = LatticeFactory::getInstance().createLattice(latticeType);
 
   if (simpleLat == NULL) {
-    sprintf(painCave.errMsg, "Lattice Factory can not create %s lattice\n",
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Lattice Factory can not create %s lattice\n",
             latticeType.c_str());
     painCave.isFatal = 1;
     simError();
@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
   nx = args_info.nx_arg;
 
   if (nx <= 0) {
-    sprintf(painCave.errMsg, "The number of unit cells in the x direction "
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "The number of unit cells in the x direction "
                              "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
   ny = args_info.ny_arg;
 
   if (ny <= 0) {
-    sprintf(painCave.errMsg, "The number of unit cells in the y direction "
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "The number of unit cells in the y direction "
                              "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
   nz = args_info.nz_arg;
 
   if (nz <= 0) {
-    sprintf(painCave.errMsg, "The number of unit cells in the z direction "
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "The number of unit cells in the z direction "
                              "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
@@ -144,7 +144,7 @@ int main(int argc, char* argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg, "No input .omd file name was specified "
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "No input .omd file name was specified "
                              "on the command line");
     painCave.isFatal = 1;
     simError();
@@ -239,7 +239,7 @@ int main(int argc, char* argv[]) {
   writer = new DumpWriter(newInfo, outputFileName);
 
   if (writer == NULL) {
-    sprintf(painCave.errMsg, "error in creating DumpWriter");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "error in creating DumpWriter");
     painCave.isFatal = 1;
     simError();
   }
@@ -250,7 +250,7 @@ int main(int argc, char* argv[]) {
 
   delete writer;
 
-  sprintf(painCave.errMsg,
+  snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "A new OpenMD file called \"%s\" has been generated.\n",
           outputFileName.c_str());
   painCave.isFatal  = 0;
@@ -275,7 +275,7 @@ void createMdFile(const std::string& oldMdFileName,
   while (!oldMdFile.eof()) {
     // correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
-      sprintf(buffer, "\t\tnMol = %d;", nMol);
+      snprintf(buffer, MAXLEN, "\t\tnMol = %d;", nMol);
       newMdFile << buffer << std::endl;
     } else
       newMdFile << buffer << std::endl;

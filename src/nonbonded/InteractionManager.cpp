@@ -130,8 +130,7 @@ namespace OpenMD {
       pair<map<int, AtomType*>::iterator, bool> ret;
       ret = typeMap_.insert(pair<int, AtomType*>(atid1, atype1));
       if (ret.second == false) {
-        sprintf(
-            painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "InteractionManager already had a previous entry with ident %d\n",
             atype1->getIdent());
         painCave.severity = OPENMD_INFO;
@@ -240,7 +239,7 @@ namespace OpenMD {
 
           if (nbiType->isMorse()) {
             if (vdwExplicit) {
-              sprintf(painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                       "InteractionManager::initialize found more than one "
                       "explicit \n"
                       "\tvan der Waals interaction for atom types %s - %s\n",
@@ -273,7 +272,7 @@ namespace OpenMD {
 
           if (nbiType->isRepulsivePower()) {
             if (vdwExplicit) {
-              sprintf(painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                       "InteractionManager::initialize found more than one "
                       "explicit \n"
                       "\tvan der Waals interaction for atom types %s - %s\n",
@@ -308,7 +307,7 @@ namespace OpenMD {
 
           if (nbiType->isMie()) {
             if (vdwExplicit) {
-              sprintf(painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                       "InteractionManager::initialize found more than one "
                       "explicit \n"
                       "\tvan der Waals interaction for atom types %s - %s\n",
@@ -361,7 +360,7 @@ namespace OpenMD {
 
           if (nbiType->isSC()) {
             if (metExplicit) {
-              sprintf(painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                       "InteractionManager::initialize found more than one "
                       "explicit\n"
                       "\tmetallic interaction for atom types %s - %s\n",
@@ -389,7 +388,7 @@ namespace OpenMD {
 
           if (nbiType->isMAW()) {
             if (vdwExplicit) {
-              sprintf(painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                       "InteractionManager::initialize found more than one "
                       "explicit\n"
                       "\tvan der Waals interaction for atom types %s - %s\n",
@@ -422,7 +421,7 @@ namespace OpenMD {
 
           if (nbiType->isInversePowerSeries()) {
             if (vdwExplicit) {
-              sprintf(painCave.errMsg,
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                       "InteractionManager::initialize found more than one "
                       "explicit \n"
                       "\tvan der Waals interaction for atom types %s - %s\n",
@@ -470,7 +469,7 @@ namespace OpenMD {
         atid2  = atype2->getIdent();
 
         if (interactions_[atid1][atid2].size() == 0) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "InteractionManager could not find a matching non-bonded\n"
                   "\tinteraction for atom types %s - %s\n"
                   "\tProceeding without this interaction.\n",

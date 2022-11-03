@@ -155,8 +155,9 @@ namespace OpenMD {
 
       void add(const std::vector<RealType>& val) {
         if (val.empty() || (val.size() != Avg_.size() && !Avg_.empty())) {
-          sprintf(painCave.errMsg, "Size of vector passed to add() did not "
-                                   "match the size of the StaticAccumulator.");
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "Size of vector passed to add() did not "
+                   "match the size of the StaticAccumulator.");
           painCave.isFatal = 1;
           simError();
         }

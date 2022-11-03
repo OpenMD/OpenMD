@@ -80,7 +80,7 @@ namespace OpenMD {
           new std::ifstream(filename_.c_str(), ifstream::in | ifstream::binary);
 
       if (inFile_->fail()) {
-        sprintf(painCave.errMsg, "DumpReader: Cannot open file: %s\n",
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader: Cannot open file: %s\n",
                 filename_.c_str());
         painCave.isFatal = 1;
         simError();
@@ -138,7 +138,7 @@ namespace OpenMD {
         currPos          = inFile_->tellg();
         if (line.find("<Snapshot>") != std::string::npos) {
           if (foundOpenSnapshotTag) {
-            sprintf(painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                     "DumpReader:<Snapshot> is multiply nested at line %d "
                     "in %s \n",
                     lineNo, filename_.c_str());
@@ -151,7 +151,7 @@ namespace OpenMD {
 
         } else if (line.find("</Snapshot>") != std::string::npos) {
           if (!foundOpenSnapshotTag) {
-            sprintf(painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                     "DumpReader:</Snapshot> appears before <Snapshot> at "
                     "line %d in %s \n",
                     lineNo, filename_.c_str());
@@ -160,7 +160,7 @@ namespace OpenMD {
           }
 
           if (foundClosedSnapshotTag) {
-            sprintf(painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                     "DumpReader:</Snapshot> appears multiply nested at "
                     "line %d in %s \n",
                     lineNo, filename_.c_str());
@@ -176,7 +176,7 @@ namespace OpenMD {
       // only found <Snapshot> for the last frame means the file is
       // corrupted, we should discard it and give a warning message
       if (foundOpenSnapshotTag) {
-        sprintf(painCave.errMsg, "DumpReader: last frame in %s is invalid\n",
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader: last frame in %s is invalid\n",
                 filename_.c_str());
         painCave.isFatal = 0;
         simError();
@@ -186,7 +186,7 @@ namespace OpenMD {
       nframes_ = framePos_.size();
 
       if (nframes_ == 0) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "DumpReader: %s does not contain a valid frame\n",
                 filename_.c_str());
         painCave.isFatal = 1;
@@ -286,7 +286,7 @@ namespace OpenMD {
 
     line = buffer;
     if (line.find("<Snapshot>") == std::string::npos) {
-      sprintf(painCave.errMsg, "DumpReader Error: can not find <Snapshot>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader Error: can not find <Snapshot>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -305,7 +305,7 @@ namespace OpenMD {
       readSiteData(inputStream);
     } else {
       if (line.find("</Snapshot>") == std::string::npos) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "DumpReader Error: can not find </Snapshot>\n");
         painCave.isFatal = 1;
         simError();
@@ -313,7 +313,7 @@ namespace OpenMD {
     }
 
     if (nSD != info_->getNGlobalIntegrableObjects()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "DumpReader Error: Number of parsed StuntDouble lines (%d)\n"
               "\tis not the same as the expected number of Objects (%d)\n",
               nSD, info_->getNGlobalIntegrableObjects());
@@ -329,7 +329,7 @@ namespace OpenMD {
     nTokens = tokenizer.countTokens();
 
     if (nTokens < 2) {
-      sprintf(painCave.errMsg, "DumpReader Error: Not enough Tokens.\n%s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader Error: Not enough Tokens.\n%s\n",
               line.c_str());
       painCave.isFatal = 1;
       simError();
@@ -348,7 +348,7 @@ namespace OpenMD {
     if (needPos_) {
       found = type.find("p");
       if (found == std::string::npos) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "DumpReader Error: StuntDouble %d has no Position\n"
                 "\tField (\"p\") specified.\n%s\n",
                 index, line.c_str());
@@ -361,7 +361,7 @@ namespace OpenMD {
       if (needQuaternion_) {
         found = type.find("q");
         if (found == std::string::npos) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "DumpReader Error: Directional StuntDouble %d has no\n"
                   "\tQuaternion Field (\"q\") specified.\n%s\n",
                   index, line.c_str());
@@ -402,7 +402,7 @@ namespace OpenMD {
           if (qlen < OpenMD::epsilon) {  // check quaternion is not
             // equal to 0
 
-            sprintf(painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                     "DumpReader Error: initial quaternion error "
                     "(q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n");
             painCave.isFatal = 1;
@@ -493,7 +493,7 @@ namespace OpenMD {
       }
 
       default: {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "DumpReader Error: %s is an unrecognized type\n", type.c_str());
         painCave.isFatal = 1;
         simError();
@@ -519,7 +519,7 @@ namespace OpenMD {
     nTokens = tokenizer.countTokens();
 
     if (nTokens < 2) {
-      sprintf(painCave.errMsg, "DumpReader Error: Not enough Tokens.\n%s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader Error: Not enough Tokens.\n%s\n",
               line.c_str());
       painCave.isFatal = 1;
       simError();
@@ -615,7 +615,7 @@ namespace OpenMD {
         break;
       }
       default: {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "DumpReader Error: %s is an unrecognized type\n", type.c_str());
         painCave.isFatal = 1;
         simError();
@@ -630,7 +630,7 @@ namespace OpenMD {
     std::string line(buffer);
 
     if (line.find("<StuntDoubles>") == std::string::npos) {
-      sprintf(painCave.errMsg, "DumpReader Error: Missing <StuntDoubles>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader Error: Missing <StuntDoubles>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -675,7 +675,7 @@ namespace OpenMD {
     std::string line(buffer);
 
     if (line.find("<FrameData>") == std::string::npos) {
-      sprintf(painCave.errMsg, "DumpReader Error: Missing <FrameData>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader Error: Missing <FrameData>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -687,7 +687,7 @@ namespace OpenMD {
 
       StringTokenizer tokenizer(line, " ;\t\n\r{}:,");
       if (!tokenizer.hasMoreTokens()) {
-        sprintf(painCave.errMsg, "DumpReader Error: Not enough Tokens.\n%s\n",
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader Error: Not enough Tokens.\n%s\n",
                 line.c_str());
         painCave.isFatal = 1;
         simError();
@@ -727,7 +727,7 @@ namespace OpenMD {
         eta(2, 2) = tokenizer.nextTokenAsDouble();
         s->setBarostat(eta);
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "DumpReader Error: %s is an invalid property in <FrameData>\n",
                 propertyName.c_str());
         painCave.isFatal = 0;

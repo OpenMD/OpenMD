@@ -73,8 +73,7 @@ namespace OpenMD {
       Vector3d omega        = momentInertia.inverse() * angMom;
       propertyTemp          = omega;
     } else {
-      sprintf(
-          painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "The selection contains non-directional entities. Your selection should include\
  Directional atoms and/or Rigid Bodies.\n");
       painCave.isFatal = 1;

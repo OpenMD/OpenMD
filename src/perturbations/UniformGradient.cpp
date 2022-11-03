@@ -72,7 +72,7 @@ namespace OpenMD {
     if (simParams->haveUniformGradientDirection1()) {
       std::vector<RealType> d1 = simParams->getUniformGradientDirection1();
       if (d1.size() != 3) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "uniformGradientDirection1: Incorrect number of parameters\n"
                 "\tspecified. There should be 3 parameters, but %lu were\n"
                 "\tspecified.\n",
@@ -91,7 +91,7 @@ namespace OpenMD {
     if (simParams->haveUniformGradientDirection2()) {
       std::vector<RealType> d2 = simParams->getUniformGradientDirection2();
       if (d2.size() != 3) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "uniformGradientDirection2: Incorrect number of parameters\n"
                 "\tspecified. There should be 3 parameters, but %lu were\n"
                 "\tspecified.\n",
@@ -130,19 +130,19 @@ namespace OpenMD {
 
     } else {
       if (!haveA) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "UniformGradient: uniformGradientDirection1 not specified.\n");
         painCave.isFatal = 1;
         simError();
       }
       if (!haveB) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "UniformGradient: uniformGradientDirection2 not specified.\n");
         painCave.isFatal = 1;
         simError();
       }
       if (!haveG) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "UniformGradient: uniformGradientStrength not specified.\n");
         painCave.isFatal = 1;
         simError();

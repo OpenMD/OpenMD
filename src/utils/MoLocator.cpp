@@ -67,7 +67,7 @@ namespace OpenMD {
     RotMat3x3d rotMat = latVec2RotMat(ort);
 
     if (mol->getNIntegrableObjects() != nIntegrableObjects) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "MoLocator::placeMol error.\n"
               "\tThe number of integrable objects of MoleculeStamp is not\n"
               "\tthe same as that of Molecule\n");
@@ -110,7 +110,7 @@ namespace OpenMD {
       currAtomStamp = myStamp->getAtomStamp(i);
 
       if (!currAtomStamp->havePosition()) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "MoLocator::calcRef error.\n"
                 "\tComponent %s, atom %s does not have a position specified.\n"
                 "\tThis means MoLocator cannot initalize it's position.\n",

@@ -79,7 +79,7 @@ namespace OpenMD {
       if (simParams_->haveLangevinBufferRadius()) {
         langevinBufferRadius_ = simParams_->getLangevinBufferRadius();
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "langevinBufferRadius must be specified "
                 "when useSphericalBoundaryConditions is turned on.\n");
         painCave.severity = OPENMD_ERROR;
@@ -90,7 +90,7 @@ namespace OpenMD {
       if (simParams_->haveFrozenBufferRadius()) {
         frozenBufferRadius_ = simParams_->getFrozenBufferRadius();
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "frozenBufferRadius must be specified "
                 "when useSphericalBoundaryConditions is turned on.\n");
         painCave.severity = OPENMD_ERROR;
@@ -99,7 +99,7 @@ namespace OpenMD {
       }
 
       if (frozenBufferRadius_ < langevinBufferRadius_) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "frozenBufferRadius has been set smaller than the "
                 "langevinBufferRadius.  This is probably an error.\n");
         painCave.severity = OPENMD_WARNING;
@@ -130,8 +130,7 @@ namespace OpenMD {
       if (simParams_->haveHydroPropFile()) {
         hydroPropMap_ = parseFrictionFile(simParams_->getHydroPropFile());
       } else {
-        sprintf(
-            painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
             "HydroPropFile must be set to a file name if Langevin Dynamics\n"
             "\tis specified for rigidBodies which contain more than one atom\n"
             "\tTo create a HydroPropFile, run the \"Hydro\" program.\n");
@@ -151,7 +150,7 @@ namespace OpenMD {
             moments_.push_back(getMomentData(sd));
 
           } else {
-            sprintf(painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                     "Can not find resistance tensor for atom [%s]\n",
                     sd->getType().c_str());
             painCave.severity = OPENMD_ERROR;
@@ -191,7 +190,7 @@ namespace OpenMD {
                   }
                 }
                 if (aNum == 0) {
-                  sprintf(painCave.errMsg,
+                  snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                           "Could not find atom type in default element.txt\n");
                   painCave.severity = OPENMD_ERROR;
                   painCave.isFatal  = 1;
@@ -202,7 +201,7 @@ namespace OpenMD {
           }
 
           if (!simParams_->haveTargetTemp()) {
-            sprintf(painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                     "You can't use LangevinDynamics without a targetTemp!\n");
             painCave.isFatal  = 1;
             painCave.severity = OPENMD_ERROR;
@@ -210,7 +209,7 @@ namespace OpenMD {
           }
 
           if (!simParams_->haveViscosity()) {
-            sprintf(painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                     "You can't use LangevinDynamics without a viscosity!\n");
             painCave.isFatal  = 1;
             painCave.severity = OPENMD_ERROR;
@@ -272,7 +271,7 @@ namespace OpenMD {
         // Center of Resistance:
         moment->rcr = i->second->getCenterOfResistance();
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "LDForceManager createMomentData: Couldn't find HydroProp for\n"
                 "object type %s!\n",
                 sd->getType().c_str());

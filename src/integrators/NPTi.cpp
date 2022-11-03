@@ -101,7 +101,7 @@ namespace OpenMD {
     scaleFactor = exp(dt * eta);
 
     if ((scaleFactor > 1.1) || (scaleFactor < 0.9)) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "NPTi error: Attempting a Box scaling of more than 10 percent"
               " check your tauBarostat, as it is probably too small!\n"
               " eta = %lf, scaleFactor = %lf\n",

@@ -62,7 +62,7 @@ namespace OpenMD {
     if (simParam->haveZconsTime()) {
       zconsTime_ = simParam->getZconsTime();
     } else {
-      sprintf(painCave.errMsg, "ZConstraint error: If you use a ZConstraint,\n"
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "ZConstraint error: If you use a ZConstraint,\n"
                                "\tyou must set zconsTime.\n");
       painCave.isFatal = 1;
       simError();
@@ -72,7 +72,7 @@ namespace OpenMD {
       zconsTol_ = simParam->getZconsTol();
     } else {
       zconsTol_ = 0.01;
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "ZConstraint Warning: Tolerance for z-constraint method is not "
               "specified.\n"
               "\tOpenMD will use a default value of %f.\n"
@@ -201,37 +201,35 @@ namespace OpenMD {
     char buffer[65535];
     std::string result;
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    snprintf(buffer, 65535, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
-    sprintf(buffer, "number of zconstraint molecule: %d\n",
+    snprintf(buffer, 65535, "number of zconstraint molecule: %d\n",
             (int)zmolStates_.size());
     result += buffer;
 
-    sprintf(buffer, "zconstraint tolerance = %lf\n", zconsTol_);
+    snprintf(buffer, 65535, "zconstraint tolerance = %lf\n", zconsTol_);
     result += buffer;
 
-    sprintf(buffer, "zconstraint sample time = %lf\n", zconsTime_);
+    snprintf(buffer, 65535, "zconstraint sample time = %lf\n", zconsTime_);
     result += buffer;
 
-    sprintf(buffer, "zconstraint output filename = %s\n",
+    snprintf(buffer, 65535, "zconstraint output filename = %s\n",
             zconsFilename_.c_str());
     result += buffer;
 
     std::map<int, ZConsState>::iterator i;
     int j = 0;
     for (i = zmolStates_.begin(); i != zmolStates_.end(); ++i) {
-      sprintf(buffer, "zconstraint molecule[%d] = %d\n", j++, i->first);
+      snprintf(buffer, 65535, "zconstraint molecule[%d] = %d\n", j++, i->first);
       result += buffer;
     }
 
-    sprintf(
-        buffer,
+    snprintf(buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 

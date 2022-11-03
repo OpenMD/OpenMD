@@ -214,8 +214,9 @@ struct ParameterTraits<std::pair<int, int>> {
       r         = std::make_pair(atom1, atom2);
       return true;
     } else {
-      sprintf(painCave.errMsg, "ParameterManager Error: "
-                               "Incorrect number of tokens to make a pair!\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "ParameterManager Error: "
+               "Incorrect number of tokens to make a pair!\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -369,9 +370,10 @@ public:                                       \
 #define CheckParameter(NAME, CONSTRAINT)                                \
   if (!NAME.empty()) {                                                  \
     if (!(CONSTRAINT)(NAME.getData())) {                                \
-      sprintf(painCave.errMsg, "Error in checking %s : should be %s\n", \
-              NAME.getKeyword().c_str(),                                \
-              (CONSTRAINT).getConstraintDescription().c_str());         \
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,               \
+               "Error in checking %s : should be %s\n",                 \
+               NAME.getKeyword().c_str(),                               \
+               (CONSTRAINT).getConstraintDescription().c_str());        \
       painCave.isFatal  = 1;                                            \
       painCave.severity = OPENMD_ERROR;                                 \
       simError();                                                       \

@@ -198,7 +198,7 @@ namespace OpenMD {
     if (hasCoordinateOrigin) {
       std::vector<RealType> co = rnemdParams->getCoordinateOrigin();
       if (co.size() != 3) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "ShellStatistics: Incorrect number of parameters specified for "
                 "coordinateOrigin.\n"
                 "\tthere should be 3 parameters, but %lu were specified.\n",
@@ -215,7 +215,7 @@ namespace OpenMD {
         if (!comEvaluator_.isDynamic()) {
           comSeleMan_.setSelectionSet(comEvaluator_.evaluate());
           if (comSeleMan_.getSelectionCount() != 1) {
-            sprintf(painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                     "ShellStatistics: More than one selected object in "
                     "comsele.\n"
                     "\tThere are %d selected objects.\n",
@@ -252,7 +252,7 @@ namespace OpenMD {
     if (comEvaluator_.isDynamic()) {
       comSeleMan_.setSelectionSet(comEvaluator_.evaluate());
       if (comSeleMan_.getSelectionCount() != 1) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "ShellStatistics: More than one selected object in "
                 "comsele.\n"
                 "\tThere are %d selected objects.\n",

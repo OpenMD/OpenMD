@@ -189,7 +189,7 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg, "GofXyz: unable to open %s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "GofXyz: unable to open %s\n",
               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();

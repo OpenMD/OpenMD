@@ -132,7 +132,7 @@ namespace OpenMD {
       w[5] = w[4];
       break;
     default:
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "LegendreGauss1d does not implement a %d point algorithm\n",
               points);
       painCave.isFatal = 1;;

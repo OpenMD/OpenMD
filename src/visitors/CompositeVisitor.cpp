@@ -125,35 +125,35 @@ namespace OpenMD {
     std::string result;
     char buffer[65535];
 
-    sprintf(
-        buffer,
+    snprintf(
+             buffer, 65535,
         "******************************************************************\n");
     result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    snprintf(buffer, 65535, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
-    sprintf(
-        buffer,
+    snprintf(
+             buffer, 65535,
         "Visitor Description: visitor manager  maintaining a priority  list\n");
     result += buffer;
 
-    sprintf(buffer, "visitors in current priority list:\n");
+    snprintf(buffer, 65535, "visitors in current priority list:\n");
     result += buffer;
 
     for (i = visitorList.begin(); i != visitorList.end(); ++i) {
-      sprintf(buffer, "Priority = %d\tvisitor = %s\n", (*i).second,
+      snprintf(buffer, 65535, "Priority = %d\tvisitor = %s\n", (*i).second,
               ((*i).first->getVisitorName()).c_str());
       result += buffer;
     }
 
-    sprintf(buffer, "Detail information about every visitor:\n");
+    snprintf(buffer, 65535, "Detail information about every visitor:\n");
 
     for (i = visitorList.begin(); i != visitorList.end(); ++i)
       result += ((*i).first)->toString();
 
-    sprintf(
-        buffer,
+    snprintf(
+             buffer, 65535,
         "******************************************************************\n");
     result += buffer;
 

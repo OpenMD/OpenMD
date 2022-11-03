@@ -63,8 +63,7 @@ namespace OpenMD {
     int nTokens = tokenizer.countTokens();
 
     if (nTokens < 2) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "ChargeAtomTypesSectionParser Error: Not enough tokens at line %d\n",
           lineNo);
       painCave.isFatal = 1;
@@ -80,7 +79,7 @@ namespace OpenMD {
         RealType charge        = cus_ * tokenizer.nextTokenAsDouble();
         fca.makeFixedCharge(charge);
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "ChargeAtomTypesSectionParser Error: Can not find matching "
                 "AtomType at "
                 "line %d\n",

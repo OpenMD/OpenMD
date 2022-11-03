@@ -58,7 +58,7 @@ namespace OpenMD {
 
   PolarizableAtypeParameters PolarizableAdapter::getPolarizableParam() {
     if (!isPolarizable()) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "PolarizableAdapter::getPolarizableParam was passed an atomType "
               "(%s)\n"
               "\tthat does not appear to be a polarizable atom.\n",
@@ -70,8 +70,7 @@ namespace OpenMD {
 
     std::shared_ptr<GenericData> data = at_->getPropertyByName(PolTypeID);
     if (data == nullptr) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "PolarizableAdapter::getPolarizableParam could not find polarizable\n"
           "\tparameters for atomType %s.\n",
           at_->getName().c_str());
@@ -83,7 +82,7 @@ namespace OpenMD {
     std::shared_ptr<PolarizableAtypeData> polData =
         std::dynamic_pointer_cast<PolarizableAtypeData>(data);
     if (polData == nullptr) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "PolarizableAdapter::getPolarizableParam could not convert\n"
               "\tGenericData to PolarizableAtypeData for atom type %s\n",
               at_->getName().c_str());

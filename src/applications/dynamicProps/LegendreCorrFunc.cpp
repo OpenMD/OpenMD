@@ -110,7 +110,7 @@ namespace OpenMD {
     for (sd = seleMan1_.beginSelected(i); sd != NULL;
          sd = seleMan1_.nextSelected(i)) {
       if (!sd->isDirectional()) {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "LegendreCorrFunc::validateSelection Error: "
                 "at least one of the selected objects is not Directional\n");
         painCave.isFatal = 1;

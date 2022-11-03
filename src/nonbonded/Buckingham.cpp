@@ -78,7 +78,7 @@ namespace OpenMD {
         keys          = nbiTypes->getKeys(j);
         AtomType* at1 = forceField_->getAtomType(keys[0]);
         if (at1 == NULL) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "Buckingham::initialize could not find AtomType %s\n"
                   "\tto for for %s - %s interaction.\n",
                   keys[0].c_str(), keys[0].c_str(), keys[1].c_str());
@@ -89,7 +89,7 @@ namespace OpenMD {
 
         AtomType* at2 = forceField_->getAtomType(keys[1]);
         if (at2 == NULL) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "Buckingham::initialize could not find AtomType %s\n"
                   "\tfor %s - %s nonbonded interaction.\n",
                   keys[1].c_str(), keys[0].c_str(), keys[1].c_str());
@@ -115,7 +115,7 @@ namespace OpenMD {
             dynamic_cast<BuckinghamInteractionType*>(nbt);
 
         if (bit == NULL) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "Buckingham::initialize could not convert "
                   "NonBondedInteractionType\n"
                   "\tto BuckinghamInteractionType for %s - %s interaction.\n",

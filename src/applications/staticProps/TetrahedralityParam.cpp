@@ -253,7 +253,7 @@ namespace OpenMD {
       osq.close();
 
     } else {
-      sprintf(painCave.errMsg, "TetrahedralityParam: unable to open %s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "TetrahedralityParam: unable to open %s\n",
               (getOutputFileName() + "q").c_str());
       painCave.isFatal = 1;
       simError();

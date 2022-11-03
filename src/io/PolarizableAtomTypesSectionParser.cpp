@@ -63,7 +63,7 @@ namespace OpenMD {
     int nTokens = tokenizer.countTokens();
 
     if (nTokens < 2) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "PolarizableAtomTypesSectionParser Error: "
               "Not enough tokens at line %d\n",
               lineNo);
@@ -78,7 +78,7 @@ namespace OpenMD {
         RealType polarizability = tokenizer.nextTokenAsDouble();
         fca.makePolarizable(polarizability);
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "PolarizableAtomTypesSectionParser Error: "
                 "Can not find matching AtomType at line %d\n",
                 lineNo);

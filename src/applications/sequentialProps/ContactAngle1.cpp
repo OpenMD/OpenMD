@@ -97,7 +97,7 @@ namespace OpenMD {
     RealType dz = com.z() - solidZ_;
 
     if (dz < 0.0) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "ContactAngle1: Z-center of mass of selection, %lf, was\n"
               "\tlocated below the solid reference plane, %lf\n",
               com.z(), solidZ_);

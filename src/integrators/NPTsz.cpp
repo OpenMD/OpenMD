@@ -161,7 +161,7 @@ namespace OpenMD {
     if (scaleFactor < smallScale) smallScale = scaleFactor;
 
     if ((bigScale > 1.1) || (smallScale < 0.9)) {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "NPTsz: Attempting a Box scaling of more than 10 percent.\n"
               "\tCheck your tauBarostat, as it is probably too small!\n\n"
               "\tscaleMat = [%lf\t%lf\t%lf]\n"

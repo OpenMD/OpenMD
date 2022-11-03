@@ -202,7 +202,7 @@ namespace OpenBabel {
         pmol->SetTitle("HOH");
       } else {
         os << "molecule {\n";
-        sprintf(buffer, "%u", i);
+        snprintf(buffer, BUFFLEN, "%u", i);
         os << "  name = \"" << molPrefix << buffer << "\";\n";
 
         int ai = 0;
@@ -387,7 +387,7 @@ namespace OpenBabel {
            << "\"HOH\""
            << "; // change to appropriate water model" << endl;
       } else {
-        sprintf(buffer, "%u", i);
+        snprintf(buffer, BUFFLEN, "%u", i);
         os << "  type = " << molPrefix << buffer << ";" << endl;
       }
       os << "  nMol = " << numMols[i] << ";" << endl;
@@ -398,15 +398,14 @@ namespace OpenBabel {
     os << "  <Snapshot>" << endl;
     os << "    <FrameData>" << endl;
 
-    sprintf(buffer, "        Time: %.10g", 0.0);
+    snprintf(buffer, BUFFLEN, "        Time: %.10g", 0.0);
 
     os << buffer << endl;
 
     CalcBoundingBox(mol, min_x, max_x, min_y, max_y, min_z, max_z);
 
     // still to do: should compute a bounding box here
-    sprintf(
-        buffer,
+    snprintf(buffer, BUFFLEN,
         "        Hmat: {{ %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }, { "
         "%.10g, "
         "%.10g, %.10g }}",
@@ -421,7 +420,8 @@ namespace OpenBabel {
 
     for (vector<int>::iterator i = indices.begin(); i != indices.end(); ++i) {
       atom = mol.GetAtom(*i);
-      sprintf(buffer, "%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e", *i - 1,
+      snprintf(buffer, BUFFLEN,
+               "%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e", *i - 1,
               "pv", atom->GetX(), atom->GetY(), atom->GetZ(), 0.0, 0.0, 0.0);
       os << buffer << endl;
     }

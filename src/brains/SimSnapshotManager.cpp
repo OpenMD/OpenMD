@@ -98,7 +98,7 @@ namespace OpenMD {
 
   void SimSnapshotManager::setCapacity(int capacity) {
     // give warning message
-    sprintf(painCave.errMsg,
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "SimSnapshotManager error: can not set capacity for "
             "SimSnapshotManager.\n");
     painCave.isFatal = 0;

@@ -61,7 +61,7 @@ namespace OpenMD {
         dt_  = info_->getSimParams()->getDt();
         dt2_ = dt_ * 0.5;
       } else {
-        sprintf(painCave.errMsg, "FluctuatingChargeNVE Error: dt is not set\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "FluctuatingChargeNVE Error: dt is not set\n");
         painCave.isFatal = 1;
         simError();
       }

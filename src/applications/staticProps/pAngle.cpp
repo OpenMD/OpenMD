@@ -226,7 +226,7 @@ namespace OpenMD {
           }
 
           if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount()) {
-            sprintf(painCave.errMsg,
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                     "In frame %d, the number of selected StuntDoubles are\n"
                     "\tnot the same in --sele1 and sele2\n",
                     istep);
@@ -297,7 +297,7 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg, "pAngle: unable to open %s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "pAngle: unable to open %s\n",
               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();

@@ -73,7 +73,7 @@ namespace OpenMD {
       dt  = simParams->getDt();
       dt2 = 0.5 * dt;
     } else {
-      sprintf(painCave.errMsg, "Integrator Error: dt is not set\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Integrator Error: dt is not set\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -81,7 +81,7 @@ namespace OpenMD {
     if (simParams->haveRunTime()) {
       runTime = simParams->getRunTime();
     } else {
-      sprintf(painCave.errMsg, "Integrator Error: runTime is not set\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Integrator Error: runTime is not set\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -122,7 +122,7 @@ namespace OpenMD {
       if (simParams->haveTargetTemp()) {
         targetScalingTemp = simParams->getTargetTemp();
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Integrator Error: Target Temperature must be set to turn on "
                 "tempSet\n");
         painCave.isFatal = 1;
@@ -173,7 +173,7 @@ namespace OpenMD {
       } else if (prop.compare("DAMPED") == 0) {
         flucQ_ = new FluctuatingChargeDamped(info);
       } else {
-        sprintf(painCave.errMsg,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Integrator Error: Unknown Fluctuating Charge propagator (%s) "
                 "requested\n",
                 simParams->getFluctuatingChargeParameters()

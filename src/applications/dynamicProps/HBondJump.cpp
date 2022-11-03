@@ -143,7 +143,7 @@ namespace OpenMD {
         RealType time2 = times_[j];
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "HBondJump::correlation Error: sampleTime (%f)\n"
                   "\tin %s does not match actual time-spacing between\n"
                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
@@ -635,7 +635,7 @@ namespace OpenMD {
         RealType time2 = times_[j];
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "HBondJump::correlation Error: sampleTime (%f)\n"
                   "\tin %s does not match actual time-spacing between\n"
                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
@@ -736,7 +736,7 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "HBondJumpZ::writeCorrelate Error: fail to open %s\n",
               outputFilename_.c_str());
       painCave.isFatal = 1;
@@ -949,7 +949,7 @@ namespace OpenMD {
         RealType time2 = times_[j];
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
-          sprintf(painCave.errMsg,
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "HBondJump::correlation Error: sampleTime (%f)\n"
                   "\tin %s does not match actual time-spacing between\n"
                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
@@ -1049,7 +1049,7 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "HBondJumpR::writeCorrelate Error: fail to open %s\n",
               outputFilename_.c_str());
       painCave.isFatal = 1;

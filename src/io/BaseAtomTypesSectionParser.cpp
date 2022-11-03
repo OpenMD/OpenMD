@@ -65,8 +65,7 @@ namespace OpenMD {
     // in BaseAtomTypeSection, a line at least contains 2 tokens
     // atomTypeName and mass
     if (nTokens < 2) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "BaseAtomTypesSectionParser Error: Not enough tokens at line %d\n",
           lineNo);
       painCave.isFatal = 1;
@@ -85,7 +84,7 @@ namespace OpenMD {
       }
 
       //    else {
-      //         sprintf(painCave.errMsg, "BaseAtomTypesSectionParser Error:
+      //         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "BaseAtomTypesSectionParser Error:
       //         Duplicate BaseAtomType at line %d\n",
       //                 lineNo);
       //         painCave.isFatal = 1;
