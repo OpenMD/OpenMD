@@ -547,14 +547,14 @@ namespace OpenMD::RNEMD {
       simError();
     }
 
-    // if (rnemdFluxType_ == rnemdParticle) {
-    //   SelectionManager tempCommonA = seleManA_ & outputSeleMan_;
-    //   SelectionManager tempCommonB = seleManB_ & outputSeleMan_;
+    if (rnemdFluxType_ == rnemdParticle) {
+      SelectionManager tempCommonA = seleManA_ & outputSeleMan_;
+      SelectionManager tempCommonB = seleManB_ & outputSeleMan_;
 
-    //   this->doRNEMDImpl(tempCommonA, tempCommonB);
-    // } else {
-    this->doRNEMDImpl(commonA_, commonB_);
-    // }
+      this->doRNEMDImpl(tempCommonA, tempCommonB);
+    } else {
+      this->doRNEMDImpl(commonA_, commonB_);
+    }
   }
 
   void RNEMD::collectData() {

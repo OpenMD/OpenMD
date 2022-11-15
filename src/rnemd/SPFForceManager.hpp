@@ -61,6 +61,7 @@ namespace OpenMD::RNEMD {
   class SPFForceManager : public ForceManager {
   public:
     SPFForceManager(SimInfo* info);
+    ~SPFForceManager();
 
     void setSelectedMolecule(Molecule* selectedMolecule, Vector3d newCom);
     bool updateLambda(RealType& particleTarget, RealType& deltaLambda);
@@ -76,13 +77,9 @@ namespace OpenMD::RNEMD {
              (potentialSink_ - potentialSource_);
     }
 
-    Molecule* getSelectedMolecule() const { return selectedMolecule_; }
-    Snapshot* getTemporarySourceSnapshot() const {
-      return temporarySourceSnapshot_;
-    }
-    Snapshot* getTemporarySinkSnapshot() const {
-      return temporarySinkSnapshot_;
-    }
+    Molecule* getSelectedMolecule() { return selectedMolecule_; }
+    Snapshot getTemporarySourceSnapshot() { return *temporarySourceSnapshot_; }
+    Snapshot getTemporarySinkSnapshot() { return *temporarySinkSnapshot_; }
 
     void combineForcesAndTorques();
     void updatePotentials();

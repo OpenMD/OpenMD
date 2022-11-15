@@ -46,12 +46,11 @@
 #include <config.h>
 
 #include <vector>
-#include <memory>
 
 #include "brains/ForceManager.hpp"
-#include "brains/Thermo.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/Snapshot.hpp"
+#include "brains/Thermo.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
@@ -62,11 +61,28 @@ namespace OpenMD::RNEMD {
 
   SPFForceManager::SPFForceManager(SimInfo* info) :
       ForceManager {info}, lambda_ {}, potentialSource_ {}, potentialSink_ {} {
-
-    thermo_ = std::make_unique<Thermo>(info);
+    thermo_          = std::make_unique<Thermo>(info);
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
     k_ = info_->getSimParams()->getRNEMDParameters()->getSPFScalingPower();
+
+    int nAtoms        = info_->getNAtoms();
+    int nRigidBodies  = info_->getNRigidBodies();
+    int nCutoffGroups = info_->getNCutoffGroups();
+    int storageLayout = info_->getSnapshotManager()->getStorageLayout();
+
+    bool usePBC = info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
+    temporarySourceSnapshot_ = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
+                                            storageLayout, usePBC);
+
+    temporarySinkSnapshot_ = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
+                                          storageLayout, usePBC);
+  }
+
+  SPFForceManager::~SPFForceManager() {
+    delete temporarySourceSnapshot_;
+    delete temporarySinkSnapshot_;
   }
 
   void SPFForceManager::calcForces() {
@@ -85,21 +101,17 @@ namespace OpenMD::RNEMD {
         delta = currentSourceCom - prevSourceCom;
       }
 
-      int nAtoms        = info_->getNAtoms();
-      int nRigidBodies  = info_->getNRigidBodies();
-      int nCutoffGroups = info_->getNCutoffGroups();
-      int storageLayout = info_->getSnapshotManager()->getStorageLayout();
-
-      bool usePBC = info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
-      temporarySourceSnapshot_ = new Snapshot(
-          nAtoms, nRigidBodies, nCutoffGroups, storageLayout, usePBC);
-
-      temporarySinkSnapshot_ = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
-                                            storageLayout, usePBC);
-
-      *temporarySourceSnapshot_ = *currentSnapshot_;
-      currentSnapshot_->clearDerivedProperties();
+      if (temporarySourceSnapshot_ && currentSnapshot_) {
+        *temporarySourceSnapshot_ = *currentSnapshot_;
+        currentSnapshot_->clearDerivedProperties();
+      } else {
+        sprintf(painCave.errMsg,
+                "Either temporarySourceSnapshot or currentSnapshot "
+                "has a null value.\n");
+        painCave.isFatal  = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
+      }
 
       // Only the processor with the selected molecule should do this step:
       if (selectedMolecule_) {
@@ -111,8 +123,17 @@ namespace OpenMD::RNEMD {
       ForceManager::calcForces();
       potentialSink_ = currentSnapshot_->getPotentialEnergy();
 
-      *temporarySinkSnapshot_ = *currentSnapshot_;
-      currentSnapshot_->clearDerivedProperties();
+      if (temporarySinkSnapshot_ && currentSnapshot_) {
+        *temporarySinkSnapshot_ = *currentSnapshot_;
+        currentSnapshot_->clearDerivedProperties();
+      } else {
+        sprintf(painCave.errMsg,
+                "Either temporarySinkSnapshot or currentSnapshot "
+                "has a null value.\n");
+        painCave.isFatal  = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
+      }
 
       combineForcesAndTorques();
       updatePotentials();
@@ -121,7 +142,9 @@ namespace OpenMD::RNEMD {
       // Only the processor with the selected molecule should do this step:
       if (selectedMolecule_) { selectedMolecule_->setCom(currentSourceCom); }
     } else {
-      potentialSink_ = currentSnapshot_->getPotentialEnergy();
+      *temporarySourceSnapshot_ = *currentSnapshot_;
+      *temporarySinkSnapshot_   = *currentSnapshot_;
+      potentialSink_            = currentSnapshot_->getPotentialEnergy();
     }
   }
 
@@ -161,8 +184,12 @@ namespace OpenMD::RNEMD {
         lambda_ = 0.0;
 
         // Only the processor with the selected molecule should do this step:
-        if (selectedMolecule_) { selectedMolecule_->setCom(currentSinkCom_); }
+        if (selectedMolecule_) {
+          selectedMolecule_->setCom(currentSinkCom_);
+          selectedMolecule_ = nullptr;
+        }
 
+        hasSelectedMolecule_   = false;
         updateSelectedMolecule = true;
       }
     }

@@ -71,16 +71,9 @@ namespace OpenMD {
         currRNEMD += RNEMD_exchangeTime;
       }
 
-      rnemd_->collectData();
-
       if (RNEMD::SPFForceManager* spfForceManager =
               dynamic_cast<RNEMD::SPFForceManager*>(forceMan_)) {
-        Snapshot* tempSourceSnap =
-            spfForceManager->getTemporarySourceSnapshot();
 
-        Snapshot* tempSinkSnap = spfForceManager->getTemporarySinkSnapshot();
-
-        if (tempSourceSnap && tempSinkSnap) {
           if (rnemd_->failedLastKick()) {
             snap->clearDerivedProperties();
 
@@ -88,17 +81,15 @@ namespace OpenMD {
             spfForceManager->updatePotentials();
             spfForceManager->updateVirialTensor();
 
-            snap->atomData.velocity = tempSourceSnap->atomData.velocity;
+            Snapshot tempSourceSnap = spfForceManager->getTemporarySourceSnapshot();
+
+            snap->atomData.velocity = tempSourceSnap.atomData.velocity;
             snap->rigidbodyData.velocity =
-                tempSourceSnap->rigidbodyData.velocity;
-            snap->cgData.velocity = tempSourceSnap->cgData.velocity;
+                tempSourceSnap.rigidbodyData.velocity;
+            snap->cgData.velocity = tempSourceSnap.cgData.velocity;
 
             this->moveB();
           }
-
-          delete tempSourceSnap;
-          delete tempSinkSnap;
-        }
       } else {
         sprintf(painCave.errMsg, "SPFDynamics cannot be used with the "
                                  "default ForceManager.\n");
@@ -106,6 +97,8 @@ namespace OpenMD {
         painCave.severity = OPENMD_ERROR;
         simError();
       }
+
+      rnemd_->collectData();
     }
 
     saveConservedQuantity();
@@ -122,8 +115,6 @@ namespace OpenMD {
     if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
       stats->collectStats();
 
-      if (useRNEMD) { rnemd_->writeOutputFile(); }
-
       statWriter->writeStat();
 
       progressBar->setStatus(snap->getTime(), runTime);
@@ -133,6 +124,9 @@ namespace OpenMD {
       needVirial    = false;
       currStatus += statusTime;
     }
+
+    // Write to RNEMD file every timestep
+    if (useRNEMD) { rnemd_->writeOutputFile(); }
 
     difference = snap->getTime() - currReset;
 

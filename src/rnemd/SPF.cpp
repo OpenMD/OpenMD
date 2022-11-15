@@ -135,12 +135,9 @@ namespace OpenMD::RNEMD {
 
     failedLastTrial_ = false;
 
-    int selei;
-    int selej;
+    int selei {}, selej {};
 
     StuntDouble* sd;
-
-    std::vector<StuntDouble*> binA, binB;
 
     Vector3d P_a {V3Zero};
     Vector3d P_b {V3Zero};
@@ -150,16 +147,10 @@ namespace OpenMD::RNEMD {
     RealType K_b {};
 
     for (sd = smanA.beginSelected(selei); sd != NULL;
-         sd = smanA.nextSelected(selei)) {
-      Vector3d pos = sd->getPos();
-
-      // wrap the stuntdouble's position back into the box:
-      if (usePeriodicBoundaryConditions_) currentSnap_->wrapVector(pos);
-
+          sd = smanA.nextSelected(selei)) {
+        
       RealType mass = sd->getMass();
       Vector3d vel  = sd->getVel();
-
-      binA.push_back(sd);
 
       P_a += mass * vel;
       M_a += mass;
@@ -168,15 +159,8 @@ namespace OpenMD::RNEMD {
 
     for (sd = smanB.beginSelected(selej); sd != NULL;
          sd = smanB.nextSelected(selej)) {
-      Vector3d pos = sd->getPos();
-
-      // wrap the stuntdouble's position back into the box:
-      if (usePeriodicBoundaryConditions_) currentSnap_->wrapVector(pos);
-
       RealType mass = sd->getMass();
       Vector3d vel  = sd->getVel();
-
-      binB.push_back(sd);
 
       P_b += mass * vel;
       M_b += mass;
@@ -220,19 +204,23 @@ namespace OpenMD::RNEMD {
         RealType a = std::sqrt(a2);
 
         if ((a > 0.999) && (a < 1.001)) {  // restrict scaling coefficients
-          std::vector<StuntDouble*>::iterator sdi;
           Vector3d vel;
 
-          for (sdi = binA.begin(); sdi != binA.end(); ++sdi) {
-            vel = ((*sdi)->getVel() - v_a) * a + v_a;
+          int selei2 {}, selej2 {};
+          StuntDouble* sd2;
 
-            (*sdi)->setVel(vel);
+          for (sd2 = smanA.beginSelected(selei2); sd2 != NULL;
+               sd2 = smanA.nextSelected(selei2)) {
+            vel = (sd2->getVel() - v_a) * a + v_a;
+
+            sd2->setVel(vel);
           }
 
-          for (sdi = binB.begin(); sdi != binB.end(); ++sdi) {
-            vel = ((*sdi)->getVel() - v_b) * a + v_b;
+          for (sd2 = smanB.beginSelected(selei2); sd2 != NULL;
+               sd2 = smanB.nextSelected(selei2)) {
+            vel = (sd2->getVel() - v_b) * a + v_b;
 
-            (*sdi)->setVel(vel);
+            sd2->setVel(vel);
           }
 
           currentSnap_->hasTranslationalKineticEnergy = false;
@@ -261,13 +249,13 @@ namespace OpenMD::RNEMD {
     }
 
     if (!successfulExchange) {
-      sprintf(painCave.errMsg,
-              "SPF exchange NOT performed - roots that solve\n"
-              "\tthe constraint equations may not exist or there may be\n"
-              "\tno selected objects in one or both slabs.\n");
-      painCave.isFatal  = 0;
-      painCave.severity = OPENMD_INFO;
-      simError();
+      //   sprintf(painCave.errMsg,
+      //           "SPF exchange NOT performed - roots that solve\n"
+      //           "\tthe constraint equations may not exist or there may be\n"
+      //           "\tno selected objects in one or both slabs.\n");
+      //   painCave.isFatal  = 0;
+      //   painCave.severity = OPENMD_INFO;
+      //   simError();
       failTrialCount_++;
       failedLastTrial_ = true;
     }
@@ -336,7 +324,7 @@ namespace OpenMD::RNEMD {
 #endif
     }
 
-    if (globalSelectedID > 0) {
+    if (globalSelectedID >= 0) {
       currentObjectSelection_ =
           rnemdObjectSelection_ + " && ! " + std::to_string(globalSelectedID);
 
