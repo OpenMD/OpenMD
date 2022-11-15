@@ -89,7 +89,7 @@ namespace OpenMD {
     Electrostatic();
     ~Electrostatic();
     void setForceField(ForceField* ff);
-    void setSimulatedAtomTypes(set<AtomType*>& simtypes);
+    void setSimulatedAtomTypes(AtomTypeSet& simtypes);
     void setSimInfo(SimInfo* info) { info_ = info; };
     void addType(AtomType* atomType);
     virtual void calcForce(InteractionData& idat);
@@ -140,7 +140,7 @@ namespace OpenMD {
     SimInfo* info_ {nullptr};
     ForceField* forceField_;
     FluctuatingChargeForces* flucQ_;
-    set<AtomType*> simTypes_;
+    AtomTypeSet simTypes_;
     RealType cutoffRadius_;
     RealType pre11_;
     RealType pre12_;

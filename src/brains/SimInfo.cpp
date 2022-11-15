@@ -708,12 +708,12 @@ namespace OpenMD {
    * simulation.  Must query all processors to assemble this information.
    *
    */
-  set<AtomType*> SimInfo::getSimulatedAtomTypes() {
+  AtomTypeSet SimInfo::getSimulatedAtomTypes() {
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::AtomIterator ai;
     Atom* atom;
-    set<AtomType*> atomTypes;
+    AtomTypeSet atomTypes;
 
     for (mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
       for (atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
@@ -727,7 +727,7 @@ namespace OpenMD {
     // numerical idents to a vector:
 
     vector<int> foundTypes;
-    set<AtomType*>::iterator i;
+    AtomTypeSet::iterator i;
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i)
       foundTypes.push_back((*i)->getIdent());
 
@@ -783,7 +783,7 @@ namespace OpenMD {
 
   int getGlobalCountOfType(AtomType*) {
     /*
-    set<AtomType*> atypes = getSimulatedAtomTypes();
+    AtomTypeSet atypes = getSimulatedAtomTypes();
     map<AtomType*, int> counts_;
 
     for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
@@ -811,8 +811,8 @@ namespace OpenMD {
         calcBoxQuadrupole_ = true;
       }
 
-    set<AtomType*>::iterator i;
-    set<AtomType*> atomTypes;
+    AtomTypeSet::iterator i;
+    AtomTypeSet atomTypes;
     atomTypes                   = getSimulatedAtomTypes();
     bool usesElectrostatic      = false;
     bool usesMetallic           = false;

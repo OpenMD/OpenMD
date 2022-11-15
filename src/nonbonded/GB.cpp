@@ -106,7 +106,7 @@ namespace OpenMD {
 
     // GB handles all of the GB-GB interactions as well as GB-LJ cross
     // interactions:
-    set<AtomType*>::iterator at;
+    AtomTypeSet::iterator at;
     for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
       if ((*at)->isGayBerne()) nGB_++;
       if ((*at)->isLennardJones()) nGB_++;

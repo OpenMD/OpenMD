@@ -56,7 +56,7 @@ namespace OpenMD {
   public:
     SHAPES();
     void setForceField(ForceField* ff) { forceField_ = ff; };
-    void setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+    void setSimulatedAtomTypes(AtomTypeSet& simtypes) {
       simTypes_ = simtypes;
       initialize();
     };
@@ -76,7 +76,7 @@ namespace OpenMD {
     map<int, AtomType*> LJMap;
 
     ForceField* forceField_;
-    set<AtomType*> simTypes_;
+    AtomTypeSet simTypes_;
 
     int lMax_;
     int mMax_;

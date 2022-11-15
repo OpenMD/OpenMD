@@ -206,7 +206,7 @@ namespace OpenMD::RNEMD {
 
     outputEvaluator_.loadScriptString(outputSelection_);
     outputSeleMan_.setSelectionSet(outputEvaluator_.evaluate());
-    std::set<AtomType*> osTypes = outputSeleMan_.getSelectedAtomTypes();
+    AtomTypeSet osTypes = outputSeleMan_.getSelectedAtomTypes();
     std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
 
     nBins_    = rnemdParams->getOutputBins();
@@ -509,7 +509,7 @@ namespace OpenMD::RNEMD {
     hmat_ = currentSnap_->getHmat();
 
     // dynamic object evaluators:
-    evaluator_.loadScriptString(currentObjectSelection_);
+    evaluator_.loadScriptString(rnemdObjectSelection_);
     if (evaluator_.isDynamic()) seleMan_.setSelectionSet(evaluator_.evaluate());
 
     evaluatorA_.loadScriptString(selectionA_);
@@ -547,7 +547,14 @@ namespace OpenMD::RNEMD {
       simError();
     }
 
+    // if (rnemdFluxType_ == rnemdParticle) {
+    //   SelectionManager tempCommonA = seleManA_ & outputSeleMan_;
+    //   SelectionManager tempCommonB = seleManB_ & outputSeleMan_;
+
+    //   this->doRNEMDImpl(tempCommonA, tempCommonB);
+    // } else {
     this->doRNEMDImpl(commonA_, commonB_);
+    // }
   }
 
   void RNEMD::collectData() {
@@ -563,6 +570,7 @@ namespace OpenMD::RNEMD {
     Vector3d u = angularMomentumFluxVector_;
     u.normalize();
 
+    // throw an error if isDynamic instead?
     if (outputEvaluator_.isDynamic()) {
       outputSeleMan_.setSelectionSet(outputEvaluator_.evaluate());
     }
@@ -692,7 +700,7 @@ namespace OpenMD::RNEMD {
 
         // we need to subtract out degrees of freedom from constraints
         // belonging to in molecules in this bin:
-        if (seleMan_.isSelected(mol)) {
+        if (outputSeleMan_.isSelected(mol)) {
           Vector3d pos    = mol->getCom();
           binNo           = getBin(pos);
           int constraints = mol->getNConstraintPairs();

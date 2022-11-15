@@ -47,6 +47,7 @@
 
 #include <config.h>
 
+#include <set>
 #include <string>
 
 #include "utils/PropertyMap.hpp"
@@ -155,6 +156,15 @@ namespace OpenMD {
     AtomType& operator=(const AtomType& atomType);
     PropertyMap properties_;
   };
+
+  class AtomTypeCompare {
+  public:
+    bool operator()(AtomType* lhs, AtomType* rhs) const {
+      return lhs->getIdent() < rhs->getIdent();
+    }
+  };
+
+  using AtomTypeSet = std::set<AtomType*, AtomTypeCompare>;
 }  // namespace OpenMD
 
 #endif

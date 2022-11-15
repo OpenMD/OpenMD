@@ -90,7 +90,7 @@ namespace OpenMD {
     frequencyMap_["PiC"]    = -0.00896;
 
     ForceField* forceField_ = info_->getForceField();
-    set<AtomType*> atypes   = info_->getSimulatedAtomTypes();
+    AtomTypeSet atypes   = info_->getSimulatedAtomTypes();
     PairList* excludes      = info_->getExcludedInteractions();
     int nAtoms =
         info->getSnapshotManager()->getCurrentSnapshot()->getNumberOfAtoms();

@@ -60,7 +60,7 @@ namespace OpenMD {
     FQtids.clear();
     FQtids.resize(forceField_->getNAtomType(), -1);
 
-    set<AtomType*>::iterator at;
+    AtomTypeSet::iterator at;
     for (at = simTypes_.begin(); at != simTypes_.end(); ++at)
       if ((*at)->isFluctuatingCharge()) addType(*at);
 

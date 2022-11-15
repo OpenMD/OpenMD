@@ -65,7 +65,7 @@ ANTLR_C_USING(strcasecmp)
 
 /** Functor for the literals map
  */
-class ANTLR_API CharScannerLiteralsLess : public ANTLR_USE_NAMESPACE(std)binary_function<ANTLR_USE_NAMESPACE(std)string,ANTLR_USE_NAMESPACE(std)string,bool> {
+class ANTLR_API CharScannerLiteralsLess {
 private:
 	const CharScanner* scanner;
 public:
@@ -76,8 +76,14 @@ public:
 	: scanner(theScanner)
 	{
 	}
+
+    using result_type = bool;
+    using first_argument_type = ANTLR_USE_NAMESPACE(std)string;
+    using second_argument_type = ANTLR_USE_NAMESPACE(std)string;
+
 	bool operator() (const ANTLR_USE_NAMESPACE(std)string& x,const ANTLR_USE_NAMESPACE(std)string& y) const;
-// defaults are good enough..
+
+  // defaults are good enough..
 	//	CharScannerLiteralsLess(const CharScannerLiteralsLess&);
 	//	CharScannerLiteralsLess& operator=(const CharScannerLiteralsLess&);
 };

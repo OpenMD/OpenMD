@@ -91,7 +91,7 @@ namespace OpenMD {
     EAM();
     void setForceField(ForceField* ff) { forceField_ = ff; };
     void setElectrostatic(Electrostatic* el) { electrostatic_ = el; };
-    void setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+    void setSimulatedAtomTypes(AtomTypeSet& simtypes) {
       simTypes_ = simtypes;
       initialize();
     };
@@ -179,7 +179,7 @@ namespace OpenMD {
 
     ForceField* forceField_;
     Electrostatic* electrostatic_;
-    set<AtomType*> simTypes_;
+    AtomTypeSet simTypes_;
     RealType pre11_;
     RealType eamRcut_;
     // RealType oss_;

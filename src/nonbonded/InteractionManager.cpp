@@ -100,7 +100,7 @@ namespace OpenMD {
     // We only need to worry about the types that are actually in the
     // simulation:
 
-    set<AtomType*> atypes = info_->getSimulatedAtomTypes();
+    AtomTypeSet atypes = info_->getSimulatedAtomTypes();
 
     lj_->setSimulatedAtomTypes(atypes);
     gb_->setSimulatedAtomTypes(atypes);
@@ -115,7 +115,7 @@ namespace OpenMD {
     mie_->setSimulatedAtomTypes(atypes);
     inversePowerSeries_->setSimulatedAtomTypes(atypes);
 
-    set<AtomType*>::iterator at;
+    AtomTypeSet::iterator at;
     set<NonBondedInteractionPtr>::iterator it;
 
     for (at = atypes.begin(); at != atypes.end(); ++at) {
@@ -457,8 +457,8 @@ namespace OpenMD {
     // Make sure every pair of atom types in this simulation has a
     // non-bonded interaction.  If not, just inform the user.
 
-    set<AtomType*> simTypes = info_->getSimulatedAtomTypes();
-    set<AtomType*>::iterator bt;
+    AtomTypeSet simTypes = info_->getSimulatedAtomTypes();
+    AtomTypeSet::iterator bt;
 
     for (at = simTypes.begin(); at != simTypes.end(); ++at) {
       atype1 = (*at);

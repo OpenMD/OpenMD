@@ -160,6 +160,8 @@ namespace OpenMD {
       data_.resize(n, value);
     }
 
+    void reserve(size_type new_cap) { data_.reserve(new_cap); }
+
     /**
      * Tests if this vetor is equal to other vector
      * @return true if equal, otherwise return false

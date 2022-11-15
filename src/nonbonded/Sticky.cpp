@@ -66,7 +66,7 @@ namespace OpenMD {
 
     // Sticky handles all of the Sticky-Sticky interactions
 
-    set<AtomType*>::iterator at;
+    AtomTypeSet::iterator at;
     for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
       if ((*at)->isSticky()) nSticky_++;
     }

@@ -79,7 +79,7 @@ namespace OpenMD {
 
     evaluator_.loadScriptString(sele);
     seleMan_.setSelectionSet(evaluator_.evaluate());
-    std::set<AtomType*> osTypes = seleMan_.getSelectedAtomTypes();
+    AtomTypeSet osTypes = seleMan_.getSelectedAtomTypes();
     std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
 
     data_.resize(RNEMDZ::ENDINDEX);

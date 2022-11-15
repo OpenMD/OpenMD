@@ -135,8 +135,8 @@ namespace OpenMD {
     // We need the list of simulated atom types to figure out cutoffs
     // as well as long range corrections.
 
-    set<AtomType*>::iterator i;
-    set<AtomType*> atomTypes_;
+    AtomTypeSet::iterator i;
+    AtomTypeSet atomTypes_;
     atomTypes_ = info_->getSimulatedAtomTypes();
 
     if (simParams_->haveCutoffRadius()) {
@@ -1100,8 +1100,8 @@ namespace OpenMD {
         RealType Elrc(0.0);
         RealType Wlrc(0.0);
 
-        set<AtomType*>::iterator i;
-        set<AtomType*>::iterator j;
+        AtomTypeSet::iterator i;
+        AtomTypeSet::iterator j;
 
         RealType n_i, n_j;
         RealType rho_i, rho_j;
@@ -1827,8 +1827,8 @@ namespace OpenMD {
         RealType Elrc(0.0);
         RealType Wlrc(0.0);
 
-        set<AtomType*>::iterator i;
-        set<AtomType*>::iterator j;
+        AtomTypeSet::iterator i;
+        AtomTypeSet::iterator j;
 
         RealType n_i, n_j;
         RealType rho_i, rho_j;

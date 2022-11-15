@@ -113,7 +113,7 @@ namespace OpenMD {
 
     SCtids.resize(forceField_->getNAtomType(), -1);
 
-    set<AtomType*>::iterator at;
+    AtomTypeSet::iterator at;
     for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
       if ((*at)->isSC()) nSC_++;
     }

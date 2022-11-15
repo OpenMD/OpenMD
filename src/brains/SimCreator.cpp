@@ -670,8 +670,8 @@ namespace OpenMD {
   int SimCreator::computeStorageLayout(SimInfo* info) {
     Globals* simParams       = info->getSimParams();
     int nRigidBodies         = info->getNGlobalRigidBodies();
-    set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
-    set<AtomType*>::iterator i;
+    AtomTypeSet atomTypes = info->getSimulatedAtomTypes();
+    AtomTypeSet::iterator i;
     bool hasDirectionalAtoms  = false;
     bool hasFixedCharge       = false;
     bool hasDipoles           = false;

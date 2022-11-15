@@ -122,7 +122,7 @@ namespace OpenMD {
     CutoffMethod
         cutoffMethod_; /**< Cutoff Method for most non-bonded interactions */
 
-    std::set<AtomType*> atomTypes_;
+    AtomTypeSet atomTypes_;
     std::vector<pair<AtomType*, AtomType*>> interactions_;
     std::map<Bend*, BendDataSet> bendDataSets;
     std::map<Torsion*, TorsionDataSet> torsionDataSets;

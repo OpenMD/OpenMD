@@ -418,7 +418,7 @@ namespace OpenMD {
     void removeInteractionPairs(Molecule* mol);
 
     /** Returns the set of atom types present in this simulation */
-    set<AtomType*> getSimulatedAtomTypes();
+    AtomTypeSet getSimulatedAtomTypes();
 
     /** Returns the global count of atoms of a particular type */
     int getGlobalCountOfType(AtomType* atype);

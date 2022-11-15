@@ -64,7 +64,7 @@ namespace OpenMD {
   public:
     Morse();
     void setForceField(ForceField* ff) { forceField_ = ff; };
-    void setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+    void setSimulatedAtomTypes(AtomTypeSet& simtypes) {
       simTypes_ = simtypes;
       initialize();
     };
@@ -87,7 +87,7 @@ namespace OpenMD {
                         between two Morse types */
     int nM_;
     ForceField* forceField_;
-    set<AtomType*> simTypes_;
+    AtomTypeSet simTypes_;
     string name_;
   };
 }  // namespace OpenMD

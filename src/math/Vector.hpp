@@ -407,7 +407,7 @@ namespace OpenMD {
      */
     inline bool isNormalized() { return equal(lengthSquare(), (RealType)1); }
 
-    unsigned int size() { return Dim; }
+    unsigned int size() const { return Dim; }
 
   protected:
     Real data_[Dim] {};

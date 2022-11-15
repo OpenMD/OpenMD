@@ -327,7 +327,7 @@ namespace OpenMD {
 
   std::vector<Vector3d> Thermo::getCurrentDensity() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
-    std::set<AtomType*> simTypes = info_->getSimulatedAtomTypes();
+    AtomTypeSet simTypes = info_->getSimulatedAtomTypes();
 
     SimInfo::MoleculeIterator miter;
     std::vector<Atom*>::iterator iiter;
@@ -336,7 +336,7 @@ namespace OpenMD {
     RigidBody* rb;
     Atom* atom;
     AtomType* atype;
-    std::set<AtomType*>::iterator at;
+    AtomTypeSet::iterator at;
     Vector3d Jc(0.0);
     std::vector<Vector3d> typeJc(simTypes.size(), V3Zero);
 

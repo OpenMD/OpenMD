@@ -543,8 +543,8 @@ namespace OpenMD {
    * Must query all processors to assemble this information.
    *
    */
-  std::set<AtomType*> SelectionManager::getSelectedAtomTypes() {
-    std::set<AtomType*> atomTypes;
+  AtomTypeSet SelectionManager::getSelectedAtomTypes() {
+    AtomTypeSet atomTypes;
 
     for (int i = 0; i < ss_.bitsets_[STUNTDOUBLE].size(); ++i) {
       if (ss_.bitsets_[STUNTDOUBLE][i]) {
@@ -563,7 +563,7 @@ namespace OpenMD {
     // numerical idents to a vector:
 
     std::vector<int> foundTypes;
-    set<AtomType*>::iterator i;
+    AtomTypeSet::iterator i;
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i)
       foundTypes.push_back((*i)->getIdent());
 

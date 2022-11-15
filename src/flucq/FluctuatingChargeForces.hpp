@@ -63,7 +63,7 @@ namespace OpenMD {
   public:
     FluctuatingChargeForces(SimInfo* info);
     void setForceField(ForceField* ff) { forceField_ = ff; };
-    void setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+    void setSimulatedAtomTypes(AtomTypeSet& simtypes) {
       simTypes_ = simtypes;
     };
     void getSelfInteraction(int atid, RealType charge, RealType& potential,
@@ -74,7 +74,7 @@ namespace OpenMD {
     void initialize();
     SimInfo* info_ {nullptr};
     ForceField* forceField_;
-    set<AtomType*> simTypes_;
+    AtomTypeSet simTypes_;
 
     FluctuatingChargeAtomData data;
 

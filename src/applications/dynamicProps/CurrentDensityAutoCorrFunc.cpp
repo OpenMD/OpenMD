@@ -59,7 +59,7 @@ namespace OpenMD {
     setCorrFuncType("Current Density Auto Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".currentDensityCorr");
 
-    std::set<AtomType*> osTypes = seleMan1_.getSelectedAtomTypes();
+    AtomTypeSet osTypes = seleMan1_.getSelectedAtomTypes();
     std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
 
     Jc_.resize(nFrames_, V3Zero);

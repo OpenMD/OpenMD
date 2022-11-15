@@ -485,7 +485,7 @@ namespace OpenMD {
      */
     Molecule* nthSelectedMolecule(int& n);
 
-    std::set<AtomType*> getSelectedAtomTypes();
+    AtomTypeSet getSelectedAtomTypes();
 
     SelectionManager& operator&=(const SelectionManager& sman) {
       for (int i = 0; i < N_SELECTIONTYPES; i++)

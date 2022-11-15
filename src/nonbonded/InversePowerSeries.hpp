@@ -61,7 +61,7 @@ namespace OpenMD {
   public:
     InversePowerSeries();
     void setForceField(ForceField* ff) { forceField_ = ff; }
-    void setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+    void setSimulatedAtomTypes(AtomTypeSet& simtypes) {
       simTypes_ = simtypes;
       initialize();
     }
@@ -92,7 +92,7 @@ namespace OpenMD {
          types */
 
     ForceField* forceField_;
-    set<AtomType*> simTypes_;
+    AtomTypeSet simTypes_;
     string name_;
   };
 }  // namespace OpenMD
