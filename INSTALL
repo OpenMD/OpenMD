@@ -183,8 +183,8 @@ Advanced build options
   * How do I build the Doxygen documentation?
 
     If CMake found the "doxygen" program in your PATH, an optional
-    build target called "doc" is created.  If the Doxygen executable
+    build target called "docs" is created.  If the Doxygen executable
     was not on the PATH, you will need to specify its location with
     -DDOXYGEN_EXECUTABLE=wherever.  To build the documentation, type:
 
-    $ make doc
+    $ make docs
