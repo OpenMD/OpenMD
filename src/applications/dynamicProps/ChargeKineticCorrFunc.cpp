@@ -80,11 +80,11 @@ namespace OpenMD {
       FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
 
       if (!sd->isDirectional() && !fqa.isFluctuatingCharge()) {
-        sprintf(painCave.errMsg,
-                "ChargeKineticCorrFunc::validateSelection Error: selection "
-                "%d (%s)\n"
-                "\t is not a Directional object\n",
-                sd->getGlobalIndex(), sd->getType().c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "ChargeKineticCorrFunc::validateSelection Error: selection "
+                 "%d (%s)\n"
+                 "\t is not a Directional object\n",
+                 sd->getGlobalIndex(), sd->getType().c_str());
         painCave.isFatal = 1;
         simError();
       }

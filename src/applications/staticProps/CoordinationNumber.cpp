@@ -182,10 +182,10 @@ namespace OpenMD {
         if (whichBin < histogram_.size()) {
           histogram_[whichBin] += 1;
         } else {
-          sprintf(painCave.errMsg,
-                  "Coordination Number: Error: "
-                  "In frame, %d, object %d has CN %lf outside of range max.\n",
-                  istep, sd1->getGlobalIndex(), cn);
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "Coordination Number: Error: "
+                   "In frame, %d, object %d has CN %lf outside of range max.\n",
+                   istep, sd1->getGlobalIndex(), cn);
           painCave.isFatal = 1;
           simError();
         }

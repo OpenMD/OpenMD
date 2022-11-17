@@ -41,9 +41,9 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "applications/hydrodynamics/ApproximationModel.hpp"
+#include "hydrodynamics/ApproximationModel.hpp"
 
-#include "applications/hydrodynamics/CompositeShape.hpp"
+#include "hydrodynamics/CompositeShape.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "math/DynamicRectMatrix.hpp"
@@ -89,8 +89,8 @@ namespace OpenMD {
 
   void ApproximationModel::init() {
     if (!createBeads(beads_)) {
-      sprintf(painCave.errMsg,
-              "ApproximationModel::init() : Could not create beads\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "ApproximationModel::init() : Could not create beads\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -129,10 +129,11 @@ namespace OpenMD {
       for (std::size_t j = 0; j < nbeads; ++j) {
         // checking if the beads' radii are non-negative values.
         if (beads[i].radius < 0 || beads[j].radius < 0) {
-          sprintf(painCave.errMsg,
-                  "There are beads with negative radius. Starting from index 0,\
+          snprintf(
+              painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+              "There are beads with negative radius. Starting from index 0,\
  check bead (%lu) and/or bead (%lu).\n",
-                  i, j);
+              i, j);
           painCave.isFatal = 1;
           simError();
         }
@@ -243,7 +244,7 @@ namespace OpenMD {
     }
 
     // overlapping beads percentage
-    //#overlap_beads counts (i,j) and (j,i) beads; and N*(N-1) counts (Tij) and
+    // #overlap_beads counts (i,j) and (j,i) beads; and N*(N-1) counts (Tij) and
     //(Tji)
     // elements  (i!=j)
     if (overlap_beads > 0) {
@@ -360,16 +361,16 @@ namespace OpenMD {
     // Write data to .hydro file
     Mat6x6d Xi;
 
-    cr->setCOR(ror);
+    cr->setCenterOfResistance(ror);
 
     Xi.setSubMatrix(0, 0, Xirtt);
     Xi.setSubMatrix(0, 3, Xirtr.transpose());
     Xi.setSubMatrix(3, 0, Xirtr);
     Xi.setSubMatrix(3, 3, Xirrr);
 
-    cr->setXi(Xi);
+    cr->setResistanceTensor(Xi);
 
-    cr->setD(Dr6x6);
+    cr->setDiffusionTensor(Dr6x6);
 
     std::cout << "\n";
     std::cout << "-----------------------------------------\n";
@@ -491,16 +492,16 @@ namespace OpenMD {
     // Write data to .hydro file
     Mat6x6d Did;
 
-    cd->setCOR(rod);
+    cd->setCenterOfResistance(rod);
 
-    cd->setXi(Xid);
+    cd->setResistanceTensor(Xid);
 
     Did.setSubMatrix(0, 0, Ddtt);
     Did.setSubMatrix(0, 3, Ddtr.transpose());
     Did.setSubMatrix(3, 0, Ddtr);
     Did.setSubMatrix(3, 3, Ddrr);
 
-    cd->setD(Did);
+    cd->setDiffusionTensor(Did);
 
     std::cout << "Center of diffusion: " << std::endl;
     std::cout << rod << "\n" << std::endl;
@@ -567,21 +568,21 @@ namespace OpenMD {
     // Write data to .hydro file
     Mat6x6d Xcm, Dcm;
 
-    com->setCOR(refMolCom);
+    com->setCenterOfResistance(refMolCom);
 
     Xcm.setSubMatrix(0, 0, Xicomtt);
     Xcm.setSubMatrix(0, 3, Xicomtr.transpose());
     Xcm.setSubMatrix(3, 0, Xicomtr);
     Xcm.setSubMatrix(3, 3, Xicomrr);
 
-    com->setXi(Xcm);
+    com->setResistanceTensor(Xcm);
 
     Dcm.setSubMatrix(0, 0, Dcomtt);
     Dcm.setSubMatrix(0, 3, Dcomtr.transpose());
     Dcm.setSubMatrix(3, 0, Dcomtr);
     Dcm.setSubMatrix(3, 3, Dcomrr);
 
-    com->setD(Dcm);
+    com->setDiffusionTensor(Dcm);
 
     std::cout << "Center of mass :" << std::endl;
     std::cout << refMolCom << "\n" << std::endl;

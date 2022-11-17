@@ -240,8 +240,9 @@ namespace OpenMD {
       osq.close();
 
     } else {
-      sprintf(painCave.errMsg, "HBondGeometric: unable to open %s\n",
-              (getOutputFileName() + "q").c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "HBondGeometric: unable to open %s\n",
+               (getOutputFileName() + "q").c_str());
       painCave.isFatal = 1;
       simError();
     }

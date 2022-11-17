@@ -74,7 +74,8 @@ namespace OpenMD {
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     } else {
-      sprintf(painCave.errMsg, "dynamic selection is not allowed\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "dynamic selection is not allowed\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -83,7 +84,8 @@ namespace OpenMD {
     if (!evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     } else {
-      sprintf(painCave.errMsg, "dynamic selection is not allowed\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "dynamic selection is not allowed\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -92,7 +94,8 @@ namespace OpenMD {
     if (!evaluator3_.isDynamic()) {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
     } else {
-      sprintf(painCave.errMsg, "dynamic selection is not allowed\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "dynamic selection is not allowed\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -103,8 +106,8 @@ namespace OpenMD {
     int nselected3 = seleMan3_.getSelectionCount();
 
     if (nselected1 != nselected2 || nselected1 != nselected3) {
-      sprintf(painCave.errMsg,
-              "The number of selected Stuntdoubles must be the same\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "The number of selected Stuntdoubles must be the same\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

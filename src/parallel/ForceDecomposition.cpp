@@ -72,11 +72,11 @@ namespace OpenMD {
       skinThickness_ = simParams_->getSkinThickness();
     } else {
       skinThickness_ = 1.0;
-      sprintf(painCave.errMsg,
-              "ForceDecomposition: No value was set for the skinThickness.\n"
-              "\tOpenMD will use a default value of %f Angstroms\n"
-              "\tfor this simulation\n",
-              skinThickness_);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "ForceDecomposition: No value was set for the skinThickness.\n"
+               "\tOpenMD will use a default value of %f Angstroms\n"
+               "\tfor this simulation\n",
+               skinThickness_);
       painCave.severity = OPENMD_INFO;
       painCave.isFatal  = 0;
       simError();

@@ -64,9 +64,9 @@ namespace OpenMD {
     // in SCAtomTypesSectionParser, a line at least contains 6 tokens
     // atomTypeName, epsilon,c,m,n and alpha
     if (nTokens < 6) {
-      sprintf(painCave.errMsg,
-              "SCAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-              lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "SCAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+               lineNo);
       painCave.isFatal = 1;
       simError();
     } else {
@@ -88,10 +88,11 @@ namespace OpenMD {
         sca.makeSuttonChen(c, m, n, alpha, epsilon);
 
       } else {
-        sprintf(painCave.errMsg,
-                "SCAtomTypesSectionParser Error: Atom Type [%s] is not created "
-                "yet\n",
-                atomTypeName.c_str());
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+            "SCAtomTypesSectionParser Error: Atom Type [%s] is not created "
+            "yet\n",
+            atomTypeName.c_str());
         painCave.isFatal = 1;
         simError();
       }

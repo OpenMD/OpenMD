@@ -219,9 +219,9 @@ namespace OpenMD {
     for (mol = seleMan1_.beginSelectedMolecule(i); mol != NULL;
          mol = seleMan1_.nextSelectedMolecule(i)) {
       if (mol->getNRigidBodies() < 1) {
-        sprintf(painCave.errMsg,
-                "COHZ::validateSelection Error: "
-                "at least one selected molecule does not have a rigid body\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "COHZ::validateSelection Error: "
+                 "at least one selected molecule does not have a rigid body\n");
         painCave.isFatal = 1;
         simError();
       }
@@ -261,8 +261,9 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg,
-              "COHz::writeCorrelate Error: failed to open %s\n", Dfile.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "COHz::writeCorrelate Error: failed to open %s\n",
+               Dfile.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -292,9 +293,9 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg,
-              "COHz::writeCorrelate Error: failed to open %s\n",
-              OHfile.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "COHz::writeCorrelate Error: failed to open %s\n",
+               OHfile.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -324,9 +325,9 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg,
-              "COHz::writeCorrelate Error: failed to open %s\n",
-              HHfile.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "COHz::writeCorrelate Error: failed to open %s\n",
+               HHfile.c_str());
       painCave.isFatal = 1;
       simError();
     }

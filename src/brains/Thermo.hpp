@@ -72,12 +72,14 @@ namespace OpenMD {
                                    // kcal fs / e / mol
     std::vector<Vector3d> getCurrentDensity();
 
-    RealType getPressure();  // gives the instant pressure in atm;
-    RealType getPressure(Snapshot* snap); // gives the instant pressure in atm for a given snapshot;
+    RealType getPressure();                // gives the instant pressure in atm;
+    RealType getPressure(Snapshot* snap);  // gives the instant pressure in atm
+                                           // for a given snapshot;
 
     /** \brief gives the pressure tensor in amu*fs^-2*Ang^-1 */
     Mat3x3d getPressureTensor();
-    /** \brief gives the pressure tensor in amu*fs^-2*Ang^-1 for a given snapshot */
+    /** \brief gives the pressure tensor in amu*fs^-2*Ang^-1 for a given
+     * snapshot */
     Mat3x3d getPressureTensor(Snapshot* snap);
 
     RealType getVolume();  // gives the volume in Ang^3

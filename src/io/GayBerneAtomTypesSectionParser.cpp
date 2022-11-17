@@ -64,8 +64,8 @@ namespace OpenMD {
     // in GayBerneAtomTypesSection, a line at least contains 7 tokens
     // atomTypeName   d    l    eps_X  eps_S   eps_E   dw
     if (nTokens < 7) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "GayBerneAtomTypesSectionParser: Not enough tokens at line %d\n"
           "\tPlease note that GB atoms now require separate specification of "
           "epsilon\n"
@@ -92,11 +92,11 @@ namespace OpenMD {
         gba.makeGayBerne(GB_d, GB_l, GB_eps_X, GB_eps_S, GB_eps_E, GB_dw);
 
       } else {
-        sprintf(painCave.errMsg,
-                "GayBerneAtomTypesSectionParser: Can not find matching "
-                "AtomType %s\n"
-                "\tfor this GayBerne atom type\n",
-                atomTypeName.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "GayBerneAtomTypesSectionParser: Can not find matching "
+                 "AtomType %s\n"
+                 "\tfor this GayBerne atom type\n",
+                 atomTypeName.c_str());
         painCave.isFatal = 1;
         simError();
       }

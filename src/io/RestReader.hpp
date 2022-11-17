@@ -73,8 +73,8 @@ namespace OpenMD {
                                     ifstream::in | ifstream::binary);
 
         if (inFile_->fail()) {
-          sprintf(painCave.errMsg, "RestReader: Cannot open file: %s\n",
-                  filename_.c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "RestReader: Cannot open file: %s\n", filename_.c_str());
           painCave.isFatal = 1;
           simError();
         }

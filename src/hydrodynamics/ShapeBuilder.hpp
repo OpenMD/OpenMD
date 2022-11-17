@@ -41,69 +41,24 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "applications/hydrodynamics/HydrodynamicsModelFactory.hpp"
+#ifndef HYDRODYNAMICS_SHAPEBUILDER_HPP
+#define HYDRODYNAMICS_SHAPEBUILDER_HPP
 
-#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
-#include "applications/hydrodynamics/HydrodynamicsModelCreator.hpp"
-#include "brains/SimInfo.hpp"
-#include "utils/MemoryUtils.hpp"
+#include "hydrodynamics/Shape.hpp"
+#include "primitives/Molecule.hpp"
+#include "utils/ElementsTable.hpp"
 
 namespace OpenMD {
 
-  // initialize instance of HydrodynamicsModelFactory
-  HydrodynamicsModelFactory* HydrodynamicsModelFactory::instance_ = NULL;
+  class ShapeBuilder {
+  public:
+    static Shape* createShape(StuntDouble* sd);
 
-  HydrodynamicsModelFactory::~HydrodynamicsModelFactory() {
-    Utils::deletePointers(creatorMap_);
-  }
-
-  bool HydrodynamicsModelFactory::registerHydrodynamicsModel(
-      HydrodynamicsModelCreator* creator) {
-    return creatorMap_
-        .insert(CreatorMapType::value_type(creator->getIdent(), creator))
-        .second;
-  }
-
-  bool HydrodynamicsModelFactory::unregisterHydrodynamicsModel(
-      const std::string& id) {
-    return creatorMap_.erase(id) == 1;
-  }
-
-  HydrodynamicsModel* HydrodynamicsModelFactory::createHydrodynamicsModel(
-      const std::string& id, StuntDouble* sd, SimInfo* info) {
-    CreatorMapType::iterator i = creatorMap_.find(id);
-    if (i != creatorMap_.end()) {
-      // invoke functor to create object
-      return (i->second)->create(sd, info);
-    } else {
-      return NULL;
-    }
-  }
-
-  std::vector<std::string> HydrodynamicsModelFactory::getIdents() {
-    IdentVectorType idents;
-    CreatorMapType::iterator i;
-
-    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-      idents.push_back(i->first);
-    }
-
-    return idents;
-  }
-
-  std::ostream& operator<<(std::ostream& o,
-                           HydrodynamicsModelFactory& factory) {
-    HydrodynamicsModelFactory::IdentVectorType idents;
-    HydrodynamicsModelFactory::IdentVectorIterator i;
-
-    idents = factory.getIdents();
-
-    o << "Avaliable type identifiers in this factory: " << std::endl;
-    for (i = idents.begin(); i != idents.end(); ++i) {
-      o << *i << std::endl;
-    }
-
-    return o;
-  }
-
+  private:
+    static Shape* internalCreateShape(Atom* atom);
+    static Shape* internalCreateShape(DirectionalAtom* datom);
+    static Shape* internalCreateShape(RigidBody* rb);
+  };
 }  // namespace OpenMD
+
+#endif

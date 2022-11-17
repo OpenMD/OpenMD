@@ -348,8 +348,9 @@ namespace OpenMD {
       osq.close();
 
     } else {
-      sprintf(painCave.errMsg, "IcosahedralOfR: unable to open %s\n",
-              (getOutputFileName() + "q").c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "IcosahedralOfR: unable to open %s\n",
+               (getOutputFileName() + "q").c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -379,8 +380,9 @@ namespace OpenMD {
 
       osw.close();
     } else {
-      sprintf(painCave.errMsg, "IcosahedralOfR: unable to open %s\n",
-              (getOutputFileName() + "w").c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "IcosahedralOfR: unable to open %s\n",
+               (getOutputFileName() + "w").c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -412,8 +414,9 @@ namespace OpenMD {
 
       osw.close();
     } else {
-      sprintf(painCave.errMsg, "FCCOfR: unable to open %s\n",
-              (getOutputFileName() + "w").c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "FCCOfR: unable to open %s\n",
+               (getOutputFileName() + "w").c_str());
       painCave.isFatal = 1;
       simError();
     }

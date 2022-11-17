@@ -41,57 +41,58 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "applications/hydrodynamics/CompositeShape.hpp"
+#ifndef HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
+#define HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
 
-#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
-#include "utils/MemoryUtils.hpp"
+#include <vector>
+
+#include "hydrodynamics/HydroProp.hpp"
+#include "math/DynamicRectMatrix.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
+#include "primitives/Molecule.hpp"
 
 namespace OpenMD {
 
-  CompositeShape::~CompositeShape() { Utils::deletePointers(shapes_); }
+  struct BeadParam {
+    std::string atomName;
+    Vector3d pos;
+    RealType mass;  // to compute center of mass in ApproximationModel.cpp
+    RealType radius;
+  };
 
-  bool CompositeShape::isInterior(Vector3d pos) {
-    bool result = false;
-    std::vector<Shape*>::iterator iter;
-    for (iter = shapes_.begin(); iter != shapes_.end(); ++iter) {
-      if ((*iter)->isInterior(pos)) {
-        result = true;
-        break;
-      }
-    }
+  class Shape;
+  class Sphere;
+  class Ellipsoid;
+  class CompositeShape;
 
-    return result;
-  }
+  class HydrodynamicsModel {
+  public:
+    HydrodynamicsModel(StuntDouble* sd, SimInfo* info) : sd_(sd), info_(info) {}
+    virtual ~HydrodynamicsModel() = default;
 
-  template<class Cont, class Predict>
-  void swap_if(Cont& b1, Cont& b2, Predict predict) {
-    unsigned int size = b1.size();
-    assert(size == b2.size());
-    for (unsigned int i = 0; i < size; ++i) {
-      if (predict(b1[i], b2[i])) std::swap(b1[i], b2[i]);
-    }
-  }
+    virtual bool calcHydroProps(Shape* shape, RealType viscosity,
+                                RealType temperature);
 
-  std::pair<Vector3d, Vector3d> CompositeShape::getBoundingBox() {
-    std::vector<Shape*>::iterator iter     = shapes_.begin();
-    std::pair<Vector3d, Vector3d> boundary = (*iter)->getBoundingBox();
-    for (++iter; iter != shapes_.end(); ++iter) {
-      std::pair<Vector3d, Vector3d> currBoundary = (*iter)->getBoundingBox();
-      swap_if(boundary.first, currBoundary.first, std::greater<RealType>());
-      swap_if(boundary.second, currBoundary.second, std::less<RealType>());
-    }
+    virtual void init() {};
+    virtual void writeBeads(std::ostream& os) = 0;
+    void writeHydroProps(std::ostream& os);
 
-    return boundary;
-  }
+    void setCR(HydroProp* cr) { cr_ = cr; }
+    void setCD(HydroProp* cd) { cd_ = cd; }
+    void setCOM(HydroProp* com) { com_ = com; }
+    std::string getStuntDoubleName() { return sd_->getType(); }
 
-  HydroProp* CompositeShape::getHydroProp(RealType, RealType) {
-    HydroProp* props = new HydroProp();
-    props->setCOR(V3Zero);
-    sprintf(painCave.errMsg,
-            "CompositeShape was asked to return an analytic HydroProps.\n");
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal  = 1;
-    simError();
-    return props;
-  }
+  protected:
+    StuntDouble* sd_;
+    SimInfo* info_ {nullptr};
+
+  private:
+    HydroProp* cr_;
+    HydroProp* cd_;
+    HydroProp* com_;
+    std::vector<BeadParam> beads_;
+  };
 }  // namespace OpenMD
+
+#endif

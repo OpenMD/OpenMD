@@ -91,8 +91,8 @@ namespace OpenMD {
     pair<set<int>::iterator, bool> ret;
     ret = Stypes.insert(atid);
     if (ret.second == false) {
-      sprintf(painCave.errMsg,
-              "Sticky already had a previous entry with ident %d\n", atid);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Sticky already had a previous entry with ident %d\n", atid);
       painCave.severity = OPENMD_INFO;
       painCave.isFatal  = 0;
       simError();
@@ -339,8 +339,6 @@ namespace OpenMD {
 
     if (stid1 == -1 || stid2 == -1)
       return 0.0;
-    else {
-      return MixingMap[stid1][stid2].rbig;
-    }
+    else { return MixingMap[stid1][stid2].rbig; }
   }
 }  // namespace OpenMD

@@ -1,22 +1,22 @@
 /* -*- mode: c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
 /*
- Copyright (C) 2006, 2007 Ferdinando Ametrano
- Copyright (C) 2007 Marco Bianchetti
- Copyright (C) 2001, 2002, 2003 Nicolas Di Césaré
+  Copyright (C) 2006, 2007 Ferdinando Ametrano
+  Copyright (C) 2007 Marco Bianchetti
+  Copyright (C) 2001, 2002, 2003 Nicolas Di Césaré
 
- This file is part of QuantLib, a free-software/open-source library
- for financial quantitative analysts and developers - http://quantlib.org/
+  This file is part of QuantLib, a free-software/open-source library
+  for financial quantitative analysts and developers - http://quantlib.org/
 
- QuantLib is free software: you can redistribute it and/or modify it
- under the terms of the QuantLib license.  You should have received a
- copy of the license along with this program; if not, please email
- <quantlib-dev@lists.sf.net>. The license is also available online at
- <http://quantlib.org/license.shtml>.
+  QuantLib is free software: you can redistribute it and/or modify it
+  under the terms of the QuantLib license.  You should have received a
+  copy of the license along with this program; if not, please email
+  <quantlib-dev@lists.sf.net>. The license is also available online at
+  <http://quantlib.org/license.shtml>.
 
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE.  See the license for more details.
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE.  See the license for more details.
 */
 
 #include "optimization/EndCriteria.hpp"
@@ -38,20 +38,20 @@ namespace QuantLib {
       gradientNormEpsilon_(gradientNormEpsilon) {
     // replaced the QL_REQUIRE macro with OpenMD's simError calls
     if (maxStationaryStateIterations_ <= 1) {
-      sprintf(painCave.errMsg,
-              "maxStationaryStateIterations_ ( %lu ) "
-              "must be greater than one\n",
-              (unsigned long)maxStationaryStateIterations_);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "maxStationaryStateIterations_ ( %lu ) "
+               "must be greater than one\n",
+               (unsigned long)maxStationaryStateIterations_);
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
     }
     if (maxStationaryStateIterations_ > maxIterations_) {
-      sprintf(painCave.errMsg,
-              "maxStationaryStateIterations_ ( %lu ) "
-              "must be less than maxIterations_ ( %lu )\n",
-              (unsigned long)maxStationaryStateIterations_,
-              (unsigned long)maxIterations_);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "maxStationaryStateIterations_ ( %lu ) "
+               "must be less than maxIterations_ ( %lu )\n",
+               (unsigned long)maxStationaryStateIterations_,
+               (unsigned long)maxIterations_);
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
@@ -165,7 +165,8 @@ namespace QuantLib {
     case QuantLib::EndCriteria::Unknown:
       return out << "Unknown";
     default:
-      sprintf(painCave.errMsg, "unknown EndCriteria::Type ( %d )\n", int(ec));
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "unknown EndCriteria::Type ( %d )\n", int(ec));
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();

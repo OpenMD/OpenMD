@@ -185,8 +185,8 @@ int main(int argc, char* argv[]) {
   MinimizerParameters* miniPars = simParams->getMinimizerParameters();
 
   if (miniPars->getUseMinimizer() && simParams->haveEnsemble()) {
-    sprintf(
-        painCave.errMsg,
+    snprintf(
+        painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
         "Ensemble keyword can not co-exist with useMinimizer = \"true\" in the "
         "minimizer block\n");
     painCave.isFatal = 1;
@@ -200,9 +200,9 @@ int main(int argc, char* argv[]) {
             toUpperCopy(miniPars->getMethod()), info);
 
     if (myMinimizer == NULL) {
-      sprintf(painCave.errMsg,
-              "Optimization Factory can not create %s OptimizationMethod\n",
-              miniPars->getMethod().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Optimization Factory can not create %s OptimizationMethod\n",
+               miniPars->getMethod().c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -234,9 +234,9 @@ int main(int argc, char* argv[]) {
             toUpperCopy(simParams->getEnsemble()), info);
 
     if (myIntegrator == NULL) {
-      sprintf(painCave.errMsg,
-              "Integrator Factory can not create %s Integrator\n",
-              simParams->getEnsemble().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Integrator Factory can not create %s Integrator\n",
+               simParams->getEnsemble().c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -244,9 +244,9 @@ int main(int argc, char* argv[]) {
     myIntegrator->integrate();
     delete myIntegrator;
   } else {
-    sprintf(painCave.errMsg,
-            "Integrator Factory can not create %s Integrator\n",
-            simParams->getEnsemble().c_str());
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Integrator Factory can not create %s Integrator\n",
+             simParams->getEnsemble().c_str());
     painCave.isFatal = 1;
     simError();
   }

@@ -243,7 +243,8 @@ int main(int argc, char* argv[]) {
     if (args_info.order_given)
       order = args_info.order_arg;
     else {
-      sprintf(painCave.errMsg, "--order must be set if --lcorr is set\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--order must be set if --lcorr is set\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -256,7 +257,8 @@ int main(int argc, char* argv[]) {
     if (args_info.order_given)
       order = args_info.order_arg;
     else {
-      sprintf(painCave.errMsg, "--order must be set if --lcorrZ is set\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--order must be set if --lcorrZ is set\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -271,7 +273,8 @@ int main(int argc, char* argv[]) {
     if (args_info.order_given)
       order = args_info.order_arg;
     else {
-      sprintf(painCave.errMsg, "--order must be set if --cohZ is set\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--order must be set if --cohZ is set\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -296,7 +299,8 @@ int main(int argc, char* argv[]) {
           args_info.OOcut_arg, args_info.thetacut_arg, args_info.OHcut_arg,
           maxLen, args_info.nbins_arg);
     } else {
-      sprintf(painCave.errMsg, "--sele3 must be set if --jumptimeR is set\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--sele3 must be set if --jumptimeR is set\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -318,8 +322,8 @@ int main(int argc, char* argv[]) {
       corrFunc =
           std::make_unique<CoMRCorrFunc>(info, dumpFileName, sele1, sele2);
     } else {
-      sprintf(painCave.errMsg,
-              "--sele1 must be set for Center of Mass Rcorr\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--sele1 must be set for Center of Mass Rcorr\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

@@ -65,10 +65,10 @@ namespace OpenMD {
     // in LennardJonesAtomTypesSectionParser, a line at least contains 3 tokens
     // atomTypeName, epsilon and sigma
     if (nTokens < 3) {
-      sprintf(painCave.errMsg,
-              "LennardJonesAtomTypesSectionParser Error: Not enough tokens at "
-              "line %d\n",
-              lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "LennardJonesAtomTypesSectionParser Error: Not enough tokens at "
+               "line %d\n",
+               lineNo);
       painCave.isFatal = 1;
       simError();
     } else {
@@ -92,8 +92,8 @@ namespace OpenMD {
         lj.makeLennardJones(sigma, epsilon, isSoft);
 
       } else {
-        sprintf(
-            painCave.errMsg,
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "LennardJonesAtomTypesSectionParser Error: Atom Type [%s] is not "
             "created yet\n",
             atomTypeName.c_str());

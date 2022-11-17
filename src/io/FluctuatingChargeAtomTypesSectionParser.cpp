@@ -71,10 +71,10 @@ namespace OpenMD {
     int nTokens = tokenizer.countTokens();
 
     if (nTokens < 3) {
-      sprintf(painCave.errMsg,
-              "FluctuatingChargeAtomTypesSectionParser Error: "
-              "Not enough tokens at line %d\n",
-              lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "FluctuatingChargeAtomTypesSectionParser Error: "
+               "Not enough tokens at line %d\n",
+               lineNo);
       painCave.isFatal = 1;
       simError();
     }
@@ -106,10 +106,10 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg,
-              "FluctuatingChargeAtomTypesSectionParser Error: Atom Type [%s] "
-              "has not been created yet\n",
-              atomTypeName.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "FluctuatingChargeAtomTypesSectionParser Error: Atom Type [%s] "
+               "has not been created yet\n",
+               atomTypeName.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -130,10 +130,10 @@ namespace OpenMD {
       //   hardness (Jii), slaterN, slaterZeta
 
       if (nTokens < 4) {
-        sprintf(painCave.errMsg,
-                "FluctuatingChargeAtomTypesSectionParser Error: "
-                "Not enough tokens at line %d\n",
-                lineNo);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "FluctuatingChargeAtomTypesSectionParser Error: "
+                 "Not enough tokens at line %d\n",
+                 lineNo);
         painCave.isFatal = 1;
         simError();
       } else {
@@ -153,10 +153,10 @@ namespace OpenMD {
       // fluctuating charge parameters and nValence.
 
       if (nTokens < 3 || nTokens % 2 != 1) {
-        sprintf(painCave.errMsg,
-                "FluctuatingChargeAtomTypesSectionParser Error: "
-                "Not enough tokens at line %d\n",
-                lineNo);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "FluctuatingChargeAtomTypesSectionParser Error: "
+                 "Not enough tokens at line %d\n",
+                 lineNo);
         painCave.isFatal = 1;
         simError();
       } else {
@@ -189,10 +189,10 @@ namespace OpenMD {
       // affinities.
 
       if (nTokens < 3 || nTokens % 2 != 0) {
-        sprintf(painCave.errMsg,
-                "FluctuatingChargeAtomTypesSectionParser Error: "
-                "Not enough tokens at line %d\n",
-                lineNo);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "FluctuatingChargeAtomTypesSectionParser Error: "
+                 "Not enough tokens at line %d\n",
+                 lineNo);
         painCave.isFatal = 1;
         simError();
       } else {
@@ -225,10 +225,10 @@ namespace OpenMD {
 
     case fqtUnknown:
     default:
-      sprintf(painCave.errMsg,
-              "FluctuatingChargeAtomTypesSectionParser Error: "
-              "Unknown Fluctuating Charge Type at line %d\n",
-              lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "FluctuatingChargeAtomTypesSectionParser Error: "
+               "Unknown Fluctuating Charge Type at line %d\n",
+               lineNo);
       painCave.isFatal = 1;
       simError();
       break;

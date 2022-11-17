@@ -63,70 +63,105 @@ namespace OpenMD {
       cor_[2] = tokenizer.nextTokenAsDouble();
 
       hasCOR = true;
+      Mat3x3d Xitt(0.0);
+      Mat3x3d Xirt(0.0);
+      Mat3x3d Xitr(0.0);
+      Mat3x3d Xirr(0.0);
 
-      Xitt_(0, 0) = tokenizer.nextTokenAsDouble();
-      Xitt_(0, 1) = tokenizer.nextTokenAsDouble();
-      Xitt_(0, 2) = tokenizer.nextTokenAsDouble();
-      Xitt_(1, 0) = tokenizer.nextTokenAsDouble();
-      Xitt_(1, 1) = tokenizer.nextTokenAsDouble();
-      Xitt_(1, 2) = tokenizer.nextTokenAsDouble();
-      Xitt_(2, 0) = tokenizer.nextTokenAsDouble();
-      Xitt_(2, 1) = tokenizer.nextTokenAsDouble();
-      Xitt_(2, 2) = tokenizer.nextTokenAsDouble();
+      Xitt(0, 0) = tokenizer.nextTokenAsDouble();
+      Xitt(0, 1) = tokenizer.nextTokenAsDouble();
+      Xitt(0, 2) = tokenizer.nextTokenAsDouble();
+      Xitt(1, 0) = tokenizer.nextTokenAsDouble();
+      Xitt(1, 1) = tokenizer.nextTokenAsDouble();
+      Xitt(1, 2) = tokenizer.nextTokenAsDouble();
+      Xitt(2, 0) = tokenizer.nextTokenAsDouble();
+      Xitt(2, 1) = tokenizer.nextTokenAsDouble();
+      Xitt(2, 2) = tokenizer.nextTokenAsDouble();
 
-      Xirt_(0, 0) = tokenizer.nextTokenAsDouble();
-      Xirt_(0, 1) = tokenizer.nextTokenAsDouble();
-      Xirt_(0, 2) = tokenizer.nextTokenAsDouble();
-      Xirt_(1, 0) = tokenizer.nextTokenAsDouble();
-      Xirt_(1, 1) = tokenizer.nextTokenAsDouble();
-      Xirt_(1, 2) = tokenizer.nextTokenAsDouble();
-      Xirt_(2, 0) = tokenizer.nextTokenAsDouble();
-      Xirt_(2, 1) = tokenizer.nextTokenAsDouble();
-      Xirt_(2, 2) = tokenizer.nextTokenAsDouble();
+      Xirt(0, 0) = tokenizer.nextTokenAsDouble();
+      Xirt(0, 1) = tokenizer.nextTokenAsDouble();
+      Xirt(0, 2) = tokenizer.nextTokenAsDouble();
+      Xirt(1, 0) = tokenizer.nextTokenAsDouble();
+      Xirt(1, 1) = tokenizer.nextTokenAsDouble();
+      Xirt(1, 2) = tokenizer.nextTokenAsDouble();
+      Xirt(2, 0) = tokenizer.nextTokenAsDouble();
+      Xirt(2, 1) = tokenizer.nextTokenAsDouble();
+      Xirt(2, 2) = tokenizer.nextTokenAsDouble();
 
-      Xitr_(0, 0) = tokenizer.nextTokenAsDouble();
-      Xitr_(0, 1) = tokenizer.nextTokenAsDouble();
-      Xitr_(0, 2) = tokenizer.nextTokenAsDouble();
-      Xitr_(1, 0) = tokenizer.nextTokenAsDouble();
-      Xitr_(1, 1) = tokenizer.nextTokenAsDouble();
-      Xitr_(1, 2) = tokenizer.nextTokenAsDouble();
-      Xitr_(2, 0) = tokenizer.nextTokenAsDouble();
-      Xitr_(2, 1) = tokenizer.nextTokenAsDouble();
-      Xitr_(2, 2) = tokenizer.nextTokenAsDouble();
+      Xitr(0, 0) = tokenizer.nextTokenAsDouble();
+      Xitr(0, 1) = tokenizer.nextTokenAsDouble();
+      Xitr(0, 2) = tokenizer.nextTokenAsDouble();
+      Xitr(1, 0) = tokenizer.nextTokenAsDouble();
+      Xitr(1, 1) = tokenizer.nextTokenAsDouble();
+      Xitr(1, 2) = tokenizer.nextTokenAsDouble();
+      Xitr(2, 0) = tokenizer.nextTokenAsDouble();
+      Xitr(2, 1) = tokenizer.nextTokenAsDouble();
+      Xitr(2, 2) = tokenizer.nextTokenAsDouble();
 
-      Xirr_(0, 0) = tokenizer.nextTokenAsDouble();
-      Xirr_(0, 1) = tokenizer.nextTokenAsDouble();
-      Xirr_(0, 2) = tokenizer.nextTokenAsDouble();
-      Xirr_(1, 0) = tokenizer.nextTokenAsDouble();
-      Xirr_(1, 1) = tokenizer.nextTokenAsDouble();
-      Xirr_(1, 2) = tokenizer.nextTokenAsDouble();
-      Xirr_(2, 0) = tokenizer.nextTokenAsDouble();
-      Xirr_(2, 1) = tokenizer.nextTokenAsDouble();
-      Xirr_(2, 2) = tokenizer.nextTokenAsDouble();
+      Xirr(0, 0) = tokenizer.nextTokenAsDouble();
+      Xirr(0, 1) = tokenizer.nextTokenAsDouble();
+      Xirr(0, 2) = tokenizer.nextTokenAsDouble();
+      Xirr(1, 0) = tokenizer.nextTokenAsDouble();
+      Xirr(1, 1) = tokenizer.nextTokenAsDouble();
+      Xirr(1, 2) = tokenizer.nextTokenAsDouble();
+      Xirr(2, 0) = tokenizer.nextTokenAsDouble();
+      Xirr(2, 1) = tokenizer.nextTokenAsDouble();
+      Xirr(2, 2) = tokenizer.nextTokenAsDouble();
 
-      Xi_.setSubMatrix(0, 0, Xitt_);
-      Xi_.setSubMatrix(0, 3, Xirt_);
-      Xi_.setSubMatrix(3, 0, Xitr_);
-      Xi_.setSubMatrix(3, 3, Xirr_);
+      Xi_.setSubMatrix(0, 0, Xitt);
+      Xi_.setSubMatrix(0, 3, Xirt);
+      Xi_.setSubMatrix(3, 0, Xitr);
+      Xi_.setSubMatrix(3, 3, Xirr);
 
       hasXi = true;
-
-      CholeskyDecomposition(Xi_, S_);
+      complete();
     }
   }
 
-  void HydroProp::complete() {
-    if (hasXi) {
-      for (int i1 = 0; i1 < 3; i1++) {
-        for (int j1 = 0; j1 < 3; j1++) {
-          Xitt_(i1, j1) = Xi_(i1, j1);
-          Xirt_(i1, j1) = Xi_(i1, j1 + 3);
-          Xitr_(i1, j1) = Xi_(i1 + 3, j1);
-          Xirr_(i1, j1) = Xi_(i1 + 3, j1 + 3);
-        }
-      }
-      CholeskyDecomposition(Xi_, S_);
+  Mat3x3d HydroProp::getXitt() {
+    Mat3x3d Xitt;
+    Xi_.getSubMatrix(0, 0, Xitt);
+    return Xitt;
+  }
+  Mat3x3d HydroProp::getXirt() {
+    Mat3x3d Xirt;
+    Xi_.getSubMatrix(0, 3, Xirt);
+    return Xirt;
+  }
+  Mat3x3d HydroProp::getXitr() {
+    Mat3x3d Xitr;
+    Xi_.getSubMatrix(3, 0, Xitr);
+    return Xitr;
+  }
+  Mat3x3d HydroProp::getXirr() {
+    Mat3x3d Xirr;
+    Xi_.getSubMatrix(3, 3, Xirr);
+    return Xirr;
+  }
+
+  Mat3x3d HydroProp::getPitchMatrix() {
+    Mat3x3d P;
+    P = Constants::TWO_PI * getXitt().inverse() * getXirt();
+    return P;
+  }
+
+  RealType HydroProp::getScalarPitch() {
+    Mat3x3d P = getPitchMatrix();
+    Vector3d evals;
+    Mat3x3d evects;
+    Mat3x3d::diagonalize(P, evals, evects);
+    RealType pScalar(0.0);
+
+    for (int i = 0; i < 3; i++) {
+      pScalar += pow(evals[i], 2);
     }
+    pScalar /= 3.0;
+
+    return sqrt(pScalar);
+  }
+
+  void HydroProp::complete() {
+    if (hasXi) { CholeskyDecomposition(Xi_, S_); }
   }
 
 }  // namespace OpenMD

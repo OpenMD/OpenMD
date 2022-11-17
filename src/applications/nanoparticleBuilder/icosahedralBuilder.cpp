@@ -70,7 +70,7 @@ void createMdFile(const std::string& oldMdFileName,
   while (!oldMdFile.eof()) {
     // correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
-      sprintf(buffer, "\tnMol = %i;", nMol);
+      snprintf(buffer, MAXLEN, "\tnMol = %i;", nMol);
       newMdFile << buffer << std::endl;
     } else {
       newMdFile << buffer << std::endl;
@@ -101,8 +101,9 @@ int main(int argc, char* argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg, "No input .omd file name was specified "
-                             "on the command line");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "No input .omd file name was specified "
+             "on the command line");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
     simError();
@@ -112,15 +113,17 @@ int main(int argc, char* argv[]) {
       (args_info.cuboctahedron_given || args_info.truncatedCube_given)) {
     nShells = args_info.shells_arg;
     if (nShells < 0) {
-      sprintf(painCave.errMsg, "icosahedralBuilder:  The number of shells\n"
-                               "\tmust be greater than or equal to zero.");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "icosahedralBuilder:  The number of shells\n"
+               "\tmust be greater than or equal to zero.");
       painCave.isFatal = 1;
       cmdline_parser_print_help();
       simError();
     }
   } else {
-    sprintf(painCave.errMsg, "icosahedralBuilder:  The number of shells\n"
-                             "\tis required to build a Mackay Icosahedron.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "icosahedralBuilder:  The number of shells\n"
+             "\tis required to build a Mackay Icosahedron.");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
     simError();
@@ -129,8 +132,9 @@ int main(int argc, char* argv[]) {
   if (args_info.latticeConstant_given) {
     latticeConstant = args_info.latticeConstant_arg;
   } else {
-    sprintf(painCave.errMsg, "icosahedralBuilder:  No lattice constant\n"
-                             "\tgiven.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "icosahedralBuilder:  No lattice constant\n"
+             "\tgiven.");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
     simError();
@@ -169,7 +173,8 @@ int main(int argc, char* argv[]) {
     if (args_info.lattice_given) {
       lattice = args_info.lattice_arg;
     } else {
-      sprintf(painCave.errMsg, "icosahedralBuilder: No lattice type given.");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "icosahedralBuilder: No lattice type given.");
       painCave.isFatal = 1;
       cmdline_parser_print_help();
       simError();
@@ -177,7 +182,8 @@ int main(int argc, char* argv[]) {
     if (args_info.unitCells_given) {
       unitCells = args_info.unitCells_arg;
     } else {
-      sprintf(painCave.errMsg, "icosahedralBuilder: Must specify unit cells.");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "icosahedralBuilder: Must specify unit cells.");
       painCave.isFatal = 1;
       cmdline_parser_print_help();
       simError();
@@ -258,7 +264,8 @@ int main(int argc, char* argv[]) {
   writer = new DumpWriter(NewInfo, outputFileName);
 
   if (writer == NULL) {
-    sprintf(painCave.errMsg, "Error in creating dumpwriter object ");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Error in creating dumpwriter object ");
     painCave.isFatal = 1;
     simError();
   }
@@ -270,10 +277,10 @@ int main(int argc, char* argv[]) {
   delete writer;
 
   // clean up by calling simError.....
-  sprintf(painCave.errMsg,
-          "A new OpenMD file called \"%s\" has been "
-          "generated.\n",
-          outputFileName.c_str());
+  snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+           "A new OpenMD file called \"%s\" has been "
+           "generated.\n",
+           outputFileName.c_str());
   painCave.isFatal  = 0;
   painCave.severity = OPENMD_INFO;
   simError();

@@ -79,11 +79,11 @@ namespace OpenMD {
       FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atomType);
 
       if (!fqa.isFluctuatingCharge()) {
-        sprintf(painCave.errMsg,
-                "WCorrFunc::validateSelection Error: selection "
-                "%d (%s)\n"
-                "\t is not a fluq object\n",
-                sd->getGlobalIndex(), sd->getType().c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "WCorrFunc::validateSelection Error: selection "
+                 "%d (%s)\n"
+                 "\t is not a fluq object\n",
+                 sd->getGlobalIndex(), sd->getType().c_str());
         painCave.isFatal = 1;
         simError();
       }

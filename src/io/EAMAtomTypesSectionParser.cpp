@@ -87,10 +87,10 @@ namespace OpenMD {
         } else if (eamParameterType == "ZHOU" ||
                    eamParameterType == "ZHOU2001") {
           if (nTokens < 20) {
-            sprintf(painCave.errMsg,
-                    "EAMAtomTypesSectionParser Error: "
-                    "Not enough tokens at line %d\n",
-                    lineNo);
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "EAMAtomTypesSectionParser Error: "
+                     "Not enough tokens at line %d\n",
+                     lineNo);
             painCave.isFatal = 1;
             simError();
           } else {
@@ -123,10 +123,10 @@ namespace OpenMD {
           }
         } else if (eamParameterType == "ZHOU2004") {
           if (nTokens < 23) {
-            sprintf(painCave.errMsg,
-                    "EAMAtomTypesSectionParser Error: "
-                    "Not enough tokens at line %d\n",
-                    lineNo);
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "EAMAtomTypesSectionParser Error: "
+                     "Not enough tokens at line %d\n",
+                     lineNo);
             painCave.isFatal = 1;
             simError();
           } else {
@@ -163,10 +163,10 @@ namespace OpenMD {
 
         } else if (eamParameterType == "ZHOU2005") {
           if (nTokens < 22) {
-            sprintf(painCave.errMsg,
-                    "EAMAtomTypesSectionParser Error: "
-                    "Not enough tokens at line %d\n",
-                    lineNo);
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "EAMAtomTypesSectionParser Error: "
+                     "Not enough tokens at line %d\n",
+                     lineNo);
             painCave.isFatal = 1;
             simError();
           } else {
@@ -201,10 +201,10 @@ namespace OpenMD {
           }
         } else if (eamParameterType == "ZHOU2005OXYGEN") {
           if (nTokens < 36) {
-            sprintf(painCave.errMsg,
-                    "EAMAtomTypesSectionParser Error: "
-                    "Not enough tokens at line %d\n",
-                    lineNo);
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "EAMAtomTypesSectionParser Error: "
+                     "Not enough tokens at line %d\n",
+                     lineNo);
             painCave.isFatal = 1;
             simError();
           } else {
@@ -261,10 +261,10 @@ namespace OpenMD {
           }
         } else if (eamParameterType == "ZHOUROSE") {
           if (nTokens < 10) {
-            sprintf(painCave.errMsg,
-                    "EAMAtomTypesSectionParser Error: "
-                    "Not enough tokens at line %d\n",
-                    lineNo);
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "EAMAtomTypesSectionParser Error: "
+                     "Not enough tokens at line %d\n",
+                     lineNo);
             painCave.isFatal = 1;
             simError();
           } else {
@@ -283,10 +283,10 @@ namespace OpenMD {
           }
         } else if (eamParameterType == "OXYFUNCFL") {
           if (nTokens < 9) {
-            sprintf(painCave.errMsg,
-                    "EAMAtomTypesSectionParser Error: "
-                    "Not enough tokens at line %d\n",
-                    lineNo);
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "EAMAtomTypesSectionParser Error: "
+                     "Not enough tokens at line %d\n",
+                     lineNo);
             painCave.isFatal = 1;
             simError();
           } else {
@@ -319,8 +319,9 @@ namespace OpenMD {
                 nrho = tokenizer1.nextTokenAsInt();
                 drho = tokenizer1.nextTokenAsDouble();
               } else {
-                sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
-                                         "Not enough tokens\n");
+                snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                         "EAMAtomTypesSectionParser Error: "
+                         "Not enough tokens\n");
                 painCave.isFatal = 1;
                 simError();
               }
@@ -338,28 +339,28 @@ namespace OpenMD {
                                 nrho, F);
           }
         } else {
-          sprintf(painCave.errMsg,
-                  "EAMAtomTypesSectionParser Error: %s "
-                  "is not a recognized EAM type\n",
-                  eamParameterType.c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "EAMAtomTypesSectionParser Error: %s "
+                   "is not a recognized EAM type\n",
+                   eamParameterType.c_str());
           painCave.isFatal = 1;
           simError();
         }
 
       } else {
-        sprintf(painCave.errMsg,
-                "EAMAtomTypesSectionParser Error: "
-                "Can not find AtomType [%s]\n",
-                atomTypeName.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "EAMAtomTypesSectionParser Error: "
+                 "Can not find AtomType [%s]\n",
+                 atomTypeName.c_str());
         painCave.isFatal = 1;
         simError();
       }
 
     } else {
-      sprintf(painCave.errMsg,
-              "EAMAtomTypesSectionParser Error: "
-              "Not enough tokens at line %d\n",
-              lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "EAMAtomTypesSectionParser Error: "
+               "Not enough tokens at line %d\n",
+               lineNo);
       painCave.isFatal = 1;
       simError();
     }
@@ -401,8 +402,9 @@ namespace OpenMD {
         latticeConstant = tokenizer1.nextTokenAsDouble() * dus_;
         lattice         = tokenizer1.nextToken();
       } else {
-        sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
-                                 "Not enough tokens\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "EAMAtomTypesSectionParser Error: "
+                 "Not enough tokens\n");
         painCave.isFatal = 1;
         simError();
       }
@@ -421,8 +423,9 @@ namespace OpenMD {
         dr   = tokenizer2.nextTokenAsDouble() * dus_;
         rcut = tokenizer2.nextTokenAsDouble() * dus_;
       } else {
-        sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
-                                 "Not enough tokens\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "EAMAtomTypesSectionParser Error: "
+                 "Not enough tokens\n");
         painCave.isFatal = 1;
         simError();
       }
@@ -462,8 +465,9 @@ namespace OpenMD {
           array.push_back(tokenizer.nextTokenAsDouble());
         }
       } else {
-        sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
-                                 "Not enough tokens\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "EAMAtomTypesSectionParser Error: "
+                 "Not enough tokens\n");
         painCave.isFatal = 1;
         simError();
       }
@@ -471,8 +475,9 @@ namespace OpenMD {
     }
 
     if (lineCount < nlinesToRead) {
-      sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: "
-                               "Not enough lines to read\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "EAMAtomTypesSectionParser Error: "
+               "Not enough lines to read\n");
       painCave.isFatal = 1;
       simError();
     }

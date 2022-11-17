@@ -146,10 +146,10 @@ namespace OpenMD {
           seleMan2_.setSelectionSet(evaluator2_.evaluate());
 
           if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount()) {
-            sprintf(painCave.errMsg,
-                    "In frame %d, the number of selected StuntDoubles are\n"
-                    "\tnot the same in --sele1 and sele2\n",
-                    i);
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "In frame %d, the number of selected StuntDoubles are\n"
+                     "\tnot the same in --sele1 and sele2\n",
+                     i);
             painCave.severity = OPENMD_INFO;
             painCave.isFatal  = 0;
             simError();
@@ -175,10 +175,10 @@ namespace OpenMD {
       }
 
       if (vecCount == 0) {
-        sprintf(painCave.errMsg,
-                "In frame %d, the number of selected vectors was zero.\n"
-                "\tThis will not give a meaningful order parameter.",
-                i);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "In frame %d, the number of selected vectors was zero.\n"
+                 "\tThis will not give a meaningful order parameter.",
+                 i);
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();

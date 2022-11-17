@@ -148,8 +148,8 @@ namespace OpenMD {
         summationMethod_ = (*i).second;
       } else {
         // throw error
-        sprintf(
-            painCave.errMsg,
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "Electrostatic::initialize: Unknown electrostaticSummationMethod.\n"
             "\t(Input file specified %s .)\n"
             "\telectrostaticSummationMethod must be one of: \"hard\",\n"
@@ -173,12 +173,12 @@ namespace OpenMD {
     if (summationMethod_ == esm_REACTION_FIELD) {
       if (!simParams_->haveDielectric()) {
         // throw warning
-        sprintf(painCave.errMsg,
-                "SimInfo warning: dielectric was not specified in the input "
-                "file\n\tfor "
-                "the reaction field correction method.\n"
-                "\tA default value of %f will be used for the dielectric.\n",
-                dielectric_);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "SimInfo warning: dielectric was not specified in the input "
+                 "file\n\tfor "
+                 "the reaction field correction method.\n"
+                 "\tA default value of %f will be used for the dielectric.\n",
+                 dielectric_);
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;
         simError();
@@ -196,12 +196,12 @@ namespace OpenMD {
       if (i != screeningMap_.end()) {
         screeningMethod_ = (*i).second;
       } else {
-        sprintf(painCave.errMsg,
-                "SimInfo error: Unknown electrostaticScreeningMethod.\n"
-                "\t(Input file specified %s .)\n"
-                "\telectrostaticScreeningMethod must be one of: \"undamped\"\n"
-                "or \"damped\".\n",
-                myScreen.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "SimInfo error: Unknown electrostaticScreeningMethod.\n"
+                 "\t(Input file specified %s .)\n"
+                 "\telectrostaticScreeningMethod must be one of: \"undamped\"\n"
+                 "or \"damped\".\n",
+                 myScreen.c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -209,8 +209,9 @@ namespace OpenMD {
 
     // check to make sure a cutoff value has been set:
     if (!haveCutoffRadius_) {
-      sprintf(painCave.errMsg, "Electrostatic::initialize has no Default "
-                               "Cutoff value!\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Electrostatic::initialize has no Default "
+               "Cutoff value!\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -223,8 +224,8 @@ namespace OpenMD {
         dampingAlpha_ = 0.425 - cutoffRadius_ * 0.02;
         if (dampingAlpha_ < 0.0) dampingAlpha_ = 0.0;
         // throw warning
-        sprintf(
-            painCave.errMsg,
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "Electrostatic::initialize: dampingAlpha was not specified in the\n"
             "\tinput file.  A default value of %f (1/ang) will be used for "
             "the\n"
@@ -612,11 +613,11 @@ namespace OpenMD {
         for (i = summationMap_.begin(); i != summationMap_.end(); ++i) {
           if ((*i).second == summationMethod_) meth = (*i).first;
         }
-        sprintf(painCave.errMsg,
-                "Electrostatic::initialize: electrostaticSummationMethod %s \n"
-                "\thas not been implemented yet. Please select one of:\n"
-                "\t\"hard\", \"shifted_potential\", or \"shifted_force\"\n",
-                meth.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Electrostatic::initialize: electrostaticSummationMethod %s \n"
+                 "\thas not been implemented yet. Please select one of:\n"
+                 "\t\"hard\", \"shifted_potential\", or \"shifted_force\"\n",
+                 meth.c_str());
         painCave.isFatal = 1;
         simError();
         break;
@@ -707,9 +708,9 @@ namespace OpenMD {
     pair<set<int>::iterator, bool> ret;
     ret = Etypes.insert(atid);
     if (ret.second == false) {
-      sprintf(painCave.errMsg,
-              "Electrostatic already had a previous entry with ident %d\n",
-              atid);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Electrostatic already had a previous entry with ident %d\n",
+               atid);
       painCave.severity = OPENMD_INFO;
       painCave.isFatal  = 0;
       simError();
@@ -721,10 +722,11 @@ namespace OpenMD {
     if (electrostaticAtomData.is_Fluctuating) {
       ret = FQtypes.insert(atid);
       if (ret.second == false) {
-        sprintf(painCave.errMsg,
-                "Electrostatic already had a previous fluctuating charge entry "
-                "with ident %d\n",
-                atid);
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+            "Electrostatic already had a previous fluctuating charge entry "
+            "with ident %d\n",
+            atid);
         painCave.severity = OPENMD_INFO;
         painCave.isFatal  = 0;
         simError();
@@ -1394,6 +1396,7 @@ namespace OpenMD {
   void Electrostatic::ReciprocalSpaceSum(RealType& pot) {
     RealType kPot = 0.0;
     RealType kVir = 0.0;
+    // Mat3x3d kVirTens(0.0);
 
     const RealType mPoleConverter = 0.20819434;  // converts from the
                                                  // internal units of
@@ -1548,7 +1551,8 @@ namespace OpenMD {
     RealType rl, rm, rn;
     Vector3d kVec;
     Vector3d Qk;
-    Mat3x3d k2;
+    RealType k2;
+    Mat3x3d Kmat;
     RealType ckcs, ckss, dkcs, dkss, qkcs, qkss;
     int atid;
     ElectrostaticAtomData data;
@@ -1588,7 +1592,8 @@ namespace OpenMD {
           int kk = ll * ll + mm * mm + nn * nn;
           if (kk <= kSqLim) {
             kVec = Vector3d(rl, rm, rn);
-            k2   = outProduct(kVec, kVec);
+            k2   = dot(kVec, kVec);         // length^2 of kVec
+            Kmat = outProduct(kVec, kVec);  // kMatrix
             // Calculate exp(ikr) terms
             for (Molecule* mol = info_->beginMolecule(mi); mol != NULL;
                  mol           = info_->nextMolecule(mi)) {
@@ -1680,6 +1685,15 @@ namespace OpenMD {
                  8.0 * (dkss * qkcs - dkcs * qkss) +
                  5.0 * (qkss * qkss + qkcs * qkcs));
 
+            // kVirTens += 2 * rvol * AK[kk] *
+            //   ( Mat3x3d::identity() - 2.0*( 1.0 / k2 - ralph) * Kmat ) *
+            //   (ckcs * ckcs + ckss * ckss + 4.0 * (ckss * dkcs - ckcs * dkss)
+            //   +
+            //    3.0 * (dkcs * dkcs + dkss * dkss) -
+            //    6.0 * (ckss * qkss + ckcs * qkcs) +
+            //    8.0 * (dkss * qkcs - dkcs * qkss) +
+            //    5.0 * (qkss * qkss + qkcs * qkcs));
+
             // Calculate force and torque for each site:
 
             for (Molecule* mol = info_->beginMolecule(mi); mol != NULL;
@@ -1721,6 +1735,7 @@ namespace OpenMD {
       mMin = 1;
     }
     pot += kPot;
+    //    virialTensor += kVirTens;
   }
 
   void Electrostatic::getSitePotentials(Atom* a1, Atom* a2, bool excluded,

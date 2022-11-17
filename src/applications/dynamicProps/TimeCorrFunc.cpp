@@ -77,13 +77,13 @@ namespace OpenMD {
     if (simParams->haveSampleTime()) {
       deltaTime_ = simParams->getSampleTime();
     } else {
-      sprintf(painCave.errMsg,
-              "TimeCorrFunc Error: can not figure out deltaTime\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "TimeCorrFunc Error: can not figure out deltaTime\n");
       painCave.isFatal = 1;
       simError();
     }
 
-    sprintf(painCave.errMsg, "Scanning for frames.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Scanning for frames.");
     painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
     simError();
@@ -260,19 +260,22 @@ namespace OpenMD {
   void TimeCorrFunc<T>::doCorrelate() {
     painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
-    sprintf(painCave.errMsg, "Starting pre-correlate scan.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Starting pre-correlate scan.");
     simError();
     preCorrelate();
 
-    sprintf(painCave.errMsg, "Calculating correlation function.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Calculating correlation function.");
     simError();
     correlation();
 
-    sprintf(painCave.errMsg, "Doing post-correlation calculations.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Doing post-correlation calculations.");
     simError();
     postCorrelate();
 
-    sprintf(painCave.errMsg, "Writing output.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Writing output.");
     simError();
     writeCorrelate();
   }
@@ -304,11 +307,11 @@ namespace OpenMD {
         RealType time2 = times_[j];
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
-          sprintf(painCave.errMsg,
-                  "TimeCorrFunc::correlateBlocks Error: sampleTime (%f)\n"
-                  "\tin %s does not match actual time-spacing between\n"
-                  "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                  deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "TimeCorrFunc::correlateBlocks Error: sampleTime (%f)\n"
+                   "\tin %s does not match actual time-spacing between\n"
+                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
           painCave.isFatal = 1;
           simError();
         }
@@ -411,9 +414,9 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
       }
 
     } else {
-      sprintf(painCave.errMsg,
-              "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
+               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -450,9 +453,9 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
       }
 
     } else {
-      sprintf(painCave.errMsg,
-              "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
+               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -491,9 +494,9 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
       }
 
     } else {
-      sprintf(painCave.errMsg,
-              "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
+               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

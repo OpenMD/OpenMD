@@ -121,6 +121,9 @@ groupoption "eam_density" D  "computes an average eam density profile of the sel
 groupoption "net_charge" q "computes an average charge profile of the selected atom" group="staticProps"
 groupoption "current_density" J "computes the current density for the selected atom" group="staticProps"
 groupoption "chargez" - "computes the charge distribution along selected axis and selected atom" group="staticProps"
+groupoption "charger" - "computes the charge density as a function of the radius and selected atom" group="staticProps"
+groupoption "numberz" - "computes the number density along selected axis and selected molcule" group="staticProps"
+groupoption "numberr" - "computes the number density as a function of the radius and selected molecule" group="staticProps"
 groupoption "charge_density_z" - "computes the continuous charge distribution along selected axis and selected atom" group="staticProps"
 
 groupoption "countz" - "computes the number of selected atoms  along selected axis" group="staticProps"

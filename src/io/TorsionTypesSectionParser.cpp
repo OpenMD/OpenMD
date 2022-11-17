@@ -73,9 +73,10 @@ namespace OpenMD {
     int nTokens = tokenizer.countTokens();
 
     if (nTokens < 5) {
-      sprintf(painCave.errMsg,
-              "TorsionTypesSectionParser Error: Not enough tokens at line %d\n",
-              lineNo);
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "TorsionTypesSectionParser Error: Not enough tokens at line %d\n",
+          lineNo);
       painCave.isFatal = 1;
       simError();
       return;
@@ -90,10 +91,10 @@ namespace OpenMD {
     try {
       torsionType = ttParser.parseLine(remainder);
     } catch (OpenMDException& e) {
-      sprintf(painCave.errMsg,
-              "TorsionTypesSectionParser Error: %s "
-              "at line %d\n",
-              e.what(), lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "TorsionTypesSectionParser Error: %s "
+               "at line %d\n",
+               e.what(), lineNo);
       painCave.isFatal = 1;
       simError();
     }

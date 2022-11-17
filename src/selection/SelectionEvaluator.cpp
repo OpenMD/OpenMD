@@ -80,8 +80,8 @@ namespace OpenMD {
       error        = true;
       errorMessage = compiler.getErrorMessage();
 
-      sprintf(painCave.errMsg, "SelectionCompiler Error: %s\n",
-              errorMessage.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "SelectionCompiler Error: %s\n", errorMessage.c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

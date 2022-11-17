@@ -65,10 +65,10 @@ namespace OpenMD {
     // Atom r1 theta0 x1 D1 zeta Z1 Vi Uj Xi Hard Radius
 
     if (nTokens < 12) {
-      sprintf(painCave.errMsg,
-              "UFFAtomTypesSectionParser Error: "
-              "Not enough tokens at line %d\n",
-              lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "UFFAtomTypesSectionParser Error: "
+               "Not enough tokens at line %d\n",
+               lineNo);
       painCave.isFatal = 1;
       simError();
     } else {
@@ -101,10 +101,10 @@ namespace OpenMD {
         uffa.makeUFF(r1, theta0, x1, D1, zeta, Z1, Vi, Uj, Xi, Hard, Radius);
 
       } else {
-        sprintf(painCave.errMsg,
-                "UFFAtomTypesSectionParser Error: Atom Type [%s]"
-                " has not been created yet\n",
-                atomTypeName.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "UFFAtomTypesSectionParser Error: Atom Type [%s]"
+                 " has not been created yet\n",
+                 atomTypeName.c_str());
         painCave.isFatal = 1;
         simError();
       }

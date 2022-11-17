@@ -256,21 +256,21 @@ namespace OpenMD {
 
         if (ad1 >= ad2 && ad1 >= ad3) {
           s    = 0.5 / sqrt(1.0 + this->data_[0][0] - this->data_[1][1] -
-                         this->data_[2][2]);
+                            this->data_[2][2]);
           q[0] = (this->data_[1][2] - this->data_[2][1]) * s;
           q[1] = 0.25 / s;
           q[2] = (this->data_[0][1] + this->data_[1][0]) * s;
           q[3] = (this->data_[0][2] + this->data_[2][0]) * s;
         } else if (ad2 >= ad1 && ad2 >= ad3) {
           s    = 0.5 / sqrt(1.0 + this->data_[1][1] - this->data_[0][0] -
-                         this->data_[2][2]);
+                            this->data_[2][2]);
           q[0] = (this->data_[2][0] - this->data_[0][2]) * s;
           q[1] = (this->data_[0][1] + this->data_[1][0]) * s;
           q[2] = 0.25 / s;
           q[3] = (this->data_[1][2] + this->data_[2][1]) * s;
         } else {
           s    = 0.5 / sqrt(1.0 + this->data_[2][2] - this->data_[0][0] -
-                         this->data_[1][1]);
+                            this->data_[1][1]);
           q[0] = (this->data_[0][1] - this->data_[1][0]) * s;
           q[1] = (this->data_[0][2] + this->data_[2][0]) * s;
           q[2] = (this->data_[1][2] + this->data_[2][1]) * s;

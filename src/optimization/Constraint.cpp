@@ -36,7 +36,8 @@ namespace QuantLib {
     int icount                        = 0;
     while (!valid) {
       if (icount > 200) {
-        sprintf(painCave.errMsg, "can't update parameter vector\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "can't update parameter vector\n");
         painCave.isFatal  = 1;
         painCave.severity = OPENMD_ERROR;
         simError();

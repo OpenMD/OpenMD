@@ -41,61 +41,30 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
+#ifndef HYDRODYNAMICS_COMPOSITESHAPE_HPP
+#define HYDRODYNAMICS_COMPOSITESHAPE_HPP
 
 #include <vector>
 
-#include "hydrodynamics/HydroProp.hpp"
-#include "math/DynamicRectMatrix.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "math/Vector3.hpp"
-#include "primitives/Molecule.hpp"
+#include "hydrodynamics/Shape.hpp"
 
 namespace OpenMD {
-
-  struct BeadParam {
-    std::string atomName;
-    Vector3d pos;
-    RealType mass;  // to compute center of mass in ApproximationModel.cpp
-    RealType radius;
-  };
-
-  class Shape;
-  class Sphere;
-  class Ellipsoid;
-  class CompositeShape;
-
-  class HydrodynamicsModel {
+  /**
+   * @class CompositeShape
+   * Combine composite pattern and visitor pattern
+   */
+  class CompositeShape : public Shape {
   public:
-    HydrodynamicsModel(StuntDouble* sd, SimInfo* info) : sd_(sd), info_(info) {}
-    virtual ~HydrodynamicsModel() = default;
-
-    virtual bool calcHydroProps(Shape* shape, RealType viscosity,
-                                RealType temperature);
-
-    virtual void init() {};
-    virtual void writeBeads(std::ostream& os) = 0;
-    void writeHydroProps(std::ostream& os);
-    // HydroProp* getHydroPropsAtCR() {return cr_;}  //function not called in
-    // any other file HydroProp* getHydroPropsAtCD() {return cd_;}  //function
-    // not called in any other file HydroProp* getHydroPropsAtCOM() {return
-    // com_;}  //function not called in any other file
-
-    void setCR(HydroProp* cr) { cr_ = cr; }
-    void setCD(HydroProp* cd) { cd_ = cd; }
-    void setCOM(HydroProp* com) { com_ = com; }
-    std::string getStuntDoubleName() { return sd_->getType(); }
-
-  protected:
-    StuntDouble* sd_;
-    SimInfo* info_ {nullptr};
+    CompositeShape() {}
+    virtual ~CompositeShape();
+    virtual bool isInterior(Vector3d pos);
+    virtual std::pair<Vector3d, Vector3d> getBoundingBox();
+    virtual bool hasAnalyticalSolution() { return false; }
+    virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature);
+    void addShape(Shape* s) { shapes_.push_back(s); }
 
   private:
-    HydroProp* cr_;
-    HydroProp* cd_;
-    HydroProp* com_;
-    std::vector<BeadParam> beads_;
+    std::vector<Shape*> shapes_;
   };
 }  // namespace OpenMD
 

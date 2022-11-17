@@ -59,7 +59,7 @@ namespace OpenMD {
     previousSnapshot_ = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
                                      storageLayout, usePBC);
     currentSnapshot_  = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
-                                    storageLayout, usePBC);
+                                     storageLayout, usePBC);
   }
 
   SimSnapshotManager::~SimSnapshotManager() {
@@ -97,9 +97,9 @@ namespace OpenMD {
 
   void SimSnapshotManager::setCapacity(int) {
     // give warning message
-    sprintf(painCave.errMsg,
-            "SimSnapshotManager error: can not set capacity for "
-            "SimSnapshotManager.\n");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "SimSnapshotManager error: can not set capacity for "
+             "SimSnapshotManager.\n");
     painCave.isFatal = 0;
     simError();
   }

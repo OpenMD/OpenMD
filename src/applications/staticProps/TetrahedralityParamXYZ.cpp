@@ -250,7 +250,69 @@ namespace OpenMD {
       //   }
       // }
     }
-    writeQxyz();
+    // writeQxyz();
+    writeVTKGrid();
+  }
+
+  void TetrahedralityParamXYZ::writeVTKGrid() {
+    Mat3x3d hmat = info_->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+
+    // normalize by total weight in voxel:
+    for (unsigned int i = 0; i < hist_.size(); ++i) {
+      for (unsigned int j = 0; j < hist_[i].size(); ++j) {
+        for (unsigned int k = 0; k < hist_[i][j].size(); ++k) {
+          hist_[i][j][k] = hist_[i][j][k] / count_[i][j][k];
+        }
+      }
+    }
+
+    std::ofstream qXYZstream(outputFilename_.c_str());
+    if (qXYZstream.is_open()) {
+      qXYZstream << "# vtk DataFile Version 2.0\n";
+      qXYZstream << "Tetrahedrality Parameter volume rendering\n";
+      qXYZstream << "ASCII\n";
+      qXYZstream << "DATASET RECTILINEAR_GRID\n";
+      qXYZstream << "DIMENSIONS " << hist_.size() << " " << hist_[0].size()
+                 << " " << hist_[0][0].size() << "\n";
+      qXYZstream << "X_COORDINATES " << hist_.size() << " float\n";
+      for (std::size_t i = 0; i < hist_.size(); ++i) {
+        qXYZstream << (RealType(i) / nBins_.x()) * hmat(0, 0) << " ";
+      }
+      qXYZstream << "\n";
+      qXYZstream << "Y_COORDINATES " << hist_[0].size() << " float\n";
+      for (std::size_t j = 0; j < hist_[0].size(); ++j) {
+        qXYZstream << (RealType(j) / nBins_.y()) * hmat(1, 1) << " ";
+      }
+      qXYZstream << "\n";
+      qXYZstream << "Z_COORDINATES " << hist_[0][0].size() << " float\n";
+      for (std::size_t k = 0; k < hist_[0][0].size(); ++k) {
+        qXYZstream << (RealType(k) / nBins_.z()) * hmat(2, 2) << " ";
+      }
+      qXYZstream << "\n";
+      qXYZstream << "POINT_DATA "
+                 << hist_.size() * hist_[0].size() * hist_[0][0].size() << "\n";
+      qXYZstream << "SCALARS scalars float\n";
+      qXYZstream << "LOOKUP_TABLE default\n";
+
+      for (std::size_t k = 0; k < hist_[0][0].size(); ++k) {
+        for (std::size_t j = 0; j < hist_[0].size(); ++j) {
+          for (std::size_t i = 0; i < hist_.size(); ++i) {
+            qXYZstream << hist_[i][j][k] << " ";
+
+            // qXYZstream.write(reinterpret_cast<char *>( &hist_[i][j][k] ),
+            // sizeof( hist_[i][j][k] ));
+          }
+        }
+      }
+      qXYZstream << "\n";
+    } else {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "TetrahedralityParamXYZ: unable to open %s\n",
+               outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+    qXYZstream.close();
   }
 
   void TetrahedralityParamXYZ::writeQxyz() {
@@ -295,8 +357,9 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg, "TetrahedralityParamXYZ: unable to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "TetrahedralityParamXYZ: unable to open %s\n",
+               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

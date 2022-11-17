@@ -430,8 +430,9 @@ namespace OpenMD {
   }
 
   RNEMDR::RNEMDR(SimInfo* info, const std::string& filename,
-                 const std::string& sele, int nrbins) :
-      ShellStatistics(info, filename, sele, nrbins) {
+                 const std::string& sele, const std::string& comsele,
+                 int nrbins) :
+      ShellStatistics(info, filename, sele, comsele, nrbins) {
     setOutputName(getPrefix(filename) + ".rnemdR");
 
     data_.resize(RNEMDR::ENDINDEX);
@@ -465,6 +466,10 @@ namespace OpenMD {
     for (unsigned int i = 0; i < nBins_; i++)
       density->accumulator.push_back(new Accumulator());
     addOutputDataAt(density, DENSITY);
+
+    outputMask_.set(TEMPERATURE);
+    outputMask_.set(ANGULARVELOCITY);
+    outputMask_.set(DENSITY);
   }
 
   void RNEMDR::processFrame(int istep) {
@@ -474,7 +479,6 @@ namespace OpenMD {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
-    int i;
     int binNo;
     RealType mass;
     Vector3d vel;
@@ -498,7 +502,6 @@ namespace OpenMD {
     std::vector<AtomType*>::iterator at;
     Molecule* mol;
     StuntDouble* sd;
-    AtomType* atype;
 
     // loop over the selected atoms:
     for (mol = info_->beginMolecule(miter); mol != NULL;
@@ -590,9 +593,9 @@ namespace OpenMD {
   }
 
   RNEMDRTheta::RNEMDRTheta(SimInfo* info, const std::string& filename,
-                           const std::string& sele, int nrbins,
-                           int nangleBins) :
-      ShellStatistics(info, filename, sele, nrbins),
+                           const std::string& sele, const std::string& comsele,
+                           int nrbins, int nangleBins) :
+      ShellStatistics(info, filename, sele, comsele, nrbins),
       nAngleBins_(nangleBins) {
     Globals* simParams                  = info->getSimParams();
     RNEMD::RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
@@ -603,11 +606,11 @@ namespace OpenMD {
       std::vector<RealType> amf = rnemdParams->getAngularMomentumFluxVector();
 
       if (amf.size() != 3) {
-        sprintf(painCave.errMsg,
-                "RNEMDRTheta: Incorrect number of parameters specified for "
-                "angularMomentumFluxVector.\n"
-                "\tthere should be 3 parameters, but %lu were specified.\n",
-                amf.size());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RNEMDRTheta: Incorrect number of parameters specified for "
+                 "angularMomentumFluxVector.\n"
+                 "\tthere should be 3 parameters, but %lu were specified.\n",
+                 amf.size());
         painCave.isFatal = 1;
         simError();
       }

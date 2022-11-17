@@ -66,10 +66,10 @@ namespace OpenMD {
       options_.setData(optionName, optionValue);
 
     } else {
-      sprintf(painCave.errMsg,
-              "OptionSectionParser Error: "
-              "Not enough tokens at line %d\n",
-              lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "OptionSectionParser Error: "
+               "Not enough tokens at line %d\n",
+               lineNo);
       painCave.isFatal = 1;
       simError();
     }

@@ -146,8 +146,8 @@ namespace OpenMD {
     bool isNameValid(const std::string& name);
 
     bool compileError(const std::string& errorMsg) {
-      sprintf(painCave.errMsg, "SelectionCompiler Error: %s\n",
-              errorMsg.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "SelectionCompiler Error: %s\n", errorMsg.c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

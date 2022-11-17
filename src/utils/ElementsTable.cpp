@@ -270,11 +270,11 @@ namespace OpenMD {
       return (1);
     } else if (strcasecmp(identifier, "Hl") == 0) {
       // ligand hydrogen -- found in some CIF PR#3048959.
-      sprintf(painCave.errMsg,
-              "ElementsTable warning.\n"
-              "\tCannot understand the element label %s\n"
-              "\tGuessing it's hydrogen\n",
-              identifier);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "ElementsTable warning.\n"
+               "\tCannot understand the element label %s\n"
+               "\tGuessing it's hydrogen\n",
+               identifier);
       painCave.isFatal  = 0;
       painCave.severity = OPENMD_WARNING;
       simError();
@@ -329,10 +329,10 @@ namespace OpenMD {
       ifs.open(buffer.c_str());
 
       if (!(&ifs)->is_open()) {
-        sprintf(painCave.errMsg,
-                "ElementsTable error.\n"
-                "\tunable to open datafile %s \n",
-                filename_.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "ElementsTable error.\n"
+                 "\tunable to open datafile %s \n",
+                 filename_.c_str());
         painCave.isFatal = 0;
         simError();
       }
@@ -346,10 +346,10 @@ namespace OpenMD {
     if (ifs) ifs.close();
 
     if (GetSize() == 0) {
-      sprintf(painCave.errMsg,
-              "ElementsTable error.\n"
-              "\tCannot initialize database %s \n",
-              filename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "ElementsTable error.\n"
+               "\tCannot initialize database %s \n",
+               filename_.c_str());
       painCave.isFatal = 0;
       simError();
     }

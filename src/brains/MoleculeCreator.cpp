@@ -198,9 +198,9 @@ namespace OpenMD {
       }
 
       if (!cStamp->haveConstrainedDistance()) {
-        sprintf(painCave.errMsg,
-                "Constraint Error: A non-bond constraint was specified\n"
-                "\twithout providing a value for the constrainedDistance.\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Constraint Error: A non-bond constraint was specified\n"
+                 "\twithout providing a value for the constrainedDistance.\n");
         painCave.isFatal = 1;
         simError();
       } else {
@@ -235,10 +235,10 @@ namespace OpenMD {
     Atom* atom;
 
     atomType = ff->getAtomType(stamp->getType());
-
     if (atomType == NULL) {
-      sprintf(painCave.errMsg, "Can not find Matching Atom Type for[%s]",
-              stamp->getType().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Can not find Matching Atom Type for[%s]",
+               stamp->getType().c_str());
 
       painCave.isFatal = 1;
       simError();
@@ -313,10 +313,10 @@ namespace OpenMD {
         bondType = btParser.parseTypeAndPars(stamp->getOverrideType(),
                                              stamp->getOverridePars());
       } catch (OpenMDException& e) {
-        sprintf(painCave.errMsg,
-                "MoleculeCreator Error: %s "
-                "for molecule %s\n",
-                e.what(), mol->getType().c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "MoleculeCreator Error: %s "
+                 "for molecule %s\n",
+                 e.what(), mol->getType().c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -325,8 +325,9 @@ namespace OpenMD {
       bondType = ff->getBondType(atomA->getType(), atomB->getType());
 
       if (bondType == NULL) {
-        sprintf(painCave.errMsg, "Can not find Matching Bond Type for[%s, %s]",
-                atomA->getType().c_str(), atomB->getType().c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Can not find Matching Bond Type for[%s, %s]",
+                 atomA->getType().c_str(), atomB->getType().c_str());
 
         painCave.isFatal = 1;
         simError();
@@ -369,10 +370,10 @@ namespace OpenMD {
           bendType = btParser.parseTypeAndPars(stamp->getOverrideType(),
                                                stamp->getOverridePars());
         } catch (OpenMDException& e) {
-          sprintf(painCave.errMsg,
-                  "MoleculeCreator Error: %s "
-                  "for molecule %s\n",
-                  e.what(), mol->getType().c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "MoleculeCreator Error: %s "
+                   "for molecule %s\n",
+                   e.what(), mol->getType().c_str());
           painCave.isFatal = 1;
           simError();
         }
@@ -382,10 +383,10 @@ namespace OpenMD {
                             atomC->getType().c_str());
 
         if (bendType == NULL) {
-          sprintf(painCave.errMsg,
-                  "Can not find Matching Bend Type for[%s, %s, %s]",
-                  atomA->getType().c_str(), atomB->getType().c_str(),
-                  atomC->getType().c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "Can not find Matching Bend Type for[%s, %s, %s]",
+                   atomA->getType().c_str(), atomB->getType().c_str(),
+                   atomC->getType().c_str());
 
           painCave.isFatal = 1;
           simError();
@@ -402,7 +403,8 @@ namespace OpenMD {
       DirectionalAtom* ghostAtom =
           dynamic_cast<DirectionalAtom*>(mol->getAtomAt(ghostIndex));
       if (ghostAtom == NULL) {
-        sprintf(painCave.errMsg, "Can not cast Atom to DirectionalAtom");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Can not cast Atom to DirectionalAtom");
         painCave.isFatal = 1;
         simError();
       }
@@ -412,10 +414,10 @@ namespace OpenMD {
           bendType = btParser.parseTypeAndPars(stamp->getOverrideType(),
                                                stamp->getOverridePars());
         } catch (OpenMDException& e) {
-          sprintf(painCave.errMsg,
-                  "MoleculeCreator Error: %s "
-                  "for molecule %s\n",
-                  e.what(), mol->getType().c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "MoleculeCreator Error: %s "
+                   "for molecule %s\n",
+                   e.what(), mol->getType().c_str());
           painCave.isFatal = 1;
           simError();
         }
@@ -424,10 +426,10 @@ namespace OpenMD {
                                    "GHOST");
 
         if (bendType == NULL) {
-          sprintf(painCave.errMsg,
-                  "Can not find Matching Bend Type for[%s, %s, %s]",
-                  normalAtom->getType().c_str(), ghostAtom->getType().c_str(),
-                  "GHOST");
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "Can not find Matching Bend Type for[%s, %s, %s]",
+                   normalAtom->getType().c_str(), ghostAtom->getType().c_str(),
+                   "GHOST");
 
           painCave.isFatal = 1;
           simError();
@@ -475,10 +477,10 @@ namespace OpenMD {
           torsionType = ttParser.parseTypeAndPars(stamp->getOverrideType(),
                                                   stamp->getOverridePars());
         } catch (OpenMDException& e) {
-          sprintf(painCave.errMsg,
-                  "MoleculeCreator Error: %s "
-                  "for molecule %s\n",
-                  e.what(), mol->getType().c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "MoleculeCreator Error: %s "
+                   "for molecule %s\n",
+                   e.what(), mol->getType().c_str());
           painCave.isFatal = 1;
           simError();
         }
@@ -486,10 +488,10 @@ namespace OpenMD {
         torsionType = ff->getTorsionType(atomA->getType(), atomB->getType(),
                                          atomC->getType(), atomD->getType());
         if (torsionType == NULL) {
-          sprintf(painCave.errMsg,
-                  "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
-                  atomA->getType().c_str(), atomB->getType().c_str(),
-                  atomC->getType().c_str(), atomD->getType().c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
+                   atomA->getType().c_str(), atomB->getType().c_str(),
+                   atomC->getType().c_str(), atomD->getType().c_str());
 
           painCave.isFatal = 1;
           simError();
@@ -501,7 +503,8 @@ namespace OpenMD {
       DirectionalAtom* dAtom = dynamic_cast<DirectionalAtom*>(
           mol->getAtomAt(stamp->getGhostVectorSource()));
       if (dAtom == NULL) {
-        sprintf(painCave.errMsg, "Can not cast Atom to DirectionalAtom");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Can not cast Atom to DirectionalAtom");
         painCave.isFatal = 1;
         simError();
       }
@@ -511,10 +514,10 @@ namespace OpenMD {
           torsionType = ttParser.parseTypeAndPars(stamp->getOverrideType(),
                                                   stamp->getOverridePars());
         } catch (OpenMDException& e) {
-          sprintf(painCave.errMsg,
-                  "MoleculeCreator Error: %s "
-                  "for molecule %s\n",
-                  e.what(), mol->getType().c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "MoleculeCreator Error: %s "
+                   "for molecule %s\n",
+                   e.what(), mol->getType().c_str());
           painCave.isFatal = 1;
           simError();
         }
@@ -523,10 +526,10 @@ namespace OpenMD {
                                          atomC->getType(), "GHOST");
 
         if (torsionType == NULL) {
-          sprintf(painCave.errMsg,
-                  "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
-                  atomA->getType().c_str(), atomB->getType().c_str(),
-                  atomC->getType().c_str(), "GHOST");
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
+                   atomA->getType().c_str(), atomB->getType().c_str(),
+                   atomC->getType().c_str(), "GHOST");
 
           painCave.isFatal = 1;
           simError();
@@ -574,10 +577,10 @@ namespace OpenMD {
         inversionType = itParser.parseTypeAndPars(stamp->getOverrideType(),
                                                   stamp->getOverridePars());
       } catch (OpenMDException& e) {
-        sprintf(painCave.errMsg,
-                "MoleculeCreator Error: %s "
-                "for molecule %s\n",
-                e.what(), mol->getType().c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "MoleculeCreator Error: %s "
+                 "for molecule %s\n",
+                 e.what(), mol->getType().c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -586,8 +589,8 @@ namespace OpenMD {
                                            atomC->getType(), atomD->getType());
 
       if (inversionType == NULL) {
-        sprintf(
-            painCave.errMsg,
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "No Matching Inversion Type for[%s, %s, %s, %s]\n"
             "\t(May not be a problem: not all inversions are parametrized)\n",
             atomA->getType().c_str(), atomB->getType().c_str(),
@@ -668,7 +671,7 @@ namespace OpenMD {
         ConstraintElem* consElemA = new ConstraintElem(bond->getAtomA());
         ConstraintElem* consElemB = new ConstraintElem(bond->getAtomB());
         cPair                     = new ConstraintPair(consElemA, consElemB,
-                                   fbt->getEquilibriumBondLength(), false);
+                                                       fbt->getEquilibriumBondLength(), false);
         mol->addConstraintPair(cPair);
       }
     }

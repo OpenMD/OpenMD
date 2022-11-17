@@ -104,8 +104,8 @@ namespace OpenMD {
       if (hasSurfaceArea_) {
         return surfaceArea_;
       } else {
-        sprintf(painCave.errMsg, "SelectionEvaluator Error: %s\n",
-                "No Surface Area For You!");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "SelectionEvaluator Error: %s\n", "No Surface Area For You!");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
@@ -117,8 +117,8 @@ namespace OpenMD {
       if (hasVolume_) {
         return volume_;
       } else {
-        sprintf(painCave.errMsg, "SelectionEvaluator Error: %s\n",
-                "No Volume For You!");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "SelectionEvaluator Error: %s\n", "No Volume For You!");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
@@ -175,8 +175,8 @@ namespace OpenMD {
     SelectionSet hull(int frame);
 
     void evalError(const std::string& message) {
-      sprintf(painCave.errMsg, "SelectionEvaluator Error: %s\n",
-              message.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "SelectionEvaluator Error: %s\n", message.c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

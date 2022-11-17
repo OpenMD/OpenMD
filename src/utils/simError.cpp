@@ -98,7 +98,8 @@ int simError(void) {
 #ifdef IS_MPI
   if (worldRank == 0) {
     if (painCave.isEventLoop) {
-      sprintf(nodeMsg, " (reported by MPI node %d)", worldRank);
+      snprintf(nodeMsg, MAX_SIM_ERROR_MSG_LENGTH, " (reported by MPI node %d)",
+               worldRank);
       strncat(errorMsg, nodeMsg,
               MAX_SIM_ERROR_MSG_LENGTH - strlen(errorMsg) - 1);
       errorMsg[MAX_SIM_ERROR_MSG_LENGTH - 1] = '\0';

@@ -181,8 +181,8 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg, "PipeDensity: unable to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "PipeDensity: unable to open %s\n", outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

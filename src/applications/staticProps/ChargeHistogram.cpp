@@ -110,7 +110,8 @@ namespace OpenMD {
     }
 
     if (charge.empty()) {
-      sprintf(painCave.errMsg, "Selected atom not found.\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Selected atom not found.\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -167,8 +168,8 @@ namespace OpenMD {
         rdfStream << bincenter_[i] << "\t" << histList_[i] << "\n";
       }
     } else {
-      sprintf(painCave.errMsg, "ChargeHistogram: unable to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "ChargeHistogram: unable to open %s\n", outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

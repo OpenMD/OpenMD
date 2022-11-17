@@ -151,7 +151,8 @@ namespace OpenMD {
 
     line = buffer;
     if (line.find("<Snapshot>") == std::string::npos) {
-      sprintf(painCave.errMsg, "RestReader Error: can not find <Snapshot>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RestReader Error: can not find <Snapshot>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -165,7 +166,8 @@ namespace OpenMD {
     inputStream.getline(buffer, bufferSize);
     line = buffer;
     if (line.find("</Snapshot>") == std::string::npos) {
-      sprintf(painCave.errMsg, "RestReader Error: can not find </Snapshot>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RestReader Error: can not find </Snapshot>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -219,8 +221,8 @@ namespace OpenMD {
               dynamic_cast<MolecularRestraint*>(restData->getData());
 
           if (mRest == NULL) {
-            sprintf(painCave.errMsg,
-                    "Can not cast RestraintData to MolecularRestraint\n");
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "Can not cast RestraintData to MolecularRestraint\n");
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();
@@ -264,8 +266,8 @@ namespace OpenMD {
     nTokens = tokenizer.countTokens();
 
     if (nTokens < 2) {
-      sprintf(painCave.errMsg, "RestReader Error: Not enough Tokens.\n%s\n",
-              line.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RestReader Error: Not enough Tokens.\n%s\n", line.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -308,10 +310,11 @@ namespace OpenMD {
           RealType qlen = q.length();
           if (qlen < OpenMD::epsilon) {  // check quaternion is not equal to 0
 
-            sprintf(painCave.errMsg,
-                    "RestReader Error: initial quaternion error (q0^2 + q1^2 + "
-                    "q2^2 + "
-                    "q3^2) ~ 0\n");
+            snprintf(
+                painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                "RestReader Error: initial quaternion error (q0^2 + q1^2 + "
+                "q2^2 + "
+                "q3^2) ~ 0\n");
             painCave.isFatal = 1;
             simError();
           }
@@ -344,8 +347,9 @@ namespace OpenMD {
         break;
       }
       default: {
-        sprintf(painCave.errMsg,
-                "RestReader Error: %s is an unrecognized type\n", type.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RestReader Error: %s is an unrecognized type\n",
+                 type.c_str());
         painCave.isFatal = 1;
         simError();
         break;
@@ -368,8 +372,8 @@ namespace OpenMD {
           ObjectRestraint* oRest =
               dynamic_cast<ObjectRestraint*>(restData->getData());
           if (oRest == NULL) {
-            sprintf(painCave.errMsg,
-                    "Can not cast RestraintData to ObjectRestraint\n");
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "Can not cast RestraintData to ObjectRestraint\n");
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();
@@ -390,7 +394,8 @@ namespace OpenMD {
     std::string line(buffer);
 
     if (line.find("<StuntDoubles>") == std::string::npos) {
-      sprintf(painCave.errMsg, "RestReader Error: Missing <StuntDoubles>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RestReader Error: Missing <StuntDoubles>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -409,7 +414,8 @@ namespace OpenMD {
     std::string line(buffer);
 
     if (line.find("<FrameData>") == std::string::npos) {
-      sprintf(painCave.errMsg, "RestReader Error: Missing <FrameData>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RestReader Error: Missing <FrameData>\n");
       painCave.isFatal = 1;
       simError();
     }

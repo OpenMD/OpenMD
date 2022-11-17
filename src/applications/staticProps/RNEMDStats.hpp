@@ -98,7 +98,7 @@ namespace OpenMD {
   class RNEMDR : public ShellStatistics {
   public:
     RNEMDR(SimInfo* info, const std::string& filename, const std::string& sele,
-           int nrbins);
+           const std::string& comsele, int nrbins);
     void processFrame(int frame);
     void processStuntDouble(StuntDouble*, int) {}
 
@@ -124,7 +124,8 @@ namespace OpenMD {
   class RNEMDRTheta : public ShellStatistics {
   public:
     RNEMDRTheta(SimInfo* info, const std::string& filename,
-                const std::string& sele, int nrbins, int nanglebins);
+                const std::string& sele, const std::string& comsele, int nrbins,
+                int nanglebins);
     void processFrame(int frame);
     void processStuntDouble(StuntDouble*, int) {}
     std::pair<int, int> getBins(Vector3d pos);

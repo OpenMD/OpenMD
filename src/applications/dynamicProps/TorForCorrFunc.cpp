@@ -69,11 +69,11 @@ namespace OpenMD {
     for (sd = seleMan.beginSelected(i); sd != NULL;
          sd = seleMan.nextSelected(i)) {
       if (!sd->isDirectional()) {
-        sprintf(painCave.errMsg,
-                "TorForCorrFunc::validateSelection Error: selection "
-                "%d (%s)\n"
-                "\t is not a Directional object\n",
-                sd->getGlobalIndex(), sd->getType().c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "TorForCorrFunc::validateSelection Error: selection "
+                 "%d (%s)\n"
+                 "\t is not a Directional object\n",
+                 sd->getGlobalIndex(), sd->getType().c_str());
         painCave.isFatal = 1;
         simError();
       }

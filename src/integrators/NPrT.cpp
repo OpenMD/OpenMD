@@ -54,8 +54,8 @@ namespace OpenMD {
   NPrT::NPrT(SimInfo* info) : NPT(info) {
     Globals* simParams = info_->getSimParams();
     if (!simParams->haveSurfaceTension()) {
-      sprintf(painCave.errMsg,
-              "If you use the NPT integrator, you must set tauBarostat.\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "If you use the NPT integrator, you must set tauBarostat.\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

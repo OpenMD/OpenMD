@@ -119,28 +119,28 @@ namespace OpenMD {
     std::string result;
     std::set<std::string>::iterator i;
 
-    sprintf(
-        buffer,
+    snprintf(
+        buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    snprintf(buffer, 65535, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
     // print the ignore type list
-    sprintf(buffer, "lipidHeadName list contains below types:\n");
+    snprintf(buffer, 65535, "lipidHeadName list contains below types:\n");
     result += buffer;
 
     for (i = lipidHeadName.begin(); i != lipidHeadName.end(); ++i) {
-      sprintf(buffer, "%s\t", i->c_str());
+      snprintf(buffer, 65535, "%s\t", i->c_str());
       result += buffer;
     }
 
-    sprintf(buffer, "\n");
+    snprintf(buffer, 65535, "\n");
     result += buffer;
 
-    sprintf(
-        buffer,
+    snprintf(
+        buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
@@ -173,22 +173,23 @@ namespace OpenMD {
     char buffer[65535];
     std::string result;
 
-    sprintf(
-        buffer,
+    snprintf(
+        buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    snprintf(buffer, 65535, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
     // print the ignore type list
-    sprintf(buffer, "Visitor Description: add a pseudo atom at the center of "
-                    "the mass of the "
-                    "rigidbody\n");
+    snprintf(buffer, 65535,
+             "Visitor Description: add a pseudo atom at the center of "
+             "the mass of the "
+             "rigidbody\n");
     result += buffer;
 
-    sprintf(
-        buffer,
+    snprintf(
+        buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 

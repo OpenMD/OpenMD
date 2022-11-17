@@ -166,8 +166,8 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg, "GofRZ: unable to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "GofRZ: unable to open %s\n", outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

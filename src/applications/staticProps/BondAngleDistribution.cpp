@@ -202,8 +202,9 @@ namespace OpenMD {
       ofs.close();
 
     } else {
-      sprintf(painCave.errMsg, "BondAngleDistribution: unable to open %s\n",
-              (getOutputFileName() + "q").c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "BondAngleDistribution: unable to open %s\n",
+               (getOutputFileName() + "q").c_str());
       painCave.isFatal = 1;
       simError();
     }

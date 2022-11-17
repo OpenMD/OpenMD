@@ -231,7 +231,6 @@ namespace OpenMD {
                    std::back_inserter(result.bitset_),
                    [](int val) { return val != 0; });
 #else
-
     // Not in MPI?  Just return a copy of the current bitset:
     std::copy(bitset_.begin(), bitset_.end(),
               std::back_inserter(result.bitset_));

@@ -76,8 +76,8 @@ namespace OpenMD::RNEMD {
             dynamic_cast<SPFForceManager*>(forceMan)) {
       forceManager_ = spfForceManager;
     } else {
-      sprintf(painCave.errMsg,
-              "SPF-RNEMD cannot be used with the default ForceManager.\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "SPF-RNEMD cannot be used with the default ForceManager.\n");
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
@@ -100,21 +100,21 @@ namespace OpenMD::RNEMD {
     }
 
     if (methodFluxMismatch) {
-      sprintf(painCave.errMsg,
-              "RNEMD: The current method, SPF\n"
-              "\tcannot be used with the current flux type, %s\n",
-              rnemdFluxTypeLabel_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: The current method, SPF\n"
+               "\tcannot be used with the current flux type, %s\n",
+               rnemdFluxTypeLabel_.c_str());
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
     }
 
     if (!hasCorrectFlux) {
-      sprintf(painCave.errMsg,
-              "RNEMD: The current method, SPF, and flux type, %s,\n"
-              "\tdid not have the correct flux value specified. Options\n"
-              "\tinclude: particleFlux.\n",
-              rnemdFluxTypeLabel_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: The current method, SPF, and flux type, %s,\n"
+               "\tdid not have the correct flux value specified. Options\n"
+               "\tinclude: particleFlux.\n",
+               rnemdFluxTypeLabel_.c_str());
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
@@ -147,8 +147,7 @@ namespace OpenMD::RNEMD {
     RealType K_b {};
 
     for (sd = smanA.beginSelected(selei); sd != NULL;
-          sd = smanA.nextSelected(selei)) {
-        
+         sd = smanA.nextSelected(selei)) {
       RealType mass = sd->getMass();
       Vector3d vel  = sd->getVel();
 
@@ -249,7 +248,7 @@ namespace OpenMD::RNEMD {
     }
 
     if (!successfulExchange) {
-      //   sprintf(painCave.errMsg,
+      //   snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
       //           "SPF exchange NOT performed - roots that solve\n"
       //           "\tthe constraint equations may not exist or there may be\n"
       //           "\tno selected objects in one or both slabs.\n");

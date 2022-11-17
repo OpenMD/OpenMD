@@ -60,8 +60,8 @@ namespace OpenMD {
   FluctuatingAtypeParameters
       FluctuatingChargeAdapter::getFluctuatingChargeParam() {
     if (!isFluctuatingCharge()) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "FluctuatingChargeAdapter::getFluctuatingChargeParam was passed an "
           "atomType "
           "(%s)\n"
@@ -74,8 +74,8 @@ namespace OpenMD {
 
     std::shared_ptr<GenericData> data = at_->getPropertyByName(FQtypeID);
     if (data == nullptr) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "FluctuatingChargeAdapter::getFluctuatingChargeParam could not find "
           "fluctuating charge\n"
           "\tparameters for atomType %s.\n",
@@ -88,11 +88,11 @@ namespace OpenMD {
     std::shared_ptr<FluctuatingAtypeData> fqData =
         std::dynamic_pointer_cast<FluctuatingAtypeData>(data);
     if (fqData == nullptr) {
-      sprintf(painCave.errMsg,
-              "FluctuatingChargeAdapter::getFluctuatingChargeParam could not "
-              "convert\n"
-              "\tGenericData to FluctuatingAtypeData for atom type %s\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "FluctuatingChargeAdapter::getFluctuatingChargeParam could not "
+               "convert\n"
+               "\tGenericData to FluctuatingAtypeData for atom type %s\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

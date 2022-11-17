@@ -63,15 +63,16 @@ namespace OpenMD {
         dt_  = info_->getSimParams()->getDt();
         dt2_ = dt_ * 0.5;
       } else {
-        sprintf(painCave.errMsg,
-                "FluctuatingChargeLangevin Error: dt is not set\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "FluctuatingChargeLangevin Error: dt is not set\n");
         painCave.isFatal = 1;
         simError();
       }
 
       if (!fqParams_->haveTargetTemp()) {
-        sprintf(painCave.errMsg, "You can't use the FluctuatingChargeLangevin "
-                                 "propagator without a flucQ.targetTemp!\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "You can't use the FluctuatingChargeLangevin "
+                 "propagator without a flucQ.targetTemp!\n");
         painCave.isFatal  = 1;
         painCave.severity = OPENMD_ERROR;
         simError();
@@ -82,9 +83,9 @@ namespace OpenMD {
       // We must set tauThermostat.
 
       if (!fqParams_->haveDragCoefficient()) {
-        sprintf(painCave.errMsg,
-                "If you use the FluctuatingChargeLangevin\n"
-                "\tpropagator, you must set flucQ.dragCoefficient .\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "If you use the FluctuatingChargeLangevin\n"
+                 "\tpropagator, you must set flucQ.dragCoefficient .\n");
 
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;

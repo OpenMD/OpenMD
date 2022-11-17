@@ -181,24 +181,24 @@ namespace OpenMD {
     }
 
     if ((bigScale > 1.01) || (smallScale < 0.99)) {
-      sprintf(painCave.errMsg,
-              "NPTf error: Attempting a Box scaling of more than 1 percent.\n"
-              " Check your tauBarostat, as it is probably too small!\n\n"
-              " scaleMat = [%lf\t%lf\t%lf]\n"
-              "            [%lf\t%lf\t%lf]\n"
-              "            [%lf\t%lf\t%lf]\n"
-              "      eta = [%lf\t%lf\t%lf]\n"
-              "            [%lf\t%lf\t%lf]\n"
-              "            [%lf\t%lf\t%lf]\n",
-              scaleMat(0, 0), scaleMat(0, 1), scaleMat(0, 2), scaleMat(1, 0),
-              scaleMat(1, 1), scaleMat(1, 2), scaleMat(2, 0), scaleMat(2, 1),
-              scaleMat(2, 2), eta(0, 0), eta(0, 1), eta(0, 2), eta(1, 0),
-              eta(1, 1), eta(1, 2), eta(2, 0), eta(2, 1), eta(2, 2));
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "NPTf error: Attempting a Box scaling of more than 1 percent.\n"
+               " Check your tauBarostat, as it is probably too small!\n\n"
+               " scaleMat = [%lf\t%lf\t%lf]\n"
+               "            [%lf\t%lf\t%lf]\n"
+               "            [%lf\t%lf\t%lf]\n"
+               "      eta = [%lf\t%lf\t%lf]\n"
+               "            [%lf\t%lf\t%lf]\n"
+               "            [%lf\t%lf\t%lf]\n",
+               scaleMat(0, 0), scaleMat(0, 1), scaleMat(0, 2), scaleMat(1, 0),
+               scaleMat(1, 1), scaleMat(1, 2), scaleMat(2, 0), scaleMat(2, 1),
+               scaleMat(2, 2), eta(0, 0), eta(0, 1), eta(0, 2), eta(1, 0),
+               eta(1, 1), eta(1, 2), eta(2, 0), eta(2, 1), eta(2, 2));
       painCave.isFatal = 1;
       simError();
     } else if (offDiagMax > 0.01) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "NPTf error: Attempting an off-diagonal Box scaling of more than 1 "
           "percent.\n"
           " Check your tauBarostat, as it is probably too small!\n\n"
@@ -284,7 +284,7 @@ namespace OpenMD {
     eta = snap->getBarostat();
 
     // if (!eta.isDiagonal()) {
-    //    sprintf( painCave.errMsg,
+    //    snprintf( painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
     //             "NPTf error: the diagonal elements of eta matrix are not the
     //             same or etaMat is not a diagonal matrix");
     //    painCave.isFatal = 1;

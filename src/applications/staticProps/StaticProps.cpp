@@ -80,6 +80,7 @@
 #include "applications/staticProps/AngleR.hpp"
 #include "applications/staticProps/ChargeDensityZ.hpp"
 #include "applications/staticProps/ChargeHistogram.hpp"
+#include "applications/staticProps/ChargeR.hpp"
 #include "applications/staticProps/ChargeZ.hpp"
 #include "applications/staticProps/CoordinationNumber.hpp"
 #include "applications/staticProps/CurrentDensity.hpp"
@@ -91,6 +92,8 @@
 #include "applications/staticProps/MomentumHistogram.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
+#include "applications/staticProps/NumberR.hpp"
+#include "applications/staticProps/NumberZ.hpp"
 #include "applications/staticProps/OrderParameterProbZ.hpp"
 #include "applications/staticProps/PositionZ.hpp"
 #include "applications/staticProps/PotDiff.hpp"
@@ -118,6 +121,7 @@ int main(int argc, char* argv[]) {
   std::string sele1;
   std::string sele2;
   std::string sele3;
+  std::string comsele;
 
   // check the first selection argument, or set it to the environment
   // variable, or failing that, set it to "select all"
@@ -154,6 +158,11 @@ int main(int argc, char* argv[]) {
 
   if (args_info.sele3_given) sele3 = args_info.sele3_arg;
 
+  // check the comsele selection argument, which is only set if
+  // requested by the user
+
+  if (args_info.comsele_given) comsele = args_info.comsele_arg;
+
   bool batchMode(false);
   if (args_info.scd_given) {
     if (args_info.sele1_given && args_info.sele2_given &&
@@ -163,16 +172,18 @@ int main(int argc, char* argv[]) {
                args_info.end_given) {
       if (args_info.begin_arg < 0 || args_info.end_arg < 0 ||
           args_info.begin_arg > args_info.end_arg - 2) {
-        sprintf(painCave.errMsg, "below conditions are not satisfied:\n"
-                                 "0 <= begin && 0<= end && begin <= end-2\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "below conditions are not satisfied:\n"
+                 "0 <= begin && 0<= end && begin <= end-2\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
       }
       batchMode = true;
     } else {
-      sprintf(painCave.errMsg, "either --sele1, --sele2, --sele3 are specified,"
-                               " or --molname, --begin, --end are specified\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "either --sele1, --sele2, --sele3 are specified,"
+               " or --molname, --begin, --end are specified\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -324,7 +335,8 @@ int main(int argc, char* argv[]) {
                                           args_info.refsele_arg, maxLen,
                                           args_info.nbins_arg);
     } else {
-      sprintf(painCave.errMsg, "--refsele must set when --gxyz is used");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--refsele must set when --gxyz is used");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -334,8 +346,8 @@ int main(int argc, char* argv[]) {
       analyser = std::make_unique<TwoDGofR>(info, dumpFileName, sele1, sele2,
                                             maxLen, args_info.dz_arg, nrbins);
     } else {
-      sprintf(painCave.errMsg,
-              "A slab width (dz) must be specified when calculating TwoDGofR");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A slab width (dz) must be specified when calculating TwoDGofR");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -345,8 +357,8 @@ int main(int argc, char* argv[]) {
       analyser = std::make_unique<KirkwoodBuff>(info, dumpFileName, sele1,
                                                 sele2, maxLen, nrbins);
     } else {
-      sprintf(
-          painCave.errMsg,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "Two selection scripts (--sele1 and --sele2) must be specified when "
           "calculating Kirkwood Buff integrals");
       painCave.severity = OPENMD_ERROR;
@@ -366,9 +378,9 @@ int main(int argc, char* argv[]) {
             std::make_unique<P2OrderParameter>(info, dumpFileName, sele1);
       }
     } else {
-      sprintf(painCave.errMsg,
-              "At least one selection script (--sele1) must be specified when "
-              "calculating P2 order parameters");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "At least one selection script (--sele1) must be specified when "
+               "calculating P2 order parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -380,10 +392,10 @@ int main(int argc, char* argv[]) {
       analyser = std::make_unique<BondOrderParameter>(
           info, dumpFileName, sele1, args_info.rcut_arg, args_info.nbins_arg);
     } else {
-      sprintf(painCave.errMsg,
-              "A cutoff radius (rcut) must be specified when calculating Bond "
-              "Order "
-              "Parameters");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating Bond "
+               "Order "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -397,10 +409,10 @@ int main(int argc, char* argv[]) {
       analyser = std::make_unique<TetrahedralityParam>(
           info, dumpFileName, sele1, args_info.rcut_arg, args_info.nbins_arg);
     } else {
-      sprintf(painCave.errMsg,
-              "A cutoff radius (rcut) must be specified when calculating "
-              "Tetrahedrality "
-              "Parameters");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating "
+               "Tetrahedrality "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -411,10 +423,10 @@ int main(int argc, char* argv[]) {
           info, dumpFileName, sele1, sele2, args_info.rcut_arg,
           args_info.nbins_arg, privilegedAxis);
     } else {
-      sprintf(painCave.errMsg,
-              "A cutoff radius (rcut) must be specified when calculating "
-              "Tetrahedrality "
-              "Parameters");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating "
+               "Tetrahedrality "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -426,18 +438,18 @@ int main(int argc, char* argv[]) {
             info, dumpFileName, sele1, sele2, sele3, args_info.rcut_arg, maxLen,
             nrbins);
       } else {
-        sprintf(painCave.errMsg,
-                "Selection3 (--sele3) must be given when calculating "
-                "Tetrahedrality Parameter Qk(r)");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Selection3 (--sele3) must be given when calculating "
+                 "Tetrahedrality Parameter Qk(r)");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
       }
     } else {
-      sprintf(painCave.errMsg,
-              "A cutoff radius (rcut) must be specified when calculating "
-              "Tetrahedrality "
-              "Parameters");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating "
+               "Tetrahedrality "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -448,10 +460,10 @@ int main(int argc, char* argv[]) {
           info, dumpFileName, sele1, sele2, args_info.rcut_arg,
           args_info.nbins_arg);
     } else {
-      sprintf(painCave.errMsg,
-              "A cutoff radius (rcut) must be specified when calculating "
-              "Tetrahedrality "
-              "Parameters");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating "
+               "Tetrahedrality "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -462,33 +474,34 @@ int main(int argc, char* argv[]) {
           info, dumpFileName, sele1, args_info.rcut_arg, args_info.OOcut_arg,
           args_info.thetacut_arg, args_info.OHcut_arg, args_info.nbins_arg);
     } else {
-      sprintf(painCave.errMsg,
-              "A cutoff radius (rcut) must be specified when calculating "
-              " Tetrahedrality Hydrogen Bonding Matrix");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating "
+               " Tetrahedrality Hydrogen Bonding Matrix");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.tet_param_xyz_given) {
     if (!args_info.rcut_given) {
-      sprintf(painCave.errMsg,
-              "A cutoff radius (rcut) must be specified when calculating"
-              " Tetrahedrality Parameters");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating"
+               " Tetrahedrality Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
     if (!args_info.voxelSize_given) {
-      sprintf(painCave.errMsg, "A voxel size must be specified when calculating"
-                               " volume-resolved Tetrahedrality Parameters");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A voxel size must be specified when calculating"
+               " volume-resolved Tetrahedrality Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
     if (!args_info.gaussWidth_given) {
-      sprintf(painCave.errMsg,
-              "A gaussian width must be specified when calculating"
-              " volume-resolved Tetrahedrality Parameters");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A gaussian width must be specified when calculating"
+               " volume-resolved Tetrahedrality Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -501,10 +514,10 @@ int main(int argc, char* argv[]) {
       analyser = std::make_unique<IcosahedralOfR>(
           info, dumpFileName, sele1, args_info.rcut_arg, nrbins, maxLen);
     } else {
-      sprintf(painCave.errMsg,
-              "A cutoff radius (rcut) must be specified when calculating Bond "
-              "Order "
-              "Parameters");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating Bond "
+               "Order "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -514,10 +527,10 @@ int main(int argc, char* argv[]) {
       analyser = std::make_unique<FCCOfR>(info, dumpFileName, sele1,
                                           args_info.rcut_arg, nrbins, maxLen);
     } else {
-      sprintf(painCave.errMsg,
-              "A cutoff radius (rcut) must be specified when calculating Bond "
-              "Order "
-              "Parameters");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating Bond "
+               "Order "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -527,10 +540,10 @@ int main(int argc, char* argv[]) {
       analyser = std::make_unique<BondAngleDistribution>(
           info, dumpFileName, sele1, args_info.rcut_arg, args_info.nbins_arg);
     } else {
-      sprintf(painCave.errMsg,
-              "A cutoff radius (rcut) must be specified when calculating Bond "
-              "Angle "
-              "Distributions");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating Bond "
+               "Angle "
+               "Distributions");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -598,10 +611,11 @@ int main(int argc, char* argv[]) {
     analyser = std::make_unique<RNEMDZ>(info, dumpFileName, sele1,
                                         args_info.nbins_arg, privilegedAxis);
   } else if (args_info.rnemdr_given) {
-    analyser = std::make_unique<RNEMDR>(info, dumpFileName, sele1, nrbins);
+    analyser =
+        std::make_unique<RNEMDR>(info, dumpFileName, sele1, comsele, nrbins);
   } else if (args_info.rnemdrt_given) {
-    analyser = std::make_unique<RNEMDRTheta>(info, dumpFileName, sele1, nrbins,
-                                             nanglebins);
+    analyser = std::make_unique<RNEMDRTheta>(info, dumpFileName, sele1, comsele,
+                                             nrbins, nanglebins);
   } else if (args_info.nitrile_given) {
     analyser = std::make_unique<NitrileFrequencyMap>(info, dumpFileName, sele1,
                                                      args_info.nbins_arg);
@@ -624,9 +638,9 @@ int main(int argc, char* argv[]) {
         analyser = std::make_unique<pAngle>(info, dumpFileName, sele1,
                                             args_info.nbins_arg);
     } else {
-      sprintf(painCave.errMsg,
-              "At least one selection script (--sele1) must be specified when "
-              "calculating P(angle) distributions");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "At least one selection script (--sele1) must be specified when "
+               "calculating P(angle) distributions");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -653,9 +667,9 @@ int main(int argc, char* argv[]) {
                                   args_info.rcut_arg, args_info.nbins_arg);
       }
     } else {
-      sprintf(painCave.errMsg,
-              "A cutoff radius (rcut) must be specified when calculating\n"
-              "\t Coordination Numbers");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating\n"
+               "\t Coordination Numbers");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -668,9 +682,9 @@ int main(int argc, char* argv[]) {
       analyser = std::make_unique<RhoR>(info, dumpFileName, sele1, maxLen,
                                         nrbins, args_info.radius_arg);
     } else {
-      sprintf(painCave.errMsg,
-              "A particle radius (radius) must be specified when calculating "
-              "Rho(r)");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A particle radius (radius) must be specified when calculating "
+               "Rho(r)");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -689,17 +703,17 @@ int main(int argc, char* argv[]) {
             info, dumpFileName, sele1, sele2, args_info.rcut_arg,
             args_info.thetacut_arg, args_info.nbins_arg);
       } else {
-        sprintf(painCave.errMsg,
-                "A cutoff angle (thetacut) must be specified when calculating "
-                "Hydrogen "
-                "Bonding Statistics");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "A cutoff angle (thetacut) must be specified when calculating "
+                 "Hydrogen "
+                 "Bonding Statistics");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
       }
     } else {
-      sprintf(
-          painCave.errMsg,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "A cutoff radius (rcut) must be specified when calculating Hydrogen "
           "Bonding Statistics");
       painCave.severity = OPENMD_ERROR;
@@ -765,7 +779,8 @@ int main(int argc, char* argv[]) {
           args_info.dipoleY_arg, args_info.dipoleZ_arg, args_info.nbins_arg,
           privilegedAxis);
     else {
-      sprintf(painCave.errMsg, "Dipole components must be provided.");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Dipole components must be provided.");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -779,7 +794,8 @@ int main(int argc, char* argv[]) {
           args_info.dipoleY_arg, args_info.dipoleZ_arg, args_info.nbins_arg,
           privilegedAxis);
     else {
-      sprintf(painCave.errMsg, "Dipole components must be provided.");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Dipole components must be provided.");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

@@ -143,8 +143,8 @@ namespace OpenMD {
     pair<set<int>::iterator, bool> ret;
     ret = SCtypes.insert(atid);
     if (ret.second == false) {
-      sprintf(painCave.errMsg,
-              "SC already had a previous entry with ident %d\n", atid);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "SC already had a previous entry with ident %d\n", atid);
       painCave.severity = OPENMD_INFO;
       painCave.isFatal  = 0;
       simError();

@@ -73,26 +73,26 @@ namespace OpenMD {
 
       if (RNEMD::SPFForceManager* spfForceManager =
               dynamic_cast<RNEMD::SPFForceManager*>(forceMan_)) {
+        if (rnemd_->failedLastKick()) {
+          snap->clearDerivedProperties();
 
-          if (rnemd_->failedLastKick()) {
-            snap->clearDerivedProperties();
+          spfForceManager->combineForcesAndTorques();
+          spfForceManager->updatePotentials();
+          spfForceManager->updateVirialTensor();
 
-            spfForceManager->combineForcesAndTorques();
-            spfForceManager->updatePotentials();
-            spfForceManager->updateVirialTensor();
+          Snapshot tempSourceSnap =
+              spfForceManager->getTemporarySourceSnapshot();
 
-            Snapshot tempSourceSnap = spfForceManager->getTemporarySourceSnapshot();
+          snap->atomData.velocity      = tempSourceSnap.atomData.velocity;
+          snap->rigidbodyData.velocity = tempSourceSnap.rigidbodyData.velocity;
+          snap->cgData.velocity        = tempSourceSnap.cgData.velocity;
 
-            snap->atomData.velocity = tempSourceSnap.atomData.velocity;
-            snap->rigidbodyData.velocity =
-                tempSourceSnap.rigidbodyData.velocity;
-            snap->cgData.velocity = tempSourceSnap.cgData.velocity;
-
-            this->moveB();
-          }
+          this->moveB();
+        }
       } else {
-        sprintf(painCave.errMsg, "SPFDynamics cannot be used with the "
-                                 "default ForceManager.\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "SPFDynamics cannot be used with the "
+                 "default ForceManager.\n");
         painCave.isFatal  = 1;
         painCave.severity = OPENMD_ERROR;
         simError();

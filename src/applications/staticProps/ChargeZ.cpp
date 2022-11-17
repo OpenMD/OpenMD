@@ -117,6 +117,21 @@ namespace OpenMD {
       zBox_.push_back(hmat(axis_, axis_));
 
       RealType halfBoxZ_ = hmat(axis_, axis_) / 2.0;
+      RealType area      = 0.0;
+      switch (axis_) {
+      case 0:
+        area = currentSnapshot_->getYZarea();
+        break;
+      case 1:
+        area = currentSnapshot_->getXZarea();
+        break;
+      case 2:
+      default:
+        area = currentSnapshot_->getXYarea();
+        break;
+      }
+
+      areas_.push_back(area);
 
       if (evaluator_.isDynamic()) {
         seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -176,6 +191,12 @@ namespace OpenMD {
     }
     RealType zAve = zSum / zBox_.size();
 
+    RealType areaSum = 0.0;
+    for (j = areas_.begin(); j != areas_.end(); ++j) {
+      areaSum += *j;
+    }
+    RealType areaAve = areaSum / areas_.size();
+
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
       rdfStream << "#ChargeZ "
@@ -185,17 +206,17 @@ namespace OpenMD {
       RealType binCharge;
       for (unsigned int i = 0; i < chargeZ_.size(); ++i) {
         RealType z = zAve * (i + 0.5) / chargeZ_.size();
-        if (sliceSDCount_[i] > 0)
-          binCharge = chargeZ_[i] / (nProcessed_ * sliceSDCount_[i]);
-        else
-          binCharge = chargeZ_[i];
+
+        RealType volSlice = areaAve * zAve / zBox_.size();
+
+        binCharge = chargeZ_[i] / (volSlice * nProcessed_);
 
         rdfStream << z << "\t" << binCharge << "\n";
       }
 
     } else {
-      sprintf(painCave.errMsg, "ChargeZ: unable to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "ChargeZ: unable to open %s\n", outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

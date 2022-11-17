@@ -326,7 +326,7 @@ namespace OpenMD {
   }
 
   std::vector<Vector3d> Thermo::getCurrentDensity() {
-    Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
+    Snapshot* snap       = info_->getSnapshotManager()->getCurrentSnapshot();
     AtomTypeSet simTypes = info_->getSimulatedAtomTypes();
 
     SimInfo::MoleculeIterator miter;

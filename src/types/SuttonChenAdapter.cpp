@@ -54,8 +54,8 @@ namespace OpenMD {
 
   SCAtypeParameters SuttonChenAdapter::getSuttonChenParam() {
     if (!isSuttonChen()) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "SuttonChenAdapter::getSuttonChenParam was passed an atomType (%s)\n"
           "\tthat does not appear to be a Sutton-Chen atom.\n",
           at_->getName().c_str());
@@ -66,8 +66,8 @@ namespace OpenMD {
 
     std::shared_ptr<GenericData> data = at_->getPropertyByName(SCtypeID);
     if (data == nullptr) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "SuttonChenAdapter::getSuttonChenParam could not find Sutton-Chen\n"
           "\tparameters for atomType %s.\n",
           at_->getName().c_str());
@@ -79,10 +79,10 @@ namespace OpenMD {
     std::shared_ptr<SCAtypeData> scData =
         std::dynamic_pointer_cast<SCAtypeData>(data);
     if (scData == nullptr) {
-      sprintf(painCave.errMsg,
-              "SuttonChenAdapter::getSuttonChenParam could not convert\n"
-              "\tGenericData to SCAtypeData for atom type %s\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "SuttonChenAdapter::getSuttonChenParam could not convert\n"
+               "\tGenericData to SCAtypeData for atom type %s\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

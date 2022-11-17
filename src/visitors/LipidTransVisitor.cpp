@@ -65,15 +65,15 @@ namespace OpenMD {
         originDatom_ =
             dynamic_cast<DirectionalAtom*>(originSeleMan_.beginSelected(i));
         if (originDatom_ == NULL) {
-          sprintf(painCave.errMsg,
-                  "LipidTransVisitor: origin selection must select an "
-                  "directional atom");
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "LipidTransVisitor: origin selection must select an "
+                   "directional atom");
           painCave.isFatal = 1;
           simError();
         }
       } else {
-        sprintf(
-            painCave.errMsg,
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "LipidTransVisitor: origin selection must select an directional "
             "atom");
         painCave.isFatal = 1;
@@ -151,19 +151,19 @@ namespace OpenMD {
     char buffer[65535];
     std::string result;
 
-    sprintf(
-        buffer,
+    snprintf(
+        buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    snprintf(buffer, 65535, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
-    sprintf(buffer, "Visitor Description: rotate the whole system\n");
+    snprintf(buffer, 65535, "Visitor Description: rotate the whole system\n");
     result += buffer;
 
-    sprintf(
-        buffer,
+    snprintf(
+        buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 

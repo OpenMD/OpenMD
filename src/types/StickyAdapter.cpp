@@ -54,10 +54,10 @@ namespace OpenMD {
 
   StickyAtypeParameters StickyAdapter::getStickyParam() {
     if (!isSticky()) {
-      sprintf(painCave.errMsg,
-              "StickyAdapter::getStickyParam was passed an atomType (%s)\n"
-              "\tthat does not appear to be a Sticky atom.\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "StickyAdapter::getStickyParam was passed an atomType (%s)\n"
+               "\tthat does not appear to be a Sticky atom.\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -65,10 +65,10 @@ namespace OpenMD {
 
     std::shared_ptr<GenericData> data = at_->getPropertyByName(StickyTypeID);
     if (data == nullptr) {
-      sprintf(painCave.errMsg,
-              "StickyAdapter::getStickyParam could not find Sticky\n"
-              "\tparameters for atomType %s.\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "StickyAdapter::getStickyParam could not find Sticky\n"
+               "\tparameters for atomType %s.\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -77,10 +77,10 @@ namespace OpenMD {
     std::shared_ptr<StickyAtypeData> stickyData =
         std::dynamic_pointer_cast<StickyAtypeData>(data);
     if (stickyData == nullptr) {
-      sprintf(painCave.errMsg,
-              "StickyAdapter::getStickyParam could not convert\n"
-              "\tGenericData to StickyAtypeData for atom type %s\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "StickyAdapter::getStickyParam could not convert\n"
+               "\tGenericData to StickyAtypeData for atom type %s\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

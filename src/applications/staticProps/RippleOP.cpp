@@ -63,7 +63,8 @@ namespace OpenMD {
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     } else {
-      sprintf(painCave.errMsg, "--sele1 must be static selection\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--sele1 must be static selection\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -72,16 +73,18 @@ namespace OpenMD {
     if (!evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     } else {
-      sprintf(painCave.errMsg, "--sele2 must be static selection\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--sele2 must be static selection\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
 
     if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount()) {
-      sprintf(painCave.errMsg,
-              "The number of selected Stuntdoubles are not the same in --sele1 "
-              "and sele2\n");
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "The number of selected Stuntdoubles are not the same in --sele1 "
+          "and sele2\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

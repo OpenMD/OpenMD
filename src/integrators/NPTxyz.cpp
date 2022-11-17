@@ -143,8 +143,8 @@ namespace OpenMD {
     }
 
     if ((bigScale > 1.1) || (smallScale < 0.9)) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "NPTxyz error: Attempting a Box scaling of more than 10 percent.\n"
           " Check your tauBarostat, as it is probably too small!\n\n"
           " scaleMat = [%lf\t%lf\t%lf]\n"

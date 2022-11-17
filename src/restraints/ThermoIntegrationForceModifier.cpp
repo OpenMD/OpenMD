@@ -64,12 +64,12 @@ namespace OpenMD {
       tIntLambda = simParam_->getThermodynamicIntegrationLambda();
     } else {
       tIntLambda = 1.0;
-      sprintf(painCave.errMsg,
-              "ThermoIntegration error: the transformation parameter\n"
-              "\t(lambda) was not specified. OpenMD will use a default\n"
-              "\tvalue of %f. To set lambda, use the \n"
-              "\tthermodynamicIntegrationLambda variable.\n",
-              tIntLambda);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "ThermoIntegration error: the transformation parameter\n"
+               "\t(lambda) was not specified. OpenMD will use a default\n"
+               "\tvalue of %f. To set lambda, use the \n"
+               "\tthermodynamicIntegrationLambda variable.\n",
+               tIntLambda);
       painCave.isFatal = 0;
       simError();
     }
@@ -78,12 +78,12 @@ namespace OpenMD {
       tIntK = simParam_->getThermodynamicIntegrationK();
     } else {
       tIntK = 1.0;
-      sprintf(painCave.errMsg,
-              "ThermoIntegration Warning: the tranformation parameter\n"
-              "\texponent (k) was not specified. OpenMD will use a default\n"
-              "\tvalue of %f. To set k, use the thermodynamicIntegrationK\n"
-              "\tvariable.\n",
-              tIntK);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "ThermoIntegration Warning: the tranformation parameter\n"
+               "\texponent (k) was not specified. OpenMD will use a default\n"
+               "\tvalue of %f. To set k, use the thermodynamicIntegrationK\n"
+               "\tvariable.\n",
+               tIntK);
       painCave.isFatal = 0;
       simError();
     }

@@ -122,8 +122,8 @@ namespace OpenMD {
       ofs.close();
 
     } else {
-      sprintf(painCave.errMsg, "StaticAnalyser: unable to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "StaticAnalyser: unable to open %s\n", outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -148,10 +148,10 @@ namespace OpenMD {
       }
 
       if (std::isinf(r) || std::isnan(r)) {
-        sprintf(painCave.errMsg,
-                "StaticAnalyser detected a numerical error writing:\n"
-                "\t%s for bin %u",
-                dat->title.c_str(), bin);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "StaticAnalyser detected a numerical error writing:\n"
+                 "\t%s for bin %u",
+                 dat->title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
       } else {
@@ -178,10 +178,10 @@ namespace OpenMD {
 
       if (std::isinf(v[0]) || std::isnan(v[0]) || std::isinf(v[1]) ||
           std::isnan(v[1]) || std::isinf(v[2]) || std::isnan(v[2])) {
-        sprintf(painCave.errMsg,
-                "StaticAnalyser detected a numerical error writing:\n"
-                "\t%s for bin %u",
-                dat->title.c_str(), bin);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "StaticAnalyser detected a numerical error writing:\n"
+                 "\t%s for bin %u",
+                 dat->title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
       } else {
@@ -212,10 +212,10 @@ namespace OpenMD {
         }
 
         if (std::isinf(s) || std::isnan(s)) {
-          sprintf(painCave.errMsg,
-                  "StaticAnalyser detected a numerical error writing:\n"
-                  "\t%s for bin %u, column %u",
-                  dat->title.c_str(), bin, static_cast<unsigned int>(i));
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "StaticAnalyser detected a numerical error writing:\n"
+                   "\t%s for bin %u, column %u",
+                   dat->title.c_str(), bin, static_cast<unsigned int>(i));
           painCave.isFatal = 1;
           simError();
         } else {
@@ -252,10 +252,10 @@ namespace OpenMD {
           ->get95percentConfidenceInterval(r);
 
       if (std::isinf(r) || std::isnan(r)) {
-        sprintf(painCave.errMsg,
-                "StaticAnalyser detected a numerical error writing:\n"
-                "\tstandard deviation of %s for bin %u",
-                dat->title.c_str(), bin);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "StaticAnalyser detected a numerical error writing:\n"
+                 "\tstandard deviation of %s for bin %u",
+                 dat->title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
       } else {
@@ -279,10 +279,10 @@ namespace OpenMD {
 
       if (std::isinf(v[0]) || std::isnan(v[0]) || std::isinf(v[1]) ||
           std::isnan(v[1]) || std::isinf(v[2]) || std::isnan(v[2])) {
-        sprintf(painCave.errMsg,
-                "StaticAnalyser detected a numerical error writing:\n"
-                "\tstandard deviation of %s for bin %u",
-                dat->title.c_str(), bin);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "StaticAnalyser detected a numerical error writing:\n"
+                 "\tstandard deviation of %s for bin %u",
+                 dat->title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
       } else {
@@ -308,10 +308,10 @@ namespace OpenMD {
             ->get95percentConfidenceInterval(s);
 
         if (std::isinf(s) || std::isnan(s)) {
-          sprintf(painCave.errMsg,
-                  "StaticAnalyser detected a numerical error writing:\n"
-                  "\t%s std. dev. for bin %u, column %u",
-                  dat->title.c_str(), bin, static_cast<unsigned int>(i));
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "StaticAnalyser detected a numerical error writing:\n"
+                   "\t%s std. dev. for bin %u, column %u",
+                   dat->title.c_str(), bin, static_cast<unsigned int>(i));
           painCave.isFatal = 1;
           simError();
         } else {

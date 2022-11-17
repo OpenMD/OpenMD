@@ -216,11 +216,11 @@ namespace OpenMD {
         RealType time2 = times_[j];
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
-          sprintf(painCave.errMsg,
-                  "HBondPersistence::correlation Error: sampleTime (%f)\n"
-                  "\tin %s does not match actual time-spacing between\n"
-                  "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                  deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "HBondPersistence::correlation Error: sampleTime (%f)\n"
+                   "\tin %s does not match actual time-spacing between\n"
+                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
           painCave.isFatal = 1;
           simError();
         }

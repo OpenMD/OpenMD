@@ -77,8 +77,9 @@ int main(int argc, char* argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg, "No input file name was specified "
-                             "on the command line");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "No input file name was specified "
+             "on the command line");
     painCave.severity = OPENMD_ERROR;
     painCave.isFatal  = 1;
     simError();
@@ -95,8 +96,8 @@ int main(int argc, char* argv[]) {
   outputFileName = args_info.output_arg;
 
   if (!outputFileName.compare(inputFileName)) {
-    sprintf(painCave.errMsg,
-            "Input and Output File names should be different!");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Input and Output File names should be different!");
     painCave.severity = OPENMD_ERROR;
     painCave.isFatal  = 1;
     simError();
@@ -105,7 +106,8 @@ int main(int argc, char* argv[]) {
   DumpWriter* writer = new DumpWriter(info, outputFileName);
 
   if (writer == NULL) {
-    sprintf(painCave.errMsg, "error in creating DumpWriter");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "error in creating DumpWriter");
     painCave.severity = OPENMD_ERROR;
     painCave.isFatal  = 1;
     simError();
@@ -138,9 +140,9 @@ int main(int argc, char* argv[]) {
 
   delete writer;
 
-  sprintf(painCave.errMsg,
-          "A new OpenMD file called \"%s\" has been generated.\n",
-          outputFileName.c_str());
+  snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+           "A new OpenMD file called \"%s\" has been generated.\n",
+           outputFileName.c_str());
   painCave.severity = OPENMD_INFO;
   painCave.isFatal  = 0;
   simError();

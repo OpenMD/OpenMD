@@ -256,9 +256,9 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg,
-              "DisplacementZ::writeCorrelate Error: fail to open %s\n",
-              getOutputFileName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "DisplacementZ::writeCorrelate Error: fail to open %s\n",
+               getOutputFileName().c_str());
       painCave.isFatal = 1;
       simError();
     }

@@ -104,4 +104,4 @@ namespace OpenMD {
   };
 }  // namespace OpenMD
 
-#endif  //#define IO_DUMPWRITER_HPP
+#endif  // #define IO_DUMPWRITER_HPP

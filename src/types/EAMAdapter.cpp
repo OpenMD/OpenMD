@@ -56,10 +56,10 @@ namespace OpenMD {
 
   EAMParameters EAMAdapter::getEAMParam() {
     if (!isEAM()) {
-      sprintf(painCave.errMsg,
-              "EAMAdapter::getEAMParam was passed an atomType (%s)\n"
-              "\tthat does not appear to be an EAM atom.\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "EAMAdapter::getEAMParam was passed an atomType (%s)\n"
+               "\tthat does not appear to be an EAM atom.\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -67,10 +67,10 @@ namespace OpenMD {
 
     std::shared_ptr<GenericData> data = at_->getPropertyByName(EAMtypeID);
     if (data == nullptr) {
-      sprintf(painCave.errMsg,
-              "EAMAdapter::getEAMParam could not find EAM\n"
-              "\tparameters for atomType %s.\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "EAMAdapter::getEAMParam could not find EAM\n"
+               "\tparameters for atomType %s.\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -78,10 +78,10 @@ namespace OpenMD {
 
     std::shared_ptr<EAMData> eamData = std::dynamic_pointer_cast<EAMData>(data);
     if (eamData == nullptr) {
-      sprintf(painCave.errMsg,
-              "EAMAdapter::getEAMParam could not convert\n"
-              "\tGenericData to EAMData for atom type %s\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "EAMAdapter::getEAMParam could not convert\n"
+               "\tGenericData to EAMData for atom type %s\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -92,10 +92,10 @@ namespace OpenMD {
 
   FuncflParameters EAMAdapter::getFuncflParam() {
     if (!isEAM()) {
-      sprintf(painCave.errMsg,
-              "EAMAdapter::getFuncflParam was passed an atomType (%s)\n"
-              "\tthat does not appear to be an EAM atom.\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "EAMAdapter::getFuncflParam was passed an atomType (%s)\n"
+               "\tthat does not appear to be an EAM atom.\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -103,10 +103,10 @@ namespace OpenMD {
 
     std::shared_ptr<GenericData> data = at_->getPropertyByName(FuncflTypeID);
     if (data == nullptr) {
-      sprintf(painCave.errMsg,
-              "EAMAdapter::getFuncflParam could not find Funcfl\n"
-              "\tparameters for atomType %s.\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "EAMAdapter::getFuncflParam could not find Funcfl\n"
+               "\tparameters for atomType %s.\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -115,10 +115,10 @@ namespace OpenMD {
     std::shared_ptr<FuncflData> funcflData =
         std::dynamic_pointer_cast<FuncflData>(data);
     if (funcflData == nullptr) {
-      sprintf(painCave.errMsg,
-              "EAMAdapter::getFuncflParam could not convert\n"
-              "\tGenericData to FuncflData for atom type %s\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "EAMAdapter::getFuncflParam could not convert\n"
+               "\tGenericData to FuncflData for atom type %s\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -129,10 +129,10 @@ namespace OpenMD {
 
   ZhouParameters EAMAdapter::getZhouParam() {
     if (!isEAM()) {
-      sprintf(painCave.errMsg,
-              "EAMAdapter::getZhouParam was passed an atomType (%s)\n"
-              "\tthat does not appear to be an EAM atom.\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "EAMAdapter::getZhouParam was passed an atomType (%s)\n"
+               "\tthat does not appear to be an EAM atom.\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -140,10 +140,10 @@ namespace OpenMD {
 
     std::shared_ptr<GenericData> data = at_->getPropertyByName(ZhouTypeID);
     if (data == nullptr) {
-      sprintf(painCave.errMsg,
-              "EAMAdapter::getZhouParam could not find Zhou\n"
-              "\tparameters for atomType %s.\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "EAMAdapter::getZhouParam could not find Zhou\n"
+               "\tparameters for atomType %s.\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -152,10 +152,10 @@ namespace OpenMD {
     std::shared_ptr<ZhouData> zhouData =
         std::dynamic_pointer_cast<ZhouData>(data);
     if (zhouData == nullptr) {
-      sprintf(painCave.errMsg,
-              "EAMAdapter::getZhouParam could not convert\n"
-              "\tGenericData to ZhouData for atom type %s\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "EAMAdapter::getZhouParam could not convert\n"
+               "\tGenericData to ZhouData for atom type %s\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

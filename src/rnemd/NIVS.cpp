@@ -109,22 +109,22 @@ namespace OpenMD::RNEMD {
     }
 
     if (methodFluxMismatch) {
-      sprintf(painCave.errMsg,
-              "RNEMD: The current method,\n"
-              "\t\tNIVS\n"
-              "\tcannot be used with the current flux type, %s\n",
-              rnemdFluxTypeLabel_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: The current method,\n"
+               "\t\tNIVS\n"
+               "\tcannot be used with the current flux type, %s\n",
+               rnemdFluxTypeLabel_.c_str());
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
     }
 
     if (!hasCorrectFlux) {
-      sprintf(painCave.errMsg,
-              "RNEMD: The current method, NIVS, and flux type, %s,\n"
-              "\tdid not have the correct flux value specified. Options\n"
-              "\tinclude: kineticFlux and momentumFlux.\n",
-              rnemdFluxTypeLabel_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: The current method, NIVS, and flux type, %s,\n"
+               "\tdid not have the correct flux value specified. Options\n"
+               "\tinclude: kineticFlux and momentumFlux.\n",
+               rnemdFluxTypeLabel_.c_str());
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
@@ -459,8 +459,8 @@ namespace OpenMD::RNEMD {
         r2 = *ri;
         // Check to see if FindRealRoots() gave the right answer:
         if (fabs(u0 + r2 * (u1 + r2 * (u2 + r2 * (u3 + r2 * u4)))) > 1e-6) {
-          sprintf(painCave.errMsg,
-                  "RNEMD Warning: polynomial solve seems to have an error!");
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "RNEMD Warning: polynomial solve seems to have an error!");
           painCave.isFatal = 0;
           simError();
           failRootCount_++;
@@ -521,7 +521,7 @@ namespace OpenMD::RNEMD {
 #ifdef IS_MPI
         if (worldRank == 0) {
 #endif
-          // sprintf(painCave.errMsg,
+          // snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           //         "RNEMD: roots r1= %lf\tr2 = %lf\n",
           //         bestPair.first, bestPair.second);
           // painCave.isFatal = 0;
@@ -591,10 +591,10 @@ namespace OpenMD::RNEMD {
       }
     }
     if (successfulScale != true) {
-      sprintf(painCave.errMsg,
-              "NIVS exchange NOT performed - roots that solve\n"
-              "\tthe constraint equations may not exist or there may be\n"
-              "\tno selected objects in one or both slabs.\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "NIVS exchange NOT performed - roots that solve\n"
+               "\tthe constraint equations may not exist or there may be\n"
+               "\tno selected objects in one or both slabs.\n");
       painCave.isFatal  = 0;
       painCave.severity = OPENMD_INFO;
       simError();

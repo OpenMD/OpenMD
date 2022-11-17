@@ -73,7 +73,8 @@ namespace OpenMD {
       dt  = simParams->getDt();
       dt2 = 0.5 * dt;
     } else {
-      sprintf(painCave.errMsg, "Integrator Error: dt is not set\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Integrator Error: dt is not set\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -81,7 +82,8 @@ namespace OpenMD {
     if (simParams->haveRunTime()) {
       runTime = simParams->getRunTime();
     } else {
-      sprintf(painCave.errMsg, "Integrator Error: runTime is not set\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Integrator Error: runTime is not set\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -122,9 +124,9 @@ namespace OpenMD {
       if (simParams->haveTargetTemp()) {
         targetScalingTemp = simParams->getTargetTemp();
       } else {
-        sprintf(painCave.errMsg,
-                "Integrator Error: Target Temperature must be set to turn on "
-                "tempSet\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Integrator Error: Target Temperature must be set to turn on "
+                 "tempSet\n");
         painCave.isFatal = 1;
         simError();
       }
@@ -142,8 +144,8 @@ namespace OpenMD {
         if (Utils::traits_cast<Utils::ci_char_traits>(
                 simParams->getRNEMDParameters()->getMethod()) == "SPF") {
           if (toUpperCopy(simParams->getEnsemble()) != "SPF") {
-            sprintf(painCave.errMsg,
-                    "The SPF RNEMD method requires the SPF Ensemble.\n");
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "The SPF RNEMD method requires the SPF Ensemble.\n");
             painCave.isFatal = 1;
             simError();
           }
@@ -185,12 +187,12 @@ namespace OpenMD {
       } else if (prop.compare("DAMPED") == 0) {
         flucQ_ = new FluctuatingChargeDamped(info);
       } else {
-        sprintf(painCave.errMsg,
-                "Integrator Error: Unknown Fluctuating Charge propagator (%s) "
-                "requested\n",
-                simParams->getFluctuatingChargeParameters()
-                    ->getPropagator()
-                    .c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Integrator Error: Unknown Fluctuating Charge propagator (%s) "
+                 "requested\n",
+                 simParams->getFluctuatingChargeParameters()
+                     ->getPropagator()
+                     .c_str());
         painCave.isFatal = 1;
       }
     }

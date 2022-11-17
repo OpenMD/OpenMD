@@ -59,8 +59,8 @@ namespace OpenMD {
     }
 
     if (!simParams->haveTargetTemp()) {
-      sprintf(painCave.errMsg,
-              "You can't use the NVT integrator without a targetTemp_!\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "You can't use the NVT integrator without a targetTemp_!\n");
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
@@ -71,8 +71,9 @@ namespace OpenMD {
     // We must set tauThermostat.
 
     if (!simParams->haveTauThermostat()) {
-      sprintf(painCave.errMsg, "If you use the constant temperature\n"
-                               "\tintegrator, you must set tauThermostat.\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "If you use the constant temperature\n"
+               "\tintegrator, you must set tauThermostat.\n");
 
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;

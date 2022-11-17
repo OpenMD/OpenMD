@@ -117,7 +117,7 @@ namespace OpenMD {
     LatticeFactory() = default;
     ~LatticeFactory();
 
-    LatticeFactory(const LatticeFactory&) = delete;
+    LatticeFactory(const LatticeFactory&)            = delete;
     LatticeFactory& operator=(const LatticeFactory&) = delete;
 
     CreatorMapType creatorMap_;

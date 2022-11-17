@@ -83,10 +83,10 @@ namespace OpenMD {
     // name dq phi theta psi dipole_moment Qxx Qyy Qzz
 
     if (nTokens < 5) {
-      sprintf(painCave.errMsg,
-              "MultipoleAtomTypesSectionParser Error: Not enough tokens at "
-              "line %d\n",
-              lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "MultipoleAtomTypesSectionParser Error: Not enough tokens at "
+               "line %d\n",
+               lineNo);
       painCave.isFatal = 1;
       simError();
     } else {
@@ -98,11 +98,11 @@ namespace OpenMD {
 
       AtomType* atomType = ff.getAtomType(atomTypeName);
       if (atomType == NULL) {
-        sprintf(painCave.errMsg,
-                "MultipoleAtomTypesSectionParser Error: Can not find matched "
-                "AtomType[%s] "
-                "at line %d\n",
-                atomTypeName.c_str(), lineNo);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "MultipoleAtomTypesSectionParser Error: Can not find matched "
+                 "AtomType[%s] "
+                 "at line %d\n",
+                 atomTypeName.c_str(), lineNo);
         painCave.isFatal = 1;
         simError();
       }
@@ -125,10 +125,10 @@ namespace OpenMD {
         parseDipole(tokenizer, dipoleMoment, lineNo);
         isDipole = true;
       } else if (multipoleType == "s") {
-        sprintf(painCave.errMsg,
-                "MultipoleAtomTypesSectionParser Error: \n"
-                "\tsplit dipoles (type s) have been deprecated (line: %d)\n",
-                lineNo);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "MultipoleAtomTypesSectionParser Error: \n"
+                 "\tsplit dipoles (type s) have been deprecated (line: %d)\n",
+                 lineNo);
         painCave.isFatal = 1;
         simError();
       } else if (multipoleType == "q") {
@@ -140,19 +140,19 @@ namespace OpenMD {
         parseQuadrupole(tokenizer, quadrupoleMoments, lineNo);
         isQuadrupole = true;
       } else if (multipoleType == "sq") {
-        sprintf(painCave.errMsg,
-                "MultipoleAtomTypesSectionParser Error: \n"
-                "\tsplit dipole quadrupoles (type sq) have been deprecated "
-                "(line: %d)\n",
-                lineNo);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "MultipoleAtomTypesSectionParser Error: \n"
+                 "\tsplit dipole quadrupoles (type sq) have been deprecated "
+                 "(line: %d)\n",
+                 lineNo);
         painCave.isFatal = 1;
         simError();
       } else {
-        sprintf(painCave.errMsg,
-                "MultipoleAtomTypesSectionParser Error: unrecognized multiple "
-                "type at line "
-                "%d\n",
-                lineNo);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "MultipoleAtomTypesSectionParser Error: unrecognized multiple "
+                 "type at line "
+                 "%d\n",
+                 lineNo);
         painCave.isFatal = 1;
         simError();
       }
@@ -174,10 +174,10 @@ namespace OpenMD {
     if (tokenizer.hasMoreTokens()) {
       dipoleMoment = tokenizer.nextTokenAsDouble();
     } else {
-      sprintf(painCave.errMsg,
-              "MultipoleAtomTypesSectionParser Error: Not enough tokens at "
-              "line %d\n",
-              lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "MultipoleAtomTypesSectionParser Error: Not enough tokens at "
+               "line %d\n",
+               lineNo);
       painCave.isFatal = 1;
       simError();
     }
@@ -194,16 +194,17 @@ namespace OpenMD {
       // RealType trace =  quadrupoleMoments.sum();
       //
       // if (fabs(trace) > OpenMD::epsilon) {
-      //   sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: the
-      //   trace of quadrupole moments is not zero at line %d\n", 	lineNo);
-      //   painCave.isFatal = 1; simError();
+      //   snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+      //   "MultipoleAtomTypesSectionParser Error: the trace of quadrupole
+      //   moments is not zero at line %d\n", 	lineNo); painCave.isFatal = 1;
+      //   simError();
       // }
 
     } else {
-      sprintf(painCave.errMsg,
-              "MultipoleAtomTypesSectionParser Error: Not enough tokens at "
-              "line %d\n",
-              lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "MultipoleAtomTypesSectionParser Error: Not enough tokens at "
+               "line %d\n",
+               lineNo);
       painCave.isFatal = 1;
       simError();
     }

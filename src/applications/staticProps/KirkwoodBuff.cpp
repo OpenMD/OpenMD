@@ -218,8 +218,8 @@ namespace OpenMD {
         ofs << "\n";
       }
     } else {
-      sprintf(painCave.errMsg, "KirkwoodBuff: unable to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "KirkwoodBuff: unable to open %s\n", outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

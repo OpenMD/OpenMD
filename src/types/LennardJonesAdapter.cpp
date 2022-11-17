@@ -56,10 +56,10 @@ namespace OpenMD {
 
   LJAtypeParameters LennardJonesAdapter::getLJParam() {
     if (!isLennardJones()) {
-      sprintf(painCave.errMsg,
-              "LennardJonesAdapter::getLJParam was passed an atomType (%s)\n"
-              "\tthat does not appear to be a Lennard-Jones atom.\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "LennardJonesAdapter::getLJParam was passed an atomType (%s)\n"
+               "\tthat does not appear to be a Lennard-Jones atom.\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -67,10 +67,10 @@ namespace OpenMD {
 
     std::shared_ptr<GenericData> data = at_->getPropertyByName(LJtypeID);
     if (data == nullptr) {
-      sprintf(painCave.errMsg,
-              "LennardJonesAdapter::getLJParam could not find Lennard-Jones\n"
-              "\tparameters for atomType %s.\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "LennardJonesAdapter::getLJParam could not find Lennard-Jones\n"
+               "\tparameters for atomType %s.\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -79,10 +79,10 @@ namespace OpenMD {
     std::shared_ptr<LJAtypeData> ljData =
         std::dynamic_pointer_cast<LJAtypeData>(data);
     if (ljData == nullptr) {
-      sprintf(painCave.errMsg,
-              "LennardJonesAdapter::getLJParam could not convert\n"
-              "\tGenericData to LJAtypeData for atom type %s\n",
-              at_->getName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "LennardJonesAdapter::getLJParam could not convert\n"
+               "\tGenericData to LJAtypeData for atom type %s\n",
+               at_->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

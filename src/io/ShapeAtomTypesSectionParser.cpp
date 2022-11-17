@@ -82,10 +82,10 @@ namespace OpenMD {
       parseShapeFile(ff, shapeFile, atomType);
 
     } else {
-      sprintf(painCave.errMsg,
-              "ShapesAtomTypesSectionParser Error: "
-              "Not enough tokens at line %d\n",
-              lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "ShapesAtomTypesSectionParser Error: "
+               "Not enough tokens at line %d\n",
+               lineNo);
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -127,12 +127,12 @@ namespace OpenMD {
       shapeStream.open(shapeFileName.c_str());
 
       if (!shapeStream.is_open()) {
-        sprintf(painCave.errMsg,
-                "Error opening the shape file:\n"
-                "\t%s\n"
-                "\tHave you tried setting the FORCE_PARAM_PATH environment "
-                "variable?\n",
-                shapeFileName.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Error opening the shape file:\n"
+                 "\t%s\n"
+                 "\tHave you tried setting the FORCE_PARAM_PATH environment "
+                 "variable?\n",
+                 shapeFileName.c_str());
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
@@ -155,10 +155,10 @@ namespace OpenMD {
         // blank lines are ignored
         if (tokenInfo.countTokens() != 0) {
           if (tokenInfo.countTokens() < 5) {
-            sprintf(painCave.errMsg,
-                    "ShapesAtomTypesSectionParser Error: Not enough "
-                    "information on a ShapeInfo line in file: %s\n",
-                    shapeFileName.c_str());
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "ShapesAtomTypesSectionParser Error: Not enough "
+                     "information on a ShapeInfo line in file: %s\n",
+                     shapeFileName.c_str());
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();
@@ -191,10 +191,10 @@ namespace OpenMD {
         // blank lines are ignored
         if (tokenInfo1.countTokens() != 0) {
           if (tokenInfo1.countTokens() < 4) {
-            sprintf(painCave.errMsg,
-                    "ShapesAtomTypesSectionParser Error: Not enough "
-                    "information on a ContactFunctions line in file: %s\n",
-                    shapeFileName.c_str());
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "ShapesAtomTypesSectionParser Error: Not enough "
+                     "information on a ContactFunctions line in file: %s\n",
+                     shapeFileName.c_str());
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();
@@ -235,10 +235,10 @@ namespace OpenMD {
         // blank lines are ignored
         if (tokenInfo2.countTokens() != 0) {
           if (tokenInfo2.countTokens() < 4) {
-            sprintf(painCave.errMsg,
-                    "ShapesAtomTypesSectionParser Error: Not enough "
-                    "information on a RangeFunctions line in file: %s\n",
-                    shapeFileName.c_str());
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "ShapesAtomTypesSectionParser Error: Not enough "
+                     "information on a RangeFunctions line in file: %s\n",
+                     shapeFileName.c_str());
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();
@@ -279,10 +279,10 @@ namespace OpenMD {
         // blank lines are ignored
         if (tokenInfo3.countTokens() != 0) {
           if (tokenInfo3.countTokens() < 4) {
-            sprintf(painCave.errMsg,
-                    "ShapesAtomTypesSectionParser Error: Not enough "
-                    "information on a StrengthFunctions line in file: %s\n",
-                    shapeFileName.c_str());
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "ShapesAtomTypesSectionParser Error: Not enough "
+                     "information on a StrengthFunctions line in file: %s\n",
+                     shapeFileName.c_str());
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();

@@ -77,7 +77,7 @@ class SimplePreprocessor {
             //    std::stringstream ss;
             //    ss << "Can not open " << filename << " for preprocessing\n";
             //    
-            //    sprintf(painCave.errMsg,
+            //    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             //            "Can not open (%s) for processing. \n"
             //            "\tPlease check md file name syntax.\n", filename.c_str());
             //    

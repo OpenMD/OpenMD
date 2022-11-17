@@ -244,17 +244,17 @@ namespace OpenMD {
 
     if (distance <= len_) {
       if (!sd1->isDirectional()) {
-        sprintf(painCave.errMsg,
-                "GofAngle2: attempted to use a non-directional object: %s\n",
-                sd1->getType().c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "GofAngle2: attempted to use a non-directional object: %s\n",
+                 sd1->getType().c_str());
         painCave.isFatal = 1;
         simError();
       }
 
       if (!sd2->isDirectional()) {
-        sprintf(painCave.errMsg,
-                "GofAngle2: attempted to use a non-directional object: %s\n",
-                sd2->getType().c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "GofAngle2: attempted to use a non-directional object: %s\n",
+                 sd2->getType().c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -327,9 +327,9 @@ namespace OpenMD {
       r13.normalize();
 
       if (!sd2->isDirectional()) {
-        sprintf(painCave.errMsg,
-                "GofAngle2: attempted to use a non-directional object: %s\n",
-                sd2->getType().c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "GofAngle2: attempted to use a non-directional object: %s\n",
+                 sd2->getType().c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -396,8 +396,8 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg, "GofRAngle2: unable to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "GofRAngle2: unable to open %s\n", outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

@@ -103,22 +103,22 @@ namespace OpenMD::RNEMD {
     }
 
     if (methodFluxMismatch) {
-      sprintf(painCave.errMsg,
-              "RNEMD: The current method,\n"
-              "\t\tSwap\n"
-              "\tcannot be used with the current flux type, %s\n",
-              rnemdFluxTypeLabel_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: The current method,\n"
+               "\t\tSwap\n"
+               "\tcannot be used with the current flux type, %s\n",
+               rnemdFluxTypeLabel_.c_str());
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
     }
 
     if (!hasCorrectFlux) {
-      sprintf(painCave.errMsg,
-              "RNEMD: The current method, Swap, and flux type, %s,\n"
-              "\tdid not have the correct flux value specified. Options\n"
-              "\tinclude: kineticFlux and momentumFlux.\n",
-              rnemdFluxTypeLabel_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: The current method, Swap, and flux type, %s,\n"
+               "\tdid not have the correct flux value specified. Options\n"
+               "\tinclude: kineticFlux and momentumFlux.\n",
+               rnemdFluxTypeLabel_.c_str());
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
@@ -492,17 +492,18 @@ namespace OpenMD::RNEMD {
           break;
         }
       } else {
-        sprintf(painCave.errMsg, "RNEMD::doSwap exchange NOT performed "
-                                 "because min_val > max_val\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RNEMD::doSwap exchange NOT performed "
+                 "because min_val > max_val\n");
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;
         simError();
         failTrialCount_++;
       }
     } else {
-      sprintf(painCave.errMsg,
-              "Swap exchange NOT performed because selected object\n"
-              "\twas not present in at least one of the two slabs.\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Swap exchange NOT performed because selected object\n"
+               "\twas not present in at least one of the two slabs.\n");
       painCave.isFatal  = 0;
       painCave.severity = OPENMD_INFO;
       simError();

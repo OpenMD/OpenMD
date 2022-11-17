@@ -159,15 +159,15 @@ namespace OpenMD {
     if (scaleFactor < smallScale) smallScale = scaleFactor;
 
     if ((bigScale > 1.1) || (smallScale < 0.9)) {
-      sprintf(painCave.errMsg,
-              "NPTsz: Attempting a Box scaling of more than 10 percent.\n"
-              "\tCheck your tauBarostat, as it is probably too small!\n\n"
-              "\tscaleMat = [%lf\t%lf\t%lf]\n"
-              "\t           [%lf\t%lf\t%lf]\n"
-              "\t           [%lf\t%lf\t%lf]\n",
-              scaleMat(0, 0), scaleMat(0, 1), scaleMat(0, 2), scaleMat(1, 0),
-              scaleMat(1, 1), scaleMat(1, 2), scaleMat(2, 0), scaleMat(2, 1),
-              scaleMat(2, 2));
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "NPTsz: Attempting a Box scaling of more than 10 percent.\n"
+               "\tCheck your tauBarostat, as it is probably too small!\n\n"
+               "\tscaleMat = [%lf\t%lf\t%lf]\n"
+               "\t           [%lf\t%lf\t%lf]\n"
+               "\t           [%lf\t%lf\t%lf]\n",
+               scaleMat(0, 0), scaleMat(0, 1), scaleMat(0, 2), scaleMat(1, 0),
+               scaleMat(1, 1), scaleMat(1, 2), scaleMat(2, 0), scaleMat(2, 1),
+               scaleMat(2, 2));
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

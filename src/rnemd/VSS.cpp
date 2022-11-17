@@ -133,23 +133,23 @@ namespace OpenMD::RNEMD {
     }
 
     if (methodFluxMismatch) {
-      sprintf(painCave.errMsg,
-              "RNEMD: The current method,\n"
-              "\t\tVSS\n"
-              "\tcannot be used with the current flux type, %s\n",
-              rnemdFluxTypeLabel_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: The current method,\n"
+               "\t\tVSS\n"
+               "\tcannot be used with the current flux type, %s\n",
+               rnemdFluxTypeLabel_.c_str());
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
     }
 
     if (!hasCorrectFlux) {
-      sprintf(painCave.errMsg,
-              "RNEMD: The current method, VSS, and flux type, %s,\n"
-              "\tdid not have the correct flux value specified. Options\n"
-              "\tinclude: kineticFlux, momentumFlux, angularMomentumFlux,\n"
-              "\tmomentumFluxVector, and angularMomentumFluxVector.\n",
-              rnemdFluxTypeLabel_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: The current method, VSS, and flux type, %s,\n"
+               "\tdid not have the correct flux value specified. Options\n"
+               "\tinclude: kineticFlux, momentumFlux, angularMomentumFlux,\n"
+               "\tmomentumFluxVector, and angularMomentumFluxVector.\n",
+               rnemdFluxTypeLabel_.c_str());
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
@@ -491,10 +491,10 @@ namespace OpenMD::RNEMD {
     }
 
     if (successfulExchange != true) {
-      sprintf(painCave.errMsg,
-              "VSS exchange NOT performed - roots that solve\n"
-              "\tthe constraint equations may not exist or there may be\n"
-              "\tno selected objects in one or both slabs.\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "VSS exchange NOT performed - roots that solve\n"
+               "\tthe constraint equations may not exist or there may be\n"
+               "\tno selected objects in one or both slabs.\n");
       painCave.isFatal  = 0;
       painCave.severity = OPENMD_INFO;
       simError();

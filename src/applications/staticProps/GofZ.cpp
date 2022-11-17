@@ -134,8 +134,8 @@ namespace OpenMD {
         rdfStream << z << "\t" << avgGofz_[i] / nProcessed_ << "\n";
       }
     } else {
-      sprintf(painCave.errMsg, "GofZ: unable to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "GofZ: unable to open %s\n", outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

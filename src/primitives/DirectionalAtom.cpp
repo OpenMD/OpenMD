@@ -72,8 +72,8 @@ namespace OpenMD {
     }
 
     if (nLinearAxis > 1) {
-      sprintf(
-          painCave.errMsg,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "Directional Atom warning.\n"
           "\tOpenMD found more than one axis in this directional atom with a "
           "vanishing \n"

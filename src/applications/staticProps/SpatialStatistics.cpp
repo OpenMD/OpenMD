@@ -183,9 +183,11 @@ namespace OpenMD {
   }
 
   ShellStatistics::ShellStatistics(SimInfo* info, const std::string& filename,
-                                   const std::string& sele, int nbins) :
+                                   const std::string& sele,
+                                   const std::string& comsele, int nbins) :
       SpatialStatistics(info, filename, sele, nbins),
-      coordinateOrigin_(V3Zero) {
+      coordinateOrigin_(V3Zero), comSele_(comsele), comSeleMan_(info),
+      comEvaluator_(info) {
     binWidth_ = 1.0;
 
     Globals* simParams                  = info->getSimParams();
@@ -195,11 +197,12 @@ namespace OpenMD {
     if (hasCoordinateOrigin) {
       std::vector<RealType> co = rnemdParams->getCoordinateOrigin();
       if (co.size() != 3) {
-        sprintf(painCave.errMsg,
-                "RNEMD: Incorrect number of parameters specified for "
-                "coordinateOrigin.\n"
-                "\tthere should be 3 parameters, but %lu were specified.\n",
-                co.size());
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+            "ShellStatistics: Incorrect number of parameters specified for "
+            "coordinateOrigin.\n"
+            "\tthere should be 3 parameters, but %lu were specified.\n",
+            co.size());
         painCave.isFatal = 1;
         simError();
       }
@@ -207,7 +210,26 @@ namespace OpenMD {
       coordinateOrigin_.y() = co[1];
       coordinateOrigin_.z() = co[2];
     } else {
-      coordinateOrigin_ = V3Zero;
+      if (!comSele_.empty()) {
+        comEvaluator_.loadScriptString(comSele_);
+        if (!comEvaluator_.isDynamic()) {
+          comSeleMan_.setSelectionSet(comEvaluator_.evaluate());
+          if (comSeleMan_.getSelectionCount() != 1) {
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "ShellStatistics: More than one selected object in "
+                     "comsele.\n"
+                     "\tThere are %d selected objects.\n",
+                     comSeleMan_.getSelectionCount());
+            painCave.isFatal = 1;
+            simError();
+          }
+          int isd;
+          StuntDouble* sd   = comSeleMan_.beginSelected(isd);
+          coordinateOrigin_ = sd->getPos();
+        }
+      } else {
+        coordinateOrigin_ = V3Zero;
+      }
     }
 
     r_               = new OutputData;
@@ -223,6 +245,26 @@ namespace OpenMD {
     for (int i = 0; i < nbins; i++) {
       RealType r = (((RealType)i + 0.5) * binWidth_);
       dynamic_cast<Accumulator*>(r_->accumulator[i])->add(r);
+    }
+  }
+
+  void ShellStatistics::processFrame(int istep) {
+    if (comEvaluator_.isDynamic()) {
+      comSeleMan_.setSelectionSet(comEvaluator_.evaluate());
+      if (comSeleMan_.getSelectionCount() != 1) {
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "ShellStatistics: More than one selected object in "
+                 "comsele.\n"
+                 "\tThere are %d selected objects.\n",
+                 comSeleMan_.getSelectionCount());
+        painCave.isFatal = 1;
+        simError();
+      }
+      int isd;
+      StuntDouble* sd   = comSeleMan_.beginSelected(isd);
+      coordinateOrigin_ = sd->getPos();
+
+      SpatialStatistics::processFrame(istep);
     }
   }
 

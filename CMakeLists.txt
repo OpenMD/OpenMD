@@ -396,9 +396,17 @@ src/brains/Register.cpp
 src/brains/SimSnapshotManager.cpp
 src/brains/Snapshot.cpp
 src/brains/Stats.cpp
+src/hydrodynamics/AnalyticalModel.cpp
+src/hydrodynamics/ApproximationModel.cpp
+src/hydrodynamics/BeadModel.cpp
+src/hydrodynamics/CompositeShape.cpp
 src/hydrodynamics/Ellipsoid.cpp
+src/hydrodynamics/HydrodynamicsModel.cpp
+src/hydrodynamics/HydrodynamicsModelFactory.cpp
 src/hydrodynamics/HydroProp.cpp
+src/hydrodynamics/ShapeBuilder.cpp
 src/hydrodynamics/Sphere.cpp
+src/hydrodynamics/RoughShell.cpp
 src/integrators/DLM.cpp
 src/flucq/FluctuatingChargeDamped.cpp
 src/flucq/FluctuatingChargeLangevin.cpp
@@ -724,15 +732,7 @@ src/applications/dynamicProps/DynamicPropsCmd.cpp
 )
 
 set (HYDROSOURCE
-src/applications/hydrodynamics/AnalyticalModel.cpp
-src/applications/hydrodynamics/ApproximationModel.cpp
-src/applications/hydrodynamics/BeadModel.cpp
-src/applications/hydrodynamics/CompositeShape.cpp
 src/applications/hydrodynamics/Hydro.cpp
-src/applications/hydrodynamics/HydrodynamicsModel.cpp
-src/applications/hydrodynamics/HydrodynamicsModelFactory.cpp
-src/applications/hydrodynamics/RoughShell.cpp
-src/applications/hydrodynamics/ShapeBuilder.cpp
 src/applications/hydrodynamics/HydroCmd.cpp
 )
 
@@ -772,6 +772,8 @@ src/applications/staticProps/MultipoleSum.cpp
 src/applications/staticProps/NanoLength.cpp
 src/applications/staticProps/NanoVolume.cpp
 src/applications/staticProps/NitrileFrequencyMap.cpp
+src/applications/staticProps/NumberR.cpp
+src/applications/staticProps/NumberZ.cpp
 src/applications/staticProps/ObjectCount.cpp
 src/applications/staticProps/P2OrderParameter.cpp
 src/applications/staticProps/PipeDensity.cpp
@@ -800,6 +802,7 @@ src/applications/staticProps/DensityHistogram.cpp
 src/applications/staticProps/MomentumHistogram.cpp
 src/applications/staticProps/ChargeHistogram.cpp
 src/applications/staticProps/CurrentDensity.cpp
+src/applications/staticProps/ChargeR.cpp
 src/applications/staticProps/ChargeZ.cpp
 src/applications/staticProps/PositionZ.cpp
 src/applications/staticProps/DipoleOrientation.cpp

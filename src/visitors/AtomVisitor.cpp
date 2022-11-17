@@ -196,19 +196,21 @@ namespace OpenMD {
     char buffer[65535];
     std::string result;
 
-    sprintf(buffer,
-            "--------------------------------------------------------------\n");
+    snprintf(
+        buffer, 65535,
+        "--------------------------------------------------------------\n");
     result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    snprintf(buffer, 65535, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
-    sprintf(buffer,
-            "Visitor Description: copy atom infomation into atom data\n");
+    snprintf(buffer, 65535,
+             "Visitor Description: copy atom infomation into atom data\n");
     result += buffer;
 
-    sprintf(buffer,
-            "--------------------------------------------------------------\n");
+    snprintf(
+        buffer, 65535,
+        "--------------------------------------------------------------\n");
     result += buffer;
 
     return result;

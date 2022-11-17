@@ -90,6 +90,7 @@ namespace OpenMD {
 
   private:
     void writeQxyz();
+    void writeVTKGrid();
 
     Snapshot* currentSnapshot_;
     std::string selectionScript1_;

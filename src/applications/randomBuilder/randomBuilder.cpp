@@ -101,8 +101,9 @@ int main(int argc, char* argv[]) {
   simpleLat = LatticeFactory::getInstance().createLattice(latticeType);
 
   if (simpleLat == NULL) {
-    sprintf(painCave.errMsg, "Lattice Factory can not create %s lattice\n",
-            latticeType.c_str());
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Lattice Factory can not create %s lattice\n",
+             latticeType.c_str());
     painCave.isFatal = 1;
     simError();
   }
@@ -113,8 +114,9 @@ int main(int argc, char* argv[]) {
   nx = args_info.nx_arg;
 
   if (nx <= 0) {
-    sprintf(painCave.errMsg, "The number of unit cells in the x direction "
-                             "must be greater than 0.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "The number of unit cells in the x direction "
+             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
   }
@@ -122,8 +124,9 @@ int main(int argc, char* argv[]) {
   ny = args_info.ny_arg;
 
   if (ny <= 0) {
-    sprintf(painCave.errMsg, "The number of unit cells in the y direction "
-                             "must be greater than 0.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "The number of unit cells in the y direction "
+             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
   }
@@ -131,8 +134,9 @@ int main(int argc, char* argv[]) {
   nz = args_info.nz_arg;
 
   if (nz <= 0) {
-    sprintf(painCave.errMsg, "The number of unit cells in the z direction "
-                             "must be greater than 0.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "The number of unit cells in the z direction "
+             "must be greater than 0.");
     painCave.isFatal = 1;
     simError();
   }
@@ -143,8 +147,9 @@ int main(int argc, char* argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg, "No input .omd file name was specified "
-                             "on the command line");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "No input .omd file name was specified "
+             "on the command line");
     painCave.isFatal = 1;
     simError();
   }
@@ -178,9 +183,9 @@ int main(int argc, char* argv[]) {
       }
       molFractions.push_back(remainingFraction);
     } else {
-      sprintf(painCave.errMsg,
-              "randomBuilder can't figure out molFractions "
-              "for all of the components in the <MetaData> block.");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "randomBuilder can't figure out molFractions "
+               "for all of the components in the <MetaData> block.");
       painCave.isFatal = 1;
       simError();
     }
@@ -192,22 +197,24 @@ int main(int argc, char* argv[]) {
 
   for (std::size_t i = 0; i < nComponents; i++) {
     if (molFractions.at(i) < 0.0) {
-      sprintf(painCave.errMsg, "One of the requested molFractions was"
-                               " less than zero!");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "One of the requested molFractions was"
+               " less than zero!");
       painCave.isFatal = 1;
       simError();
     }
     if (molFractions.at(i) > 1.0) {
-      sprintf(painCave.errMsg, "One of the requested molFractions was"
-                               " greater than one!");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "One of the requested molFractions was"
+               " greater than one!");
       painCave.isFatal = 1;
       simError();
     }
     totalFraction += molFractions.at(i);
   }
   if (abs(totalFraction - 1.0) > 1e-6) {
-    sprintf(painCave.errMsg,
-            "The sum of molFractions was not close enough to 1.0");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "The sum of molFractions was not close enough to 1.0");
     painCave.isFatal = 1;
     simError();
   }
@@ -233,8 +240,9 @@ int main(int argc, char* argv[]) {
   RealType avgMass = totalMass / (RealType)totalMolecules;
 
   if (totalMolecules != nSites) {
-    sprintf(painCave.errMsg, "Computed total number of molecules is not equal "
-                             "to the number of lattice sites!");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Computed total number of molecules is not equal "
+             "to the number of lattice sites!");
     painCave.isFatal = 1;
     simError();
   }
@@ -335,7 +343,8 @@ int main(int argc, char* argv[]) {
   writer = new DumpWriter(newInfo, outputFileName);
 
   if (writer == NULL) {
-    sprintf(painCave.errMsg, "error in creating DumpWriter");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "error in creating DumpWriter");
     painCave.isFatal = 1;
     simError();
   }
@@ -346,10 +355,10 @@ int main(int argc, char* argv[]) {
 
   delete writer;
 
-  sprintf(painCave.errMsg,
-          "A new OpenMD file called \"%s\" has been "
-          "generated.\n",
-          outputFileName.c_str());
+  snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+           "A new OpenMD file called \"%s\" has been "
+           "generated.\n",
+           outputFileName.c_str());
   painCave.isFatal  = 0;
   painCave.severity = OPENMD_INFO;
   simError();
@@ -375,7 +384,7 @@ void createMdFile(const std::string& oldMdFileName,
     // correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
       if (i < nMol.size()) {
-        sprintf(buffer, "\tnMol = %i;", nMol.at(i));
+        snprintf(buffer, MAXLEN, "\tnMol = %i;", nMol.at(i));
         newMdFile << buffer << std::endl;
         i++;
       }
@@ -389,10 +398,10 @@ void createMdFile(const std::string& oldMdFileName,
   newMdFile.close();
 
   if (i != nMol.size()) {
-    sprintf(painCave.errMsg,
-            "Couldn't replace the correct number of nMol\n"
-            "\tstatements in component blocks.  Make sure that all\n"
-            "\tcomponents in the template file have nMol=1");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Couldn't replace the correct number of nMol\n"
+             "\tstatements in component blocks.  Make sure that all\n"
+             "\tcomponents in the template file have nMol=1");
     painCave.isFatal = 1;
     simError();
   }

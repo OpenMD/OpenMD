@@ -135,7 +135,8 @@ int main(int argc, char* argv[]) {
 
   DumpWriter* writer = new DumpWriter(newInfo, outFileName);
   if (writer == NULL) {
-    sprintf(painCave.errMsg, "error in creating DumpWriter");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "error in creating DumpWriter");
     painCave.isFatal = 1;
     simError();
   }
@@ -269,7 +270,7 @@ void createMdFile(const std::string& oldMdFileName,
     // correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
       if (i < nMol.size()) {
-        sprintf(buffer, "\tnMol = %i;", nMol.at(i));
+        snprintf(buffer, MAXLEN, "\tnMol = %i;", nMol.at(i));
         newMdFile << buffer << std::endl;
         i++;
       }
@@ -283,8 +284,9 @@ void createMdFile(const std::string& oldMdFileName,
   newMdFile.close();
 
   if (i != nMol.size()) {
-    sprintf(painCave.errMsg, "Couldn't replace the correct number of nMol\n"
-                             "\tstatements in component blocks.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Couldn't replace the correct number of nMol\n"
+             "\tstatements in component blocks.");
     painCave.isFatal = 1;
     simError();
   }

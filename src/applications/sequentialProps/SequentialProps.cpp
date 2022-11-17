@@ -118,9 +118,9 @@ int main(int argc, char* argv[]) {
       analyzer = new GCNSeq(info, dumpFileName, sele1, sele2,
                             args_info.rcut_arg, args_info.nbins_arg);
     } else {
-      sprintf(painCave.errMsg,
-              "A cutoff radius (rcut) must be specified when calculating\n"
-              "\tGeneralized Coordinate Number");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating\n"
+               "\tGeneralized Coordinate Number");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -130,7 +130,8 @@ int main(int argc, char* argv[]) {
     if (args_info.referenceZ_given)
       solidZ = args_info.referenceZ_arg;
     else {
-      sprintf(painCave.errMsg, "--referenceZ must be set if --ca1 is used\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--referenceZ must be set if --ca1 is used\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -139,7 +140,8 @@ int main(int argc, char* argv[]) {
     if (args_info.dropletR_given)
       dropletR = args_info.dropletR_arg;
     else {
-      sprintf(painCave.errMsg, "--dropletR must be set if --ca1 is used\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--dropletR must be set if --ca1 is used\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -152,7 +154,8 @@ int main(int argc, char* argv[]) {
     if (args_info.referenceZ_given)
       solidZ = args_info.referenceZ_arg;
     else {
-      sprintf(painCave.errMsg, "--referenceZ must be set if --ca2 is used\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--referenceZ must be set if --ca2 is used\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -161,7 +164,8 @@ int main(int argc, char* argv[]) {
     if (args_info.centroidX_given)
       centroidX = args_info.centroidX_arg;
     else {
-      sprintf(painCave.errMsg, "--centroidX must be set if --ca2 is used\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--centroidX must be set if --ca2 is used\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -170,7 +174,8 @@ int main(int argc, char* argv[]) {
     if (args_info.centroidY_given)
       centroidY = args_info.centroidY_arg;
     else {
-      sprintf(painCave.errMsg, "--centroidY must be set if --ca2 is used\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--centroidY must be set if --ca2 is used\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -179,7 +184,8 @@ int main(int argc, char* argv[]) {
     if (args_info.threshDens_given)
       threshDens = args_info.threshDens_arg;
     else {
-      sprintf(painCave.errMsg, "--threshDens must be set if --ca2 is used\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--threshDens must be set if --ca2 is used\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -188,7 +194,8 @@ int main(int argc, char* argv[]) {
     if (args_info.bufferLength_given)
       bufferLength = args_info.bufferLength_arg;
     else {
-      sprintf(painCave.errMsg, "--bufferLength must be set if --ca2 is used\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--bufferLength must be set if --ca2 is used\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

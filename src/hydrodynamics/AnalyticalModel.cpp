@@ -40,9 +40,9 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-#include "applications/hydrodynamics/AnalyticalModel.hpp"
+#include "hydrodynamics/AnalyticalModel.hpp"
 
-#include "applications/hydrodynamics/CompositeShape.hpp"
+#include "hydrodynamics/CompositeShape.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "math/LU.hpp"
@@ -74,8 +74,8 @@ namespace OpenMD {
           // return true;
           return false;
         } else {
-          sprintf(painCave.errMsg,
-                  "Could not figure out what kind of shape this is!\n");
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "Could not figure out what kind of shape this is!\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
           simError();

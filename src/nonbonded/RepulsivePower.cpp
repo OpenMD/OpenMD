@@ -76,10 +76,10 @@ namespace OpenMD {
         keys          = nbiTypes->getKeys(j);
         AtomType* at1 = forceField_->getAtomType(keys[0]);
         if (at1 == NULL) {
-          sprintf(painCave.errMsg,
-                  "RepulsivePower::initialize could not find AtomType %s\n"
-                  "\tto for for %s - %s interaction.\n",
-                  keys[0].c_str(), keys[0].c_str(), keys[1].c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "RepulsivePower::initialize could not find AtomType %s\n"
+                   "\tto for for %s - %s interaction.\n",
+                   keys[0].c_str(), keys[0].c_str(), keys[1].c_str());
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
           simError();
@@ -87,10 +87,10 @@ namespace OpenMD {
 
         AtomType* at2 = forceField_->getAtomType(keys[1]);
         if (at2 == NULL) {
-          sprintf(painCave.errMsg,
-                  "RepulsivePower::initialize could not find AtomType %s\n"
-                  "\tfor %s - %s nonbonded interaction.\n",
-                  keys[1].c_str(), keys[0].c_str(), keys[1].c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "RepulsivePower::initialize could not find AtomType %s\n"
+                   "\tfor %s - %s nonbonded interaction.\n",
+                   keys[1].c_str(), keys[0].c_str(), keys[1].c_str());
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
           simError();
@@ -112,8 +112,8 @@ namespace OpenMD {
         RepulsivePowerInteractionType* rpit =
             dynamic_cast<RepulsivePowerInteractionType*>(nbt);
         if (rpit == NULL) {
-          sprintf(
-              painCave.errMsg,
+          snprintf(
+              painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
               "RepulsivePower::initialize could not convert "
               "NonBondedInteractionType\n"
               "\tto RepulsivePowerInteractionType for %s - %s interaction.\n",
@@ -142,9 +142,33 @@ namespace OpenMD {
     mixer.sigmai  = 1.0 / mixer.sigma;
     mixer.nRep    = nRep;
 
-    int rptid1 = RPtids[atype1->getIdent()];
-    int rptid2 = RPtids[atype2->getIdent()];
-    int nRP    = RPtypes.size();
+    int nRP   = RPtypes.size();
+    int atid1 = atype1->getIdent();
+    int atid2 = atype2->getIdent();
+    int rptid1, rptid2;
+
+    pair<set<int>::iterator, bool> ret;
+    ret = RPtypes.insert(atid1);
+    if (ret.second == false) {
+      // already had this type in the MieMap, just get the mietid:
+      rptid1 = RPtids[atid1];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      rptid1        = nRP;
+      RPtids[atid1] = nRP;
+      nRP++;
+    }
+
+    ret = RPtypes.insert(atid2);
+    if (ret.second == false) {
+      // already had this type in the MieMap, just get the mietid:
+      rptid2 = RPtids[atid2];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      rptid2        = nRP;
+      RPtids[atid2] = nRP;
+      nRP++;
+    }
 
     MixingMap.resize(nRP);
     MixingMap[rptid1].resize(nRP);

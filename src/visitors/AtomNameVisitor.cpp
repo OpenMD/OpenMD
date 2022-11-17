@@ -97,19 +97,19 @@ namespace OpenMD {
     char buffer[65535];
     std::string result;
 
-    sprintf(
-        buffer,
+    snprintf(
+        buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    snprintf(buffer, 65535, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
-    sprintf(buffer, "Visitor Description: print base atom types\n");
+    snprintf(buffer, 65535, "Visitor Description: print base atom types\n");
     result += buffer;
 
-    sprintf(
-        buffer,
+    snprintf(
+        buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 

@@ -40,9 +40,9 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
+#include "hydrodynamics/HydrodynamicsModel.hpp"
 
-#include "applications/hydrodynamics/CompositeShape.hpp"
+#include "hydrodynamics/CompositeShape.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "hydrodynamics/Shape.hpp"
 #include "hydrodynamics/Sphere.hpp"
@@ -61,14 +61,14 @@ namespace OpenMD {
 
     // center of resistance
 
-    center = cr_->getCOR();
+    center = cr_->getCenterOfResistance();
 
     os << center[0] << "\t" << center[1] << "\t" << center[2] << "\t";
 
     // resistance tensor at center of resistance
     // translation
 
-    Xi = cr_->getXi();
+    Xi = cr_->getResistanceTensor();
 
     os << Xi(0, 0) << "\t" << Xi(0, 1) << "\t" << Xi(0, 2) << "\t" << Xi(1, 0)
        << "\t" << Xi(1, 1) << "\t" << Xi(1, 2) << "\t" << Xi(2, 0) << "\t"
@@ -92,7 +92,7 @@ namespace OpenMD {
     // diffusion tensor at center of resistance
     // translation
 
-    D = cr_->getD();
+    D = cr_->getDiffusionTensor();
 
     os << D(0, 0) << "\t" << D(0, 1) << "\t" << D(0, 2) << "\t" << D(1, 0)
        << "\t" << D(1, 1) << "\t" << D(1, 2) << "\t" << D(2, 0) << "\t"
@@ -117,14 +117,14 @@ namespace OpenMD {
 
     // center of diffusion
 
-    center = cd_->getCOR();
+    center = cd_->getCenterOfResistance();
 
     os << center[0] << "\t" << center[1] << "\t" << center[2] << "\t";
 
     // resistance tensor at center of diffusion
     // translation
 
-    Xi = cd_->getXi();
+    Xi = cd_->getResistanceTensor();
 
     os << Xi(0, 0) << "\t" << Xi(0, 1) << "\t" << Xi(0, 2) << "\t" << Xi(1, 0)
        << "\t" << Xi(1, 1) << "\t" << Xi(1, 2) << "\t" << Xi(2, 0) << "\t"
@@ -148,7 +148,7 @@ namespace OpenMD {
     // diffusion tensor at center of diffusion
     // translation
 
-    D = cd_->getD();
+    D = cd_->getDiffusionTensor();
 
     os << D(0, 0) << "\t" << D(0, 1) << "\t" << D(0, 2) << "\t" << D(1, 0)
        << "\t" << D(1, 1) << "\t" << D(1, 2) << "\t" << D(2, 0) << "\t"
@@ -173,14 +173,14 @@ namespace OpenMD {
 
     // center of mass
 
-    center = com_->getCOR();
+    center = com_->getCenterOfResistance();
 
     os << center[0] << "\t" << center[1] << "\t" << center[2] << "\t";
 
     // resistance tensor at center of mass
     // translation-translation
 
-    Xi = com_->getXi();
+    Xi = com_->getResistanceTensor();
 
     os << Xi(0, 0) << "\t" << Xi(0, 1) << "\t" << Xi(0, 2) << "\t" << Xi(1, 0)
        << "\t" << Xi(1, 1) << "\t" << Xi(1, 2) << "\t" << Xi(2, 0) << "\t"
@@ -204,7 +204,7 @@ namespace OpenMD {
     // diffusion tensor at center of mass
     // translation-translation
 
-    D = com_->getD();
+    D = com_->getDiffusionTensor();
 
     os << D(0, 0) << "\t" << D(0, 1) << "\t" << D(0, 2) << "\t" << D(1, 0)
        << "\t" << D(1, 1) << "\t" << D(1, 2) << "\t" << D(2, 0) << "\t"

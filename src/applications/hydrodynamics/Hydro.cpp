@@ -46,16 +46,16 @@
 #include <string>
 
 #include "HydroCmd.hpp"
-#include "applications/hydrodynamics/AnalyticalModel.hpp"
-#include "applications/hydrodynamics/BeadModel.hpp"
-#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
-#include "applications/hydrodynamics/HydrodynamicsModelCreator.hpp"
-#include "applications/hydrodynamics/HydrodynamicsModelFactory.hpp"
-#include "applications/hydrodynamics/RoughShell.hpp"
-#include "applications/hydrodynamics/ShapeBuilder.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
+#include "hydrodynamics/AnalyticalModel.hpp"
+#include "hydrodynamics/BeadModel.hpp"
+#include "hydrodynamics/HydrodynamicsModel.hpp"
+#include "hydrodynamics/HydrodynamicsModelCreator.hpp"
+#include "hydrodynamics/HydrodynamicsModelFactory.hpp"
+#include "hydrodynamics/RoughShell.hpp"
+#include "hydrodynamics/ShapeBuilder.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
 
@@ -115,7 +115,8 @@ int main(int argc, char* argv[]) {
   if (simParams->haveViscosity()) {
     viscosity = simParams->getViscosity();
   } else {
-    sprintf(painCave.errMsg, "viscosity must be set\n");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "viscosity must be set\n");
     painCave.isFatal = 1;
     simError();
   }
@@ -123,7 +124,8 @@ int main(int argc, char* argv[]) {
   if (simParams->haveTargetTemp()) {
     temperature = simParams->getTargetTemp();
   } else {
-    sprintf(painCave.errMsg, "target temperature must be set\n");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "target temperature must be set\n");
     painCave.isFatal = 1;
     simError();
   }
@@ -206,7 +208,8 @@ int main(int argc, char* argv[]) {
       delete model;
 
     } else {
-      sprintf(painCave.errMsg, "Could not create HydrodynamicsModel\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Could not create HydrodynamicsModel\n");
       painCave.isFatal = 1;
       simError();
     }

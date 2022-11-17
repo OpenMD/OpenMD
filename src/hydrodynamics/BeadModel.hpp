@@ -41,10 +41,10 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
+#ifndef HYDRODYNAMICS_BEADMODEL_HPP
+#define HYDRODYNAMICS_BEADMODEL_HPP
 
-#include "applications/hydrodynamics/ApproximationModel.hpp"
+#include "hydrodynamics/ApproximationModel.hpp"
 #include "utils/ElementsTable.hpp"
 
 namespace OpenMD {

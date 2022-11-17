@@ -324,7 +324,8 @@ namespace OpenMD {
         Q_histogram_[std::make_pair(qbin, l)] += 1;
         Qcount_[l]++;
       } else {
-        sprintf(painCave.errMsg, "q_l value outside reasonable range\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "q_l value outside reasonable range\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
@@ -337,9 +338,9 @@ namespace OpenMD {
         W_histogram_[std::make_pair(wbin, l)] += 1;
         Wcount_[l]++;
       } else {
-        sprintf(painCave.errMsg,
-                "Re[w_hat] value (%lf) outside reasonable range\n",
-                real(what[l]));
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Re[w_hat] value (%lf) outside reasonable range\n",
+                 real(what[l]));
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
@@ -378,8 +379,9 @@ namespace OpenMD {
       osq.close();
 
     } else {
-      sprintf(painCave.errMsg, "BondOrderParameter: unable to open %s\n",
-              (getOutputFileName() + "q").c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "BondOrderParameter: unable to open %s\n",
+               (getOutputFileName() + "q").c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -412,8 +414,9 @@ namespace OpenMD {
 
       osw.close();
     } else {
-      sprintf(painCave.errMsg, "BondOrderParameter: unable to open %s\n",
-              (getOutputFileName() + "w").c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "BondOrderParameter: unable to open %s\n",
+               (getOutputFileName() + "w").c_str());
       painCave.isFatal = 1;
       simError();
     }

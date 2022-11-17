@@ -133,11 +133,11 @@ namespace OpenMD::RNEMD {
 
       allowedFluxTypes.erase(allowedFluxTypes.length() - 2, 2);
 
-      sprintf(painCave.errMsg,
-              "RNEMD: No fluxType was set in the omd file. This parameter\n"
-              "\tmust be set to use RNEMD, and can take any of these values:\n"
-              "\t\t%s.\n",
-              allowedFluxTypes.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: No fluxType was set in the omd file. This parameter\n"
+               "\tmust be set to use RNEMD, and can take any of these values:\n"
+               "\t\t%s.\n",
+               allowedFluxTypes.c_str());
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
@@ -189,11 +189,11 @@ namespace OpenMD::RNEMD {
     if (hasCoordinateOrigin) {
       std::vector<RealType> co = rnemdParams->getCoordinateOrigin();
       if (co.size() != 3) {
-        sprintf(painCave.errMsg,
-                "RNEMD: Incorrect number of parameters specified for "
-                "coordinateOrigin.\n"
-                "\tthere should be 3 parameters, but %lu were specified.\n",
-                co.size());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RNEMD: Incorrect number of parameters specified for "
+                 "coordinateOrigin.\n"
+                 "\tthere should be 3 parameters, but %lu were specified.\n",
+                 co.size());
         painCave.isFatal = 1;
         simError();
       }
@@ -372,10 +372,10 @@ namespace OpenMD::RNEMD {
     RealType newET = std::ceil(exchangeTime_ / dt) * dt;
 
     if (std::fabs(newET - exchangeTime_) > 1e-6) {
-      sprintf(painCave.errMsg,
-              "RNEMD: The exchangeTime was reset to %lf,\n"
-              "\t\twhich is a multiple of dt, %lf.\n",
-              newET, dt);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: The exchangeTime was reset to %lf,\n"
+               "\t\twhich is a multiple of dt, %lf.\n",
+               newET, dt);
       painCave.isFatal  = 0;
       painCave.severity = OPENMD_WARNING;
       simError();
@@ -462,15 +462,15 @@ namespace OpenMD::RNEMD {
     int nIntegrable    = info->getNGlobalIntegrableObjects();
 
     if (selectionCount > nIntegrable) {
-      sprintf(painCave.errMsg,
-              "RNEMD: The current objectSelection,\n"
-              "\t\t%s\n"
-              "\thas resulted in %d selected objects.  However,\n"
-              "\tthe total number of integrable objects in the system\n"
-              "\tis only %d.  This is almost certainly not what you want\n"
-              "\tto do.  A likely cause of this is forgetting the _RB_0\n"
-              "\tselector in the selection script!\n",
-              currentObjectSelection_.c_str(), selectionCount, nIntegrable);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: The current objectSelection,\n"
+               "\t\t%s\n"
+               "\thas resulted in %d selected objects.  However,\n"
+               "\tthe total number of integrable objects in the system\n"
+               "\tis only %d.  This is almost certainly not what you want\n"
+               "\tto do.  A likely cause of this is forgetting the _RB_0\n"
+               "\tselector in the selection script!\n",
+               currentObjectSelection_.c_str(), selectionCount, nIntegrable);
       painCave.isFatal  = 0;
       painCave.severity = OPENMD_WARNING;
       simError();
@@ -535,13 +535,13 @@ namespace OpenMD::RNEMD {
     particleTarget_        = particleFlux_ * exchangeTime_ * area;
 
     if (std::fabs(particleTarget_) > 1.0) {
-      sprintf(painCave.errMsg,
-              "RNEMD: The current particleFlux,\n"
-              "\t\t%f\n"
-              "\thas resulted in a target particle exchange of %f.\n"
-              "\tThis is equivalent to moving more than one particle\n"
-              "\tduring each exchange.  Please reduce your particleFlux.\n",
-              particleFlux_, particleTarget_);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: The current particleFlux,\n"
+               "\t\t%f\n"
+               "\thas resulted in a target particle exchange of %f.\n"
+               "\tThis is equivalent to moving more than one particle\n"
+               "\tduring each exchange.  Please reduce your particleFlux.\n",
+               particleFlux_, particleTarget_);
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
@@ -839,8 +839,9 @@ namespace OpenMD::RNEMD {
       rnemdFile_.open(rnemdFileName_.c_str(), std::ios::out | std::ios::trunc);
 
       if (!rnemdFile_) {
-        sprintf(painCave.errMsg, "Could not open \"%s\" for RNEMD output.\n",
-                rnemdFileName_.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Could not open \"%s\" for RNEMD output.\n",
+                 rnemdFileName_.c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -958,9 +959,9 @@ namespace OpenMD::RNEMD {
             else if (data_[i].dataType == "Array2d")
               writeArray(i, j);
             else {
-              sprintf(painCave.errMsg,
-                      "RNEMD found an unknown data type for: %s ",
-                      data_[i].title.c_str());
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                       "RNEMD found an unknown data type for: %s ",
+                       data_[i].title.c_str());
               painCave.isFatal = 1;
               simError();
             }
@@ -984,9 +985,9 @@ namespace OpenMD::RNEMD {
             else if (data_[i].dataType == "Array2d")
               writeArrayErrorBars(i, j);
             else {
-              sprintf(painCave.errMsg,
-                      "RNEMD found an unknown data type for: %s ",
-                      data_[i].title.c_str());
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                       "RNEMD found an unknown data type for: %s ",
+                       data_[i].title.c_str());
               painCave.isFatal = 1;
               simError();
             }
@@ -1016,11 +1017,11 @@ namespace OpenMD::RNEMD {
   void RNEMD::setMomentumFluxVector(
       const std::vector<RealType>& momentumFluxVector) {
     if (momentumFluxVector.size() != 3) {
-      sprintf(painCave.errMsg,
-              "RNEMD: Incorrect number of parameters specified for "
-              "momentumFluxVector.\n"
-              "\tthere should be 3 parameters, but %lu were specified.\n",
-              momentumFluxVector.size());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: Incorrect number of parameters specified for "
+               "momentumFluxVector.\n"
+               "\tthere should be 3 parameters, but %lu were specified.\n",
+               momentumFluxVector.size());
       painCave.isFatal = 1;
       simError();
     }
@@ -1033,11 +1034,11 @@ namespace OpenMD::RNEMD {
   void RNEMD::setAngularMomentumFluxVector(
       const std::vector<RealType>& angularMomentumFluxVector) {
     if (angularMomentumFluxVector.size() != 3) {
-      sprintf(painCave.errMsg,
-              "RNEMD: Incorrect number of parameters specified for "
-              "angularMomentumFluxVector.\n"
-              "\tthere should be 3 parameters, but %lu were specified.\n",
-              angularMomentumFluxVector.size());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RNEMD: Incorrect number of parameters specified for "
+               "angularMomentumFluxVector.\n"
+               "\tthere should be 3 parameters, but %lu were specified.\n",
+               angularMomentumFluxVector.size());
       painCave.isFatal = 1;
       simError();
     }
@@ -1058,10 +1059,10 @@ namespace OpenMD::RNEMD {
       if (i != outputMap_.end()) {
         outputMask_.set(i->second);
       } else {
-        sprintf(painCave.errMsg,
-                "RNEMD::parseOutputFileFormat: %s is not a recognized\n"
-                "\toutputFileFormat keyword.\n",
-                token.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RNEMD::parseOutputFileFormat: %s is not a recognized\n"
+                 "\toutputFileFormat keyword.\n",
+                 token.c_str());
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_ERROR;
         simError();
@@ -1086,11 +1087,11 @@ namespace OpenMD::RNEMD {
     }
 
     if (printSlabCenterWarning) {
-      sprintf(painCave.errMsg,
-              "The given slab center was set to %0.2f. In the wrapped "
-              "coordinates\n"
-              "\t[-Hmat/2, +Hmat/2], this has been remapped to %0.2f.\n",
-              slabCenter, tempSlabCenter[rnemdPrivilegedAxis_]);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "The given slab center was set to %0.2f. In the wrapped "
+               "coordinates\n"
+               "\t[-Hmat/2, +Hmat/2], this has been remapped to %0.2f.\n",
+               slabCenter, tempSlabCenter[rnemdPrivilegedAxis_]);
       painCave.isFatal  = 0;
       painCave.severity = OPENMD_WARNING;
       simError();
@@ -1148,8 +1149,8 @@ namespace OpenMD::RNEMD {
         volumeA_ = surfaceMeshA->getVolume();
         delete surfaceMeshA;
 #else
-        sprintf(
-            painCave.errMsg,
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "RNEMD::getDividingArea : Hull calculation is not possible\n"
             "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
         painCave.severity = OPENMD_ERROR;
@@ -1205,7 +1206,7 @@ namespace OpenMD::RNEMD {
         delete surfaceMeshB;
 #else
         sprintf(
-            painCave.errMsg,
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "RNEMD::getDividingArea : Hull calculation is not possible\n"
             "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
         painCave.severity = OPENMD_ERROR;
@@ -1274,9 +1275,9 @@ namespace OpenMD::RNEMD {
       dynamic_cast<Accumulator*>(data_[index].accumulator[bin])->getAverage(s);
 
       if (std::isinf(s) || std::isnan(s)) {
-        sprintf(painCave.errMsg,
-                "RNEMD detected a numerical error writing: %s for bin %u",
-                data_[index].title.c_str(), bin);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RNEMD detected a numerical error writing: %s for bin %u",
+                 data_[index].title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
       } else {
@@ -1301,9 +1302,9 @@ namespace OpenMD::RNEMD {
 
       if (std::isinf(s[0]) || std::isnan(s[0]) || std::isinf(s[1]) ||
           std::isnan(s[1]) || std::isinf(s[2]) || std::isnan(s[2])) {
-        sprintf(painCave.errMsg,
-                "RNEMD detected a numerical error writing: %s for bin %u",
-                data_[index].title.c_str(), bin);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RNEMD detected a numerical error writing: %s for bin %u",
+                 data_[index].title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
       } else {
@@ -1330,11 +1331,11 @@ namespace OpenMD::RNEMD {
             ->getAverage(s);
 
         if (std::isinf(s) || std::isnan(s)) {
-          sprintf(painCave.errMsg,
-                  "RNEMD detected a numerical error writing: %s for bin %u, "
-                  "column %u",
-                  data_[index].title.c_str(), bin,
-                  static_cast<unsigned int>(i));
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "RNEMD detected a numerical error writing: %s for bin %u, "
+                   "column %u",
+                   data_[index].title.c_str(), bin,
+                   static_cast<unsigned int>(i));
           painCave.isFatal = 1;
           simError();
         } else {
@@ -1359,10 +1360,10 @@ namespace OpenMD::RNEMD {
           ->get95percentConfidenceInterval(s);
 
       if (std::isinf(s) || std::isnan(s)) {
-        sprintf(painCave.errMsg,
-                "RNEMD detected a numerical error writing: %s std. dev. for "
-                "bin %u",
-                data_[index].title.c_str(), bin);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RNEMD detected a numerical error writing: %s std. dev. for "
+                 "bin %u",
+                 data_[index].title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
       } else {
@@ -1387,10 +1388,10 @@ namespace OpenMD::RNEMD {
 
       if (std::isinf(s[0]) || std::isnan(s[0]) || std::isinf(s[1]) ||
           std::isnan(s[1]) || std::isinf(s[2]) || std::isnan(s[2])) {
-        sprintf(painCave.errMsg,
-                "RNEMD detected a numerical error writing: %s std. dev. for "
-                "bin %u",
-                data_[index].title.c_str(), bin);
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RNEMD detected a numerical error writing: %s std. dev. for "
+                 "bin %u",
+                 data_[index].title.c_str(), bin);
         painCave.isFatal = 1;
         simError();
       } else {
@@ -1417,12 +1418,12 @@ namespace OpenMD::RNEMD {
             ->get95percentConfidenceInterval(s);
 
         if (std::isinf(s) || std::isnan(s)) {
-          sprintf(painCave.errMsg,
-                  "RNEMD detected a numerical error writing: %s std. dev. for "
-                  "bin %u, "
-                  "column %u",
-                  data_[index].title.c_str(), bin,
-                  static_cast<unsigned int>(i));
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "RNEMD detected a numerical error writing: %s std. dev. for "
+                   "bin %u, "
+                   "column %u",
+                   data_[index].title.c_str(), bin,
+                   static_cast<unsigned int>(i));
           painCave.isFatal = 1;
           simError();
         } else {

@@ -105,9 +105,9 @@ namespace OpenMD::RNEMD {
         *temporarySourceSnapshot_ = *currentSnapshot_;
         currentSnapshot_->clearDerivedProperties();
       } else {
-        sprintf(painCave.errMsg,
-                "Either temporarySourceSnapshot or currentSnapshot "
-                "has a null value.\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Either temporarySourceSnapshot or currentSnapshot "
+                 "has a null value.\n");
         painCave.isFatal  = 1;
         painCave.severity = OPENMD_ERROR;
         simError();
@@ -127,9 +127,9 @@ namespace OpenMD::RNEMD {
         *temporarySinkSnapshot_ = *currentSnapshot_;
         currentSnapshot_->clearDerivedProperties();
       } else {
-        sprintf(painCave.errMsg,
-                "Either temporarySinkSnapshot or currentSnapshot "
-                "has a null value.\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Either temporarySinkSnapshot or currentSnapshot "
+                 "has a null value.\n");
         painCave.isFatal  = 1;
         painCave.severity = OPENMD_ERROR;
         simError();

@@ -75,10 +75,10 @@ namespace OpenMD {
         keys          = nbiTypes->getKeys(j);
         AtomType* at1 = forceField_->getAtomType(keys[0]);
         if (at1 == NULL) {
-          sprintf(painCave.errMsg,
-                  "Mie::initialize could not find AtomType %s\n"
-                  "\tto for for %s - %s interaction.\n",
-                  keys[0].c_str(), keys[0].c_str(), keys[1].c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "Mie::initialize could not find AtomType %s\n"
+                   "\tto for for %s - %s interaction.\n",
+                   keys[0].c_str(), keys[0].c_str(), keys[1].c_str());
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
           simError();
@@ -86,10 +86,10 @@ namespace OpenMD {
 
         AtomType* at2 = forceField_->getAtomType(keys[1]);
         if (at2 == NULL) {
-          sprintf(painCave.errMsg,
-                  "Mie::initialize could not find AtomType %s\n"
-                  "\tfor %s - %s nonbonded interaction.\n",
-                  keys[1].c_str(), keys[0].c_str(), keys[1].c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "Mie::initialize could not find AtomType %s\n"
+                   "\tfor %s - %s nonbonded interaction.\n",
+                   keys[1].c_str(), keys[0].c_str(), keys[1].c_str());
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
           simError();
@@ -110,10 +110,11 @@ namespace OpenMD {
 
         MieInteractionType* mit = dynamic_cast<MieInteractionType*>(nbt);
         if (mit == NULL) {
-          sprintf(painCave.errMsg,
-                  "Mie::initialize could not convert NonBondedInteractionType\n"
-                  "\tto MieInteractionType for %s - %s interaction.\n",
-                  at1->getName().c_str(), at2->getName().c_str());
+          snprintf(
+              painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+              "Mie::initialize could not convert NonBondedInteractionType\n"
+              "\tto MieInteractionType for %s - %s interaction.\n",
+              at1->getName().c_str(), at2->getName().c_str());
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
           simError();
@@ -145,9 +146,33 @@ namespace OpenMD {
 
     mixer.nmScale = n * pow(n / m, m / (n - m)) / (n - m);
 
-    int mietid1 = MieTids[atype1->getIdent()];
-    int mietid2 = MieTids[atype2->getIdent()];
-    int nMie    = MieTypes.size();
+    int nMie  = MieTypes.size();
+    int atid1 = atype1->getIdent();
+    int atid2 = atype2->getIdent();
+    int mietid1, mietid2;
+
+    pair<set<int>::iterator, bool> ret;
+    ret = MieTypes.insert(atid1);
+    if (ret.second == false) {
+      // already had this type in the MieMap, just get the mietid:
+      mietid1 = MieTids[atid1];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      mietid1        = nMie;
+      MieTids[atid1] = nMie;
+      nMie++;
+    }
+
+    ret = MieTypes.insert(atid2);
+    if (ret.second == false) {
+      // already had this type in the MieMap, just get the mietid:
+      mietid2 = MieTids[atid2];
+    } else {
+      // didn't already have it, so make a new one and assign it:
+      mietid2        = nMie;
+      MieTids[atid2] = nMie;
+      nMie++;
+    }
 
     MixingMap.resize(nMie);
     MixingMap[mietid1].resize(nMie);

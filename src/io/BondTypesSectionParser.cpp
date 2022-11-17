@@ -62,9 +62,9 @@ namespace OpenMD {
     int nTokens        = tokenizer.countTokens();
 
     if (nTokens < 4) {
-      sprintf(painCave.errMsg,
-              "BondTypesSectionParser Error: Not enough tokens at line %d\n",
-              lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "BondTypesSectionParser Error: Not enough tokens at line %d\n",
+               lineNo);
       painCave.isFatal = 1;
       simError();
     }
@@ -77,10 +77,10 @@ namespace OpenMD {
     try {
       bondType = btParser.parseLine(remainder, kScale);
     } catch (OpenMDException& e) {
-      sprintf(painCave.errMsg,
-              "BondTypesSectionParser Error: %s "
-              "at line %d\n",
-              e.what(), lineNo);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "BondTypesSectionParser Error: %s "
+               "at line %d\n",
+               e.what(), lineNo);
       painCave.isFatal = 1;
       simError();
     }

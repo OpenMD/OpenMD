@@ -815,51 +815,59 @@ X	 PT2	  NT	X	Charmm	            0	            2	      240
 end TorsionTypes
 
 begin InversionTypes
-  CA	 CAH	  CA	   H	HarmonicInversion	    0.0877304	0
-  CA	  NP	  CA	   H	HarmonicInversion	    0.0877304	0
-  CA	  NP	  CT	   H	HarmonicInversion	    0.0877304	0
- CAH	 CAH	  CA	 NAH	HarmonicInversion	    0.0877304	0
- CAH	 CAH	 CAH	   H	HarmonicInversion	    0.0877304	0
- CAH	 CAH	 NAH	  CT	HarmonicInversion	    0.0877304	0
- CAH	 CAH	 NAH	  CI	HarmonicInversion	    0.0877304	0
- CAH	 CAH	 NAH	   H	HarmonicInversion	    0.0877304	0
- CAH	 CAH	 NAX	  CT	HarmonicInversion	    0.0877304	0
- CAH	 NAH	 NAH	  CI	HarmonicInversion	    0.0877304	0
- CAH	 NAH	 NAH	   H	HarmonicInversion	    0.0877304	0
- CAH	 NAH	 NAH	  CT	HarmonicInversion	    0.0877304	0
- CCC	 COC	 COC	   H	HarmonicInversion	    0.0219326	0
- CCO	  CT	 OCO	  OC	HarmonicInversion	   0.00526382	0
- CCO	  OC	  OC	  OC	HarmonicInversion	    0.0219326	0
-  CI	  NI	 CAH	   H	HarmonicInversion	    0.0657978	0
-CO2T	  NP	  ND	  NP	HarmonicInversion	   0.00307056	0
-CO2T	  NP	  NP	  ND	HarmonicInversion	   0.00307056	0
-CO2T	  ND	  ND	  NP	HarmonicInversion	   0.00307056	0
-CO2T	  ND	  NP	  ND	HarmonicInversion	   0.00307056	0
- COC	 CCC	 OCC	 CFC	HarmonicInversion	    0.0219326	0
- COC	 CCC	 OCC	  CT	HarmonicInversion	    0.0219326	0
- COC	 CCC	OCCT	 CFC	HarmonicInversion	    0.0219326	0
- COC	 CCC	OCCT	  CT	HarmonicInversion	    0.0219326	0
- CON	  CT	 OCO	  ND	HarmonicInversion	   0.00526382	0
-CU2T	  NP	  ND	  ND	HarmonicInversion	   0.00219326	0
-CU2T	  NP	  NP	  ND	HarmonicInversion	   0.00219326	0
-CU2T	  ND	  ND	  NP	HarmonicInversion	   0.00219326	0
-CU2T	  ND	  NP	  ND	HarmonicInversion	   0.00219326	0
-NI2T	  NP	  ND	  ND	HarmonicInversion	   0.00307056	0
-NI2T	  NP	  NP	  ND	HarmonicInversion	   0.00307056	0
-NI2T	  ND	  ND	  NP	HarmonicInversion	   0.00307056	0
-NI2T	  ND	  NP	  ND	HarmonicInversion	   0.00307056	0
- NOO	  CT	 ONO	 ONO	HarmonicInversion	   0.00526382	0
-  OW	  CT	CU2P	CU2P	HarmonicInversion	    0.0219326	0
- PT2	  NB	  NB	  NT	HarmonicInversion	    0.0438652	0
- PT2	  NB	  NT	  NB	HarmonicInversion	    0.0438652	0
- PT2	  NB	  NT	  NT	HarmonicInversion	    0.0438652	0
- PT2	  NT	  NB	  NB	HarmonicInversion	    0.0438652	0
- PT2	  NT	  NT	  NB	HarmonicInversion	    0.0438652	0
+  CA	 CAH	  CA	   H	Harmonic	    0.0877304	0
+  CA	  NP	  CA	   H	Harmonic	    0.0877304	0
+  CA	  NP	  CT	   H	Harmonic	    0.0877304	0
+ CAH	 CAH	  CA	 NAH	Harmonic	    0.0877304	0
+ CAH	 CAH	 CAH	   H	Harmonic	    0.0877304	0
+ CAH	 CAH	 NAH	  CT	Harmonic	    0.0877304	0
+ CAH	 CAH	 NAH	  CI	Harmonic	    0.0877304	0
+ CAH	 CAH	 NAH	   H	Harmonic	    0.0877304	0
+ CAH	 CAH	 NAX	  CT	Harmonic	    0.0877304	0
+ CAH	 NAH	 NAH	  CI	Harmonic	    0.0877304	0
+ CAH	 NAH	 NAH	   H	Harmonic	    0.0877304	0
+ CAH	 NAH	 NAH	  CT	Harmonic	    0.0877304	0
+ CCC	 COC	 COC	   H	Harmonic	    0.0219326	0
+ CCO	  CT	 OCO	  OC	Harmonic	   0.00526382	0
+ CCO	  OC	  OC	  OC	Harmonic	    0.0219326	0
+  CI	  NI	 CAH	   H	Harmonic	    0.0657978	0
+CO2T	  NP	  ND	  NP	Harmonic	   0.00307056	0
+CO2T	  NP	  NP	  ND	Harmonic	   0.00307056	0
+CO2T	  ND	  ND	  NP	Harmonic	   0.00307056	0
+CO2T	  ND	  NP	  ND	Harmonic	   0.00307056	0
+ COC	 CCC	 OCC	 CFC	Harmonic	    0.0219326	0
+ COC	 CCC	 OCC	  CT	Harmonic	    0.0219326	0
+ COC	 CCC	OCCT	 CFC	Harmonic	    0.0219326	0
+ COC	 CCC	OCCT	  CT	Harmonic	    0.0219326	0
+ CON	  CT	 OCO	  ND	Harmonic	   0.00526382	0
+CU2T	  NP	  ND	  ND	Harmonic	   0.00219326	0
+CU2T	  NP	  NP	  ND	Harmonic	   0.00219326	0
+CU2T	  ND	  ND	  NP	Harmonic	   0.00219326	0
+CU2T	  ND	  NP	  ND	Harmonic	   0.00219326	0
+NI2T	  NP	  ND	  ND	Harmonic	   0.00307056	0
+NI2T	  NP	  NP	  ND	Harmonic	   0.00307056	0
+NI2T	  ND	  ND	  NP	Harmonic	   0.00307056	0
+NI2T	  ND	  NP	  ND	Harmonic	   0.00307056	0
+ NOO	  CT	 ONO	 ONO	Harmonic	   0.00526382	0
+  OW	  CT	CU2P	CU2P	Harmonic	    0.0219326	0
+ PT2	  NB	  NB	  NT	Harmonic	    0.0438652	0
+ PT2	  NB	  NT	  NB	Harmonic	    0.0438652	0
+ PT2	  NB	  NT	  NT	Harmonic	    0.0438652	0
+ PT2	  NT	  NB	  NB	Harmonic	    0.0438652	0
+ PT2	  NT	  NT	  NB	Harmonic	    0.0438652	0
+  CA	 CTH	  NT	  NS	AmberImproper		 1.10
+  CA	 CT3H	  NS	  CA	AmberImproper		 1.10
+  CA	  NT	  CA	   C	AmberImproper		 1.10
+   C	  CA	  ND	   O	AmberImproper		 10.5
+   C	  CA	 NDH	   O	AmberImproper		 10.5
+  NT	  CA	  CA	 CU2	AmberImproper		 1.00
+  ND	   C	 CTH	 CU2	AmberImproper		 1.00
+  NS	  CA	  CA	CT3H	AmberImproper		 1.00
 end InversionTypes
 
 begin LennardJonesAtomTypes
 // Most will be overridden by the explicit Buckingham
-// NonBondedInteractionTypes below. These are only here in case we
+// NonBondedInteractions below. These are only here in case we
 // need to interact with other non-MOMEC atom types
   SW	        0.185	      3.56359
    C	        0.044	      3.38542
@@ -915,7 +923,7 @@ ZN2T	            0	            1e-5
  PT4	            0	            1e-5
 end LennardJonesAtomTypes
 
-begin NonBondedInteractionTypes
+begin NonBondedInteractions
   SW	  SW	Buckingham Traditional	        53650	        3.125	      1704.96
   SW	   C	Buckingham Traditional	      26164.4	      3.20513	      714.303
   SW	  C3	Buckingham Traditional	      26164.4	      3.20513	      714.303
@@ -1951,4 +1959,4 @@ OCCT	 PT4	Buckingham Traditional	            0	      7.35294	            0
    H	ZN2T	Buckingham Traditional	            0	      8.68056	            0
    H	 RH3	Buckingham Traditional	            0	      8.68056	            0
    H	 PT4	Buckingham Traditional	            0	      8.68056	            0
-end NonBondedInteractionTypes
+end NonBondedInteractions

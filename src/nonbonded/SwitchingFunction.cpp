@@ -64,8 +64,8 @@ namespace OpenMD {
         setSwitch(rin_, rout_);
       }
     } else {
-      sprintf(
-          painCave.errMsg,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "SwitchingFunction::setSwitchType was given unknown function type\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
@@ -75,28 +75,28 @@ namespace OpenMD {
 
   void SwitchingFunction::setSwitch(RealType rinner, RealType router) {
     if (router < rinner) {
-      sprintf(painCave.errMsg,
-              "SwitchingFunction::setSwitch was given rinner (%lf) which was\n"
-              "\tlarger than router (%lf).\n",
-              rinner, router);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "SwitchingFunction::setSwitch was given rinner (%lf) which was\n"
+               "\tlarger than router (%lf).\n",
+               rinner, router);
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
     if (router < 0.0) {
-      sprintf(painCave.errMsg,
-              "SwitchingFunction::setSwitch was given router (%lf) which was\n"
-              "\tless than zero.\n",
-              router);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "SwitchingFunction::setSwitch was given router (%lf) which was\n"
+               "\tless than zero.\n",
+               router);
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
     if (rinner < 0.0) {
-      sprintf(painCave.errMsg,
-              "SwitchingFunction::setSwitch was given rinner (%lf) which was\n"
-              "\tless than zero.\n",
-              router);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "SwitchingFunction::setSwitch was given rinner (%lf) which was\n"
+               "\tless than zero.\n",
+               router);
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

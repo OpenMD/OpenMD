@@ -137,7 +137,8 @@ namespace OpenMD {
     }
 
     if (momentum.empty()) {
-      sprintf(painCave.errMsg, "Momentum for selected atom not found.\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Momentum for selected atom not found.\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -198,8 +199,9 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg, "MomentumHistogram: unable to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "MomentumHistogram: unable to open %s\n",
+               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

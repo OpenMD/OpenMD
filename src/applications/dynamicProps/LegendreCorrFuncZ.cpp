@@ -194,8 +194,9 @@ namespace OpenMD {
     for (sd = seleMan1_.beginSelected(i); sd != NULL;
          sd = seleMan1_.nextSelected(i)) {
       if (!sd->isDirectionalAtom()) {
-        sprintf(painCave.errMsg, "LegendreCorrFunc::validateSelection Error: "
-                                 "selected atoms are not Directional\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "LegendreCorrFunc::validateSelection Error: "
+                 "selected atoms are not Directional\n");
         painCave.isFatal = 1;
         simError();
       }
@@ -229,9 +230,9 @@ namespace OpenMD {
       }
 
     } else {
-      sprintf(painCave.errMsg,
-              "LegendreCorrFuncZ::writeCorrelate Error: failed to open %s\n",
-              getOutputFileName().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "LegendreCorrFuncZ::writeCorrelate Error: failed to open %s\n",
+               getOutputFileName().c_str());
       painCave.isFatal = 1;
       simError();
     }

@@ -67,7 +67,7 @@ namespace OpenMD {
     TokenMap();
     ~TokenMap() = default;
 
-    TokenMap(const TokenMap&) = delete;
+    TokenMap(const TokenMap&)            = delete;
     TokenMap& operator=(const TokenMap&) = delete;
 
     TokenMapType tokenMap_;

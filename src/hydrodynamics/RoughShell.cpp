@@ -41,10 +41,10 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "applications/hydrodynamics/RoughShell.hpp"
+#include "hydrodynamics/RoughShell.hpp"
 
-#include "applications/hydrodynamics/ShapeBuilder.hpp"
 #include "brains/SimInfo.hpp"
+#include "hydrodynamics/ShapeBuilder.hpp"
 
 namespace OpenMD {
 
@@ -62,11 +62,11 @@ namespace OpenMD {
     bool interior;
   };
 
-  struct ExteriorFunctor : public std::unary_function<BeadLattice, bool> {
+  struct ExteriorFunctor {
     bool operator()(const BeadLattice& bead) { return !bead.interior; }
   };
 
-  struct InteriorFunctor : public std::unary_function<BeadLattice, bool> {
+  struct InteriorFunctor {
     bool operator()(const BeadLattice& bead) { return bead.interior; }
   };
 

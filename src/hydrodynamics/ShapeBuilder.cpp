@@ -40,9 +40,9 @@
  * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
-#include "applications/hydrodynamics/ShapeBuilder.hpp"
+#include "hydrodynamics/ShapeBuilder.hpp"
 
-#include "applications/hydrodynamics/CompositeShape.hpp"
+#include "hydrodynamics/CompositeShape.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "types/GayBerneAdapter.hpp"
@@ -80,8 +80,8 @@ namespace OpenMD {
         }
       }
       if (obanum == 0) {
-        sprintf(painCave.errMsg,
-                "Could not find atom type in default element.txt\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
@@ -105,8 +105,8 @@ namespace OpenMD {
       if (obanum != 0) {
         currShape = new Sphere(datom->getPos(), etab.GetVdwRad(obanum));
       } else {
-        sprintf(painCave.errMsg,
-                "Could not find atom type in default element.txt\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();

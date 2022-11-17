@@ -68,8 +68,8 @@ namespace OpenMD {
       statfile_.open(filename.c_str(), std::ios::out | std::ios::trunc);
 
       if (!statfile_) {
-        sprintf(painCave.errMsg, "Could not open \"%s\" for stat output.\n",
-                filename.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Could not open \"%s\" for stat output.\n", filename.c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -96,7 +96,8 @@ namespace OpenMD {
 #ifdef IS_MPI
     }
 
-    sprintf(checkPointMsg, "Sucessfully opened output file for stating.\n");
+    snprintf(checkPointMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Sucessfully opened output file for stating.\n");
     errorCheckPoint();
 #endif
   }
@@ -158,9 +159,9 @@ namespace OpenMD {
           else if (stats_->getDataType(i) == "Array2d")
             writeArray(i);
           else {
-            sprintf(painCave.errMsg,
-                    "StatWriter found an unknown data type for: %s ",
-                    stats_->getTitle(i).c_str());
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "StatWriter found an unknown data type for: %s ",
+                     stats_->getTitle(i).c_str());
             painCave.isFatal = 1;
             simError();
           }
@@ -182,9 +183,9 @@ namespace OpenMD {
     if (!std::isinf(s) && !std::isnan(s)) {
       statfile_ << "\t" << s;
     } else {
-      sprintf(painCave.errMsg,
-              "StatWriter detected a numerical error writing: %s ",
-              stats_->getTitle(i).c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "StatWriter detected a numerical error writing: %s ",
+               stats_->getTitle(i).c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -194,9 +195,9 @@ namespace OpenMD {
     Vector3d s = stats_->getVectorData(i);
     if (std::isinf(s[0]) || std::isnan(s[0]) || std::isinf(s[1]) ||
         std::isnan(s[1]) || std::isinf(s[2]) || std::isnan(s[2])) {
-      sprintf(painCave.errMsg,
-              "StatWriter detected a numerical error writing: %s",
-              stats_->getTitle(i).c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "StatWriter detected a numerical error writing: %s",
+               stats_->getTitle(i).c_str());
       painCave.isFatal = 1;
       simError();
     } else {
@@ -213,9 +214,9 @@ namespace OpenMD {
       if (std::isinf(s[j]) || std::isnan(s[j])) foundError = true;
     }
     if (foundError) {
-      sprintf(painCave.errMsg,
-              "StatWriter detected a numerical error writing: %s",
-              stats_->getTitle(i).c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "StatWriter detected a numerical error writing: %s",
+               stats_->getTitle(i).c_str());
       painCave.isFatal = 1;
       simError();
     } else {
@@ -231,9 +232,9 @@ namespace OpenMD {
     for (unsigned int i1 = 0; i1 < 3; i1++) {
       for (unsigned int j1 = 0; j1 < 3; j1++) {
         if (std::isinf(s(i1, j1)) || std::isnan(s(i1, j1))) {
-          sprintf(painCave.errMsg,
-                  "StatWriter detected a numerical error writing: %s",
-                  stats_->getTitle(i).c_str());
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "StatWriter detected a numerical error writing: %s",
+                   stats_->getTitle(i).c_str());
           painCave.isFatal = 1;
           simError();
         } else {
@@ -248,9 +249,9 @@ namespace OpenMD {
 
     for (unsigned int j = 0; j < s.size(); ++j) {
       if (std::isinf(s[j]) || std::isnan(s[j])) {
-        sprintf(painCave.errMsg,
-                "StatWriter detected a numerical error writing: %s",
-                stats_->getTitle(i).c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "StatWriter detected a numerical error writing: %s",
+                 stats_->getTitle(i).c_str());
         painCave.isFatal = 1;
         simError();
       } else {
@@ -267,8 +268,9 @@ namespace OpenMD {
                        std::ios::out | std::ios::trunc);
 
       if (!reportfile_) {
-        sprintf(painCave.errMsg, "Could not open \"%s\" for report output.\n",
-                reportFileName_.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Could not open \"%s\" for report output.\n",
+                 reportFileName_.c_str());
         painCave.isFatal = 1;
         simError();
       }
