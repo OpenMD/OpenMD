@@ -284,10 +284,10 @@ endif (FFTW3_FOUND)
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in" "${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile" @ONLY)
-  add_custom_target(doc
-    ${DOXYGEN_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doc"
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in" "${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile" @ONLY)
+  add_custom_target(docs
+    ${DOXYGEN_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs"
     COMMENT "Generating API documentation with Doxygen" VERBATIM
   )
 endif(DOXYGEN_FOUND)
@@ -963,7 +963,7 @@ set(PERL_FILES
 src/applications/utilities/solvator
 src/applications/utilities/waterBoxer
 src/applications/utilities/waterSphere
-doc/git2cl
+docs/git2cl
 )
 
 IF(PERL_FOUND)
@@ -1034,8 +1034,8 @@ INSTALL(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runMe"
              PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 
-INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/doc/OpenMDmanual.pdf"
-        DESTINATION doc
+INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/docs/OpenMDmanual.pdf"
+        DESTINATION docs
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
 message( STATUS)
