@@ -25,7 +25,7 @@ sections:
   2) a `<Snapshot>` block for initial coordinate and velocity information.
 
 Detailed descriptions of the structures of these files are available
-in the `doc` directory. Sample simulations are available in the
+in the `docs` directory. Sample simulations are available in the
 `samples` directory.
 
 ## Requirements
