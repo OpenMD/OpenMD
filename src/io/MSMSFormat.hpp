@@ -78,16 +78,16 @@ namespace OpenMD {
 	if (tokenizer.countTokens() == 9) {
 	  Vector3d vertex;
 	  Vector3d normal;
-	  int l0fa, atomid, l;
+	  // int l0fa, atomid, l;
 	  vertex[0] = tokenizer.nextTokenAsDouble();
 	  vertex[1] = tokenizer.nextTokenAsDouble();
 	  vertex[2] = tokenizer.nextTokenAsDouble();
 	  normal[0] = tokenizer.nextTokenAsDouble();
 	  normal[1] = tokenizer.nextTokenAsDouble();
 	  normal[2] = tokenizer.nextTokenAsDouble();
-	  l0fa = tokenizer.nextTokenAsInt();
-	  atomid = tokenizer.nextTokenAsInt();
-	  l = tokenizer.nextTokenAsInt();
+	  // l0fa = tokenizer.nextTokenAsInt();
+	  // atomid = tokenizer.nextTokenAsInt();
+	  // l = tokenizer.nextTokenAsInt();
 	  vertices_.push_back(vertex);
 	  normals_.push_back(normal);
 	}
@@ -103,12 +103,13 @@ namespace OpenMD {
 	StringTokenizer tokenizer(line);
 	// do we have 5 tokens on this vertex line?
 	if (tokenizer.countTokens() == 5) {
-	  int v0, v1, v2, surftype, ana;
+	  int v0, v1, v2;
+	  // int surftype, ana;
 	  v0 = tokenizer.nextTokenAsInt();
 	  v1 = tokenizer.nextTokenAsInt();
 	  v2 = tokenizer.nextTokenAsInt();
-	  surftype = tokenizer.nextTokenAsInt();
-	  ana = tokenizer.nextTokenAsInt();
+	  // surftype = tokenizer.nextTokenAsInt();
+	  // ana = tokenizer.nextTokenAsInt();
 	  v0--; // convert from 1-based indexing to 0-based indexing
 	  v1--;
 	  v2--;

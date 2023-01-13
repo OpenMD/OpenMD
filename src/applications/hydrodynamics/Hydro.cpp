@@ -352,7 +352,7 @@ int main(int argc, char* argv[]) {
     for (si = uniqueStuntDoubles.begin(); si != uniqueStuntDoubles.end(); ++si) {
       HydrodynamicsModel* model = NULL;
       shape  = si->second.shape;
-      StuntDouble* sd = si->second.sd;
+      // StuntDouble* sd = si->second.sd;
       
       // if (shape->hasAnalyticalSolution()) {
       //  model = new AnalyticalModel(sd, info);

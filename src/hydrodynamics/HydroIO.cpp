@@ -119,7 +119,6 @@ namespace OpenMD {
 
     ifstream ifs(f);   
     json ij = json::parse(ifs);
-    int i, j;
     
     auto &entries = ij["OpenMD-Hydro"];
     

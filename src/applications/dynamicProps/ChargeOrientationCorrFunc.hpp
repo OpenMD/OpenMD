@@ -53,8 +53,8 @@ namespace OpenMD {
   public:
     ChargeOrientationCorrFunc(SimInfo* info, const std::string& filename,
                               const std::string& sele1,
-                              const std::string& sele2, const RealType dipoleX,
-                              const RealType dipoleY, const RealType dipoleZ,
+                              const std::string& sele2, RealType dipoleX = 0.0,
+                              RealType dipoleY = 0.0, RealType dipoleZ = -1.0,
                               const RealType cutOff = 10.0, const int axis = 2);
 
   private:

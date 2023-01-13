@@ -900,6 +900,7 @@ namespace JAMA {
         @return     real(diag(D))
     */
     void getRealEigenvalues(DynamicVector<Real>& d_) {
+      d_.reserve(d.size());
       d_ = d;
       return;
     }
