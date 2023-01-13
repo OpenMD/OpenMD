@@ -201,7 +201,7 @@ namespace OpenMD {
   void MoleculeStamp::checkBonds() {
     std::ostringstream oss;
     // make sure index is not out of range
-    size_t natoms = getNAtoms();
+    int natoms = static_cast<int>(getNAtoms());
     for (std::size_t i = 0; i < getNBonds(); ++i) {
       BondStamp* bondStamp = getBondStamp(i);
       if (bondStamp->getA() > natoms - 1 || bondStamp->getA() < 0 ||

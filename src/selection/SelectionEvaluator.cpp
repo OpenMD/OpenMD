@@ -896,7 +896,7 @@ namespace OpenMD {
 
     if (value.type() == typeid(int)) {
       int index = boost::any_cast<int>(value);
-      if (index < 0 || index >= bs.bitsets_[STUNTDOUBLE].size()) {
+      if (index < 0 || index >= static_cast<int>(bs.bitsets_[STUNTDOUBLE].size())) {
         invalidIndex(index);
       } else {
         bs = indexFinder.find(index);
@@ -906,7 +906,7 @@ namespace OpenMD {
           boost::any_cast<std::pair<int, int>>(value);
       assert(indexRange.first <= indexRange.second);
       if (indexRange.first < 0 ||
-          indexRange.second >= bs.bitsets_[STUNTDOUBLE].size()) {
+          indexRange.second >= static_cast<int>(bs.bitsets_[STUNTDOUBLE].size())) {
         invalidIndexRange(indexRange);
       } else {
         bs = indexFinder.find(indexRange.first, indexRange.second);

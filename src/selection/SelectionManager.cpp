@@ -119,7 +119,7 @@ namespace OpenMD {
   StuntDouble* SelectionManager::beginSelected(int& i) {
 #ifdef IS_MPI
     i = 0;
-    while (i < ss_.bitsets_[STUNTDOUBLE].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[STUNTDOUBLE].size())) {
       if (ss_.bitsets_[STUNTDOUBLE][i]) {
         // check that this processor owns this stuntdouble
         if (stuntdoubles_[i] != NULL) return stuntdoubles_[i];
@@ -136,7 +136,7 @@ namespace OpenMD {
   StuntDouble* SelectionManager::nextSelected(int& i) {
 #ifdef IS_MPI
     ++i;
-    while (i < ss_.bitsets_[STUNTDOUBLE].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[STUNTDOUBLE].size())) {
       if (ss_.bitsets_[STUNTDOUBLE][i]) {
         // check that this processor owns this stuntdouble
         if (stuntdoubles_[i] != NULL) return stuntdoubles_[i];
@@ -153,7 +153,7 @@ namespace OpenMD {
   StuntDouble* SelectionManager::beginUnselected(int& i) {
 #ifdef IS_MPI
     i = 0;
-    while (i < ss_.bitsets_[STUNTDOUBLE].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[STUNTDOUBLE].size())) {
       if (!ss_.bitsets_[STUNTDOUBLE][i]) {
         // check that this processor owns this stuntdouble
         if (stuntdoubles_[i] != NULL) return stuntdoubles_[i];
@@ -170,7 +170,7 @@ namespace OpenMD {
   StuntDouble* SelectionManager::nextUnselected(int& i) {
 #ifdef IS_MPI
     ++i;
-    while (i < ss_.bitsets_[STUNTDOUBLE].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[STUNTDOUBLE].size())) {
       if (!ss_.bitsets_[STUNTDOUBLE][i]) {
         // check that this processor owns this stuntdouble
         if (stuntdoubles_[i] != NULL) return stuntdoubles_[i];
@@ -187,7 +187,7 @@ namespace OpenMD {
   Bond* SelectionManager::beginSelectedBond(int& i) {
 #ifdef IS_MPI
     i = 0;
-    while (i < ss_.bitsets_[BOND].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[BOND].size())) {
       if (ss_.bitsets_[BOND][i]) {
         // check that this processor owns this bond
         if (bonds_[i] != NULL) return bonds_[i];
@@ -204,7 +204,7 @@ namespace OpenMD {
   Bond* SelectionManager::nextSelectedBond(int& i) {
 #ifdef IS_MPI
     ++i;
-    while (i < ss_.bitsets_[BOND].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[BOND].size())) {
       if (ss_.bitsets_[BOND][i]) {
         // check that this processor owns this bond
         if (bonds_[i] != NULL) return bonds_[i];
@@ -221,7 +221,7 @@ namespace OpenMD {
   Bond* SelectionManager::beginUnselectedBond(int& i) {
 #ifdef IS_MPI
     i = 0;
-    while (i < ss_.bitsets_[BOND].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[BOND].size())) {
       if (!ss_.bitsets_[BOND][i]) {
         // check that this processor owns this bond
         if (bonds_[i] != NULL) return bonds_[i];
@@ -238,7 +238,7 @@ namespace OpenMD {
   Bond* SelectionManager::nextUnselectedBond(int& i) {
 #ifdef IS_MPI
     ++i;
-    while (i < ss_.bitsets_[BOND].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[BOND].size())) {
       if (!ss_.bitsets_[BOND][i]) {
         // check that this processor owns this bond
         if (bonds_[i] != NULL) return bonds_[i];
@@ -255,7 +255,7 @@ namespace OpenMD {
   Bend* SelectionManager::beginSelectedBend(int& i) {
 #ifdef IS_MPI
     i = 0;
-    while (i < ss_.bitsets_[BEND].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[BEND].size())) {
       if (ss_.bitsets_[BEND][i]) {
         // check that this processor owns this bend
         if (bends_[i] != NULL) return bends_[i];
@@ -272,7 +272,7 @@ namespace OpenMD {
   Bend* SelectionManager::nextSelectedBend(int& i) {
 #ifdef IS_MPI
     ++i;
-    while (i < ss_.bitsets_[BEND].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[BEND].size())) {
       if (ss_.bitsets_[BEND][i]) {
         // check that this processor owns this bend
         if (bends_[i] != NULL) return bends_[i];
@@ -289,7 +289,7 @@ namespace OpenMD {
   Bend* SelectionManager::beginUnselectedBend(int& i) {
 #ifdef IS_MPI
     i = 0;
-    while (i < ss_.bitsets_[BEND].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[BEND].size())) {
       if (!ss_.bitsets_[BEND][i]) {
         // check that this processor owns this bend
         if (bends_[i] != NULL) return bends_[i];
@@ -306,7 +306,7 @@ namespace OpenMD {
   Bend* SelectionManager::nextUnselectedBend(int& i) {
 #ifdef IS_MPI
     ++i;
-    while (i < ss_.bitsets_[BEND].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[BEND].size())) {
       if (!ss_.bitsets_[BEND][i]) {
         // check that this processor owns this bend
         if (bends_[i] != NULL) return bends_[i];
@@ -323,7 +323,7 @@ namespace OpenMD {
   Torsion* SelectionManager::beginSelectedTorsion(int& i) {
 #ifdef IS_MPI
     i = 0;
-    while (i < ss_.bitsets_[TORSION].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[TORSION].size())) {
       if (ss_.bitsets_[TORSION][i]) {
         // check that this processor owns this torsion
         if (torsions_[i] != NULL) return torsions_[i];
@@ -340,7 +340,7 @@ namespace OpenMD {
   Torsion* SelectionManager::nextSelectedTorsion(int& i) {
 #ifdef IS_MPI
     ++i;
-    while (i < ss_.bitsets_[TORSION].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[TORSION].size())) {
       if (ss_.bitsets_[TORSION][i]) {
         // check that this processor owns this torsion
         if (torsions_[i] != NULL) return torsions_[i];
@@ -357,7 +357,7 @@ namespace OpenMD {
   Torsion* SelectionManager::beginUnselectedTorsion(int& i) {
 #ifdef IS_MPI
     i = 0;
-    while (i < ss_.bitsets_[TORSION].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[TORSION].size())) {
       if (!ss_.bitsets_[TORSION][i]) {
         // check that this processor owns this torsion
         if (torsions_[i] != NULL) return torsions_[i];
@@ -374,7 +374,7 @@ namespace OpenMD {
   Torsion* SelectionManager::nextUnselectedTorsion(int& i) {
 #ifdef IS_MPI
     ++i;
-    while (i < ss_.bitsets_[TORSION].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[TORSION].size())) {
       if (!ss_.bitsets_[TORSION][i]) {
         // check that this processor owns this torsion
         if (torsions_[i] != NULL) return torsions_[i];
@@ -391,7 +391,7 @@ namespace OpenMD {
   Inversion* SelectionManager::beginSelectedInversion(int& i) {
 #ifdef IS_MPI
     i = 0;
-    while (i < ss_.bitsets_[INVERSION].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[INVERSION].size())) {
       if (ss_.bitsets_[INVERSION][i]) {
         // check that this processor owns this inversion
         if (inversions_[i] != NULL) return inversions_[i];
@@ -408,7 +408,7 @@ namespace OpenMD {
   Inversion* SelectionManager::nextSelectedInversion(int& i) {
 #ifdef IS_MPI
     ++i;
-    while (i < ss_.bitsets_[INVERSION].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[INVERSION].size())) {
       if (ss_.bitsets_[INVERSION][i]) {
         // check that this processor owns this inversion
         if (inversions_[i] != NULL) return inversions_[i];
@@ -425,7 +425,7 @@ namespace OpenMD {
   Inversion* SelectionManager::beginUnselectedInversion(int& i) {
 #ifdef IS_MPI
     i = 0;
-    while (i < ss_.bitsets_[INVERSION].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[INVERSION].size())) {
       if (!ss_.bitsets_[INVERSION][i]) {
         // check that this processor owns this inversion
         if (inversions_[i] != NULL) return inversions_[i];
@@ -442,7 +442,7 @@ namespace OpenMD {
   Inversion* SelectionManager::nextUnselectedInversion(int& i) {
 #ifdef IS_MPI
     ++i;
-    while (i < ss_.bitsets_[INVERSION].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[INVERSION].size())) {
       if (!ss_.bitsets_[INVERSION][i]) {
         // check that this processor owns this inversion
         if (inversions_[i] != NULL) return inversions_[i];
@@ -459,7 +459,7 @@ namespace OpenMD {
   Molecule* SelectionManager::beginSelectedMolecule(int& i) {
 #ifdef IS_MPI
     i = 0;
-    while (i < ss_.bitsets_[MOLECULE].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[MOLECULE].size())) {
       if (ss_.bitsets_[MOLECULE][i]) {
         // check that this processor owns this molecule
         if (molecules_[i] != NULL) return molecules_[i];
@@ -476,7 +476,7 @@ namespace OpenMD {
   Molecule* SelectionManager::nextSelectedMolecule(int& i) {
 #ifdef IS_MPI
     ++i;
-    while (i < ss_.bitsets_[MOLECULE].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[MOLECULE].size())) {
       if (ss_.bitsets_[MOLECULE][i]) {
         // check that this processor owns this molecule
         if (molecules_[i] != NULL) return molecules_[i];
@@ -493,7 +493,7 @@ namespace OpenMD {
   Molecule* SelectionManager::beginUnselectedMolecule(int& i) {
 #ifdef IS_MPI
     i = 0;
-    while (i < ss_.bitsets_[MOLECULE].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[MOLECULE].size())) {
       if (!ss_.bitsets_[MOLECULE][i]) {
         // check that this processor owns this molecule
         if (molecules_[i] != NULL) return molecules_[i];
@@ -510,7 +510,7 @@ namespace OpenMD {
   Molecule* SelectionManager::nextUnselectedMolecule(int& i) {
 #ifdef IS_MPI
     ++i;
-    while (i < ss_.bitsets_[MOLECULE].size()) {
+    while (i < static_cast<int>(ss_.bitsets_[MOLECULE].size())) {
       if (!ss_.bitsets_[MOLECULE][i]) {
         // check that this processor owns this molecule
         if (molecules_[i] != NULL) return molecules_[i];
@@ -548,7 +548,7 @@ namespace OpenMD {
   std::set<AtomType*> SelectionManager::getSelectedAtomTypes() {
     std::set<AtomType*> atomTypes;
 
-    for (int i = 0; i < ss_.bitsets_[STUNTDOUBLE].size(); ++i) {
+    for (size_t i = 0; i < ss_.bitsets_[STUNTDOUBLE].size(); ++i) {
       if (ss_.bitsets_[STUNTDOUBLE][i]) {
         // check that this processor owns this stuntdouble
         if (stuntdoubles_[i] != NULL) {

@@ -272,7 +272,7 @@ namespace OpenMD {
 
     RigidBody* rb = new RigidBody();
     nAtoms        = rbStamp->getNMembers();
-    for (int i = 0; i < nAtoms; ++i) {
+    for (std::size_t i = 0; i < nAtoms; ++i) {
       // rbStamp->getMember(i) return the local index of current atom
       // inside the molecule.  It is not the same as local index of
       // atom which is the index of atom at DataStorage class

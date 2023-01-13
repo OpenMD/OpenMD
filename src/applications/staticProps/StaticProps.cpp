@@ -770,7 +770,7 @@ int main(int argc, char* argv[]) {
       analyser = Utils::make_unique<DipoleOrientation>(
           info, dumpFileName, sele1, args_info.dipoleX_arg,
           args_info.dipoleY_arg, args_info.dipoleZ_arg, args_info.nbins_arg,
-          privilegedAxis);
+	  privilegedAxis);
     else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Dipole components must be provided.");
       painCave.severity = OPENMD_ERROR;

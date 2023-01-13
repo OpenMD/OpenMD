@@ -103,7 +103,7 @@ namespace OpenMD {
     }
 
     ++fromIndex;
-    while (fromIndex < size()) {
+    while (fromIndex < static_cast<int>(size())) {
       if (!bitset_[fromIndex]) { return fromIndex; }
       ++fromIndex;
     }
@@ -129,7 +129,7 @@ namespace OpenMD {
     }
 
     ++fromIndex;
-    while (fromIndex < size()) {
+    while (fromIndex < static_cast<int>(size())) {
       if (bitset_[fromIndex]) { return fromIndex; }
       ++fromIndex;
     }

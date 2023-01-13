@@ -550,7 +550,7 @@ namespace OpenMD {
         // Sometimes site lines are inherited from other models, so
         // just ignore a site line that exceeds the number of atoms in
         // our RB:
-        if (siteIndex >= rb->getNumAtoms()) { return; }
+        if (siteIndex >= static_cast<int>(rb->getNumAtoms())) { return; }
 
         sd = rb->getAtoms()[siteIndex];
       }
