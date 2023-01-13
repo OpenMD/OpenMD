@@ -176,7 +176,7 @@ check_cxx_symbol_exists(strncasecmp   "string.h"   HAVE_STRNCASECMP)
 option(FORMAT_OPENMD "Builds specified libraries while also formatting the code." OFF)
 
 if (FORMAT_OPENMD AND NOT WIN32)
-  find_program(formatter clang-format HINTS /opt/local/libexec/llvm-11/bin/)
+  find_program(formatter clang-format HINTS /opt/local/libexec/llvm-15/bin/)
 
   if (NOT formatter_NOTFOUND)
     message(STATUS "Formatting OpenMD")
@@ -460,6 +460,7 @@ src/io/StickyAtomTypesSectionParser.cpp
 src/io/StickyPowerAtomTypesSectionParser.cpp
 src/io/TorsionTypesSectionParser.cpp
 src/io/UFFAtomTypesSectionParser.cpp
+src/io/XYZFormat.cpp
 src/io/ZConsReader.cpp
 src/lattice/CubicLattice.cpp
 src/lattice/FCCLattice.cpp
