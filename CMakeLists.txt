@@ -280,7 +280,7 @@ ELSE(FFTW3_FOUND)
   MESSAGE(STATUS "No fftw3 found - will be missing some analysis modules")
 endif (FFTW3_FOUND)
 
-find_package(nlohmann_json 3.11.2 REQUIRED)
+find_package(nlohmann_json 3.10.5 REQUIRED)
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
