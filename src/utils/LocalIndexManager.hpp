@@ -121,7 +121,8 @@ namespace OpenMD {
       if (indices.empty()) { return; }
 
       std::sort(indices.begin(), indices.end());
-      std::unique(indices.begin(), indices.end());
+      auto last = std::unique(indices.begin(), indices.end());
+      indices.erase(last, indices.end());
 
       std::vector<int>::iterator i;
       int beginIndex;

@@ -58,7 +58,7 @@ namespace OpenMD {
     virtual ~BendStamp();
 
     int getMemberAt(int index) { return members_.at(index); }
-    int getNMembers() { return members_.size(); }
+    size_t getNMembers() { return members_.size(); }
     std::vector<int> getMembers() { return members_; }
     void setMembers(const std::vector<int>& members) {
       members_ = members;

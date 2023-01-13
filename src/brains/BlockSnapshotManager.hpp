@@ -69,7 +69,7 @@ namespace OpenMD {
     virtual Snapshot* getSnapshot(int id);
 
     /** Returns number of snapshot blocks in this BlockSnapshotManager*/
-    int getNBlocks() { return blocks_.size(); }
+    size_t getNBlocks() { return blocks_.size(); }
 
     SnapshotBlock getSnapshotBlock(int block) { return blocks_.at(block); }
 

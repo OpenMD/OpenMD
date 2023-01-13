@@ -127,7 +127,7 @@ namespace OpenMD {
           .velocity[localIndex_];
     }
 
-    int getNumAtom() { return cutoffAtomList.size(); }
+    size_t getNumAtom() { return cutoffAtomList.size(); }
 
     int getGlobalIndex() { return globalIndex; }
 

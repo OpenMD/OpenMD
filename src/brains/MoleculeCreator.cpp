@@ -79,8 +79,8 @@ namespace OpenMD {
     // create atoms
     Atom* atom;
     AtomStamp* currentAtomStamp;
-    int nAtom = molStamp->getNAtoms();
-    for (int i = 0; i < nAtom; ++i) {
+    size_t nAtom = molStamp->getNAtoms();
+    for (size_t i = 0; i < nAtom; ++i) {
       currentAtomStamp = molStamp->getAtomStamp(i);      
       atom             = createAtom(ff, mol, currentAtomStamp, localIndexMan);
       mol->addAtom(atom);
@@ -89,9 +89,9 @@ namespace OpenMD {
     // create rigidbodies
     RigidBody* rb;
     RigidBodyStamp* currentRigidBodyStamp;
-    int nRigidbodies = molStamp->getNRigidBodies();
+    size_t nRigidbodies = molStamp->getNRigidBodies();
 
-    for (int i = 0; i < nRigidbodies; ++i) {
+    for (size_t i = 0; i < nRigidbodies; ++i) {
       currentRigidBodyStamp = molStamp->getRigidBodyStamp(i);
       rb = createRigidBody(molStamp, mol, currentRigidBodyStamp, localIndexMan);
       mol->addRigidBody(rb);
@@ -100,9 +100,9 @@ namespace OpenMD {
     // create bonds
     Bond* bond;
     BondStamp* currentBondStamp;
-    int nBonds = molStamp->getNBonds();
+    size_t nBonds = molStamp->getNBonds();
 
-    for (int i = 0; i < nBonds; ++i) {
+    for (size_t i = 0; i < nBonds; ++i) {
       currentBondStamp = molStamp->getBondStamp(i);
       bond             = createBond(ff, mol, currentBondStamp, localIndexMan);
       mol->addBond(bond);
@@ -111,8 +111,8 @@ namespace OpenMD {
     // create bends
     Bend* bend;
     BendStamp* currentBendStamp;
-    int nBends = molStamp->getNBends();
-    for (int i = 0; i < nBends; ++i) {
+    size_t nBends = molStamp->getNBends();
+    for (size_t i = 0; i < nBends; ++i) {
       currentBendStamp = molStamp->getBendStamp(i);
       bend             = createBend(ff, mol, currentBendStamp, localIndexMan);
       mol->addBend(bend);
@@ -121,8 +121,8 @@ namespace OpenMD {
     // create torsions
     Torsion* torsion;
     TorsionStamp* currentTorsionStamp;
-    int nTorsions = molStamp->getNTorsions();
-    for (int i = 0; i < nTorsions; ++i) {
+    size_t nTorsions = molStamp->getNTorsions();
+    for (size_t i = 0; i < nTorsions; ++i) {
       currentTorsionStamp = molStamp->getTorsionStamp(i);
       torsion = createTorsion(ff, mol, currentTorsionStamp, localIndexMan);
       mol->addTorsion(torsion);
@@ -131,8 +131,8 @@ namespace OpenMD {
     // create inversions
     Inversion* inversion;
     InversionStamp* currentInversionStamp;
-    int nInversions = molStamp->getNInversions();
-    for (int i = 0; i < nInversions; ++i) {
+    size_t nInversions = molStamp->getNInversions();
+    for (size_t i = 0; i < nInversions; ++i) {
       currentInversionStamp = molStamp->getInversionStamp(i);
       inversion =
           createInversion(ff, mol, currentInversionStamp, localIndexMan);
@@ -142,8 +142,8 @@ namespace OpenMD {
     // create cutoffGroups
     CutoffGroup* cutoffGroup;
     CutoffGroupStamp* currentCutoffGroupStamp;
-    int nCutoffGroups = molStamp->getNCutoffGroups();
-    for (int i = 0; i < nCutoffGroups; ++i) {
+    size_t nCutoffGroups = molStamp->getNCutoffGroups();
+    for (size_t i = 0; i < nCutoffGroups; ++i) {
       currentCutoffGroupStamp = molStamp->getCutoffGroupStamp(i);
       cutoffGroup =
           createCutoffGroup(mol, currentCutoffGroupStamp, localIndexMan);
@@ -266,7 +266,7 @@ namespace OpenMD {
       MoleculeStamp* molStamp, Molecule* mol, RigidBodyStamp* rbStamp,
       LocalIndexManager* localIndexMan) {
     Atom* atom;
-    int nAtoms;
+    size_t nAtoms;
     Vector3d refCoor;
     AtomStamp* atomStamp;
 
@@ -627,13 +627,13 @@ namespace OpenMD {
   CutoffGroup* MoleculeCreator::createCutoffGroup(
       Molecule* mol, CutoffGroupStamp* stamp,
       LocalIndexManager* localIndexMan) {
-    int nAtoms;
+    size_t nAtoms;
     CutoffGroup* cg;
     Atom* atom;
     cg = new CutoffGroup();
 
     nAtoms = stamp->getNMembers();
-    for (int i = 0; i < nAtoms; ++i) {
+    for (size_t i = 0; i < nAtoms; ++i) {
       atom = mol->getAtomAt(stamp->getMemberAt(i));
       assert(atom);
       cg->addAtom(atom);

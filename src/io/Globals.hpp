@@ -163,15 +163,15 @@ namespace OpenMD {
     bool addZConsStamp(ZConsStamp* zcons);
     bool addRestraintStamp(RestraintStamp* rest);
     bool addMoleculeStamp(MoleculeStamp* molStamp);
-    int getNComponents() { return components_.size(); }
+    size_t getNComponents() { return components_.size(); }
     std::vector<Component*> getComponents() { return components_; }
     Component* getComponentAt(int index) { return components_.at(index); }
 
-    int getNZconsStamps() { return zconstraints_.size(); }
+    size_t getNZconsStamps() { return zconstraints_.size(); }
     std::vector<ZConsStamp*> getZconsStamps() { return zconstraints_; }
     ZConsStamp* getZconsStampAt(int index) { return zconstraints_.at(index); }
 
-    int getNRestraintStamps() { return restraints_.size(); }
+    size_t getNRestraintStamps() { return restraints_.size(); }
     std::vector<RestraintStamp*> getRestraintStamps() { return restraints_; }
     RestraintStamp* getRestraintStampAt(int index) {
       return restraints_.at(index);

@@ -56,7 +56,7 @@ namespace OpenMD {
     int getIndex() { return index_; }
 
     int getMemberAt(int index) { return members_.at(index); }
-    int getNMembers() { return members_.size(); }
+    size_t getNMembers() { return members_.size(); }
     std::vector<int> getMembers() { return members_; }
 
     bool setMembers(const std::vector<int>& members) {

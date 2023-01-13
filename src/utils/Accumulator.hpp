@@ -64,7 +64,7 @@ namespace OpenMD {
     virtual ~BaseAccumulator() {};
 
   protected:
-    size_t Count_;
+    size_t Count_ {};
   };
 
   /**

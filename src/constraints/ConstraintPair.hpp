@@ -83,7 +83,7 @@ namespace OpenMD {
     ConstraintElem* consElem1_;
     ConstraintElem* consElem2_;
     RealType dist2;
-    RealType force_;
+    RealType force_ {};
     bool printForce_;
   };
 

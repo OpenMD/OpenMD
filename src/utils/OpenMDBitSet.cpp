@@ -49,6 +49,7 @@
 #include <cassert>
 #include <iterator>
 #include <string>
+#include <functional>
 
 #ifdef IS_MPI
 #include <mpi.h>
@@ -67,7 +68,7 @@ namespace OpenMD {
 #endif
   }
 
-  void OpenMDBitSet::flip(int fromIndex, int toIndex) {
+  void OpenMDBitSet::flip(size_t fromIndex, size_t toIndex) {
     assert(fromIndex <= toIndex);
     assert(fromIndex >= 0);
     assert(toIndex <= size());
@@ -77,7 +78,7 @@ namespace OpenMD {
     std::transform(first, last, first, std::logical_not<bool>());
   }
 
-  OpenMDBitSet OpenMDBitSet::get(int fromIndex, int toIndex) {
+  OpenMDBitSet OpenMDBitSet::get(size_t fromIndex, size_t toIndex) {
     assert(fromIndex <= toIndex);
     assert(fromIndex >= 0);
     assert(toIndex <= size());
@@ -166,7 +167,7 @@ namespace OpenMD {
                    bitset_.begin(), std::bit_xor<bool>());
   }
 
-  void OpenMDBitSet::setBits(int fromIndex, int toIndex, bool value) {
+  void OpenMDBitSet::setBits(size_t fromIndex, size_t toIndex, bool value) {
     assert(fromIndex <= toIndex);
     assert(fromIndex >= 0);
     assert(toIndex <= size());
@@ -175,8 +176,8 @@ namespace OpenMD {
     std::fill(first, last, value);
   }
 
-  void OpenMDBitSet::resize(int nbits) {
-    int oldSize = size();
+  void OpenMDBitSet::resize(size_t nbits) {
+    size_t oldSize = size();
     bitset_.resize(nbits);
     if (nbits > oldSize) {
       std::fill(bitset_.begin() + oldSize, bitset_.end(), false);
@@ -257,7 +258,7 @@ namespace OpenMD {
   //}
 
   std::ostream& operator<<(std::ostream& os, const OpenMDBitSet& bs) {
-    for (unsigned int i = 0; i < bs.bitset_.size(); ++i) {
+    for (size_t i = 0; i < bs.bitset_.size(); ++i) {
       std::string val = bs[i] ? "true" : "false";
       os << "OpenMDBitSet[" << i << "] = " << val << std::endl;
     }

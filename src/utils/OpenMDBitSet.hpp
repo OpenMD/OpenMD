@@ -60,28 +60,28 @@ namespace OpenMD {
     /** */
     OpenMDBitSet() {}
     /** */
-    OpenMDBitSet(int nbits) : bitset_(nbits) { clearAll(); }
+    OpenMDBitSet(size_t nbits) : bitset_(nbits) { clearAll(); }
 
     /** Returns the number of bits set to true in this OpenMDBitSet.  */
     int countBits();
 
     /** Sets the bit at the specified index to to the complement of its current
      * value. */
-    void flip(int bitIndex) { bitset_[bitIndex] = !bitset_[bitIndex]; }
+    void flip(size_t bitIndex) { bitset_[bitIndex] = !bitset_[bitIndex]; }
 
     /** Sets each bit from the specified fromIndex(inclusive) to the specified
      * toIndex(exclusive) to the complement of its current value. */
-    void flip(int fromIndex, int toIndex);
+    void flip(size_t fromIndex, size_t toIndex);
 
     /** Sets each bit to the complement of its current value. */
     void flip() { flip(0, size()); }
 
     /** Returns the value of the bit with the specified index. */
-    bool get(int bitIndex) { return bitset_[bitIndex]; }
+    bool get(size_t bitIndex) { return bitset_[bitIndex]; }
 
     /** Returns a new OpenMDBitSet composed of bits from this OpenMDBitSet from
      * fromIndex(inclusive) to toIndex(exclusive). */
-    OpenMDBitSet get(int fromIndex, int toIndex);
+    OpenMDBitSet get(size_t fromIndex, size_t toIndex);
 
     /** Returns true if any bits are set to true */
     bool any() { return !none(); }
@@ -119,15 +119,15 @@ namespace OpenMD {
     /** Performs a logical XOR of this bit set with the bit set argument. */
     void xorOperator(const OpenMDBitSet& bs);
 
-    void setBitOn(int bitIndex) { setBit(bitIndex, true); }
+    void setBitOn(size_t bitIndex) { setBit(bitIndex, true); }
 
-    void setBitOff(int bitIndex) { setBit(bitIndex, false); }
+    void setBitOff(size_t bitIndex) { setBit(bitIndex, false); }
 
-    void setRangeOn(int fromIndex, int toIndex) {
+    void setRangeOn(size_t fromIndex, size_t toIndex) {
       setBits(fromIndex, toIndex, true);
     }
 
-    void setRangeOff(int fromIndex, int toIndex) {
+    void setRangeOff(size_t fromIndex, size_t toIndex) {
       setBits(fromIndex, toIndex, false);
     }
 
@@ -138,10 +138,10 @@ namespace OpenMD {
 
     /** Returns the number of bits of space actually in use by this OpenMDBitSet
      * to represent bit values. */
-    int size() const { return bitset_.size(); }
+    size_t size() const { return bitset_.size(); }
 
     /** Changes the size of OpenMDBitSet*/
-    void resize(int nbits);
+    void resize(size_t nbits);
 
     OpenMDBitSet& operator&=(const OpenMDBitSet& bs) {
       andOperator(bs);
@@ -180,11 +180,11 @@ namespace OpenMD {
 
   private:
     /** Sets the bit at the specified index to the specified value. */
-    void setBit(int bitIndex, bool value) { bitset_[bitIndex] = value; }
+    void setBit(size_t bitIndex, bool value) { bitset_[bitIndex] = value; }
 
     /** Sets the bits from the specified fromIndex(inclusive) to the specified
      * toIndex(exclusive) to the specified value. */
-    void setBits(int fromIndex, int toIndex, bool value);
+    void setBits(size_t fromIndex, size_t toIndex, bool value);
 
     std::vector<bool> bitset_;
   };
