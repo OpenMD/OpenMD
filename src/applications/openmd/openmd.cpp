@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-2023 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
            "    "
            "      |\n"
         << "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright "
-           "2004-2021 by "
+           "2004-2023 by "
            "the     |\n"
         << "  |     /_/                                   University of Notre "
            "Dame.      |\n"
