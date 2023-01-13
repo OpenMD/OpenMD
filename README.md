@@ -55,8 +55,7 @@ in the `docs` directory. Sample simulations are available in the
     work, but we haven't tried. You can get Open MPI here:
     [open-mpi.org](http://www.open-mpi.org/)
 
- 4) Other optional (but quite useful) libraries that will unlock some
-    features of OpenMD:
+ 4) Other required libraries that unlock some features of OpenMD:
 
       + Open Babel:  [openbabel.org](http://openbabel.org)
       + Qhull:       [www.qhull.org](http://www.qhull.org)
