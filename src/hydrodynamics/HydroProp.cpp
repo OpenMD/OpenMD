@@ -60,8 +60,8 @@ namespace OpenMD {
       CholeskyDecomposition(Xi_, S_);
       hasS_ = true;
     } else {
-      sprintf(painCave.errMsg,
-	      "HydroProp was asked to complete without a Resistance Tensor.\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+	       "HydroProp was asked to complete without a Resistance Tensor.\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -238,6 +238,7 @@ namespace OpenMD {
 
   void HydroProp::pitchAxes(Mat3x3d& pitchAxes, Vector3d& pitches, RealType& pitchScalar){
     Mat3x3d P = getPitchMatrix();
+    
     Mat3x3d::diagonalize(P, pitches, pitchAxes);
 
     pitchScalar = 0.0;      

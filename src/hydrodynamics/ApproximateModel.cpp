@@ -99,7 +99,9 @@ namespace OpenMD {
   void ApproximateModel::setShape(Shape* shape) {
     elements_.clear();
     shape_ = shape;
-    assignElements();    
+    std::cerr << "Assigning Elements...";
+    assignElements();
+    std::cerr << " done.\n";
   }
 
   HydroProp* ApproximateModel::calcHydroProps(RealType viscosity) {
@@ -108,27 +110,30 @@ namespace OpenMD {
     hp->setName( shape_->getName() );
     std::size_t nelements = elements_.size();
     if (nelements == 0)
-      nelements = assignElements();
-
-    std::cerr << "flag n = " << nelements << "\n";
+      nelements = assignElements();   
     
     DynamicRectMatrix<RealType> B(3 * nelements, 3 * nelements);
     DynamicRectMatrix<RealType> C(3 * nelements, 3 * nelements);
-    Mat3x3d I = SquareMatrix3<RealType>::identity();
-    
+    Mat3x3d I = Mat3x3d::identity();
+
+    std::cerr << "Checking " << nelements << " elements...";
     for (std::size_t i = 0; i < nelements; ++i) 
-      checkElement(i);          
-    
+      checkElement(i);
+    std::cerr << " done.\n";
+
+    std::cerr << "Calculating B matrix...";
     for (std::size_t i = 0; i < nelements; ++i) {
       for (std::size_t j = 0; j < nelements; ++j) {
         Mat3x3d Tij = interactionTensor(i, j, viscosity);
-
         B.setSubMatrix(i * 3, j * 3, Tij);
       }
     }
-
+    std::cerr << " done.\n";
+        
     // invert B Matrix
+    std::cerr << "Inverting B matrix...";
     invertMatrix(B, C);  // B is modified during the inversion
+    std::cerr << " done.\n";
 
     // prepare U Matrix relative to arbitrary origin O(0.0, 0.0, 0.0);
     // relative to the original geometry
@@ -145,6 +150,7 @@ namespace OpenMD {
     Mat3x3d Xiorr;
     Mat3x3d Xiotr;
 
+    std::cerr << "Assembling resistance tensor...";
     for (std::size_t i = 0; i < nelements; ++i) {
       for (std::size_t j = 0; j < nelements; ++j) {
         Mat3x3d Cij;
@@ -217,6 +223,7 @@ namespace OpenMD {
     Xi.setSubMatrix(0, 3, Xirtr.transpose());
     Xi.setSubMatrix(3, 0, Xirtr);
     Xi.setSubMatrix(3, 3, Xirrr);
+    std::cerr << " done.\n";
 
     hp->setResistanceTensor(Xi);
     

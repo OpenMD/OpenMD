@@ -43,30 +43,85 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
-#define HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
+#ifndef MATH_VECTOR2_HPP
+#define MATH_VECTOR2_HPP
 
-#include <vector>
+#include <cassert>
+#include <cmath>
 
-#include "hydrodynamics/HydrodynamicsModel.hpp"
-#include "math/DynamicRectMatrix.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "math/Vector3.hpp"
+#include "Vector.hpp"
 
 namespace OpenMD {
 
-  class Shape;
-  class ApproximationModel : public HydrodynamicsModel {
+  template<typename Real>
+  class Vector2 : public Vector<Real, 2> {
   public:
-    ApproximationModel();
+    typedef Real ElemType;
+    typedef Real* ElemPoinerType;
+    Vector2() : Vector<Real, 2>() {}
 
-    virtual HydroProp* calcHydroProps(Shape* shape, RealType viscosity);
-    virtual std::size_t assignElements(Shape* shape);
-    virtual Mat3x3d interactionTensor(std::size_t i, std::size_t j,
-				      RealType viscosity);
-    virtual void writeElements(std::ostream& os);
-    
+    /** Constructs and initializes a Vector2 from x and y coordinates */
+    inline Vector2(Real x, Real y) {
+      this->data_[0] = x;
+      this->data_[1] = y;
+    }
+
+    /** Constructs and initializes from an array*/
+    inline Vector2(Real* array) : Vector<Real, 2>(array) {}
+
+    inline Vector2(const Vector<Real, 2>& v) : Vector<Real, 2>(v) {}
+
+    inline Vector2<Real>& operator=(const Vector<Real, 2>& v) {
+      if (this == &v) { return *this; }
+      Vector<Real, 2>::operator=(v);
+      return *this;
+    }
+
+    /**
+     * Returns reference of the first element of Vector2.
+     * @return reference of the first element of Vector2
+     */
+    inline Real& x() { return this->data_[0]; }
+
+    /**
+     * Returns the first element of Vector2.
+     * @return  the first element of Vector2
+     */
+    inline Real x() const { return this->data_[0]; }
+
+    /**
+     * Returns reference of the second element of Vector2.
+     * @return reference of the second element of Vector2
+     */
+    inline Real& y() { return this->data_[1]; }
+
+    /**
+     * Returns  the second element of Vector2.
+     * @return c the second element of Vector2
+     */
+    inline Real y() const { return this->data_[1]; }
   };
+
+  /**
+   * Returns the linear indexing for size_t vectors. Compare to
+   * Rapaport's VLinear
+   *
+   * @param p first vector
+   * @param s second vector
+   */
+  inline std::size_t Vlinear(const Vector2<std::size_t>& p,
+			     const Vector2<std::size_t>& s) {
+    return std::size_t( p.y() * s.x() + p.x() );
+  }
+  
+  typedef Vector2<int> Vector2i;
+
+  typedef Vector2<RealType> Vector2d;
+
+  const Vector2d V2Zero(0.0, 0.0);
+  const Vector2d V2X(1.0, 0.0);
+  const Vector2d V2Y(0.0, 1.0);
+
 }  // namespace OpenMD
 
 #endif

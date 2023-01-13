@@ -52,8 +52,8 @@ namespace OpenMD {
 
   Ellipsoid::Ellipsoid(Vector3d origin, RealType rAxial, RealType rEquatorial,
                        Mat3x3d rotMat) :
-      origin_(origin),
-      rAxial_(rAxial), rEquatorial_(rEquatorial), rotMat_(rotMat) {
+    origin_(origin), rAxial_(rAxial), rEquatorial_(rEquatorial),
+    rotMat_(rotMat) {
     if (rAxial_ > rEquatorial_) {
       rMajor_ = rAxial_;
       rMinor_ = rEquatorial_;
@@ -108,13 +108,13 @@ namespace OpenMD {
 
     RealType pi = Constants::PI;
     RealType XittA =
-        16.0 * pi * viscosity * (a2 - b2) / ((2.0 * a2 - b2) * S - 2.0 * a);
+      16.0 * pi * viscosity * (a2 - b2) / ((2.0 * a2 - b2) * S - 2.0 * a);
     RealType XittB = 32.0 * pi * viscosity * (a2 - b2) /
-                     ((2.0 * a2 - 3.0 * b2) * S + 2.0 * a);
+      ((2.0 * a2 - 3.0 * b2) * S + 2.0 * a);
     RealType XirrA =
-        32.0 / 3.0 * pi * viscosity * (a2 - b2) * b2 / (2.0 * a - b2 * S);
+      32.0 / 3.0 * pi * viscosity * (a2 - b2) * b2 / (2.0 * a - b2 * S);
     RealType XirrB = 32.0 / 3.0 * pi * viscosity * (a2 * a2 - b2 * b2) /
-                     ((2.0 * a2 - b2) * S - 2.0 * a);
+      ((2.0 * a2 - b2) * S - 2.0 * a);
 
     Mat6x6d Xi;
 

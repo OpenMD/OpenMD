@@ -57,9 +57,9 @@ namespace OpenMD {
 	if (shape_->isSpherical()) {
 	  createSingleBead( dynamic_cast<Sphere*>(shape_) );
 	} else {
-	  sprintf(painCave.errMsg,
-		  "AtomicBeadModel::assignElements Error: GayBerne and other non-spherical\n"
-		  "\tatoms should use the RoughShell or BoundaryElement models\n");
+	  snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		   "AtomicBeadModel::assignElements Error: GayBerne and other non-spherical\n"
+		   "\tatoms should use the RoughShell or BoundaryElement models\n");
 	  painCave.severity = OPENMD_ERROR;
 	  painCave.isFatal  = 1;
 	  simError();
@@ -73,19 +73,18 @@ namespace OpenMD {
   void AtomicBeadModel::createBeads(Shape* shape) {
     if (shape != NULL ) {
       if (shape->isComposite()) {
-	std::cerr << "creating beads for " << shape->getName() << "\n";
 	std::vector<Shape*> shapes = dynamic_cast<CompositeShape*>(shape)->getShapes();
 	for (std::vector<Shape*>::iterator i = shapes.begin();
 	     i != shapes.end(); ++i) {
-	  if ( (*i)->isComposite() )
+	  if ( (*i)->isComposite() ) {
 	    createBeads( dynamic_cast<CompositeShape*>( (*i) ) );
-	  else {	      
-	    if (shape->isSpherical()) {
-	      createSingleBead( dynamic_cast<Sphere*>(shape_) );
+	  } else {
+	    if ((*i)->isSpherical()) {
+	      createSingleBead( dynamic_cast<Sphere*>( (*i) ) );
 	    } else {
-	      sprintf(painCave.errMsg,
-		      "AtomicBeadModel::createBeads Error: GayBerne and other non-spherical\n"
-		      "\tatoms should use the RoughShell or BoundaryElement models\n");
+	      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		       "AtomicBeadModel::createBeads Error: GayBerne and other non-spherical\n"
+		       "\tatoms should use the RoughShell or BoundaryElement models\n");
 	      painCave.severity = OPENMD_ERROR;
 	      painCave.isFatal  = 1;
 	      simError();
@@ -96,9 +95,9 @@ namespace OpenMD {
 	if (shape->isSpherical()) {
 	  createSingleBead(dynamic_cast<Sphere*>(shape_));
 	} else {
-	  sprintf(painCave.errMsg,
-		  "AtomicBeadModel::createBeads Error2: GayBerne and other non-spherical\n"
-		  "\tatoms should use the RoughShell or BoundaryElement models\n");
+	  snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		   "AtomicBeadModel::createBeads Error: GayBerne and other non-spherical\n"
+		   "\tatoms should use the RoughShell or BoundaryElement models\n");
 	  painCave.severity = OPENMD_ERROR;
 	  painCave.isFatal  = 1;
 	  simError();

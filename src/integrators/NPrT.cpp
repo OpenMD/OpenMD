@@ -214,7 +214,7 @@ namespace OpenMD {
     eta = snap->getBarostat();
 
     // if (!eta.isDiagonal()) {
-    //    sprintf( painCave.errMsg,
+    //    snprintf( painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
     //             "NPrT error: the diagonal elements of eta matrix are not the
     //             same or etaMat is not a diagonal matrix");
     //    painCave.isFatal = 1;

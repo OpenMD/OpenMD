@@ -158,8 +158,8 @@ int main(int argc, char* argv[]) {
   // long long int memSize = memparse(args_info.memory_arg, &end);
 
   // We don't really need to print this out anymore:
-  // sprintf( painCave.errMsg,
-  //          "Amount of memory being used: %llu bytes\n", memSize);
+  // snprintf( painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+  //           "Amount of memory being used: %llu bytes\n", memSize);
   // painCave.severity = OPENMD_INFO;
   // painCave.isFatal = 0;
   // simError();

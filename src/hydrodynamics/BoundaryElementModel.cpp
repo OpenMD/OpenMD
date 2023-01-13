@@ -46,6 +46,7 @@
 #include "hydrodynamics/BoundaryElementModel.hpp"
 #include "hydrodynamics/Mesh.hpp"
 #include "math/integration/StrangFixCowperTriangleQuadrature.hpp"
+#include "math/integration/TriangleQuadrature.hpp"
 #include "math/DynamicRectMatrix.hpp"
 #include "math/LU.hpp"
 #include "math/SquareMatrix3.hpp"
@@ -61,8 +62,8 @@ namespace OpenMD {
       if (shape_->isMesh()) {
         createTriangles( dynamic_cast<Mesh*>(shape_) );
       } else {
-	sprintf(painCave.errMsg,
-		"BoundaryElementModel::assignElements Error: No mesh was given as the shape\n");
+	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
+		 "BoundaryElementModel::assignElements Error: No mesh was given as the shape\n");
 	painCave.severity = OPENMD_ERROR;
 	painCave.isFatal  = 1;
 	simError();
@@ -75,13 +76,13 @@ namespace OpenMD {
   void BoundaryElementModel::createTriangles(Mesh* m) {
     if (m != NULL ) {
       std::string name = m->getName();
-      std::cerr << "creating triangles for " << m->getName() << "\n";      
       std::vector<Triangle> facets = m->getFacets();
       for (std::vector<Triangle>::iterator i = facets.begin();
 	   i != facets.end(); ++i) {
 	HydrodynamicsElement currTri;
 	currTri.name = name;
 	currTri.pos = (*i).getCentroid();
+	currTri.t = (*i);
 	elements_.push_back(currTri);	
       }
     }
@@ -96,15 +97,15 @@ namespace OpenMD {
     std::string name = shape_->getName();
     os << "solid" << " " << name << std::endl;
     for (iter = elements_.begin(); iter != elements_.end(); ++iter) {
-      Triangle* t = iter->t;
-      os << "\t" << "facet normal" << " " << t->getUnitNormal() << std::endl;
+      Triangle t = iter->t;
+      os << "\t" << "facet normal" << " " << t.getUnitNormal() << std::endl;
       os << "\t\t" << "outer loop" << std::endl;
-      os << "\t\t\t" << " " << "vertex" << " " << t->vertex1() << std::endl;
-      os << "\t\t\t" << " " << "vertex" << " " << t->vertex2() << std::endl;
-      os << "\t\t\t" << " " << "vertex" << " " << t->vertex3() << std::endl;
+      os << "\t\t\t" << " " << "vertex" << " " << t.vertex1() << std::endl;
+      os << "\t\t\t" << " " << "vertex" << " " << t.vertex2() << std::endl;
+      os << "\t\t\t" << " " << "vertex" << " " << t.vertex3() << std::endl;
       os << "\t\t" << "endloop" << std::endl;
       os << "\t" << "endfacet" << std::endl;
-      }
+    }
     os << "endsolid" << " " << name << std::endl;
   }
   
@@ -112,111 +113,47 @@ namespace OpenMD {
 						  const std::size_t j,
 						  const RealType viscosity) {
     
-    Mat3x3d Tij;
+    Mat3x3d B;
     Mat3x3d I = SquareMatrix3<RealType>::identity();
+
+    StrangFixCowperTriangleQuadratureRule rule(6);
+        
+    Vector3d centroid = elements_[i].pos;
+    Triangle t = elements_[j].t;
+
+    auto Tij = [&t, &centroid, &I, &viscosity](const Vector3d& p)  {
+      // p are in barycentric coordinates
+      Vector3d r = t.barycentricToCartesian(p);
+      Vector3d ab = centroid - r;
+      RealType abl = ab.length();
+      Mat3x3d T;
+      T = (I + outProduct(ab, ab) / (abl*abl) );
+      T /= (8.0 * Constants::PI * viscosity * abl);
+      return T;
+    };
+
+    B = TriangleQuadrature<RectMatrix<RealType,3,3>, RealType>::Integrate(Tij,
+									  rule,
+									  1.0);
     
-    StrangFixCowperTriangle<RealType, Vector3d>(7) sfc7 = new StrangFixCowperTriangle<RealType, Vector3d>(7);
-    
-    if (i == j) {
+    centroid = elements_[j].pos;
+    t = elements_[i].t;
 
-      // self interaction, there is no overlapping volume
-      RealType c = 1.0 / (6.0 * Constants::PI * viscosity * elements_[i].radius);
-      
-      Tij(0, 0) = c;
-      Tij(1, 1) = c;
-      Tij(2, 2) = c;
+    auto Tji = [&t, &centroid, &I, &viscosity](const Vector3d& p) {
+      // p are in barycentric coordinates
+      Vector3d r = t.barycentricToCartesian(p);
+      Vector3d ab = centroid - r;
+      RealType abl = ab.length();
+      Mat3x3d T;
+      T = (I + outProduct(ab, ab) / (abl*abl) );
+      T /= (8.0 * Constants::PI * viscosity * abl);
+      return T;
+    };
 
-    } else {      
-
-      // non-self interaction: divided into overlapping and
-      // non-overlapping beads; the transitions between these cases
-      // are continuous
-      
-      Vector3d Rij  = elements_[i].pos - elements_[j].pos;
-      RealType rij  = Rij.length();
-      RealType rij2 = rij * rij;
-      
-      if (rij >= (elements_[i].radius + elements_[j].radius)) {
-
-	// non-overlapping beads
-	RealType sumSigma2OverRij2 = ((elements_[i].radius * elements_[i].radius) +
-				      (elements_[j].radius * elements_[j].radius)) / rij2;
-	Mat3x3d tmpMat;
-	tmpMat = outProduct(Rij, Rij) / rij2;
-	RealType constant = 8.0 * Constants::PI * viscosity * rij;
-	RealType tmp1     = 1.0 + sumSigma2OverRij2 / 3.0;
-	RealType tmp2     = 1.0 - sumSigma2OverRij2;
-	Tij               = (tmp1 * I + tmp2 * tmpMat) / constant;
-	
-      } else if (rij > fabs(elements_[i].radius - elements_[j].radius) &&
-		 rij < (elements_[i].radius + elements_[j].radius)) {
-
-	// overlapping beads, part I
-	std::cout << "There is overlap between beads: (" << i
-		  << ") and (" << j << ")" << std::endl;
-	
-	RealType sum_sigma       = (elements_[i].radius + elements_[j].radius);
-	RealType subtr_sigma     = (elements_[i].radius - elements_[j].radius);
-	RealType subtr_sigma_sqr = subtr_sigma * subtr_sigma;
-	
-	RealType constant = 6.0 * Constants::PI * viscosity *
-	  (elements_[i].radius * elements_[j].radius);
-	
-	RealType rij3 = rij2 * rij;	
-	Mat3x3d tmpMat;
-	tmpMat = outProduct(Rij, Rij) / rij2;
-
-	RealType tmp_var1 = subtr_sigma_sqr + 3.0 * rij2;
-	RealType tmp1overlap =
-	  (16.0 * rij3 * sum_sigma - tmp_var1 * tmp_var1) / (32.0 * rij3);
-	
-	RealType tmp_var2    = subtr_sigma_sqr - rij2;
-	RealType tmp2overlap = (3.0 * tmp_var2 * tmp_var2) / (32.0 * rij3);
-	
-	Tij = (tmp1overlap * I + tmp2overlap * tmpMat) / constant;
-	
-	RealType volumetmp1 = (-rij + sum_sigma) * (-rij + sum_sigma);
-	RealType volumetmp2 = (rij2 + 2.0 * (rij * elements_[i].radius) -
-			       3.0 * (elements_[i].radius * elements_[i].radius) +
-			       2 * (rij * elements_[j].radius) +
-			       6 * (elements_[i].radius * elements_[j].radius) -
-			       3 * (elements_[j].radius * elements_[j].radius));
-	volumeOverlap_ += (Constants::PI / (12.0 * rij)) * volumetmp1 * volumetmp2;
-	
-      } else {
-
-	// overlapping beads, part II: one bead inside the other
-
-	if ((elements_[i].radius >= elements_[j].radius)) {
-
-	  std::cout << "Bead: (" << j << ") is inside bead (" << i << ")"
-		    << std::endl;
-
-	  RealType constant =
-	    1.0 / (6.0 * Constants::PI * viscosity * elements_[i].radius);
-	  Tij(0, 0) = constant;
-	  Tij(1, 1) = constant;
-	  Tij(2, 2) = constant;
-
-	  volumeOverlap_ += (4.0 / 3.0) * Constants::PI * pow(elements_[j].radius, 3);
-	  
-	} else {
-	  
-	  std::cout << "Bead: (" << i << ") is inside bead (" << j << ")"
-		    << std::endl;
-
-	  RealType constant =
-	    1.0 / (6.0 * Constants::PI * viscosity * elements_[j].radius);
-	  Tij(0, 0) = constant;
-	  Tij(1, 1) = constant;
-	  Tij(2, 2) = constant;
-	  	  
-	  volumeOverlap_ += (4.0 / 3.0) * Constants::PI * pow(elements_[i].radius, 3);
-	}
-      }
-    }
-
-    return Tij;
+    B += TriangleQuadrature<RectMatrix<RealType,3,3>, RealType>::Integrate(Tji,
+									   rule,
+									   1.0);
+    B *= 0.5;
+    return B;
   }
-
 }  // namespace OpenMD

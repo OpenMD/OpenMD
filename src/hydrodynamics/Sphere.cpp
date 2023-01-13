@@ -51,7 +51,7 @@
 namespace OpenMD {
 
   Sphere::Sphere(Vector3d origin, RealType radius) :
-      origin_(origin), radius_(radius) {}
+    origin_(origin), radius_(radius) {}
 
   bool Sphere::isInterior(Vector3d pos) {
     Vector3d r = pos - origin_;

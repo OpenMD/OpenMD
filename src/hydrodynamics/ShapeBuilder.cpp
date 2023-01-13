@@ -89,7 +89,6 @@ namespace OpenMD {
     AtomType* atomType      = atom->getAtomType();
     Shape* currShape        = NULL;
     LennardJonesAdapter lja = LennardJonesAdapter(atomType);
-    std::cerr << atom->getType() << "\n";
     if (lja.isLennardJones()) {
       currShape = new Sphere(atom->getPos(), lja.getSigma() / 2.0);
       currShape->setName( atom->getType() );
@@ -106,8 +105,8 @@ namespace OpenMD {
         }
       }
       if (obanum == 0) {
-        sprintf(painCave.errMsg,
-                "Could not find atom type in default element.txt\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		 "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
@@ -131,8 +130,8 @@ namespace OpenMD {
       if (obanum != 0) {
         currShape = new Sphere(datom->getPos(), etab.GetVdwRad(obanum));
       } else {
-        sprintf(painCave.errMsg,
-                "Could not find atom type in default element.txt\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		 "Could not find atom type in default element.txt\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();

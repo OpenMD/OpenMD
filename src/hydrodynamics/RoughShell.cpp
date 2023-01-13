@@ -137,7 +137,6 @@ namespace OpenMD {
         }
       }
     }
-    std::cerr << "Has " << elements_.size() << " beads\n";
     return elements_.size();
   }
 }  // namespace OpenMD

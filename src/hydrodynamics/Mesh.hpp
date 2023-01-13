@@ -62,11 +62,36 @@ namespace OpenMD {
   public:
     Mesh(){};
     virtual ~Mesh(){};
-    virtual bool isInterior(Vector3d pos);
-    virtual std::pair<Vector3d, Vector3d> getBoundingBox();
+    // punt on this one for now:
+    virtual bool isInterior(Vector3d pos) { return false; }
+    virtual std::pair<Vector3d, Vector3d> getBoundingBox() {
+      Vector3d bMax = facets_[0].vertex1();
+      Vector3d bMin = facets_[0].vertex1();
+     
+      for (auto& t : facets_) {
+	for (int i = 0; i < 3; i++) {
+	  bMax[i] = max(bMax[i], t.vertex1()[i]);
+	  bMin[i] = min(bMin[i], t.vertex1()[i]);
+	  bMax[i] = max(bMax[i], t.vertex2()[i]);
+	  bMin[i] = min(bMin[i], t.vertex2()[i]);
+	  bMax[i] = max(bMax[i], t.vertex3()[i]);
+	  bMin[i] = min(bMin[i], t.vertex3()[i]);
+	}
+      }
+      return make_pair(bMax, bMin);
+    }
     virtual bool hasAnalyticalSolution() { return false; }
-    virtual HydroProp* getHydroProp(RealType viscosity);
-    virtual Vector3d getOrigin();
+    virtual HydroProp* getHydroProp(RealType viscosity) {
+      HydroProp* props = new HydroProp();
+      props->setCenterOfResistance(V3Zero);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+	       "Mesh was asked to return an analytic HydroProps.\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+      return props;
+    }
+    virtual Vector3d getOrigin() { return Vector3d(0.0); }
     virtual bool isComposite() { return false; }
     virtual bool isSpherical() { return false; }
     virtual bool isMesh() { return true; }
@@ -116,20 +141,7 @@ namespace OpenMD {
       }
       return *this;
     }
-    
-    Mesh& rotate(double angle, const Vector3d& axis) {
-      RotMat3x3d r;
-      r.axisAngle(axis, angle);
-      Vector3d v1, v2, v3;
-      for (auto& t : facets_) {
-	v1 = r * t.vertex1();
-	v2 = r * t.vertex2();
-	v3 = r * t.vertex3();
-	t = {v1, v2, v3};
-      }
-      return *this;
-    }
-    
+        
     Mesh& flipNormal() {
       for( auto& t : facets_) {
 	t.flipNormal();

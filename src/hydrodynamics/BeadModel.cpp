@@ -97,9 +97,9 @@ namespace OpenMD {
   void BeadModel::checkElement(std::size_t i) {
     // checking if the radius is a non-negative value.
     if (elements_[i].radius < 0) {
-      sprintf(painCave.errMsg,
-	      "BeadModel::checkElement: There is a bead with a negative radius.\n"
-	      "\tStarting from index 0, check bead (%lu).\n", i);
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+	       "BeadModel::checkElement: There is a bead with a negative radius.\n"
+	       "\tStarting from index 0, check bead (%lu).\n", i);
       painCave.isFatal = 1;
       simError();
     }
@@ -132,16 +132,18 @@ namespace OpenMD {
          << "\t" << iter->pos[2] << std::endl;
     }
   }
+  
   Mat3x3d BeadModel::interactionTensor(const std::size_t i, const std::size_t j,
 				       const RealType viscosity) {
 
     Mat3x3d Tij;
     Mat3x3d I = SquareMatrix3<RealType>::identity();
+    RealType c {};
     
     if (i == j) {
 
       // self interaction, there is no overlapping volume
-      RealType c = 1.0 / (6.0 * Constants::PI * viscosity * elements_[i].radius);
+      c = 1.0 / (6.0 * Constants::PI * viscosity * elements_[i].radius);
       
       Tij(0, 0) = c;
       Tij(1, 1) = c;
@@ -160,80 +162,62 @@ namespace OpenMD {
       if (rij >= (elements_[i].radius + elements_[j].radius)) {
 
 	// non-overlapping beads
-	RealType sumSigma2OverRij2 = ((elements_[i].radius * elements_[i].radius) +
-				      (elements_[j].radius * elements_[j].radius)) / rij2;
-	Mat3x3d tmpMat;
-	tmpMat = outProduct(Rij, Rij) / rij2;
-	RealType constant = 8.0 * Constants::PI * viscosity * rij;
-	RealType tmp1     = 1.0 + sumSigma2OverRij2 / 3.0;
-	RealType tmp2     = 1.0 - sumSigma2OverRij2;
-	Tij               = (tmp1 * I + tmp2 * tmpMat) / constant;
+	RealType a = ((elements_[i].radius * elements_[i].radius) +
+		      (elements_[j].radius * elements_[j].radius)) / rij2;
+	Mat3x3d op;
+	op = outProduct(Rij, Rij) / rij2;
+	c = 1.0 / (8.0 * Constants::PI * viscosity * rij);
+	RealType b1 = 1.0 + a / 3.0;
+	RealType b2 = 1.0 - a;
+	Tij = (b1 * I + b2 * op) * c;
 	
       } else if (rij > fabs(elements_[i].radius - elements_[j].radius) &&
 		 rij < (elements_[i].radius + elements_[j].radius)) {
 
 	// overlapping beads, part I
-	std::cout << "There is overlap between beads: (" << i
-		  << ") and (" << j << ")" << std::endl;
 	
-	RealType sum_sigma       = (elements_[i].radius + elements_[j].radius);
-	RealType subtr_sigma     = (elements_[i].radius - elements_[j].radius);
-	RealType subtr_sigma_sqr = subtr_sigma * subtr_sigma;
+	RealType sum = (elements_[i].radius + elements_[j].radius);
+	RealType diff = (elements_[i].radius - elements_[j].radius);
+	RealType diff2 = diff * diff;
 	
-	RealType constant = 6.0 * Constants::PI * viscosity *
-	  (elements_[i].radius * elements_[j].radius);
+	c = 1.0 / (6.0 * Constants::PI * viscosity *
+		   (elements_[i].radius * elements_[j].radius));
 	
 	RealType rij3 = rij2 * rij;	
-	Mat3x3d tmpMat;
-	tmpMat = outProduct(Rij, Rij) / rij2;
+	Mat3x3d op;
+	op = outProduct(Rij, Rij) / rij2;
 
-	RealType tmp_var1 = subtr_sigma_sqr + 3.0 * rij2;
-	RealType tmp1overlap =
-	  (16.0 * rij3 * sum_sigma - tmp_var1 * tmp_var1) / (32.0 * rij3);
+	RealType a = diff2 + 3.0 * rij2;
+	RealType ao = (16.0 * rij3 * sum - a * a) / (32.0 * rij3);
 	
-	RealType tmp_var2    = subtr_sigma_sqr - rij2;
-	RealType tmp2overlap = (3.0 * tmp_var2 * tmp_var2) / (32.0 * rij3);
+	RealType b = diff2 - rij2;
+	RealType bo = (3.0 * b * b) / (32.0 * rij3);
 	
-	Tij = (tmp1overlap * I + tmp2overlap * tmpMat) / constant;
+	Tij = (ao * I + bo * op) * c;
 	
-	RealType volumetmp1 = (-rij + sum_sigma) * (-rij + sum_sigma);
-	RealType volumetmp2 = (rij2 + 2.0 * (rij * elements_[i].radius) -
-			       3.0 * (elements_[i].radius * elements_[i].radius) +
-			       2 * (rij * elements_[j].radius) +
-			       6 * (elements_[i].radius * elements_[j].radius) -
-			       3 * (elements_[j].radius * elements_[j].radius));
-	volumeOverlap_ += (Constants::PI / (12.0 * rij)) * volumetmp1 * volumetmp2;
+	RealType v1 = (-rij + sum) * (-rij + sum);
+	RealType v2 = (rij2 + 2.0 * (rij * elements_[i].radius) -
+		       3.0 * (elements_[i].radius * elements_[i].radius) +
+		       2.0 * (rij * elements_[j].radius) +
+		       6.0 * (elements_[i].radius * elements_[j].radius) -
+		       3.0 * (elements_[j].radius * elements_[j].radius));
+	
+	volumeOverlap_ += (Constants::PI / (12.0 * rij)) * v1 * v2;
 	
       } else {
 
 	// overlapping beads, part II: one bead inside the other
 
-	if ((elements_[i].radius >= elements_[j].radius)) {
+	RealType rmin = std::min(elements_[i].radius, elements_[j].radius);
+	RealType rmax = std::max(elements_[i].radius, elements_[j].radius);	
+	
+	c = 1.0 / (6.0 * Constants::PI * viscosity * rmax);
+	
+	Tij(0, 0) = c;
+	Tij(1, 1) = c;
+	Tij(2, 2) = c;
 
-	  std::cout << "Bead: (" << j << ") is inside bead (" << i << ")"
-		    << std::endl;
-
-	  RealType constant =
-	    1.0 / (6.0 * Constants::PI * viscosity * elements_[i].radius);
-	  Tij(0, 0) = constant;
-	  Tij(1, 1) = constant;
-	  Tij(2, 2) = constant;
-
-	  volumeOverlap_ += (4.0 / 3.0) * Constants::PI * pow(elements_[j].radius, 3);
-	  
-	} else {
-	  
-	  std::cout << "Bead: (" << i << ") is inside bead (" << j << ")"
-		    << std::endl;
-
-	  RealType constant =
-	    1.0 / (6.0 * Constants::PI * viscosity * elements_[j].radius);
-	  Tij(0, 0) = constant;
-	  Tij(1, 1) = constant;
-	  Tij(2, 2) = constant;
-	  	  
-	  volumeOverlap_ += (4.0 / 3.0) * Constants::PI * pow(elements_[i].radius, 3);
-	}
+	volumeOverlap_ += (4.0 / 3.0) * Constants::PI * pow(rmin, 3);
       }
     }
 

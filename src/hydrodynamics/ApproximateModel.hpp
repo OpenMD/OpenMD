@@ -60,7 +60,7 @@ namespace OpenMD {
     Vector3d pos;        // minimally, this is all we need
     std::string name;
     RealType radius;     // for Bead models
-    Triangle* t;         // for BoundaryElement model
+    Triangle t;          // for BoundaryElement model
     RealType mass;       // for center of mass calculation only
   };
 

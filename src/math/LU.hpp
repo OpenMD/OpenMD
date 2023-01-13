@@ -83,6 +83,7 @@
 #ifndef MATH_LU_HPP
 #define MATH_LU_HPP
 #include <limits>
+#include <iostream>
 
 namespace OpenMD {
 
@@ -194,11 +195,11 @@ namespace OpenMD {
     //
     for (i = 0; i < size; i++) {
       for (largest = 0.0, j = 0; j < size; j++) {
-        if ((temp2 = fabs(A(i, j))) > largest) { largest = temp2; }
+        if ((temp2 = abs(A(i, j))) > largest) { largest = temp2; }
       }
 
       if (largest == 0.0) {
-        // vtkGenericWarningMacro(<<"Unable to factor linear system");
+	std::cerr << "Unable to factor linear system";
         return 0;
       }
       tmpSize[i] = 1.0 / largest;
@@ -224,7 +225,7 @@ namespace OpenMD {
         }
         A(i, j) = sum;
 
-        if ((temp1 = tmpSize[i] * fabs(sum)) >= largest) {
+        if ((temp1 = tmpSize[i] * abs(sum)) >= largest) {
           largest = temp1;
           maxI    = i;
         }
@@ -245,8 +246,8 @@ namespace OpenMD {
       //
       index[j] = maxI;
 
-      if (fabs(A(j, j)) <= std::numeric_limits<RealType>::epsilon()) {
-        // vtkGenericWarningMacro(<<"Unable to factor linear system");
+      if (abs(A(j, j)) <= std::numeric_limits<Real>::epsilon()) {
+	std::cerr << "Unable to factor linear system";
         return false;
       }
 
