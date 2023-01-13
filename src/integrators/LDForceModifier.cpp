@@ -50,6 +50,7 @@
 
 #include "brains/ForceModifier.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
+#include "hydrodynamics/HydroIO.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "math/CholeskyDecomposition.hpp"
 #include "math/SquareMatrix3.hpp"
@@ -125,7 +126,8 @@ namespace OpenMD {
 
     if (needHydroPropFile) {
       if (simParams_->haveHydroPropFile()) {
-        hydroPropMap_ = parseFrictionFile(simParams_->getHydroPropFile());
+        HydroIO* hio  = new HydroIO();
+        hydroPropMap_ = hio->parseHydroFile(simParams_->getHydroPropFile());
       } else {
         snprintf(
             painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
@@ -214,8 +216,8 @@ namespace OpenMD {
             simError();
           }
 
-          HydroProp* currHydroProp = currShape->getHydroProp(
-              simParams_->getViscosity(), simParams_->getTargetTemp());
+          HydroProp* currHydroProp =
+              currShape->getHydroProp(simParams_->getViscosity());
           map<string, HydroProp*>::iterator iter =
               hydroPropMap_.find(sd->getType());
           if (iter != hydroPropMap_.end()) {
@@ -238,23 +240,6 @@ namespace OpenMD {
         std::sqrt(2.0 * Constants::kb * simParams_->getTargetTemp() / dt);
 
     forceDistribution_ = std::normal_distribution<RealType>(0.0, stdDev);
-  }
-
-  std::map<std::string, HydroProp*> LDForceModifier::parseFrictionFile(
-      const std::string& filename) {
-    std::map<std::string, HydroProp*> props;
-    std::ifstream ifs(filename.c_str());
-    if (ifs.is_open()) {}
-
-    const unsigned int BufferSize = 65535;
-    char buffer[BufferSize];
-    while (ifs.getline(buffer, BufferSize)) {
-      HydroProp* currProp = new HydroProp(buffer);
-      props.insert(
-          map<string, HydroProp*>::value_type(currProp->getName(), currProp));
-    }
-
-    return props;
   }
 
   MomentData* LDForceModifier::getMomentData(StuntDouble* sd) {
@@ -358,6 +343,8 @@ namespace OpenMD {
             genRandomForceAndTorque(randomForceBody, randomTorqueBody, index);
             Vector3d randomForceLab  = Atrans * randomForceBody;
             Vector3d randomTorqueLab = Atrans * randomTorqueBody;
+
+            std::cerr << randomForceLab << "\t" << randomTorqueLab << "\n";
             sd->addFrc(randomForceLab);
             sd->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab));
 
@@ -373,11 +360,12 @@ namespace OpenMD {
 
             Vector3d vel    = sd->getVel();
             Vector3d angMom = sd->getJ();
-
+            std::cerr << "v = " << vel << " j = " << angMom << "\n";
             // estimate velocity at full-step using everything but
             // friction forces:
 
             frc = sd->getFrc();
+
             Vector3d velStep =
                 vel + (dt2_ / mass * Constants::energyConvert) * frc;
 
@@ -428,6 +416,12 @@ namespace OpenMD {
               frictionTorqueBody = -(hydroProps_[index]->getXitr() * vcdBody +
                                      hydroProps_[index]->getXirr() * omegaBody);
               frictionTorqueLab  = Atrans * frictionTorqueBody;
+
+              std::cerr << "vcd = " << vcdBody << " omega = " << omegaBody
+                        << "\n";
+
+              std::cerr << frictionForceLab << "\t" << frictionTorqueLab
+                        << "\n";
 
               // re-estimate velocities at full-step using friction forces:
 

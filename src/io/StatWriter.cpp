@@ -46,10 +46,6 @@
 #define _LARGEFILE_SOURCE64
 #define _FILE_OFFSET_BITS 64
 
-#ifdef _MSC_VER
-#include <amp_math.h>
-#endif
-
 #include "brains/Stats.hpp"
 #include "io/StatWriter.hpp"
 #include "utils/Revision.hpp"

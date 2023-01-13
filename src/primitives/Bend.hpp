@@ -124,7 +124,7 @@ namespace OpenMD {
     void accept(BaseVisitor* v) { v->visit(this); }
 
   protected:
-    RealType potential_;
+    RealType potential_ {};
     BendType* bendType_; /**< bend type */
     std::string name_;
   };

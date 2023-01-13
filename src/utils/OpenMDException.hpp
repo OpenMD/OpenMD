@@ -45,6 +45,7 @@
 #define UTILS_OPENMDEXCEPTION_HPP
 
 #include <exception>
+#include <string>
 
 namespace OpenMD {
 

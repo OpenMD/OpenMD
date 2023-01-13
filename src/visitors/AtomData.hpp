@@ -97,7 +97,7 @@ namespace OpenMD {
 
     std::vector<std::shared_ptr<AtomInfo>> getData() { return data; }
 
-    int getSize() { return data.size(); }
+    size_t getSize() { return data.size(); }
 
   protected:
     std::vector<std::shared_ptr<AtomInfo>> data;

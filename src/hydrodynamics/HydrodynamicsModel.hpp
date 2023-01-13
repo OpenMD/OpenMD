@@ -50,16 +50,8 @@
 #include "math/DynamicRectMatrix.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
-#include "primitives/Molecule.hpp"
 
 namespace OpenMD {
-
-  struct BeadParam {
-    std::string atomName;
-    Vector3d pos;
-    RealType mass;  // to compute center of mass in ApproximationModel.cpp
-    RealType radius;
-  };
 
   class Shape;
   class Sphere;
@@ -68,30 +60,18 @@ namespace OpenMD {
 
   class HydrodynamicsModel {
   public:
-    HydrodynamicsModel(StuntDouble* sd, SimInfo* info) : sd_(sd), info_(info) {}
+    HydrodynamicsModel() {}
     virtual ~HydrodynamicsModel() = default;
 
-    virtual bool calcHydroProps(Shape* shape, RealType viscosity,
-                                RealType temperature);
+    virtual void setShape(Shape* shape) { shape_ = shape; }
+    virtual HydroProp* calcHydroProps(RealType viscosity);
 
     virtual void init() {};
-    virtual void writeBeads(std::ostream& os) = 0;
-    void writeHydroProps(std::ostream& os);
-
-    void setCR(HydroProp* cr) { cr_ = cr; }
-    void setCD(HydroProp* cd) { cd_ = cd; }
-    void setCOM(HydroProp* com) { com_ = com; }
-    std::string getStuntDoubleName() { return sd_->getType(); }
+    virtual void writeElements(std::ostream& os) = 0;
+    void writeHydroProps(HydroProp* hp, RealType temperature, std::ostream& os);
 
   protected:
-    StuntDouble* sd_;
-    SimInfo* info_ {nullptr};
-
-  private:
-    HydroProp* cr_;
-    HydroProp* cd_;
-    HydroProp* com_;
-    std::vector<BeadParam> beads_;
+    Shape* shape_;
   };
 }  // namespace OpenMD
 

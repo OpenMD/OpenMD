@@ -90,7 +90,7 @@ namespace OpenMD {
     }
     void addBond(int bondIndex) { bonds_.push_back(bondIndex); }
     void addBondedAtom(int atomIndex) { bondedAtoms_.insert(atomIndex); }
-    int getCoordination() { return bonds_.size(); }
+    size_t getCoordination() { return bonds_.size(); }
     void overrideCharge(RealType c) {
       orCharge_    = c;
       hasOverride_ = true;

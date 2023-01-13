@@ -185,7 +185,7 @@ namespace OpenMD {
       return j == foundTypes.end() ? NULL : j->second;
     }
 
-    unsigned int size() { return data_.size(); }
+    size_t size() { return data_.size(); }
 
     ElemPtr beginType(MapTypeIterator& i) {
       i = data_.begin();

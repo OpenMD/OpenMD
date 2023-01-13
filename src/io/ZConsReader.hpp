@@ -63,8 +63,8 @@ namespace OpenMD {
 
     void readNextFrame();
     bool hasNextFrame();
-    int getNZMols() { return allZmols_.size(); }
-    int getNFixedZmols() { return fixedZmolData_.size(); }
+    size_t getNZMols() { return allZmols_.size(); }
+    size_t getNFixedZmols() { return fixedZmolData_.size(); }
     const std::vector<ZconsData>& getFixedZMolData() { return fixedZmolData_; }
     RealType getCurTime() { return curTime_; }
 

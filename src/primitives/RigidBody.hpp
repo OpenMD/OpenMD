@@ -155,7 +155,7 @@ namespace OpenMD {
      * Returns the number of atoms in this rigid body
      * @return the number of atoms in this rigid body
      */
-    int getNumAtoms() { return atoms_.size(); }
+    size_t getNumAtoms() { return atoms_.size(); }
 
     /**
      * Return the position of atom which belongs to this rigid body.

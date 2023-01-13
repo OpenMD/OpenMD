@@ -1551,7 +1551,7 @@ namespace OpenMD {
     RealType rl, rm, rn;
     Vector3d kVec;
     Vector3d Qk;
-    RealType k2;
+    // RealType k2;
     Mat3x3d Kmat;
     RealType ckcs, ckss, dkcs, dkss, qkcs, qkss;
     int atid;
@@ -1592,7 +1592,7 @@ namespace OpenMD {
           int kk = ll * ll + mm * mm + nn * nn;
           if (kk <= kSqLim) {
             kVec = Vector3d(rl, rm, rn);
-            k2   = dot(kVec, kVec);         // length^2 of kVec
+            // k2     = dot(kVec, kVec);  // length^2 of kVec
             Kmat = outProduct(kVec, kVec);  // kMatrix
             // Calculate exp(ikr) terms
             for (Molecule* mol = info_->beginMolecule(mi); mol != NULL;

@@ -45,8 +45,11 @@
 
 #include "hydrodynamics/HydrodynamicsModel.hpp"
 #include "utils/MemoryUtils.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
+
+  CompositeShape::CompositeShape() { origin_ = V3Zero; }
 
   CompositeShape::~CompositeShape() { Utils::deletePointers(shapes_); }
 
@@ -84,7 +87,7 @@ namespace OpenMD {
     return boundary;
   }
 
-  HydroProp* CompositeShape::getHydroProp(RealType, RealType) {
+  HydroProp* CompositeShape::getHydroProp(RealType viscosity) {
     HydroProp* props = new HydroProp();
     props->setCenterOfResistance(V3Zero);
     snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,

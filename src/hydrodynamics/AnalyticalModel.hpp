@@ -50,11 +50,9 @@ namespace OpenMD {
 
   class AnalyticalModel : public HydrodynamicsModel {
   public:
-    AnalyticalModel(StuntDouble* sd, SimInfo* info) :
-        HydrodynamicsModel(sd, info) {}
-    virtual bool calcHydroProps(Shape* shape, RealType viscosity,
-                                RealType temperature);
-    virtual void writeBeads(std::ostream& os);
+    AnalyticalModel() : HydrodynamicsModel() {}
+    virtual HydroProp* calcHydroProps(RealType viscosity);
+    virtual void writeElements(std::ostream& os);
   };
 }  // namespace OpenMD
 

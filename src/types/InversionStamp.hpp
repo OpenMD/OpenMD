@@ -56,7 +56,7 @@ namespace OpenMD {
 
     int getCenter() { return center_; }
     int getSatelliteAt(int index) { return satellites_.at(index); }
-    int getNSatellites() { return satellites_.size(); }
+    size_t getNSatellites() { return satellites_.size(); }
     std::vector<int> getSatellites() { return satellites_; }
     void setCenter(int center) { center_ = center; }
     void addSatellite(int sat) {

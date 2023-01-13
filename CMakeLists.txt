@@ -95,8 +95,8 @@ else()
 endif()
 
 # OpenMD version number.
-set (VERSION_MAJOR "2")
-set (VERSION_MINOR "7")
+set (VERSION_MAJOR "3")
+set (VERSION_MINOR "0")
 set (VERSION_TINY "0")
 option(SINGLE_PRECISION "Build Single precision (float) version" OFF)
 
@@ -283,14 +283,15 @@ ELSE(FFTW3_FOUND)
   MESSAGE(STATUS "No fftw3 found - will be missing some analysis modules")
 endif (FFTW3_FOUND)
 
+find_package(nlohmann_json 3.10.5 REQUIRED)
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in" "${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile" @ONLY)
-  add_custom_target(doc
-    ${DOXYGEN_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doc"
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in" "${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile" @ONLY)
+  add_custom_target(docs
+    ${DOXYGEN_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs"
     COMMENT "Generating API documentation with Doxygen" VERBATIM
   )
 endif(DOXYGEN_FOUND)
@@ -397,16 +398,19 @@ src/brains/SimSnapshotManager.cpp
 src/brains/Snapshot.cpp
 src/brains/Stats.cpp
 src/hydrodynamics/AnalyticalModel.cpp
-src/hydrodynamics/ApproximationModel.cpp
+src/hydrodynamics/ApproximateModel.cpp
+src/hydrodynamics/AtomicBeadModel.cpp
 src/hydrodynamics/BeadModel.cpp
+src/hydrodynamics/BoundaryElementModel.cpp
 src/hydrodynamics/CompositeShape.cpp
 src/hydrodynamics/Ellipsoid.cpp
+src/hydrodynamics/HydroIO.cpp
+src/hydrodynamics/HydroProp.cpp
 src/hydrodynamics/HydrodynamicsModel.cpp
 src/hydrodynamics/HydrodynamicsModelFactory.cpp
-src/hydrodynamics/HydroProp.cpp
+src/hydrodynamics/RoughShell.cpp
 src/hydrodynamics/ShapeBuilder.cpp
 src/hydrodynamics/Sphere.cpp
-src/hydrodynamics/RoughShell.cpp
 src/integrators/DLM.cpp
 src/flucq/FluctuatingChargeDamped.cpp
 src/flucq/FluctuatingChargeLangevin.cpp
@@ -864,7 +868,7 @@ target_link_libraries(Dump2XYZ openmd_single openmd_core openmd_single openmd_co
 add_executable(DynamicProps ${DYNAMICPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(DynamicProps openmd_single openmd_core openmd_single openmd_core)
 add_executable(Hydro ${HYDROSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(Hydro openmd_single openmd_core openmd_single openmd_core)
+target_link_libraries(Hydro PRIVATE openmd_single openmd_core openmd_single openmd_core nlohmann_json::nlohmann_json)
 add_executable(omd2omd ${OMD2OMDSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(omd2omd openmd_single openmd_core openmd_single openmd_core)
 add_executable(equationofstate ${EOSSOURCE} ${GETOPT_SOURCE})
@@ -971,7 +975,7 @@ set(PERL_FILES
 src/applications/utilities/solvator
 src/applications/utilities/waterBoxer
 src/applications/utilities/waterSphere
-doc/git2cl
+docs/git2cl
 )
 
 IF(PERL_FOUND)
@@ -1042,8 +1046,8 @@ INSTALL(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runMe"
              PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 
-INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/doc/OpenMDmanual.pdf"
-        DESTINATION doc
+INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/docs/OpenMDmanual.pdf"
+        DESTINATION docs
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
 message( STATUS)

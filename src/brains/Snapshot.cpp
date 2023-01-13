@@ -243,7 +243,7 @@ namespace OpenMD {
       // all.  They were annoying and not very informative.
 
       // if( frameData.orthoRhombic ) {
-      //   sprintf( painCave.errMsg,
+      //   snprintf( painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
       //   	 "OpenMD is switching from the default Non-Orthorhombic\n"
       //   	 "\tto the faster Orthorhombic periodic boundary
       //   computations.\n"
@@ -255,7 +255,7 @@ namespace OpenMD {
       //   simError();
       // }
       // else {
-      //   sprintf( painCave.errMsg,
+      //   snprintf( painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
       //   	 "OpenMD is switching from the faster Orthorhombic to the
       //   more\n"
       //   	 "\tflexible Non-Orthorhombic periodic boundary computations.\n"

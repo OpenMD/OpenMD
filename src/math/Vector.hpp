@@ -98,6 +98,14 @@ namespace OpenMD {
       return *this;
     }
 
+    /** array assignment operator */
+    inline Vector<Real, Dim>& operator=(const Real* v) {
+      for (unsigned int i = 0; i < Dim; i++)
+        this->data_[i] = v[i];
+
+      return *this;
+    }
+
     // template<typename T>
     // inline Vector(const T& s){
     inline Vector(const Real& s) {

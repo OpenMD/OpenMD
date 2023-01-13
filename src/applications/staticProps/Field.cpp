@@ -132,7 +132,7 @@ namespace OpenMD {
         dens_[i][j].resize(nBins_.z());
 
         std::fill(dens_[i][j].begin(), dens_[i][j].end(), 0.0);
-        std::fill(field_[i][j].begin(), field_[i][j].end(), T(0));
+        std::fill(field_[i][j].begin(), field_[i][j].end(), T(0.0));
       }
     }
 

@@ -64,12 +64,9 @@ namespace OpenMD {
   class Triangle {
   public:
     Triangle();
+    Triangle(Vector3d P1, Vector3d P2, Vector3d P3);
     virtual ~Triangle() {};
 
-    void setNormal(Vector3d normal) {
-      normal_     = normal;
-      HaveNormal_ = true;
-    }
     void setUnitNormal(Vector3d normal) {
       unitnormal_     = normal;
       HaveUnitNormal_ = true;
@@ -99,6 +96,18 @@ namespace OpenMD {
       } else {
         return computeUnitNormal();
       }
+    }
+
+    void flipNormal() {
+      std::swap(vertices_[1], vertices_[2]);
+
+      // Compute some quantites like a,b,c
+      a_ = vertices_[0] - vertices_[1];
+      b_ = vertices_[0] - vertices_[2];
+      c_ = vertices_[1] - vertices_[2];
+
+      HaveUnitNormal_ = false;
+      HaveNormal_     = false;
     }
 
     RealType getArea() {
@@ -137,6 +146,10 @@ namespace OpenMD {
 
     RealType getFacetMass() { return mass_; }
 
+    Vector3d vertex1() const { return vertices_[0]; }
+    Vector3d vertex2() const { return vertices_[1]; }
+    Vector3d vertex3() const { return vertices_[2]; }
+
     RealType a() { return a_.length(); }
 
     RealType b() { return b_.length(); }
@@ -167,6 +180,25 @@ namespace OpenMD {
     }
 
     Mat3x3d computeHydrodynamicTensor(RealType viscosity);
+
+    Vector3d cartesionToBarycentric(Vector3d p) {
+      RealType area = getArea();
+
+      Vector3d v0 = vertices_[0] - p;
+      Vector3d v1 = vertices_[1] - p;
+      Vector3d v2 = vertices_[2] - p;
+
+      RealType u = 0.5 * cross(v1, v2).length() / area;
+      RealType v = 0.5 * cross(v0, v2).length() / area;
+      RealType w = 0.5 * cross(v0, v1).length() / area;
+
+      return Vector3d(u, v, w);
+    }
+
+    Vector3d barycentricToCartesian(const Vector3d& barycentric) const {
+      return barycentric.x() * vertices_[0] + barycentric.y() * vertices_[1] +
+             barycentric.z() * vertices_[2];
+    }
 
   private:
     Mat3x3d hydro_tensor(const Vector3d& ri, const Vector3d& rj0,

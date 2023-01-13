@@ -165,7 +165,7 @@ namespace OpenMD {
      * Returns the number of local molecules.
      * @return the number of local molecules
      */
-    int getNMolecules() { return molecules_.size(); }
+    size_t getNMolecules() { return molecules_.size(); }
 
     /** Returns the number of local atoms */
     unsigned int getNAtoms() { return nAtoms_; }
@@ -283,7 +283,7 @@ namespace OpenMD {
     MoleculeStamp* getMoleculeStamp(int id) { return moleculeStamps_[id]; }
 
     /** Return the total number of the molecule stamps */
-    int getNMoleculeStamp() { return moleculeStamps_.size(); }
+    size_t getNMoleculeStamp() { return moleculeStamps_.size(); }
 
     /**
      * Finds a molecule with a specified global index

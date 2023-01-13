@@ -43,82 +43,179 @@
 
 #include "hydrodynamics/BeadModel.hpp"
 
-#include "types/LennardJonesAdapter.hpp"
+#include "hydrodynamics/CompositeShape.hpp"
+#include "hydrodynamics/Ellipsoid.hpp"
+#include "hydrodynamics/Sphere.hpp"
+#include "math/DynamicRectMatrix.hpp"
+#include "math/LU.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "utils/Constants.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
-  bool BeadModel::createBeads(std::vector<BeadParam>& beads) {
-    if (sd_->isAtom()) {
-      if (!createSingleBead(static_cast<Atom*>(sd_), beads)) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                 "BeadModel::createBeads Error: GayBerne and other "
-                 "non-spherical atoms should use the RoughShell model\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal  = 1;
-        simError();
-        return false;
-      }
-    } else if (sd_->isRigidBody()) {
-      RigidBody* rb = static_cast<RigidBody*>(sd_);
-      std::vector<Atom*>::iterator ai;
-      Atom* atom;
-      for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
-        if (!createSingleBead(atom, beads)) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "BeadModel::createBeads Error: GayBerne and other "
-                   "non-spherical atoms should use the RoughShell model\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal  = 1;
-          simError();
-          return false;
-        }
-      }
+
+  /**
+   * References:
+   *
+   * For the General Hydro Framework:
+   * Beatriz Carrasco and Jose Gracia de la Torre; "Hydrodynamic
+   * Properties of Rigid Particles: Comparison of Different Modeling
+   * and Computational Procedures", Biophysical Journal, 75(6), 3044,
+   * 1999
+   *
+   * Xiuquan Sun, Teng Lin, and J. Daniel Gezelter; "Langevin dynamics
+   * for rigid bodies of arbitrary shape", J. Chem. Phys. 128, 234107
+   * (2008)
+   *
+   * For overlapping beads and overlapping volume:
+   *
+   * Beatriz Carrasco and Jose Garcia de la Torre and Peter Zipper;
+   * "Calculation of hydrodynamic properties of macromolecular bead
+   * models with overlapping spheres", Eur Biophys J (1999) 28:
+   * 510-515
+   *
+   * For overlapping volume between two spherical beads:
+   * http://mathworld.wolfram.com/Sphere-SphereIntersection.html
+   *
+   * For non-overlapping and overlapping translation-translation
+   * mobility tensors:
+   *
+   * Zuk, P. J., E. Wajnryb, K. A. Mizerski, and P. Szymczak;
+   * “Rotne–Prager–Yamakawa Approximation for Different-Sized
+   * Particles in Application to Macromolecular Bead Models.”, Journal
+   * of Fluid Mechanics, 741 (2014)
+   *
+   * For distinctions between centers of resistance and diffusion:
+   * Steven Harvey and Jose Garcia de la Torre; "Coordinate Systems
+   * for Modeling the Hydrodynamic Resistance and Diffusion
+   * Coefficients of Irregularly Shaped Rigid Macromolecules",
+   * Macromolecules 1980 13 (4), 960-964
+   **/
+  BeadModel::BeadModel() : ApproximateModel() { volumeOverlap_ = 0.0; }
+
+  void BeadModel::checkElement(std::size_t i) {
+    // checking if the radius is a non-negative value.
+    if (elements_[i].radius < 0) {
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "BeadModel::checkElement: There is a bead with a negative radius.\n"
+          "\tStarting from index 0, check bead (%lu).\n",
+          i);
+      painCave.isFatal = 1;
+      simError();
     }
-    return true;
+    // if the bead's radius is below 1.0e-14, substitute by 1.0e-14;
+    // to avoid problem in the self-interaction part (i.e., to not divide by
+    // zero)
+    if (elements_[i].radius < 1.0e-14) elements_[i].radius = 1.0e-14;
   }
 
-  bool BeadModel::createSingleBead(Atom* atom, std::vector<BeadParam>& beads) {
-    AtomType* atomType      = atom->getAtomType();
-    LennardJonesAdapter lja = LennardJonesAdapter(atomType);
-    if (atomType->isGayBerne()) {
-      return false;
-    } else if (lja.isLennardJones()) {
-      BeadParam currBead;
-      currBead.atomName = atom->getType();
-      currBead.pos      = atom->getPos();
-      currBead.mass     = atom->getMass();  // to compute center of mass in
-                                            // ApproximationModel.cpp
-      currBead.radius = lja.getSigma() / 2.0;
-      std::cout << "using rLJ = " << currBead.radius << " for atom "
-                << currBead.atomName << "\n";
-      beads.push_back(currBead);
+  RealType BeadModel::volumeCorrection() {
+    RealType volume(0.0);
+    for (std::vector<HydrodynamicsElement>::iterator iter = elements_.begin();
+         iter != elements_.end(); ++iter) {
+      volume += 4.0 / 3.0 * Constants::PI * pow((*iter).radius, 3);
+    }
+    // double loop double counts overlap volume Vij = Vji
+    volume -= 0.5 * volumeOverlap_;
+
+    return volume;
+  }
+
+  void BeadModel::writeElements(std::ostream& os) {
+    std::vector<HydrodynamicsElement>::iterator iter;
+    os << elements_.size() << std::endl;
+    os << "Generated by Hydro" << std::endl;
+    for (iter = elements_.begin(); iter != elements_.end(); ++iter) {
+      os << iter->name << "\t" << iter->pos[0] << "\t" << iter->pos[1] << "\t"
+         << iter->pos[2] << std::endl;
+    }
+  }
+
+  Mat3x3d BeadModel::interactionTensor(const std::size_t i, const std::size_t j,
+                                       const RealType viscosity) {
+    Mat3x3d Tij;
+    Mat3x3d I = SquareMatrix3<RealType>::identity();
+    RealType c {};
+
+    if (i == j) {
+      // self interaction, there is no overlapping volume
+      c = 1.0 / (6.0 * Constants::PI * viscosity * elements_[i].radius);
+
+      Tij(0, 0) = c;
+      Tij(1, 1) = c;
+      Tij(2, 2) = c;
+
     } else {
-      std::cout << "For atom " << atom->getType() << ", trying ";
-      int obanum(0);
-      std::vector<AtomType*> atChain = atomType->allYourBase();
-      std::vector<AtomType*>::iterator i;
-      for (i = atChain.begin(); i != atChain.end(); ++i) {
-        std::cout << (*i)->getName() << " -> ";
-        obanum = etab.GetAtomicNum((*i)->getName().c_str());
-        if (obanum != 0) {
-          BeadParam currBead;
-          currBead.atomName = atom->getType();
-          currBead.pos      = atom->getPos();
-          currBead.mass     = atom->getMass();  // to compute center of mass in
-                                                // ApproximationModel.cpp
-          currBead.radius = etab.GetVdwRad(obanum);
-          std::cout << "using rVdW = " << currBead.radius << "\n";
-          beads.push_back(currBead);
-          break;
-        }
-      }
-      if (obanum == 0) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                 "Could not find atom type in default element.txt\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal  = 1;
-        simError();
+      // non-self interaction: divided into overlapping and
+      // non-overlapping beads; the transitions between these cases
+      // are continuous
+
+      Vector3d Rij  = elements_[i].pos - elements_[j].pos;
+      RealType rij  = Rij.length();
+      RealType rij2 = rij * rij;
+
+      if (rij >= (elements_[i].radius + elements_[j].radius)) {
+        // non-overlapping beads
+        RealType a = ((elements_[i].radius * elements_[i].radius) +
+                      (elements_[j].radius * elements_[j].radius)) /
+                     rij2;
+        Mat3x3d op;
+        op          = outProduct(Rij, Rij) / rij2;
+        c           = 1.0 / (8.0 * Constants::PI * viscosity * rij);
+        RealType b1 = 1.0 + a / 3.0;
+        RealType b2 = 1.0 - a;
+        Tij         = (b1 * I + b2 * op) * c;
+
+      } else if (rij > fabs(elements_[i].radius - elements_[j].radius) &&
+                 rij < (elements_[i].radius + elements_[j].radius)) {
+        // overlapping beads, part I
+
+        RealType sum   = (elements_[i].radius + elements_[j].radius);
+        RealType diff  = (elements_[i].radius - elements_[j].radius);
+        RealType diff2 = diff * diff;
+
+        c = 1.0 / (6.0 * Constants::PI * viscosity *
+                   (elements_[i].radius * elements_[j].radius));
+
+        RealType rij3 = rij2 * rij;
+        Mat3x3d op;
+        op = outProduct(Rij, Rij) / rij2;
+
+        RealType a  = diff2 + 3.0 * rij2;
+        RealType ao = (16.0 * rij3 * sum - a * a) / (32.0 * rij3);
+
+        RealType b  = diff2 - rij2;
+        RealType bo = (3.0 * b * b) / (32.0 * rij3);
+
+        Tij = (ao * I + bo * op) * c;
+
+        RealType v1 = (-rij + sum) * (-rij + sum);
+        RealType v2 = (rij2 + 2.0 * (rij * elements_[i].radius) -
+                       3.0 * (elements_[i].radius * elements_[i].radius) +
+                       2.0 * (rij * elements_[j].radius) +
+                       6.0 * (elements_[i].radius * elements_[j].radius) -
+                       3.0 * (elements_[j].radius * elements_[j].radius));
+
+        volumeOverlap_ += (Constants::PI / (12.0 * rij)) * v1 * v2;
+
+      } else {
+        // overlapping beads, part II: one bead inside the other
+
+        RealType rmin = std::min(elements_[i].radius, elements_[j].radius);
+        RealType rmax = std::max(elements_[i].radius, elements_[j].radius);
+
+        c = 1.0 / (6.0 * Constants::PI * viscosity * rmax);
+
+        Tij(0, 0) = c;
+        Tij(1, 1) = c;
+        Tij(2, 2) = c;
+
+        volumeOverlap_ += (4.0 / 3.0) * Constants::PI * pow(rmin, 3);
       }
     }
-    return true;
+
+    return Tij;
   }
+
 }  // namespace OpenMD

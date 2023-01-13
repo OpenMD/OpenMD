@@ -44,23 +44,21 @@
 #ifndef HYDRODYNAMICS_ROUGHSHELL_HPP
 #define HYDRODYNAMICS_ROUGHSHELL_HPP
 
-#include "hydrodynamics/ApproximationModel.hpp"
+#include "hydrodynamics/BeadModel.hpp"
 #include "hydrodynamics/CompositeShape.hpp"
 #include "utils/Grid3d.hpp"
 
 namespace OpenMD {
 
-  class RoughShell : public ApproximationModel {
+  class RoughShell : public BeadModel {
   public:
-    RoughShell(StuntDouble* sd, SimInfo* info);
-    virtual ~RoughShell() { delete shape_; }
+    RoughShell() : BeadModel() {}
     void setSigma(RealType sigma) { sigma_ = sigma; }
     RealType getSigma() { return sigma_; }
+    virtual std::size_t assignElements();
 
   private:
-    virtual bool createBeads(vector<BeadParam>& beads);
     RealType sigma_;
-    Shape* shape_;
   };
 }  // namespace OpenMD
 

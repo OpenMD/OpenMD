@@ -140,7 +140,7 @@ namespace OpenMD {
     SelectionSet bsTemp = bs;
     bsTemp              = bsTemp.parallelReduce();
 
-    for (int i = 0; i < bsTemp.bitsets_[STUNTDOUBLE].size(); ++i) {
+    for (size_t i = 0; i < bsTemp.bitsets_[STUNTDOUBLE].size(); ++i) {
       if (bsTemp.bitsets_[STUNTDOUBLE][i]) {
 #ifdef IS_MPI
 
@@ -166,7 +166,7 @@ namespace OpenMD {
         center    = stuntdoubles_[i];
         centerPos = center->getPos();
 #endif
-        for (unsigned int j = 0; j < molecules_.size(); ++j) {
+        for (size_t j = 0; j < molecules_.size(); ++j) {
           if (molecules_[j] != NULL) {
             Vector3d r = centerPos - molecules_[j]->getCom();
             currSnapshot->wrapVector(r);
@@ -175,7 +175,7 @@ namespace OpenMD {
             }
           }
         }
-        for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
+        for (size_t j = 0; j < stuntdoubles_.size(); ++j) {
           if (stuntdoubles_[j] != NULL) {
             Vector3d r = centerPos - stuntdoubles_[j]->getPos();
             currSnapshot->wrapVector(r);
@@ -184,7 +184,7 @@ namespace OpenMD {
             }
           }
         }
-        for (unsigned int j = 0; j < bonds_.size(); ++j) {
+        for (size_t j = 0; j < bonds_.size(); ++j) {
           if (bonds_[j] != NULL) {
             Vector3d loc = bonds_[j]->getAtomA()->getPos();
             loc += bonds_[j]->getAtomB()->getPos();
@@ -194,7 +194,7 @@ namespace OpenMD {
             if (r.length() <= distance) { bsResult.bitsets_[BOND].setBitOn(j); }
           }
         }
-        for (unsigned int j = 0; j < bends_.size(); ++j) {
+        for (size_t j = 0; j < bends_.size(); ++j) {
           if (bends_[j] != NULL) {
             Vector3d loc = bends_[j]->getAtomA()->getPos();
             loc += bends_[j]->getAtomB()->getPos();
@@ -205,7 +205,7 @@ namespace OpenMD {
             if (r.length() <= distance) { bsResult.bitsets_[BEND].setBitOn(j); }
           }
         }
-        for (unsigned int j = 0; j < torsions_.size(); ++j) {
+        for (size_t j = 0; j < torsions_.size(); ++j) {
           if (torsions_[j] != NULL) {
             Vector3d loc = torsions_[j]->getAtomA()->getPos();
             loc += torsions_[j]->getAtomB()->getPos();
@@ -219,7 +219,7 @@ namespace OpenMD {
             }
           }
         }
-        for (unsigned int j = 0; j < inversions_.size(); ++j) {
+        for (size_t j = 0; j < inversions_.size(); ++j) {
           if (inversions_[j] != NULL) {
             Vector3d loc = inversions_[j]->getAtomA()->getPos();
             loc += inversions_[j]->getAtomB()->getPos();
@@ -266,7 +266,7 @@ namespace OpenMD {
     SelectionSet bsTemp = bs;
     bsTemp              = bsTemp.parallelReduce();
 
-    for (int i = 0; i < bsTemp.bitsets_[STUNTDOUBLE].size(); ++i) {
+    for (size_t i = 0; i < bsTemp.bitsets_[STUNTDOUBLE].size(); ++i) {
       if (bsTemp.bitsets_[STUNTDOUBLE][i]) {
         // Now, if we own stuntdouble i, we can use the position, but in
         // parallel, we'll need to let everyone else know what that
@@ -291,7 +291,7 @@ namespace OpenMD {
         center    = stuntdoubles_[i];
         centerPos = center->getPos(frame);
 #endif
-        for (unsigned int j = 0; j < molecules_.size(); ++j) {
+        for (size_t j = 0; j < molecules_.size(); ++j) {
           if (molecules_[j] != NULL) {
             Vector3d r = centerPos - molecules_[j]->getCom(frame);
             currSnapshot->wrapVector(r);
@@ -301,7 +301,7 @@ namespace OpenMD {
           }
         }
 
-        for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
+        for (size_t j = 0; j < stuntdoubles_.size(); ++j) {
           if (stuntdoubles_[j] != NULL) {
             Vector3d r = centerPos - stuntdoubles_[j]->getPos(frame);
             currSnapshot->wrapVector(r);
@@ -310,7 +310,7 @@ namespace OpenMD {
             }
           }
         }
-        for (unsigned int j = 0; j < bonds_.size(); ++j) {
+        for (size_t j = 0; j < bonds_.size(); ++j) {
           if (bonds_[j] != NULL) {
             Vector3d loc = bonds_[j]->getAtomA()->getPos(frame);
             loc += bonds_[j]->getAtomB()->getPos(frame);
@@ -320,7 +320,7 @@ namespace OpenMD {
             if (r.length() <= distance) { bsResult.bitsets_[BOND].setBitOn(j); }
           }
         }
-        for (unsigned int j = 0; j < bends_.size(); ++j) {
+        for (size_t j = 0; j < bends_.size(); ++j) {
           if (bends_[j] != NULL) {
             Vector3d loc = bends_[j]->getAtomA()->getPos(frame);
             loc += bends_[j]->getAtomB()->getPos(frame);
@@ -331,7 +331,7 @@ namespace OpenMD {
             if (r.length() <= distance) { bsResult.bitsets_[BEND].setBitOn(j); }
           }
         }
-        for (unsigned int j = 0; j < torsions_.size(); ++j) {
+        for (size_t j = 0; j < torsions_.size(); ++j) {
           if (torsions_[j] != NULL) {
             Vector3d loc = torsions_[j]->getAtomA()->getPos(frame);
             loc += torsions_[j]->getAtomB()->getPos(frame);
@@ -345,7 +345,7 @@ namespace OpenMD {
             }
           }
         }
-        for (unsigned int j = 0; j < inversions_.size(); ++j) {
+        for (size_t j = 0; j < inversions_.size(); ++j) {
           if (inversions_[j] != NULL) {
             Vector3d loc = inversions_[j]->getAtomA()->getPos(frame);
             loc += inversions_[j]->getAtomB()->getPos(frame);

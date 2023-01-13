@@ -44,18 +44,59 @@
 #ifndef HYDRODYNAMICS_BEADMODEL_HPP
 #define HYDRODYNAMICS_BEADMODEL_HPP
 
-#include "hydrodynamics/ApproximationModel.hpp"
-#include "utils/ElementsTable.hpp"
+#include <vector>
+
+#include "hydrodynamics/ApproximateModel.hpp"
+#include "math/DynamicRectMatrix.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
+#include "primitives/Molecule.hpp"
 
 namespace OpenMD {
 
-  class BeadModel : public ApproximationModel {
-  public:
-    BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
+  class Shape;
 
-  private:
-    virtual bool createBeads(std::vector<BeadParam>& beads);
-    bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);
+  /**
+   * References:
+   *
+   * For overlapping beads and overlapping volume:
+   *
+   * Beatriz Carrasco and Jose Garcia de la Torre and Peter Zipper;
+   * "Calculation of hydrodynamic properties of macromolecular bead
+   * models with overlapping spheres", Eur Biophys J (1999) 28:
+   * 510-515
+   *
+   * For overlapping volume between two spherical beads:
+   * http://mathworld.wolfram.com/Sphere-SphereIntersection.html
+   *
+   * For non-overlapping and overlapping translation-translation
+   * mobility tensors:
+   *
+   * Zuk, P. J., E. Wajnryb, K. A. Mizerski, and P. Szymczak;
+   * “Rotne–Prager–Yamakawa Approximation for Different-Sized
+   * Particles in Application to Macromolecular Bead Models.”, Journal
+   * of Fluid Mechanics, 741 (2014)
+   *
+   * For distinctions between centers of resistance and diffusion:
+   * Steven Harvey and Jose Garcia de la Torre; "Coordinate Systems
+   * for Modeling the Hydrodynamic Resistance and Diffusion
+   * Coefficients of Irregularly Shaped Rigid Macromolecules",
+   * Macromolecules 1980 13 (4), 960-964
+   **/
+  class BeadModel : public ApproximateModel {
+  public:
+    BeadModel();
+
+    virtual std::size_t assignElements() = 0;
+    virtual void checkElement(std::size_t i);
+    virtual void writeElements(std::ostream& os);
+
+    virtual Mat3x3d interactionTensor(const std::size_t i, const std::size_t j,
+                                      const RealType viscosity);
+    virtual RealType volumeCorrection();
+
+  protected:
+    RealType volumeOverlap_;
   };
 }  // namespace OpenMD
 

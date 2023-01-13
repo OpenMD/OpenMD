@@ -71,13 +71,18 @@ namespace OpenMD {
     virtual bool isInterior(Vector3d pos);
     virtual std::pair<Vector3d, Vector3d> getBoundingBox();
     virtual bool hasAnalyticalSolution() { return true; }
+    virtual bool isComposite() { return false; }
+    virtual bool isSpherical() { return false; }
+    virtual bool isMesh() { return false; }
 
-    virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature);
+    virtual HydroProp* getHydroProp(RealType viscosity);
 
     RealType getRAxial() { return rAxial_; }
     RealType getREquatorial() { return rEquatorial_; }
     RealType getRMajor() { return rMajor_; }
     RealType getRMinor() { return rMinor_; }
+    virtual Vector3d getOrigin() { return origin_; }
+    Mat3x3d getRotMat() { return rotMat_; }
 
   private:
     Vector3d origin_;

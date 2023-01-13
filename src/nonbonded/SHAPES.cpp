@@ -139,8 +139,7 @@ namespace OpenMD {
     LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
     if (ljData == NULL) {
       snprintf(
-          painCave.errMsg,
-          MAX_SIM_ERROR_MSG_LENGTH
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "SHAPES::getLJParam could not convert GenericData to LJParam for\n"
           "\tatom type %s\n",
           atomType->getName().c_str());

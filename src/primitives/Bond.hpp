@@ -110,7 +110,7 @@ namespace OpenMD {
     void accept(BaseVisitor* v) { v->visit(this); }
 
   private:
-    RealType potential_;
+    RealType potential_ {};
     BondType* bondType_; /**< bond type */
     std::string name_;
   };
