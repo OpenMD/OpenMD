@@ -87,20 +87,20 @@ namespace OpenMD {
     // cellOffsets are the partial space for the cell lists used in
     // constructing the neighbor lists
     cellOffsets_.clear();
-    cellOffsets_.push_back(Vector3i(0, 0, 0));
-    cellOffsets_.push_back(Vector3i(1, 0, 0));
-    cellOffsets_.push_back(Vector3i(1, 1, 0));
-    cellOffsets_.push_back(Vector3i(0, 1, 0));
-    cellOffsets_.push_back(Vector3i(-1, 1, 0));
-    cellOffsets_.push_back(Vector3i(0, 0, 1));
-    cellOffsets_.push_back(Vector3i(1, 0, 1));
-    cellOffsets_.push_back(Vector3i(1, 1, 1));
-    cellOffsets_.push_back(Vector3i(0, 1, 1));
-    cellOffsets_.push_back(Vector3i(-1, 1, 1));
-    cellOffsets_.push_back(Vector3i(-1, 0, 1));
-    cellOffsets_.push_back(Vector3i(-1, -1, 1));
-    cellOffsets_.push_back(Vector3i(0, -1, 1));
-    cellOffsets_.push_back(Vector3i(1, -1, 1));
+    cellOffsets_.push_back(Vector3i( 0,  0,  0));
+    cellOffsets_.push_back(Vector3i( 1,  0,  0));
+    cellOffsets_.push_back(Vector3i( 1,  1,  0));
+    cellOffsets_.push_back(Vector3i( 0,  1,  0));
+    cellOffsets_.push_back(Vector3i(-1,  1,  0));
+    cellOffsets_.push_back(Vector3i( 0,  0,  1));
+    cellOffsets_.push_back(Vector3i( 1,  0,  1));
+    cellOffsets_.push_back(Vector3i( 1,  1,  1));
+    cellOffsets_.push_back(Vector3i( 0,  1,  1));
+    cellOffsets_.push_back(Vector3i(-1,  1,  1));
+    cellOffsets_.push_back(Vector3i(-1,  0,  1));
+    cellOffsets_.push_back(Vector3i(-1, -1,  1));
+    cellOffsets_.push_back(Vector3i( 0, -1,  1));
+    cellOffsets_.push_back(Vector3i( 1, -1,  1));
   }
 
   void ForceDecomposition::setCutoffRadius(RealType rcut) {

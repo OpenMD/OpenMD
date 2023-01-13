@@ -54,6 +54,7 @@ namespace OpenMD {
   class ShapeBuilder {
   public:
     static Shape* createShape(StuntDouble* sd);
+    static Shape* createShape(Molecule* mol);
 
   private:
     static Shape* internalCreateShape(Atom* atom);

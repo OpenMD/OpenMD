@@ -10,24 +10,33 @@
 args "--no-handle-error --include-getopt --show-required --unamed-opts --file-name=HydroCmd --c-extension=cpp --header-extension=hpp"
 
 package "Hydro"
-version ""
+version "2"
 
 purpose
 "Generates resistance tensor (.hydro) files which are required when
-using the Langevin integrator using complex rigid bodies. Hydro
-supports two approximate models: the BeadModel and
-RoughShell. Additionally, Hydro can generate resistance tensor files
-using analytic solutions for simple shapes. To generate a .hydro file,
-a metadata file is needed as the input file. Since the resistance
-tensor depends on these quantities, the viscosity of the solvent and
-the temperature (targetTemp) of the system must be defined in
-meta-data file. If the approximate model in use is the RoughShell
-model the beadSize (the diameter of the small beads used to
-approximate the surface of the body) must also be specified."
+using the Langevin integrator with complex rigid bodies. Hydro
+supports three approximate models: AtomicBead, RoughShell, and
+BoundaryElement. Additionally, Hydro can generate resistance tensor
+files using analytic solutions for simple shapes. 
+
+To generate a .hydro file, an input file is needed. 
+
+Since the resistance tensor depends on viscosity of the solvent, and
+diffusion tensors depend on temperature, these must either be
+specified as arguments or listed in the MetaData (omd) file with the
+keywords viscosity and targetTemp. If the approximate model in use is
+the RoughShell model the beadSize (the diameter of the small beads
+used to approximate the surface of the body) must also be specified."
 
 # Options
-option	"input"    i  "input MetaData (omd) file"                                    string	typestr="filename" 	required
-option	"output"   o  "output file prefix"                                           string	default="hydro"	        optional
-option  "model"    -  "hydrodynamics model"         values="BeadModel","RoughShell"  enum default="RoughShell"          required
-option  "beadSize" s  "bead size (diameter) for RoughShell model (in angstroms)"                double     default="0.2"           optional
-option  "beads"	   b  "generate the beads only, hydrodynamics will not be performed" flag    	off
+defgroup "input file" groupdesc=" an input file is required" yes
+groupoption  "input"    i  "input MetaData (omd) file"           string  typestr="filename"  group="input file"
+groupoption  "xyz"      x  "xyz file for AtomicBead model"       string  typestr="filename"  group="input file"
+groupoption  "stl"      -  "stl file for BoundaryElement model"  string  typestr="filename"  group="input file"
+groupoption  "msms"     -  "filename root for MSMS .vert and .face files"  string typestr="filename" group="input file"
+option       "output"   o  "output file prefix"                  string   optional
+option       "model"    -  "hydrodynamics model"                 values="AtomicBead","RoughShell","BoundaryElement"  enum required
+option       "beadSize" s  "bead size (diameter) for RoughShell model (in angstroms)"  double  default="0.2"  optional
+option       "beads"    b  "generate the beads only, hydrodynamics will not be performed" flag  off
+option       "viscosity" v "viscosity (in poise)"  double default="0.01" optional
+option       "temperature" t "temperature (in Kelvin" double default="300" optional

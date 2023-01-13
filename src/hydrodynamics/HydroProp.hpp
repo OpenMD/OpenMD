@@ -73,47 +73,69 @@ namespace OpenMD {
   class HydroProp {
   public:
     HydroProp();
-    HydroProp(Vector3d cor, Mat6x6d Xi, Mat6x6d D);
-    HydroProp(const std::string& frictionLine);
+    HydroProp(Vector3d cor, Mat6x6d Xi);
 
-    void complete();
-    
+    void setName(std::string name) { name_ = name; }
+    std::string getName() { return name_; }
+        
     void setCenterOfResistance(Vector3d cor) {
       cor_   = cor;
-      hasCOR = true;
+      hasCOR_ = true;
     }
     Vector3d getCenterOfResistance() { return cor_; }
     
     void setResistanceTensor(Mat6x6d Xi) {
       Xi_   = Xi;
-      hasXi = true;
+      hasXi_ = true;
       complete();
     }
     Mat6x6d getResistanceTensor() { return Xi_; }
-    
-    void setDiffusionTensor(Mat6x6d D) { D_ = D; }
-    Mat6x6d getDiffusionTensor() { return D_; }
-
-    void setName(std::string name) { name_ = name; }
-    std::string getName() { return name_; }
-       
-    Mat3x3d getPitchMatrix();
-    RealType getScalarPitch();
-    
     Mat3x3d getXitt();
     Mat3x3d getXitr();
     Mat3x3d getXirt();
     Mat3x3d getXirr();
-    Mat6x6d getS() { return S_; }
+
+    void complete();
+    /*
+     * Returns the result of a Cholesky decomposition to obtain the
+     * square root matrix of the resistance tensor, 
+     *  \f[ \Xi = S S^T \f] 
+     * where S is a lower triangular matrix.
+     */
+    Mat6x6d getS();
+        
+    Mat6x6d getDiffusionTensor(RealType temperature);
+           
+    /*
+     * Recomputes the Resistance Tensor at a new location
+     */
+    Mat6x6d getResistanceTensorAtPos(Vector3d pos);
+    /*
+     * Recomputes the Diffusion Tensor at a new location (and temperature)
+     */
+    Mat6x6d getDiffusionTensorAtPos(Vector3d pos, RealType temperature);
+    /*
+     * Computes the Center Of Diffusion at a particular temperature
+     */
+    Vector3d getCenterOfDiffusion(RealType temperature);
+
+    Mat3x3d getPitchMatrix();
+    RealType getScalarPitch();
+    void pitchAxes(Mat3x3d& pitchAxes, Vector3d& pitches, RealType& pitchScalar);
+    
+    /*
+     * Computes the Center of Pitch
+     */
+    Vector3d getCenterOfPitch();
 
   private:
     std::string name_;
-    Vector3d cor_;
-    Mat6x6d Xi_;
-    Mat6x6d D_;
-    Mat6x6d S_;
-    bool hasCOR;
-    bool hasXi;
+    Vector3d cor_; // Center of Resistance
+    Mat6x6d Xi_;   // Resistance Tensor
+    Mat6x6d S_;    // Cholesky Decomposition of Xi_
+    bool hasCOR_;
+    bool hasXi_;
+    bool hasS_;    
   };
 }  // namespace OpenMD
 

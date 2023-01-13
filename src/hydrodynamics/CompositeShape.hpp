@@ -55,17 +55,25 @@ namespace OpenMD {
    */
   class CompositeShape : public Shape {
   public:
-    CompositeShape() {}
+    CompositeShape();
     virtual ~CompositeShape();
     virtual bool isInterior(Vector3d pos);
     virtual std::pair<Vector3d, Vector3d> getBoundingBox();
     virtual bool hasAnalyticalSolution() { return false; }
-    virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature);
+    virtual bool isComposite() { return true; }
+    virtual bool isSpherical() { return false; }
+    virtual bool isMesh() { return false; }
+    
+    virtual HydroProp* getHydroProp(RealType viscosity);
     void addShape(Shape* s) { shapes_.push_back(s); }
-
+    std::vector<Shape*> getShapes() { return shapes_; }
+    Vector3d getOrigin() { return origin_; }
+    void setOrigin(Vector3d o) { origin_ = o; }
+    
   private:
+    Vector3d origin_;
     std::vector<Shape*> shapes_;
   };
-
+  
 }  // namespace OpenMD
 #endif

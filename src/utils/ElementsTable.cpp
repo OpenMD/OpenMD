@@ -284,9 +284,9 @@ namespace OpenMD {
 
     if (identifier[0] != '*') {
       // Quiet down the error messages for now:
-      // sprintf( painCave.errMsg,
-      //         "ElementsTable warning.\n"
-      //         "\tCannot understand the element label %s\n", identifier);
+      // snprintf( painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+      //          "ElementsTable warning.\n"
+      //          "\tCannot understand the element label %s\n", identifier);
       // painCave.isFatal = 0;
       // painCave.severity = OPENMD_WARNING;
       // simError();

@@ -87,8 +87,6 @@ namespace OpenMD {
     void setForceTolerance(RealType tol) { forceTolerance_ = tol; }
 
   private:
-    std::map<std::string, HydroProp*> parseFrictionFile(
-        const std::string& filename);
     MomentData* getMomentData(StuntDouble* sd);
     void genRandomForceAndTorque(Vector3d& force, Vector3d& torque,
                                  unsigned int index);

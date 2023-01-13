@@ -43,8 +43,8 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
-#define HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
+#ifndef HYDRODYNAMICS_APPROXIMATEMODEL_HPP
+#define HYDRODYNAMICS_APPROXIMATEMODEL_HPP
 
 #include <vector>
 
@@ -52,29 +52,37 @@
 #include "math/DynamicRectMatrix.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
-#include "primitives/Molecule.hpp"
-#include "utils/any.hpp"
+#include "math/Triangle.hpp"
 
 namespace OpenMD {
 
+  struct HydrodynamicsElement {
+    Vector3d pos;        // minimally, this is all we need
+    std::string name;
+    RealType radius;     // for Bead models
+    Triangle t;          // for BoundaryElement model
+    RealType mass;       // for center of mass calculation only
+  };
+
   class Shape;
-  class ApproximationModel : public HydrodynamicsModel {
+  class ApproximateModel : public HydrodynamicsModel {
   public:
-    ApproximationModel(StuntDouble* sd, SimInfo* info);
+    ApproximateModel();
+    
+    virtual void setShape(Shape* shape);
+    virtual HydroProp* calcHydroProps(RealType viscosity);
 
-    virtual bool calcHydroProps(Shape* shape, RealType viscosity,
-                                RealType temperature);
-    virtual void init();
-    virtual void writeBeads(std::ostream& os);
+    virtual std::size_t assignElements() = 0;
+    virtual void checkElement(std::size_t i) = 0;
+    virtual void writeElements(std::ostream& os) = 0;
+    virtual Mat3x3d interactionTensor(std::size_t i, std::size_t j,
+				      RealType viscosity) = 0;
+    
+    virtual RealType volumeCorrection() { return 0.0; }
 
-  private:
-    virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
+  protected:
+    std::vector<HydrodynamicsElement> elements_;
 
-    bool calcHydroPropsAtCRandAtCDandAtCOM(std::vector<BeadParam>& beads,
-                                           RealType viscosity,
-                                           RealType temperature, HydroProp* cr,
-                                           HydroProp* cd, HydroProp* coM);
-    std::vector<BeadParam> beads_;
   };
 }  // namespace OpenMD
 

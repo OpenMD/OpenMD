@@ -51,7 +51,7 @@
 namespace OpenMD {
 
   Sphere::Sphere(Vector3d origin, RealType radius) :
-      origin_(origin), radius_(radius) {}
+    origin_(origin), radius_(radius) {}
 
   bool Sphere::isInterior(Vector3d pos) {
     Vector3d r = pos - origin_;
@@ -73,12 +73,12 @@ namespace OpenMD {
     return boundary;
   }
 
-  HydroProp* Sphere::getHydroProp(RealType viscosity, RealType temperature) {
-    RealType Xitt = 6.0 * Constants::PI * viscosity * radius_;
-    RealType Xirr =
-        8.0 * Constants::PI * viscosity * radius_ * radius_ * radius_;
+  HydroProp* Sphere::getHydroProp(RealType viscosity) {
 
-    Mat6x6d Xi, XiCopy, D;
+    RealType Xitt = 6.0 * Constants::PI * viscosity * radius_;
+    RealType Xirr = 8.0 * Constants::PI * viscosity * pow(radius_, 3);
+
+    Mat6x6d Xi;
 
     Xi(0, 0) = Xitt;
     Xi(1, 1) = Xitt;
@@ -88,14 +88,9 @@ namespace OpenMD {
     Xi(5, 5) = Xirr;
 
     Xi *= Constants::viscoConvert;
-    XiCopy = Xi;
 
-    invertMatrix(XiCopy, D);
-    RealType kt = Constants::kb * temperature;  // in kcal mol^-1
-    D *= kt;  // now in angstroms^2 fs^-1  (at least for Trans-trans)
-
-    HydroProp* hprop = new HydroProp(V3Zero, Xi, D);
-
+    HydroProp* hprop = new HydroProp(V3Zero, Xi);
+    hprop->setName( getName() );
     return hprop;
   }
 

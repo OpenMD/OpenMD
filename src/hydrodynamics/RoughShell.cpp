@@ -45,17 +45,8 @@
 
 #include "hydrodynamics/RoughShell.hpp"
 #include "hydrodynamics/ShapeBuilder.hpp"
-#include "brains/SimInfo.hpp"
 
 namespace OpenMD {
-
-  RoughShell::RoughShell(StuntDouble* sd, SimInfo* info) :
-      ApproximationModel(sd, info) {
-    shape_ = ShapeBuilder::createShape(sd);
-
-    Globals* simParams = info->getSimParams();
-    if (simParams->haveBeadSize()) { sigma_ = simParams->getBeadSize(); }
-  }
 
   struct BeadLattice {
     Vector3d origin;
@@ -63,38 +54,35 @@ namespace OpenMD {
     bool interior;
   };
 
-  struct ExteriorFunctor {
+  struct ExteriorFunctor : public std::unary_function<BeadLattice, bool> {
     bool operator()(const BeadLattice& bead) { return !bead.interior; }
   };
 
-  struct InteriorFunctor {
+  struct InteriorFunctor : public std::unary_function<BeadLattice, bool> {
     bool operator()(const BeadLattice& bead) { return bead.interior; }
   };
-
-  // OpenMD files: functions
-  // ShapeBuilder.cpp: currShape = new Sphere(atom->getPos(),
-  // lja.getSigma()/2.0); Sphere.cpp: Sphere::Sphere(Vector3d origin, RealType
-  // radius) : origin_(origin), radius_(radius) std::pair<Vector3d, Vector3d>
-  // Sphere::getBoundingBox()
-  bool RoughShell::createBeads(std::vector<BeadParam>& beads) {
+  
+  std::size_t RoughShell::assignElements() {
     std::pair<Vector3d, Vector3d> boxBoundary = shape_->getBoundingBox();
-    RealType firstMin                         = std::min(
-        std::min(floor(boxBoundary.first[0]), floor(boxBoundary.first[1])),
-        floor(boxBoundary.first[2]));
-    RealType secondMax = std::max(
-        std::max(ceil(boxBoundary.second[0]), ceil(boxBoundary.second[1])),
-        ceil(boxBoundary.second[2]));  // std::max is a binary function, i.e.,
-                                       // it accepts two values at a time
-    int len = secondMax - firstMin;    // floor() and ceil() functions return an
-                                       // integer number
+    RealType firstMin  = std::min(std::min(floor(boxBoundary.first[0]),
+					   floor(boxBoundary.first[1])),
+				  floor(boxBoundary.first[2]));
+    RealType secondMax = std::max(std::max(ceil(boxBoundary.second[0]),
+					   ceil(boxBoundary.second[1])),
+				  ceil(boxBoundary.second[2]));
+    // std::max is a binary function, i.e., it accepts two values at a time
+    // floor() and ceil() functions return an integer number
+    int len = secondMax - firstMin;
 
     // number of lattices after shifting positions to integer values (to be
     // symmetric under reflection)
-    int numLattices = ceil(len / sigma_) +
-                      2;  //+2: one extra lattice to the left (-1) and one
-                          // extra lattice to the right (+1)
-    Grid3D<BeadLattice> grid(numLattices, numLattices,
-                             numLattices);  // Grid3d.hpp
+
+    int numLattices = ceil(len / sigma_) + 2;
+    
+    // +2: one extra lattice point to the left (-1) and one extra
+    // lattice point to the right (+1)
+
+    Grid3D<BeadLattice> grid(numLattices, numLattices, numLattices);
 
     // fill beads
     for (int i = 0; i < numLattices; ++i) {
@@ -102,14 +90,12 @@ namespace OpenMD {
         for (int k = 0; k < numLattices; ++k) {
           BeadLattice& currentBead = grid(i, j, k);
           currentBead.origin =
-              Vector3d((i - 1) * sigma_ + floor(boxBoundary.first[0]),
-                       (j - 1) * sigma_ + floor(boxBoundary.first[1]),
-                       (k - 1) * sigma_ + floor(boxBoundary.first[2]));
+	    Vector3d((i - 1) * sigma_ + floor(boxBoundary.first[0]),
+		     (j - 1) * sigma_ + floor(boxBoundary.first[1]),
+		     (k - 1) * sigma_ + floor(boxBoundary.first[2]));
           currentBead.radius   = sigma_ / 2.0;
-          currentBead.interior = shape_->isInterior(
-              grid(i, j, k)
-                  .origin);  // return True if bead is inside the given radius
-                             // (bool Sphere::isInterior(Vector3d pos))
+          currentBead.interior = shape_->isInterior(grid(i, j, k).origin);
+	  // returns True if bead is inside the given shape
         }
       }
     }
@@ -119,38 +105,38 @@ namespace OpenMD {
       for (int j = 0; j < numLattices; ++j) {
         for (int k = 0; k < numLattices; ++k) {
           std::vector<BeadLattice> neighborCells =
-              grid.getAllNeighbors(i, j, k);
+	    grid.getAllNeighbors(i, j, k);
           // if one of its neighbor cells (beads) is exterior, current cell
           // (bead) is on the surface; loop over beads' center (lattice point)
-
+	  
           if (grid(i, j, k).interior) {
-            bool allNeighBorIsInterior = true;
+            bool allNeighborsAreInterior = true;
             for (std::vector<BeadLattice>::iterator l = neighborCells.begin();
                  l != neighborCells.end(); ++l) {
               if (!l->interior) {
-                allNeighBorIsInterior = false;
+                allNeighborsAreInterior = false;
                 break;
               }
             }
-
-            if (allNeighBorIsInterior)
-              continue;  // if allNeighBorIsInterior = true, skip the remaining
-                         // code below, i.e., bead is not on the surface
-
-            BeadParam surfaceBead;  // if allNeighBorIsInterior=false; bead is
-                                    // on the surface; grab lattice point
-            surfaceBead.atomName = "H";
-            surfaceBead.pos =
-                grid(i, j, k)
-                    .origin;  // loop over the i, j, k positions (lattice
-                              // point) of the grid (loop is above)
-            surfaceBead.mass   = 1.0079;
+	    
+            if (allNeighborsAreInterior)
+              continue;  // if allNeighborsAreInterior == true, skip
+                         // the remaining code below, i.e., bead is
+                         // not on the surface
+	    
+            HydrodynamicsElement surfaceBead;
+	    // if allNeighborsAreInterior == false, bead is on the
+	    // surface; grab this lattice point
+            surfaceBead.name = "H";
+            surfaceBead.pos = grid(i, j, k).origin;
+	    // loop over the i, j, k positions (lattice point) of the
+	    // grid (loop is above)
             surfaceBead.radius = grid(i, j, k).radius;
-            beads.push_back(surfaceBead);
+            elements_.push_back(surfaceBead);
           }
         }
       }
     }
-    return true;
+    return elements_.size();
   }
 }  // namespace OpenMD

@@ -162,7 +162,7 @@ namespace OpenMD {
     eta            = etaMat(0, 0);
     // if (fabs(etaMat(1,1) - eta) >= OpenMD::epsilon || fabs(etaMat(1,1) - eta)
     // >= OpenMD::epsilon || !etaMat.isDiagonal()) {
-    //    sprintf( painCave.errMsg,
+    //    snprintf( painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
     //             "NPTi error: the diagonal elements of  eta matrix are not the
     //             same or etaMat is not a diagonal matrix");
     //    painCave.isFatal = 1;

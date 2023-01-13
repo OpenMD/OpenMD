@@ -53,6 +53,24 @@ Triangle::Triangle() :
     HaveArea_(false), HaveNormal_(false), HaveUnitNormal_(false),
     HaveCentroid_(false) {}
 
+Triangle::Triangle(Vector3d P1, Vector3d P2, Vector3d P3) :
+  mass_(0.0), facetVelocity_(V3Zero),  HaveArea_(false), HaveNormal_(false),
+  HaveUnitNormal_(false), HaveCentroid_(false) {
+
+  vertices_[0] = P1;
+  vertices_[1] = P2;
+  vertices_[2] = P3;
+
+  // Compute some quantites like a,b,c
+  a_ = P1 - P2;
+  b_ = P1 - P3;
+  c_ = P2 - P3;
+  computeArea();
+  computeNormal();
+  computeCentroid();
+}
+
+
 void Triangle::addVertices(Vector3d P1, Vector3d P2, Vector3d P3) {
   vertices_[0] = P1;
   vertices_[1] = P2;
