@@ -34,6 +34,7 @@ jobs:
           sudo apt-get install libfftw3-3 libfftw3-dev
           sudo apt-get install openbabel libopenbabel-dev
           sudo apt-get install openmpi-bin libopenmpi-dev
+          sudo apt-get install nlohmann-json3-dev
           sudo apt-get install python3-numpy python3-scipy
           sudo apt-get install qhull-bin libqhull-dev
           sudo apt-get install minizip zlib1g-dev
@@ -59,6 +60,7 @@ jobs:
           brew install fftw
           brew install open-babel
           brew install open-mpi
+          brew install nlohmann-json
           brew install numpy scipy
           brew install qhull
           brew install zlib
