@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.12)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+cmake_policy(SET CMP0135 NEW)
+include(FetchContent)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
@@ -242,6 +244,41 @@ ELSE(OPENBABEL3_FOUND)
   ENDIF(OPENBABEL2_FOUND)
 ENDIF(OPENBABEL3_FOUND)
 
+find_package(nlohmann_json REQUIRED)
+if (NOT nlohmann_json_FOUND)
+   FetchContent_Declare(nlohmann_json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+   FetchContent_MakeAvailable(nlohmann_json)
+   set(nlohmann_json_INCLUDE_DIR ${nlohmann_json_SOURCE_DIR}/include)
+endif()
+message(STATUS Adding include for json to ${nlohmann_json_INCLUDE_DIR})
+include_directories(${nlohmann_json_INCLUDE_DIR}) 
+
+
+# option(WITH_JSON "Build JSON support" ON)
+# option(OPENMD_USE_SYSTEM_nlohmann_json "Use the system nlohmann_json if available." ON)
+# if(WITH_JSON)
+#   set(nlohmann_json_VERSION_MIN 3.10.5)
+#   # First try find system nlohmann_json
+#   if(OPENMD_USE_SYSTEM_nlohmann_json)
+#     find_package(nlohmann_json ${nlohmann_json_VERSION_MIN})
+#  endif()
+# # Otherwise download nlohmann_json to OpenMD source directory
+#  if (NOT nlohmann_json_FOUND OR nlohmann_json_VERSION VERSION_LESS ${nlohmann_json_VERSION_MIN})
+#   set(nlohmann_json_VERSION 3.11.2)
+#    if(NOT EXISTS "${openbabel_SOURCE_DIR}/external/nlohmann_json-${nlohmann_json_VERSION}")
+#      file(DOWNLOAD "https://github.com/nlohmann/json/releases/download/v${nlohmann_json_VERSION}/json.hpp"
+#        "${OPENMD_SOURCE_DIR}/external/nlohmann_json-${nlohmann_json_VERSION}/json.hpp" STATUS status)
+#      message(STATUS "Downloaded nlohmann_json to ${OPENMD_SOURCE_DIR}/external/nlohmann_json-${nlohmann_json_VERSION}.")
+#    endif()
+#    set(nlohmann_json_FOUND TRUE)
+#    set(nlohmann_json_INCLUDE_DIRS ${OPENMD_SOURCE_DIR}/external/nlohmann_json-${nlohmann_json_VERSION})
+#  endif()
+#  if(nlohmann_json_FOUND)
+#    message(STATUS "Hydro JSON formats will be supported. Using nlohmann_json ${nlohmann_json_VERSION} at ${nlohmann_json_INCLUDE_DIRS}")
+#    add_definitions(-DHAVE_NLOHMANN_JDON)
+#    include_directories(${nlohmann_json_INCLUDE_DIRS})
+#  endif()
+# endif()
 
 #Look for QHULL Libraries
 find_package(Qhull)
@@ -280,7 +317,6 @@ ELSE(FFTW3_FOUND)
   MESSAGE(STATUS "No fftw3 found - will be missing some analysis modules")
 endif (FFTW3_FOUND)
 
-find_package(nlohmann_json 3.10.5 REQUIRED)
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
@@ -542,6 +578,7 @@ src/types/LennardJonesAdapter.cpp
 src/types/MoleculeStamp.cpp
 src/types/MultipoleAdapter.cpp
 src/types/NonBondedInteractionType.cpp
+src/types/NodesStamp.cpp
 src/types/PolarizableAdapter.cpp
 src/types/RestraintStamp.cpp
 src/types/RigidBodyStamp.cpp
@@ -860,7 +897,7 @@ target_link_libraries(Dump2XYZ openmd_single openmd_core openmd_single openmd_co
 add_executable(DynamicProps ${DYNAMICPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(DynamicProps openmd_single openmd_core openmd_single openmd_core)
 add_executable(Hydro ${HYDROSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(Hydro PRIVATE openmd_single openmd_core openmd_single openmd_core nlohmann_json::nlohmann_json)
+target_link_libraries(Hydro PRIVATE openmd_single openmd_core openmd_single openmd_core)
 add_executable(omd2omd ${OMD2OMDSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(omd2omd openmd_single openmd_core openmd_single openmd_core)
 add_executable(equationofstate ${EOSSOURCE} ${GETOPT_SOURCE})
@@ -1058,6 +1095,7 @@ message( STATUS "MPI_CXX_LIBRARIES .......... = ${MPI_CXX_LIBRARIES}")
 message( STATUS "OPENBABEL_DIR .............. = ${OPENBABEL_DIR}")
 message( STATUS "OPENBABEL_INCLUDE_DIR ...... = ${OPENBABEL_INCLUDE_DIR}")
 message( STATUS "OPENBABEL_LIBRARIES ........ = ${OPENBABEL_LIBRARIES}")
+message( STATUS "nlohmann_json_INCLUDE_DIR .. = ${nlohmann_json_INCLUDE_DIR}")
 message( STATUS "QHULL_ROOT ................. = ${QHULL_ROOT}")
 message( STATUS "QHULL_INCLUDE_DIR .......... = ${QHULL_INCLUDE_DIR}")
 message( STATUS "QHULL_LIBRARIES ............ = ${QHULL_LIBRARIES}")

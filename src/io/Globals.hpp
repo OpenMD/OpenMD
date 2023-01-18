@@ -57,6 +57,7 @@
 #include "rnemd/RNEMDParameters.hpp"
 #include "types/Component.hpp"
 #include "types/MoleculeStamp.hpp"
+#include "types/FragmentStamp.hpp"
 #include "types/RestraintStamp.hpp"
 #include "types/ZconsStamp.hpp"
 #include "utils/ParameterManager.hpp"
@@ -163,6 +164,7 @@ namespace OpenMD {
     bool addZConsStamp(ZConsStamp* zcons);
     bool addRestraintStamp(RestraintStamp* rest);
     bool addMoleculeStamp(MoleculeStamp* molStamp);
+    bool addFragmentStamp(FragmentStamp* fragStamp);
     size_t getNComponents() { return components_.size(); }
     std::vector<Component*> getComponents() { return components_; }
     Component* getComponentAt(int index) { return components_.at(index); }
@@ -195,6 +197,7 @@ namespace OpenMD {
     std::vector<ZConsStamp*> zconstraints_;
     std::vector<RestraintStamp*> restraints_;
     std::map<std::string, MoleculeStamp*> moleculeStamps_;
+    std::map<std::string, FragmentStamp*> fragmentStamps_;
     std::pair<int, int> taggedAtomPair_;
     FluctuatingChargeParameters* flucQpars_;
     RNEMD::RNEMDParameters* rnemdPars_;

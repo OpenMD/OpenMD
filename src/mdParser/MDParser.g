@@ -39,6 +39,7 @@ tokens
   CONSTRAINT        = "constraint";
   DISTANCE          = "distance";
   FRAGMENT          = "fragment";
+  SEQUENCE          = "sequence";
   MEMBERS           = "members";
   CENTER            = "center";
   SATELLITES        = "satellites";
@@ -65,6 +66,7 @@ tokens
   CENTRALATOMHEIGHT = "CentralAtomHeight";
   DREIDING          = "Dreiding";
   CHARGE            = "charge";
+  NODES             = "nodes";
   ENDBLOCK;
 }
 
@@ -75,6 +77,7 @@ mdfile  : (statement)*
 statement : assignment
     | componentblock
     | moleculeblock
+    | fragmentblock
     | zconstraintblock
     | restraintblock
     | flucqblock
@@ -121,8 +124,8 @@ moleculestatement : assignment
                   | inversionblock
                   | rigidbodyblock
                   | cutoffgroupblock
-                  | fragmentblock
                   | constraintblock
+                  | sequencestring
                   ;
 
 atomblock : ATOM^ LBRACKET! intConst RBRACKET! LCURLY! (atomstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
@@ -204,11 +207,27 @@ cutoffgroupstatement  : assignment
     | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
     ;
 
-fragmentblock : FRAGMENT^ LBRACKET! intConst RBRACKET! LCURLY! (fragmentstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
+nodesblock : NODES^ (LBRACKET! intConst! RBRACKET!)?  LCURLY!(nodesstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
+          ;
+
+nodesstatement : assignment
+    | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
     ;
 
+fragmentblock : FRAGMENT^ LCURLY! (fragmentstatement)*  RCURLY {#RCURLY->setType(ENDBLOCK);}
+              ;
+
 fragmentstatement : assignment
-    ;
+                  | atomblock
+                  | bondblock
+                  | bendblock
+                  | torsionblock
+                  | inversionblock
+                  | rigidbodyblock
+                  | cutoffgroupblock
+                  | constraintblock
+                  | nodesblock
+                  ;
 
 constraintblock : CONSTRAINT^ (LBRACKET! intConst! RBRACKET!)?  LCURLY!(constraintstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
     ;
@@ -216,7 +235,10 @@ constraintblock : CONSTRAINT^ (LBRACKET! intConst! RBRACKET!)?  LCURLY!(constrai
 constraintstatement : assignment
     | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
     ;
-    
+
+sequencestring : SEQUENCE ASSIGNEQUAL^ constant SEMICOLON!
+               ;
+
 
 doubleNumberTuple   : doubleNumber (COMMA! doubleNumber)* 
     ;

@@ -3,7 +3,7 @@
 
 #include <antlr/config.hpp>
 #include "MDTreeParserTokenTypes.hpp"
-/* $ANTLR 2.7.7 (20160304): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
+/* $ANTLR 2.7.7 (2006-11-01): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
 #include <antlr/TreeParser.hpp>
 
 #line 2 "MDTreeParser.g"
@@ -52,6 +52,7 @@ public:
 	public: void assignment(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void componentblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void moleculeblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void fragmentblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void zconstraintblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void restraintblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void flucqblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
@@ -71,8 +72,10 @@ public:
 	public: void inversionblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void rigidbodyblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void cutoffgroupblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
-	public: void fragmentblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void constraintblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void sequencestring(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void fragmentstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void nodesblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void atomstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	protected: RealType  doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bondstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
@@ -82,8 +85,8 @@ public:
 	public: void inversionstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void rigidbodystatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void cutoffgroupstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
-	public: void fragmentstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void constraintstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void nodesstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 public:
 	ANTLR_USE_NAMESPACE(antlr)RefAST getAST()
 	{
@@ -96,10 +99,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 78;
+	static const int NUM_TOKENS = 80;
 #else
 	enum {
-		NUM_TOKENS = 78
+		NUM_TOKENS = 80
 	};
 #endif
 	
@@ -117,6 +120,8 @@ private:
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_5;
 	static const unsigned long _tokenSet_6_data_[];
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_6;
+	static const unsigned long _tokenSet_7_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_7;
 };
 
 #endif /*INC_MDTreeParser_hpp_*/

@@ -363,4 +363,22 @@ namespace OpenMD {
     }
     return ret;
   }
+
+  bool Globals::addFragmentStamp(FragmentStamp* fragStamp) {
+    std::string fragStampName = fragStamp->getName();
+    std::map<std::string, FragmentStamp*>::iterator i;
+    bool ret = false;
+    i        = fragmentStamps_.find(fragStampName);
+    if (i == fragmentStamps_.end()) {
+      fragmentStamps_.insert(std::map<std::string, FragmentStamp*>::value_type(
+          fragStampName, fragStamp));
+      ret = true;
+    } else {
+      std::ostringstream oss;
+      oss << "Globals Error: Fragment Stamp " << fragStamp->getName()
+          << "appears multiple times\n";
+      throw OpenMDException(oss.str());
+    }
+    return ret;
+  }
 }  // namespace OpenMD
