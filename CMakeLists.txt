@@ -1,11 +1,10 @@
 # Top level cmake script for OpenMD.
-project(OpenMD CXX)
 cmake_minimum_required(VERSION 3.12)
+
+project(OpenMD VERSION 3.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-cmake_policy(SET CMP0135 NEW)
-include(FetchContent)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
@@ -16,6 +15,16 @@ endif()
 IF(WIN32)
    ADD_DEFINITIONS(/D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
+
+include(FetchContent)
+find_package(nlohmann_json REQUIRED)
+if (NOT nlohmann_json_FOUND)
+   FetchContent_Declare(nlohmann_json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+   FetchContent_MakeAvailable(nlohmann_json)
+   set(nlohmann_json_INCLUDE_DIR ${nlohmann_json_SOURCE_DIR}/include)
+endif()
+message(STATUS "Adding include for json to ${nlohmann_json_INCLUDE_DIR}")
+include_directories(${nlohmann_json_INCLUDE_DIR}) 
 
 if (NOT NO_PARALLEL)
     if(WIN32)
@@ -77,7 +86,7 @@ if (NOT NO_PARALLEL)
       else()
         set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
         set(ENV{CXX} ${MPI_CXX_COMPILER})
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_FLAGS}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_FLAGS}")
       endif()
    ENDIF()
 endif()
@@ -243,15 +252,6 @@ ELSE(OPENBABEL3_FOUND)
      MESSAGE(STATUS "No OpenBabel found - will not build atom2omd")
   ENDIF(OPENBABEL2_FOUND)
 ENDIF(OPENBABEL3_FOUND)
-
-find_package(nlohmann_json REQUIRED)
-if (NOT nlohmann_json_FOUND)
-   FetchContent_Declare(nlohmann_json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
-   FetchContent_MakeAvailable(nlohmann_json)
-   set(nlohmann_json_INCLUDE_DIR ${nlohmann_json_SOURCE_DIR}/include)
-endif()
-message(STATUS Adding include for json to ${nlohmann_json_INCLUDE_DIR})
-include_directories(${nlohmann_json_INCLUDE_DIR}) 
 
 
 # option(WITH_JSON "Build JSON support" ON)
