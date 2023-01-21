@@ -203,7 +203,7 @@ namespace OpenMD {
 
       // the eigen vector is already normalized in SquareMatrix3::diagonalize
       Vector3d director = eigenvectors.getColumn(which);
-      if (director[0] < 0) { director.negate(); }
+      // if (director[2] < 0) { director.negate(); }
 
       RealType angle = 0.0;
       vecCount       = 0;
@@ -269,16 +269,27 @@ namespace OpenMD {
 
   void P2OrderParameter::writeP2() {
     ofstream os(getOutputFileName().c_str());
-    os << "#radial distribution function\n";
+    os << "#P2 Order parameter\n";
     os << "#selection1: (" << selectionScript1_ << ")\t";
     if (!doVect_) { os << "selection2: (" << selectionScript2_ << ")\n"; }
     os << "#p2\tdirector_x\tdirector_y\tdiretor_z\tangle(degree)\n";
 
+    RealType p2Sum {};
+    RealType angleSum {};
+    Vector3d directorSum(0.0);
+
     for (size_t i = 0; i < orderParams_.size(); ++i) {
-      os << orderParams_[i].p2 << "\t" << orderParams_[i].director[0] << "\t"
-         << orderParams_[i].director[1] << "\t" << orderParams_[i].director[2]
-         << "\t" << orderParams_[i].angle << "\n";
+      p2Sum += orderParams_[i].p2;
+      directorSum += orderParams_[i].director;
+      angleSum += orderParams_[i].angle;
     }
+
+    p2Sum /= orderParams_.size();
+    directorSum /= orderParams_.size();
+    angleSum /= orderParams_.size();
+
+    os << p2Sum << "\t" << directorSum[0] << "\t" << directorSum[1] << "\t"
+       << directorSum[2] << "\t" << angleSum << "\n";
   }
 
 }  // namespace OpenMD

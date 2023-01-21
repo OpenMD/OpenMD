@@ -217,8 +217,8 @@ namespace OpenMD {
     for (std::size_t i = 0; i < getNBonds(); ++i) {
       BondStamp* bondStamp = getBondStamp(i);
       std::pair<int, int> bondPair(bondStamp->getA(), bondStamp->getB());
-      // make sure bondTuple.first is always less than or equal to
-      // bondTuple.third
+      // make sure bondPair.first is always less than or equal to
+      // bondPair.third
       if (bondPair.first > bondPair.second) {
         std::swap(bondPair.first, bondPair.second);
       }
@@ -326,6 +326,7 @@ namespace OpenMD {
 
     std::set<std::tuple<int, int, int>> allBends;
     std::set<std::tuple<int, int, int>>::iterator iter;
+
     for (std::size_t i = 0; i < getNBends(); ++i) {
       BendStamp* bendStamp  = getBendStamp(i);
       std::vector<int> bend = bendStamp->getMembers();
@@ -350,7 +351,7 @@ namespace OpenMD {
       }
 
       std::tuple<int, int, int> bendTuple {bend[0], bend[1], bend[2]};
-      auto [first, second, third] = bendTuple;
+      auto& [first, second, third] = bendTuple;
 
       // make sure the first element of bendTuple is always less than or equal
       // to the third element of bendTuple
@@ -470,7 +471,7 @@ namespace OpenMD {
 
       std::tuple<int, int, int, int> torsionTuple {torsion[0], torsion[1],
                                                    torsion[2], torsion[3]};
-      auto [first, second, third, fourth] = torsionTuple;
+      auto& [first, second, third, fourth] = torsionTuple;
 
       if (first > fourth) {
         std::swap(first, fourth);
@@ -626,7 +627,7 @@ namespace OpenMD {
 
       std::tuple<int, int, int, int> inversionTuple {
           cent, inversion[0], inversion[1], inversion[2]};
-      auto [first, second, third, fourth] = inversionTuple;
+      auto& [first, second, third, fourth] = inversionTuple;
 
       // In OpenMD, the Central atom in an inversion comes first, and
       // has a special position.  The other three atoms can come in
@@ -783,8 +784,8 @@ namespace OpenMD {
       ConstraintStamp* constraintStamp = getConstraintStamp(i);
       std::pair<int, int> constraintPair(constraintStamp->getA(),
                                          constraintStamp->getB());
-      // make sure constraintTuple.first is always less than or equal to
-      // constraintTuple.third
+      // make sure constraintPair.first is always less than or equal to
+      // constraintPair.third
       if (constraintPair.first > constraintPair.second) {
         std::swap(constraintPair.first, constraintPair.second);
       }

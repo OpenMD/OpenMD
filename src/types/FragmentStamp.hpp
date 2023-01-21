@@ -41,22 +41,129 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef TYES_FRAGMENTSTAMP_HPP
-#define TYES_FRAGMENTSTAMP_HPP
+#ifndef TYPES_FRAGMENTSTAMP_HPP
+#define TYPES_FRAGMENTSTAMP_HPP
 
-#include "types/DataHolder.hpp"
+#include <utility>
+#include <vector>
+
+#include "types/AtomStamp.hpp"
+#include "types/BendStamp.hpp"
+#include "types/BondStamp.hpp"
+#include "types/ConstraintStamp.hpp"
+#include "types/CutoffGroupStamp.hpp"
+#include "types/FragmentStamp.hpp"
+#include "types/InversionStamp.hpp"
+#include "types/NodesStamp.hpp"
+#include "types/RigidBodyStamp.hpp"
+#include "types/TorsionStamp.hpp"
 
 namespace OpenMD {
+
   class FragmentStamp : public DataHolder {
     DeclareParameter(Name, std::string);
 
   public:
-    FragmentStamp(int index);
+    FragmentStamp();
+    virtual ~FragmentStamp();
+
+    bool addAtomStamp(AtomStamp* atom);
+    bool addBondStamp(BondStamp* bond);
+    bool addBendStamp(BendStamp* bend);
+    bool addTorsionStamp(TorsionStamp* torsion);
+    bool addInversionStamp(InversionStamp* inversion);
+    bool addRigidBodyStamp(RigidBodyStamp* rigidbody);
+    bool addCutoffGroupStamp(CutoffGroupStamp* cutoffgroup);
+    bool addConstraintStamp(ConstraintStamp* constraint);
+    bool addNodesStamp(NodesStamp* nodes);
+
+    std::size_t getNAtoms() { return atomStamps_.size(); }
+    std::size_t getNBonds() { return bondStamps_.size(); }
+    std::size_t getNBends() { return bendStamps_.size(); }
+    std::size_t getNTorsions() { return torsionStamps_.size(); }
+    std::size_t getNInversions() { return inversionStamps_.size(); }
+    std::size_t getNRigidBodies() { return rigidBodyStamps_.size(); }
+    std::size_t getNCutoffGroups() { return cutoffGroupStamps_.size(); }
+    std::size_t getNConstraints() { return constraintStamps_.size(); }
+
+    std::size_t getNNodes() { return nodesStamps_.size(); }
+
+    AtomStamp* getAtomStamp(int index) { return atomStamps_[index]; }
+    BondStamp* getBondStamp(int index) { return bondStamps_[index]; }
+    BendStamp* getBendStamp(int index) { return bendStamps_[index]; }
+    TorsionStamp* getTorsionStamp(int index) { return torsionStamps_[index]; }
+    InversionStamp* getInversionStamp(int index) {
+      return inversionStamps_[index];
+    }
+    RigidBodyStamp* getRigidBodyStamp(int index) {
+      return rigidBodyStamps_[index];
+    }
+    CutoffGroupStamp* getCutoffGroupStamp(int index) {
+      return cutoffGroupStamps_[index];
+    }
+    ConstraintStamp* getConstraintStamp(int index) {
+      return constraintStamps_[index];
+    }
+    NodesStamp* getNodesStamp(int index) { return nodesStamps_[index]; }
+
+    bool isBondInSameRigidBody(BondStamp* bond);
+    bool isAtomInRigidBody(int atomIndex);
+    bool isAtomInRigidBody(int atomIndex, int& whichRigidBody,
+                           int& consAtomIndex);
+    std::vector<std::pair<int, int>> getJointAtoms(int rb1, int rb2);
+
+    std::size_t getNFreeAtoms() { return freeAtoms_.size(); }
     virtual void validate();
     int getIndex() { return index_; }
 
   private:
+    void fillBondInfo();
+    void checkAtoms();
+    void checkBonds();
+    void checkBends();
+    void checkTorsions();
+    void checkInversions();
+    void checkRigidBodies();
+    void checkCutoffGroups();
+    void checkNodes();
+    void checkConstraints();
+
+    template<class Cont, class T>
+    bool addIndexSensitiveStamp(Cont& cont, T* stamp) {
+      // typename Cont::iterator i;
+      unsigned int index = stamp->getIndex();
+      bool ret           = false;
+      size_t size        = cont.size();
+
+      if (size >= index + 1) {
+        if (cont[index] != NULL) {
+          ret = false;
+        } else {
+          cont[index] = stamp;
+          ret         = true;
+        }
+      } else {
+        cont.insert(cont.end(), index - cont.size() + 1, NULL);
+        cont[index] = stamp;
+        ret         = true;
+      }
+
+      return ret;
+    }
+
     int index_;
+    std::vector<AtomStamp*> atomStamps_;
+    std::vector<int> freeAtoms_;
+    std::vector<BondStamp*> bondStamps_;
+    std::vector<BendStamp*> bendStamps_;
+    std::vector<TorsionStamp*> torsionStamps_;
+    std::vector<InversionStamp*> inversionStamps_;
+    std::vector<RigidBodyStamp*> rigidBodyStamps_;
+    std::vector<CutoffGroupStamp*> cutoffGroupStamps_;
+    std::vector<ConstraintStamp*> constraintStamps_;
+    std::vector<NodesStamp*> nodesStamps_;
+    std::vector<int> nodeAtoms_;
+    std::vector<int> atom2Rigidbody;
   };
 }  // namespace OpenMD
 

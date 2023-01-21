@@ -37,6 +37,7 @@ mdfile  : (statement)* {blockStack.top()->validate(); blockStack.pop();}
 statement : assignment
     | componentblock
     | moleculeblock
+    | fragmentblock
     | zconstraintblock
     | restraintblock
     | flucqblock
@@ -111,8 +112,28 @@ moleculestatement : assignment
     | inversionblock
     | rigidbodyblock
     | cutoffgroupblock
-    | fragmentblock
     | constraintblock
+    | sequencestring
+    ;
+
+sequencestring  : #(ASSIGNEQUAL id:SEQUENCE constant[#id]) //{blockStack.top()->assign(#ID->getText(),);}
+    ;
+
+fragmentblock : #(FRAGMENT {FragmentStamp* currFragmentStamp = new FragmentStamp(); blockStack.push(currFragmentStamp);}
+            (fragmentstatement)* 
+            ENDBLOCK ) {blockStack.top()->validate(); blockStack.pop(); currConf->addFragmentStamp(currFragmentStamp);}
+    ;
+
+fragmentstatement : assignment
+    | atomblock
+    | bondblock
+    | bendblock
+    | torsionblock
+    | inversionblock
+    | rigidbodyblock
+    | cutoffgroupblock
+    | constraintblock
+    | nodesblock
     ;
 
 atomblock 
@@ -297,19 +318,6 @@ cutoffgroupstatement
               | #(MEMBERS ivec=inttuple) {currCutoffGroupStamp->setMembers(ivec);}             
               ;
 
-fragmentblock {int ival;}
-               : #(FRAGMENT ival=intConst {FragmentStamp* currFragmentStamp = new FragmentStamp(ival); blockStack.push(currFragmentStamp);}
-                      (fragmentstatement)* 
-                      ENDBLOCK) {
-                                  blockStack.top()->validate();
-                                  blockStack.pop(); 
-                                  MoleculeStamp* currMoleculeStamp = static_cast<MoleculeStamp*>(blockStack.top());
-                                  currMoleculeStamp->addFragmentStamp(currFragmentStamp); 
-                                }
-              ;
-
-fragmentstatement : assignment
-    ;
 
 constraintblock : #(CONSTRAINT {ConstraintStamp* currConstraintStamp = new ConstraintStamp(); blockStack.push(currConstraintStamp);}
                 (constraintstatement)* 
@@ -329,7 +337,26 @@ constraintstatement
               | #(MEMBERS ivec=inttuple) {currConstraintStamp->setMembers(ivec);}
               ;
 
-              
+nodesblock 
+    : #(NODES {NodesStamp* currNodesStamp = new NodesStamp(); blockStack.push(currNodesStamp);}
+            (nodesstatement)* 
+            ENDBLOCK )  {
+            blockStack.top()->validate();
+            blockStack.pop(); 
+            FragmentStamp* currFragmentStamp = static_cast<FragmentStamp*>(blockStack.top());
+            currFragmentStamp->addNodesStamp(currNodesStamp); 
+        }   
+    ;
+
+nodesstatement 
+{
+    vector<int> ivec;
+    NodesStamp* currNodesStamp = static_cast<NodesStamp*>(blockStack.top());
+}
+    : assignment
+    | #(MEMBERS ivec=inttuple) {currNodesStamp->setMembers(ivec);}
+    ;
+
 doubleNumberTuple returns [vector<RealType> dvec]
 {
     RealType dval;

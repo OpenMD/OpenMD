@@ -2,7 +2,7 @@
 #define INC_MDParser_hpp_
 
 #include <antlr/config.hpp>
-/* $ANTLR 2.7.7 (20160304): "MDParser.g" -> "MDParser.hpp"$ */
+/* $ANTLR 2.7.7 (2006-11-01): "MDParser.g" -> "MDParser.hpp"$ */
 #include <antlr/TokenStream.hpp>
 #include <antlr/TokenBuffer.hpp>
 #include "MDTokenTypes.hpp"
@@ -49,6 +49,7 @@ public:
 	public: void assignment();
 	public: void componentblock();
 	public: void moleculeblock();
+	public: void fragmentblock();
 	public: void zconstraintblock();
 	public: void restraintblock();
 	public: void flucqblock();
@@ -66,8 +67,8 @@ public:
 	public: void inversionblock();
 	public: void rigidbodyblock();
 	public: void cutoffgroupblock();
-	public: void fragmentblock();
 	public: void constraintblock();
+	public: void sequencestring();
 	public: void atomstatement();
 	public: void doubleNumberTuple();
 	public: void bondstatement();
@@ -77,6 +78,8 @@ public:
 	public: void inversionstatement();
 	public: void rigidbodystatement();
 	public: void cutoffgroupstatement();
+	public: void nodesblock();
+	public: void nodesstatement();
 	public: void fragmentstatement();
 	public: void constraintstatement();
 	protected: void doubleNumber();
@@ -91,10 +94,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 78;
+	static const int NUM_TOKENS = 80;
 #else
 	enum {
-		NUM_TOKENS = 78
+		NUM_TOKENS = 80
 	};
 #endif
 	
@@ -144,6 +147,10 @@ private:
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_21;
 	static const unsigned long _tokenSet_22_data_[];
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_22;
+	static const unsigned long _tokenSet_23_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_23;
+	static const unsigned long _tokenSet_24_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_24;
 };
 
 #endif /*INC_MDParser_hpp_*/
