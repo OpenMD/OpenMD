@@ -54,10 +54,8 @@ namespace OpenMD {
                                              const std::string& filename,
                                              const std::string& sele1,
                                              const std::string& sele2) :
-      SystemACF<RealType>(info, filename, sele1, sele2,
-                          DataStorage::dslPosition | DataStorage::dslAmat |
-                              DataStorage::dslDipole |
-                              DataStorage::dslFlucQPosition) {
+    SystemACF<RealType>(info, filename, sele1, sele2) {
+    
     setCorrFuncType("SystemDipoleCorrFunc");
     setOutputName(getPrefix(dumpFilename_) + ".sysdipcorr");
     setLabelString("<M(0).M(t)>");

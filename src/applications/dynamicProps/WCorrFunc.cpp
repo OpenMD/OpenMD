@@ -51,8 +51,8 @@
 namespace OpenMD {
   WCorrFunc::WCorrFunc(SimInfo* info, const std::string& filename,
                        const std::string& sele1, const std::string& sele2) :
-      ObjectACF<RealType>(info, filename, sele1, sele2,
-                          DataStorage::dslFlucQVelocity) {
+    ObjectACF<RealType>(info, filename, sele1, sele2) {
+    
     setCorrFuncType(" Charge Velocity Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".wcorr");
     setLabelString("<w(0)w(t)>");

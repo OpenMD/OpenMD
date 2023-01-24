@@ -178,9 +178,11 @@ namespace OpenMD {
     outputMask_.set(DENSITY);
     outputMask_.set(ACTIVITY);
 
-    int storageLayout = info_->getStorageLayout();
+    int atomStorageLayout = info_->getAtomStorageLayout();
+    int rigidBodyStorageLayout = info->getRigidBodyStorageLayout();
+    int cutoffGroupStorageLayout = info->getCutoffGroupStorageLayout();
 
-    if (storageLayout & DataStorage::dslElectricField) {
+    if (atomStorageLayout & DataStorage::dslElectricField) {
       outputMask_.set(ELECTRICFIELD);
       outputMask_.set(ELECTROSTATICPOTENTIAL);
       addOutputDataAt(eField, ELECTRICFIELD);
@@ -188,12 +190,12 @@ namespace OpenMD {
     }
 
     if (info_->usesElectrostaticAtoms() ||
-        storageLayout & DataStorage::dslFlucQPosition) {
+        atomStorageLayout & DataStorage::dslFlucQPosition) {
       outputMask_.set(CHARGE);
       addOutputDataAt(charge, CHARGE);
     }
 
-    if (storageLayout & DataStorage::dslFlucQVelocity) {
+    if (atomStorageLayout & DataStorage::dslFlucQVelocity) {
       outputMask_.set(CHARGEVELOCITY);
       addOutputDataAt(chargeVelocity, CHARGEVELOCITY);
     }

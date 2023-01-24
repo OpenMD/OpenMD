@@ -69,7 +69,9 @@ namespace OpenMD {
    */
   class SimSnapshotManager : public SnapshotManager {
   public:
-    SimSnapshotManager(SimInfo* info, int storageLayout = 0);
+    SimSnapshotManager(SimInfo* info, int atomStorageLayout = 0,
+		       int rigidBodyStorageLayout = 0,
+		       int cutoffGroupStorageLayout = 0);
     ~SimSnapshotManager();
     virtual bool advance();
     virtual bool resetToPrevious();

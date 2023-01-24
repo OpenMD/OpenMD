@@ -83,7 +83,7 @@ namespace OpenMD {
     DumpReader reader(info_, dumpFilename_);
     int nFrames = reader.getNFrames();
 
-    storageLayout_ = info_->getStorageLayout();
+    // storageLayout_ = info_->getStorageLayout();
 
     for (frame_ = 0; frame_ < nFrames; frame_ += step_) {
       reader.readFrame(frame_);

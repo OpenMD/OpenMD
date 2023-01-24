@@ -55,9 +55,8 @@ namespace OpenMD {
                                                          const string& filename,
                                                          const string& sele1,
                                                          const string& sele2) :
-      SystemACF<RealType>(
-          info, filename, sele1, sele2,
-          DataStorage::dslVelocity | DataStorage::dslFlucQPosition) {
+    SystemACF<RealType>(info, filename, sele1, sele2) {
+    
     setCorrFuncType("Current Density Auto Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".currentDensityCorr");
 

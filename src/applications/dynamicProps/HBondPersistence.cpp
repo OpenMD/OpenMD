@@ -54,9 +54,9 @@ namespace OpenMD {
                                      const std::string& sele1,
                                      const std::string& sele2, double OOcut,
                                      double thetaCut, double OHcut) :
-      TimeCorrFunc<RealType>(info, filename, sele1, sele2,
-                             DataStorage::dslPosition | DataStorage::dslAmat),
-      OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut) {
+    TimeCorrFunc<RealType>(info, filename, sele1, sele2),
+    OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut) {
+    
     setCorrFuncType("HBondPersistence");
     setOutputName(getPrefix(dumpFilename_) + ".HBpersistence");
 

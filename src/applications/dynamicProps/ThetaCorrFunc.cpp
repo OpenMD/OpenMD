@@ -49,8 +49,8 @@ namespace OpenMD {
   ThetaCorrFunc::ThetaCorrFunc(SimInfo* info, const std::string& filename,
                                const std::string& sele1,
                                const std::string& sele2) :
-      ObjectACF<RealType>(info, filename, sele1, sele2,
-                          DataStorage::dslPosition) {
+    ObjectACF<RealType>(info, filename, sele1, sele2) {
+    
     setCorrFuncType("ThetaCorrFunc");
     setOutputName(getPrefix(dumpFilename_) + ".tcorr");
     setLabelString("Cos(theta)");

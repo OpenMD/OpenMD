@@ -49,8 +49,7 @@ namespace OpenMD {
   BondCorrFunc::BondCorrFunc(SimInfo* info, const std::string& filename,
                              const std::string& sele1,
                              const std::string& sele2) :
-      AutoCorrFunc<RealType>(info, filename, sele1, sele2,
-                             DataStorage::dslPosition) {
+      AutoCorrFunc<RealType>(info, filename, sele1, sele2) {
     setCorrFuncType("Bond Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".bondcorr");
 

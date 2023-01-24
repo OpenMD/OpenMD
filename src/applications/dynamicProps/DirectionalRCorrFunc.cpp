@@ -52,8 +52,8 @@ namespace OpenMD {
                                              const std::string& filename,
                                              const std::string& sele1,
                                              const std::string& sele2) :
-      ObjectACF<Vector3d>(info, filename, sele1, sele2,
-                          DataStorage::dslPosition | DataStorage::dslAmat) {
+    ObjectACF<Vector3d>(info, filename, sele1, sele2) {
+    
     setCorrFuncType("DirectionalRCorrFunc");
     setOutputName(getPrefix(dumpFilename_) + ".drcorr");
     setLabelString("r2\trparallel\trperpendicular");

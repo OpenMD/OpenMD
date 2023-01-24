@@ -48,7 +48,6 @@
 #include <string>
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
-#include "brains/DataStorage.hpp"
 #include "brains/SimInfo.hpp"
 #include "math/Vector3.hpp"
 #include "primitives/Atom.hpp"
@@ -62,9 +61,8 @@ namespace OpenMD {
   FreqFlucCorrFunc::FreqFlucCorrFunc(SimInfo* info, const std::string& filename,
                                      const std::string& sele1,
                                      const std::string& sele2) :
-      ObjectACF<RealType>(info, filename, sele1, sele2,
-                          DataStorage::dslElectricField | DataStorage::dslAmat |
-                              DataStorage::dslDipole) {
+    ObjectACF<RealType>(info, filename, sele1, sele2) {
+    
     setCorrFuncType("FreqFluc Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".ffcorr");
   }
