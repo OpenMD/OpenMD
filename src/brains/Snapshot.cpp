@@ -92,10 +92,11 @@ namespace OpenMD {
   }
 
   Snapshot::Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups,
-                     int storageLayout, bool usePBC) :
-      atomData(nAtoms, storageLayout),
-      rigidbodyData(nRigidbodies, storageLayout),
-      cgData(nCutoffGroups, DataStorage::dslPosition), orthoTolerance_(1e-6) {
+                     int atomStorageLayout, int rigidBodyStorageLayout,
+                     int cutoffGroupStorageLayout, bool usePBC) :
+      atomData(nAtoms, atomStorageLayout),
+      rigidbodyData(nRigidbodies, rigidBodyStorageLayout),
+      cgData(nCutoffGroups, cutoffGroupStorageLayout), orthoTolerance_(1e-6) {
     frameData.id                   = -1;
     frameData.currentTime          = 0;
     frameData.hmat                 = Mat3x3d(0.0);

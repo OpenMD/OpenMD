@@ -50,8 +50,7 @@
 namespace OpenMD {
   RCorrFunc::RCorrFunc(SimInfo* info, const std::string& filename,
                        const std::string& sele1, const std::string& sele2) :
-      ObjectACF<RealType>(info, filename, sele1, sele2,
-                          DataStorage::dslPosition | DataStorage::dslAmat) {
+      ObjectACF<RealType>(info, filename, sele1, sele2) {
     setCorrFuncType("Mean Square Displacement");
     setOutputName(getPrefix(dumpFilename_) + ".rcorr");
 
@@ -61,8 +60,7 @@ namespace OpenMD {
   RCorrFuncZ::RCorrFuncZ(SimInfo* info, const std::string& filename,
                          const std::string& sele1, const std::string& sele2,
                          int nZbins, int axis) :
-      ObjectACF<RealType>(info, filename, sele1, sele2,
-                          DataStorage::dslPosition | DataStorage::dslAmat),
+      ObjectACF<RealType>(info, filename, sele1, sele2),
       axis_(axis) {
     setCorrFuncType("Mean Square Displacement binned by Z");
     setOutputName(getPrefix(dumpFilename_) + ".rcorrZ");
@@ -113,8 +111,7 @@ namespace OpenMD {
 
   RCorrFuncR::RCorrFuncR(SimInfo* info, const std::string& filename,
                          const std::string& sele1, const std::string& sele2) :
-      ObjectACF<RealType>(info, filename, sele1, sele2,
-                          DataStorage::dslPosition | DataStorage::dslAmat) {
+      ObjectACF<RealType>(info, filename, sele1, sele2) {
     // Turn on COM calculation in reader:
     bool ncp = true;
     reader_->setNeedCOMprops(ncp);

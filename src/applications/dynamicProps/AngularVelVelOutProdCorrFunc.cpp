@@ -49,9 +49,7 @@ namespace OpenMD {
   AngularVelVelOutProdCorrFunc::AngularVelVelOutProdCorrFunc(
       SimInfo* info, const std::string& filename, const std::string& sele1,
       const std::string& sele2) :
-      ObjectCCF<Mat3x3d>(
-          info, filename, sele1, sele2,
-          DataStorage::dslVelocity | DataStorage::dslAngularMomentum) {
+      ObjectCCF<Mat3x3d>(info, filename, sele1, sele2) {
     setCorrFuncType(
         "Angular Velocity - Velocity Outer Product Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".wvOutProdcorr");

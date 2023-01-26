@@ -246,11 +246,17 @@ namespace OpenMD {
     /** Returns the snapshot manager. */
     SnapshotManager* getSnapshotManager() { return sman_; }
 
-    /** Returns the storage layout (computed by SimCreator) */
-    int getStorageLayout() { return storageLayout_; }
+    /** Returns the storage layouts (computed by SimCreator) */
+    int getAtomStorageLayout() { return atomStorageLayout_; }
+    int getRigidBodyStorageLayout() { return rigidBodyStorageLayout_; }
+    int getCutoffGroupStorageLayout() { return cutoffGroupStorageLayout_; }
 
-    /** Sets the storage layout (computed by SimCreator) */
-    void setStorageLayout(int sl) { storageLayout_ = sl; }
+    /** Sets the storage layouts (computed by SimCreator) */
+    void setAtomStorageLayout(int asl) { atomStorageLayout_ = asl; }
+    void setRigidBodyStorageLayout(int rbsl) { rigidBodyStorageLayout_ = rbsl; }
+    void setCutoffGroupStorageLayout(int cgsl) {
+      cutoffGroupStorageLayout_ = cgsl;
+    }
 
     /** Sets the snapshot manager. */
     void setSnapshotManager(SnapshotManager* sman);
@@ -601,8 +607,11 @@ namespace OpenMD {
     PropertyMap properties_; /**< Generic Properties can be added */
     SnapshotManager*
         sman_; /**< SnapshotManager (handles particle positions, etc.) */
-    int storageLayout_; /**< Bits to tell how much data to store on each object
-                         */
+
+    int atomStorageLayout_; /**< Bits to tell how much data to store
+                               on each object */
+    int rigidBodyStorageLayout_;
+    int cutoffGroupStorageLayout_;
 
     /**
      * The reason to have a local index manager is that when molecule

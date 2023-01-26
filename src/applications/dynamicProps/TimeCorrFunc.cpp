@@ -55,20 +55,13 @@ namespace OpenMD {
 
   template<typename T>
   TimeCorrFunc<T>::TimeCorrFunc(SimInfo* info, const string& filename,
-                                const string& sele1, const string& sele2,
-                                int storageLayout) :
-      storageLayout_(storageLayout),
-      info_(info), dumpFilename_(filename), seleMan1_(info_), seleMan2_(info_),
+                                const string& sele1, const string& sele2) :
+      info_(info),
+      dumpFilename_(filename), seleMan1_(info_), seleMan2_(info_),
       selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info_),
       evaluator2_(info_), autoCorrFunc_(false), doSystemProperties_(false),
       doMolecularProperties_(false), doObjectProperties_(false),
       doBondProperties_(false) {
-    // Request maximum needed storage for the simulation (including of
-    // whatever was passed down by the individual correlation
-    // function).
-
-    storageLayout_ = info->getStorageLayout() | storageLayout;
-
     reader_ = new DumpReader(info_, dumpFilename_);
 
     uniqueSelections_ = (sele1.compare(sele2) != 0) ? true : false;
@@ -509,24 +502,23 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   template<typename T>
   CrossCorrFunc<T>::CrossCorrFunc(SimInfo* info, const std::string& filename,
                                   const std::string& sele1,
-                                  const std::string& sele2, int storageLayout) :
-      TimeCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
+                                  const std::string& sele2) :
+      TimeCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_ = false;
   }
 
   template<typename T>
   AutoCorrFunc<T>::AutoCorrFunc(SimInfo* info, const std::string& filename,
                                 const std::string& sele1,
-                                const std::string& sele2, int storageLayout) :
-      TimeCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
+                                const std::string& sele2) :
+      TimeCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_ = true;
   }
 
   template<typename T>
   SystemACF<T>::SystemACF(SimInfo* info, const std::string& filename,
-                          const std::string& sele1, const std::string& sele2,
-                          int storageLayout) :
-      AutoCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
+                          const std::string& sele1, const std::string& sele2) :
+      AutoCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_          = true;
     this->doSystemProperties_    = true;
     this->doMolecularProperties_ = false;
@@ -536,9 +528,8 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
 
   template<typename T>
   SystemCCF<T>::SystemCCF(SimInfo* info, const std::string& filename,
-                          const std::string& sele1, const std::string& sele2,
-                          int storageLayout) :
-      CrossCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
+                          const std::string& sele1, const std::string& sele2) :
+      CrossCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_          = false;
     this->doSystemProperties_    = true;
     this->doMolecularProperties_ = false;
@@ -548,9 +539,8 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
 
   template<typename T>
   ObjectACF<T>::ObjectACF(SimInfo* info, const std::string& filename,
-                          const std::string& sele1, const std::string& sele2,
-                          int storageLayout) :
-      AutoCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
+                          const std::string& sele1, const std::string& sele2) :
+      AutoCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_          = true;
     this->doSystemProperties_    = false;
     this->doMolecularProperties_ = false;
@@ -560,9 +550,8 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
 
   template<typename T>
   ObjectCCF<T>::ObjectCCF(SimInfo* info, const std::string& filename,
-                          const std::string& sele1, const std::string& sele2,
-                          int storageLayout) :
-      CrossCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
+                          const std::string& sele1, const std::string& sele2) :
+      CrossCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_          = false;
     this->doSystemProperties_    = false;
     this->doMolecularProperties_ = false;
@@ -573,8 +562,8 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   template<typename T>
   MoleculeACF<T>::MoleculeACF(SimInfo* info, const std::string& filename,
                               const std::string& sele1,
-                              const std::string& sele2, int storageLayout) :
-      AutoCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
+                              const std::string& sele2) :
+      AutoCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_          = true;
     this->doSystemProperties_    = false;
     this->doMolecularProperties_ = true;
@@ -585,8 +574,8 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   template<typename T>
   MoleculeCCF<T>::MoleculeCCF(SimInfo* info, const std::string& filename,
                               const std::string& sele1,
-                              const std::string& sele2, int storageLayout) :
-      CrossCorrFunc<T>(info, filename, sele1, sele2, storageLayout) {
+                              const std::string& sele2) :
+      CrossCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_          = false;
     this->doSystemProperties_    = false;
     this->doMolecularProperties_ = true;

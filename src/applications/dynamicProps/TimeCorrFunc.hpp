@@ -64,8 +64,7 @@ namespace OpenMD {
   class TimeCorrFunc : public DynamicProperty {
   public:
     TimeCorrFunc(SimInfo* info, const std::string& filename,
-                 const std::string& sele1, const std::string& sele2,
-                 int storageLayout);
+                 const std::string& sele1, const std::string& sele2);
 
     virtual ~TimeCorrFunc() { delete reader_; }
     virtual void doCorrelate();
@@ -106,8 +105,6 @@ namespace OpenMD {
     virtual int computeProperty2(int frame, Bond* b) = 0;
     // For everything except System properties:
     virtual T calcCorrVal(int frame1, int frame2, int id1, int id2) = 0;
-
-    int storageLayout_;
 
     RealType deltaTime_;
     unsigned int nTimeBins_;
@@ -152,8 +149,7 @@ namespace OpenMD {
   class AutoCorrFunc : public TimeCorrFunc<T> {
   public:
     AutoCorrFunc(SimInfo* info, const std::string& filename,
-                 const std::string& sele1, const std::string& sele2,
-                 int storageLayout);
+                 const std::string& sele1, const std::string& sele2);
 
   protected:
     virtual void computeProperty1(int frame)                 = 0;
@@ -171,8 +167,7 @@ namespace OpenMD {
   class CrossCorrFunc : public TimeCorrFunc<T> {
   public:
     CrossCorrFunc(SimInfo* info, const std::string& filename,
-                  const std::string& sele1, const std::string& sele2,
-                  int storageLayout);
+                  const std::string& sele1, const std::string& sele2);
 
   protected:
     virtual void computeProperty1(int frame)                 = 0;
@@ -189,8 +184,7 @@ namespace OpenMD {
   class SystemACF : public AutoCorrFunc<T> {
   public:
     SystemACF(SimInfo* info, const std::string& filename,
-              const std::string& sele1, const std::string& sele2,
-              int storageLayout);
+              const std::string& sele1, const std::string& sele2);
 
   protected:
     virtual void computeProperty1(int frame)      = 0;
@@ -212,8 +206,7 @@ namespace OpenMD {
   class SystemCCF : public CrossCorrFunc<T> {
   public:
     SystemCCF(SimInfo* info, const std::string& filename,
-              const std::string& sele1, const std::string& sele2,
-              int storageLayout);
+              const std::string& sele1, const std::string& sele2);
 
   protected:
     virtual void computeProperty1(int frame)      = 0;
@@ -235,8 +228,7 @@ namespace OpenMD {
   class ObjectACF : public AutoCorrFunc<T> {
   public:
     ObjectACF(SimInfo* info, const std::string& filename,
-              const std::string& sele1, const std::string& sele2,
-              int storageLayout);
+              const std::string& sele1, const std::string& sele2);
 
   protected:
     virtual int computeProperty1(int frame, StuntDouble* sd)        = 0;
@@ -258,8 +250,7 @@ namespace OpenMD {
   class ObjectCCF : public CrossCorrFunc<T> {
   public:
     ObjectCCF(SimInfo* info, const std::string& filename,
-              const std::string& sele1, const std::string& sele2,
-              int storageLayout);
+              const std::string& sele1, const std::string& sele2);
 
   protected:
     virtual int computeProperty1(int frame, StuntDouble* sd)        = 0;
@@ -281,8 +272,7 @@ namespace OpenMD {
   class MoleculeACF : public AutoCorrFunc<T> {
   public:
     MoleculeACF(SimInfo* info, const std::string& filename,
-                const std::string& sele1, const std::string& sele2,
-                int storageLayout);
+                const std::string& sele1, const std::string& sele2);
 
   protected:
     virtual int computeProperty1(int frame, Molecule* mol)          = 0;
@@ -304,8 +294,7 @@ namespace OpenMD {
   class MoleculeCCF : public CrossCorrFunc<T> {
   public:
     MoleculeCCF(SimInfo* info, const std::string& filename,
-                const std::string& sele1, const std::string& sele2,
-                int storageLayout);
+                const std::string& sele1, const std::string& sele2);
 
   protected:
     virtual int computeProperty1(int frame, Molecule* mol)          = 0;

@@ -53,9 +53,7 @@ namespace OpenMD {
                                                const std::string& sele1,
                                                const std::string& sele2,
                                                const RealType cutoff) :
-      ObjectCCF<RealType>(
-          info, filename, sele1, sele2,
-          DataStorage::dslFlucQPosition | DataStorage::dslVelocity),
+      ObjectCCF<RealType>(info, filename, sele1, sele2),
       rcut_(cutoff) {
     setCorrFuncType("Charge - Kinetic Cross Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".QKcorr");

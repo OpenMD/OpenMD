@@ -190,21 +190,31 @@ namespace OpenMD {
   void DumpReader::readFrame(int whichFrame) {
     if (!isScanned_) scanFile();
 
-    int storageLayout = info_->getSnapshotManager()->getStorageLayout();
+    int asl  = info_->getSnapshotManager()->getAtomStorageLayout();
+    int rbsl = info_->getSnapshotManager()->getRigidBodyStorageLayout();
 
-    needPos_        = (storageLayout & DataStorage::dslPosition) ? true : false;
-    needVel_        = (storageLayout & DataStorage::dslVelocity) ? true : false;
-    needQuaternion_ = (storageLayout & DataStorage::dslAmat ||
-                       storageLayout & DataStorage::dslDipole ||
-                       storageLayout & DataStorage::dslQuadrupole) ?
-                          true :
-                          false;
-    needAngMom_ =
-        (storageLayout & DataStorage::dslAngularMomentum) ? true : false;
+    needPos_ =
+        (asl & DataStorage::dslPosition || rbsl & DataStorage::dslPosition) ?
+            true :
+            false;
+    needVel_ =
+        (asl & DataStorage::dslVelocity || rbsl & DataStorage::dslVelocity) ?
+            true :
+            false;
+    needQuaternion_ =
+        (asl & DataStorage::dslAmat || asl & DataStorage::dslDipole ||
+         asl & DataStorage::dslQuadrupole || rbsl & DataStorage::dslAmat ||
+         rbsl & DataStorage::dslDipole || rbsl & DataStorage::dslQuadrupole) ?
+            true :
+            false;
+    needAngMom_ = (asl & DataStorage::dslAngularMomentum ||
+                   rbsl & DataStorage::dslAngularMomentum) ?
+                      true :
+                      false;
 
     // some dump files contain the efield, but we should only parse
     // and set the field if we have actually allocated memory for it
-    readField_ = (storageLayout & DataStorage::dslElectricField) ? true : false;
+    readField_ = (asl & DataStorage::dslElectricField) ? true : false;
 
     readSet(whichFrame);
 

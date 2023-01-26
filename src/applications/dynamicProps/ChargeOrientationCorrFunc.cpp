@@ -52,10 +52,8 @@ namespace OpenMD {
   ChargeOrientationCorrFunc::ChargeOrientationCorrFunc(
       SimInfo* info, const std::string& filename, const std::string& sele1,
       const std::string& sele2, const RealType dipoleX, const RealType dipoleY,
-      const RealType dipoleZ, const RealType, const int axis) :
-      ObjectCCF<RealType>(
-          info, filename, sele1, sele2,
-          DataStorage::dslFlucQPosition | DataStorage::dslVelocity),
+      const RealType dipoleZ, const RealType cutOff, const int axis) :
+      ObjectCCF<RealType>(info, filename, sele1, sele2),
       axis_(axis) {
     setCorrFuncType(
         "Charge - Orientation Order Parameter Cross Correlation Function");

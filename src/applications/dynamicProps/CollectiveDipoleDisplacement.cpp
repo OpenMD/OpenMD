@@ -52,9 +52,7 @@ namespace OpenMD {
   CollectiveDipoleDisplacement::CollectiveDipoleDisplacement(
       SimInfo* info, const string& filename, const string& sele1,
       const std::string& sele2) :
-      SystemACF<Vector3d>(
-          info, filename, sele1, sele2,
-          DataStorage::dslPosition | DataStorage::dslFlucQPosition) {
+      SystemACF<Vector3d>(info, filename, sele1, sele2) {
     setCorrFuncType("Collective Dipole Displacement Function");
     setOutputName(getPrefix(dumpFilename_) + ".ddisp");
 

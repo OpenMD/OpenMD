@@ -319,7 +319,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
 
 #ifdef IS_MPI
       vel  = Vector3d(globalVels[dim_ * id], globalVels[dim_ * id + 1],
-                      globalVels[dim_ * id + 2]);
+                     globalVels[dim_ * id + 2]);
       mass = globalMasses[id];
 
       // localID will be between 0 and hullSitesOnProc[myrank] if we

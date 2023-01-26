@@ -61,9 +61,7 @@ namespace OpenMD {
   CoMRCorrFunc::CoMRCorrFunc(SimInfo* info, const std::string& filename,
                              const std::string& sele1,
                              const std::string& sele2) :
-      SystemACF<RealType>(info, filename, sele1, sele2,
-                          DataStorage::dslPosition | DataStorage::dslVelocity |
-                              DataStorage::dslForce) {
+      SystemACF<RealType>(info, filename, sele1, sele2) {
     setCorrFuncType("CoMRCorrFunc");
     setOutputName(getPrefix(dumpFilename_) + ".comrcorr");
     setLabelString("CoMR^2");

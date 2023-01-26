@@ -49,9 +49,7 @@ namespace OpenMD {
   ForTorCorrFunc::ForTorCorrFunc(SimInfo* info, const std::string& filename,
                                  const std::string& sele1,
                                  const std::string& sele2) :
-      ObjectCCF<Mat3x3d>(info, filename, sele1, sele2,
-                         DataStorage::dslForce | DataStorage::dslAmat |
-                             DataStorage::dslTorque) {
+      ObjectCCF<Mat3x3d>(info, filename, sele1, sele2) {
     setCorrFuncType("Force - Torque Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".ftcorr");
 

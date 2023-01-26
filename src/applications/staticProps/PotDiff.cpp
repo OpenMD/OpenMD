@@ -69,12 +69,18 @@ namespace OpenMD {
     // using fluctuating charge values.  If we don't have any
     // fluctuating charges in the simulation, we need to expand
     // storage to hold them.
-    int storageLayout = info_->getStorageLayout();
-    storageLayout |= DataStorage::dslFlucQPosition;
-    storageLayout |= DataStorage::dslFlucQVelocity;
-    storageLayout |= DataStorage::dslFlucQForce;
-    info_->setStorageLayout(storageLayout);
-    info_->setSnapshotManager(new SimSnapshotManager(info_, storageLayout));
+    int atomStorageLayout        = info_->getAtomStorageLayout();
+    int rigidBodyStorageLayout   = info->getRigidBodyStorageLayout();
+    int cutoffGroupStorageLayout = info->getCutoffGroupStorageLayout();
+
+    atomStorageLayout |= DataStorage::dslFlucQPosition;
+    atomStorageLayout |= DataStorage::dslFlucQVelocity;
+    atomStorageLayout |= DataStorage::dslFlucQForce;
+
+    info_->setAtomStorageLayout(atomStorageLayout);
+    info_->setSnapshotManager(new SimSnapshotManager(info_, atomStorageLayout,
+                                                     rigidBodyStorageLayout,
+                                                     cutoffGroupStorageLayout));
 
     // now we have to figure out which AtomTypes to convert to fluctuating
     // charges

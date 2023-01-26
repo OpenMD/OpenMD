@@ -51,8 +51,7 @@ namespace OpenMD {
   Displacement::Displacement(SimInfo* info, const std::string& filename,
                              const std::string& sele1,
                              const std::string& sele2) :
-      ObjectACF<Vector3d>(info, filename, sele1, sele2,
-                          DataStorage::dslPosition | DataStorage::dslAmat) {
+      ObjectACF<Vector3d>(info, filename, sele1, sele2) {
     setCorrFuncType("Displacement");
     setOutputName(getPrefix(dumpFilename_) + ".disp");
 
@@ -62,8 +61,7 @@ namespace OpenMD {
   DisplacementZ::DisplacementZ(SimInfo* info, const std::string& filename,
                                const std::string& sele1,
                                const std::string& sele2, int nZbins, int axis) :
-      ObjectACF<Vector3d>(info, filename, sele1, sele2,
-                          DataStorage::dslPosition | DataStorage::dslAmat) {
+      ObjectACF<Vector3d>(info, filename, sele1, sele2) {
     setCorrFuncType("Displacement binned by Z");
     setOutputName(getPrefix(dumpFilename_) + ".dispZ");
 

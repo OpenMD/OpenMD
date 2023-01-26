@@ -173,7 +173,9 @@ namespace OpenMD {
     ForceField* ff_;
     InteractionManager* interactionMan_;
 
-    int storageLayout_;
+    int atomStorageLayout_;
+    int rigidBodyStorageLayout_;
+    int cutoffGroupStorageLayout_;
     bool needVelocities_;
     bool usePeriodicBoundaryConditions_;
     RealType skinThickness_; /**< Verlet neighbor list skin thickness */

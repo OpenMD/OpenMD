@@ -121,7 +121,7 @@ namespace OpenMD {
     IntegratorFactory() = default;
     ~IntegratorFactory();
 
-    IntegratorFactory(const IntegratorFactory&)            = delete;
+    IntegratorFactory(const IntegratorFactory&) = delete;
     IntegratorFactory& operator=(const IntegratorFactory&) = delete;
 
     CreatorMapType creatorMap_;

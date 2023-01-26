@@ -112,7 +112,7 @@ namespace OpenMD {
 
     std::string outputFilename_;
     int frame_;
-    int storageLayout_;
+    // int storageLayout_;
     std::vector<RealType> times_;
     std::vector<RealType> values_;
     std::string sequenceType_;

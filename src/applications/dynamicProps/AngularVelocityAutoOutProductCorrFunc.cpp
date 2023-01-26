@@ -50,8 +50,7 @@ namespace OpenMD {
   AngularVelocityAutoOutProductCorrFunc::AngularVelocityAutoOutProductCorrFunc(
       SimInfo* info, const std::string& filename, const std::string& sele1,
       const std::string& sele2) :
-      ObjectACF<Mat3x3d>(info, filename, sele1, sele2,
-                         DataStorage::dslAngularMomentum) {
+      ObjectACF<Mat3x3d>(info, filename, sele1, sele2) {
     setCorrFuncType(
         "Angular Velocity - Angular Velocity Auto Outer Product Correlation "
         "Function");

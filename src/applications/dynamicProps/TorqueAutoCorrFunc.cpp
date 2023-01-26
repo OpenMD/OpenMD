@@ -51,9 +51,7 @@ namespace OpenMD {
                                          const std::string& filename,
                                          const std::string& sele1,
                                          const std::string& sele2) :
-      ObjectACF<Mat3x3d>(info, filename, sele1, sele2,
-                         DataStorage::dslForce | DataStorage::dslAmat |
-                             DataStorage::dslTorque) {
+      ObjectACF<Mat3x3d>(info, filename, sele1, sele2) {
     setCorrFuncType("Torque Auto Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".tacorr");
 

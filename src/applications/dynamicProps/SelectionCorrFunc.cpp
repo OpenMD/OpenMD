@@ -48,7 +48,7 @@ namespace OpenMD {
                                        const std::string& filename,
                                        const std::string& sele1,
                                        const std::string& sele2) :
-      ObjectCCF<int>(info, filename, sele1, sele2, DataStorage::dslPosition) {
+      ObjectCCF<int>(info, filename, sele1, sele2) {
     setCorrFuncType("SelectionCorrFunc");
     setOutputName(getPrefix(dumpFilename_) + ".selecorr");
 

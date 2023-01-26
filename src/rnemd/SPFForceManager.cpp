@@ -69,15 +69,22 @@ namespace OpenMD::RNEMD {
     int nAtoms        = info_->getNAtoms();
     int nRigidBodies  = info_->getNRigidBodies();
     int nCutoffGroups = info_->getNCutoffGroups();
-    int storageLayout = info_->getSnapshotManager()->getStorageLayout();
+
+    int atomStorageLayout = info_->getSnapshotManager()->getAtomStorageLayout();
+    int rbStorageLayout =
+        info_->getSnapshotManager()->getRigidBodyStorageLayout();
+    int cgStorageLayout =
+        info_->getSnapshotManager()->getCutoffGroupStorageLayout();
 
     bool usePBC = info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-    temporarySourceSnapshot_ = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
-                                            storageLayout, usePBC);
+    temporarySourceSnapshot_ =
+        new Snapshot(nAtoms, nRigidBodies, nCutoffGroups, atomStorageLayout,
+                     rbStorageLayout, cgStorageLayout, usePBC);
 
-    temporarySinkSnapshot_ = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
-                                          storageLayout, usePBC);
+    temporarySinkSnapshot_ =
+        new Snapshot(nAtoms, nRigidBodies, nCutoffGroups, atomStorageLayout,
+                     rbStorageLayout, cgStorageLayout, usePBC);
   }
 
   SPFForceManager::~SPFForceManager() {

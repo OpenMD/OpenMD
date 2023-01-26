@@ -339,6 +339,8 @@ namespace OpenMD {
 
     if (stid1 == -1 || stid2 == -1)
       return 0.0;
-    else { return MixingMap[stid1][stid2].rbig; }
+    else {
+      return MixingMap[stid1][stid2].rbig;
+    }
   }
 }  // namespace OpenMD

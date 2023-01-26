@@ -53,9 +53,7 @@ namespace OpenMD {
   COHZ::COHZ(SimInfo* info, const std::string& filename,
              const std::string& sele1, const std::string& sele2, int order,
              int nZbins, int axis) :
-      MoleculeACF<Vector<RealType, 4>>(
-          info, filename, sele1, sele2,
-          DataStorage::dslPosition | DataStorage::dslAmat),
+      MoleculeACF<Vector<RealType, 4>>(info, filename, sele1, sele2),
       nZBins_(nZbins), axis_(axis) {
     setCorrFuncType("Legendre Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".lcorr");

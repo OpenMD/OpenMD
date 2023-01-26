@@ -56,9 +56,11 @@ namespace OpenMD {
                                          InteractionManager* iMan) :
       info_(info),
       interactionMan_(iMan), needVelocities_(false) {
-    sman_          = info_->getSnapshotManager();
-    storageLayout_ = sman_->getStorageLayout();
-    ff_            = info_->getForceField();
+    sman_                     = info_->getSnapshotManager();
+    atomStorageLayout_        = sman_->getAtomStorageLayout();
+    rigidBodyStorageLayout_   = sman_->getRigidBodyStorageLayout();
+    cutoffGroupStorageLayout_ = sman_->getCutoffGroupStorageLayout();
+    ff_                       = info_->getForceField();
 
     usePeriodicBoundaryConditions_ =
         info->getSimParams()->getUsePeriodicBoundaryConditions();
@@ -112,11 +114,11 @@ namespace OpenMD {
     sdat.selfPot = selfPot;
     sdat.selePot = selectedSelfPot;
 
-    if (storageLayout_ & DataStorage::dslDensity) {
+    if (atomStorageLayout_ & DataStorage::dslDensity) {
       sdat.rho = snap_->atomData.density[atom];
     }
 
-    if (storageLayout_ & DataStorage::dslParticlePot) {
+    if (atomStorageLayout_ & DataStorage::dslParticlePot) {
       sdat.particlePot = snap_->atomData.particlePot[atom];
     }
   }
@@ -126,19 +128,19 @@ namespace OpenMD {
     sdat.selfPot = selfPot;
     sdat.selePot = selectedSelfPot;
 
-    if (storageLayout_ & DataStorage::dslSkippedCharge) {
+    if (atomStorageLayout_ & DataStorage::dslSkippedCharge) {
       sdat.skippedCharge = snap_->atomData.skippedCharge[atom];
     }
 
-    if (storageLayout_ & DataStorage::dslParticlePot) {
+    if (atomStorageLayout_ & DataStorage::dslParticlePot) {
       sdat.particlePot = snap_->atomData.particlePot[atom];
     }
 
-    if (storageLayout_ & DataStorage::dslFlucQPosition) {
+    if (atomStorageLayout_ & DataStorage::dslFlucQPosition) {
       sdat.flucQ = snap_->atomData.flucQPos[atom];
     }
 
-    if (storageLayout_ & DataStorage::dslFlucQForce) {
+    if (atomStorageLayout_ & DataStorage::dslFlucQForce) {
       sdat.flucQfrc = snap_->atomData.flucQFrc[atom];
     }
   }
@@ -147,15 +149,16 @@ namespace OpenMD {
     selfPot         = sdat.selfPot;
     selectedSelfPot = sdat.selePot;
 
-    if (storageLayout_ & DataStorage::dslFunctional) {
+    if (atomStorageLayout_ & DataStorage::dslFunctional) {
       snap_->atomData.functional[atom] += sdat.frho;
     }
 
-    if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+    if (atomStorageLayout_ & DataStorage::dslFunctionalDerivative) {
       snap_->atomData.functionalDerivative[atom] += sdat.dfrhodrho;
     }
 
-    if (sdat.doParticlePot && (storageLayout_ & DataStorage::dslParticlePot)) {
+    if (sdat.doParticlePot &&
+        (atomStorageLayout_ & DataStorage::dslParticlePot)) {
       snap_->atomData.particlePot[atom] = sdat.particlePot;
     }
   }
@@ -164,7 +167,7 @@ namespace OpenMD {
     selfPot         = sdat.selfPot;
     selectedSelfPot = sdat.selePot;
 
-    if (storageLayout_ & DataStorage::dslFlucQForce) {
+    if (atomStorageLayout_ & DataStorage::dslFlucQForce) {
       snap_->atomData.flucQFrc[atom] = sdat.flucQfrc;
     }
   }

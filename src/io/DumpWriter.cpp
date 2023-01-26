@@ -617,7 +617,7 @@ namespace OpenMD {
 
   std::string DumpWriter::prepareSiteLine(StuntDouble* sd, int ioIndex,
                                           int siteIndex) {
-    int storageLayout = info_->getSnapshotManager()->getStorageLayout();
+    int asl = info_->getSnapshotManager()->getAtomStorageLayout();
 
     std::string id;
     std::string type;
@@ -633,7 +633,7 @@ namespace OpenMD {
     }
 
     if (needFlucQ_) {
-      if (storageLayout & DataStorage::dslFlucQPosition) {
+      if (asl & DataStorage::dslFlucQPosition) {
         type += "c";
         RealType fqPos = sd->getFlucQPos();
         if (std::isinf(fqPos) || std::isnan(fqPos)) {
@@ -648,7 +648,7 @@ namespace OpenMD {
         line += tempBuffer;
       }
 
-      if (storageLayout & DataStorage::dslFlucQVelocity) {
+      if (asl & DataStorage::dslFlucQVelocity) {
         type += "w";
         RealType fqVel = sd->getFlucQVel();
         if (std::isinf(fqVel) || std::isnan(fqVel)) {
@@ -664,7 +664,7 @@ namespace OpenMD {
       }
 
       if (needForceVector_) {
-        if (storageLayout & DataStorage::dslFlucQForce) {
+        if (asl & DataStorage::dslFlucQForce) {
           type += "g";
           RealType fqFrc = sd->getFlucQFrc();
           if (std::isinf(fqFrc) || std::isnan(fqFrc)) {
@@ -682,7 +682,7 @@ namespace OpenMD {
     }
 
     if (needElectricField_) {
-      if (storageLayout & DataStorage::dslElectricField) {
+      if (asl & DataStorage::dslElectricField) {
         type += "e";
         Vector3d eField = sd->getElectricField();
         if (std::isinf(eField[0]) || std::isnan(eField[0]) ||
@@ -702,7 +702,7 @@ namespace OpenMD {
     }
 
     if (needSitePotential_) {
-      if (storageLayout & DataStorage::dslSitePotential) {
+      if (asl & DataStorage::dslSitePotential) {
         type += "s";
         RealType sPot = sd->getSitePotential();
         if (std::isinf(sPot) || std::isnan(sPot)) {
@@ -719,7 +719,7 @@ namespace OpenMD {
     }
 
     if (needParticlePot_) {
-      if (storageLayout & DataStorage::dslParticlePot) {
+      if (asl & DataStorage::dslParticlePot) {
         type += "u";
         RealType particlePot = sd->getParticlePot();
         if (std::isinf(particlePot) || std::isnan(particlePot)) {
@@ -736,7 +736,7 @@ namespace OpenMD {
     }
 
     if (needDensity_) {
-      if (storageLayout & DataStorage::dslDensity) {
+      if (asl & DataStorage::dslDensity) {
         type += "d";
         RealType density = sd->getDensity();
         if (std::isinf(density) || std::isnan(density)) {

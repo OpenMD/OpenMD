@@ -86,7 +86,7 @@ namespace OpenMD {
     EF.y() = ef[1];
     EF.z() = ef[2];
 
-    int storageLayout_ = info_->getSnapshotManager()->getStorageLayout();
+    int storageLayout_ = info_->getSnapshotManager()->getAtomStorageLayout();
     if (storageLayout_ & DataStorage::dslParticlePot) doParticlePot = true;
     initialized = true;
   }

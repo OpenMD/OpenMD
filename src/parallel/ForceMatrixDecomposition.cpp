@@ -108,10 +108,10 @@ namespace OpenMD {
    * SimulationSetup
    */
   void ForceMatrixDecomposition::distributeInitialData() {
-    snap_          = sman_->getCurrentSnapshot();
-    storageLayout_ = sman_->getStorageLayout();
-    ff_            = info_->getForceField();
-    nLocal_        = snap_->getNumberOfAtoms();
+    snap_              = sman_->getCurrentSnapshot();
+    atomStorageLayout_ = sman_->getAtomStorageLayout();
+    ff_                = info_->getForceField();
+    nLocal_            = snap_->getNumberOfAtoms();
 
     nGroups_ = info_->getNLocalCutoffGroups();
     // gather the information for atomtype IDs (atids):
@@ -163,9 +163,9 @@ namespace OpenMD {
 
     // Modify the data storage objects with the correct layouts and sizes:
     atomRowData.resize(nAtomsInRow_);
-    atomRowData.setStorageLayout(storageLayout_);
+    atomRowData.setStorageLayout(atomStorageLayout_);
     atomColData.resize(nAtomsInCol_);
-    atomColData.setStorageLayout(storageLayout_);
+    atomColData.setStorageLayout(atomStorageLayout_);
     cgRowData.resize(nGroupsInRow_);
     cgRowData.setStorageLayout(DataStorage::dslPosition);
     cgColData.resize(nGroupsInCol_);
@@ -339,12 +339,12 @@ namespace OpenMD {
     selectedSelfPot = 0.0;
 
 #ifdef IS_MPI
-    if (storageLayout_ & DataStorage::dslForce) {
+    if (atomStorageLayout_ & DataStorage::dslForce) {
       fill(atomRowData.force.begin(), atomRowData.force.end(), V3Zero);
       fill(atomColData.force.begin(), atomColData.force.end(), V3Zero);
     }
 
-    if (storageLayout_ & DataStorage::dslTorque) {
+    if (atomStorageLayout_ & DataStorage::dslTorque) {
       fill(atomRowData.torque.begin(), atomRowData.torque.end(), V3Zero);
       fill(atomColData.torque.begin(), atomColData.torque.end(), V3Zero);
     }
@@ -367,48 +367,48 @@ namespace OpenMD {
     fill(selepot_col.begin(), selepot_col.end(),
          Vector<RealType, N_INTERACTION_FAMILIES>(0.0));
 
-    if (storageLayout_ & DataStorage::dslParticlePot) {
+    if (atomStorageLayout_ & DataStorage::dslParticlePot) {
       fill(atomRowData.particlePot.begin(), atomRowData.particlePot.end(), 0.0);
       fill(atomColData.particlePot.begin(), atomColData.particlePot.end(), 0.0);
     }
 
-    if (storageLayout_ & DataStorage::dslDensity) {
+    if (atomStorageLayout_ & DataStorage::dslDensity) {
       fill(atomRowData.density.begin(), atomRowData.density.end(), 0.0);
       fill(atomColData.density.begin(), atomColData.density.end(), 0.0);
     }
 
-    if (storageLayout_ & DataStorage::dslFunctional) {
+    if (atomStorageLayout_ & DataStorage::dslFunctional) {
       fill(atomRowData.functional.begin(), atomRowData.functional.end(), 0.0);
       fill(atomColData.functional.begin(), atomColData.functional.end(), 0.0);
     }
 
-    if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+    if (atomStorageLayout_ & DataStorage::dslFunctionalDerivative) {
       fill(atomRowData.functionalDerivative.begin(),
            atomRowData.functionalDerivative.end(), 0.0);
       fill(atomColData.functionalDerivative.begin(),
            atomColData.functionalDerivative.end(), 0.0);
     }
 
-    if (storageLayout_ & DataStorage::dslSkippedCharge) {
+    if (atomStorageLayout_ & DataStorage::dslSkippedCharge) {
       fill(atomRowData.skippedCharge.begin(), atomRowData.skippedCharge.end(),
            0.0);
       fill(atomColData.skippedCharge.begin(), atomColData.skippedCharge.end(),
            0.0);
     }
 
-    if (storageLayout_ & DataStorage::dslFlucQForce) {
+    if (atomStorageLayout_ & DataStorage::dslFlucQForce) {
       fill(atomRowData.flucQFrc.begin(), atomRowData.flucQFrc.end(), 0.0);
       fill(atomColData.flucQFrc.begin(), atomColData.flucQFrc.end(), 0.0);
     }
 
-    if (storageLayout_ & DataStorage::dslElectricField) {
+    if (atomStorageLayout_ & DataStorage::dslElectricField) {
       fill(atomRowData.electricField.begin(), atomRowData.electricField.end(),
            V3Zero);
       fill(atomColData.electricField.begin(), atomColData.electricField.end(),
            V3Zero);
     }
 
-    if (storageLayout_ & DataStorage::dslSitePotential) {
+    if (atomStorageLayout_ & DataStorage::dslSitePotential) {
       fill(atomRowData.sitePotential.begin(), atomRowData.sitePotential.end(),
            0.0);
       fill(atomColData.sitePotential.begin(), atomColData.sitePotential.end(),
@@ -418,35 +418,35 @@ namespace OpenMD {
 #endif
     // even in parallel, we need to zero out the local arrays:
 
-    if (storageLayout_ & DataStorage::dslParticlePot) {
+    if (atomStorageLayout_ & DataStorage::dslParticlePot) {
       fill(snap_->atomData.particlePot.begin(),
            snap_->atomData.particlePot.end(), 0.0);
     }
 
-    if (storageLayout_ & DataStorage::dslDensity) {
+    if (atomStorageLayout_ & DataStorage::dslDensity) {
       fill(snap_->atomData.density.begin(), snap_->atomData.density.end(), 0.0);
     }
 
-    if (storageLayout_ & DataStorage::dslFunctional) {
+    if (atomStorageLayout_ & DataStorage::dslFunctional) {
       fill(snap_->atomData.functional.begin(), snap_->atomData.functional.end(),
            0.0);
     }
 
-    if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+    if (atomStorageLayout_ & DataStorage::dslFunctionalDerivative) {
       fill(snap_->atomData.functionalDerivative.begin(),
            snap_->atomData.functionalDerivative.end(), 0.0);
     }
 
-    if (storageLayout_ & DataStorage::dslSkippedCharge) {
+    if (atomStorageLayout_ & DataStorage::dslSkippedCharge) {
       fill(snap_->atomData.skippedCharge.begin(),
            snap_->atomData.skippedCharge.end(), 0.0);
     }
 
-    if (storageLayout_ & DataStorage::dslElectricField) {
+    if (atomStorageLayout_ & DataStorage::dslElectricField) {
       fill(snap_->atomData.electricField.begin(),
            snap_->atomData.electricField.end(), V3Zero);
     }
-    if (storageLayout_ & DataStorage::dslSitePotential) {
+    if (atomStorageLayout_ & DataStorage::dslSitePotential) {
       fill(snap_->atomData.sitePotential.begin(),
            snap_->atomData.sitePotential.end(), 0.0);
     }
@@ -455,8 +455,8 @@ namespace OpenMD {
   void ForceMatrixDecomposition::distributeData() {
 #ifdef IS_MPI
 
-    snap_          = sman_->getCurrentSnapshot();
-    storageLayout_ = sman_->getStorageLayout();
+    snap_              = sman_->getCurrentSnapshot();
+    atomStorageLayout_ = sman_->getAtomStorageLayout();
 
     bool needsCG = true;
     if (info_->getNCutoffGroups() != info_->getNAtoms()) needsCG = false;
@@ -485,18 +485,18 @@ namespace OpenMD {
     }
 
     // if needed, gather the atomic rotation matrices
-    if (storageLayout_ & DataStorage::dslAmat) {
+    if (atomStorageLayout_ & DataStorage::dslAmat) {
       AtomPlanMatrixRow->gather(snap_->atomData.aMat, atomRowData.aMat);
       AtomPlanMatrixColumn->gather(snap_->atomData.aMat, atomColData.aMat);
     }
 
     // if needed, gather the atomic eletrostatic information
-    if (storageLayout_ & DataStorage::dslDipole) {
+    if (atomStorageLayout_ & DataStorage::dslDipole) {
       AtomPlanVectorRow->gather(snap_->atomData.dipole, atomRowData.dipole);
       AtomPlanVectorColumn->gather(snap_->atomData.dipole, atomColData.dipole);
     }
 
-    if (storageLayout_ & DataStorage::dslQuadrupole) {
+    if (atomStorageLayout_ & DataStorage::dslQuadrupole) {
       AtomPlanMatrixRow->gather(snap_->atomData.quadrupole,
                                 atomRowData.quadrupole);
       AtomPlanMatrixColumn->gather(snap_->atomData.quadrupole,
@@ -504,7 +504,7 @@ namespace OpenMD {
     }
 
     // if needed, gather the atomic fluctuating charge values
-    if (storageLayout_ & DataStorage::dslFlucQPosition) {
+    if (atomStorageLayout_ & DataStorage::dslFlucQPosition) {
       AtomPlanRealRow->gather(snap_->atomData.flucQPos, atomRowData.flucQPos);
       AtomPlanRealColumn->gather(snap_->atomData.flucQPos,
                                  atomColData.flucQPos);
@@ -519,10 +519,10 @@ namespace OpenMD {
   void ForceMatrixDecomposition::collectIntermediateData() {
 #ifdef IS_MPI
 
-    snap_          = sman_->getCurrentSnapshot();
-    storageLayout_ = sman_->getStorageLayout();
+    snap_              = sman_->getCurrentSnapshot();
+    atomStorageLayout_ = sman_->getAtomStorageLayout();
 
-    if (storageLayout_ & DataStorage::dslDensity) {
+    if (atomStorageLayout_ & DataStorage::dslDensity) {
       AtomPlanRealRow->scatter(atomRowData.density, snap_->atomData.density);
 
       int n = snap_->atomData.density.size();
@@ -534,7 +534,7 @@ namespace OpenMD {
 
     // this isn't necessary if we don't have polarizable atoms, but
     // we'll leave it here for now.
-    if (storageLayout_ & DataStorage::dslElectricField) {
+    if (atomStorageLayout_ & DataStorage::dslElectricField) {
       AtomPlanVectorRow->scatter(atomRowData.electricField,
                                  snap_->atomData.electricField);
 
@@ -553,17 +553,17 @@ namespace OpenMD {
    */
   void ForceMatrixDecomposition::distributeIntermediateData() {
 #ifdef IS_MPI
-    snap_          = sman_->getCurrentSnapshot();
-    storageLayout_ = sman_->getStorageLayout();
+    snap_              = sman_->getCurrentSnapshot();
+    atomStorageLayout_ = sman_->getAtomStorageLayout();
 
-    if (storageLayout_ & DataStorage::dslFunctional) {
+    if (atomStorageLayout_ & DataStorage::dslFunctional) {
       AtomPlanRealRow->gather(snap_->atomData.functional,
                               atomRowData.functional);
       AtomPlanRealColumn->gather(snap_->atomData.functional,
                                  atomColData.functional);
     }
 
-    if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+    if (atomStorageLayout_ & DataStorage::dslFunctionalDerivative) {
       AtomPlanRealRow->gather(snap_->atomData.functionalDerivative,
                               atomRowData.functionalDerivative);
       AtomPlanRealColumn->gather(snap_->atomData.functionalDerivative,
@@ -574,8 +574,8 @@ namespace OpenMD {
 
   void ForceMatrixDecomposition::collectData() {
 #ifdef IS_MPI
-    snap_          = sman_->getCurrentSnapshot();
-    storageLayout_ = sman_->getStorageLayout();
+    snap_              = sman_->getCurrentSnapshot();
+    atomStorageLayout_ = sman_->getAtomStorageLayout();
 
     int n = snap_->atomData.force.size();
     vector<Vector3d> frc_tmp(n, V3Zero);
@@ -591,7 +591,7 @@ namespace OpenMD {
       snap_->atomData.force[i] += frc_tmp[i];
     }
 
-    if (storageLayout_ & DataStorage::dslTorque) {
+    if (atomStorageLayout_ & DataStorage::dslTorque) {
       int nt = snap_->atomData.torque.size();
       vector<Vector3d> trq_tmp(nt, V3Zero);
 
@@ -606,7 +606,7 @@ namespace OpenMD {
         snap_->atomData.torque[i] += trq_tmp[i];
     }
 
-    if (storageLayout_ & DataStorage::dslSkippedCharge) {
+    if (atomStorageLayout_ & DataStorage::dslSkippedCharge) {
       int ns = snap_->atomData.skippedCharge.size();
       vector<RealType> skch_tmp(ns, 0.0);
 
@@ -621,7 +621,7 @@ namespace OpenMD {
         snap_->atomData.skippedCharge[i] += skch_tmp[i];
     }
 
-    if (storageLayout_ & DataStorage::dslFlucQForce) {
+    if (atomStorageLayout_ & DataStorage::dslFlucQForce) {
       int nq = snap_->atomData.flucQFrc.size();
       vector<RealType> fqfrc_tmp(nq, 0.0);
 
@@ -636,7 +636,7 @@ namespace OpenMD {
         snap_->atomData.flucQFrc[i] += fqfrc_tmp[i];
     }
 
-    if (storageLayout_ & DataStorage::dslElectricField) {
+    if (atomStorageLayout_ & DataStorage::dslElectricField) {
       int nef = snap_->atomData.electricField.size();
       vector<Vector3d> efield_tmp(nef, V3Zero);
 
@@ -651,7 +651,7 @@ namespace OpenMD {
         snap_->atomData.electricField[i] += efield_tmp[i];
     }
 
-    if (storageLayout_ & DataStorage::dslSitePotential) {
+    if (atomStorageLayout_ & DataStorage::dslSitePotential) {
       int nsp = snap_->atomData.sitePotential.size();
       vector<RealType> sp_tmp(nsp, 0.0);
 
@@ -690,7 +690,7 @@ namespace OpenMD {
     for (std::size_t ii = 0; ii < selepot_temp.size(); ii++)
       selectedPot += selepot_temp[ii];
 
-    if (storageLayout_ & DataStorage::dslParticlePot) {
+    if (atomStorageLayout_ & DataStorage::dslParticlePot) {
       // This is the pairwise contribution to the particle pot.  The
       // embedding contribution is added in each of the low level
       // non-bonded routines.  In single processor, this is done in
@@ -724,7 +724,7 @@ namespace OpenMD {
     for (std::size_t ii = 0; ii < selepot_temp.size(); ii++)
       selectedPot += selepot_temp[ii];
 
-    if (storageLayout_ & DataStorage::dslParticlePot) {
+    if (atomStorageLayout_ & DataStorage::dslParticlePot) {
       // This is the pairwise contribution to the particle pot.  The
       // embedding contribution is added in each of the low level
       // non-bonded routines.  In single processor, this is done in
@@ -738,7 +738,7 @@ namespace OpenMD {
       }
     }
 
-    if (storageLayout_ & DataStorage::dslParticlePot) {
+    if (atomStorageLayout_ & DataStorage::dslParticlePot) {
       int npp = snap_->atomData.particlePot.size();
       vector<RealType> ppot_temp(npp, 0.0);
 
@@ -1000,52 +1000,52 @@ namespace OpenMD {
         idat.sameRegion = false;
       }
 
-      if (storageLayout_ & DataStorage::dslAmat) {
+      if (atomStorageLayout_ & DataStorage::dslAmat) {
         idat.A1 = atomRowData.aMat[atom1];
         idat.A2 = atomColData.aMat[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslTorque) {
+      if (atomStorageLayout_ & DataStorage::dslTorque) {
         idat.t1 = atomRowData.torque[atom1];
         idat.t2 = atomColData.torque[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslDipole) {
+      if (atomStorageLayout_ & DataStorage::dslDipole) {
         idat.D_1 = atomRowData.dipole[atom1];
         idat.D_2 = atomColData.dipole[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslQuadrupole) {
+      if (atomStorageLayout_ & DataStorage::dslQuadrupole) {
         idat.Q_1 = atomRowData.quadrupole[atom1];
         idat.Q_2 = atomColData.quadrupole[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslDensity) {
+      if (atomStorageLayout_ & DataStorage::dslDensity) {
         idat.rho1 = atomRowData.density[atom1];
         idat.rho2 = atomColData.density[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslFunctional) {
+      if (atomStorageLayout_ & DataStorage::dslFunctional) {
         idat.frho1 = atomRowData.functional[atom1];
         idat.frho2 = atomColData.functional[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+      if (atomStorageLayout_ & DataStorage::dslFunctionalDerivative) {
         idat.dfrho1 = atomRowData.functionalDerivative[atom1];
         idat.dfrho2 = atomColData.functionalDerivative[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslParticlePot) {
+      if (atomStorageLayout_ & DataStorage::dslParticlePot) {
         idat.particlePot1 = atomRowData.particlePot[atom1];
         idat.particlePot2 = atomColData.particlePot[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslSkippedCharge) {
+      if (atomStorageLayout_ & DataStorage::dslSkippedCharge) {
         idat.skippedCharge1 = atomRowData.skippedCharge[atom1];
         idat.skippedCharge2 = atomColData.skippedCharge[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslFlucQPosition) {
+      if (atomStorageLayout_ & DataStorage::dslFlucQPosition) {
         idat.flucQ1 = atomRowData.flucQPos[atom1];
         idat.flucQ2 = atomColData.flucQPos[atom2];
       }
@@ -1061,52 +1061,52 @@ namespace OpenMD {
         idat.sameRegion = false;
       }
 
-      if (storageLayout_ & DataStorage::dslAmat) {
+      if (atomStorageLayout_ & DataStorage::dslAmat) {
         idat.A1 = snap_->atomData.aMat[atom1];
         idat.A2 = snap_->atomData.aMat[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslTorque) {
+      if (atomStorageLayout_ & DataStorage::dslTorque) {
         idat.t1 = snap_->atomData.torque[atom1];
         idat.t2 = snap_->atomData.torque[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslDipole) {
+      if (atomStorageLayout_ & DataStorage::dslDipole) {
         idat.D_1 = snap_->atomData.dipole[atom1];
         idat.D_2 = snap_->atomData.dipole[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslQuadrupole) {
+      if (atomStorageLayout_ & DataStorage::dslQuadrupole) {
         idat.Q_1 = snap_->atomData.quadrupole[atom1];
         idat.Q_2 = snap_->atomData.quadrupole[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslDensity) {
+      if (atomStorageLayout_ & DataStorage::dslDensity) {
         idat.rho1 = snap_->atomData.density[atom1];
         idat.rho2 = snap_->atomData.density[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslFunctional) {
+      if (atomStorageLayout_ & DataStorage::dslFunctional) {
         idat.frho1 = snap_->atomData.functional[atom1];
         idat.frho2 = snap_->atomData.functional[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+      if (atomStorageLayout_ & DataStorage::dslFunctionalDerivative) {
         idat.dfrho1 = snap_->atomData.functionalDerivative[atom1];
         idat.dfrho2 = snap_->atomData.functionalDerivative[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslParticlePot) {
+      if (atomStorageLayout_ & DataStorage::dslParticlePot) {
         idat.particlePot1 = snap_->atomData.particlePot[atom1];
         idat.particlePot2 = snap_->atomData.particlePot[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslSkippedCharge) {
+      if (atomStorageLayout_ & DataStorage::dslSkippedCharge) {
         idat.skippedCharge1 = snap_->atomData.skippedCharge[atom1];
         idat.skippedCharge2 = snap_->atomData.skippedCharge[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslFlucQPosition) {
+      if (atomStorageLayout_ & DataStorage::dslFlucQPosition) {
         idat.flucQ1 = snap_->atomData.flucQPos[atom1];
         idat.flucQ2 = snap_->atomData.flucQPos[atom2];
       }
@@ -1123,43 +1123,43 @@ namespace OpenMD {
         idat.sameRegion = false;
       }
 
-      if (storageLayout_ & DataStorage::dslAmat) {
+      if (atomStorageLayout_ & DataStorage::dslAmat) {
         idat.A2 = atomColData.aMat[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslTorque) {
+      if (atomStorageLayout_ & DataStorage::dslTorque) {
         idat.t2 = atomColData.torque[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslDipole) {
+      if (atomStorageLayout_ & DataStorage::dslDipole) {
         idat.D_2 = atomColData.dipole[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslQuadrupole) {
+      if (atomStorageLayout_ & DataStorage::dslQuadrupole) {
         idat.Q_2 = atomColData.quadrupole[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslDensity) {
+      if (atomStorageLayout_ & DataStorage::dslDensity) {
         idat.rho2 = atomColData.density[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslFunctional) {
+      if (atomStorageLayout_ & DataStorage::dslFunctional) {
         idat.frho2 = atomColData.functional[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+      if (atomStorageLayout_ & DataStorage::dslFunctionalDerivative) {
         idat.dfrho2 = atomColData.functionalDerivative[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslParticlePot) {
+      if (atomStorageLayout_ & DataStorage::dslParticlePot) {
         idat.particlePot2 = atomColData.particlePot[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslSkippedCharge) {
+      if (atomStorageLayout_ & DataStorage::dslSkippedCharge) {
         idat.skippedCharge2 = atomColData.skippedCharge[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslFlucQPosition) {
+      if (atomStorageLayout_ & DataStorage::dslFlucQPosition) {
         idat.flucQ2 = atomColData.flucQPos[atom2];
       }
 
@@ -1172,43 +1172,43 @@ namespace OpenMD {
         idat.sameRegion = false;
       }
 
-      if (storageLayout_ & DataStorage::dslAmat) {
+      if (atomStorageLayout_ & DataStorage::dslAmat) {
         idat.A2 = snap_->atomData.aMat[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslTorque) {
+      if (atomStorageLayout_ & DataStorage::dslTorque) {
         idat.t2 = snap_->atomData.torque[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslDipole) {
+      if (atomStorageLayout_ & DataStorage::dslDipole) {
         idat.D_2 = snap_->atomData.dipole[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslQuadrupole) {
+      if (atomStorageLayout_ & DataStorage::dslQuadrupole) {
         idat.Q_2 = snap_->atomData.quadrupole[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslDensity) {
+      if (atomStorageLayout_ & DataStorage::dslDensity) {
         idat.rho2 = snap_->atomData.density[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslFunctional) {
+      if (atomStorageLayout_ & DataStorage::dslFunctional) {
         idat.frho2 = snap_->atomData.functional[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+      if (atomStorageLayout_ & DataStorage::dslFunctionalDerivative) {
         idat.dfrho2 = snap_->atomData.functionalDerivative[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslParticlePot) {
+      if (atomStorageLayout_ & DataStorage::dslParticlePot) {
         idat.particlePot2 = snap_->atomData.particlePot[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslSkippedCharge) {
+      if (atomStorageLayout_ & DataStorage::dslSkippedCharge) {
         idat.skippedCharge2 = snap_->atomData.skippedCharge[atom2];
       }
 
-      if (storageLayout_ & DataStorage::dslFlucQPosition) {
+      if (atomStorageLayout_ & DataStorage::dslFlucQPosition) {
         idat.flucQ2 = snap_->atomData.flucQPos[atom2];
       }
 
@@ -1229,27 +1229,27 @@ namespace OpenMD {
     atomRowData.force[atom1] += idat.f1;
     atomColData.force[atom2] -= idat.f1;
 
-    if (storageLayout_ & DataStorage::dslFlucQForce) {
+    if (atomStorageLayout_ & DataStorage::dslFlucQForce) {
       atomRowData.flucQFrc[atom1] -= idat.dVdFQ1;
       atomColData.flucQFrc[atom2] -= idat.dVdFQ2;
     }
 
-    if (storageLayout_ & DataStorage::dslElectricField) {
+    if (atomStorageLayout_ & DataStorage::dslElectricField) {
       atomRowData.electricField[atom1] += idat.eField1;
       atomColData.electricField[atom2] += idat.eField2;
     }
 
-    if (storageLayout_ & DataStorage::dslSitePotential) {
+    if (atomStorageLayout_ & DataStorage::dslSitePotential) {
       atomRowData.sitePotential[atom1] += idat.sPot1;
       atomColData.sitePotential[atom2] += idat.sPot2;
     }
 
-    if (storageLayout_ & DataStorage::dslTorque) {
+    if (atomStorageLayout_ & DataStorage::dslTorque) {
       atomRowData.torque[atom1] = idat.t1;
       atomColData.torque[atom2] = idat.t2;
     }
 
-    if (storageLayout_ & DataStorage::dslSkippedCharge) {
+    if (atomStorageLayout_ & DataStorage::dslSkippedCharge) {
       atomRowData.skippedCharge[atom1] = idat.skippedCharge1;
       atomColData.skippedCharge[atom2] = idat.skippedCharge2;
     }
@@ -1271,27 +1271,27 @@ namespace OpenMD {
       snap_->atomData.particlePot[atom2] += idat.vpair * idat.sw;
     }
 
-    if (storageLayout_ & DataStorage::dslFlucQForce) {
+    if (atomStorageLayout_ & DataStorage::dslFlucQForce) {
       snap_->atomData.flucQFrc[atom1] -= idat.dVdFQ1;
       snap_->atomData.flucQFrc[atom2] -= idat.dVdFQ2;
     }
 
-    if (storageLayout_ & DataStorage::dslElectricField) {
+    if (atomStorageLayout_ & DataStorage::dslElectricField) {
       snap_->atomData.electricField[atom1] += idat.eField1;
       snap_->atomData.electricField[atom2] += idat.eField2;
     }
 
-    if (storageLayout_ & DataStorage::dslSitePotential) {
+    if (atomStorageLayout_ & DataStorage::dslSitePotential) {
       snap_->atomData.sitePotential[atom1] += idat.sPot1;
       snap_->atomData.sitePotential[atom2] += idat.sPot2;
     }
 
-    if (storageLayout_ & DataStorage::dslTorque) {
+    if (atomStorageLayout_ & DataStorage::dslTorque) {
       snap_->atomData.torque[atom1] = idat.t1;
       snap_->atomData.torque[atom2] = idat.t2;
     }
 
-    if (storageLayout_ & DataStorage::dslSkippedCharge) {
+    if (atomStorageLayout_ & DataStorage::dslSkippedCharge) {
       snap_->atomData.skippedCharge[atom1] = idat.skippedCharge1;
       snap_->atomData.skippedCharge[atom2] = idat.skippedCharge2;
     }
@@ -1302,14 +1302,14 @@ namespace OpenMD {
                                                    int atom1, int atom2) {
 #ifdef IS_MPI
 
-    if (storageLayout_ & DataStorage::dslDensity) {
+    if (atomStorageLayout_ & DataStorage::dslDensity) {
       atomRowData.density[atom1] = idat.rho1;
       atomColData.density[atom2] = idat.rho2;
     }
 
 #else
 
-    if (storageLayout_ & DataStorage::dslDensity) {
+    if (atomStorageLayout_ & DataStorage::dslDensity) {
       snap_->atomData.density[atom1] = idat.rho1;
       snap_->atomData.density[atom2] = idat.rho2;
     }

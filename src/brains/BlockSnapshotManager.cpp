@@ -53,12 +53,12 @@
 
 namespace OpenMD {
 
-  BlockSnapshotManager::BlockSnapshotManager(SimInfo* info,
-                                             const std::string& filename,
-                                             int storageLayout,
-                                             long long int memSize,
-                                             int blockCapacity) :
-      SnapshotManager(storageLayout),
+  BlockSnapshotManager::BlockSnapshotManager(
+      SimInfo* info, const std::string& filename, int atomStorageLayout,
+      int rigidBodyStorageLayout, int cutoffGroupStorageLayout,
+      long long int memSize, int blockCapacity) :
+      SnapshotManager(atomStorageLayout, rigidBodyStorageLayout,
+                      cutoffGroupStorageLayout),
       blockCapacity_(blockCapacity), memSize_(memSize),
       activeBlocks_(blockCapacity_, -1), activeRefCount_(blockCapacity_, 0) {
     nAtoms_        = info->getNGlobalAtoms();
@@ -71,15 +71,16 @@ namespace OpenMD {
     // RealType rssMem = residentMem();
     // RealType avaliablePhysMem = physMem - rssMem;
 
-    int bytesPerStuntDouble =
-        DataStorage::getBytesPerStuntDouble(storageLayout);
+    int bytesPerAtom = DataStorage::getBytesPerStuntDouble(atomStorageLayout);
+    int bytesPerRigidBody =
+        DataStorage::getBytesPerStuntDouble(rigidBodyStorageLayout);
     int bytesPerCutoffGroup =
         DataStorage::getBytesPerStuntDouble(DataStorage::dslPosition);
 
     int bytesPerFrameData = Snapshot::getFrameDataSize();
-    int bytesPerFrame     = (nRigidBodies_ + nAtoms_) * bytesPerStuntDouble +
-                        nCutoffGroups_ * bytesPerCutoffGroup +
-                        bytesPerFrameData;
+    int bytesPerFrame =
+        nRigidBodies_ * bytesPerRigidBody + nAtoms_ * bytesPerAtom +
+        nCutoffGroups_ * bytesPerCutoffGroup + bytesPerFrameData;
 
     // total number of frames that can fit in memory
     // RealType frameCapacity = avaliablePhysMem / bytesPerFrame;
@@ -121,8 +122,10 @@ namespace OpenMD {
               << " bytes" << std::endl;
     std::cout << "        Bytes per FrameData:\t"
               << (unsigned long)bytesPerFrameData << std::endl;
-    std::cout << "      Bytes per StuntDouble:\t"
-              << (unsigned long)bytesPerStuntDouble << std::endl;
+    std::cout << "             Bytes per Atom:\t" << (unsigned long)bytesPerAtom
+              << std::endl;
+    std::cout << "        Bytes per RigidBody:\t"
+              << (unsigned long)bytesPerRigidBody << std::endl;
     std::cout << "     Bytes per Cutoff Group:\t"
               << (unsigned long)bytesPerCutoffGroup << std::endl;
     std::cout << "            Bytes per Frame:\t"
@@ -259,8 +262,9 @@ namespace OpenMD {
   }
 
   Snapshot* BlockSnapshotManager::loadFrame(int frame) {
-    Snapshot* snapshot = new Snapshot(nAtoms_, nRigidBodies_, nCutoffGroups_,
-                                      getStorageLayout(), usePBC_);
+    Snapshot* snapshot = new Snapshot(
+        nAtoms_, nRigidBodies_, nCutoffGroups_, getAtomStorageLayout(),
+        getRigidBodyStorageLayout(), getCutoffGroupStorageLayout(), usePBC_);
     snapshot->setID(frame);
     snapshot->clearDerivedProperties();
 

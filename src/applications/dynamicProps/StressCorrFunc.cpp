@@ -46,7 +46,6 @@
 #include <string>
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
-#include "brains/DataStorage.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
 #include "utils/Constants.hpp"
@@ -60,9 +59,7 @@ namespace OpenMD {
   StressCorrFunc::StressCorrFunc(SimInfo* info, const std::string& filename,
                                  const std::string& sele1,
                                  const std::string& sele2) :
-      SystemACF<Mat3x3d>(info, filename, sele1, sele2,
-                         DataStorage::dslPosition | DataStorage::dslVelocity |
-                             DataStorage::dslForce) {
+      SystemACF<Mat3x3d>(info, filename, sele1, sele2) {
     setCorrFuncType("StressCorrFunc");
     setOutputName(getPrefix(dumpFilename_) + ".action");
     setLabelString("Txx\tTxy\tTxz\tTyx\tTyy\tTyz\tTzx\tTzy\tTzz");
