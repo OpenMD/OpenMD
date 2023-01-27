@@ -3,7 +3,7 @@
 # program that builds spheres of water
 
 # author    = "Dan Gezelter
-# copyright = "Copyright (c) 2004-2022 The University of Notre Dame. All Rights Reserved."
+# copyright = "Copyright (c) 2004-present The University of Notre Dame. All Rights Reserved."
 # license   = "OpenMD"
 
 use Getopt::Std;
