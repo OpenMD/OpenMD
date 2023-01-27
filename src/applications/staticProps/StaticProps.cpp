@@ -90,6 +90,7 @@
 #include "applications/staticProps/DipoleOrientation.hpp"
 #include "applications/staticProps/Field.hpp"
 #include "applications/staticProps/HBondGeometric.hpp"
+#include "applications/staticProps/HBondZ.hpp"
 #include "applications/staticProps/Kirkwood.hpp"
 #include "applications/staticProps/MomentumHistogram.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
@@ -690,7 +691,10 @@ int main(int argc, char* argv[]) {
   } else if (args_info.angle_r_given) {
     analyser =
         Utils::make_unique<AngleR>(info, dumpFileName, sele1, maxLen, nrbins);
-  } else if (args_info.hbond_given) {
+  }
+
+
+  else if (args_info.hbond_given) {
     if (args_info.rcut_given) {
       if (args_info.thetacut_given) {
         analyser = Utils::make_unique<HBondGeometric>(
@@ -713,7 +717,35 @@ int main(int argc, char* argv[]) {
       painCave.isFatal  = 1;
       simError();
     }
-  } else if (args_info.potDiff_given) {
+  }
+
+   else if (args_info.hbondz_given) {
+    if (args_info.rcut_given) {
+      if (args_info.thetacut_given) {
+        analyser = Utils::make_unique<HBondZ>(
+            info, dumpFileName, sele1, sele2, args_info.rcut_arg,
+            args_info.thetacut_arg, args_info.nbins_arg);
+      } else {
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                "A cutoff angle (thetacut) must be specified when calculating "
+                "Hydrogen "
+                "Bonding Statistics");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal  = 1;
+        simError();
+      }
+    } else {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "A cutoff radius (rcut) must be specified when calculating Hydrogen "
+          "Bonding Statistics");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+  }
+
+
+  else if (args_info.potDiff_given) {
     analyser = Utils::make_unique<PotDiff>(info, dumpFileName, sele1);
   } else if (args_info.kirkwood_given) {
     analyser = Utils::make_unique<Kirkwood>(info, dumpFileName, sele1, sele2,

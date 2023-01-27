@@ -799,6 +799,7 @@ src/applications/staticProps/GofZ.cpp
 src/applications/staticProps/CoordinationNumber.cpp
 src/applications/staticProps/Hxy.cpp
 src/applications/staticProps/HBondGeometric.cpp
+src/applications/staticProps/HBondZ.cpp
 src/applications/staticProps/Kirkwood.cpp
 src/applications/staticProps/Field.cpp
 src/applications/staticProps/MultipoleSum.cpp

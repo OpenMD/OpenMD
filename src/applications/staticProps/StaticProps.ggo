@@ -109,6 +109,7 @@ groupoption "cn"           -    "Coordination Number Distribution" group="static
 groupoption "scn"           -   "Secondary Coordination Number Distribution" group="staticProps"
 groupoption "gcn"           -   "Generalized Coordination Number Distribution" group="staticProps"
 groupoption "hbond"     -       "Hydrogen Bonding statistics using geometric criteria (rcut and thetacut must be specified)" group="staticProps"
+groupoption "hbondz"     -      "Hydrogen Bonding density binned by z (rcut and thetacut must be specified)" group="staticProps"
 groupoption "potDiff"   -       "potential energy difference when charge on selection is set to zero"  group="staticProps"
 groupoption "tet_hb"    -       "hydrogen bond statistics binned by tetrahedrality of donor and acceptor molecules" group="staticProps"
 groupoption "kirkwood"  k       "distance-dependent Kirkwood factor" group="staticProps"
