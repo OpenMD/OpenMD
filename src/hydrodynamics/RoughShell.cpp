@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -44,6 +43,8 @@
  */
 
 #include "hydrodynamics/RoughShell.hpp"
+
+#include "brains/SimInfo.hpp"
 #include "hydrodynamics/ShapeBuilder.hpp"
 
 namespace OpenMD {
@@ -61,15 +62,15 @@ namespace OpenMD {
   struct InteriorFunctor {
     bool operator()(const BeadLattice& bead) { return bead.interior; }
   };
-  
+
   std::size_t RoughShell::assignElements() {
     std::pair<Vector3d, Vector3d> boxBoundary = shape_->getBoundingBox();
-    RealType firstMin  = std::min(std::min(floor(boxBoundary.first[0]),
-					   floor(boxBoundary.first[1])),
-				  floor(boxBoundary.first[2]));
-    RealType secondMax = std::max(std::max(ceil(boxBoundary.second[0]),
-					   ceil(boxBoundary.second[1])),
-				  ceil(boxBoundary.second[2]));
+    RealType firstMin                         = std::min(
+        std::min(floor(boxBoundary.first[0]), floor(boxBoundary.first[1])),
+        floor(boxBoundary.first[2]));
+    RealType secondMax = std::max(
+        std::max(ceil(boxBoundary.second[0]), ceil(boxBoundary.second[1])),
+        ceil(boxBoundary.second[2]));
     // std::max is a binary function, i.e., it accepts two values at a time
     // floor() and ceil() functions return an integer number
     int len = secondMax - firstMin;
@@ -78,7 +79,7 @@ namespace OpenMD {
     // symmetric under reflection)
 
     int numLattices = ceil(len / sigma_) + 2;
-    
+
     // +2: one extra lattice point to the left (-1) and one extra
     // lattice point to the right (+1)
 
@@ -90,12 +91,12 @@ namespace OpenMD {
         for (int k = 0; k < numLattices; ++k) {
           BeadLattice& currentBead = grid(i, j, k);
           currentBead.origin =
-	    Vector3d((i - 1) * sigma_ + floor(boxBoundary.first[0]),
-		     (j - 1) * sigma_ + floor(boxBoundary.first[1]),
-		     (k - 1) * sigma_ + floor(boxBoundary.first[2]));
+              Vector3d((i - 1) * sigma_ + floor(boxBoundary.first[0]),
+                       (j - 1) * sigma_ + floor(boxBoundary.first[1]),
+                       (k - 1) * sigma_ + floor(boxBoundary.first[2]));
           currentBead.radius   = sigma_ / 2.0;
           currentBead.interior = shape_->isInterior(grid(i, j, k).origin);
-	  // returns True if bead is inside the given shape
+          // returns True if bead is inside the given shape
         }
       }
     }
@@ -105,10 +106,10 @@ namespace OpenMD {
       for (int j = 0; j < numLattices; ++j) {
         for (int k = 0; k < numLattices; ++k) {
           std::vector<BeadLattice> neighborCells =
-	    grid.getAllNeighbors(i, j, k);
+              grid.getAllNeighbors(i, j, k);
           // if one of its neighbor cells (beads) is exterior, current cell
           // (bead) is on the surface; loop over beads' center (lattice point)
-	  
+
           if (grid(i, j, k).interior) {
             bool allNeighborsAreInterior = true;
             for (std::vector<BeadLattice>::iterator l = neighborCells.begin();
@@ -118,19 +119,19 @@ namespace OpenMD {
                 break;
               }
             }
-	    
+
             if (allNeighborsAreInterior)
               continue;  // if allNeighborsAreInterior == true, skip
                          // the remaining code below, i.e., bead is
                          // not on the surface
-	    
+
             HydrodynamicsElement surfaceBead;
-	    // if allNeighborsAreInterior == false, bead is on the
-	    // surface; grab this lattice point
+            // if allNeighborsAreInterior == false, bead is on the
+            // surface; grab this lattice point
             surfaceBead.name = "H";
-            surfaceBead.pos = grid(i, j, k).origin;
-	    // loop over the i, j, k positions (lattice point) of the
-	    // grid (loop is above)
+            surfaceBead.pos  = grid(i, j, k).origin;
+            // loop over the i, j, k positions (lattice point) of the
+            // grid (loop is above)
             surfaceBead.radius = grid(i, j, k).radius;
             elements_.push_back(surfaceBead);
           }

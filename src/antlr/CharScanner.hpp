@@ -76,11 +76,13 @@ public:
 	: scanner(theScanner)
 	{
 	}
-  using result_type = bool;
-  using first_argument_type = ANTLR_USE_NAMESPACE(std)string;
-  using second_argument_type = ANTLR_USE_NAMESPACE(std)string;
 
-  bool operator() (const ANTLR_USE_NAMESPACE(std)string& x,const ANTLR_USE_NAMESPACE(std)string& y) const;
+    using result_type = bool;
+    using first_argument_type = ANTLR_USE_NAMESPACE(std)string;
+    using second_argument_type = ANTLR_USE_NAMESPACE(std)string;
+
+	bool operator() (const ANTLR_USE_NAMESPACE(std)string& x,const ANTLR_USE_NAMESPACE(std)string& y) const;
+
   // defaults are good enough..
 	//	CharScannerLiteralsLess(const CharScannerLiteralsLess&);
 	//	CharScannerLiteralsLess& operator=(const CharScannerLiteralsLess&);
@@ -129,7 +131,7 @@ public:
 	/** called by the generated lexer to do error recovery, override to
 	 * customize the behaviour.
 	 */
-	virtual void recover(const RecognitionException& ex, const BitSet& tokenSet)
+	virtual void recover(const RecognitionException&, const BitSet& tokenSet)
 	{
 		consume();
 		consumeUntil(tokenSet);

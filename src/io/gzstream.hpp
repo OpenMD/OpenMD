@@ -111,6 +111,6 @@ namespace OpenMD {
       gzstreambase::open(name, open_mode);
     }
   };
-
 }  // namespace OpenMD
+
 #endif

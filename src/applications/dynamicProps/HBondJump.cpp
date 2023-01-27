@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -51,13 +50,13 @@
 #include "utils/Revision.hpp"
 
 namespace OpenMD {
+
   HBondJump::HBondJump(SimInfo* info, const std::string& filename,
                        const std::string& sele1, const std::string& sele2,
                        double OOcut, double thetaCut, double OHcut) :
-    TimeCorrFunc<RealType>(info, filename, sele1, sele2),
-    OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut),
-    sele1_minus_common_(info), sele2_minus_common_(info), common_(info) {
-    
+      TimeCorrFunc<RealType>(info, filename, sele1, sele2),
+      OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut),
+      sele1_minus_common_(info), sele2_minus_common_(info), common_(info) {
     setCorrFuncType("HBondJump");
     setOutputName(getPrefix(dumpFilename_) + ".jump");
 
@@ -144,10 +143,10 @@ namespace OpenMD {
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "HBondJump::correlation Error: sampleTime (%f)\n"
-                  "\tin %s does not match actual time-spacing between\n"
-                  "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                  deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+                   "HBondJump::correlation Error: sampleTime (%f)\n"
+                   "\tin %s does not match actual time-spacing between\n"
+                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
           painCave.isFatal = 1;
           simError();
         }
@@ -636,10 +635,10 @@ namespace OpenMD {
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "HBondJump::correlation Error: sampleTime (%f)\n"
-                  "\tin %s does not match actual time-spacing between\n"
-                  "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                  deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+                   "HBondJump::correlation Error: sampleTime (%f)\n"
+                   "\tin %s does not match actual time-spacing between\n"
+                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
           painCave.isFatal = 1;
           simError();
         }
@@ -737,8 +736,8 @@ namespace OpenMD {
 
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "HBondJumpZ::writeCorrelate Error: fail to open %s\n",
-              outputFilename_.c_str());
+               "HBondJumpZ::writeCorrelate Error: fail to open %s\n",
+               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -746,16 +745,14 @@ namespace OpenMD {
     ofs.close();
   }
 
-
   HBondJumpR::HBondJumpR(SimInfo* info, const std::string& filename,
                          const std::string& sele1, const std::string& sele2,
                          const std::string& sele3, RealType OOcut,
-			 RealType thetaCut, RealType OHcut, RealType len, 
+                         RealType thetaCut, RealType OHcut, RealType len,
                          int nRBins) :
       HBondJump(info, filename, sele1, sele2, OOcut, thetaCut, OHcut),
       len_(len), nRBins_(nRBins), seleMan3_(info_), selectionScript3_(sele3),
-      evaluator3_(info_)  {
-    
+      evaluator3_(info_) {
     setCorrFuncType("HBondJumpR");
     setOutputName(getPrefix(dumpFilename_) + ".jumpR");
 
@@ -764,11 +761,9 @@ namespace OpenMD {
     counts_.resize(nTimeBins_);
     for (unsigned int i = 0; i < nTimeBins_; i++) {
       histogram_[i].resize(nRBins_);
-      std::fill(histogram_[i].begin(), histogram_[i].end(), 0.0);
       counts_[i].resize(nRBins_);
-      std::fill(counts_[i].begin(), counts_[i].end(), 0);
     }
-    
+
     evaluator3_.loadScriptString(selectionScript3_);
     if (!evaluator3_.isDynamic()) {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
@@ -792,14 +787,12 @@ namespace OpenMD {
     RealType r;
     int isd3;
 
-
     if (evaluator3_.isDynamic()) {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
     }
 
     bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
-
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     // Register all the possible HBond donor hydrogens:
     for (mol1 = info_->beginMolecule(mi); mol1 != NULL;
@@ -832,27 +825,24 @@ namespace OpenMD {
               registerHydrogenBond(frame, index, hInd, aInd);
               pos = hPos;
 
-	      RealType shortest = HONKING_LARGE_VALUE;
-          
-	      // loop over selection 3 to find closest atom in selection 3:
-	      for (sd3 = seleMan3_.beginSelected(isd3); sd3 != NULL;
-		   sd3 = seleMan3_.nextSelected(isd3)) {  
+              RealType shortest = HONKING_LARGE_VALUE;
 
-		vec = pos - sd3->getPos();
-            
-		if (usePeriodicBoundaryConditions_)
-		  currentSnapshot_->wrapVector(vec);
-		
-		r = vec.length();
-		
-		if (r < shortest) shortest = r;
-	      }     
-          
-	      int whichBin = int(shortest / deltaR_);
-	      if (whichBin < int(nRBins_)) {
-		rbin_[frame][index] = whichBin;
-	      }		
-	    }
+              // loop over selection 3 to find closest atom in selection 3:
+              for (sd3 = seleMan3_.beginSelected(isd3); sd3 != NULL;
+                   sd3 = seleMan3_.nextSelected(isd3)) {
+                vec = pos - sd3->getPos();
+
+                if (usePeriodicBoundaryConditions_)
+                  currentSnapshot_->wrapVector(vec);
+
+                r = vec.length();
+
+                if (r < shortest) shortest = r;
+              }
+
+              int whichBin = int(shortest / deltaR_);
+              if (whichBin < int(nRBins_)) { rbin_[frame][index] = whichBin; }
+            }
           }
         }
       }
@@ -875,27 +865,24 @@ namespace OpenMD {
             if (isHBond(dPos, hPos, aPos)) {
               aInd = hba->getGlobalIndex();
               registerHydrogenBond(frame, index, hInd, aInd);
-              pos = hPos;
-	      RealType shortest = HONKING_LARGE_VALUE;
-          
-	      // loop over selection 3 to find closest atom in selection 3:
-	      for (sd3 = seleMan3_.beginSelected(isd3); sd3 != NULL;
-		   sd3 = seleMan3_.nextSelected(isd3)) {  
+              pos               = hPos;
+              RealType shortest = HONKING_LARGE_VALUE;
 
-		vec = pos - sd3->getPos();
-            
-		if (usePeriodicBoundaryConditions_)
-		  currentSnapshot_->wrapVector(vec);
-		
-		r = vec.length();
-		
-		if (r < shortest) shortest = r;
-	      }     
-          
-	      int whichBin = int(shortest / deltaR_);
-	      if (whichBin < int(nRBins_)) {
-		rbin_[frame][index] = whichBin;
-	      }		
+              // loop over selection 3 to find closest atom in selection 3:
+              for (sd3 = seleMan3_.beginSelected(isd3); sd3 != NULL;
+                   sd3 = seleMan3_.nextSelected(isd3)) {
+                vec = pos - sd3->getPos();
+
+                if (usePeriodicBoundaryConditions_)
+                  currentSnapshot_->wrapVector(vec);
+
+                r = vec.length();
+
+                if (r < shortest) shortest = r;
+              }
+
+              int whichBin = int(shortest / deltaR_);
+              if (whichBin < int(nRBins_)) { rbin_[frame][index] = whichBin; }
             }
           }
         }
@@ -908,7 +895,8 @@ namespace OpenMD {
 
     // If this hydrogen wasn't already registered, register it:
     if (GIDtoH_[frame][hIndex] == -1) {
-      index                  = hydrogen_[frame].size();
+      index = hydrogen_[frame].size();
+
       GIDtoH_[frame][hIndex] = index;
       hydrogen_[frame].push_back(hIndex);
       acceptor_[frame].push_back(-1);
@@ -935,7 +923,7 @@ namespace OpenMD {
   void HBondJumpR::correlation() {
     std::vector<int> s1;
     std::vector<int>::iterator i1;
-    int index1, index2, gid, aInd1, aInd2, rBin;
+    int index1, index2, gid, aInd1, aInd2;
 
     for (int i = 0; i < nFrames_; ++i) {
       RealType time1 = times_[i];
@@ -950,10 +938,10 @@ namespace OpenMD {
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "HBondJump::correlation Error: sampleTime (%f)\n"
-                  "\tin %s does not match actual time-spacing between\n"
-                  "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                  deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+                   "HBondJump::correlation Error: sampleTime (%f)\n"
+                   "\tin %s does not match actual time-spacing between\n"
+                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
           painCave.isFatal = 1;
           simError();
         }
@@ -971,38 +959,39 @@ namespace OpenMD {
           index2 = GIDtoH_[j][gid];
 
           if (selected_[i][index1]) {
-            rBin = rbin_[i][index1];
-            counts_[timeBin][rBin]++;
+            if (int rBin {rbin_[i][index1]}; rBin != -1) {
+              counts_[timeBin][rBin]++;
 
-            if (acceptor_[i][index1] == -1) {
-              aInd1 = lastAcceptor_[i][index1];
-            } else {
-              aInd1 = acceptor_[i][index1];
-            }
+              if (acceptor_[i][index1] == -1) {
+                aInd1 = lastAcceptor_[i][index1];
+              } else {
+                aInd1 = acceptor_[i][index1];
+              }
 
-            if (acceptor_[j][index2] == -1) {
-              aInd2 = lastAcceptor_[j][index2];
-            } else {
-              aInd2 = acceptor_[j][index2];
-            }
+              if (acceptor_[j][index2] == -1) {
+                aInd2 = lastAcceptor_[j][index2];
+              } else {
+                aInd2 = acceptor_[j][index2];
+              }
 
-            // aInd1 = acceptor_[i][index1];
-            // aInd2 = acceptor_[j][index2];
+              // aInd1 = acceptor_[i][index1];
+              // aInd2 = acceptor_[j][index2];
 
-            if (aInd1 != aInd2) {
-              // different acceptor so nA(0) . nB(t) = 1
-              histogram_[timeBin][rBin] += 1;
-            } else {
-              // same acceptor, but we need to look at the start frames
-              // for these H-bonds to make sure it is the same H-bond:
-              if (acceptorStartFrame_[i][index1] !=
-                  acceptorStartFrame_[j][index2]) {
-                // different start frame, so this is considered a
-                // different H-bond:
+              if (aInd1 != aInd2) {
+                // different acceptor so nA(0) . nB(t) = 1
                 histogram_[timeBin][rBin] += 1;
               } else {
-                // same start frame, so this is considered the same H-bond:
-                histogram_[timeBin][rBin] += 0;
+                // same acceptor, but we need to look at the start frames
+                // for these H-bonds to make sure it is the same H-bond:
+                if (acceptorStartFrame_[i][index1] !=
+                    acceptorStartFrame_[j][index2]) {
+                  // different start frame, so this is considered a
+                  // different H-bond:
+                  histogram_[timeBin][rBin] += 1;
+                } else {
+                  // same start frame, so this is considered the same H-bond:
+                  histogram_[timeBin][rBin] += 0;
+                }
               }
             }
           }
@@ -1050,8 +1039,8 @@ namespace OpenMD {
 
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "HBondJumpR::writeCorrelate Error: fail to open %s\n",
-              outputFilename_.c_str());
+               "HBondJumpR::writeCorrelate Error: fail to open %s\n",
+               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -1059,5 +1048,4 @@ namespace OpenMD {
     ofs.close();
   }
 
-  
 }  // namespace OpenMD

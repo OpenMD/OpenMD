@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -83,15 +82,16 @@ namespace OpenMD {
   template<typename Real>
   class Polynomial {
   public:
-    typedef Polynomial<Real> PolynomialType;
-    typedef int ExponentType;
-    typedef Real CoefficientType;
-    typedef std::map<ExponentType, CoefficientType> PolynomialPairMap;
-    typedef typename PolynomialPairMap::iterator iterator;
-    typedef typename PolynomialPairMap::const_iterator const_iterator;
+    using PolynomialType    = Polynomial<Real>;
+    using ExponentType      = int;
+    using CoefficientType   = Real;
+    using PolynomialPairMap = std::map<ExponentType, CoefficientType>;
+    using iterator          = typename PolynomialPairMap::iterator;
+    using const_iterator    = typename PolynomialPairMap::const_iterator;
 
     Polynomial() {}
     Polynomial(Real v) { setCoefficient(0, v); }
+
     /**
      * Calculates the value of this Polynomial evaluated at the given x value.
      * @return The value of this Polynomial evaluates at the given x value
@@ -176,11 +176,9 @@ namespace OpenMD {
     }
 
     iterator begin() { return polyPairMap_.begin(); }
-
     const_iterator begin() const { return polyPairMap_.begin(); }
 
     iterator end() { return polyPairMap_.end(); }
-
     const_iterator end() const { return polyPairMap_.end(); }
 
     iterator find(ExponentType exponent) { return polyPairMap_.find(exponent); }
@@ -193,21 +191,6 @@ namespace OpenMD {
         if (i->first > deg) deg = i->first;
       }
       return deg;
-    }
-
-    PolynomialType& operator=(const PolynomialType& p) {
-      if (this != &p)  // protect against invalid self-assignment
-      {
-        typename Polynomial<Real>::const_iterator i;
-
-        polyPairMap_.clear();  // clear out the old map
-
-        for (i = p.begin(); i != p.end(); ++i) {
-          this->setCoefficient(i->first, i->second);
-        }
-      }
-      // by convention, always return *this
-      return *this;
     }
 
     PolynomialType& operator+=(const PolynomialType& p) {
@@ -242,7 +225,6 @@ namespace OpenMD {
       return *this;
     }
 
-    // PolynomialType& operator *= (const Real v)
     PolynomialType& operator*=(const Real v) {
       typename Polynomial<Real>::const_iterator i;
       // Polynomial<Real> result;
@@ -640,7 +622,7 @@ namespace OpenMD {
     return true;
   }
 
-  typedef Polynomial<RealType> DoublePolynomial;
-
+  using DoublePolynomial = Polynomial<RealType>;
 }  // namespace OpenMD
+
 #endif  // MATH_POLYNOMIAL_HPP

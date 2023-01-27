@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -50,6 +49,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 
 #include "brains/ForceManager.hpp"
@@ -71,7 +71,6 @@
 #include "optimization/Method.hpp"
 #include "optimization/OptimizationFactory.hpp"
 #include "optimization/Problem.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/StringUtils.hpp"
 
 using namespace OpenMD;
@@ -85,8 +84,9 @@ using namespace JAMA;
 template<typename Real>
 class Vector6 : public Vector<Real, 6> {
 public:
-  typedef Real ElemType;
-  typedef Real* ElemPoinerType;
+  using ElemType       = Real;
+  using ElemPoinerType = Real*;
+
   Vector6() : Vector<Real, 6>() {}
 
   /** Constructs and initializes a Vector6d from individual coordinates */
@@ -111,7 +111,7 @@ public:
   }
 };
 
-typedef Vector6<RealType> Vector6d;
+using Vector6d = Vector6<RealType>;
 
 RealType slope(const std::vector<RealType>& x, const std::vector<RealType>& y) {
   // for (size_t i = 0; i < x.size(); i++) {
@@ -397,7 +397,7 @@ int main(int argc, char* argv[]) {
       inputFileName = args_info.inputs[0];
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "No input file name was specified on the command line");
+               "No input file name was specified on the command line");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -560,8 +560,7 @@ int main(int argc, char* argv[]) {
   Globals* simParams     = info->getSimParams();
   ForceManager* forceMan = new ForceManager(info);
 
-  // Remove in favor of std::make_unique<> when we switch to C++14 and above
-  std::unique_ptr<Velocitizer> veloSet {Utils::make_unique<Velocitizer>(info)};
+  std::unique_ptr<Velocitizer> veloSet {std::make_unique<Velocitizer>(info)};
 
   forceMan->initialize();
   info->update();
@@ -598,8 +597,8 @@ int main(int argc, char* argv[]) {
 
     if (minim == NULL) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "Optimization Factory can not create %s OptimizationMethod\n",
-              miniPars->getMethod().c_str());
+               "Optimization Factory can not create %s OptimizationMethod\n",
+               miniPars->getMethod().c_str());
       painCave.isFatal = 1;
       simError();
     }

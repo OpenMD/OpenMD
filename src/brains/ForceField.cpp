@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -53,6 +52,7 @@
 #include "brains/ForceField.hpp"
 
 #include <algorithm>
+#include <tuple>
 
 #include "io/AtomTypesSectionParser.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
@@ -307,7 +307,7 @@ namespace OpenMD {
       int kk = 0;
       int IKscore;
 
-      std::vector<tuple3<int, int, std::vector<std::string>>> foundBends;
+      std::vector<std::tuple<int, int, std::vector<std::string>>> foundBends;
 
       for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
         ii = 0;
@@ -323,7 +323,7 @@ namespace OpenMD {
 
             BendType* bendType = bendTypeCont_.find(myKeys);
             if (bendType) {
-              foundBends.push_back(make_tuple3(jj, IKscore, myKeys));
+              foundBends.push_back(std::make_tuple(jj, IKscore, myKeys));
             }
             kk++;
           }
@@ -334,7 +334,7 @@ namespace OpenMD {
 
       if (!foundBends.empty()) {
         std::sort(foundBends.begin(), foundBends.end());
-        std::vector<std::string> theKeys = foundBends[0].third;
+        std::vector<std::string> theKeys = std::get<2>(foundBends[0]);
 
         BendType* bestType = bendTypeCont_.find(theKeys);
         return bestType;
@@ -398,7 +398,7 @@ namespace OpenMD {
       int ILscore;
       int JKscore;
 
-      std::vector<tuple3<int, int, std::vector<std::string>>> foundTorsions;
+      std::vector<std::tuple<int, int, std::vector<std::string>>> foundTorsions;
 
       for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
         kk = 0;
@@ -418,7 +418,8 @@ namespace OpenMD {
 
               TorsionType* torsionType = torsionTypeCont_.find(myKeys);
               if (torsionType) {
-                foundTorsions.push_back(make_tuple3(JKscore, ILscore, myKeys));
+                foundTorsions.push_back(
+                    std::make_tuple(JKscore, ILscore, myKeys));
               }
               ll++;
             }
@@ -431,7 +432,7 @@ namespace OpenMD {
 
       if (!foundTorsions.empty()) {
         std::sort(foundTorsions.begin(), foundTorsions.end());
-        std::vector<std::string> theKeys = foundTorsions[0].third;
+        std::vector<std::string> theKeys = std::get<2>(foundTorsions[0]);
 
         TorsionType* bestType = torsionTypeCont_.find(theKeys);
         return bestType;
@@ -496,7 +497,8 @@ namespace OpenMD {
       int Iscore;
       int JKLscore;
 
-      std::vector<tuple3<int, int, std::vector<std::string>>> foundInversions;
+      std::vector<std::tuple<int, int, std::vector<std::string>>>
+          foundInversions;
 
       for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
         kk = 0;
@@ -518,7 +520,7 @@ namespace OpenMD {
                   inversionTypeCont_.permutedFindSkippingFirstElement(myKeys);
               if (inversionType) {
                 foundInversions.push_back(
-                    make_tuple3(Iscore, JKLscore, myKeys));
+                    std::make_tuple(Iscore, JKLscore, myKeys));
               }
               ll++;
             }
@@ -531,7 +533,7 @@ namespace OpenMD {
 
       if (!foundInversions.empty()) {
         std::sort(foundInversions.begin(), foundInversions.end());
-        std::vector<std::string> theKeys = foundInversions[0].third;
+        std::vector<std::string> theKeys = std::get<2>(foundInversions[0]);
 
         InversionType* bestType =
             inversionTypeCont_.permutedFindSkippingFirstElement(theKeys);
@@ -775,11 +777,11 @@ namespace OpenMD {
 
       if (!ffStream->is_open()) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "Error opening the force field parameter file:\n"
-                "\t%s\n"
-                "\tHave you tried setting the FORCE_PARAM_PATH environment "
-                "variable?\n",
-                forceFieldFilename.c_str());
+                 "Error opening the force field parameter file:\n"
+                 "\t%s\n"
+                 "\tHave you tried setting the FORCE_PARAM_PATH environment "
+                 "variable?\n",
+                 forceFieldFilename.c_str());
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();

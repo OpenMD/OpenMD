@@ -5,7 +5,7 @@ atom2md.cpp - OpenBabel-based conversion program to OpenMD file,
 Copyright (C) 1998-2001 by OpenEye Scientific Software, Inc.
 Some portions Copyright (C) 2001-2006 by Geoffrey R. Hutchison
 Some portions Copyright (C) 2004-2006 by Chris Morley
-Some portions Copyright (C) 2004-2020 by J. Daniel Gezelter
+Some portions Copyright (C) 2004-present by J. Daniel Gezelter
 
 This file is part of both the OpenMD and Open Babel projects.
 For more information, see <http://openmd.net> and

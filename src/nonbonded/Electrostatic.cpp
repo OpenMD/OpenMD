@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -86,7 +85,7 @@ namespace OpenMD {
     flucQ_->setForceField(forceField_);
   }
 
-  void Electrostatic::setSimulatedAtomTypes(set<AtomType*>& simtypes) {
+  void Electrostatic::setSimulatedAtomTypes(AtomTypeSet& simtypes) {
     simTypes_ = simtypes;
     flucQ_->setSimulatedAtomTypes(simTypes_);
   }
@@ -150,7 +149,8 @@ namespace OpenMD {
         summationMethod_ = (*i).second;
       } else {
         // throw error
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "Electrostatic::initialize: Unknown electrostaticSummationMethod.\n"
             "\t(Input file specified %s .)\n"
             "\telectrostaticSummationMethod must be one of: \"hard\",\n"
@@ -175,11 +175,11 @@ namespace OpenMD {
       if (!simParams_->haveDielectric()) {
         // throw warning
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "SimInfo warning: dielectric was not specified in the input "
-                "file\n\tfor "
-                "the reaction field correction method.\n"
-                "\tA default value of %f will be used for the dielectric.\n",
-                dielectric_);
+                 "SimInfo warning: dielectric was not specified in the input "
+                 "file\n\tfor "
+                 "the reaction field correction method.\n"
+                 "\tA default value of %f will be used for the dielectric.\n",
+                 dielectric_);
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;
         simError();
@@ -198,11 +198,11 @@ namespace OpenMD {
         screeningMethod_ = (*i).second;
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "SimInfo error: Unknown electrostaticScreeningMethod.\n"
-                "\t(Input file specified %s .)\n"
-                "\telectrostaticScreeningMethod must be one of: \"undamped\"\n"
-                "or \"damped\".\n",
-                myScreen.c_str());
+                 "SimInfo error: Unknown electrostaticScreeningMethod.\n"
+                 "\t(Input file specified %s .)\n"
+                 "\telectrostaticScreeningMethod must be one of: \"undamped\"\n"
+                 "or \"damped\".\n",
+                 myScreen.c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -210,8 +210,9 @@ namespace OpenMD {
 
     // check to make sure a cutoff value has been set:
     if (!haveCutoffRadius_) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Electrostatic::initialize has no Default "
-                               "Cutoff value!\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Electrostatic::initialize has no Default "
+               "Cutoff value!\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -224,7 +225,8 @@ namespace OpenMD {
         dampingAlpha_ = 0.425 - cutoffRadius_ * 0.02;
         if (dampingAlpha_ < 0.0) dampingAlpha_ = 0.0;
         // throw warning
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "Electrostatic::initialize: dampingAlpha was not specified in the\n"
             "\tinput file.  A default value of %f (1/ang) will be used for "
             "the\n"
@@ -251,7 +253,7 @@ namespace OpenMD {
     Etids.resize(forceField_->getNAtomType(), -1);
     FQtids.resize(forceField_->getNAtomType(), -1);
 
-    set<AtomType*>::iterator at;
+    AtomTypeSet::iterator at;
     for (at = simTypes_.begin(); at != simTypes_.end(); ++at) {
       if ((*at)->isElectrostatic()) nElectro_++;
       if ((*at)->isFluctuatingCharge()) nFlucq_++;
@@ -613,10 +615,10 @@ namespace OpenMD {
           if ((*i).second == summationMethod_) meth = (*i).first;
         }
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "Electrostatic::initialize: electrostaticSummationMethod %s \n"
-                "\thas not been implemented yet. Please select one of:\n"
-                "\t\"hard\", \"shifted_potential\", or \"shifted_force\"\n",
-                meth.c_str());
+                 "Electrostatic::initialize: electrostaticSummationMethod %s \n"
+                 "\thas not been implemented yet. Please select one of:\n"
+                 "\t\"hard\", \"shifted_potential\", or \"shifted_force\"\n",
+                 meth.c_str());
         painCave.isFatal = 1;
         simError();
         break;
@@ -708,8 +710,8 @@ namespace OpenMD {
     ret = Etypes.insert(atid);
     if (ret.second == false) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "Electrostatic already had a previous entry with ident %d\n",
-              atid);
+               "Electrostatic already had a previous entry with ident %d\n",
+               atid);
       painCave.severity = OPENMD_INFO;
       painCave.isFatal  = 0;
       simError();
@@ -721,10 +723,11 @@ namespace OpenMD {
     if (electrostaticAtomData.is_Fluctuating) {
       ret = FQtypes.insert(atid);
       if (ret.second == false) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "Electrostatic already had a previous fluctuating charge entry "
-                "with ident %d\n",
-                atid);
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+            "Electrostatic already had a previous fluctuating charge entry "
+            "with ident %d\n",
+            atid);
         painCave.severity = OPENMD_INFO;
         painCave.isFatal  = 0;
         simError();
@@ -1383,8 +1386,7 @@ namespace OpenMD {
     }
   }
 
-  RealType Electrostatic::getSuggestedCutoffRadius(
-      pair<AtomType*, AtomType*> atypes) {
+  RealType Electrostatic::getSuggestedCutoffRadius(pair<AtomType*, AtomType*>) {
     // This seems to work moderately well as a default.  There's no
     // inherent scale for 1/r interactions that we can standardize.
     // 12 angstroms seems to be a reasonably good guess for most
@@ -1395,7 +1397,7 @@ namespace OpenMD {
   void Electrostatic::ReciprocalSpaceSum(RealType& pot) {
     RealType kPot = 0.0;
     RealType kVir = 0.0;
-    //Mat3x3d kVirTens(0.0);
+    // Mat3x3d kVirTens(0.0);
 
     const RealType mPoleConverter = 0.20819434;  // converts from the
                                                  // internal units of
@@ -1590,9 +1592,9 @@ namespace OpenMD {
           // Test on magnitude of k vector:
           int kk = ll * ll + mm * mm + nn * nn;
           if (kk <= kSqLim) {
-            kVec   = Vector3d(rl, rm, rn);
+            kVec = Vector3d(rl, rm, rn);
             // k2     = dot(kVec, kVec);  // length^2 of kVec
-            Kmat   = outProduct(kVec, kVec); // kMatrix
+            Kmat = outProduct(kVec, kVec);  // kMatrix
             // Calculate exp(ikr) terms
             for (Molecule* mol = info_->beginMolecule(mi); mol != NULL;
                  mol           = info_->nextMolecule(mi)) {
@@ -1686,13 +1688,13 @@ namespace OpenMD {
 
             // kVirTens += 2 * rvol * AK[kk] *
             //   ( Mat3x3d::identity() - 2.0*( 1.0 / k2 - ralph) * Kmat ) *
-            //   (ckcs * ckcs + ckss * ckss + 4.0 * (ckss * dkcs - ckcs * dkss) +
+            //   (ckcs * ckcs + ckss * ckss + 4.0 * (ckss * dkcs - ckcs * dkss)
+            //   +
             //    3.0 * (dkcs * dkcs + dkss * dkss) -
             //    6.0 * (ckss * qkss + ckcs * qkcs) +
             //    8.0 * (dkss * qkcs - dkcs * qkss) +
             //    5.0 * (qkss * qkss + qkcs * qkcs));
-            
-            
+
             // Calculate force and torque for each site:
 
             for (Molecule* mol = info_->beginMolecule(mi); mol != NULL;

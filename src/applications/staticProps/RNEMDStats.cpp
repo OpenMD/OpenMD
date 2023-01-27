@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -81,7 +80,7 @@ namespace OpenMD {
 
     evaluator_.loadScriptString(sele);
     seleMan_.setSelectionSet(evaluator_.evaluate());
-    std::set<AtomType*> osTypes = seleMan_.getSelectedAtomTypes();
+    AtomTypeSet osTypes = seleMan_.getSelectedAtomTypes();
     std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
 
     data_.resize(RNEMDZ::ENDINDEX);
@@ -116,8 +115,7 @@ namespace OpenMD {
       density->accumulator.push_back(new Accumulator());
     addOutputDataAt(density, DENSITY);
 
-    activity = new OutputData;
-    ;
+    activity               = new OutputData;
     activity->units        = "unitless";
     activity->title        = "Activity";
     activity->dataType     = odtArray2d;
@@ -178,8 +176,8 @@ namespace OpenMD {
     outputMask_.set(DENSITY);
     outputMask_.set(ACTIVITY);
 
-    int atomStorageLayout = info_->getAtomStorageLayout();
-    int rigidBodyStorageLayout = info->getRigidBodyStorageLayout();
+    int atomStorageLayout        = info_->getAtomStorageLayout();
+    int rigidBodyStorageLayout   = info->getRigidBodyStorageLayout();
     int cutoffGroupStorageLayout = info->getCutoffGroupStorageLayout();
 
     if (atomStorageLayout & DataStorage::dslElectricField) {
@@ -358,8 +356,8 @@ namespace OpenMD {
         }
       }
       if (seleMan_.isSelected(mol)) {
-        Vector3d pos = mol->getCom();
-        binNo        = getBin(pos);
+        Vector3d pos    = mol->getCom();
+        binNo           = getBin(pos);
         int constraints = mol->getNConstraintPairs();
         binDOF[binNo] -= constraints;
       }
@@ -437,7 +435,7 @@ namespace OpenMD {
   RNEMDR::RNEMDR(SimInfo* info, const std::string& filename,
                  const std::string& sele, const std::string& comsele,
                  int nrbins) :
-    ShellStatistics(info, filename, sele, comsele, nrbins) {
+      ShellStatistics(info, filename, sele, comsele, nrbins) {
     setOutputName(getPrefix(filename) + ".rnemdR");
 
     data_.resize(RNEMDR::ENDINDEX);
@@ -474,7 +472,7 @@ namespace OpenMD {
 
     outputMask_.set(TEMPERATURE);
     outputMask_.set(ANGULARVELOCITY);
-    outputMask_.set(DENSITY);     
+    outputMask_.set(DENSITY);
   }
 
   void RNEMDR::processFrame(int istep) {
@@ -501,7 +499,7 @@ namespace OpenMD {
     std::vector<Mat3x3d> binI(nBins_);
     std::vector<RealType> binKE(nBins_, 0.0);
     std::vector<int> binDOF(nBins_, 0);
-    
+
     SimInfo::MoleculeIterator miter;
     std::vector<StuntDouble*>::iterator iiter;
     std::vector<AtomType*>::iterator at;
@@ -514,10 +512,9 @@ namespace OpenMD {
       for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
            sd = mol->nextIntegrableObject(iiter)) {
         if (seleMan_.isSelected(sd)) {
-
           // figure out where that object is:
           binNo = getBin(sd->getPos());
-          
+
           if (binNo >= 0 && binNo < int(nBins_)) {
             mass = sd->getMass();
             vel  = sd->getVel();
@@ -529,7 +526,7 @@ namespace OpenMD {
             I(0, 0) += mass * r2;
             I(1, 1) += mass * r2;
             I(2, 2) += mass * r2;
-            
+
             binCount[binNo]++;
             binMass[binNo] += mass;
             binP[binNo] += mass * vel;
@@ -537,7 +534,7 @@ namespace OpenMD {
             binI[binNo] += I;
             binL[binNo] += L;
             binDOF[binNo] += 3;
-            
+
             if (sd->isDirectional()) {
               Vector3d angMom = sd->getJ();
               Mat3x3d Ia      = sd->getI();
@@ -559,30 +556,30 @@ namespace OpenMD {
         }
       }
       if (seleMan_.isSelected(mol)) {
-        Vector3d pos = mol->getCom();
-        binNo        = getBin(pos);
+        Vector3d pos    = mol->getCom();
+        binNo           = getBin(pos);
         int constraints = mol->getNConstraintPairs();
         binDOF[binNo] -= constraints;
-      }      
+      }
     }
-    
+
     for (unsigned int i = 0; i < nBins_; i++) {
       RealType r, rinner, router, den(0.0), binVolume(0.0), temp(0.0);
       Vector3d omega(0.0);
-      
+
       r      = (((RealType)i + 0.5) * binWidth_);
       rinner = (RealType)i * binWidth_;
       router = (RealType)(i + 1) * binWidth_;
       binVolume =
-        (4.0 * Constants::PI * (pow(router, 3) - pow(rinner, 3))) / 3.0;
-      
+          (4.0 * Constants::PI * (pow(router, 3) - pow(rinner, 3))) / 3.0;
+
       dynamic_cast<Accumulator*>(data_[R]->accumulator[i])->add(r);
-      
+
       // For the following properties, zero should be added if the selected
       //   species is not present in the bin
       den = binMass[i] * Constants::densityConvert / binVolume;
       dynamic_cast<Accumulator*>(data_[DENSITY]->accumulator[i])->add(den);
-      
+
       if (binDOF[i] > 0) {
         // The calculations of the following properties are undefined if
         //   the selected species is not found in the bin
@@ -601,7 +598,7 @@ namespace OpenMD {
   RNEMDRTheta::RNEMDRTheta(SimInfo* info, const std::string& filename,
                            const std::string& sele, const std::string& comsele,
                            int nrbins, int nangleBins) :
-    ShellStatistics(info, filename, sele, comsele, nrbins),
+      ShellStatistics(info, filename, sele, comsele, nrbins),
       nAngleBins_(nangleBins) {
     Globals* simParams                  = info->getSimParams();
     RNEMD::RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
@@ -613,10 +610,10 @@ namespace OpenMD {
 
       if (amf.size() != 3) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "RNEMDRTheta: Incorrect number of parameters specified for "
-                "angularMomentumFluxVector.\n"
-                "\tthere should be 3 parameters, but %lu were specified.\n",
-                amf.size());
+                 "RNEMDRTheta: Incorrect number of parameters specified for "
+                 "angularMomentumFluxVector.\n"
+                 "\tthere should be 3 parameters, but %lu were specified.\n",
+                 amf.size());
         painCave.isFatal = 1;
         simError();
       }

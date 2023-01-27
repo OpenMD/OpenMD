@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -48,9 +47,9 @@
 #include <functional>
 #include <iostream>
 #include <sstream>
+#include <tuple>
 
 #include "utils/MemoryUtils.hpp"
-#include "utils/Tuple.hpp"
 
 using namespace std;
 
@@ -64,9 +63,7 @@ namespace OpenMD {
     return tmp.size() != cont.size();
   }
 
-  FragmentStamp::FragmentStamp() {
-    DefineParameter(Name, "name");
-  }
+  FragmentStamp::FragmentStamp() { DefineParameter(Name, "name"); }
 
   FragmentStamp::~FragmentStamp() {
     Utils::deletePointers(atomStamps_);
@@ -91,7 +88,7 @@ namespace OpenMD {
     }
     return ret;
   }
-  
+
   bool FragmentStamp::addBondStamp(BondStamp* bond) {
     bondStamps_.push_back(bond);
     return true;
@@ -122,7 +119,7 @@ namespace OpenMD {
     }
     return ret;
   }
-  
+
   bool FragmentStamp::addCutoffGroupStamp(CutoffGroupStamp* cutoffgroup) {
     cutoffGroupStamps_.push_back(cutoffgroup);
     return true;
@@ -139,9 +136,9 @@ namespace OpenMD {
   }
 
   void FragmentStamp::validate() {
-    DataHolder::validate(); 
+    DataHolder::validate();
     CheckParameter(Name, isNotEmpty());
-    
+
     atom2Rigidbody.resize(getNAtoms());
 
     // A negative number means the atom is a free atom, and does not
@@ -170,7 +167,7 @@ namespace OpenMD {
     checkConstraints();
     checkNodes();
   }
-  
+
   void FragmentStamp::checkAtoms() {
     std::vector<AtomStamp*>::iterator ai = std::find(
         atomStamps_.begin(), atomStamps_.end(), static_cast<AtomStamp*>(NULL));
@@ -203,8 +200,8 @@ namespace OpenMD {
     for (std::size_t i = 0; i < getNBonds(); ++i) {
       BondStamp* bondStamp = getBondStamp(i);
       std::pair<int, int> bondPair(bondStamp->getA(), bondStamp->getB());
-      // make sure bondTuple.first is always less than or equal to
-      // bondTuple.third
+      // make sure bondPair.first is always less than or equal to
+      // bondPair.third
       if (bondPair.first > bondPair.second) {
         std::swap(bondPair.first, bondPair.second);
       }
@@ -309,8 +306,8 @@ namespace OpenMD {
       }
     }
 
-    std::set<IntTuple3> allBends;
-    std::set<IntTuple3>::iterator iter;
+    std::set<std::tuple<int, int, int>> allBends;
+    std::set<std::tuple<int, int, int>>::iterator iter;
     for (std::size_t i = 0; i < getNBends(); ++i) {
       BendStamp* bendStamp  = getBendStamp(i);
       std::vector<int> bend = bendStamp->getMembers();
@@ -334,13 +331,12 @@ namespace OpenMD {
         if (j != bend.end()) { bend.insert(j, ghostIndex); }
       }
 
-      IntTuple3 bendTuple(bend[0], bend[1], bend[2]);
+      std::tuple<int, int, int> bendTuple {bend[0], bend[1], bend[2]};
+      auto& [first, second, third] = bendTuple;
 
       // make sure bendTuple.first is always less than or equal to
       // bendTuple.third
-      if (bendTuple.first > bendTuple.third) {
-        std::swap(bendTuple.first, bendTuple.third);
-      }
+      if (first > third) { std::swap(first, third); }
 
       iter = allBends.find(bendTuple);
       if (iter != allBends.end()) {
@@ -396,8 +392,8 @@ namespace OpenMD {
       }
     }
 
-    std::set<IntTuple4> allTorsions;
-    std::set<IntTuple4>::iterator iter;
+    std::set<std::tuple<int, int, int, int>> allTorsions;
+    std::set<std::tuple<int, int, int, int>>::iterator iter;
     for (std::size_t i = 0; i < getNTorsions(); ++i) {
       TorsionStamp* torsionStamp = getTorsionStamp(i);
       std::vector<int> torsion   = torsionStamp->getMembers();
@@ -408,10 +404,13 @@ namespace OpenMD {
         if (j != torsion.end()) { torsion.insert(j, ghostIndex); }
       }
 
-      IntTuple4 torsionTuple(torsion[0], torsion[1], torsion[2], torsion[3]);
-      if (torsionTuple.first > torsionTuple.fourth) {
-        std::swap(torsionTuple.first, torsionTuple.fourth);
-        std::swap(torsionTuple.second, torsionTuple.third);
+      std::tuple<int, int, int, int> torsionTuple(torsion[0], torsion[1],
+                                                  torsion[2], torsion[3]);
+      auto& [first, second, third, fourth] = torsionTuple;
+
+      if (first > fourth) {
+        std::swap(first, fourth);
+        std::swap(second, third);
       }
 
       iter = allTorsions.find(torsionTuple);
@@ -514,29 +513,25 @@ namespace OpenMD {
       }
     }
 
-    std::set<IntTuple4> allInversions;
-    std::set<IntTuple4>::iterator iter;
+    std::set<std::tuple<int, int, int, int>> allInversions;
+    std::set<std::tuple<int, int, int, int>>::iterator iter;
     for (std::size_t i = 0; i < getNInversions(); ++i) {
       InversionStamp* inversionStamp = getInversionStamp(i);
       int cent                       = inversionStamp->getCenter();
       std::vector<int> inversion     = inversionStamp->getSatellites();
 
-      IntTuple4 inversionTuple(cent, inversion[0], inversion[1], inversion[2]);
+      std::tuple<int, int, int, int> inversionTuple(cent, inversion[0],
+                                                    inversion[1], inversion[2]);
+      auto& [first, second, third, fourth] = inversionTuple;
 
       // In OpenMD, the Central atom in an inversion comes first, and
       // has a special position.  The other three atoms can come in
       // random order, and should be sorted in increasing numerical
       // order to check for duplicates.  This requires three pairwise
       // swaps:
-
-      if (inversionTuple.third > inversionTuple.fourth)
-        std::swap(inversionTuple.third, inversionTuple.fourth);
-
-      if (inversionTuple.second > inversionTuple.third)
-        std::swap(inversionTuple.second, inversionTuple.third);
-
-      if (inversionTuple.third > inversionTuple.fourth)
-        std::swap(inversionTuple.third, inversionTuple.fourth);
+      if (third > fourth) std::swap(third, fourth);
+      if (second > third) std::swap(second, third);
+      if (third > fourth) std::swap(third, fourth);
 
       iter = allInversions.find(inversionTuple);
       if (iter == allInversions.end()) {
@@ -605,7 +600,7 @@ namespace OpenMD {
       }
     }
   }
-  
+
   void FragmentStamp::checkConstraints() {
     std::ostringstream oss;
     // make sure index is not out of range
@@ -628,8 +623,8 @@ namespace OpenMD {
       ConstraintStamp* constraintStamp = getConstraintStamp(i);
       std::pair<int, int> constraintPair(constraintStamp->getA(),
                                          constraintStamp->getB());
-      // make sure constraintTuple.first is always less than or equal to
-      // constraintTuple.third
+      // make sure constraintPair.first is always less than or equal to
+      // constraintPair.third
       if (constraintPair.first > constraintPair.second) {
         std::swap(constraintPair.first, constraintPair.second);
       }
@@ -673,10 +668,10 @@ namespace OpenMD {
     }
 
     for (std::size_t i = 0; i < getNNodes(); ++i) {
-      NodesStamp* nStamp      = getNodesStamp(i);
-      std::vector<int> nodeAtoms  = nStamp->getMembers();
+      NodesStamp* nStamp           = getNodesStamp(i);
+      std::vector<int> nodeAtoms   = nStamp->getMembers();
       std::vector<int>::iterator j = std::find_if(
-	  nodeAtoms.begin(), nodeAtoms.end(),
+          nodeAtoms.begin(), nodeAtoms.end(),
           std::bind(std::greater<int>(), placeholders::_1, getNAtoms() - 1));
       if (j != nodeAtoms.end()) {
         oss << "Error in Fragment " << getName();
@@ -684,7 +679,7 @@ namespace OpenMD {
       }
     }
   }
-  
+
   void FragmentStamp::fillBondInfo() {
     for (std::size_t i = 0; i < getNBonds(); ++i) {
       BondStamp* bondStamp = getBondStamp(i);
@@ -789,6 +784,4 @@ namespace OpenMD {
     return jointAtomIndexPair;
   }
 
-
-  
 }  // namespace OpenMD

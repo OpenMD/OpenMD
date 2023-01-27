@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -56,91 +55,125 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <initializer_list>
 #include <iostream>
 #include <vector>
+
+#include "math/Vector.hpp"
 
 namespace OpenMD {
 
   /**
    * @class DynamicVector DynamicVector.hpp "math/DynamicVector.hpp"
-   * @brief Fix length vector class
+   * @brief Dynamically-sized vector class
    */
   template<typename Real, typename Alloc = std::allocator<Real>>
-  class DynamicVector : public std::vector<Real, Alloc> {
+  class DynamicVector {
   public:
-    typedef Real value_type;
-    typedef std::vector<Real, Alloc> VectorType;
-    typedef typename VectorType::pointer pointer;
-    typedef typename VectorType::const_pointer const_pointer;
-    typedef typename VectorType::reference reference;
-    typedef typename VectorType::const_reference const_reference;
-    typedef typename VectorType::iterator iterator;
-    typedef typename VectorType::const_iterator const_iterator;
-    typedef typename VectorType::const_reverse_iterator const_reverse_iterator;
-    typedef typename VectorType::reverse_iterator reverse_iterator;
-    typedef typename VectorType::size_type size_type;
-    typedef typename VectorType::difference_type difference_type;
-    typedef typename VectorType::allocator_type allocator_type;
+    using value_type             = Real;
+    using allocator_type         = Alloc;
+    using VectorType             = std::vector<Real, Alloc>;
+    using size_type              = typename VectorType::size_type;
+    using difference_type        = typename VectorType::difference_type;
+    using reference              = typename VectorType::reference;
+    using const_reference        = typename VectorType::const_reference;
+    using pointer                = typename VectorType::pointer;
+    using const_pointer          = typename VectorType::const_pointer;
+    using iterator               = typename VectorType::iterator;
+    using const_iterator         = typename VectorType::const_iterator;
+    using reverse_iterator       = typename VectorType::reverse_iterator;
+    using const_reverse_iterator = typename VectorType::const_reverse_iterator;
 
-    // [23.2.4.1] construct/copy/destroy
-    // (assign() and get_allocator() are also listed in this section)
     /**
-     *  @brief  Default constructor creates no elements.
+     * @brief  Default constructor creates no elements.
+     * @param  alloc  The allocator_type to use
      */
     explicit DynamicVector(const allocator_type& alloc = allocator_type()) :
-        std::vector<Real, Alloc>(alloc) {}
+        data_(alloc) {}
 
     /**
-     *  @brief  Create a %DynamicVector with copies of an exemplar element.
-     *  @param  n  The number of elements to initially create.
-     *  @param  value  An element to copy.
-     *  @param  alloc  The allocator_type to use
+     * @brief  Create a %DynamicVector with copies of an exemplar element.
+     * @param  n  The number of elements to initially create.
+     * @param  value  An element to copy.
+     * @param  alloc  The allocator_type to use
      *
-     *  This constructor fills the %DynamicVector with @a n copies of @a value.
+     * This constructor fills the %DynamicVector with @a n copies of @a value.
      */
     DynamicVector(size_type n, const value_type& value,
                   const allocator_type& alloc = allocator_type()) :
-        std::vector<Real, Alloc>(n, value, alloc) {}
+        data_(n, value, alloc) {}
 
     /**
-     *  @brief  Create a %DynamicVector with default elements.
-     *  @param  n  The number of elements to initially create.
+     * @brief  Create a %DynamicVector with default elements.
+     * @param  n  The number of elements to initially create.
+     * @param  alloc  The allocator_type to use
      *
      *  This constructor fills the %DynamicVector with @a n copies of a
      *  default-constructed element.
      */
-    explicit DynamicVector(size_type n) : std::vector<Real, Alloc>(n) {}
+    explicit DynamicVector(size_type n,
+                           const allocator_type& alloc = allocator_type()) :
+        data_(n, alloc) {}
 
     /**
-     *  @brief  %Vector copy constructor.
-     *  @param  x  A %DynamicVector of identical element and allocator types.
-     *
-     *  The newly-created %DynamicVector uses a copy of the allocation
-     *  object used by @a x.  All the elements of @a x are copied,
-     *  but any extra memory in
-     *  @a x (for fast expansion) will not be copied.
+     * @brief  Create a %DynamicVector using an iterator range
+     * @param  first  The beginning of the range to copy the elements from
+     * @param  last   The end of the range to copy the elements from
+     * @param  alloc  The allocator_type to use
      */
-    DynamicVector(const DynamicVector& x) : std::vector<Real, Alloc>(x) {}
-
-    template<typename _InputIterator>
-    DynamicVector(_InputIterator first, _InputIterator last,
+    template<typename InputIterator>
+    DynamicVector(InputIterator first, InputIterator last,
                   const allocator_type& alloc = allocator_type()) :
-        std::vector<Real, Alloc>(first, last, alloc) {}
+        data_(first, last, alloc) {}
 
-    inline Real operator()(unsigned int i) const { return (*this)[i]; }
+    /**
+     * @brief  Create a %DynamicVector with the contents of an initializer_list
+     * @param  init   Initializer list to initialize the elements with
+     * @param  alloc  The allocator_type to use
+     */
+    DynamicVector(std::initializer_list<value_type> init,
+                  const allocator_type& alloc = allocator_type()) :
+        data_(init, alloc) {}
 
-    inline Real& operator()(unsigned int i) { return (*this)[i]; }
+    // Element access functions
+    reference operator[](size_type i) { return data_[i]; }
+    const_reference operator[](size_type i) const { return data_[i]; }
+
+    reference operator()(size_type i) { return data_[i]; }
+    const_reference operator()(size_type i) const { return data_[i]; }
+
+    // Iterator functions
+    iterator begin() noexcept { return data_.begin(); }
+    const_iterator begin() const noexcept { return data_.begin(); }
+    const_iterator cbegin() const noexcept { return data_.cbegin(); }
+
+    iterator end() noexcept { return data_.end(); }
+    const_iterator end() const noexcept { return data_.end(); }
+    const_iterator cend() const noexcept { return data_.cend(); }
+
+    // Capacity functions
+    bool empty() const noexcept { return data_.empty(); }
+    size_type size() const noexcept { return data_.size(); }
+
+    // Modifier functions
+    void resize(size_type n) { return data_.resize(n); }
+    void resize(size_type n, const value_type& value) {
+      data_.resize(n, value);
+    }
+
+    void reserve(size_type new_cap) { data_.reserve(new_cap); }
+
     /**
      * Tests if this vetor is equal to other vector
      * @return true if equal, otherwise return false
      * @param v vector to be compared
      */
-    inline bool operator==(const DynamicVector<Real>& v) {
-      for (unsigned int i = 0; i < this->size(); i++) {
-        if (!equal((*this)[i], v[i])) { return false; }
-      }
+    bool operator==(const DynamicVector<Real>& v) {
+      if (this->size() != v.size()) return false;
 
-      return true;
+      return std::equal(
+          this->begin(), this->end(), v.begin(),
+          [](Real val1, Real val2) { return OpenMD::equal(val1, val2); });
     }
 
     /**
@@ -148,32 +181,30 @@ namespace OpenMD {
      * @return true if equal, otherwise return false
      * @param v vector to be compared
      */
-    inline bool operator!=(const DynamicVector<Real>& v) {
-      return !(*this == v);
-    }
+    bool operator!=(const DynamicVector<Real>& v) { return !(*this == v); }
 
     /** Negates the value of this vector in place. */
-    inline void negate() {
-      for (unsigned int i = 0; i < this->size(); i++)
-        (*this)[i] = -(*this)[i];
+    void negate() {
+      std::transform(this->begin(), this->end(), this->begin(),
+                     [](Real val) { return -val; });
     }
 
     /**
      * Sets the value of this vector to the negation of vector v1.
      * @param v1 the source vector
      */
-    inline void negate(const DynamicVector<Real>& v1) {
-      for (unsigned int i = 0; i < this->size(); i++)
-        (*this)[i] = -v1[i];
+    void negate(const DynamicVector<Real>& v1) {
+      std::transform(v1.begin(), v1.end(), this->begin(),
+                     [](Real val) { return -val; });
     }
 
     /**
      * Sets the value of this vector to the sum of itself and v1 (*this += v1).
      * @param v1 the other vector
      */
-    inline void add(const DynamicVector<Real>& v1) {
+    void add(const DynamicVector<Real>& v1) {
       std::transform(this->begin(), this->end(), v1.begin(), this->begin(),
-                     std::plus<Real>());
+                     [](Real val1, Real val2) { return val1 + val2; });
     }
 
     /**
@@ -181,10 +212,9 @@ namespace OpenMD {
      * @param v1 the first vector
      * @param v2 the second vector
      */
-    inline void add(const DynamicVector<Real>& v1,
-                    const DynamicVector<Real>& v2) {
+    void add(const DynamicVector<Real>& v1, const DynamicVector<Real>& v2) {
       std::transform(v1.begin(), v1.end(), v2.begin(), this->begin(),
-                     std::plus<Real>());
+                     [](Real val1, Real val2) { return val1 + val2; });
     }
 
     /**
@@ -192,9 +222,9 @@ namespace OpenMD {
      * -= v1).
      * @param v1 the other vector
      */
-    inline void sub(const DynamicVector<Real>& v1) {
+    void sub(const DynamicVector<Real>& v1) {
       std::transform(this->begin(), this->end(), v1.begin(), this->begin(),
-                     std::minus<Real>());
+                     [](Real val1, Real val2) { return val1 - val2; });
     }
 
     /**
@@ -203,9 +233,9 @@ namespace OpenMD {
      * @param v1 the first vector
      * @param v2 the second vector
      */
-    inline void sub(const DynamicVector<Real>& v1, const DynamicVector& v2) {
+    void sub(const DynamicVector<Real>& v1, const DynamicVector<Real>& v2) {
       std::transform(v1.begin(), v1.end(), v2.begin(), this->begin(),
-                     std::minus<Real>());
+                     [](Real val1, Real val2) { return val1 - val2; });
     }
 
     /**
@@ -213,9 +243,9 @@ namespace OpenMD {
      * (*this *= s).
      * @param s the scalar value
      */
-    inline void mul(Real s) {
-      for (unsigned int i = 0; i < this->size(); i++)
-        (*this)[i] *= s;
+    void mul(Real s) {
+      std::transform(this->begin(), this->end(), this->begin(),
+                     [s](Real val) { return val * s; });
     }
 
     /**
@@ -224,80 +254,78 @@ namespace OpenMD {
      * @param v1 the vector
      * @param s the scalar value
      */
-    inline void mul(const DynamicVector<Real>& v1, Real s) {
-      this->resize(v1.size());
-      for (unsigned int i = 0; i < this->size(); i++)
-        (*this)[i] = s * v1[i];
+    void mul(const DynamicVector<Real>& v1, Real s) {
+      if (this->size() != v1.size()) this->resize(v1.size());
+
+      std::transform(v1.begin(), v1.end(), this->begin(),
+                     [s](Real val) { return val * s; });
     }
 
     /**
-     * Sets the value of this vector to the scalar division of itself  (*this /=
-     * s ).
+     * Sets the value of this vector to the scalar division of itself
+     * (*this /= s).
      * @param s the scalar value
      */
-    inline void div(Real s) {
-      for (unsigned int i = 0; i < this->size(); i++)
-        (*this)[i] /= s;
+    void div(Real s) {
+      std::transform(this->begin(), this->end(), this->begin(),
+                     [s](Real val) { return val / s; });
     }
 
     /**
-     * Sets the value of this vector to the scalar division of vector v1  (*this
-     * = v1 / s ).
+     * Sets the value of this vector to the scalar division of vector v1
+     * (*this = v1 / s).
      * @param v1 the source vector
      * @param s the scalar value
      */
-    inline void div(const DynamicVector<Real>& v1, Real s) {
-      for (unsigned int i = 0; i < this->size(); i++)
-        (*this)[i] = v1[i] / s;
+    void div(const DynamicVector<Real>& v1, Real s) {
+      if (this->size() != v1.size()) this->resize(v1.size());
+
+      std::transform(v1.begin(), v1.end(), this->begin(),
+                     [s](Real val) { return val / s; });
     }
 
     /** @see #add */
-    inline DynamicVector<Real>& operator+=(const DynamicVector<Real>& v1) {
+    DynamicVector<Real>& operator+=(const DynamicVector<Real>& v1) {
       add(v1);
       return *this;
     }
 
     /** @see #sub */
-    inline DynamicVector<Real>& operator-=(const DynamicVector<Real>& v1) {
+    DynamicVector<Real>& operator-=(const DynamicVector<Real>& v1) {
       sub(v1);
       return *this;
     }
 
     /** @see #mul */
-    inline DynamicVector<Real>& operator*=(Real s) {
+    DynamicVector<Real>& operator*=(Real s) {
       mul(s);
       return *this;
     }
 
     /** @see #div */
-    inline DynamicVector<Real>& operator/=(Real s) {
+    DynamicVector<Real>& operator/=(Real s) {
       div(s);
       return *this;
     }
 
     /** zero out the vector */
-    inline void setZero() {
-      for (unsigned int i = 0; i < this->size(); i++)
-        (*this)[i] = 0;
-    }
+    void setZero() { std::fill(this->begin(), this->end(), 0); }
 
     /**
      * Returns the length of this vector.
      * @return the length of this vector
      */
-    inline Real length() { return sqrt(lengthSquare()); }
+    Real length() { return std::sqrt(lengthSquare()); }
 
     /**
      * Returns the squared length of this vector.
      * @return the squared length of this vector
      */
-    inline Real lengthSquare() { return dot(*this, *this); }
+    Real lengthSquare() { return dot(*this, *this); }
 
     /** Normalizes this vector in place */
-    inline void normalize() {
-      Real len;
-
-      len = length();
+    void normalize() {
+      Real len = length();
 
       // if (len < OpenMD::Constants::epsilon)
       //  throw();
@@ -309,15 +337,18 @@ namespace OpenMD {
      * Tests if this vector is normalized
      * @return true if this vector is normalized, otherwise return false
      */
-    inline bool isNormalized() { return equal(lengthSquare(), 1.0); }
+    bool isNormalized() { return OpenMD::equal(lengthSquare(), 1.0); }
 
     template<class VectorType>
-    void getSubVector(unsigned int beginning, VectorType& v) {
+    void getSubVector(size_type beginning, VectorType& v) {
       assert(beginning + v.size() - 1 <= this->size());
 
-      for (unsigned int i = 0; i < v.size(); ++i)
+      for (size_type i {}; i < v.size(); ++i)
         v(i) = (*this)[beginning + i];
     }
+
+  private:
+    std::vector<Real, Alloc> data_;
   };
 
   /** unary minus*/
@@ -409,7 +440,7 @@ namespace OpenMD {
     Real tmp;
     tmp = 0;
     assert(v1.size() == v2.size());
-    for (unsigned int i = 0; i < v1.size(); i++)
+    for (typename DynamicVector<Real>::size_type i {}; i < v1.size(); i++)
       tmp += v1[i] * v2[i];
 
     return tmp;
@@ -445,18 +476,16 @@ namespace OpenMD {
    * Write to an output stream
    */
   template<typename Real>
-  std::ostream& operator<<(std::ostream& o, const DynamicVector<Real>& v) {
-    o << "[ ";
+  std::ostream& operator<<(std::ostream& strm, const DynamicVector<Real>& v) {
+    strm << "[ ";
 
-    for (unsigned int i = 0; i < v.size(); i++) {
-      o << v[i];
+    std::for_each(v.begin(), v.end() - 1,
+                  [&strm](auto elem) { strm << elem << ", "; });
 
-      if (i != v.size() - 1) { o << ", "; }
-    }
+    strm << *(v.end() - 1) << " ]";
 
-    o << " ]";
-    return o;
+    return strm;
   }
-
 }  // namespace OpenMD
+
 #endif

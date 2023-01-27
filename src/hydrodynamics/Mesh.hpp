@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -53,30 +52,30 @@
 #include <vector>
 
 #include "hydrodynamics/Shape.hpp"
+#include "math/SquareMatrix3.hpp"
 #include "math/Triangle.hpp"
 #include "math/Vector3.hpp"
-#include "math/SquareMatrix3.hpp"
 
 namespace OpenMD {
   class Mesh : public Shape {
   public:
-    Mesh(){};
-    virtual ~Mesh(){};
+    Mesh() {};
+    virtual ~Mesh() {};
     // punt on this one for now:
     virtual bool isInterior(Vector3d pos) { return false; }
     virtual std::pair<Vector3d, Vector3d> getBoundingBox() {
       Vector3d bMax = facets_[0].vertex1();
       Vector3d bMin = facets_[0].vertex1();
-     
+
       for (auto& t : facets_) {
-	for (int i = 0; i < 3; i++) {
-	  bMax[i] = max(bMax[i], t.vertex1()[i]);
-	  bMin[i] = min(bMin[i], t.vertex1()[i]);
-	  bMax[i] = max(bMax[i], t.vertex2()[i]);
-	  bMin[i] = min(bMin[i], t.vertex2()[i]);
-	  bMax[i] = max(bMax[i], t.vertex3()[i]);
-	  bMin[i] = min(bMin[i], t.vertex3()[i]);
-	}
+        for (int i = 0; i < 3; i++) {
+          bMax[i] = max(bMax[i], t.vertex1()[i]);
+          bMin[i] = min(bMin[i], t.vertex1()[i]);
+          bMax[i] = max(bMax[i], t.vertex2()[i]);
+          bMin[i] = min(bMin[i], t.vertex2()[i]);
+          bMax[i] = max(bMax[i], t.vertex3()[i]);
+          bMin[i] = min(bMin[i], t.vertex3()[i]);
+        }
       }
       return make_pair(bMax, bMin);
     }
@@ -85,7 +84,7 @@ namespace OpenMD {
       HydroProp* props = new HydroProp();
       props->setCenterOfResistance(V3Zero);
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-	       "Mesh was asked to return an analytic HydroProps.\n");
+               "Mesh was asked to return an analytic HydroProps.\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -99,13 +98,13 @@ namespace OpenMD {
     void add(Triangle t) { facets_.push_back(t); }
 
     void add(const Vector3d& vertex1, const Vector3d& vertex2,
-	     const Vector3d& vertex3) {
+             const Vector3d& vertex3) {
       Triangle t(vertex1, vertex2, vertex3);
-      facets_.push_back(t);      
+      facets_.push_back(t);
     }
 
-    void addQuadrilateral (const Vector3d& p1, const Vector3d& p2,
-			   const Vector3d& p3, const Vector3d& p4) {
+    void addQuadrilateral(const Vector3d& p1, const Vector3d& p2,
+                          const Vector3d& p3, const Vector3d& p4) {
       add(p1, p2, p4);
       add(p4, p2, p3);
     };
@@ -120,75 +119,88 @@ namespace OpenMD {
       y = ((s.y() != 0) ? s.y() : 1);
       z = ((s.z() != 0) ? s.z() : 1);
       Vector3d _s(x, y, z);
-      
+
       Vector3d v1, v2, v3;
       for (auto& t : facets_) {
-	v1.Vmul(t.vertex1(), _s);
-	v2.Vmul(t.vertex2(), _s);
-	v3.Vmul(t.vertex3(), _s);
-	t = {v1, v2, v3};
+        v1.Vmul(t.vertex1(), _s);
+        v2.Vmul(t.vertex2(), _s);
+        v3.Vmul(t.vertex3(), _s);
+        t = {v1, v2, v3};
       }
       return *this;
     }
-    
+
     Mesh& translate(const Vector3d& trans) {
       Vector3d v1, v2, v3;
       for (auto& t : facets_) {
-	v1 = t.vertex1() + trans;
-	v2 = t.vertex2() + trans;
-	v3 = t.vertex3() + trans;
-	t = {v1, v2, v3};
+        v1 = t.vertex1() + trans;
+        v2 = t.vertex2() + trans;
+        v3 = t.vertex3() + trans;
+        t  = {v1, v2, v3};
       }
       return *this;
     }
-        
+
     Mesh& flipNormal() {
-      for( auto& t : facets_) {
-	t.flipNormal();
+      for (auto& t : facets_) {
+        t.flipNormal();
       }
       return *this;
     }
-    
-    void stlWrite(const std::string& filename,
-		  const std::string& name="") {
-      
+
+    void stlWrite(const std::string& filename, const std::string& name = "") {
       std::ofstream file(filename);
-      
-      file << "solid" << " " << name << std::endl;
+
+      file << "solid"
+           << " " << name << std::endl;
       for (auto& t : facets_) {
-	file << "\t" << "facet normal" << " " << t.getUnitNormal() << std::endl;
-	file << "\t\t" << "outer loop" << std::endl;
-	file << "\t\t\t" << " " << "vertex" << " " << t.vertex1() << std::endl;
-	file << "\t\t\t" << " " << "vertex" << " " << t.vertex2() << std::endl;
-	file << "\t\t\t" << " " << "vertex" << " " << t.vertex3() << std::endl;
-	file << "\t\t" << "endloop" << std::endl;
-	file << "\t" << "endfacet" << std::endl;
+        file << "\t"
+             << "facet normal"
+             << " " << t.getUnitNormal() << std::endl;
+        file << "\t\t"
+             << "outer loop" << std::endl;
+        file << "\t\t\t"
+             << " "
+             << "vertex"
+             << " " << t.vertex1() << std::endl;
+        file << "\t\t\t"
+             << " "
+             << "vertex"
+             << " " << t.vertex2() << std::endl;
+        file << "\t\t\t"
+             << " "
+             << "vertex"
+             << " " << t.vertex3() << std::endl;
+        file << "\t\t"
+             << "endloop" << std::endl;
+        file << "\t"
+             << "endfacet" << std::endl;
       }
-      file << "endsolid" << " " << name << std::endl;
-      
+      file << "endsolid"
+           << " " << name << std::endl;
+
       file.close();
     }
-    
-    Mesh& operator+=(const Mesh &m) {
-      facets_.insert(facets_.end(),
-		     (m.facets_).begin(), (m.facets_).end());
+
+    Mesh& operator+=(const Mesh& m) {
+      facets_.insert(facets_.end(), (m.facets_).begin(), (m.facets_).end());
       return *this;
     }
-    
-    inline void add(const Mesh &m1, const Mesh &m2) {
+
+    inline void add(const Mesh& m1, const Mesh& m2) {
       this->facets_.insert(this->facets_.end(), (m1.facets_).begin(),
-			   (m1.facets_).end());
+                           (m1.facets_).end());
       this->facets_.insert(this->facets_.end(), (m2.facets_).begin(),
-			   (m2.facets_).end());
+                           (m2.facets_).end());
     }
-    
+
     std::vector<Triangle> getFacets() { return facets_; }
-    
+
   private:
     std::vector<Triangle> facets_;
   };
-  
-  inline Mesh operator+(const Mesh &m1, const Mesh &m2) {
+
+  inline Mesh operator+(const Mesh& m1, const Mesh& m2) {
     Mesh m;
     m.add(m1, m2);
     return m;

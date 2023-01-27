@@ -32,12 +32,13 @@ jobs:
       - name: Dependencies
         run: |
           sudo apt-get install libfftw3-3 libfftw3-dev
-          sudo apt-get install openbabel libopenbabel-dev
           sudo apt-get install openmpi-bin libopenmpi-dev
           sudo apt-get install nlohmann-json3-dev
           sudo apt-get install python3-numpy python3-scipy
           sudo apt-get install qhull-bin libqhull-dev
           sudo apt-get install minizip zlib1g-dev
+
+        # sudo apt-get install openbabel libopenbabel-dev
 
       - name: Configure
         run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE

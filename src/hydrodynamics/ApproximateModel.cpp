@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -44,6 +43,7 @@
  */
 
 #include "hydrodynamics/ApproximateModel.hpp"
+
 #include "hydrodynamics/CompositeShape.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "hydrodynamics/Sphere.hpp"
@@ -58,7 +58,7 @@ namespace OpenMD {
   /**
    * References:
    *
-   * For the General Hydro Framework:  
+   * For the General Hydro Framework:
    * Beatriz Carrasco and Jose Gracia de la Torre; "Hydrodynamic
    * Properties of Rigid Particles: Comparison of Different Modeling
    * and Computational Procedures", Biophysical Journal, 75(6), 3044,
@@ -68,7 +68,7 @@ namespace OpenMD {
    * for rigid bodies of arbitrary shape", J. Chem. Phys. 128, 234107
    * (2008)
    *
-   * For overlapping beads and overlapping volume: 
+   * For overlapping beads and overlapping volume:
    *
    * Beatriz Carrasco and Jose Garcia de la Torre and Peter Zipper;
    * "Calculation of hydrodynamic properties of macromolecular bead
@@ -76,15 +76,15 @@ namespace OpenMD {
    * 510-515
    *
    * For overlapping volume between two spherical beads:
-   * http://mathworld.wolfram.com/Sphere-SphereIntersection.html 
+   * http://mathworld.wolfram.com/Sphere-SphereIntersection.html
    *
    * For non-overlapping and overlapping translation-translation
-   * mobility tensors: 
+   * mobility tensors:
    *
    * Zuk, P. J., E. Wajnryb, K. A. Mizerski, and P. Szymczak;
    * “Rotne–Prager–Yamakawa Approximation for Different-Sized
    * Particles in Application to Macromolecular Bead Models.”, Journal
-   * of Fluid Mechanics, 741 (2014) 
+   * of Fluid Mechanics, 741 (2014)
    *
    * For distinctions between centers of resistance and diffusion:
    * Steven Harvey and Jose Garcia de la Torre; "Coordinate Systems
@@ -92,7 +92,7 @@ namespace OpenMD {
    * Coefficients of Irregularly Shaped Rigid Macromolecules",
    * Macromolecules 1980 13 (4), 960-964
    **/
-  ApproximateModel::ApproximateModel() : HydrodynamicsModel() {    
+  ApproximateModel::ApproximateModel() : HydrodynamicsModel() {
     elements_.clear();
   }
 
@@ -105,19 +105,17 @@ namespace OpenMD {
   }
 
   HydroProp* ApproximateModel::calcHydroProps(RealType viscosity) {
-    
     HydroProp* hp = new HydroProp();
-    hp->setName( shape_->getName() );
+    hp->setName(shape_->getName());
     std::size_t nelements = elements_.size();
-    if (nelements == 0)
-      nelements = assignElements();   
-    
+    if (nelements == 0) nelements = assignElements();
+
     DynamicRectMatrix<RealType> B(3 * nelements, 3 * nelements);
     DynamicRectMatrix<RealType> C(3 * nelements, 3 * nelements);
     Mat3x3d I = Mat3x3d::identity();
 
     std::cerr << "Checking " << nelements << " elements...";
-    for (std::size_t i = 0; i < nelements; ++i) 
+    for (std::size_t i = 0; i < nelements; ++i)
       checkElement(i);
     std::cerr << " done.\n";
 
@@ -129,7 +127,7 @@ namespace OpenMD {
       }
     }
     std::cerr << " done.\n";
-        
+
     // invert B Matrix
     std::cerr << "Inverting B matrix...";
     invertMatrix(B, C);  // B is modified during the inversion
@@ -137,7 +135,7 @@ namespace OpenMD {
 
     // prepare U Matrix relative to arbitrary origin O(0.0, 0.0, 0.0);
     // relative to the original geometry
-    
+
     std::vector<Mat3x3d> U;
     for (unsigned int i = 0; i < nelements; ++i) {
       Mat3x3d currU;
@@ -166,7 +164,7 @@ namespace OpenMD {
 
     // If the model requires it, calculate the total volume,
     // discounting overlap:
-    
+
     RealType volume = volumeCorrection();
 
     // Add the volume correction
@@ -180,19 +178,19 @@ namespace OpenMD {
     Mat3x3d tmp;
     Mat3x3d tmpInv;
     Vector3d tmpVec;
-    tmp(0, 0) =  Xiott(1, 1) + Xiott(2, 2);
+    tmp(0, 0) = Xiott(1, 1) + Xiott(2, 2);
     tmp(0, 1) = -Xiott(0, 1);
     tmp(0, 2) = -Xiott(0, 2);
     tmp(1, 0) = -Xiott(0, 1);
-    tmp(1, 1) =  Xiott(0, 0) + Xiott(2, 2);
+    tmp(1, 1) = Xiott(0, 0) + Xiott(2, 2);
     tmp(1, 2) = -Xiott(1, 2);
     tmp(2, 0) = -Xiott(0, 2);
     tmp(2, 1) = -Xiott(1, 2);
-    tmp(2, 2) =  Xiott(1, 1) + Xiott(0, 0);
-    
-    tmpVec[0] =  Xiotr(2, 1) - Xiotr(1, 2);
-    tmpVec[1] =  Xiotr(0, 2) - Xiotr(2, 0);
-    tmpVec[2] =  Xiotr(1, 0) - Xiotr(0, 1);
+    tmp(2, 2) = Xiott(1, 1) + Xiott(0, 0);
+
+    tmpVec[0] = Xiotr(2, 1) - Xiotr(1, 2);
+    tmpVec[1] = Xiotr(0, 2) - Xiotr(2, 0);
+    tmpVec[2] = Xiotr(1, 0) - Xiotr(0, 1);
 
     // invert tmp Matrix
     invertMatrix(tmp, tmpInv);
@@ -226,7 +224,7 @@ namespace OpenMD {
     std::cerr << " done.\n";
 
     hp->setResistanceTensor(Xi);
-    
+
     return hp;
   }
 }  // namespace OpenMD

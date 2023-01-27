@@ -19,11 +19,11 @@ namespace OpenMD {
   public:
     TriangleQuadratureRule(const TriangleQuadratureRule&) = default;
     TriangleQuadratureRule& operator=(const TriangleQuadratureRule&) = default;
-    TriangleQuadratureRule(TriangleQuadratureRule&&) = default;
-    TriangleQuadratureRule& operator=(TriangleQuadratureRule&&) = default;               
-    TriangleQuadratureRule() = default;
+    TriangleQuadratureRule(TriangleQuadratureRule&&)                 = default;
+    TriangleQuadratureRule& operator=(TriangleQuadratureRule&&) = default;
+    TriangleQuadratureRule()                                    = default;
     virtual ~TriangleQuadratureRule() {}
-    
+
     /// Returns the order of this rule.
     int order() const {
       int rule_order = do_order();
@@ -38,13 +38,11 @@ namespace OpenMD {
     const std::vector<Vector2d>& quadrature_points() const {
       return do_quadrature_points();
     }
-      
+
     /// Returns the vector of weights. These sum to 1 and there is one
     /// weight for each point returned by quadrature_points().
-    const std::vector<RealType>& weights() const {
-      return do_weights();
-    }
-    
+    const std::vector<RealType>& weights() const { return do_weights(); }
+
   protected:
     /// Derived classes shall return the order (>= 1) of this rule.
     virtual int do_order() const = 0;
@@ -55,10 +53,10 @@ namespace OpenMD {
     /// barycentric coordinate is implicit: it is the difference
     /// between unity and the sum of the other two coordinates).
     virtual const std::vector<Vector2d>& do_quadrature_points() const = 0;
-    
+
     /// Derived classes shall return the vector of weights. The sum of
     /// all weights must equal 1.0.
     virtual const std::vector<RealType>& do_weights() const = 0;
-  };  
-}
+  };
+}  // namespace OpenMD
 #endif

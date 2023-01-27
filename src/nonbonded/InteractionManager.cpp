@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -102,7 +101,7 @@ namespace OpenMD {
     // We only need to worry about the types that are actually in the
     // simulation:
 
-    set<AtomType*> atypes = info_->getSimulatedAtomTypes();
+    AtomTypeSet atypes = info_->getSimulatedAtomTypes();
 
     lj_->setSimulatedAtomTypes(atypes);
     gb_->setSimulatedAtomTypes(atypes);
@@ -117,7 +116,7 @@ namespace OpenMD {
     mie_->setSimulatedAtomTypes(atypes);
     inversePowerSeries_->setSimulatedAtomTypes(atypes);
 
-    set<AtomType*>::iterator at;
+    AtomTypeSet::iterator at;
     set<NonBondedInteractionPtr>::iterator it;
 
     for (at = atypes.begin(); at != atypes.end(); ++at) {
@@ -130,7 +129,8 @@ namespace OpenMD {
       pair<map<int, AtomType*>::iterator, bool> ret;
       ret = typeMap_.insert(pair<int, AtomType*>(atid1, atype1));
       if (ret.second == false) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "InteractionManager already had a previous entry with ident %d\n",
             atype1->getIdent());
         painCave.severity = OPENMD_INFO;
@@ -240,10 +240,10 @@ namespace OpenMD {
           if (nbiType->isMorse()) {
             if (vdwExplicit) {
               snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                      "InteractionManager::initialize found more than one "
-                      "explicit \n"
-                      "\tvan der Waals interaction for atom types %s - %s\n",
-                      atype1->getName().c_str(), atype2->getName().c_str());
+                       "InteractionManager::initialize found more than one "
+                       "explicit \n"
+                       "\tvan der Waals interaction for atom types %s - %s\n",
+                       atype1->getName().c_str(), atype2->getName().c_str());
               painCave.severity = OPENMD_ERROR;
               painCave.isFatal  = 1;
               simError();
@@ -273,10 +273,10 @@ namespace OpenMD {
           if (nbiType->isRepulsivePower()) {
             if (vdwExplicit) {
               snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                      "InteractionManager::initialize found more than one "
-                      "explicit \n"
-                      "\tvan der Waals interaction for atom types %s - %s\n",
-                      atype1->getName().c_str(), atype2->getName().c_str());
+                       "InteractionManager::initialize found more than one "
+                       "explicit \n"
+                       "\tvan der Waals interaction for atom types %s - %s\n",
+                       atype1->getName().c_str(), atype2->getName().c_str());
               painCave.severity = OPENMD_ERROR;
               painCave.isFatal  = 1;
               simError();
@@ -308,10 +308,10 @@ namespace OpenMD {
           if (nbiType->isMie()) {
             if (vdwExplicit) {
               snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                      "InteractionManager::initialize found more than one "
-                      "explicit \n"
-                      "\tvan der Waals interaction for atom types %s - %s\n",
-                      atype1->getName().c_str(), atype2->getName().c_str());
+                       "InteractionManager::initialize found more than one "
+                       "explicit \n"
+                       "\tvan der Waals interaction for atom types %s - %s\n",
+                       atype1->getName().c_str(), atype2->getName().c_str());
               painCave.severity = OPENMD_ERROR;
               painCave.isFatal  = 1;
               simError();
@@ -361,10 +361,10 @@ namespace OpenMD {
           if (nbiType->isSC()) {
             if (metExplicit) {
               snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                      "InteractionManager::initialize found more than one "
-                      "explicit\n"
-                      "\tmetallic interaction for atom types %s - %s\n",
-                      atype1->getName().c_str(), atype2->getName().c_str());
+                       "InteractionManager::initialize found more than one "
+                       "explicit\n"
+                       "\tmetallic interaction for atom types %s - %s\n",
+                       atype1->getName().c_str(), atype2->getName().c_str());
               painCave.severity = OPENMD_ERROR;
               painCave.isFatal  = 1;
               simError();
@@ -389,10 +389,10 @@ namespace OpenMD {
           if (nbiType->isMAW()) {
             if (vdwExplicit) {
               snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                      "InteractionManager::initialize found more than one "
-                      "explicit\n"
-                      "\tvan der Waals interaction for atom types %s - %s\n",
-                      atype1->getName().c_str(), atype2->getName().c_str());
+                       "InteractionManager::initialize found more than one "
+                       "explicit\n"
+                       "\tvan der Waals interaction for atom types %s - %s\n",
+                       atype1->getName().c_str(), atype2->getName().c_str());
               painCave.severity = OPENMD_ERROR;
               painCave.isFatal  = 1;
               simError();
@@ -422,10 +422,10 @@ namespace OpenMD {
           if (nbiType->isInversePowerSeries()) {
             if (vdwExplicit) {
               snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                      "InteractionManager::initialize found more than one "
-                      "explicit \n"
-                      "\tvan der Waals interaction for atom types %s - %s\n",
-                      atype1->getName().c_str(), atype2->getName().c_str());
+                       "InteractionManager::initialize found more than one "
+                       "explicit \n"
+                       "\tvan der Waals interaction for atom types %s - %s\n",
+                       atype1->getName().c_str(), atype2->getName().c_str());
               painCave.severity = OPENMD_ERROR;
               painCave.isFatal  = 1;
               simError();
@@ -458,8 +458,8 @@ namespace OpenMD {
     // Make sure every pair of atom types in this simulation has a
     // non-bonded interaction.  If not, just inform the user.
 
-    set<AtomType*> simTypes = info_->getSimulatedAtomTypes();
-    set<AtomType*>::iterator bt;
+    AtomTypeSet simTypes = info_->getSimulatedAtomTypes();
+    AtomTypeSet::iterator bt;
 
     for (at = simTypes.begin(); at != simTypes.end(); ++at) {
       atype1 = (*at);
@@ -470,10 +470,10 @@ namespace OpenMD {
 
         if (interactions_[atid1][atid2].size() == 0) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "InteractionManager could not find a matching non-bonded\n"
-                  "\tinteraction for atom types %s - %s\n"
-                  "\tProceeding without this interaction.\n",
-                  atype1->getName().c_str(), atype2->getName().c_str());
+                   "InteractionManager could not find a matching non-bonded\n"
+                   "\tinteraction for atom types %s - %s\n"
+                   "\tProceeding without this interaction.\n",
+                   atype1->getName().c_str(), atype2->getName().c_str());
           painCave.severity = OPENMD_INFO;
           painCave.isFatal  = 0;
           simError();

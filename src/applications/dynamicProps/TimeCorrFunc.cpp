@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -45,9 +44,10 @@
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 
+#include <memory>
+
 #include "math/DynamicVector.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/Revision.hpp"
 #include "utils/simError.h"
 
@@ -57,12 +57,12 @@ namespace OpenMD {
   template<typename T>
   TimeCorrFunc<T>::TimeCorrFunc(SimInfo* info, const string& filename,
                                 const string& sele1, const string& sele2) :
-    info_(info), dumpFilename_(filename), seleMan1_(info_), seleMan2_(info_),
-    selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info_),
-    evaluator2_(info_), autoCorrFunc_(false), doSystemProperties_(false),
-    doMolecularProperties_(false), doObjectProperties_(false),
-    doBondProperties_(false) {
-
+      info_(info),
+      dumpFilename_(filename), seleMan1_(info_), seleMan2_(info_),
+      selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info_),
+      evaluator2_(info_), autoCorrFunc_(false), doSystemProperties_(false),
+      doMolecularProperties_(false), doObjectProperties_(false),
+      doBondProperties_(false) {
     reader_ = new DumpReader(info_, dumpFilename_);
 
     uniqueSelections_ = (sele1.compare(sele2) != 0) ? true : false;
@@ -72,7 +72,7 @@ namespace OpenMD {
       deltaTime_ = simParams->getSampleTime();
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "TimeCorrFunc Error: can not figure out deltaTime\n");
+               "TimeCorrFunc Error: can not figure out deltaTime\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -93,8 +93,7 @@ namespace OpenMD {
     sele1ToIndex_.resize(nFrames_);
     if (uniqueSelections_) { sele2ToIndex_.resize(nFrames_); }
 
-    // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    progressBar_ = Utils::make_unique<ProgressBar>();
+    progressBar_ = std::make_unique<ProgressBar>();
   }
 
   template<typename T>
@@ -255,15 +254,18 @@ namespace OpenMD {
   void TimeCorrFunc<T>::doCorrelate() {
     painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
-    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Starting pre-correlate scan.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Starting pre-correlate scan.");
     simError();
     preCorrelate();
 
-    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Calculating correlation function.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Calculating correlation function.");
     simError();
     correlation();
 
-    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Doing post-correlation calculations.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Doing post-correlation calculations.");
     simError();
     postCorrelate();
 
@@ -300,10 +302,10 @@ namespace OpenMD {
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "TimeCorrFunc::correlateBlocks Error: sampleTime (%f)\n"
-                  "\tin %s does not match actual time-spacing between\n"
-                  "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                  deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+                   "TimeCorrFunc::correlateBlocks Error: sampleTime (%f)\n"
+                   "\tin %s does not match actual time-spacing between\n"
+                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
           painCave.isFatal = 1;
           simError();
         }
@@ -380,7 +382,7 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   }
 
   template<typename T>
-  void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {}
+  void TimeCorrFunc<T>::validateSelection(SelectionManager&) {}
 
   template<typename T>
   void TimeCorrFunc<T>::writeCorrelate() {
@@ -407,8 +409,8 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
 
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
-              outputFilename_.c_str());
+               "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
+               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -446,8 +448,8 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
 
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
-              outputFilename_.c_str());
+               "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
+               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -487,8 +489,8 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
 
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
-              outputFilename_.c_str());
+               "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
+               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -502,7 +504,7 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   CrossCorrFunc<T>::CrossCorrFunc(SimInfo* info, const std::string& filename,
                                   const std::string& sele1,
                                   const std::string& sele2) :
-    TimeCorrFunc<T>(info, filename, sele1, sele2) {
+      TimeCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_ = false;
   }
 
@@ -510,14 +512,14 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   AutoCorrFunc<T>::AutoCorrFunc(SimInfo* info, const std::string& filename,
                                 const std::string& sele1,
                                 const std::string& sele2) :
-    TimeCorrFunc<T>(info, filename, sele1, sele2) {
+      TimeCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_ = true;
   }
 
   template<typename T>
   SystemACF<T>::SystemACF(SimInfo* info, const std::string& filename,
                           const std::string& sele1, const std::string& sele2) :
-    AutoCorrFunc<T>(info, filename, sele1, sele2) {
+      AutoCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_          = true;
     this->doSystemProperties_    = true;
     this->doMolecularProperties_ = false;
@@ -528,7 +530,7 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   template<typename T>
   SystemCCF<T>::SystemCCF(SimInfo* info, const std::string& filename,
                           const std::string& sele1, const std::string& sele2) :
-    CrossCorrFunc<T>(info, filename, sele1, sele2) {
+      CrossCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_          = false;
     this->doSystemProperties_    = true;
     this->doMolecularProperties_ = false;
@@ -539,7 +541,7 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   template<typename T>
   ObjectACF<T>::ObjectACF(SimInfo* info, const std::string& filename,
                           const std::string& sele1, const std::string& sele2) :
-    AutoCorrFunc<T>(info, filename, sele1, sele2) {
+      AutoCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_          = true;
     this->doSystemProperties_    = false;
     this->doMolecularProperties_ = false;
@@ -550,7 +552,7 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   template<typename T>
   ObjectCCF<T>::ObjectCCF(SimInfo* info, const std::string& filename,
                           const std::string& sele1, const std::string& sele2) :
-    CrossCorrFunc<T>(info, filename, sele1, sele2) {
+      CrossCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_          = false;
     this->doSystemProperties_    = false;
     this->doMolecularProperties_ = false;
@@ -562,7 +564,7 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   MoleculeACF<T>::MoleculeACF(SimInfo* info, const std::string& filename,
                               const std::string& sele1,
                               const std::string& sele2) :
-    AutoCorrFunc<T>(info, filename, sele1, sele2) {
+      AutoCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_          = true;
     this->doSystemProperties_    = false;
     this->doMolecularProperties_ = true;
@@ -574,7 +576,7 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   MoleculeCCF<T>::MoleculeCCF(SimInfo* info, const std::string& filename,
                               const std::string& sele1,
                               const std::string& sele2) :
-    CrossCorrFunc<T>(info, filename, sele1, sele2) {
+      CrossCorrFunc<T>(info, filename, sele1, sele2) {
     this->autoCorrFunc_          = false;
     this->doSystemProperties_    = false;
     this->doMolecularProperties_ = true;
@@ -625,5 +627,4 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
   template class MoleculeCCF<RealType>;
   template class MoleculeCCF<Vector3d>;
   template class MoleculeCCF<Mat3x3d>;
-
 }  // namespace OpenMD

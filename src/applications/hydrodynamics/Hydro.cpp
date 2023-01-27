@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -48,31 +47,30 @@
 #include <string>
 
 #include "HydroCmd.hpp"
-#include "hydrodynamics/AnalyticalModel.hpp"
-#include "hydrodynamics/AtomicBeadModel.hpp"
-#include "hydrodynamics/BoundaryElementModel.hpp"
-#include "hydrodynamics/HydrodynamicsModel.hpp"
-#include "hydrodynamics/HydrodynamicsModelCreator.hpp"
-#include "hydrodynamics/HydrodynamicsModelFactory.hpp"
-#include "hydrodynamics/RoughShell.hpp"
-#include "hydrodynamics/ShapeBuilder.hpp"
-#include "hydrodynamics/HydroIO.hpp"
-#include "hydrodynamics/CompositeShape.hpp"
-#include "hydrodynamics/Sphere.hpp"
-#include "hydrodynamics/Mesh.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
+#include "hydrodynamics/AnalyticalModel.hpp"
+#include "hydrodynamics/AtomicBeadModel.hpp"
+#include "hydrodynamics/BoundaryElementModel.hpp"
+#include "hydrodynamics/CompositeShape.hpp"
+#include "hydrodynamics/HydroIO.hpp"
+#include "hydrodynamics/HydrodynamicsModel.hpp"
+#include "hydrodynamics/HydrodynamicsModelCreator.hpp"
+#include "hydrodynamics/HydrodynamicsModelFactory.hpp"
+#include "hydrodynamics/Mesh.hpp"
+#include "hydrodynamics/RoughShell.hpp"
+#include "hydrodynamics/ShapeBuilder.hpp"
+#include "hydrodynamics/Sphere.hpp"
+#include "io/MSMSFormat.hpp"
+#include "io/XYZFormat.hpp"
+#include "io/stl_reader.h"
+#include "utils/ElementsTable.hpp"
 #include "utils/MemoryUtils.hpp"
-#include "utils/StringUtils.hpp"
 #include "utils/StringTokenizer.hpp"
+#include "utils/StringUtils.hpp"
 #include "utils/Trim.hpp"
 #include "utils/simError.h"
-#include "utils/ElementsTable.hpp"
-
-#include "io/stl_reader.h"
-#include "io/XYZFormat.hpp"
-#include "io/MSMSFormat.hpp"
 
 using namespace OpenMD;
 
@@ -88,7 +86,7 @@ int main(int argc, char* argv[]) {
   registerHydrodynamicsModels();
 
   gengetopt_args_info args_info;
-    // parse the command line option
+  // parse the command line option
   if (cmdline_parser(argc, argv, &args_info) != 0) { exit(1); }
 
   std::string inFileName;
@@ -98,28 +96,28 @@ int main(int argc, char* argv[]) {
   bool hasModel = false;
 
   Shape* shape;
-  
+
   // get the dumpfile name and meta-data file name
   if (args_info.input_given) {
     inFileName = args_info.input_arg;
-    hasInput = true;
-  }  else {
+    hasInput   = true;
+  } else {
     if (args_info.stl_given) {
       inFileName = args_info.stl_arg;
-      modelName = "BoundaryElementModel";
-      hasInput = true;
-      hasModel = true;
+      modelName  = "BoundaryElementModel";
+      hasInput   = true;
+      hasModel   = true;
     } else if (args_info.msms_given) {
       inFileName = args_info.msms_arg;
-      modelName = "BoundaryElementModel";
-      hasInput = true;
-      hasModel = true;
+      modelName  = "BoundaryElementModel";
+      hasInput   = true;
+      hasModel   = true;
     } else {
       if (args_info.xyz_given) {
-	inFileName = args_info.xyz_arg;
-	modelName = "AtomicBeadModel";
-	hasInput = true;
-	hasModel = true;
+        inFileName = args_info.xyz_arg;
+        modelName  = "AtomicBeadModel";
+        hasInput   = true;
+        hasModel   = true;
       }
     }
   }
@@ -151,14 +149,14 @@ int main(int argc, char* argv[]) {
       break;
     }
   }
-  
+
   std::string outputFilename = prefix + ".hydro";
 
   RealType temperature = args_info.temperature_arg;
-  RealType viscosity = args_info.viscosity_arg;
+  RealType viscosity   = args_info.viscosity_arg;
 
   std::ofstream outputHydro;
-  outputHydro.open(outputFilename.c_str());  
+  outputHydro.open(outputFilename.c_str());
   HydroIO* hio = new HydroIO();
   hio->openWriter(outputHydro);
 
@@ -169,103 +167,102 @@ int main(int argc, char* argv[]) {
 
     try {
       stl_reader::ReadStlFile(inFileName.c_str(), coords, normals, tris,
-			      solids);
+                              solids);
       const size_t numTris = tris.size() / 3;
-      for(size_t itri = 0; itri < numTris; ++itri) {
-	RealType* c0 = &coords[3 * tris [3 * itri + 0]];
-	Vector3d vert0 (c0[0], c0[1], c0[2]);
-	RealType* c1 = &coords[3 * tris [3 * itri + 1]];
-	Vector3d vert1 (c1[0], c1[1], c1[2]);
-	RealType* c2 = &coords[3 * tris [3 * itri + 2]];
-	Vector3d vert2 (c2[0], c2[1], c2[2]);
-	dynamic_cast<Mesh*>(shape)->add(vert0, vert1, vert2);	  
+      for (size_t itri = 0; itri < numTris; ++itri) {
+        RealType* c0 = &coords[3 * tris[3 * itri + 0]];
+        Vector3d vert0(c0[0], c0[1], c0[2]);
+        RealType* c1 = &coords[3 * tris[3 * itri + 1]];
+        Vector3d vert1(c1[0], c1[1], c1[2]);
+        RealType* c2 = &coords[3 * tris[3 * itri + 2]];
+        Vector3d vert2(c2[0], c2[1], c2[2]);
+        dynamic_cast<Mesh*>(shape)->add(vert0, vert1, vert2);
       }
-    }
-    catch (std::exception& e) {
-      std::cout << e.what() << std::endl;
-    }
+    } catch (std::exception& e) { std::cout << e.what() << std::endl; }
     HydrodynamicsModel* model =
-      HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(modelName);
-    
+        HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(
+            modelName);
+
     if (model != NULL) {
       model->init();
       model->setShape(shape);
 
       HydroProp* hp = model->calcHydroProps(viscosity);
       hio->writeHydroProp(hp, viscosity, temperature, outputHydro);
-      hio->interpretHydroProp(hp, viscosity, temperature);        
+      hio->interpretHydroProp(hp, viscosity, temperature);
       delete model;
-      
+
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "Could not create HydrodynamicsModel\n");
       painCave.isFatal = 1;
       simError();
     }
- 
+
     hio->closeWriter(outputHydro);
-    
+
     outputHydro.close();
   } else if (args_info.msms_given) {
     MSMSFormat* msms = new MSMSFormat(inFileName.c_str());
-    shape = msms->ReadShape();
-      
+    shape            = msms->ReadShape();
+
     HydrodynamicsModel* model =
-      HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(modelName);
-    
+        HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(
+            modelName);
+
     if (model != NULL) {
       model->init();
       model->setShape(shape);
 
       HydroProp* hp = model->calcHydroProps(viscosity);
       hio->writeHydroProp(hp, viscosity, temperature, outputHydro);
-      hio->interpretHydroProp(hp, viscosity, temperature);        
+      hio->interpretHydroProp(hp, viscosity, temperature);
       delete model;
-      
+
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "Could not create HydrodynamicsModel\n");
       painCave.isFatal = 1;
       simError();
     }
- 
+
     hio->closeWriter(outputHydro);
-    
+
     outputHydro.close();
 
   } else if (args_info.xyz_given) {
-
     ifstream in(inFileName);
     if (!in) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "Could not open XYZ file\n");
       painCave.isFatal = 1;
       simError();
     }
-    
+
     XYZFormat* xyz = new XYZFormat();
     xyz->ReadMolecule(in);
 
     shape = new CompositeShape();
     shape->setName(xyz->title_);
 
-    Shape* currShape        = NULL;
+    Shape* currShape = NULL;
 
     size_t natoms = xyz->mol_.size();
-    for (size_t iatom = 0;  iatom < natoms; ++iatom) {
-      Vector3d pos = xyz->mol_[iatom]->pos;
-      int anum = xyz->mol_[iatom]->atomicNum;
+    for (size_t iatom = 0; iatom < natoms; ++iatom) {
+      Vector3d pos      = xyz->mol_[iatom]->pos;
+      int anum          = xyz->mol_[iatom]->atomicNum;
       std::string atype = xyz->mol_[iatom]->type;
-      currShape = new Sphere(pos, etab.GetVdwRad(anum));
-      currShape->setName( atype );
-      if (currShape != NULL) {	      
-	dynamic_cast<CompositeShape*>(shape)->addShape(currShape);
+      currShape         = new Sphere(pos, etab.GetVdwRad(anum));
+      currShape->setName(atype);
+      if (currShape != NULL) {
+        dynamic_cast<CompositeShape*>(shape)->addShape(currShape);
       }
     }
 
     std::cerr << "model = " << modelName << "\n";
     HydrodynamicsModel* model =
-      HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(modelName);
+        HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(
+            modelName);
 
     if (args_info.model_arg == model_arg_RoughShell) {
       RealType bs = args_info.beadSize_arg;
@@ -278,25 +275,24 @@ int main(int argc, char* argv[]) {
 
       HydroProp* hp = model->calcHydroProps(viscosity);
       hio->writeHydroProp(hp, viscosity, temperature, outputHydro);
-      hio->interpretHydroProp(hp, viscosity, temperature);        
+      hio->interpretHydroProp(hp, viscosity, temperature);
       delete model;
-      
+
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "Could not create HydrodynamicsModel\n");
       painCave.isFatal = 1;
       simError();
     }
- 
+
     hio->closeWriter(outputHydro);
-    
+
     outputHydro.close();
   } else {
-  
     // parse md file and set up the system
     SimCreator creator;
     SimInfo* info = creator.createSim(inFileName, true);
-    
+
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::IntegrableObjectIterator ii;
@@ -305,111 +301,117 @@ int main(int argc, char* argv[]) {
     identMat(0, 0) = 1.0;
     identMat(1, 1) = 1.0;
     identMat(2, 2) = 1.0;
-    
+
     Globals* simParams = info->getSimParams();
-    
+
     if (simParams->haveViscosity()) {
       viscosity = simParams->getViscosity();
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "viscosity must be set\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "viscosity must be set\n");
       painCave.isFatal = 1;
       simError();
     }
-    
+
     if (simParams->haveTargetTemp()) {
       temperature = simParams->getTargetTemp();
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "target temperature must be set\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "target temperature must be set\n");
       painCave.isFatal = 1;
       simError();
     }
-    
+
     std::map<std::string, SDShape> uniqueStuntDoubles;
 
     for (mol = info->beginMolecule(mi); mol != NULL;
-	 mol = info->nextMolecule(mi)) {
+         mol = info->nextMolecule(mi)) {
       for (sd = mol->beginIntegrableObject(ii); sd != NULL;
-	   sd = mol->nextIntegrableObject(ii)) {
-	if (uniqueStuntDoubles.find(sd->getType()) == uniqueStuntDoubles.end()) {
-	  sd->setPos(V3Zero);
-	  // sd->setA(identMat);
-	  if (sd->isRigidBody()) {
-	    sd->setA(identMat);
-	    RigidBody* rb = static_cast<RigidBody*>(sd);
-	    rb->updateAtoms();
-	  }
-	  
-	  SDShape tmp;
-	  tmp.shape = ShapeBuilder::createShape(sd);
-	  tmp.sd    = sd;
-	  uniqueStuntDoubles.insert(
-				    std::map<std::string, SDShape>::value_type(sd->getType(), tmp));
-	}
+           sd = mol->nextIntegrableObject(ii)) {
+        if (uniqueStuntDoubles.find(sd->getType()) ==
+            uniqueStuntDoubles.end()) {
+          sd->setPos(V3Zero);
+          // sd->setA(identMat);
+          if (sd->isRigidBody()) {
+            sd->setA(identMat);
+            RigidBody* rb = static_cast<RigidBody*>(sd);
+            rb->updateAtoms();
+          }
+
+          SDShape tmp;
+          tmp.shape = ShapeBuilder::createShape(sd);
+          tmp.sd    = sd;
+          uniqueStuntDoubles.insert(
+              std::map<std::string, SDShape>::value_type(sd->getType(), tmp));
+        }
       }
     }
-        
+
     std::map<std::string, SDShape>::iterator si;
-    for (si = uniqueStuntDoubles.begin(); si != uniqueStuntDoubles.end(); ++si) {
+    for (si = uniqueStuntDoubles.begin(); si != uniqueStuntDoubles.end();
+         ++si) {
       HydrodynamicsModel* model = NULL;
-      shape  = si->second.shape;
+      shape                     = si->second.shape;
       // StuntDouble* sd = si->second.sd;
-      
+
       // if (shape->hasAnalyticalSolution()) {
       //  model = new AnalyticalModel(sd, info);
       //} else {
       if (args_info.model_given) {
-	std::string modelName;
-	switch (args_info.model_arg) {
-	case model_arg_RoughShell:
-	  modelName = "RoughShell";
-	  break;
-	case model_arg_AtomicBead:
-	default:
-	  modelName = "AtomicBeadModel";
-	  break;
-	}
-	
-	model =
-          HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(modelName);
-	
-	if (args_info.model_arg == model_arg_RoughShell) {
-	  RealType bs = args_info.beadSize_arg;
-	  dynamic_cast<RoughShell*>(model)->setSigma(bs);
-	}
+        std::string modelName;
+        switch (args_info.model_arg) {
+        case model_arg_RoughShell:
+          modelName = "RoughShell";
+          break;
+        case model_arg_AtomicBead:
+        default:
+          modelName = "AtomicBeadModel";
+          break;
+        }
+
+        model =
+            HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(
+                modelName);
+
+        if (args_info.model_arg == model_arg_RoughShell) {
+          RealType bs = args_info.beadSize_arg;
+          dynamic_cast<RoughShell*>(model)->setSigma(bs);
+        }
       }
       //}
-      
+
       if (model != NULL) {
-	model->init();
-	model->setShape(shape);
-	
-	std::ofstream ofs;
-	std::stringstream outputBeads;
-	outputBeads << prefix << "_" << shape->getName() << ".xyz";
-	ofs.open(outputBeads.str().c_str());
-	model->writeElements(ofs);
-	ofs.close();
-	
-	// if beads option is turned on, skip the calculation
-	if (!args_info.beads_flag) {
-	  HydroProp* hp = model->calcHydroProps(viscosity);
-	  hio->writeHydroProp(hp, viscosity, temperature, outputHydro);
-	  hio->interpretHydroProp(hp, viscosity, temperature);
-	}
-	
-	delete model;
-	
+        model->init();
+        model->setShape(shape);
+
+        std::ofstream ofs;
+        std::stringstream outputBeads;
+        outputBeads << prefix << "_" << shape->getName() << ".xyz";
+        ofs.open(outputBeads.str().c_str());
+        model->writeElements(ofs);
+        ofs.close();
+
+        // if beads option is turned on, skip the calculation
+        if (!args_info.beads_flag) {
+          HydroProp* hp = model->calcHydroProps(viscosity);
+          hio->writeHydroProp(hp, viscosity, temperature, outputHydro);
+          hio->interpretHydroProp(hp, viscosity, temperature);
+        }
+
+        delete model;
+
       } else {
-	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Could not create HydrodynamicsModel\n");
-	painCave.isFatal = 1;
-	simError();
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Could not create HydrodynamicsModel\n");
+        painCave.isFatal = 1;
+        simError();
       }
     }
     hio->closeWriter(outputHydro);
-    
+
     outputHydro.close();
-    delete info;  
-  }    
+    delete info;
+  }
 }
 
 void registerHydrodynamicsModels() {
@@ -420,5 +422,6 @@ void registerHydrodynamicsModels() {
   HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(
       new HydrodynamicsModelBuilder<AnalyticalModel>("AnalyticalModel"));
   HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(
-      new HydrodynamicsModelBuilder<BoundaryElementModel>("BoundaryElementModel"));
+      new HydrodynamicsModelBuilder<BoundaryElementModel>(
+          "BoundaryElementModel"));
 }

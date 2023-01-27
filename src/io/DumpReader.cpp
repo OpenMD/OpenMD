@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -63,7 +62,6 @@
 
 #include "brains/Thermo.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/StringTokenizer.hpp"
 #include "utils/simError.h"
 
@@ -77,39 +75,26 @@ namespace OpenMD {
 #endif
 
       inFile_ =
-          new std::ifstream(filename_.c_str(), ifstream::in | ifstream::binary);
+          std::ifstream(filename_.c_str(), ifstream::in | ifstream::binary);
 
-      if (inFile_->fail()) {
+      if (inFile_.fail()) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-		 "DumpReader: Cannot open file: %s\n",
-                filename_.c_str());
+                 "DumpReader: Cannot open file: %s\n", filename_.c_str());
         painCave.isFatal = 1;
         simError();
       }
-
 #ifdef IS_MPI
     }
     strcpy(checkPointMsg, "Dump file opened for reading successfully.");
     errorCheckPoint();
 #endif
-
-    return;
   }
 
   DumpReader::~DumpReader() {
 #ifdef IS_MPI
-    if (worldRank == 0) {
-#endif
-
-      delete inFile_;
-
-#ifdef IS_MPI
-    }
     strcpy(checkPointMsg, "Dump file closed successfully.");
     errorCheckPoint();
 #endif
-
-    return;
   }
 
   int DumpReader::getNFrames(void) {
@@ -124,25 +109,25 @@ namespace OpenMD {
 
 #ifdef IS_MPI
     if (worldRank == 0) {
-#endif  // is_mpi
+#endif
 
-      currPos                     = inFile_->tellg();
+      currPos                     = inFile_.tellg();
       prevPos                     = currPos;
       bool foundOpenSnapshotTag   = false;
       bool foundClosedSnapshotTag = false;
 
       int lineNo = 0;
-      while (inFile_->getline(buffer, bufferSize)) {
+      while (inFile_.getline(buffer, bufferSize)) {
         ++lineNo;
 
         std::string line = buffer;
-        currPos          = inFile_->tellg();
+        currPos          = inFile_.tellg();
         if (line.find("<Snapshot>") != std::string::npos) {
           if (foundOpenSnapshotTag) {
             snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                    "DumpReader:<Snapshot> is multiply nested at line %d "
-                    "in %s \n",
-                    lineNo, filename_.c_str());
+                     "DumpReader:<Snapshot> is multiply nested at line %d "
+                     "in %s \n",
+                     lineNo, filename_.c_str());
             painCave.isFatal = 1;
             simError();
           }
@@ -153,18 +138,18 @@ namespace OpenMD {
         } else if (line.find("</Snapshot>") != std::string::npos) {
           if (!foundOpenSnapshotTag) {
             snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                    "DumpReader:</Snapshot> appears before <Snapshot> at "
-                    "line %d in %s \n",
-                    lineNo, filename_.c_str());
+                     "DumpReader:</Snapshot> appears before <Snapshot> at "
+                     "line %d in %s \n",
+                     lineNo, filename_.c_str());
             painCave.isFatal = 1;
             simError();
           }
 
           if (foundClosedSnapshotTag) {
             snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                    "DumpReader:</Snapshot> appears multiply nested at "
-                    "line %d in %s \n",
-                    lineNo, filename_.c_str());
+                     "DumpReader:</Snapshot> appears multiply nested at "
+                     "line %d in %s \n",
+                     lineNo, filename_.c_str());
             painCave.isFatal = 1;
             simError();
           }
@@ -178,8 +163,8 @@ namespace OpenMD {
       // corrupted, we should discard it and give a warning message
       if (foundOpenSnapshotTag) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-		 "DumpReader: last frame in %s is invalid\n",
-                filename_.c_str());
+                 "DumpReader: last frame in %s is invalid\n",
+                 filename_.c_str());
         painCave.isFatal = 0;
         simError();
         framePos_.pop_back();
@@ -189,8 +174,8 @@ namespace OpenMD {
 
       if (nframes_ == 0) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "DumpReader: %s does not contain a valid frame\n",
-                filename_.c_str());
+                 "DumpReader: %s does not contain a valid frame\n",
+                 filename_.c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -206,26 +191,31 @@ namespace OpenMD {
   void DumpReader::readFrame(int whichFrame) {
     if (!isScanned_) scanFile();
 
-    int asl = info_->getSnapshotManager()->getAtomStorageLayout();
+    int asl  = info_->getSnapshotManager()->getAtomStorageLayout();
     int rbsl = info_->getSnapshotManager()->getRigidBodyStorageLayout();
 
-    needPos_ = (asl & DataStorage::dslPosition ||
-		rbsl & DataStorage::dslPosition) ? true : false;
-    needVel_ = (asl & DataStorage::dslVelocity ||
-		rbsl & DataStorage::dslVelocity)  ? true : false;
-    needQuaternion_ = (asl & DataStorage::dslAmat ||
-		       asl & DataStorage::dslDipole ||
-		       asl & DataStorage::dslQuadrupole ||
-		       rbsl & DataStorage::dslAmat ||
-		       rbsl & DataStorage::dslDipole ||
-		       rbsl & DataStorage::dslQuadrupole) ? true : false;
+    needPos_ =
+        (asl & DataStorage::dslPosition || rbsl & DataStorage::dslPosition) ?
+            true :
+            false;
+    needVel_ =
+        (asl & DataStorage::dslVelocity || rbsl & DataStorage::dslVelocity) ?
+            true :
+            false;
+    needQuaternion_ =
+        (asl & DataStorage::dslAmat || asl & DataStorage::dslDipole ||
+         asl & DataStorage::dslQuadrupole || rbsl & DataStorage::dslAmat ||
+         rbsl & DataStorage::dslDipole || rbsl & DataStorage::dslQuadrupole) ?
+            true :
+            false;
     needAngMom_ = (asl & DataStorage::dslAngularMomentum ||
-		   rbsl & DataStorage::dslAngularMomentum) ? true : false;
-    
+                   rbsl & DataStorage::dslAngularMomentum) ?
+                      true :
+                      false;
+
     // some dump files contain the efield, but we should only parse
     // and set the field if we have actually allocated memory for it
-    readField_ = (asl &
-		  DataStorage::dslElectricField) ? true : false;
+    readField_ = (asl & DataStorage::dslElectricField) ? true : false;
 
     readSet(whichFrame);
 
@@ -248,10 +238,10 @@ namespace OpenMD {
     std::string line;
 
 #ifndef IS_MPI
-    inFile_->clear();
-    inFile_->seekg(framePos_[whichFrame]);
+    inFile_.clear();
+    inFile_.seekg(framePos_[whichFrame]);
 
-    std::istream& inputStream = *inFile_;
+    std::istream& inputStream = inFile_;
 #else
 
     int primaryNode = 0;
@@ -259,10 +249,10 @@ namespace OpenMD {
     if (worldRank == primaryNode) {
       std::string sendBuffer;
 
-      inFile_->clear();
-      inFile_->seekg(framePos_[whichFrame]);
+      inFile_.clear();
+      inFile_.seekg(framePos_[whichFrame]);
 
-      while (inFile_->getline(buffer, bufferSize)) {
+      while (inFile_.getline(buffer, bufferSize)) {
         line = buffer;
         sendBuffer += line;
         sendBuffer += '\n';
@@ -295,7 +285,7 @@ namespace OpenMD {
     line = buffer;
     if (line.find("<Snapshot>") == std::string::npos) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-	       "DumpReader Error: can not find <Snapshot>\n");
+               "DumpReader Error: can not find <Snapshot>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -315,7 +305,7 @@ namespace OpenMD {
     } else {
       if (line.find("</Snapshot>") == std::string::npos) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "DumpReader Error: can not find </Snapshot>\n");
+                 "DumpReader Error: can not find </Snapshot>\n");
         painCave.isFatal = 1;
         simError();
       }
@@ -323,9 +313,9 @@ namespace OpenMD {
 
     if (nSD != info_->getNGlobalIntegrableObjects()) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "DumpReader Error: Number of parsed StuntDouble lines (%d)\n"
-              "\tis not the same as the expected number of Objects (%d)\n",
-              nSD, info_->getNGlobalIntegrableObjects());
+               "DumpReader Error: Number of parsed StuntDouble lines (%d)\n"
+               "\tis not the same as the expected number of Objects (%d)\n",
+               nSD, info_->getNGlobalIntegrableObjects());
       painCave.isFatal = 1;
       simError();
     }
@@ -339,8 +329,7 @@ namespace OpenMD {
 
     if (nTokens < 2) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-	       "DumpReader Error: Not enough Tokens.\n%s\n",
-              line.c_str());
+               "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -359,9 +348,9 @@ namespace OpenMD {
       found = type.find("p");
       if (found == std::string::npos) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "DumpReader Error: StuntDouble %d has no Position\n"
-                "\tField (\"p\") specified.\n%s\n",
-                index, line.c_str());
+                 "DumpReader Error: StuntDouble %d has no Position\n"
+                 "\tField (\"p\") specified.\n%s\n",
+                 index, line.c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -372,9 +361,9 @@ namespace OpenMD {
         found = type.find("q");
         if (found == std::string::npos) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "DumpReader Error: Directional StuntDouble %d has no\n"
-                  "\tQuaternion Field (\"q\") specified.\n%s\n",
-                  index, line.c_str());
+                   "DumpReader Error: Directional StuntDouble %d has no\n"
+                   "\tQuaternion Field (\"q\") specified.\n%s\n",
+                   index, line.c_str());
           painCave.isFatal = 1;
           simError();
         }
@@ -413,8 +402,8 @@ namespace OpenMD {
             // equal to 0
 
             snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                    "DumpReader Error: initial quaternion error "
-                    "(q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n");
+                     "DumpReader Error: initial quaternion error "
+                     "(q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n");
             painCave.isFatal = 1;
             simError();
           }
@@ -485,8 +474,8 @@ namespace OpenMD {
         eField[0] = tokenizer.nextTokenAsDouble();
         eField[1] = tokenizer.nextTokenAsDouble();
         eField[2] = tokenizer.nextTokenAsDouble();
-	// only set the field if we have allocated memory for it
-	if (readField_) sd->setElectricField(eField);
+        // only set the field if we have allocated memory for it
+        if (readField_) sd->setElectricField(eField);
         break;
       }
       case 's': {
@@ -504,7 +493,8 @@ namespace OpenMD {
 
       default: {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "DumpReader Error: %s is an unrecognized type\n", type.c_str());
+                 "DumpReader Error: %s is an unrecognized type\n",
+                 type.c_str());
         painCave.isFatal = 1;
         simError();
         break;
@@ -530,8 +520,7 @@ namespace OpenMD {
 
     if (nTokens < 2) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-	       "DumpReader Error: Not enough Tokens.\n%s\n",
-              line.c_str());
+               "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -610,7 +599,7 @@ namespace OpenMD {
         eField[0] = tokenizer.nextTokenAsDouble();
         eField[1] = tokenizer.nextTokenAsDouble();
         eField[2] = tokenizer.nextTokenAsDouble();
-	if (readField_) sd->setElectricField(eField);
+        if (readField_) sd->setElectricField(eField);
         break;
       }
       case 's': {
@@ -627,7 +616,8 @@ namespace OpenMD {
       }
       default: {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "DumpReader Error: %s is an unrecognized type\n", type.c_str());
+                 "DumpReader Error: %s is an unrecognized type\n",
+                 type.c_str());
         painCave.isFatal = 1;
         simError();
         break;
@@ -641,7 +631,8 @@ namespace OpenMD {
     std::string line(buffer);
 
     if (line.find("<StuntDoubles>") == std::string::npos) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader Error: Missing <StuntDoubles>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "DumpReader Error: Missing <StuntDoubles>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -687,7 +678,7 @@ namespace OpenMD {
 
     if (line.find("<FrameData>") == std::string::npos) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-	       "DumpReader Error: Missing <FrameData>\n");
+               "DumpReader Error: Missing <FrameData>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -700,8 +691,7 @@ namespace OpenMD {
       StringTokenizer tokenizer(line, " ;\t\n\r{}:,");
       if (!tokenizer.hasMoreTokens()) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-		 "DumpReader Error: Not enough Tokens.\n%s\n",
-		 line.c_str());
+                 "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -741,8 +731,8 @@ namespace OpenMD {
         s->setBarostat(eta);
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "DumpReader Error: %s is an invalid property in <FrameData>\n",
-                propertyName.c_str());
+                 "DumpReader Error: %s is an invalid property in <FrameData>\n",
+                 propertyName.c_str());
         painCave.isFatal = 0;
         simError();
       }

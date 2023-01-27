@@ -20,7 +20,7 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__copyright__ = "Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved."
+__copyright__ = "Copyright (c) 2004-present The University of Notre Dame. All Rights Reserved."
 __license__ = "OpenMD"
 
 import sys

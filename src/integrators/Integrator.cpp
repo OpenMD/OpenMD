@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -56,7 +55,9 @@
 #include "integrators/DLM.hpp"
 #include "rnemd/MethodFactory.hpp"
 #include "rnemd/RNEMD.hpp"
-#include "utils/MemoryUtils.hpp"
+#include "rnemd/SPFForceManager.hpp"
+#include "utils/CI_String.hpp"
+#include "utils/CaseConversion.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -73,7 +74,8 @@ namespace OpenMD {
       dt  = simParams->getDt();
       dt2 = 0.5 * dt;
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Integrator Error: dt is not set\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Integrator Error: dt is not set\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -81,7 +83,8 @@ namespace OpenMD {
     if (simParams->haveRunTime()) {
       runTime = simParams->getRunTime();
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Integrator Error: runTime is not set\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Integrator Error: runTime is not set\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -123,8 +126,8 @@ namespace OpenMD {
         targetScalingTemp = simParams->getTargetTemp();
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "Integrator Error: Target Temperature must be set to turn on "
-                "tempSet\n");
+                 "Integrator Error: Target Temperature must be set to turn on "
+                 "tempSet\n");
         painCave.isFatal = 1;
         simError();
       }
@@ -132,16 +135,28 @@ namespace OpenMD {
 
     // Create a default a velocitizer: If the subclass wants to use
     // a different velocitizer, use setVelocitizer
-    // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    velocitizer_ = Utils::make_unique<Velocitizer>(info);
+    velocitizer_ = std::make_unique<Velocitizer>(info);
 
     if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
       useRNEMD = simParams->getRNEMDParameters()->getUseRNEMD();
 
       if (useRNEMD) {
+        // ForceManager will only be changed if SPF-RNEMD is enabled
+        if (Utils::traits_cast<Utils::ci_char_traits>(
+                simParams->getRNEMDParameters()->getMethod()) == "SPF") {
+          if (toUpperCopy(simParams->getEnsemble()) != "SPF") {
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "The SPF RNEMD method requires the SPF Ensemble.\n");
+            painCave.isFatal = 1;
+            simError();
+          }
+
+          forceMan_ = new RNEMD::SPFForceManager(info);
+        }
+
         RNEMD::MethodFactory rnemdMethod {
             simParams->getRNEMDParameters()->getMethod()};
-        rnemd_ = rnemdMethod.create(info);
+        rnemd_ = rnemdMethod.create(info, forceMan_);
 
         if (simParams->getRNEMDParameters()->haveExchangeTime()) {
           RNEMD_exchangeTime =
@@ -174,11 +189,11 @@ namespace OpenMD {
         flucQ_ = new FluctuatingChargeDamped(info);
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "Integrator Error: Unknown Fluctuating Charge propagator (%s) "
-                "requested\n",
-                simParams->getFluctuatingChargeParameters()
-                    ->getPropagator()
-                    .c_str());
+                 "Integrator Error: Unknown Fluctuating Charge propagator (%s) "
+                 "requested\n",
+                 simParams->getFluctuatingChargeParameters()
+                     ->getPropagator()
+                     .c_str());
         painCave.isFatal = 1;
       }
     }
@@ -265,8 +280,7 @@ namespace OpenMD {
     statWriter = createStatWriter();
     dumpWriter->writeDumpAndEor();
 
-    // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    progressBar = Utils::make_unique<ProgressBar>();
+    progressBar = std::make_unique<ProgressBar>();
 
     // save statistics, before writeStat,  we must save statistics
     saveConservedQuantity();

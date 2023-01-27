@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -64,7 +63,6 @@
 #include "primitives/Molecule.hpp"
 #include "restraints/MolecularRestraint.hpp"
 #include "restraints/ObjectRestraint.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/StringTokenizer.hpp"
 #include "utils/simError.h"
 
@@ -154,7 +152,8 @@ namespace OpenMD {
 
     line = buffer;
     if (line.find("<Snapshot>") == std::string::npos) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "RestReader Error: can not find <Snapshot>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RestReader Error: can not find <Snapshot>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -168,7 +167,8 @@ namespace OpenMD {
     inputStream.getline(buffer, bufferSize);
     line = buffer;
     if (line.find("</Snapshot>") == std::string::npos) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "RestReader Error: can not find </Snapshot>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RestReader Error: can not find </Snapshot>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -223,7 +223,7 @@ namespace OpenMD {
 
           if (mRest == NULL) {
             snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                    "Can not cast RestraintData to MolecularRestraint\n");
+                     "Can not cast RestraintData to MolecularRestraint\n");
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();
@@ -267,8 +267,8 @@ namespace OpenMD {
     nTokens = tokenizer.countTokens();
 
     if (nTokens < 2) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "RestReader Error: Not enough Tokens.\n%s\n",
-              line.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RestReader Error: Not enough Tokens.\n%s\n", line.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -311,10 +311,11 @@ namespace OpenMD {
           RealType qlen = q.length();
           if (qlen < OpenMD::epsilon) {  // check quaternion is not equal to 0
 
-            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                    "RestReader Error: initial quaternion error (q0^2 + q1^2 + "
-                    "q2^2 + "
-                    "q3^2) ~ 0\n");
+            snprintf(
+                painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                "RestReader Error: initial quaternion error (q0^2 + q1^2 + "
+                "q2^2 + "
+                "q3^2) ~ 0\n");
             painCave.isFatal = 1;
             simError();
           }
@@ -348,7 +349,8 @@ namespace OpenMD {
       }
       default: {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "RestReader Error: %s is an unrecognized type\n", type.c_str());
+                 "RestReader Error: %s is an unrecognized type\n",
+                 type.c_str());
         painCave.isFatal = 1;
         simError();
         break;
@@ -372,7 +374,7 @@ namespace OpenMD {
               dynamic_cast<ObjectRestraint*>(restData->getData());
           if (oRest == NULL) {
             snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                    "Can not cast RestraintData to ObjectRestraint\n");
+                     "Can not cast RestraintData to ObjectRestraint\n");
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();
@@ -393,7 +395,8 @@ namespace OpenMD {
     std::string line(buffer);
 
     if (line.find("<StuntDoubles>") == std::string::npos) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "RestReader Error: Missing <StuntDoubles>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RestReader Error: Missing <StuntDoubles>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -412,7 +415,8 @@ namespace OpenMD {
     std::string line(buffer);
 
     if (line.find("<FrameData>") == std::string::npos) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "RestReader Error: Missing <FrameData>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "RestReader Error: Missing <FrameData>\n");
       painCave.isFatal = 1;
       simError();
     }

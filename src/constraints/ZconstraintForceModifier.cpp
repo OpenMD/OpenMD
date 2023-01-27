@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -61,14 +60,14 @@ namespace OpenMD {
   ZConstraintForceModifier::ZConstraintForceModifier(SimInfo* info) :
       ForceModifier {info}, infiniteTime {1e31} {
     Globals* simParam = info_->getSimParams();
-    currSnapshot_  = info_->getSnapshotManager()->getCurrentSnapshot();
-    currZconsTime_ = currSnapshot_->getTime();
+    currSnapshot_     = info_->getSnapshotManager()->getCurrentSnapshot();
+    currZconsTime_    = currSnapshot_->getTime();
 
     if (simParam->haveDt()) {
       dt_ = simParam->getDt();
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "ZconstraintForceManager Error: dt is not set\n");
+               "ZconstraintForceManager Error: dt is not set\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -77,8 +76,8 @@ namespace OpenMD {
       zconsTime_ = simParam->getZconsTime();
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "ZconstraintForceManager error: If you use a ZConstraint,\n"
-              "\tyou must set zconsTime.\n");
+               "ZconstraintForceManager error: If you use a ZConstraint,\n"
+               "\tyou must set zconsTime.\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -88,11 +87,11 @@ namespace OpenMD {
     } else {
       zconsTol_ = 0.01;
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "ZconstraintForceManager Warning: Tolerance for z-constraint "
-              "method is not specified.\n"
-              "\tOpenMD will use a default value of %f.\n"
-              "\tTo set the tolerance, use the zconsTol variable.\n",
-              zconsTol_);
+               "ZconstraintForceManager Warning: Tolerance for z-constraint "
+               "method is not specified.\n"
+               "\tOpenMD will use a default value of %f.\n"
+               "\tTo set the tolerance, use the zconsTol variable.\n",
+               zconsTol_);
       painCave.isFatal = 0;
       simError();
     }
@@ -173,7 +172,7 @@ namespace OpenMD {
     MPI_Allreduce(MPI_IN_PLACE, &totMassUnconsMols_, 1, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
 #endif
-    
+
     // Zero out the velocities of center of mass of unconstrained
     // molecules and the velocities of center of mass of every single
     // z-constrained molecueles
@@ -184,7 +183,7 @@ namespace OpenMD {
 
     if (!fzOut) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "ZconstraintForceManager:: Failed to create ZConsWriter\n");
+               "ZconstraintForceManager:: Failed to create ZConsWriter\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -290,8 +289,7 @@ namespace OpenMD {
   }
 
   void ZConstraintForceModifier::modifyForces() {
-
-    currSnapshot_     = info_->getSnapshotManager()->getCurrentSnapshot();
+    currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
     if (usingZconsGap_) { updateZPos(); }
 
@@ -415,7 +413,7 @@ namespace OpenMD {
     // molecules)
 
     RealType pzMovingMols = 0.0;
-    
+
     for (i = movingZMols_.begin(); i != movingZMols_.end(); ++i) {
       mol    = i->mol;
       comVel = mol->getComVel();
@@ -480,7 +478,7 @@ namespace OpenMD {
     RealType totalFZ(0.0);
 
     // Calculate the total z-contraint force on the fixed molecules:
-    
+
     std::list<ZconstraintMol>::iterator i;
     Molecule* mol;
     StuntDouble* sd;
@@ -494,36 +492,35 @@ namespace OpenMD {
            sd = mol->nextIntegrableObject(ii)) {
         i->fz += (sd->getFrc())[whichDirection];
       }
-      
+
       totalFZ += i->fz;
     }
 
 #ifdef IS_MPI
-    // collect the total z-constraint force   
+    // collect the total z-constraint force
     MPI_Allreduce(MPI_IN_PLACE, &totalFZ, 1, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
 #endif
-	    
+
     // apply negative force to fixed z-constrained molecules:
     for (i = fixedZMols_.begin(); i != fixedZMols_.end(); ++i) {
       mol = i->mol;
 
       for (sd = mol->beginIntegrableObject(ii); sd != NULL;
            sd = mol->nextIntegrableObject(ii)) {
-	
-	Vector3d force(0.0);
+        Vector3d force(0.0);
         force[whichDirection] = -getZFOfFixedZMols(mol, sd, i->fz);
 
         sd->addFrc(force);
       }
     }
-    
+
     // modify the forces of the currently moving z-constrained
     // molecules so that system stays fixed:
     for (i = movingZMols_.begin(); i != movingZMols_.end(); ++i) {
       mol = i->mol;
 
-      Vector3d force(0.0);	  
+      Vector3d force(0.0);
       force[whichDirection] = -getZFOfMovingMols(mol, totalFZ);
 
       for (sd = mol->beginIntegrableObject(ii); sd != NULL;
@@ -569,12 +566,12 @@ namespace OpenMD {
 
 #ifdef IS_MPI
     MPI_Allreduce(MPI_IN_PLACE, &haveMoving, 1, MPI_INT, MPI_SUM,
-		  MPI_COMM_WORLD);
+                  MPI_COMM_WORLD);
 #endif
 
     return haveMoving > 0;
   }
-  
+
   /// Applies a restraint force to the molecules which are not at
   /// their specified positions.
   void ZConstraintForceModifier::doHarmonic() {
@@ -586,20 +583,20 @@ namespace OpenMD {
     StuntDouble* sd;
     Molecule::IntegrableObjectIterator ii;
     Molecule* mol;
-    
+
     RealType pe = currSnapshot_->getPotentialEnergy();
     currSnapshot_->setRawPotential(pe);
-    
+
     for (i = movingZMols_.begin(); i != movingZMols_.end(); ++i) {
-      mol = i->mol;
-      Vector3d com  = mol->getCom();
+      mol             = i->mol;
+      Vector3d com    = mol->getCom();
       RealType resPos = usingSMD_ ? i->cantPos : i->param.zTargetPos;
-      Vector3d d = com - Vector3d(0.0, 0.0, resPos);
+      Vector3d d      = com - Vector3d(0.0, 0.0, resPos);
       currSnapshot_->wrapVector(d);
 
       RealType diff = d[whichDirection];
 
-      restPot +=  0.5 * i->param.kz * diff * diff;
+      restPot += 0.5 * i->param.kz * diff * diff;
 
       RealType harmonicF = -(i->param.kz * diff);
       totalFZ += harmonicF;
@@ -618,16 +615,18 @@ namespace OpenMD {
     MPI_Allreduce(MPI_IN_PLACE, &totalFZ, 1, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
 #endif
-    
-    currSnapshot_->setRestraintPotential(restPot);
+
+    RealType rp = currSnapshot_->getRestraintPotential();
+    currSnapshot_->setRestraintPotential(rp + restPot);
+
     currSnapshot_->setPotentialEnergy(pe + restPot);
-    
+
     // modify the forces of unconstrained molecules
     std::vector<Molecule*>::iterator j;
     for (j = unzconsMols_.begin(); j != unzconsMols_.end(); ++j) {
-      mol = *j;
+      mol                   = *j;
       force[whichDirection] = getHFOfUnconsMols(mol, totalFZ);
-        
+
       for (sd = mol->beginIntegrableObject(ii); sd != NULL;
            sd = mol->nextIntegrableObject(ii)) {
         sd->addFrc(force);

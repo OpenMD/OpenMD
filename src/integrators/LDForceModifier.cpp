@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -47,19 +46,19 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <random>
 
 #include "brains/ForceModifier.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
-#include "hydrodynamics/Sphere.hpp"
 #include "hydrodynamics/HydroIO.hpp"
+#include "hydrodynamics/Sphere.hpp"
 #include "math/CholeskyDecomposition.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "types/GayBerneAdapter.hpp"
 #include "types/LennardJonesAdapter.hpp"
 #include "utils/Constants.hpp"
 #include "utils/ElementsTable.hpp"
-#include "utils/MemoryUtils.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -71,8 +70,7 @@ namespace OpenMD {
     RealType dt = simParams_->getDt();
     dt2_        = dt * 0.5;
 
-    // Remove in favor of std::make_unique<> when we switch to C++14 and above
-    veloMunge_ = Utils::make_unique<Velocitizer>(info_);
+    veloMunge_ = std::make_unique<Velocitizer>(info_);
 
     sphericalBoundaryConditions_ = false;
     if (simParams_->getUseSphericalBoundaryConditions()) {
@@ -81,8 +79,8 @@ namespace OpenMD {
         langevinBufferRadius_ = simParams_->getLangevinBufferRadius();
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "langevinBufferRadius must be specified "
-                "when useSphericalBoundaryConditions is turned on.\n");
+                 "langevinBufferRadius must be specified "
+                 "when useSphericalBoundaryConditions is turned on.\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
@@ -92,8 +90,8 @@ namespace OpenMD {
         frozenBufferRadius_ = simParams_->getFrozenBufferRadius();
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "frozenBufferRadius must be specified "
-                "when useSphericalBoundaryConditions is turned on.\n");
+                 "frozenBufferRadius must be specified "
+                 "when useSphericalBoundaryConditions is turned on.\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
@@ -101,8 +99,8 @@ namespace OpenMD {
 
       if (frozenBufferRadius_ < langevinBufferRadius_) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "frozenBufferRadius has been set smaller than the "
-                "langevinBufferRadius.  This is probably an error.\n");
+                 "frozenBufferRadius has been set smaller than the "
+                 "langevinBufferRadius.  This is probably an error.\n");
         painCave.severity = OPENMD_WARNING;
         painCave.isFatal  = 0;
         simError();
@@ -115,7 +113,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator j;
     bool needHydroPropFile = false;
-    
+
     for (mol = info_->beginMolecule(i); mol != NULL;
          mol = info_->nextMolecule(i)) {
       for (sd = mol->beginIntegrableObject(j); sd != NULL;
@@ -129,10 +127,11 @@ namespace OpenMD {
 
     if (needHydroPropFile) {
       if (simParams_->haveHydroPropFile()) {
-	HydroIO* hio = new HydroIO();
+        HydroIO* hio  = new HydroIO();
         hydroPropMap_ = hio->parseHydroFile(simParams_->getHydroPropFile());
       } else {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "HydroPropFile must be set to a file name if Langevin Dynamics\n"
             "\tis specified for rigidBodies which contain more than one atom\n"
             "\tTo create a HydroPropFile, run the \"Hydro\" program.\n");
@@ -153,8 +152,8 @@ namespace OpenMD {
 
           } else {
             snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                    "Can not find resistance tensor for atom [%s]\n",
-                    sd->getType().c_str());
+                     "Can not find resistance tensor for atom [%s]\n",
+                     sd->getType().c_str());
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();
@@ -193,7 +192,7 @@ namespace OpenMD {
                 }
                 if (aNum == 0) {
                   snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                          "Could not find atom type in default element.txt\n");
+                           "Could not find atom type in default element.txt\n");
                   painCave.severity = OPENMD_ERROR;
                   painCave.isFatal  = 1;
                   simError();
@@ -204,7 +203,7 @@ namespace OpenMD {
 
           if (!simParams_->haveTargetTemp()) {
             snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                    "You can't use LangevinDynamics without a targetTemp!\n");
+                     "You can't use LangevinDynamics without a targetTemp!\n");
             painCave.isFatal  = 1;
             painCave.severity = OPENMD_ERROR;
             simError();
@@ -212,13 +211,14 @@ namespace OpenMD {
 
           if (!simParams_->haveViscosity()) {
             snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                    "You can't use LangevinDynamics without a viscosity!\n");
+                     "You can't use LangevinDynamics without a viscosity!\n");
             painCave.isFatal  = 1;
             painCave.severity = OPENMD_ERROR;
             simError();
           }
 
-          HydroProp* currHydroProp = currShape->getHydroProp(simParams_->getViscosity());
+          HydroProp* currHydroProp =
+              currShape->getHydroProp(simParams_->getViscosity());
           map<string, HydroProp*>::iterator iter =
               hydroPropMap_.find(sd->getType());
           if (iter != hydroPropMap_.end()) {
@@ -255,10 +255,11 @@ namespace OpenMD {
         // Center of Resistance:
         moment->rcr = i->second->getCenterOfResistance();
       } else {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "LDForceManager createMomentData: Couldn't find HydroProp for\n"
-                "object type %s!\n",
-                sd->getType().c_str());
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+            "LDForceManager createMomentData: Couldn't find HydroProp for\n"
+            "object type %s!\n",
+            sd->getType().c_str());
         painCave.isFatal  = 1;
         painCave.severity = OPENMD_ERROR;
         simError();
@@ -344,10 +345,10 @@ namespace OpenMD {
             Vector3d randomForceLab  = Atrans * randomForceBody;
             Vector3d randomTorqueLab = Atrans * randomTorqueBody;
 
-	    std::cerr << randomForceLab << "\t" << randomTorqueLab << "\n";
+            std::cerr << randomForceLab << "\t" << randomTorqueLab << "\n";
             sd->addFrc(randomForceLab);
             sd->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab));
-	    
+
             Vector3d omegaBody;
 
             // What remains contains velocity explicitly, but the
@@ -360,12 +361,12 @@ namespace OpenMD {
 
             Vector3d vel    = sd->getVel();
             Vector3d angMom = sd->getJ();
-	    std::cerr <<  "v = " << vel << " j = " << angMom << "\n";
+            std::cerr << "v = " << vel << " j = " << angMom << "\n";
             // estimate velocity at full-step using everything but
             // friction forces:
 
-	    frc = sd->getFrc();
-	    
+            frc = sd->getFrc();
+
             Vector3d velStep =
                 vel + (dt2_ / mass * Constants::energyConvert) * frc;
 
@@ -417,9 +418,11 @@ namespace OpenMD {
                                      hydroProps_[index]->getXirr() * omegaBody);
               frictionTorqueLab  = Atrans * frictionTorqueBody;
 
-	      std::cerr <<  "vcd = " << vcdBody << " omega = " << omegaBody << "\n";
+              std::cerr << "vcd = " << vcdBody << " omega = " << omegaBody
+                        << "\n";
 
-	      std::cerr << frictionForceLab << "\t" << frictionTorqueLab << "\n";
+              std::cerr << frictionForceLab << "\t" << frictionTorqueLab
+                        << "\n";
 
               // re-estimate velocities at full-step using friction forces:
 

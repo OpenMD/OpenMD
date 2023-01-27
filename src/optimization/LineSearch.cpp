@@ -36,11 +36,11 @@ namespace QuantLib {
     int icount                        = 0;
     while (!valid) {
       if (icount > 200) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "can't update linesearch\n");
-          painCave.isFatal  = 1;
-          painCave.severity = OPENMD_ERROR;
-          simError();
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "can't update linesearch\n");
+        painCave.isFatal  = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
       }
       diff *= 0.5;
       icount++;

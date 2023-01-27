@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -91,9 +90,9 @@ namespace OpenMD {
       restTime_ = simParam->getStatusTime();
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "Restraint warning: If you use restraints without setting\n"
-              "\tstatusTime, no restraint data will be written to the rest\n"
-              "\tfile.\n");
+               "Restraint warning: If you use restraints without setting\n"
+               "\tstatusTime, no restraint data will be written to the rest\n"
+               "\tfile.\n");
       painCave.isFatal = 0;
       simError();
       restTime_ = simParam->getRunTime();
@@ -113,8 +112,8 @@ namespace OpenMD {
 
         if (!stamp[i]->haveMolIndex()) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "Restraint Error: A molecular restraint was specified\n"
-                  "\twithout providing a value for molIndex.\n");
+                   "Restraint Error: A molecular restraint was specified\n"
+                   "\twithout providing a value for molIndex.\n");
           painCave.isFatal = 1;
           simError();
         } else {
@@ -123,16 +122,16 @@ namespace OpenMD {
 
         if (molIndex < 0) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "Restraint Error: A molecular restraint was specified\n"
-                  "\twith a molIndex that was less than 0\n");
+                   "Restraint Error: A molecular restraint was specified\n"
+                   "\twith a molIndex that was less than 0\n");
           painCave.isFatal = 1;
           simError();
         }
         if (molIndex >= info_->getNGlobalMolecules()) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "Restraint Error: A molecular restraint was specified with\n"
-                  "\ta molIndex that was greater than the total number of "
-                  "molecules\n");
+                   "Restraint Error: A molecular restraint was specified with\n"
+                   "\ta molIndex that was greater than the total number of "
+                   "molecules\n");
           painCave.isFatal = 1;
           simError();
         }
@@ -152,7 +151,8 @@ namespace OpenMD {
             // If we were supposed to have it but got a null, then freak out.
 #endif
 
-            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+            snprintf(
+                painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                 "Restraint Error: A molecular restraint was specified, but\n"
                 "\tno molecule was found with global index %d.\n",
                 molIndex);
@@ -226,9 +226,9 @@ namespace OpenMD {
 
         if (!stamp[i]->haveObjectSelection()) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "Restraint Error: An object restraint was specified\n"
-                  "\twithout providing a selection script in the\n"
-                  "\tobjectSelection variable.\n");
+                   "Restraint Error: An object restraint was specified\n"
+                   "\twithout providing a selection script in the\n"
+                   "\tobjectSelection variable.\n");
           painCave.isFatal = 1;
           simError();
         } else {
@@ -248,11 +248,11 @@ namespace OpenMD {
 #endif
 
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "Restraint Info: The specified restraint objectSelection,\n"
-                "\t\t%s\n"
-                "\twill result in %d integrable objects being\n"
-                "\trestrained.\n",
-                objectSelection.c_str(), selectionCount);
+                 "Restraint Info: The specified restraint objectSelection,\n"
+                 "\t\t%s\n"
+                 "\twill result in %d integrable objects being\n"
+                 "\trestrained.\n",
+                 objectSelection.c_str(), selectionCount);
         painCave.severity = OPENMD_INFO;
         painCave.isFatal  = 0;
         simError();
@@ -322,7 +322,7 @@ namespace OpenMD {
     restOut     = new RestWriter(info_, restOutput_.c_str(), restraints_);
     if (!restOut) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "Restraint error: Failed to create RestWriter\n");
+               "Restraint error: Failed to create RestWriter\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -351,7 +351,8 @@ namespace OpenMD {
 #endif
 
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    currSnapshot_->setRestraintPotential(restPot);
+    RealType rp   = currSnapshot_->getRestraintPotential();
+    currSnapshot_->setRestraintPotential(rp + restPot);
 
     RealType pe = currSnapshot_->getPotentialEnergy();
     currSnapshot_->setRawPotential(pe);
@@ -393,21 +394,21 @@ namespace OpenMD {
           mRest = dynamic_cast<MolecularRestraint*>(restData->getData());
           if (mRest == NULL) {
             snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                    "Can not cast RestraintData to MolecularRestraint\n");
+                     "Can not cast RestraintData to MolecularRestraint\n");
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();
           }
         } else {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "Can not cast GenericData to RestraintData\n");
+                   "Can not cast GenericData to RestraintData\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
           simError();
         }
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "Can not find Restraint for RestrainedObject\n");
+                 "Can not find Restraint for RestrainedObject\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
@@ -460,21 +461,21 @@ namespace OpenMD {
           oRest = dynamic_cast<ObjectRestraint*>(restData->getData());
           if (oRest == NULL) {
             snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                    "Can not cast RestraintData to ObjectRestraint\n");
+                     "Can not cast RestraintData to ObjectRestraint\n");
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal  = 1;
             simError();
           }
         } else {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "Can not cast GenericData to RestraintData\n");
+                   "Can not cast GenericData to RestraintData\n");
           painCave.severity = OPENMD_ERROR;
           painCave.isFatal  = 1;
           simError();
         }
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "Can not find Restraint for RestrainedObject\n");
+                 "Can not find Restraint for RestrainedObject\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();

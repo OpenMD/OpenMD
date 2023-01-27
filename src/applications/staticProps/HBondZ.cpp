@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -45,6 +44,8 @@
 
 #include "HBondZ.hpp"
 
+#include <fstream>
+#include <string>
 #include <vector>
 
 #include "io/DumpReader.hpp"
@@ -55,15 +56,13 @@
 namespace OpenMD {
 
   HBondZ::HBondZ(SimInfo* info, const std::string& filename,
-		 const std::string& sele1,
-		 const std::string& sele2, double rCut,
-		 double thetaCut, int nzbins, int axis) :
+                 const std::string& sele1, const std::string& sele2,
+                 double rCut, double thetaCut, int nzbins, int axis) :
       StaticAnalyser(info, filename, nzbins),
       selectionScript1_(sele1), seleMan1_(info), evaluator1_(info),
       selectionScript2_(sele2), seleMan2_(info), evaluator2_(info),
       axis_(axis) {
-    
-    ff_ = info_->getForceField(); 
+    ff_ = info_->getForceField();
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -75,7 +74,6 @@ namespace OpenMD {
     }
 
     // Set up cutoff values:
-    
     nBins_    = nzbins;
     rCut_     = rCut;
     thetaCut_ = thetaCut;
@@ -90,8 +88,6 @@ namespace OpenMD {
     std::fill(sliceQ_.begin(), sliceQ_.end(), 0.0);
     std::fill(sliceCount_.begin(), sliceCount_.end(), 0);
 
-  
-  
     switch (axis_) {
     case 0:
       axisLabel_ = "x";
@@ -132,7 +128,7 @@ namespace OpenMD {
         info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);
-    int nFrames = reader.getNFrames();
+    int nFrames   = reader.getNFrames();
     frameCounter_ = 0;
 
     for (int istep = 0; istep < nFrames; istep += step_) {
@@ -155,10 +151,10 @@ namespace OpenMD {
       for (mol1 = seleMan1_.beginSelectedMolecule(ii); mol1 != NULL;
            mol1 = seleMan1_.nextSelectedMolecule(ii)) {
         // We're collecting statistics on the molecules in selection 1:
-        nHB = 0;
-        nA  = 0;
-        nD  = 0;
-	Vector3d mPos = mol1->getCom();
+        nHB           = 0;
+        nA            = 0;
+        nD            = 0;
+        Vector3d mPos = mol1->getCom();
 
         for (mol2 = seleMan2_.beginSelectedMolecule(jj); mol2 != NULL;
              mol2 = seleMan2_.nextSelectedMolecule(jj)) {
@@ -170,11 +166,10 @@ namespace OpenMD {
             DH   = hPos - dPos;
             currentSnapshot_->wrapVector(DH);
             DHdist = DH.length();
-	    
+
             // loop over the possible acceptors in molecule 2:
             for (hba2 = mol2->beginHBondAcceptor(hbaj); hba2 != NULL;
                  hba2 = mol2->nextHBondAcceptor(hbaj)) {
-
               aPos = hba2->getPos();
               DA   = aPos - dPos;
               currentSnapshot_->wrapVector(DA);
@@ -229,10 +224,11 @@ namespace OpenMD {
             }
           }
         }
-	if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(mPos);
-	int binNo = int(nBins_* (halfBoxZ_ + mPos[axis_]) / hmat(axis_, axis_));
-	sliceQ_[binNo] += nHB;
-	sliceCount_[binNo] += 1;
+        if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(mPos);
+        int binNo =
+            int(nBins_ * (halfBoxZ_ + mPos[axis_]) / hmat(axis_, axis_));
+        sliceQ_[binNo] += nHB;
+        sliceCount_[binNo] += 1;
       }
     }
     writeDensity();
@@ -260,19 +256,16 @@ namespace OpenMD {
         RealType z = zAve * (i + 0.5) / sliceQ_.size();
         if (sliceCount_[i] != 0) {
           qZstream << z << "\t" << sliceQ_[i] / sliceCount_[i] << "\n";
-	}
-	  else
-	    qZstream << z << "\t" << 0 << "\n"; 
-        
+        } else
+          qZstream << z << "\t" << 0 << "\n";
       }
 
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "HBondZ: unable to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "HBondZ: unable to open %s\n", outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }
     qZstream.close();
   }
 }  // namespace OpenMD
-

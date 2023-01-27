@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -58,37 +57,35 @@
 
 using namespace std;
 namespace OpenMD {
-  TetrahedralityParamR::TetrahedralityParamR( SimInfo* info,
-                                              const std::string& filename,
-                                              const std::string& sele1,
-                                              const std::string& sele2,
-                                              const std::string& sele3,
-                                              RealType rCut, RealType len,
-                                              int nrbins) :
-    StaticAnalyser(info, filename, nrbins),
-    selectionScript1_(sele1), selectionScript2_(sele2), selectionScript3_(sele3),
-    seleMan1_(info), seleMan2_(info), seleMan3_(info), len_(len),
-    evaluator1_(info), evaluator2_(info), evaluator3_(info), nBins_(nrbins) {
+  TetrahedralityParamR::TetrahedralityParamR(
+      SimInfo* info, const std::string& filename, const std::string& sele1,
+      const std::string& sele2, const std::string& sele3, RealType rCut,
+      RealType len, int nrbins) :
+      StaticAnalyser(info, filename, nrbins),
+      selectionScript1_(sele1), selectionScript2_(sele2),
+      selectionScript3_(sele3), seleMan1_(info), seleMan2_(info),
+      seleMan3_(info), evaluator1_(info), evaluator2_(info), evaluator3_(info),
+      len_(len), nBins_(nrbins) {
     setAnalysisType("Tetrahedrality Parameter(r)");
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
-    
+
     evaluator2_.loadScriptString(sele2);
     if (!evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }
-    
+
     evaluator3_.loadScriptString(sele3);
     if (!evaluator3_.isDynamic()) {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
     }
-    
+
     // Set up cutoff radius:
     rCut_ = rCut;
-    
+
     deltaR_ = len_ / nBins_;
 
     // fixed number of bins
@@ -117,7 +114,7 @@ namespace OpenMD {
     int isd2;
     int isd3;
     bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     DumpReader reader(info_, dumpFilename_);
     int nFrames = reader.getNFrames();
@@ -137,7 +134,7 @@ namespace OpenMD {
       if (evaluator3_.isDynamic()) {
         seleMan3_.setSelectionSet(evaluator3_.evaluate());
       }
-      
+
       // outer loop is over the selected StuntDoubles:
       for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
            sd = seleMan1_.nextSelected(isd1)) {
@@ -198,21 +195,20 @@ namespace OpenMD {
 
         if (nang > 0) {
           RealType shortest = HONKING_LARGE_VALUE;
-          
+
           // loop over selection 3 to find closest atom in selection 3:
           for (sd3 = seleMan3_.beginSelected(isd3); sd3 != NULL;
-               sd3 = seleMan3_.nextSelected(isd3)) {  
-
+               sd3 = seleMan3_.nextSelected(isd3)) {
             vec = sd->getPos() - sd3->getPos();
-            
+
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(vec);
-            
+
             r = vec.length();
-            
+
             if (r < shortest) shortest = r;
-          }     
-          
+          }
+
           int whichBin = int(shortest / deltaR_);
           if (whichBin < int(nBins_)) {
             sliceQ_[whichBin] += Qk;
@@ -226,7 +222,7 @@ namespace OpenMD {
 
   void TetrahedralityParamR::writeQr() {
     Revision rev;
-    std::ofstream qRstream(outputFilename_.c_str());   
+    std::ofstream qRstream(outputFilename_.c_str());
     if (qRstream.is_open()) {
       qRstream << "# " << getAnalysisType() << "\n";
       qRstream << "# OpenMD " << rev.getFullRevision() << "\n";
@@ -237,7 +233,8 @@ namespace OpenMD {
       if (!paramString_.empty())
         qRstream << "# parameters: " << paramString_ << "\n";
 
-      qRstream << "#distance" << "\tQk\n";
+      qRstream << "#distance"
+               << "\tQk\n";
       for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
         RealType Rval = (i + 0.5) * deltaR_;
         if (sliceCount_[i] != 0) {
@@ -247,8 +244,9 @@ namespace OpenMD {
       }
 
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "TetrahedralityParamR: unable to open %s\n",
-              outputFilename_.c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "TetrahedralityParamR: unable to open %s\n",
+               outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

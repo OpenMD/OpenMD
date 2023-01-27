@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -95,7 +94,7 @@ namespace OpenMD {
 
   Snapshot::Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups,
                      int atomStorageLayout, int rigidBodyStorageLayout,
-		     int cutoffGroupStorageLayout, bool usePBC) :
+                     int cutoffGroupStorageLayout, bool usePBC) :
       atomData(nAtoms, atomStorageLayout),
       rigidbodyData(nRigidbodies, rigidBodyStorageLayout),
       cgData(nCutoffGroups, cutoffGroupStorageLayout), orthoTolerance_(1e-6) {
@@ -184,7 +183,6 @@ namespace OpenMD {
     hasInertiaTensor              = false;
     hasGyrationalVolume           = false;
     hasHullVolume                 = false;
-    hasConservedQuantity          = false;
     hasBoundingBox                = false;
   }
 
@@ -249,7 +247,8 @@ namespace OpenMD {
       // if( frameData.orthoRhombic ) {
       //   snprintf( painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
       //   	 "OpenMD is switching from the default Non-Orthorhombic\n"
-      //   	 "\tto the faster Orthorhombic periodic boundary computations.\n"
+      //   	 "\tto the faster Orthorhombic periodic boundary
+      //   computations.\n"
       //   	 "\tThis is usually a good thing, but if you want the\n"
       //   	 "\tNon-Orthorhombic computations, make the orthoBoxTolerance\n"
       //   	 "\tvariable ( currently set to %G ) smaller.\n",
@@ -259,7 +258,8 @@ namespace OpenMD {
       // }
       // else {
       //   snprintf( painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-      //   	 "OpenMD is switching from the faster Orthorhombic to the more\n"
+      //   	 "OpenMD is switching from the faster Orthorhombic to the
+      //   more\n"
       //   	 "\tflexible Non-Orthorhombic periodic boundary computations.\n"
       //   	 "\tThis is usually because the box has deformed under\n"
       //   	 "\tNPTf integration. If you want to live on the edge with\n"
@@ -394,16 +394,32 @@ namespace OpenMD {
 
   void Snapshot::setTime(RealType time) { frameData.currentTime = time; }
 
-  void Snapshot::setBondPotential(RealType bp) { frameData.bondPotential = bp; }
+  void Snapshot::setBondPotential(RealType bp) {
+    frameData.bondPotential = bp;
+    hasShortRangePotential  = false;
+    hasPotentialEnergy      = false;
+    hasTotalEnergy          = false;
+  }
 
-  void Snapshot::setBendPotential(RealType bp) { frameData.bendPotential = bp; }
+  void Snapshot::setBendPotential(RealType bp) {
+    frameData.bendPotential = bp;
+    hasShortRangePotential  = false;
+    hasPotentialEnergy      = false;
+    hasTotalEnergy          = false;
+  }
 
   void Snapshot::setTorsionPotential(RealType tp) {
     frameData.torsionPotential = tp;
+    hasShortRangePotential     = false;
+    hasPotentialEnergy         = false;
+    hasTotalEnergy             = false;
   }
 
   void Snapshot::setInversionPotential(RealType ip) {
     frameData.inversionPotential = ip;
+    hasShortRangePotential       = false;
+    hasPotentialEnergy           = false;
+    hasTotalEnergy               = false;
   }
 
   RealType Snapshot::getBondPotential() { return frameData.bondPotential; }
@@ -425,12 +441,17 @@ namespace OpenMD {
       frameData.shortRangePotential += frameData.torsionPotential;
       frameData.shortRangePotential += frameData.inversionPotential;
       hasShortRangePotential = true;
+      hasPotentialEnergy     = false;
+      hasTotalEnergy         = false;
     }
     return frameData.shortRangePotential;
   }
 
   void Snapshot::setSurfacePotential(RealType sp) {
     frameData.surfacePotential = sp;
+    hasLongRangePotential      = false;
+    hasPotentialEnergy         = false;
+    hasTotalEnergy             = false;
   }
 
   RealType Snapshot::getSurfacePotential() {
@@ -439,13 +460,20 @@ namespace OpenMD {
 
   void Snapshot::setReciprocalPotential(RealType rp) {
     frameData.reciprocalPotential = rp;
+    hasLongRangePotential         = false;
+    hasPotentialEnergy            = false;
   }
 
   RealType Snapshot::getReciprocalPotential() {
     return frameData.reciprocalPotential;
   }
 
-  void Snapshot::setSelfPotential(potVec sp) { frameData.selfPotentials = sp; }
+  void Snapshot::setSelfPotentials(potVec sp) {
+    frameData.selfPotentials = sp;
+    hasSelfPotential         = false;
+    hasPotentialEnergy       = false;
+    hasTotalEnergy           = false;
+  }
 
   potVec Snapshot::getSelfPotentials() { return frameData.selfPotentials; }
 
@@ -454,13 +482,18 @@ namespace OpenMD {
       for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
         frameData.selfPotential += frameData.selfPotentials[i];
       }
-      hasSelfPotential = true;
+      hasSelfPotential   = true;
+      hasPotentialEnergy = false;
+      hasTotalEnergy     = false;
     }
     return frameData.selfPotential;
   }
 
-  void Snapshot::setLongRangePotential(potVec lrPot) {
+  void Snapshot::setLongRangePotentials(potVec lrPot) {
     frameData.lrPotentials = lrPot;
+    hasLongRangePotential  = false;
+    hasPotentialEnergy     = false;
+    hasTotalEnergy         = false;
   }
 
   RealType Snapshot::getLongRangePotential() {
@@ -471,6 +504,8 @@ namespace OpenMD {
       frameData.longRangePotential += frameData.reciprocalPotential;
       frameData.longRangePotential += frameData.surfacePotential;
       hasLongRangePotential = true;
+      hasPotentialEnergy    = false;
+      hasTotalEnergy        = false;
     }
     return frameData.longRangePotential;
   }
@@ -484,6 +519,7 @@ namespace OpenMD {
       frameData.potentialEnergy += this->getSelfPotential();
       frameData.potentialEnergy += this->getExcludedPotential();
       hasPotentialEnergy = true;
+      hasTotalEnergy     = false;
     }
     return frameData.potentialEnergy;
   }
@@ -491,10 +527,14 @@ namespace OpenMD {
   void Snapshot::setPotentialEnergy(const RealType pe) {
     frameData.potentialEnergy = pe;
     hasPotentialEnergy        = true;
+    hasTotalEnergy            = false;
   }
 
   void Snapshot::setExcludedPotentials(potVec exPot) {
     frameData.excludedPotentials = exPot;
+    hasExcludedPotential         = false;
+    hasPotentialEnergy           = false;
+    hasTotalEnergy               = false;
   }
 
   potVec Snapshot::getExcludedPotentials() {
@@ -507,6 +547,8 @@ namespace OpenMD {
         frameData.excludedPotential += frameData.excludedPotentials[i];
       }
       hasExcludedPotential = true;
+      hasPotentialEnergy   = false;
+      hasTotalEnergy       = false;
     }
     return frameData.excludedPotential;
   }
@@ -546,30 +588,37 @@ namespace OpenMD {
   RealType Snapshot::getKineticEnergy() { return frameData.kineticEnergy; }
 
   void Snapshot::setTranslationalKineticEnergy(RealType tke) {
-    hasTranslationalKineticEnergy  = true;
     frameData.translationalKinetic = tke;
+    hasTranslationalKineticEnergy  = true;
+    hasKineticEnergy               = false;
+    hasTotalEnergy                 = false;
   }
 
   void Snapshot::setRotationalKineticEnergy(RealType rke) {
-    hasRotationalKineticEnergy  = true;
     frameData.rotationalKinetic = rke;
+    hasRotationalKineticEnergy  = true;
+    hasKineticEnergy            = false;
+    hasTotalEnergy              = false;
   }
 
   void Snapshot::setElectronicKineticEnergy(RealType eke) {
-    hasElectronicKineticEnergy  = true;
     frameData.electronicKinetic = eke;
+    hasElectronicKineticEnergy  = true;
+    hasKineticEnergy            = false;
+    hasTotalEnergy              = false;
   }
 
   void Snapshot::setKineticEnergy(RealType ke) {
-    hasKineticEnergy        = true;
     frameData.kineticEnergy = ke;
+    hasKineticEnergy        = true;
+    hasTotalEnergy          = false;
   }
 
   RealType Snapshot::getTotalEnergy() { return frameData.totalEnergy; }
 
   void Snapshot::setTotalEnergy(RealType te) {
-    hasTotalEnergy        = true;
     frameData.totalEnergy = te;
+    hasTotalEnergy        = true;
   }
 
   RealType Snapshot::getConservedQuantity() {
@@ -577,7 +626,6 @@ namespace OpenMD {
   }
 
   void Snapshot::setConservedQuantity(RealType cq) {
-    hasConservedQuantity        = true;
     frameData.conservedQuantity = cq;
   }
 

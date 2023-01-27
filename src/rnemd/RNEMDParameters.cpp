@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -49,88 +48,88 @@
 #include <cstring>
 #include <iostream>
 
-namespace OpenMD {
-  namespace RNEMD {
+namespace OpenMD::RNEMD {
 
-    RNEMDParameters::RNEMDParameters() {
-      DefineOptionalParameterWithDefaultValue(UseRNEMD, "useRNEMD", false);
-      DefineOptionalParameterWithDefaultValue(ObjectSelection,
-                                              "objectSelection", "select all");
+  RNEMDParameters::RNEMDParameters() {
+    DefineOptionalParameterWithDefaultValue(UseRNEMD, "useRNEMD", false);
+    DefineOptionalParameterWithDefaultValue(ObjectSelection, "objectSelection",
+                                            "select all");
 
-      DefineOptionalParameterWithDefaultValue(Method, "method", "VSS");
-      DefineOptionalParameter(FluxType, "fluxType");
+    DefineOptionalParameterWithDefaultValue(Method, "method", "VSS");
+    DefineOptionalParameter(FluxType, "fluxType");
 
-      DefineOptionalParameterWithDefaultValue(ExchangeTime, "exchangeTime",
-                                              100.0);
-      DefineOptionalParameter(KineticFlux, "kineticFlux");
-      DefineOptionalParameter(MomentumFlux, "momentumFlux");
-      DefineOptionalParameter(MomentumFluxVector, "momentumFluxVector");
-      DefineOptionalParameter(AngularMomentumFlux, "angularMomentumFlux");
-      DefineOptionalParameter(AngularMomentumFluxVector,
-                              "angularMomentumFluxVector");
-      DefineOptionalParameter(SlabWidth, "slabWidth");
-      DefineOptionalParameter(SlabACenter, "slabAcenter");
-      DefineOptionalParameter(SlabBCenter, "slabBcenter");
-      DefineOptionalParameter(SphereARadius, "sphereAradius");
-      DefineOptionalParameter(SphereBRadius, "sphereBradius");
-      DefineOptionalParameter(SelectionA, "selectionA");
-      DefineOptionalParameter(SelectionB, "selectionB");
-      DefineOptionalParameter(CoordinateOrigin, "coordinateOrigin");
-      DefineOptionalParameter(OutputFileName, "outputFileName");
-      DefineOptionalParameterWithDefaultValue(OutputBins, "outputBins", 20);
-      DefineOptionalParameterWithDefaultValue(OutputBinWidth, "outputBinWidth",
-                                              2.0);
-      DefineOptionalParameter(OutputSelection, "outputSelection");
-      DefineOptionalParameter(OutputFields, "outputFields");
-      DefineOptionalParameter(DividingArea, "dividingArea");
+    DefineOptionalParameterWithDefaultValue(ExchangeTime, "exchangeTime",
+                                            100.0);
+    DefineOptionalParameter(KineticFlux, "kineticFlux");
+    DefineOptionalParameter(ParticleFlux, "particleFlux");
+    DefineOptionalParameter(MomentumFlux, "momentumFlux");
+    DefineOptionalParameter(MomentumFluxVector, "momentumFluxVector");
+    DefineOptionalParameter(AngularMomentumFlux, "angularMomentumFlux");
+    DefineOptionalParameter(AngularMomentumFluxVector,
+                            "angularMomentumFluxVector");
+    DefineOptionalParameter(SlabWidth, "slabWidth");
+    DefineOptionalParameter(SlabACenter, "slabAcenter");
+    DefineOptionalParameter(SlabBCenter, "slabBcenter");
+    DefineOptionalParameter(SphereARadius, "sphereAradius");
+    DefineOptionalParameter(SphereBRadius, "sphereBradius");
+    DefineOptionalParameter(SelectionA, "selectionA");
+    DefineOptionalParameter(SelectionB, "selectionB");
+    DefineOptionalParameter(CoordinateOrigin, "coordinateOrigin");
+    DefineOptionalParameter(OutputFileName, "outputFileName");
+    DefineOptionalParameterWithDefaultValue(OutputBins, "outputBins", 20);
+    DefineOptionalParameterWithDefaultValue(OutputBinWidth, "outputBinWidth",
+                                            2.0);
+    DefineOptionalParameter(OutputSelection, "outputSelection");
+    DefineOptionalParameter(OutputFields, "outputFields");
+    DefineOptionalParameter(DividingArea, "dividingArea");
+    DefineOptionalParameterWithDefaultValue(PrivilegedAxis, "privilegedAxis",
+                                            "z");
+    DefineOptionalParameterWithDefaultValue(SPFScalingPower, "spfScalingPower",
+                                            3);
+  }
 
-      DefineOptionalParameterWithDefaultValue(PrivilegedAxis, "privilegedAxis",
-                                              "z");
-    }
+  void RNEMDParameters::validate() {
+    CheckParameter(ExchangeTime, isPositive());
+    CheckParameter(OutputBins, isPositive());
+    CheckParameter(OutputBinWidth, isPositive());
+    CheckParameter(Method,
+                   isEqualIgnoreCase("Swap") || isEqualIgnoreCase("NIVS") ||
+                       isEqualIgnoreCase("VSS") || isEqualIgnoreCase("SPF"));
+    CheckParameter(
+        FluxType,
+        isEqualIgnoreCase("KE") || isEqualIgnoreCase("Px") ||
+            isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz") ||
+            isEqualIgnoreCase("Lx") || isEqualIgnoreCase("Ly") ||
+            isEqualIgnoreCase("Lz") || isEqualIgnoreCase("Pvector") ||
+            isEqualIgnoreCase("Lvector") || isEqualIgnoreCase("KE+Px") ||
+            isEqualIgnoreCase("KE+Py") || isEqualIgnoreCase("KE+Lx") ||
+            isEqualIgnoreCase("KE+Ly") || isEqualIgnoreCase("KE+Lz") ||
+            isEqualIgnoreCase("KE+Pvector") ||
+            isEqualIgnoreCase("KE+Lvector") || isEqualIgnoreCase("Particle"));
+    CheckParameter(PrivilegedAxis, isEqualIgnoreCase("x") ||
+                                       isEqualIgnoreCase("y") ||
+                                       isEqualIgnoreCase("z"));
+  }
 
-    void RNEMDParameters::validate() {
-      CheckParameter(ExchangeTime, isPositive());
-      CheckParameter(OutputBins, isPositive());
-      CheckParameter(OutputBinWidth, isPositive());
-      CheckParameter(Method, isEqualIgnoreCase("Swap") ||
-                                 isEqualIgnoreCase("NIVS") ||
-                                 isEqualIgnoreCase("VSS"));
-      CheckParameter(
-          FluxType,
-          isEqualIgnoreCase("KE") || isEqualIgnoreCase("Px") ||
-              isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz") ||
-              isEqualIgnoreCase("Lx") || isEqualIgnoreCase("Ly") ||
-              isEqualIgnoreCase("Lz") || isEqualIgnoreCase("Pvector") ||
-              isEqualIgnoreCase("Lvector") || isEqualIgnoreCase("KE+Px") ||
-              isEqualIgnoreCase("KE+Py") || isEqualIgnoreCase("KE+Lx") ||
-              isEqualIgnoreCase("KE+Ly") || isEqualIgnoreCase("KE+Lz") ||
-              isEqualIgnoreCase("KE+Pvector") ||
-              isEqualIgnoreCase("KE+Lvector"));
-      CheckParameter(PrivilegedAxis, isEqualIgnoreCase("x") ||
-                                         isEqualIgnoreCase("y") ||
-                                         isEqualIgnoreCase("z"));
-    }
+  bool RNEMDParameters::requiresElectricField() {
+    static bool wasParsed {false};
 
-    bool RNEMDParameters::requiresElectricField() {
-      static bool wasParsed {false};
+    if (!wasParsed) {
+      StringTokenizer tokenizer(getOutputFields(), " ,;|\t\n\r");
 
-      if (!wasParsed) {
-        StringTokenizer tokenizer(getOutputFields(), " ,;|\t\n\r");
+      while (tokenizer.hasMoreTokens()) {
+        std::string token(tokenizer.nextToken());
+        toUpper(token);
 
-        while (tokenizer.hasMoreTokens()) {
-          std::string token(tokenizer.nextToken());
-          toUpper(token);
-
-          if (token == "ELECTRICFIELD" || token == "ELECTROSTATICPOTENTIAL") {
-            calculateElectricField_ = true;
-            break;
-          }
+        if (token == "ELECTRICFIELD" || token == "ELECTROSTATICPOTENTIAL") {
+          calculateElectricField_ = true;
+          break;
         }
-
-        wasParsed = true;
       }
 
-      return calculateElectricField_;
+      wasParsed = true;
     }
-  }  // namespace RNEMD
-}  // namespace OpenMD
+
+    return calculateElectricField_;
+  }
+}  // namespace OpenMD::RNEMD

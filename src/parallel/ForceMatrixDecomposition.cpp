@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -110,10 +109,10 @@ namespace OpenMD {
    * SimulationSetup
    */
   void ForceMatrixDecomposition::distributeInitialData() {
-    snap_          = sman_->getCurrentSnapshot();
+    snap_              = sman_->getCurrentSnapshot();
     atomStorageLayout_ = sman_->getAtomStorageLayout();
-    ff_            = info_->getForceField();
-    nLocal_        = snap_->getNumberOfAtoms();
+    ff_                = info_->getForceField();
+    nLocal_            = snap_->getNumberOfAtoms();
 
     nGroups_ = info_->getNLocalCutoffGroups();
     // gather the information for atomtype IDs (atids):
@@ -521,7 +520,7 @@ namespace OpenMD {
   void ForceMatrixDecomposition::collectIntermediateData() {
 #ifdef IS_MPI
 
-    snap_          = sman_->getCurrentSnapshot();
+    snap_              = sman_->getCurrentSnapshot();
     atomStorageLayout_ = sman_->getAtomStorageLayout();
 
     if (atomStorageLayout_ & DataStorage::dslDensity) {
@@ -555,7 +554,7 @@ namespace OpenMD {
    */
   void ForceMatrixDecomposition::distributeIntermediateData() {
 #ifdef IS_MPI
-    snap_          = sman_->getCurrentSnapshot();
+    snap_              = sman_->getCurrentSnapshot();
     atomStorageLayout_ = sman_->getAtomStorageLayout();
 
     if (atomStorageLayout_ & DataStorage::dslFunctional) {
@@ -576,7 +575,7 @@ namespace OpenMD {
 
   void ForceMatrixDecomposition::collectData() {
 #ifdef IS_MPI
-    snap_          = sman_->getCurrentSnapshot();
+    snap_              = sman_->getCurrentSnapshot();
     atomStorageLayout_ = sman_->getAtomStorageLayout();
 
     int n = snap_->atomData.force.size();
@@ -912,42 +911,41 @@ namespace OpenMD {
    * We need to exclude some overcounted interactions that result from
    * the parallel decomposition.
    */
-  bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2, int cg1,
-                                              int cg2) {
-    int unique_id_1, unique_id_2;
-
 #ifdef IS_MPI
+  bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2, int, int) {
     // in MPI, we have to look up the unique IDs for each atom
-    unique_id_1 = AtomRowToGlobal[atom1];
-    unique_id_2 = AtomColToGlobal[atom2];
-    // group1 = cgRowToGlobal[cg1];
-    // group2 = cgColToGlobal[cg2];
-#else
-    unique_id_1 = AtomLocalToGlobal[atom1];
-    unique_id_2 = AtomLocalToGlobal[atom2];
-    int group1  = cgLocalToGlobal[cg1];
-    int group2  = cgLocalToGlobal[cg2];
-#endif
+    int unique_id_1 = AtomRowToGlobal[atom1];
+    int unique_id_2 = AtomColToGlobal[atom2];
 
     if (unique_id_1 == unique_id_2) return true;
 
-#ifdef IS_MPI
     // this prevents us from doing the pair on multiple processors
     if (unique_id_1 < unique_id_2) {
       if ((unique_id_1 + unique_id_2) % 2 == 0) return true;
     } else {
       if ((unique_id_1 + unique_id_2) % 2 == 1) return true;
     }
-#endif
-
-#ifndef IS_MPI
-    if (group1 == group2) {
-      if (unique_id_1 < unique_id_2) return true;
-    }
-#endif
 
     return false;
   }
+
+#else
+  bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2, int cg1,
+                                              int cg2) {
+    int unique_id_1 = AtomLocalToGlobal[atom1];
+    int unique_id_2 = AtomLocalToGlobal[atom2];
+    int group1 = cgLocalToGlobal[cg1];
+    int group2 = cgLocalToGlobal[cg2];
+
+    if (unique_id_1 == unique_id_2) return true;
+
+    if (group1 == group2) {
+      if (unique_id_1 < unique_id_2) return true;
+    }
+
+    return false;
+  }
+#endif
 
   /**
    * We need to handle the interactions for atoms who are involved in
@@ -1601,7 +1599,7 @@ namespace OpenMD {
       // include all groups here.
       for (int j1 = 0; j1 < nGroups_; j1++) {
         point[j1] = len;
-        rs        = snap_->cgData.position[j1];
+        rs = snap_->cgData.position[j1];
         // include self group interactions j2 == j1
         for (int j2 = j1; j2 < nGroups_; j2++) {
           dr = snap_->cgData.position[j2] - rs;

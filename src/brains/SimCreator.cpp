@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -88,7 +87,7 @@
 #include "types/SuttonChenAdapter.hpp"
 #include "utils/RandNumGen.hpp"
 #include "utils/Revision.hpp"
-#include "utils/StringUtils.hpp"
+#include "utils/Trim.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -159,66 +158,67 @@ namespace OpenMD {
 
     catch (antlr::MismatchedCharException& e) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "Mismatched Character: %s in file %s at line %d, column %d\n",
-              e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
-              e.getColumn());
+               "Mismatched Character: %s in file %s at line %d, column %d\n",
+               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
+               e.getColumn());
       painCave.isFatal = 1;
       simError();
     } catch (antlr::MismatchedTokenException& e) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "Mismatched Token: %s in file %s at line %d, column %d\n",
-              e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
-              e.getColumn());
+               "Mismatched Token: %s in file %s at line %d, column %d\n",
+               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
+               e.getColumn());
       painCave.isFatal = 1;
       simError();
     } catch (antlr::NoViableAltForCharException& e) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "No Viable Alternative for Character: %s in file %s at line %d, "
-              "column %d\n",
-              e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
-              e.getColumn());
+               "No Viable Alternative for Character: %s in file %s at line %d, "
+               "column %d\n",
+               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
+               e.getColumn());
       painCave.isFatal = 1;
       simError();
     } catch (antlr::NoViableAltException& e) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "No Viable Alternative: %s in file %s at line %d, column %d\n",
-              e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
-              e.getColumn());
+               "No Viable Alternative: %s in file %s at line %d, column %d\n",
+               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
+               e.getColumn());
       painCave.isFatal = 1;
       simError();
     }
 
     catch (antlr::TokenStreamRecognitionException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "Token Stream Recognition: %s in file %s at line %d, column %d\n",
-              e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
-              e.getColumn());
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "Token Stream Recognition: %s in file %s at line %d, column %d\n",
+          e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
+          e.getColumn());
       painCave.isFatal = 1;
       simError();
     }
 
     catch (antlr::TokenStreamIOException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Token Stream IO exception: %s\n",
-              e.getMessage().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Token Stream IO exception: %s\n", e.getMessage().c_str());
       painCave.isFatal = 1;
       simError();
     }
 
     catch (antlr::TokenStreamException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Token Stream exception: %s\n",
-              e.getMessage().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Token Stream exception: %s\n", e.getMessage().c_str());
       painCave.isFatal = 1;
       simError();
     } catch (antlr::RecognitionException& e) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "Recognition exception: %s in file %s at line %d, column %d\n",
-              e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
-              e.getColumn());
+               "Recognition exception: %s in file %s at line %d, column %d\n",
+               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
+               e.getColumn());
       painCave.isFatal = 1;
       simError();
     } catch (antlr::CharStreamException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Character Stream exception: %s\n",
-              e.getMessage().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Character Stream exception: %s\n", e.getMessage().c_str());
       painCave.isFatal = 1;
       simError();
     } catch (OpenMDException& e) {
@@ -226,7 +226,8 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     } catch (std::exception& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "parser exception: %s\n", e.what());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "parser exception: %s\n", e.what());
       painCave.isFatal = 1;
       simError();
     }
@@ -243,7 +244,7 @@ namespace OpenMD {
     std::string mdRawData;
     int metaDataBlockStart = -1;
     int metaDataBlockEnd   = -1;
-    streamoff mdOffset{};
+    streamoff mdOffset {};
     int mdFileVersion(2);
 
     // Create a string for embedding the version information in the MetaData
@@ -274,15 +275,15 @@ namespace OpenMD {
       mdFile_.open(mdFileName.c_str(), ifstream::in | ifstream::binary);
 
       if (mdFile_.fail()) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "SimCreator: Cannot open file: %s\n",
-                mdFileName.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "SimCreator: Cannot open file: %s\n", mdFileName.c_str());
         painCave.isFatal = 1;
         simError();
       }
 
       mdFile_.getline(buffer, bufferSize);
       ++lineNo;
-      std::string line = trimLeftCopy(buffer);
+      std::string line = Utils::trimLeftCopy(buffer);
       std::size_t i    = CaseInsensitiveFind(line, "<OpenMD");
       if (i == string::npos) {
         // try the older file strings to see if that works:
@@ -292,8 +293,8 @@ namespace OpenMD {
       if (i == string::npos) {
         // still no luck!
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "SimCreator: File: %s is not a valid OpenMD file!\n",
-                mdFileName.c_str());
+                 "SimCreator: File: %s is not a valid OpenMD file!\n",
+                 mdFileName.c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -324,7 +325,7 @@ namespace OpenMD {
       while (mdFile_.getline(buffer, bufferSize)) {
         ++lineNo;
 
-        std::string line = trimLeftCopy(buffer);
+        std::string line = Utils::trimLeftCopy(buffer);
         if (metaDataBlockStart == -1) {
           std::size_t i = CaseInsensitiveFind(line, "<MetaData>");
           if (i != string::npos) {
@@ -344,15 +345,16 @@ namespace OpenMD {
 
       if (metaDataBlockStart == -1) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "SimCreator: File: %s did not contain a <MetaData> tag!\n",
-                mdFileName.c_str());
+                 "SimCreator: File: %s did not contain a <MetaData> tag!\n",
+                 mdFileName.c_str());
         painCave.isFatal = 1;
         simError();
       }
       if (metaDataBlockEnd == -1) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                 "SimCreator: File: %s did not contain a closed MetaData block!\n",
-                 mdFileName.c_str());
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+            "SimCreator: File: %s did not contain a closed MetaData block!\n",
+            mdFileName.c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -367,7 +369,7 @@ namespace OpenMD {
 
       for (int i = 0; i < metaDataBlockEnd - metaDataBlockStart - 1; ++i) {
         mdFile_.getline(buffer, bufferSize);
-        std::string line = trimLeftCopy(buffer);
+        std::string line = Utils::trimLeftCopy(buffer);
         std::size_t j =
             CaseInsensitiveFind(line, "## Last run using OpenMD Version");
         if (j != string::npos) {
@@ -398,8 +400,8 @@ namespace OpenMD {
 
     if (ff == NULL) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "ForceField Factory can not create %s force field\n",
-              simParams->getForceField().c_str());
+               "ForceField Factory can not create %s force field\n",
+               simParams->getForceField().c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -450,10 +452,10 @@ namespace OpenMD {
 
     computeStorageLayouts(info);
 
-    int asl = info->getAtomStorageLayout();
+    int asl  = info->getAtomStorageLayout();
     int rbsl = info->getRigidBodyStorageLayout();
-    int cgsl = info->getCutoffGroupStorageLayout();    
-    
+    int cgsl = info->getCutoffGroupStorageLayout();
+
     // allocate memory for DataStorage(circular reference, need to
     // break it)
     info->setSnapshotManager(new SimSnapshotManager(info, asl, rbsl, cgsl));
@@ -521,13 +523,13 @@ namespace OpenMD {
 
     if (nProcessors > nGlobalMols) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "nProcessors (%d) > nMol (%d)\n"
-              "\tThe number of processors is larger than\n"
-              "\tthe number of molecules.  This will not result in a \n"
-              "\tusable division of atoms for force decomposition.\n"
-              "\tEither try a smaller number of processors, or run the\n"
-              "\tsingle-processor version of OpenMD.\n",
-              nProcessors, nGlobalMols);
+               "nProcessors (%d) > nMol (%d)\n"
+               "\tThe number of processors is larger than\n"
+               "\tthe number of molecules.  This will not result in a \n"
+               "\tusable division of atoms for force decomposition.\n"
+               "\tEither try a smaller number of processors, or run the\n"
+               "\tsingle-processor version of OpenMD.\n",
+               nProcessors, nGlobalMols);
 
       painCave.isFatal = 1;
       simError();
@@ -576,7 +578,8 @@ namespace OpenMD {
             // and be done with it.
 
             if (loops > 100) {
-              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+              snprintf(
+                  painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                   "There have been 100 attempts to assign molecule %d to an\n"
                   "\tunderworked processor, but there's no good place to\n"
                   "\tleave it. OpenMD is assigning it at random to processor "
@@ -642,8 +645,8 @@ namespace OpenMD {
     }
 
     info->setMolToProcMap(molToProcMap);
-    snprintf(checkPointMsg, MAX_SIM_ERROR_MSG_LENGTH, 
-            "Successfully divided the molecules among the processors.\n");
+    snprintf(checkPointMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Successfully divided the molecules among the processors.\n");
     errorCheckPoint();
   }
 
@@ -670,23 +673,23 @@ namespace OpenMD {
 #endif
     }
   }
-  
+
   void SimCreator::computeStorageLayouts(SimInfo* info) {
-    Globals* simParams       = info->getSimParams();
-    int nRigidBodies         = info->getNGlobalRigidBodies();
-    set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
-    set<AtomType*>::iterator i;
-    bool hasDirectionalAtoms  = false;
-    bool hasFixedCharge       = false;
-    bool hasDipoles           = false;
-    bool hasQuadrupoles       = false;
-    bool hasPolarizable       = false;
-    bool hasFluctuatingCharge = false;
-    bool hasMetallic          = false;
+    Globals* simParams    = info->getSimParams();
+    int nRigidBodies      = info->getNGlobalRigidBodies();
+    AtomTypeSet atomTypes = info->getSimulatedAtomTypes();
+    AtomTypeSet::iterator i;
+    bool hasDirectionalAtoms     = false;
+    bool hasFixedCharge          = false;
+    bool hasDipoles              = false;
+    bool hasQuadrupoles          = false;
+    bool hasPolarizable          = false;
+    bool hasFluctuatingCharge    = false;
+    bool hasMetallic             = false;
     int atomStorageLayout        = 0;
     int rigidBodyStorageLayout   = 0;
     int cutoffGroupStorageLayout = 0;
-    
+
     atomStorageLayout |= DataStorage::dslPosition;
     atomStorageLayout |= DataStorage::dslVelocity;
     atomStorageLayout |= DataStorage::dslForce;
@@ -713,10 +716,10 @@ namespace OpenMD {
     if (nRigidBodies > 0) {
       rigidBodyStorageLayout |= DataStorage::dslPosition;
       rigidBodyStorageLayout |= DataStorage::dslVelocity;
-      rigidBodyStorageLayout |= DataStorage::dslForce;   
+      rigidBodyStorageLayout |= DataStorage::dslForce;
       rigidBodyStorageLayout |= DataStorage::dslAmat;
       rigidBodyStorageLayout |= DataStorage::dslAngularMomentum;
-      rigidBodyStorageLayout |= DataStorage::dslTorque;      
+      rigidBodyStorageLayout |= DataStorage::dslTorque;
     }
     if (hasDirectionalAtoms) {
       atomStorageLayout |= DataStorage::dslAmat;
@@ -737,9 +740,7 @@ namespace OpenMD {
       atomStorageLayout |= DataStorage::dslFunctional;
       atomStorageLayout |= DataStorage::dslFunctionalDerivative;
     }
-    if (hasPolarizable) {
-      atomStorageLayout |= DataStorage::dslElectricField;
-    }
+    if (hasPolarizable) { atomStorageLayout |= DataStorage::dslElectricField; }
     if (hasFluctuatingCharge) {
       atomStorageLayout |= DataStorage::dslFlucQPosition;
       if (atomStorageLayout & DataStorage::dslVelocity) {
@@ -775,8 +776,8 @@ namespace OpenMD {
     if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
       if (simParams->getRNEMDParameters()->getUseRNEMD()) {
         if (simParams->getRNEMDParameters()->requiresElectricField()) {
-	  atomStorageLayout |= DataStorage::dslElectricField;
-	  rigidBodyStorageLayout |= DataStorage::dslElectricField;
+          atomStorageLayout |= DataStorage::dslElectricField;
+          rigidBodyStorageLayout |= DataStorage::dslElectricField;
         }
       }
     }
@@ -1005,9 +1006,10 @@ namespace OpenMD {
       reader.readFrame(nframes - 1);
     } else {
       // invalid initial coordinate file
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "Initial configuration file %s should at least contain one frame\n",
-               mdFileName.c_str());
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "Initial configuration file %s should at least contain one frame\n",
+          mdFileName.c_str());
       painCave.isFatal = 1;
       simError();
     }

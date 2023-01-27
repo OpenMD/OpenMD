@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -98,8 +97,9 @@ int main(int argc, char* argv[]) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "No input .omd file name was specified "
-                             "on the command line");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "No input .omd file name was specified "
+             "on the command line");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
     simError();
@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
     if (args_info.vacancyPercent_arg < 0.0 ||
         args_info.vacancyPercent_arg > 100.0) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "vacancyPercent was set to a non-sensical value.");
+               "vacancyPercent was set to a non-sensical value.");
       painCave.isFatal = 1;
       simError();
     } else {
@@ -168,9 +168,9 @@ int main(int argc, char* argv[]) {
         vacancyTargets.resize((int)(vF * nTargets));
 
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "Removing %d atoms from randomly-selected\n"
-                "\tsites between %lf and %lf.",
-                (int)vacancyTargets.size(), vIR, vOR);
+                 "Removing %d atoms from randomly-selected\n"
+                 "\tsites between %lf and %lf.",
+                 (int)vacancyTargets.size(), vIR, vOR);
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;
         simError();
@@ -186,8 +186,8 @@ int main(int argc, char* argv[]) {
 
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "Something is strange about the vacancy\n"
-                "\tinner or outer radii.  Check their values.");
+                 "Something is strange about the vacancy\n"
+                 "\tinner or outer radii.  Check their values.");
         painCave.isFatal = 1;
         simError();
       }
@@ -205,8 +205,9 @@ int main(int argc, char* argv[]) {
   nComponents = components.size();
 
   if (args_info.molFraction_given && args_info.shellRadius_given) {
-    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Specify either molFraction or shellRadius "
-                             "arguments, but not both!");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Specify either molFraction or shellRadius "
+             "arguments, but not both!");
     painCave.isFatal = 1;
     simError();
   }
@@ -228,8 +229,8 @@ int main(int argc, char* argv[]) {
       molFractions.push_back(remainingFraction);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "nanoparticleBuilder can't figure out molFractions "
-              "for all of the components in the <MetaData> block.");
+               "nanoparticleBuilder can't figure out molFractions "
+               "for all of the components in the <MetaData> block.");
       painCave.isFatal = 1;
       simError();
     }
@@ -244,7 +245,8 @@ int main(int argc, char* argv[]) {
       }
       shellRadii.push_back(particleRadius);
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "nanoparticleBuilder can't figure out the\n"
           "\tshell radii for all of the components in the <MetaData> block.");
       painCave.isFatal = 1;
@@ -252,9 +254,9 @@ int main(int argc, char* argv[]) {
     }
   } else {
     snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-            "You have a multi-component <MetaData> block,\n"
-            "\tbut have not specified either molFraction or shellRadius "
-            "arguments.");
+             "You have a multi-component <MetaData> block,\n"
+             "\tbut have not specified either molFraction or shellRadius "
+             "arguments.");
     painCave.isFatal = 1;
     simError();
   }
@@ -266,14 +268,16 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < nComponents; i++) {
       if (molFractions.at(i) < 0.0) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "One of the requested molFractions was"
-                                 " less than zero!");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "One of the requested molFractions was"
+                 " less than zero!");
         painCave.isFatal = 1;
         simError();
       }
       if (molFractions.at(i) > 1.0) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "One of the requested molFractions was"
-                                 " greater than one!");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "One of the requested molFractions was"
+                 " greater than one!");
         painCave.isFatal = 1;
         simError();
       }
@@ -281,7 +285,7 @@ int main(int argc, char* argv[]) {
     }
     if (abs(totalFraction - 1.0) > 1e-6) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "The sum of molFractions was not close enough to 1.0");
+               "The sum of molFractions was not close enough to 1.0");
       painCave.isFatal = 1;
       simError();
     }
@@ -303,8 +307,8 @@ int main(int argc, char* argv[]) {
 
     if (totalMolecules != nSites) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "Computed total number of molecules is not equal "
-              "to the number of lattice sites!");
+               "Computed total number of molecules is not equal "
+               "to the number of lattice sites!");
       painCave.isFatal = 1;
       simError();
     }
@@ -312,13 +316,13 @@ int main(int argc, char* argv[]) {
     for (unsigned int i = 0; i < shellRadii.size(); i++) {
       if (shellRadii.at(i) > particleRadius + 1e-6) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "One of the shellRadius values exceeds the particle Radius.");
+                 "One of the shellRadius values exceeds the particle Radius.");
         painCave.isFatal = 1;
         simError();
       }
       if (shellRadii.at(i) <= 0.0) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "One of the shellRadius values is smaller than zero!");
+                 "One of the shellRadius values is smaller than zero!");
         painCave.isFatal = 1;
         simError();
       }
@@ -327,7 +331,8 @@ int main(int argc, char* argv[]) {
 
   vector<int> ids;
   if ((int)args_info.molFraction_given) {
-    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Creating a randomized spherical nanoparticle.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Creating a randomized spherical nanoparticle.");
     painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
     simError();
@@ -339,7 +344,8 @@ int main(int argc, char* argv[]) {
     std::shuffle(ids.begin(), ids.end(), gen);
 
   } else {
-    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Creating a core-shell spherical nanoparticle.");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Creating a core-shell spherical nanoparticle.");
     painCave.isFatal  = 0;
     painCave.severity = OPENMD_INFO;
     simError();
@@ -428,7 +434,8 @@ int main(int argc, char* argv[]) {
   writer = new DumpWriter(NewInfo, outputFileName);
 
   if (writer == NULL) {
-    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Error in creating dumpwriter object ");
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "Error in creating dumpwriter object ");
     painCave.isFatal = 1;
     simError();
   }
@@ -441,9 +448,9 @@ int main(int argc, char* argv[]) {
 
   // cleanup a by calling sim error.....
   snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-          "A new OpenMD file called \"%s\" has been "
-          "generated.\n",
-          outputFileName.c_str());
+           "A new OpenMD file called \"%s\" has been "
+           "generated.\n",
+           outputFileName.c_str());
   painCave.isFatal  = 0;
   painCave.severity = OPENMD_INFO;
   simError();
@@ -482,9 +489,9 @@ void createMdFile(const std::string& oldMdFileName,
 
   if (i != nMol.size()) {
     snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-            "Couldn't replace the correct number of nMol\n"
-            "\tstatements in component blocks.  Make sure that all\n"
-            "\tcomponents in the template file have nMol=1");
+             "Couldn't replace the correct number of nMol\n"
+             "\tstatements in component blocks.  Make sure that all\n"
+             "\tcomponents in the template file have nMol=1");
     painCave.isFatal = 1;
     simError();
   }

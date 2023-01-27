@@ -2,7 +2,7 @@
 Copyright (C) 2000 by OpenEye Scientific Software, Inc.
 Some portions Copyright (C) 2001-2006 by Geoffrey R. Hutchison
 Some portions Copyright (C) 2004 by Chris Morley
-Some portions Copyright (C) 2004-2020 by J. Daniel Gezelter
+Some portions Copyright (C) 2004-present by J. Daniel Gezelter
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -405,7 +405,8 @@ namespace OpenBabel {
     CalcBoundingBox(mol, min_x, max_x, min_y, max_y, min_z, max_z);
 
     // still to do: should compute a bounding box here
-    snprintf(buffer, BUFFLEN,
+    snprintf(
+        buffer, BUFFLEN,
         "        Hmat: {{ %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }, { "
         "%.10g, "
         "%.10g, %.10g }}",
@@ -421,8 +422,8 @@ namespace OpenBabel {
     for (vector<int>::iterator i = indices.begin(); i != indices.end(); ++i) {
       atom = mol.GetAtom(*i);
       snprintf(buffer, BUFFLEN,
-               "%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e", *i - 1,
-              "pv", atom->GetX(), atom->GetY(), atom->GetZ(), 0.0, 0.0, 0.0);
+               "%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e", *i - 1, "pv",
+               atom->GetX(), atom->GetY(), atom->GetZ(), 0.0, 0.0, 0.0);
       os << buffer << endl;
     }
     os << "    </StuntDoubles>" << endl;

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(OpenMD VERSION 3.0.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
@@ -95,12 +95,15 @@ include(CheckCXXCompilerFlag)
 include(CheckIncludeFileCXX)
 include(CheckCXXSymbolExists)
 
-if ( CMAKE_COMPILER_IS_GNUCXX )
-    add_definitions("-Wall")
-endif ( CMAKE_COMPILER_IS_GNUCXX )
-if ( MSVC )
-    add_definitions("/W3 /DNOMINMAX")
-endif ( MSVC )
+if(WIN32)
+  add_compile_options("/W4 /Wall /DNOMINMAX /WX")
+else()
+  # add_compile_options(-pedantic-errors -Wall -Wextra -Werror)
+
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    add_compile_options(-Wno-unused-parameter -Wno-cast-function-type -Wno-clobbered)
+  endif()
+endif()
 
 # OpenMD version number.
 set (VERSION_MAJOR "3")
@@ -184,7 +187,8 @@ check_cxx_symbol_exists(strncasecmp   "string.h"   HAVE_STRNCASECMP)
 option(FORMAT_OPENMD "Builds specified libraries while also formatting the code." OFF)
 
 if (FORMAT_OPENMD AND NOT WIN32)
-  find_program(formatter clang-format HINTS /opt/local/libexec/llvm-10/bin/)
+  find_program(formatter clang-format HINTS /opt/local/libexec/llvm-11/bin/ 
+                                            /opt/local/libexec/llvm-15/bin/)
 
   if (NOT formatter_NOTFOUND)
     message(STATUS "Formatting OpenMD")
@@ -252,33 +256,6 @@ ELSE(OPENBABEL3_FOUND)
      MESSAGE(STATUS "No OpenBabel found - will not build atom2omd")
   ENDIF(OPENBABEL2_FOUND)
 ENDIF(OPENBABEL3_FOUND)
-
-
-# option(WITH_JSON "Build JSON support" ON)
-# option(OPENMD_USE_SYSTEM_nlohmann_json "Use the system nlohmann_json if available." ON)
-# if(WITH_JSON)
-#   set(nlohmann_json_VERSION_MIN 3.10.5)
-#   # First try find system nlohmann_json
-#   if(OPENMD_USE_SYSTEM_nlohmann_json)
-#     find_package(nlohmann_json ${nlohmann_json_VERSION_MIN})
-#  endif()
-# # Otherwise download nlohmann_json to OpenMD source directory
-#  if (NOT nlohmann_json_FOUND OR nlohmann_json_VERSION VERSION_LESS ${nlohmann_json_VERSION_MIN})
-#   set(nlohmann_json_VERSION 3.11.2)
-#    if(NOT EXISTS "${openbabel_SOURCE_DIR}/external/nlohmann_json-${nlohmann_json_VERSION}")
-#      file(DOWNLOAD "https://github.com/nlohmann/json/releases/download/v${nlohmann_json_VERSION}/json.hpp"
-#        "${OPENMD_SOURCE_DIR}/external/nlohmann_json-${nlohmann_json_VERSION}/json.hpp" STATUS status)
-#      message(STATUS "Downloaded nlohmann_json to ${OPENMD_SOURCE_DIR}/external/nlohmann_json-${nlohmann_json_VERSION}.")
-#    endif()
-#    set(nlohmann_json_FOUND TRUE)
-#    set(nlohmann_json_INCLUDE_DIRS ${OPENMD_SOURCE_DIR}/external/nlohmann_json-${nlohmann_json_VERSION})
-#  endif()
-#  if(nlohmann_json_FOUND)
-#    message(STATUS "Hydro JSON formats will be supported. Using nlohmann_json ${nlohmann_json_VERSION} at ${nlohmann_json_INCLUDE_DIRS}")
-#    add_definitions(-DHAVE_NLOHMANN_JDON)
-#    include_directories(${nlohmann_json_INCLUDE_DIRS})
-#  endif()
-# endif()
 
 #Look for QHULL Libraries
 find_package(Qhull)
@@ -465,6 +442,7 @@ src/integrators/NPTsz.cpp
 src/integrators/NPTxyz.cpp
 src/integrators/NVE.cpp
 src/integrators/NVT.cpp
+src/integrators/SPFDynamics.cpp
 src/integrators/VelocityVerletIntegrator.cpp
 src/io/AtomTypesSectionParser.cpp
 src/io/BaseAtomTypesSectionParser.cpp
@@ -492,6 +470,7 @@ src/io/StickyAtomTypesSectionParser.cpp
 src/io/StickyPowerAtomTypesSectionParser.cpp
 src/io/TorsionTypesSectionParser.cpp
 src/io/UFFAtomTypesSectionParser.cpp
+src/io/XYZFormat.cpp
 src/io/ZConsReader.cpp
 src/lattice/CubicLattice.cpp
 src/lattice/FCCLattice.cpp
@@ -595,7 +574,6 @@ src/utils/PropertyMap.cpp
 src/utils/RandNumGen.cpp
 src/utils/StringTokenizer.cpp
 src/utils/StringUtils.cpp
-src/utils/Trim.cpp
 src/utils/Utility.cpp
 src/utils/wildcards.cpp
 src/visitors/AtomNameVisitor.cpp
@@ -636,6 +614,8 @@ src/integrators/LangevinHullForceModifier.cpp
 src/integrators/LangevinPiston.cpp
 src/rnemd/NIVS.cpp
 src/rnemd/RNEMD.cpp
+src/rnemd/SPF.cpp
+src/rnemd/SPFForceManager.cpp
 src/rnemd/Swap.cpp
 src/rnemd/VSS.cpp
 src/io/ConstraintWriter.cpp
@@ -733,6 +713,7 @@ set (DYNAMICPROPSSOURCE
 src/applications/dynamicProps/ActionCorrFunc.cpp
 src/applications/dynamicProps/CollectiveDipoleDisplacement.cpp
 src/applications/dynamicProps/CurrentDensityAutoCorrFunc.cpp
+src/applications/dynamicProps/CoMRCorrFunc.cpp
 src/applications/dynamicProps/DipoleCorrFunc.cpp
 src/applications/dynamicProps/DirectionalRCorrFunc.cpp
 src/applications/dynamicProps/Displacement.cpp
@@ -796,6 +777,8 @@ src/applications/staticProps/GofRAngle2.cpp
 src/applications/staticProps/GofRZ.cpp
 src/applications/staticProps/GofXyz.cpp
 src/applications/staticProps/GofZ.cpp
+src/applications/staticProps/MultiComponentRDF.cpp
+src/applications/staticProps/KirkwoodBuff.cpp
 src/applications/staticProps/CoordinationNumber.cpp
 src/applications/staticProps/Hxy.cpp
 src/applications/staticProps/HBondGeometric.cpp

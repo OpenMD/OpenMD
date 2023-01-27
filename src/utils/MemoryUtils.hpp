@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -57,68 +56,53 @@
 #include <type_traits>
 #include <utility>
 
-namespace OpenMD {
-  namespace Utils {
+namespace OpenMD::Utils {
+  namespace details {
 
-    // Remove in favor of std::make_unique<> when we switch to C++14
-    template<typename T, typename... TArgs,
-             typename = typename std::enable_if<!std::is_array<T>::value>::type>
-    std::unique_ptr<T> make_unique(TArgs&&... args) {
-      return std::unique_ptr<T> {new T(std::forward<TArgs>(args)...)};
+    template<typename, typename = std::void_t<>>
+    struct is_container : std::false_type {};
+
+    template<typename T>
+    struct is_container<T, std::void_t<typename T::value_type,
+                                       typename T::reference,
+                                       typename T::const_reference,
+                                       typename T::iterator,
+                                       typename T::const_iterator,
+                                       typename T::difference_type,
+                                       typename T::size_type,
+                                       decltype(std::declval<T>().begin()),
+                                       decltype(std::declval<T>().end()),
+                                       decltype(std::declval<T>().cbegin()),
+                                       decltype(std::declval<T>().cend()),
+                                       decltype(std::declval<T>().max_size()),
+                                       decltype(std::declval<T>().empty())>> : std::true_type {};
+
+    // Convenience variable template for ease-of-use
+    template<typename T>
+    constexpr bool is_container_v = is_container<T>::value;
+
+    template<typename T>
+    void lifted_deleter(T val) {
+      delete val;
     }
 
-    namespace details {
+    template<typename T1, typename T2>
+    void lifted_deleter(std::pair<T1, T2>& val) {
+      lifted_deleter(val.second);
+    }
+  }  // namespace details
 
-      // Remove in favor of std::void_t<> when we switch to C++17
-      template<typename...>
-      using void_t = void;
-
-      template<typename, typename = void_t<>>
-      struct is_container : std::integral_constant<bool, false> {};
-
-      template<typename T>
-      struct is_container<T, void_t<typename T::value_type,
-                                    typename T::reference,
-                                    typename T::const_reference,
-                                    typename T::iterator,
-                                    typename T::const_iterator,
-                                    typename T::difference_type,
-                                    typename T::size_type,
-                                    decltype(std::declval<T>().begin()),
-                                    decltype(std::declval<T>().end()),
-                                    decltype(std::declval<T>().cbegin()),
-                                    decltype(std::declval<T>().cend()),
-                                    decltype(std::declval<T>().max_size()),
-                                    decltype(std::declval<T>().empty())>> : std::integral_constant<bool, true> {};
-
-      template<typename T>
-      void lifted_deleter(T val) {
-        delete val;
-      }
-
-      template<typename T1, typename T2>
-      void lifted_deleter(std::pair<T1, T2>& val) {
-        lifted_deleter(val.second);
-      }
-    }  // namespace details
-
-    // Base case - Combine using constexpr-if when we switch to C++17
-    template<typename Container,
-             typename = typename std::enable_if<!details::is_container<typename Container::value_type>::value>::type>
-    void deletePointers(Container& container) {
+  // Recursively deallocate the previously allocated memory from each container
+  template<typename Container>
+  void deletePointers(Container& container) {
+    if constexpr(details::is_container_v<typename Container::value_type>) {
+      for (auto& elem : container)
+        deletePointers(elem);
+    } else {
       for (auto& elem : container)
         details::lifted_deleter(elem);
     }
-
-    // Recursively deallocate the previously allocated memory from each container
-    template<typename Container,
-             typename = typename std::enable_if<details::is_container<typename Container::value_type>::value>::type,
-             typename = int /* Dummy parameter to allow multiple default template parameters in overloads */>
-    void deletePointers(Container& containerOfContainers) {
-      for (auto& container : containerOfContainers)
-        deletePointers(container);
-    }
-  }  // namespace Utils
-}  // namespace OpenMD
+  }
+}  // namespace OpenMD::Utils
 
 #endif  // OPENMD_UTILS_MEMORYUTILS_HPP

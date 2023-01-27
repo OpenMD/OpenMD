@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -47,25 +46,22 @@
 
 #include <algorithm>
 #include <functional>
-//#include "utils/residentMem.h"
-//#include "utils/physmem.h"
+#include <iostream>
+#include <string>
+
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
 
-using namespace std;
-
 namespace OpenMD {
-  BlockSnapshotManager::BlockSnapshotManager(SimInfo* info,
-                                             const std::string& filename,
-                                             int atomStorageLayout,
-					     int rigidBodyStorageLayout,
-					     int cutoffGroupStorageLayout,
-                                             long long int memSize,
-                                             int blockCapacity) :
-    SnapshotManager(atomStorageLayout, rigidBodyStorageLayout,
-		    cutoffGroupStorageLayout),
-    blockCapacity_(blockCapacity), memSize_(memSize),
-    activeBlocks_(blockCapacity_, -1), activeRefCount_(blockCapacity_, 0) {
+
+  BlockSnapshotManager::BlockSnapshotManager(
+      SimInfo* info, const std::string& filename, int atomStorageLayout,
+      int rigidBodyStorageLayout, int cutoffGroupStorageLayout,
+      long long int memSize, int blockCapacity) :
+      SnapshotManager(atomStorageLayout, rigidBodyStorageLayout,
+                      cutoffGroupStorageLayout),
+      blockCapacity_(blockCapacity), memSize_(memSize),
+      activeBlocks_(blockCapacity_, -1), activeRefCount_(blockCapacity_, 0) {
     nAtoms_        = info->getNGlobalAtoms();
     nRigidBodies_  = info->getNGlobalRigidBodies();
     nCutoffGroups_ = info->getNCutoffGroups();
@@ -76,18 +72,16 @@ namespace OpenMD {
     // RealType rssMem = residentMem();
     // RealType avaliablePhysMem = physMem - rssMem;
 
-    int bytesPerAtom =
-        DataStorage::getBytesPerStuntDouble(atomStorageLayout);
+    int bytesPerAtom = DataStorage::getBytesPerStuntDouble(atomStorageLayout);
     int bytesPerRigidBody =
-      DataStorage::getBytesPerStuntDouble(rigidBodyStorageLayout);
+        DataStorage::getBytesPerStuntDouble(rigidBodyStorageLayout);
     int bytesPerCutoffGroup =
         DataStorage::getBytesPerStuntDouble(DataStorage::dslPosition);
 
     int bytesPerFrameData = Snapshot::getFrameDataSize();
-    int bytesPerFrame = nRigidBodies_ * bytesPerRigidBody +
-      nAtoms_ * bytesPerAtom +
-      nCutoffGroups_ * bytesPerCutoffGroup +
-      bytesPerFrameData;
+    int bytesPerFrame =
+        nRigidBodies_ * bytesPerRigidBody + nAtoms_ * bytesPerAtom +
+        nCutoffGroups_ * bytesPerCutoffGroup + bytesPerFrameData;
 
     // total number of frames that can fit in memory
     // RealType frameCapacity = avaliablePhysMem / bytesPerFrame;
@@ -97,7 +91,7 @@ namespace OpenMD {
     // in memory at the same time:
     nSnapshotPerBlock_ = int(frameCapacity) / blockCapacity_;
     if (nSnapshotPerBlock_ <= 0) {
-      std::cerr << "not enough memory to hold two configs!" << std::endl;
+      std::cerr << "not enough memory to hold two configs!\n";
     }
     reader_     = new DumpReader(info, filename);
     nframes_    = reader_->getNFrames();
@@ -115,9 +109,8 @@ namespace OpenMD {
     snapshots_.insert(snapshots_.begin(), nframes_,
                       static_cast<Snapshot*>(NULL));
 
-    std::cout << "-----------------------------------------------------"
-              << std::endl;
-    std::cout << "BlockSnapshotManager memory report:" << std::endl;
+    std::cout << "-----------------------------------------------------\n";
+    std::cout << "BlockSnapshotManager memory report:\n";
     std::cout << "\n";
     // std::cout << "  Physical Memory available:\t" << (unsigned long)physMem
     // << " bytes"
@@ -130,8 +123,8 @@ namespace OpenMD {
               << " bytes" << std::endl;
     std::cout << "        Bytes per FrameData:\t"
               << (unsigned long)bytesPerFrameData << std::endl;
-    std::cout << "             Bytes per Atom:\t"
-              << (unsigned long)bytesPerAtom << std::endl;
+    std::cout << "             Bytes per Atom:\t" << (unsigned long)bytesPerAtom
+              << std::endl;
     std::cout << "        Bytes per RigidBody:\t"
               << (unsigned long)bytesPerRigidBody << std::endl;
     std::cout << "     Bytes per Cutoff Group:\t"
@@ -168,17 +161,8 @@ namespace OpenMD {
   }
 
   int BlockSnapshotManager::getNActiveBlocks() {
-#ifdef __RWSTD
-    int count = 0;
-    std::count_if(activeBlocks_.begin(), activeBlocks_.end(),
-                  std::bind(std::not_equal_to<int>(), placeholders::_1, -1),
-                  count);
-    return count;
-#else
-    return std::count_if(
-        activeBlocks_.begin(), activeBlocks_.end(),
-        std::bind(std::not_equal_to<int>(), placeholders::_1, -1));
-#endif
+    return std::count_if(activeBlocks_.begin(), activeBlocks_.end(),
+                         [](int val) { return val != -1; });
   }
 
   bool BlockSnapshotManager::loadBlock(int block) {
@@ -272,20 +256,19 @@ namespace OpenMD {
 
   std::vector<int> BlockSnapshotManager::getActiveBlocks() {
     std::vector<int> result;
-    std::copy_if(activeBlocks_.begin(), activeBlocks_.end(),
-		 std::back_inserter(result),
-		 std::bind(std::not_equal_to<int>(), placeholders::_1, -1));
+    std::copy_if(
+        activeBlocks_.begin(), activeBlocks_.end(), std::back_inserter(result),
+        std::bind(std::not_equal_to<int>(), std::placeholders::_1, -1));
     return result;
   }
 
   Snapshot* BlockSnapshotManager::loadFrame(int frame) {
-    Snapshot* snapshot = new Snapshot(nAtoms_, nRigidBodies_, nCutoffGroups_,
-                                      getAtomStorageLayout(),
-				      getRigidBodyStorageLayout(),
-				      getCutoffGroupStorageLayout(), usePBC_);
+    Snapshot* snapshot = new Snapshot(
+        nAtoms_, nRigidBodies_, nCutoffGroups_, getAtomStorageLayout(),
+        getRigidBodyStorageLayout(), getCutoffGroupStorageLayout(), usePBC_);
     snapshot->setID(frame);
     snapshot->clearDerivedProperties();
-    
+
     currentSnapshot_ = snapshot;
     reader_->readFrame(frame);
 

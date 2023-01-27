@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -65,38 +64,44 @@ struct ParameterTraits;
 // string
 template<>
 struct ParameterTraits<std::string> {
-  typedef std::string RepType;  // Representation type of the value
+  using RepType = std::string;  // Representation type of the value
 
   template<typename T>
-  static bool convert(T v, RepType& r) {
+  static bool convert(T, RepType&) {
     return false;
   }  // !NB everything is ok
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(RepType v, RepType& r) {
     r = v;
     return true;
   }
+
   static std::string getParamType() { return "string"; }
 };
 // bool
 template<>
 struct ParameterTraits<bool> {
-  typedef bool RepType;
+  using RepType = bool;
+
   template<typename T>
   static bool convert(T, RepType&) {
     return false;
   }
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(std::string v, RepType& r) {
     OpenMD::toLower(v);
     bool result = false;
@@ -110,102 +115,122 @@ struct ParameterTraits<bool> {
 
     return result;
   }
+
   static std::string getParamType() { return "bool"; }
 };
 
 // int
 template<>
 struct ParameterTraits<int> {
-  typedef int RepType;
+  using RepType = int;
+
   template<typename T>
   static bool convert(T, RepType&) {
     return false;
   }
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(RepType v, RepType& r) {
     r = v;
     return true;
   }
+
   static std::string getParamType() { return "int"; }
 };
 
 // int
 template<>
 struct ParameterTraits<unsigned long int> {
-  typedef unsigned long int RepType;
+  using RepType = unsigned long int;
+
   template<typename T>
   static bool convert(T, RepType&) {
     return false;
   }
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(RepType v, RepType& r) {
     r = v;
     return true;
   }
+
   static bool convert(int v, RepType& r) {
     r = static_cast<unsigned long int>(v);
     return true;
   }
+
   static std::string getParamType() { return "unsigned long int"; }
 };
 
 // RealType
 template<>
 struct ParameterTraits<RealType> {
-  typedef RealType RepType;
+  using RepType = RealType;
+
   template<typename T>
   static bool convert(T, RepType&) {
     return false;
   }
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(RepType v, RepType& r) {
     r = v;
     return true;
   }
+
   static bool convert(int v, RepType& r) {
     r = static_cast<RealType>(v);
     return true;
   }
+
   static bool convert(unsigned long int v, RepType& r) {
     r = static_cast<RealType>(v);
     return true;
   }
+
   static std::string getParamType() { return "RealType"; }
 };
 
 // Pair of ints
 template<>
 struct ParameterTraits<std::pair<int, int>> {
-  typedef std::pair<int, int> RepType;
+  using RepType = std::pair<int, int>;
+
   template<typename T>
   static bool convert(T, RepType&) {
     return false;
   }
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(RepType v, RepType& r) {
     r = v;
     return true;
   }
+
   static bool convert(std::string v, RepType& r) {
     OpenMD::StringTokenizer tokenizer(v, " ;,\t\n\r");
     if (tokenizer.countTokens() == 2) {
@@ -223,26 +248,31 @@ struct ParameterTraits<std::pair<int, int>> {
     }
     return false;
   }
+
   static std::string getParamType() { return "std::pair<int, int>"; }
 };
 
 template<>
 struct ParameterTraits<std::vector<RealType>> {
-  typedef std::vector<RealType> RepType;
+  using RepType = std::vector<RealType>;
+
   template<typename T>
   static bool convert(T, RepType&) {
     return false;
   }
+
   template<typename T>
   static RepType convert(T v) {
     RepType tmp;
     convert(v, tmp);
     return tmp;
   }
+
   static bool convert(RepType v, RepType& r) {
     r = v;
     return true;
   }
+
   static bool convert(std::string v, RepType& r) {
     std::cerr << "calling tokenizer\n";
     OpenMD::StringTokenizer tokenizer(v, " ();,\t\n\r");
@@ -254,6 +284,7 @@ struct ParameterTraits<std::vector<RealType>> {
     }
     return true;
   }
+
   static std::string getParamType() { return "std::vector<RealType>"; }
 };
 
@@ -287,7 +318,8 @@ protected:
 template<class ParamType>
 class Parameter : public ParameterBase {
 public:
-  typedef ParameterTraits<ParamType> ValueType;
+  using ValueType = ParameterTraits<ParamType>;
+
   void setDefaultValue(const ParamType& value) {
     data_         = value;
     defaultValue_ = true;
@@ -367,17 +399,17 @@ public:                                       \
   parameters_.insert(std::map<std::string, ParameterBase*>::value_type(      \
       std::string(KEYWORD), static_cast<ParameterBase*>(&NAME)));
 
-#define CheckParameter(NAME, CONSTRAINT)                                \
-  if (!NAME.empty()) {                                                  \
-    if (!(CONSTRAINT)(NAME.getData())) {                                \
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,               \
-               "Error in checking %s : should be %s\n",                 \
-               NAME.getKeyword().c_str(),                               \
-               (CONSTRAINT).getConstraintDescription().c_str());        \
-      painCave.isFatal  = 1;                                            \
-      painCave.severity = OPENMD_ERROR;                                 \
-      simError();                                                       \
-    }                                                                   \
+#define CheckParameter(NAME, CONSTRAINT)                         \
+  if (!NAME.empty()) {                                           \
+    if (!(CONSTRAINT)(NAME.getData())) {                         \
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,        \
+               "Error in checking %s : should be %s\n",          \
+               NAME.getKeyword().c_str(),                        \
+               (CONSTRAINT).getConstraintDescription().c_str()); \
+      painCave.isFatal  = 1;                                     \
+      painCave.severity = OPENMD_ERROR;                          \
+      simError();                                                \
+    }                                                            \
   }
 
 #endif

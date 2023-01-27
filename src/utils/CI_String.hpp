@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -51,61 +50,59 @@
 #include <iostream>
 #include <string>
 
-namespace OpenMD {
-  namespace Utils {
+namespace OpenMD::Utils {
 
-    struct ci_char_traits : public std::char_traits<char> {
-      static int compare(const char* s1_, const char* s2_,
-                         std::size_t count_) noexcept {
-        while (count_-- != 0) {
-          if (std::toupper(*s1_) < std::toupper(*s2_)) return -1;
-          if (std::toupper(*s1_) > std::toupper(*s2_)) return 1;
+  struct ci_char_traits : public std::char_traits<char> {
+    static int compare(const char* s1_, const char* s2_,
+                       std::size_t count_) noexcept {
+      while (count_-- != 0) {
+        if (std::toupper(*s1_) < std::toupper(*s2_)) return -1;
+        if (std::toupper(*s1_) > std::toupper(*s2_)) return 1;
 
-          ++s1_;
-          ++s2_;
-        }
-
-        return 0;
+        ++s1_;
+        ++s2_;
       }
 
-      static const char* find(const char* p_, std::size_t count_,
-                              const char& ch_) noexcept {
-        const auto CH {std::toupper(ch_)};
-
-        while (count_-- != 0) {
-          if (std::toupper(*p_) == CH) return p_;
-
-          ++p_;
-        }
-
-        return nullptr;
-      }
-
-      static bool eq(char a, char b) noexcept {
-        return std::toupper(a) == std::toupper(b);
-      }
-
-      static bool lt(char a, char b) noexcept {
-        return std::toupper(a) < std::toupper(b);
-      }
-    };
-
-    template<class OutputTraits, class InputTraits>
-    inline std::basic_string<char, OutputTraits> traits_cast(
-        const std::basic_string<char, InputTraits>& input) noexcept {
-      std::basic_string<char, OutputTraits> ouput {input.data(), input.size()};
-      return ouput;
+      return 0;
     }
 
-    inline std::ostream& operator<<(
-        std::ostream& os, const std::basic_string<char, ci_char_traits>& str) {
-      os << str.c_str();
-      return os;
+    static const char* find(const char* p_, std::size_t count_,
+                            const char& ch_) noexcept {
+      const auto CH {std::toupper(ch_)};
+
+      while (count_-- != 0) {
+        if (std::toupper(*p_) == CH) return p_;
+
+        ++p_;
+      }
+
+      return nullptr;
     }
 
-    // Type alias for case-insensitive strings
-    using ci_string = std::basic_string<char, ci_char_traits>;
-  }  // namespace Utils
-}  // namespace OpenMD
+    static bool eq(char a, char b) noexcept {
+      return std::toupper(a) == std::toupper(b);
+    }
+
+    static bool lt(char a, char b) noexcept {
+      return std::toupper(a) < std::toupper(b);
+    }
+  };
+
+  template<class OutputTraits, class InputTraits>
+  inline std::basic_string<char, OutputTraits> traits_cast(
+      const std::basic_string<char, InputTraits>& input) noexcept {
+    std::basic_string<char, OutputTraits> ouput {input.data(), input.size()};
+    return ouput;
+  }
+
+  inline std::ostream& operator<<(
+      std::ostream& os, const std::basic_string<char, ci_char_traits>& str) {
+    os << str.c_str();
+    return os;
+  }
+
+  // Type alias for case-insensitive strings
+  using ci_string = std::basic_string<char, ci_char_traits>;
+}  // namespace OpenMD::Utils
 
 #endif

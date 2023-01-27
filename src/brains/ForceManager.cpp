@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -53,6 +52,7 @@
 #include "brains/ForceManager.hpp"
 
 #define __OPENMD_C
+
 #include <cstdio>
 #include <iomanip>
 #include <iostream>
@@ -136,8 +136,8 @@ namespace OpenMD {
     // We need the list of simulated atom types to figure out cutoffs
     // as well as long range corrections.
 
-    set<AtomType*>::iterator i;
-    set<AtomType*> atomTypes_;
+    AtomTypeSet::iterator i;
+    AtomTypeSet atomTypes_;
     atomTypes_ = info_->getSimulatedAtomTypes();
 
     if (simParams_->haveCutoffRadius()) {
@@ -145,10 +145,10 @@ namespace OpenMD {
     } else {
       if (info_->usesElectrostaticAtoms()) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "ForceManager::setupCutoffs: No value was set for the "
-                "cutoffRadius.\n"
-                "\tOpenMD will use a default value of 12.0 angstroms"
-                "\tfor the cutoffRadius.\n");
+                 "ForceManager::setupCutoffs: No value was set for the "
+                 "cutoffRadius.\n"
+                 "\tOpenMD will use a default value of 12.0 angstroms"
+                 "\tfor the cutoffRadius.\n");
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;
         simError();
@@ -160,10 +160,10 @@ namespace OpenMD {
           rCut_   = max(thisCut, rCut_);
         }
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "ForceManager::setupCutoffs: No value was set for the "
-                "cutoffRadius.\n"
-                "\tOpenMD will use %lf angstroms.\n",
-                rCut_);
+                 "ForceManager::setupCutoffs: No value was set for the "
+                 "cutoffRadius.\n"
+                 "\tOpenMD will use %lf angstroms.\n",
+                 rCut_);
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;
         simError();
@@ -188,12 +188,12 @@ namespace OpenMD {
       i = stringToCutoffMethod.find(cutMeth);
       if (i == stringToCutoffMethod.end()) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "ForceManager::setupCutoffs: Could not find chosen "
-                "cutoffMethod %s\n"
-                "\tShould be one of: "
-                "HARD, SWITCHED, SHIFTED_POTENTIAL, TAYLOR_SHIFTED,\n"
-                "\tSHIFTED_FORCE, or EWALD_FULL\n",
-                cutMeth.c_str());
+                 "ForceManager::setupCutoffs: Could not find chosen "
+                 "cutoffMethod %s\n"
+                 "\tShould be one of: "
+                 "HARD, SWITCHED, SHIFTED_POTENTIAL, TAYLOR_SHIFTED,\n"
+                 "\tSHIFTED_FORCE, or EWALD_FULL\n",
+                 cutMeth.c_str());
         painCave.isFatal  = 1;
         painCave.severity = OPENMD_ERROR;
         simError();
@@ -202,9 +202,10 @@ namespace OpenMD {
       }
     } else {
       if (mdFileVersion > 1) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "ForceManager::setupCutoffs: No value was set "
-                                 "for the cutoffMethod.\n"
-                                 "\tOpenMD will use SHIFTED_FORCE.\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "ForceManager::setupCutoffs: No value was set "
+                 "for the cutoffMethod.\n"
+                 "\tOpenMD will use SHIFTED_FORCE.\n");
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;
         simError();
@@ -215,12 +216,12 @@ namespace OpenMD {
         // from other data).
 
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "ForceManager::setupCutoffs : DEPRECATED FILE FORMAT!\n"
-                "\tOpenMD found a file which does not set a cutoffMethod.\n"
-                "\tOpenMD will attempt to deduce a cutoffMethod using the\n"
-                "\tbehavior of the older (version 1) code.  To remove this\n"
-                "\twarning, add an explicit cutoffMethod and change the top\n"
-                "\tof the file so that it begins with <OpenMD version=2>\n");
+                 "ForceManager::setupCutoffs : DEPRECATED FILE FORMAT!\n"
+                 "\tOpenMD found a file which does not set a cutoffMethod.\n"
+                 "\tOpenMD will attempt to deduce a cutoffMethod using the\n"
+                 "\tbehavior of the older (version 1) code.  To remove this\n"
+                 "\twarning, add an explicit cutoffMethod and change the top\n"
+                 "\tof the file so that it begins with <OpenMD version=2>\n");
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_WARNING;
         simError();
@@ -250,11 +251,11 @@ namespace OpenMD {
               myMethod == "TAYLOR_SHIFTED" || myMethod == "EWALD_FULL") {
             if (simParams_->haveSwitchingRadius()) {
               snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                      "ForceManager::setupCutoffs : DEPRECATED ERROR MESSAGE\n"
-                      "\tA value was set for the switchingRadius\n"
-                      "\teven though the electrostaticSummationMethod was\n"
-                      "\tset to %s\n",
-                      myMethod.c_str());
+                       "ForceManager::setupCutoffs : DEPRECATED ERROR MESSAGE\n"
+                       "\tA value was set for the switchingRadius\n"
+                       "\teven though the electrostaticSummationMethod was\n"
+                       "\tset to %s\n",
+                       myMethod.c_str());
               painCave.severity = OPENMD_WARNING;
               painCave.isFatal  = 1;
               simError();
@@ -263,20 +264,20 @@ namespace OpenMD {
           if (abs(rCut_ - rSwitch_) < 0.0001) {
             if (cutoffMethod_ == SHIFTED_FORCE) {
               snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                      "ForceManager::setupCutoffs : DEPRECATED BEHAVIOR\n"
-                      "\tcutoffRadius and switchingRadius are set to the\n"
-                      "\tsame value.  OpenMD will use shifted force\n"
-                      "\tpotentials instead of switching functions.\n");
+                       "ForceManager::setupCutoffs : DEPRECATED BEHAVIOR\n"
+                       "\tcutoffRadius and switchingRadius are set to the\n"
+                       "\tsame value.  OpenMD will use shifted force\n"
+                       "\tpotentials instead of switching functions.\n");
               painCave.isFatal  = 0;
               painCave.severity = OPENMD_WARNING;
               simError();
             } else {
               cutoffMethod_ = SHIFTED_POTENTIAL;
               snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                      "ForceManager::setupCutoffs : DEPRECATED BEHAVIOR\n"
-                      "\tcutoffRadius and switchingRadius are set to the\n"
-                      "\tsame value.  OpenMD will use shifted potentials\n"
-                      "\tinstead of switching functions.\n");
+                       "ForceManager::setupCutoffs : DEPRECATED BEHAVIOR\n"
+                       "\tcutoffRadius and switchingRadius are set to the\n"
+                       "\tsame value.  OpenMD will use shifted potentials\n"
+                       "\tinstead of switching functions.\n");
               painCave.isFatal  = 0;
               painCave.severity = OPENMD_WARNING;
               simError();
@@ -295,9 +296,9 @@ namespace OpenMD {
         rSwitch_ = simParams_->getSwitchingRadius();
         if (rSwitch_ > rCut_) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "ForceManager::setupCutoffs: switchingRadius (%f) is larger "
-                  "than the cutoffRadius(%f)\n",
-                  rSwitch_, rCut_);
+                   "ForceManager::setupCutoffs: switchingRadius (%f) is larger "
+                   "than the cutoffRadius(%f)\n",
+                   rSwitch_, rCut_);
           painCave.isFatal  = 1;
           painCave.severity = OPENMD_ERROR;
           simError();
@@ -305,12 +306,12 @@ namespace OpenMD {
       } else {
         rSwitch_ = 0.85 * rCut_;
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "ForceManager::setupCutoffs: No value was set for the "
-                "switchingRadius.\n"
-                "\tOpenMD will use a default value of 85 percent of the "
-                "cutoffRadius.\n"
-                "\tswitchingRadius = %f. for this simulation\n",
-                rSwitch_);
+                 "ForceManager::setupCutoffs: No value was set for the "
+                 "switchingRadius.\n"
+                 "\tOpenMD will use a default value of 85 percent of the "
+                 "cutoffRadius.\n"
+                 "\tswitchingRadius = %f. for this simulation\n",
+                 rSwitch_);
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_WARNING;
         simError();
@@ -330,10 +331,10 @@ namespace OpenMD {
             }
           }
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "ForceManager::setupCutoffs: the cutoffMethod (%s)\n"
-                  "\tis not set to SWITCHED, so switchingRadius value\n"
-                  "\twill be ignored for this simulation\n",
-                  theMeth.c_str());
+                   "ForceManager::setupCutoffs: the cutoffMethod (%s)\n"
+                   "\tis not set to SWITCHED, so switchingRadius value\n"
+                   "\twill be ignored for this simulation\n",
+                   theMeth.c_str());
           painCave.isFatal  = 0;
           painCave.severity = OPENMD_WARNING;
           simError();
@@ -354,13 +355,14 @@ namespace OpenMD {
           sft_ = fifth_order_poly;
         } else {
           // throw error
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
-                   "ForceManager::setupSwitching : Unknown switchingFunctionType. "
-                   "(Input "
-                   "file specified %s .)\n"
-                   "\tswitchingFunctionType must be one of: "
-                   "\"cubic\" or \"fifth_order_polynomial\".",
-                   funcType.c_str());
+          snprintf(
+              painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+              "ForceManager::setupSwitching : Unknown switchingFunctionType. "
+              "(Input "
+              "file specified %s .)\n"
+              "\tswitchingFunctionType must be one of: "
+              "\"cubic\" or \"fifth_order_polynomial\".",
+              funcType.c_str());
           painCave.isFatal  = 1;
           painCave.severity = OPENMD_ERROR;
           simError();
@@ -413,9 +415,9 @@ namespace OpenMD {
           }
         } else {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "ForceManager::initialize : useSurfaceTerm was set true\n"
-                  "\tbut no electrostatic atoms are present. OpenMD will\n"
-                  "\tignore this setting.\n");
+                   "ForceManager::initialize : useSurfaceTerm was set true\n"
+                   "\tbut no electrostatic atoms are present. OpenMD will\n"
+                   "\tignore this setting.\n");
           painCave.isFatal  = 0;
           painCave.severity = OPENMD_WARNING;
           simError();
@@ -547,12 +549,12 @@ namespace OpenMD {
     snap->setInversionPotential(0.0);
 
     potVec zeroPot(0.0);
-    snap->setLongRangePotential(zeroPot);
+    snap->setLongRangePotentials(zeroPot);
 
     snap->setExcludedPotentials(zeroPot);
     if (doPotentialSelection_) snap->setSelectionPotentials(zeroPot);
 
-    snap->setSelfPotential(0.0);
+    snap->setSelfPotentials(0.0);
     snap->setRestraintPotential(0.0);
     snap->setRawPotential(0.0);
 
@@ -599,7 +601,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     Molecule::BondIterator bondIter;
-    ;
+
     Molecule::BendIterator bendIter;
     Molecule::TorsionIterator torsionIter;
     Molecule::InversionIterator inversionIter;
@@ -1051,10 +1053,10 @@ namespace OpenMD {
     fDecomp_->collectSelfData();
 
     longRangePotential = fDecomp_->getPairwisePotential();
-    curSnapshot->setLongRangePotential(longRangePotential);
+    curSnapshot->setLongRangePotentials(longRangePotential);
 
     selfPotential = fDecomp_->getSelfPotential();
-    curSnapshot->setSelfPotential(selfPotential);
+    curSnapshot->setSelfPotentials(selfPotential);
 
     curSnapshot->setExcludedPotentials(fDecomp_->getExcludedSelfPotential() +
                                        fDecomp_->getExcludedPotential());
@@ -1100,8 +1102,8 @@ namespace OpenMD {
         RealType Elrc(0.0);
         RealType Wlrc(0.0);
 
-        set<AtomType*>::iterator i;
-        set<AtomType*>::iterator j;
+        AtomTypeSet::iterator i;
+        AtomTypeSet::iterator j;
 
         RealType n_i, n_j;
         RealType rho_i, rho_j;
@@ -1160,7 +1162,7 @@ namespace OpenMD {
     snap->setInversionPotential(0.0);
 
     potVec zeroPot(0.0);
-    snap->setLongRangePotential(zeroPot);
+    snap->setLongRangePotentials(zeroPot);
     snap->setExcludedPotentials(zeroPot);
     if (doPotentialSelection_) snap->setSelectionPotentials(zeroPot);
 
@@ -1217,7 +1219,6 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     Molecule::BondIterator bondIter;
-    ;
     Molecule::BendIterator bendIter;
     Molecule::TorsionIterator torsionIter;
     Molecule::InversionIterator inversionIter;
@@ -1776,10 +1777,10 @@ namespace OpenMD {
     fDecomp_->collectSelfData();
 
     longRangePotential = fDecomp_->getPairwisePotential();
-    curSnapshot->setLongRangePotential(longRangePotential);
+    curSnapshot->setLongRangePotentials(longRangePotential);
 
     selfPotential = fDecomp_->getSelfPotential();
-    curSnapshot->setSelfPotential(selfPotential);
+    curSnapshot->setSelfPotentials(selfPotential);
 
     curSnapshot->setExcludedPotentials(fDecomp_->getExcludedSelfPotential() +
                                        fDecomp_->getExcludedPotential());
@@ -1828,8 +1829,8 @@ namespace OpenMD {
         RealType Elrc(0.0);
         RealType Wlrc(0.0);
 
-        set<AtomType*>::iterator i;
-        set<AtomType*>::iterator j;
+        AtomTypeSet::iterator i;
+        AtomTypeSet::iterator j;
 
         RealType n_i, n_j;
         RealType rho_i, rho_j;

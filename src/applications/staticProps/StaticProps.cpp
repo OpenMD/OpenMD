@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -60,6 +59,7 @@
 #include "applications/staticProps/GofRZ.hpp"
 #include "applications/staticProps/GofXyz.hpp"
 #include "applications/staticProps/GofZ.hpp"
+#include "applications/staticProps/KirkwoodBuff.hpp"
 #include "applications/staticProps/NanoLength.hpp"
 #include "applications/staticProps/NanoVolume.hpp"
 #include "applications/staticProps/ObjectCount.hpp"
@@ -74,7 +74,6 @@
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
-#include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
 #include "applications/staticProps/Hxy.hpp"
@@ -82,8 +81,8 @@
 #include "applications/staticProps/AngleR.hpp"
 #include "applications/staticProps/ChargeDensityZ.hpp"
 #include "applications/staticProps/ChargeHistogram.hpp"
-#include "applications/staticProps/ChargeZ.hpp"
 #include "applications/staticProps/ChargeR.hpp"
+#include "applications/staticProps/ChargeZ.hpp"
 #include "applications/staticProps/CoordinationNumber.hpp"
 #include "applications/staticProps/CurrentDensity.hpp"
 #include "applications/staticProps/DensityHistogram.hpp"
@@ -95,8 +94,8 @@
 #include "applications/staticProps/MomentumHistogram.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
-#include "applications/staticProps/NumberZ.hpp"
 #include "applications/staticProps/NumberR.hpp"
+#include "applications/staticProps/NumberZ.hpp"
 #include "applications/staticProps/OrderParameterProbZ.hpp"
 #include "applications/staticProps/PositionZ.hpp"
 #include "applications/staticProps/PotDiff.hpp"
@@ -106,9 +105,9 @@
 #include "applications/staticProps/TetrahedralityHBMatrix.hpp"
 #include "applications/staticProps/TetrahedralityParam.hpp"
 #include "applications/staticProps/TetrahedralityParamDens.hpp"
+#include "applications/staticProps/TetrahedralityParamR.hpp"
 #include "applications/staticProps/TetrahedralityParamXYZ.hpp"
 #include "applications/staticProps/TetrahedralityParamZ.hpp"
-#include "applications/staticProps/TetrahedralityParamR.hpp"
 #include "applications/staticProps/VelocityZ.hpp"
 
 using namespace OpenMD;
@@ -165,7 +164,7 @@ int main(int argc, char* argv[]) {
   // requested by the user
 
   if (args_info.comsele_given) comsele = args_info.comsele_arg;
-  
+
   bool batchMode(false);
   if (args_info.scd_given) {
     if (args_info.sele1_given && args_info.sele2_given &&
@@ -175,16 +174,18 @@ int main(int argc, char* argv[]) {
                args_info.end_given) {
       if (args_info.begin_arg < 0 || args_info.end_arg < 0 ||
           args_info.begin_arg > args_info.end_arg - 2) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "below conditions are not satisfied:\n"
-                                 "0 <= begin && 0<= end && begin <= end-2\n");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "below conditions are not satisfied:\n"
+                 "0 <= begin && 0<= end && begin <= end-2\n");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
       }
       batchMode = true;
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "either --sele1, --sele2, --sele3 are specified,"
-                               " or --molname, --begin, --end are specified\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "either --sele1, --sele2, --sele3 are specified,"
+               " or --molname, --begin, --end are specified\n");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -292,62 +293,76 @@ int main(int argc, char* argv[]) {
   std::unique_ptr<StaticAnalyser> analyser {nullptr};
 
   if (args_info.gofr_given) {
-    analyser = Utils::make_unique<GofR>(info, dumpFileName, sele1, sele2,
-                                        maxLen, nrbins);
+    analyser = std::make_unique<GofR>(info, dumpFileName, sele1, sele2, maxLen,
+                                      nrbins);
   } else if (args_info.gofz_given) {
     analyser =
-        Utils::make_unique<GofZ>(info, dumpFileName, sele1, sele2, maxLen,
-                                 zmaxLen, args_info.nbins_arg, privilegedAxis);
+        std::make_unique<GofZ>(info, dumpFileName, sele1, sele2, maxLen,
+                               zmaxLen, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.r_z_given) {
-    analyser = Utils::make_unique<GofRZ>(info, dumpFileName, sele1, sele2,
-                                         maxLen, zmaxLen, nrbins,
-                                         args_info.nbins_z_arg, privilegedAxis);
+    analyser = std::make_unique<GofRZ>(info, dumpFileName, sele1, sele2, maxLen,
+                                       zmaxLen, nrbins, args_info.nbins_z_arg,
+                                       privilegedAxis);
   } else if (args_info.r_theta_given) {
     if (args_info.sele3_given)
-      analyser = Utils::make_unique<GofRTheta>(
-          info, dumpFileName, sele1, sele2, sele3, maxLen, nrbins, nanglebins);
+      analyser = std::make_unique<GofRTheta>(info, dumpFileName, sele1, sele2,
+                                             sele3, maxLen, nrbins, nanglebins);
     else
-      analyser = Utils::make_unique<GofRTheta>(info, dumpFileName, sele1, sele2,
-                                               maxLen, nrbins, nanglebins);
+      analyser = std::make_unique<GofRTheta>(info, dumpFileName, sele1, sele2,
+                                             maxLen, nrbins, nanglebins);
   } else if (args_info.r_omega_given) {
     if (args_info.sele3_given)
-      analyser = Utils::make_unique<GofROmega>(
-          info, dumpFileName, sele1, sele2, sele3, maxLen, nrbins, nanglebins);
+      analyser = std::make_unique<GofROmega>(info, dumpFileName, sele1, sele2,
+                                             sele3, maxLen, nrbins, nanglebins);
     else
-      analyser = Utils::make_unique<GofROmega>(info, dumpFileName, sele1, sele2,
-                                               maxLen, nrbins, nanglebins);
+      analyser = std::make_unique<GofROmega>(info, dumpFileName, sele1, sele2,
+                                             maxLen, nrbins, nanglebins);
   } else if (args_info.theta_omega_given) {
     if (args_info.sele3_given)
-      analyser = Utils::make_unique<GofAngle2>(info, dumpFileName, sele1, sele2,
-                                               sele3, nanglebins);
+      analyser = std::make_unique<GofAngle2>(info, dumpFileName, sele1, sele2,
+                                             sele3, nanglebins);
     else
-      analyser = Utils::make_unique<GofAngle2>(info, dumpFileName, sele1, sele2,
-                                               nanglebins);
+      analyser = std::make_unique<GofAngle2>(info, dumpFileName, sele1, sele2,
+                                             nanglebins);
   } else if (args_info.r_theta_omega_given) {
     if (args_info.sele3_given)
-      analyser = Utils::make_unique<GofRAngle2>(
+      analyser = std::make_unique<GofRAngle2>(
           info, dumpFileName, sele1, sele2, sele3, maxLen, nrbins, nanglebins);
     else
-      analyser = Utils::make_unique<GofRAngle2>(
-          info, dumpFileName, sele1, sele2, maxLen, nrbins, nanglebins);
+      analyser = std::make_unique<GofRAngle2>(info, dumpFileName, sele1, sele2,
+                                              maxLen, nrbins, nanglebins);
   } else if (args_info.gxyz_given) {
     if (args_info.refsele_given) {
-      analyser = Utils::make_unique<GofXyz>(info, dumpFileName, sele1, sele2,
-                                            args_info.refsele_arg, maxLen,
-                                            args_info.nbins_arg);
+      analyser = std::make_unique<GofXyz>(info, dumpFileName, sele1, sele2,
+                                          args_info.refsele_arg, maxLen,
+                                          args_info.nbins_arg);
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "--refsele must set when --gxyz is used");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "--refsele must set when --gxyz is used");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.twodgofr_given) {
     if (args_info.dz_given) {
-      analyser = Utils::make_unique<TwoDGofR>(info, dumpFileName, sele1, sele2,
-                                              maxLen, args_info.dz_arg, nrbins);
+      analyser = std::make_unique<TwoDGofR>(info, dumpFileName, sele1, sele2,
+                                            maxLen, args_info.dz_arg, nrbins);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A slab width (dz) must be specified when calculating TwoDGofR");
+               "A slab width (dz) must be specified when calculating TwoDGofR");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+  } else if (args_info.kirkwood_buff_given) {
+    if (args_info.sele1_given && args_info.sele2_given) {
+      analyser = std::make_unique<KirkwoodBuff>(info, dumpFileName, sele1,
+                                                sele2, maxLen, nrbins);
+    } else {
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "Two selection scripts (--sele1 and --sele2) must be specified when "
+          "calculating Kirkwood Buff integrals");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -355,65 +370,65 @@ int main(int argc, char* argv[]) {
   } else if (args_info.p2_given) {
     if (args_info.sele1_given) {
       if (args_info.sele2_given) {
-        analyser = Utils::make_unique<P2OrderParameter>(info, dumpFileName,
-                                                        sele1, sele2);
+        analyser = std::make_unique<P2OrderParameter>(info, dumpFileName, sele1,
+                                                      sele2);
       } else if (args_info.seleoffset_given) {
-        analyser = Utils::make_unique<P2OrderParameter>(
-            info, dumpFileName, sele1, args_info.seleoffset_arg);
+        analyser = std::make_unique<P2OrderParameter>(info, dumpFileName, sele1,
+                                                      args_info.seleoffset_arg);
       } else {
         analyser =
-            Utils::make_unique<P2OrderParameter>(info, dumpFileName, sele1);
+            std::make_unique<P2OrderParameter>(info, dumpFileName, sele1);
       }
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "At least one selection script (--sele1) must be specified when "
-              "calculating P2 order parameters");
+               "At least one selection script (--sele1) must be specified when "
+               "calculating P2 order parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.rp2_given) {
-    analyser = Utils::make_unique<RippleOP>(info, dumpFileName, sele1, sele2);
+    analyser = std::make_unique<RippleOP>(info, dumpFileName, sele1, sele2);
   } else if (args_info.bo_given) {
     if (args_info.rcut_given) {
-      analyser = Utils::make_unique<BondOrderParameter>(
+      analyser = std::make_unique<BondOrderParameter>(
           info, dumpFileName, sele1, args_info.rcut_arg, args_info.nbins_arg);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A cutoff radius (rcut) must be specified when calculating Bond "
-              "Order "
-              "Parameters");
+               "A cutoff radius (rcut) must be specified when calculating Bond "
+               "Order "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.multipole_given) {
-    analyser = Utils::make_unique<MultipoleSum>(info, dumpFileName, sele1,
-                                                maxLen, args_info.nbins_arg);
+    analyser = std::make_unique<MultipoleSum>(info, dumpFileName, sele1, maxLen,
+                                              args_info.nbins_arg);
 
   } else if (args_info.tet_param_given) {
     if (args_info.rcut_given) {
-      analyser = Utils::make_unique<TetrahedralityParam>(
+      analyser = std::make_unique<TetrahedralityParam>(
           info, dumpFileName, sele1, args_info.rcut_arg, args_info.nbins_arg);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A cutoff radius (rcut) must be specified when calculating "
-              "Tetrahedrality "
-              "Parameters");
+               "A cutoff radius (rcut) must be specified when calculating "
+               "Tetrahedrality "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.tet_param_z_given) {
     if (args_info.rcut_given) {
-      analyser = Utils::make_unique<TetrahedralityParamZ>(
+      analyser = std::make_unique<TetrahedralityParamZ>(
           info, dumpFileName, sele1, sele2, args_info.rcut_arg,
           args_info.nbins_arg, privilegedAxis);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A cutoff radius (rcut) must be specified when calculating "
-              "Tetrahedrality "
-              "Parameters");
+               "A cutoff radius (rcut) must be specified when calculating "
+               "Tetrahedrality "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -421,49 +436,49 @@ int main(int argc, char* argv[]) {
   } else if (args_info.tet_param_r_given) {
     if (args_info.rcut_given) {
       if (args_info.sele3_given) {
-        analyser = Utils::make_unique<TetrahedralityParamR>(
-            info, dumpFileName, sele1, sele2, sele3, args_info.rcut_arg,
-            maxLen, nrbins);
+        analyser = std::make_unique<TetrahedralityParamR>(
+            info, dumpFileName, sele1, sele2, sele3, args_info.rcut_arg, maxLen,
+            nrbins);
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "Selection3 (--sele3) must be given when calculating "
-                "Tetrahedrality Parameter Qk(r)");
+                 "Selection3 (--sele3) must be given when calculating "
+                 "Tetrahedrality Parameter Qk(r)");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
-      }        
+      }
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A cutoff radius (rcut) must be specified when calculating "
-              "Tetrahedrality "
-              "Parameters");
+               "A cutoff radius (rcut) must be specified when calculating "
+               "Tetrahedrality "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.tet_param_dens_given) {
     if (args_info.rcut_given) {
-      analyser = Utils::make_unique<TetrahedralityParamDens>(
+      analyser = std::make_unique<TetrahedralityParamDens>(
           info, dumpFileName, sele1, sele2, args_info.rcut_arg,
           args_info.nbins_arg);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A cutoff radius (rcut) must be specified when calculating "
-              "Tetrahedrality "
-              "Parameters");
+               "A cutoff radius (rcut) must be specified when calculating "
+               "Tetrahedrality "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.tet_hb_given) {
     if (args_info.rcut_given) {
-      analyser = Utils::make_unique<TetrahedralityHBMatrix>(
+      analyser = std::make_unique<TetrahedralityHBMatrix>(
           info, dumpFileName, sele1, args_info.rcut_arg, args_info.OOcut_arg,
           args_info.thetacut_arg, args_info.OHcut_arg, args_info.nbins_arg);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A cutoff radius (rcut) must be specified when calculating "
-              " Tetrahedrality Hydrogen Bonding Matrix");
+               "A cutoff radius (rcut) must be specified when calculating "
+               " Tetrahedrality Hydrogen Bonding Matrix");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -471,314 +486,300 @@ int main(int argc, char* argv[]) {
   } else if (args_info.tet_param_xyz_given) {
     if (!args_info.rcut_given) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A cutoff radius (rcut) must be specified when calculating"
-              " Tetrahedrality Parameters");
+               "A cutoff radius (rcut) must be specified when calculating"
+               " Tetrahedrality Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
     if (!args_info.voxelSize_given) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "A voxel size must be specified when calculating"
-                               " volume-resolved Tetrahedrality Parameters");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A voxel size must be specified when calculating"
+               " volume-resolved Tetrahedrality Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
     if (!args_info.gaussWidth_given) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A gaussian width must be specified when calculating"
-              " volume-resolved Tetrahedrality Parameters");
+               "A gaussian width must be specified when calculating"
+               " volume-resolved Tetrahedrality Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
-    analyser = Utils::make_unique<TetrahedralityParamXYZ>(
+    analyser = std::make_unique<TetrahedralityParamXYZ>(
         info, dumpFileName, sele1, sele2, args_info.rcut_arg,
         args_info.voxelSize_arg, args_info.gaussWidth_arg);
   } else if (args_info.ior_given) {
     if (args_info.rcut_given) {
-      analyser = Utils::make_unique<IcosahedralOfR>(
+      analyser = std::make_unique<IcosahedralOfR>(
           info, dumpFileName, sele1, args_info.rcut_arg, nrbins, maxLen);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A cutoff radius (rcut) must be specified when calculating Bond "
-              "Order "
-              "Parameters");
+               "A cutoff radius (rcut) must be specified when calculating Bond "
+               "Order "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.for_given) {
     if (args_info.rcut_given) {
-      analyser = Utils::make_unique<FCCOfR>(info, dumpFileName, sele1,
-                                            args_info.rcut_arg, nrbins, maxLen);
+      analyser = std::make_unique<FCCOfR>(info, dumpFileName, sele1,
+                                          args_info.rcut_arg, nrbins, maxLen);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A cutoff radius (rcut) must be specified when calculating Bond "
-              "Order "
-              "Parameters");
+               "A cutoff radius (rcut) must be specified when calculating Bond "
+               "Order "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.bad_given) {
     if (args_info.rcut_given) {
-      analyser = Utils::make_unique<BondAngleDistribution>(
+      analyser = std::make_unique<BondAngleDistribution>(
           info, dumpFileName, sele1, args_info.rcut_arg, args_info.nbins_arg);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A cutoff radius (rcut) must be specified when calculating Bond "
-              "Angle "
-              "Distributions");
+               "A cutoff radius (rcut) must be specified when calculating Bond "
+               "Angle "
+               "Distributions");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.scd_given) {
     if (batchMode) {
-      analyser = Utils::make_unique<SCDOrderParameter>(
+      analyser = std::make_unique<SCDOrderParameter>(
           info, dumpFileName, args_info.molname_arg, args_info.begin_arg,
           args_info.end_arg);
     } else {
-      analyser = Utils::make_unique<SCDOrderParameter>(info, dumpFileName,
-                                                       sele1, sele2, sele3);
+      analyser = std::make_unique<SCDOrderParameter>(info, dumpFileName, sele1,
+                                                     sele2, sele3);
     }
   } else if (args_info.density_given) {
-    analyser = Utils::make_unique<DensityPlot>(info, dumpFileName, sele1, sele2,
-                                               maxLen, args_info.nbins_arg);
+    analyser = std::make_unique<DensityPlot>(info, dumpFileName, sele1, sele2,
+                                             maxLen, args_info.nbins_arg);
   } else if (args_info.count_given) {
-    analyser = Utils::make_unique<ObjectCount>(info, dumpFileName, sele1);
+    analyser = std::make_unique<ObjectCount>(info, dumpFileName, sele1);
   } else if (args_info.slab_density_given) {
-    analyser = Utils::make_unique<RhoZ>(info, dumpFileName, sele1,
-                                        args_info.nbins_arg, privilegedAxis);
+    analyser = std::make_unique<RhoZ>(info, dumpFileName, sele1,
+                                      args_info.nbins_arg, privilegedAxis);
   } else if (args_info.eam_density_given) {
-    analyser = Utils::make_unique<DensityHistogram>(info, dumpFileName, sele1,
-                                                    args_info.nbins_arg);
+    analyser = std::make_unique<DensityHistogram>(info, dumpFileName, sele1,
+                                                  args_info.nbins_arg);
   } else if (args_info.momentum_distribution_given) {
-    analyser = Utils::make_unique<MomentumHistogram>(
+    analyser = std::make_unique<MomentumHistogram>(
         info, dumpFileName, sele1, args_info.nbins_arg, momentum_type,
         momentum_comp);
   } else if (args_info.net_charge_given) {
-    analyser = Utils::make_unique<ChargeHistogram>(info, dumpFileName, sele1,
-                                                   args_info.nbins_arg);
+    analyser = std::make_unique<ChargeHistogram>(info, dumpFileName, sele1,
+                                                 args_info.nbins_arg);
   } else if (args_info.current_density_given) {
-    analyser = Utils::make_unique<CurrentDensity>(
+    analyser = std::make_unique<CurrentDensity>(
         info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.chargez_given) {
-    analyser = Utils::make_unique<ChargeZ>(info, dumpFileName, sele1,
-                                           args_info.nbins_arg, privilegedAxis);
-  } else if (args_info.charger_given) {
-    analyser = Utils::make_unique<ChargeR>(info, dumpFileName, sele1,
-                                           maxLen, args_info.nbins_arg);
-  } else if (args_info.numberz_given) {
-    analyser = Utils::make_unique<NumberZ>(info, dumpFileName, sele1,
-                                           args_info.nbins_arg, privilegedAxis);
-  } else if (args_info.numberr_given) {
-    analyser = Utils::make_unique<NumberR>(info, dumpFileName, sele1,
-                                           maxLen, args_info.nbins_arg);
+    analyser = std::make_unique<ChargeZ>(info, dumpFileName, sele1,
+                                         args_info.nbins_arg, privilegedAxis);
   } else if (args_info.charge_density_z_given) {
-    analyser = Utils::make_unique<ChargeDensityZ>(
+    analyser = std::make_unique<ChargeDensityZ>(
         info, dumpFileName, sele1, args_info.nbins_arg, vRadius,
         args_info.atom_name_arg, args_info.gen_xyz_flag, privilegedAxis);
   } else if (args_info.countz_given) {
-    analyser = Utils::make_unique<PositionZ>(
-        info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+    analyser = std::make_unique<PositionZ>(info, dumpFileName, sele1,
+                                           args_info.nbins_arg, privilegedAxis);
   } else if (args_info.pipe_density_given) {
     switch (privilegedAxis) {
     case 0:
-      analyser = Utils::make_unique<PipeDensity>(
+      analyser = std::make_unique<PipeDensity>(
           info, dumpFileName, sele1, args_info.nbins_y_arg,
           args_info.nbins_z_arg, privilegedAxis);
       break;
     case 1:
-      analyser = Utils::make_unique<PipeDensity>(
+      analyser = std::make_unique<PipeDensity>(
           info, dumpFileName, sele1, args_info.nbins_z_arg,
           args_info.nbins_x_arg, privilegedAxis);
       break;
     case 2:
     default:
-      analyser = Utils::make_unique<PipeDensity>(
+      analyser = std::make_unique<PipeDensity>(
           info, dumpFileName, sele1, args_info.nbins_x_arg,
           args_info.nbins_y_arg, privilegedAxis);
       break;
     }
   } else if (args_info.rnemdz_given) {
-    analyser = Utils::make_unique<RNEMDZ>(info, dumpFileName, sele1,
-                                          args_info.nbins_arg, privilegedAxis);
+    analyser = std::make_unique<RNEMDZ>(info, dumpFileName, sele1,
+                                        args_info.nbins_arg, privilegedAxis);
   } else if (args_info.rnemdr_given) {
-      analyser = Utils::make_unique<RNEMDR>(info, dumpFileName, sele1, comsele,
-                                            nrbins);
+    analyser =
+        std::make_unique<RNEMDR>(info, dumpFileName, sele1, comsele, nrbins);
   } else if (args_info.rnemdrt_given) {
-    analyser = Utils::make_unique<RNEMDRTheta>(info, dumpFileName, sele1,
-                                               comsele, nrbins, nanglebins);
+    analyser = std::make_unique<RNEMDRTheta>(info, dumpFileName, sele1, comsele,
+                                             nrbins, nanglebins);
   } else if (args_info.nitrile_given) {
-    analyser = Utils::make_unique<NitrileFrequencyMap>(
-        info, dumpFileName, sele1, args_info.nbins_arg);
+    analyser = std::make_unique<NitrileFrequencyMap>(info, dumpFileName, sele1,
+                                                     args_info.nbins_arg);
   } else if (args_info.p_angle_given) {
     if (args_info.sele1_given) {
       if (args_info.sele2_given)
-        analyser = Utils::make_unique<pAngle>(info, dumpFileName, sele1, sele2,
-                                              args_info.nbins_arg);
+        analyser = std::make_unique<pAngle>(info, dumpFileName, sele1, sele2,
+                                            args_info.nbins_arg);
       else if (args_info.seleoffset_given) {
         if (args_info.seleoffset2_given) {
-          analyser = Utils::make_unique<pAngle>(
+          analyser = std::make_unique<pAngle>(
               info, dumpFileName, sele1, args_info.seleoffset_arg,
               args_info.seleoffset2_arg, args_info.nbins_arg);
         } else {
-          analyser = Utils::make_unique<pAngle>(info, dumpFileName, sele1,
-                                                args_info.seleoffset_arg,
-                                                args_info.nbins_arg);
+          analyser = std::make_unique<pAngle>(info, dumpFileName, sele1,
+                                              args_info.seleoffset_arg,
+                                              args_info.nbins_arg);
         }
       } else
-        analyser = Utils::make_unique<pAngle>(info, dumpFileName, sele1,
-                                              args_info.nbins_arg);
+        analyser = std::make_unique<pAngle>(info, dumpFileName, sele1,
+                                            args_info.nbins_arg);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "At least one selection script (--sele1) must be specified when "
-              "calculating P(angle) distributions");
+               "At least one selection script (--sele1) must be specified when "
+               "calculating P(angle) distributions");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
   } else if (args_info.hxy_given) {
-    analyser = Utils::make_unique<Hxy>(
+    analyser = std::make_unique<Hxy>(
         info, dumpFileName, sele1, args_info.nbins_x_arg, args_info.nbins_y_arg,
         args_info.nbins_z_arg, args_info.nbins_arg);
 #endif
   } else if (args_info.cn_given || args_info.scn_given || args_info.gcn_given) {
     if (args_info.rcut_given) {
       if (args_info.cn_given) {
-        analyser = Utils::make_unique<CoordinationNumber>(
+        analyser = std::make_unique<CoordinationNumber>(
             info, dumpFileName, sele1, sele2, args_info.rcut_arg,
             args_info.nbins_arg);
       } else if (args_info.scn_given) {
         analyser =
-            Utils::make_unique<SCN>(info, dumpFileName, sele1, sele2,
-                                    args_info.rcut_arg, args_info.nbins_arg);
+            std::make_unique<SCN>(info, dumpFileName, sele1, sele2,
+                                  args_info.rcut_arg, args_info.nbins_arg);
       } else if (args_info.gcn_given) {
         analyser =
-            Utils::make_unique<GCN>(info, dumpFileName, sele1, sele2,
-                                    args_info.rcut_arg, args_info.nbins_arg);
+            std::make_unique<GCN>(info, dumpFileName, sele1, sele2,
+                                  args_info.rcut_arg, args_info.nbins_arg);
       }
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A cutoff radius (rcut) must be specified when calculating\n"
-              "\t Coordination Numbers");
+               "A cutoff radius (rcut) must be specified when calculating\n"
+               "\t Coordination Numbers");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.surfDiffusion_given) {
     analyser =
-        Utils::make_unique<SurfaceDiffusion>(info, dumpFileName, sele1, maxLen);
+        std::make_unique<SurfaceDiffusion>(info, dumpFileName, sele1, maxLen);
   } else if (args_info.rho_r_given) {
     if (args_info.radius_given) {
-      analyser = Utils::make_unique<RhoR>(info, dumpFileName, sele1, maxLen,
-                                          nrbins, args_info.radius_arg);
+      analyser = std::make_unique<RhoR>(info, dumpFileName, sele1, maxLen,
+                                        nrbins, args_info.radius_arg);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "A particle radius (radius) must be specified when calculating "
-              "Rho(r)");
+               "A particle radius (radius) must be specified when calculating "
+               "Rho(r)");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
   } else if (args_info.hullvol_given) {
-    analyser = Utils::make_unique<NanoVolume>(info, dumpFileName, sele1);
+    analyser = std::make_unique<NanoVolume>(info, dumpFileName, sele1);
   } else if (args_info.rodlength_given) {
-    analyser = Utils::make_unique<NanoLength>(info, dumpFileName, sele1);
+    analyser = std::make_unique<NanoLength>(info, dumpFileName, sele1);
   } else if (args_info.angle_r_given) {
     analyser =
-        Utils::make_unique<AngleR>(info, dumpFileName, sele1, maxLen, nrbins);
-  }
-
-
-  else if (args_info.hbond_given) {
+        std::make_unique<AngleR>(info, dumpFileName, sele1, maxLen, nrbins);
+  } else if (args_info.hbond_given) {
     if (args_info.rcut_given) {
       if (args_info.thetacut_given) {
-        analyser = Utils::make_unique<HBondGeometric>(
+        analyser = std::make_unique<HBondGeometric>(
             info, dumpFileName, sele1, sele2, args_info.rcut_arg,
             args_info.thetacut_arg, args_info.nbins_arg);
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "A cutoff angle (thetacut) must be specified when calculating "
-                "Hydrogen "
-                "Bonding Statistics");
+                 "A cutoff angle (thetacut) must be specified when calculating "
+                 "Hydrogen "
+                 "Bonding Statistics");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
       }
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "A cutoff radius (rcut) must be specified when calculating Hydrogen "
           "Bonding Statistics");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
-  }
-
-   else if (args_info.hbondz_given) {
+  } else if (args_info.hbondz_given) {
     if (args_info.rcut_given) {
       if (args_info.thetacut_given) {
-        analyser = Utils::make_unique<HBondZ>(
+        analyser = std::make_unique<HBondZ>(
             info, dumpFileName, sele1, sele2, args_info.rcut_arg,
             args_info.thetacut_arg, args_info.nbins_arg);
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "A cutoff angle (thetacut) must be specified when calculating "
-                "Hydrogen "
-                "Bonding Statistics");
+                 "A cutoff angle (thetacut) must be specified when calculating "
+                 "Hydrogen "
+                 "Bonding Statistics");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
       }
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "A cutoff radius (rcut) must be specified when calculating Hydrogen "
           "Bonding Statistics");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
     }
-  }
-
-
-  else if (args_info.potDiff_given) {
-    analyser = Utils::make_unique<PotDiff>(info, dumpFileName, sele1);
+  } else if (args_info.potDiff_given) {
+    analyser = std::make_unique<PotDiff>(info, dumpFileName, sele1);
   } else if (args_info.kirkwood_given) {
-    analyser = Utils::make_unique<Kirkwood>(info, dumpFileName, sele1, sele2,
-                                            maxLen, nrbins);
+    analyser = std::make_unique<Kirkwood>(info, dumpFileName, sele1, sele2,
+                                          maxLen, nrbins);
   } else if (args_info.kirkwoodQ_given) {
-    analyser = Utils::make_unique<KirkwoodQuadrupoles>(
-        info, dumpFileName, sele1, sele2, maxLen, nrbins);
+    analyser = std::make_unique<KirkwoodQuadrupoles>(info, dumpFileName, sele1,
+                                                     sele2, maxLen, nrbins);
   } else if (args_info.densityfield_given) {
-    analyser = Utils::make_unique<DensityField>(info, dumpFileName, sele1,
-                                                args_info.voxelSize_arg);
+    analyser = std::make_unique<DensityField>(info, dumpFileName, sele1,
+                                              args_info.voxelSize_arg);
   } else if (args_info.velocityfield_given) {
-    analyser = Utils::make_unique<VelocityField>(info, dumpFileName, sele1,
-                                                 args_info.voxelSize_arg);
+    analyser = std::make_unique<VelocityField>(info, dumpFileName, sele1,
+                                               args_info.voxelSize_arg);
   } else if (args_info.velocityZ_given) {
     switch (privilegedAxis) {
     case 0:
       if (privilegedAxis2 == 1) {
-        analyser = Utils::make_unique<VelocityZ>(
+        analyser = std::make_unique<VelocityZ>(
             info, dumpFileName, sele1, args_info.nbins_x_arg,
             args_info.nbins_y_arg, privilegedAxis, privilegedAxis2);
       } else if (privilegedAxis2 == 2) {
-        analyser = Utils::make_unique<VelocityZ>(
+        analyser = std::make_unique<VelocityZ>(
             info, dumpFileName, sele1, args_info.nbins_x_arg,
             args_info.nbins_z_arg, privilegedAxis, privilegedAxis2);
       }
       break;
     case 1:
       if (privilegedAxis2 == 0) {
-        analyser = Utils::make_unique<VelocityZ>(
+        analyser = std::make_unique<VelocityZ>(
             info, dumpFileName, sele1, args_info.nbins_y_arg,
             args_info.nbins_x_arg, privilegedAxis, privilegedAxis2);
       } else if (privilegedAxis2 == 2) {
-        analyser = Utils::make_unique<VelocityZ>(
+        analyser = std::make_unique<VelocityZ>(
             info, dumpFileName, sele1, args_info.nbins_y_arg,
             args_info.nbins_z_arg, privilegedAxis, privilegedAxis2);
       }
@@ -786,11 +787,11 @@ int main(int argc, char* argv[]) {
     case 2:
     default:
       if (privilegedAxis2 == 0) {
-        analyser = Utils::make_unique<VelocityZ>(
+        analyser = std::make_unique<VelocityZ>(
             info, dumpFileName, sele1, args_info.nbins_z_arg,
             args_info.nbins_x_arg, privilegedAxis, privilegedAxis2);
       } else if (privilegedAxis2 == 1) {
-        analyser = Utils::make_unique<VelocityZ>(
+        analyser = std::make_unique<VelocityZ>(
             info, dumpFileName, sele1, args_info.nbins_z_arg,
             args_info.nbins_y_arg, privilegedAxis, privilegedAxis2);
       }
@@ -799,12 +800,13 @@ int main(int argc, char* argv[]) {
   } else if (args_info.dipole_orientation_given) {
     if (args_info.dipoleX_given && args_info.dipoleY_given &&
         args_info.dipoleZ_given)
-      analyser = Utils::make_unique<DipoleOrientation>(
+      analyser = std::make_unique<DipoleOrientation>(
           info, dumpFileName, sele1, args_info.dipoleX_arg,
           args_info.dipoleY_arg, args_info.dipoleZ_arg, args_info.nbins_arg,
-	  privilegedAxis);
+          privilegedAxis);
     else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Dipole components must be provided.");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Dipole components must be provided.");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
@@ -813,12 +815,13 @@ int main(int argc, char* argv[]) {
   } else if (args_info.order_prob_given) {
     if (args_info.dipoleX_given && args_info.dipoleY_given &&
         args_info.dipoleZ_given)
-      analyser = Utils::make_unique<OrderParameterProbZ>(
+      analyser = std::make_unique<OrderParameterProbZ>(
           info, dumpFileName, sele1, args_info.dipoleX_arg,
           args_info.dipoleY_arg, args_info.dipoleZ_arg, args_info.nbins_arg,
           privilegedAxis);
     else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Dipole components must be provided.");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Dipole components must be provided.");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

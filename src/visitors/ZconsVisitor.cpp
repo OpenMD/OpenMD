@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -51,6 +50,7 @@
 #include "primitives/Molecule.hpp"
 #include "types/ZconsStamp.hpp"
 #include "utils/StringUtils.hpp"
+
 namespace OpenMD {
 
   ZConsVisitor::ZConsVisitor(SimInfo* info) :
@@ -62,8 +62,9 @@ namespace OpenMD {
     if (simParam->haveZconsTime()) {
       zconsTime_ = simParam->getZconsTime();
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "ZConstraint error: If you use a ZConstraint,\n"
-                               "\tyou must set zconsTime.\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "ZConstraint error: If you use a ZConstraint,\n"
+               "\tyou must set zconsTime.\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -73,11 +74,11 @@ namespace OpenMD {
     } else {
       zconsTol_ = 0.01;
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-              "ZConstraint Warning: Tolerance for z-constraint method is not "
-              "specified.\n"
-              "\tOpenMD will use a default value of %f.\n"
-              "\tTo set the tolerance, use the zconsTol variable.\n",
-              zconsTol_);
+               "ZConstraint Warning: Tolerance for z-constraint method is not "
+               "specified.\n"
+               "\tOpenMD will use a default value of %f.\n"
+               "\tTo set the tolerance, use the zconsTol variable.\n",
+               zconsTol_);
       painCave.isFatal = 0;
       simError();
     }
@@ -201,7 +202,8 @@ namespace OpenMD {
     char buffer[65535];
     std::string result;
 
-    snprintf(buffer, 65535,
+    snprintf(
+        buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 
@@ -209,7 +211,7 @@ namespace OpenMD {
     result += buffer;
 
     snprintf(buffer, 65535, "number of zconstraint molecule: %d\n",
-            (int)zmolStates_.size());
+             (int)zmolStates_.size());
     result += buffer;
 
     snprintf(buffer, 65535, "zconstraint tolerance = %lf\n", zconsTol_);
@@ -219,7 +221,7 @@ namespace OpenMD {
     result += buffer;
 
     snprintf(buffer, 65535, "zconstraint output filename = %s\n",
-            zconsFilename_.c_str());
+             zconsFilename_.c_str());
     result += buffer;
 
     std::map<int, ZConsState>::iterator i;
@@ -229,7 +231,8 @@ namespace OpenMD {
       result += buffer;
     }
 
-    snprintf(buffer, 65535,
+    snprintf(
+        buffer, 65535,
         "------------------------------------------------------------------\n");
     result += buffer;
 

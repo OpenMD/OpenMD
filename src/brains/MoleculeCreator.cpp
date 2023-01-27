@@ -1,33 +1,32 @@
 /*
- * Copyright (c) 2004-2021 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2004-present, The University of Notre Dame. All rights
+ * reserved.
  *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
  * research, please cite the appropriate papers when you publish your
@@ -81,7 +80,7 @@ namespace OpenMD {
     AtomStamp* currentAtomStamp;
     size_t nAtom = molStamp->getNAtoms();
     for (size_t i = 0; i < nAtom; ++i) {
-      currentAtomStamp = molStamp->getAtomStamp(i);      
+      currentAtomStamp = molStamp->getAtomStamp(i);
       atom             = createAtom(ff, mol, currentAtomStamp, localIndexMan);
       mol->addAtom(atom);
     }
@@ -201,8 +200,8 @@ namespace OpenMD {
 
       if (!cStamp->haveConstrainedDistance()) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "Constraint Error: A non-bond constraint was specified\n"
-                "\twithout providing a value for the constrainedDistance.\n");
+                 "Constraint Error: A non-bond constraint was specified\n"
+                 "\twithout providing a value for the constrainedDistance.\n");
         painCave.isFatal = 1;
         simError();
       } else {
@@ -231,16 +230,16 @@ namespace OpenMD {
     return mol;
   }
 
-  Atom* MoleculeCreator::createAtom(ForceField* ff, Molecule* mol,
-                                    AtomStamp* stamp,
+  Atom* MoleculeCreator::createAtom(ForceField* ff, Molecule*, AtomStamp* stamp,
                                     LocalIndexManager* localIndexMan) {
     AtomType* atomType;
     Atom* atom;
 
     atomType = ff->getAtomType(stamp->getType());
     if (atomType == NULL) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Can not find Matching Atom Type for[%s]",
-              stamp->getType().c_str());
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Can not find Matching Atom Type for[%s]",
+               stamp->getType().c_str());
 
       painCave.isFatal = 1;
       simError();
@@ -256,8 +255,6 @@ namespace OpenMD {
     }
 
     atom->setLocalIndex(localIndexMan->getNextAtomIndex());
-
-    
 
     return atom;
   }
@@ -318,9 +315,9 @@ namespace OpenMD {
                                              stamp->getOverridePars());
       } catch (OpenMDException& e) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "MoleculeCreator Error: %s "
-                "for molecule %s\n",
-                e.what(), mol->getType().c_str());
+                 "MoleculeCreator Error: %s "
+                 "for molecule %s\n",
+                 e.what(), mol->getType().c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -329,8 +326,9 @@ namespace OpenMD {
       bondType = ff->getBondType(atomA->getType(), atomB->getType());
 
       if (bondType == NULL) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Can not find Matching Bond Type for[%s, %s]",
-                atomA->getType().c_str(), atomB->getType().c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Can not find Matching Bond Type for[%s, %s]",
+                 atomA->getType().c_str(), atomB->getType().c_str());
 
         painCave.isFatal = 1;
         simError();
@@ -374,9 +372,9 @@ namespace OpenMD {
                                                stamp->getOverridePars());
         } catch (OpenMDException& e) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "MoleculeCreator Error: %s "
-                  "for molecule %s\n",
-                  e.what(), mol->getType().c_str());
+                   "MoleculeCreator Error: %s "
+                   "for molecule %s\n",
+                   e.what(), mol->getType().c_str());
           painCave.isFatal = 1;
           simError();
         }
@@ -387,9 +385,9 @@ namespace OpenMD {
 
         if (bendType == NULL) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "Can not find Matching Bend Type for[%s, %s, %s]",
-                  atomA->getType().c_str(), atomB->getType().c_str(),
-                  atomC->getType().c_str());
+                   "Can not find Matching Bend Type for[%s, %s, %s]",
+                   atomA->getType().c_str(), atomB->getType().c_str(),
+                   atomC->getType().c_str());
 
           painCave.isFatal = 1;
           simError();
@@ -406,7 +404,8 @@ namespace OpenMD {
       DirectionalAtom* ghostAtom =
           dynamic_cast<DirectionalAtom*>(mol->getAtomAt(ghostIndex));
       if (ghostAtom == NULL) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Can not cast Atom to DirectionalAtom");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Can not cast Atom to DirectionalAtom");
         painCave.isFatal = 1;
         simError();
       }
@@ -417,9 +416,9 @@ namespace OpenMD {
                                                stamp->getOverridePars());
         } catch (OpenMDException& e) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "MoleculeCreator Error: %s "
-                  "for molecule %s\n",
-                  e.what(), mol->getType().c_str());
+                   "MoleculeCreator Error: %s "
+                   "for molecule %s\n",
+                   e.what(), mol->getType().c_str());
           painCave.isFatal = 1;
           simError();
         }
@@ -429,9 +428,9 @@ namespace OpenMD {
 
         if (bendType == NULL) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "Can not find Matching Bend Type for[%s, %s, %s]",
-                  normalAtom->getType().c_str(), ghostAtom->getType().c_str(),
-                  "GHOST");
+                   "Can not find Matching Bend Type for[%s, %s, %s]",
+                   normalAtom->getType().c_str(), ghostAtom->getType().c_str(),
+                   "GHOST");
 
           painCave.isFatal = 1;
           simError();
@@ -480,9 +479,9 @@ namespace OpenMD {
                                                   stamp->getOverridePars());
         } catch (OpenMDException& e) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "MoleculeCreator Error: %s "
-                  "for molecule %s\n",
-                  e.what(), mol->getType().c_str());
+                   "MoleculeCreator Error: %s "
+                   "for molecule %s\n",
+                   e.what(), mol->getType().c_str());
           painCave.isFatal = 1;
           simError();
         }
@@ -491,9 +490,9 @@ namespace OpenMD {
                                          atomC->getType(), atomD->getType());
         if (torsionType == NULL) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
-                  atomA->getType().c_str(), atomB->getType().c_str(),
-                  atomC->getType().c_str(), atomD->getType().c_str());
+                   "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
+                   atomA->getType().c_str(), atomB->getType().c_str(),
+                   atomC->getType().c_str(), atomD->getType().c_str());
 
           painCave.isFatal = 1;
           simError();
@@ -505,7 +504,8 @@ namespace OpenMD {
       DirectionalAtom* dAtom = dynamic_cast<DirectionalAtom*>(
           mol->getAtomAt(stamp->getGhostVectorSource()));
       if (dAtom == NULL) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "Can not cast Atom to DirectionalAtom");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Can not cast Atom to DirectionalAtom");
         painCave.isFatal = 1;
         simError();
       }
@@ -516,9 +516,9 @@ namespace OpenMD {
                                                   stamp->getOverridePars());
         } catch (OpenMDException& e) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "MoleculeCreator Error: %s "
-                  "for molecule %s\n",
-                  e.what(), mol->getType().c_str());
+                   "MoleculeCreator Error: %s "
+                   "for molecule %s\n",
+                   e.what(), mol->getType().c_str());
           painCave.isFatal = 1;
           simError();
         }
@@ -528,9 +528,9 @@ namespace OpenMD {
 
         if (torsionType == NULL) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                  "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
-                  atomA->getType().c_str(), atomB->getType().c_str(),
-                  atomC->getType().c_str(), "GHOST");
+                   "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
+                   atomA->getType().c_str(), atomB->getType().c_str(),
+                   atomC->getType().c_str(), "GHOST");
 
           painCave.isFatal = 1;
           simError();
@@ -579,9 +579,9 @@ namespace OpenMD {
                                                   stamp->getOverridePars());
       } catch (OpenMDException& e) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                "MoleculeCreator Error: %s "
-                "for molecule %s\n",
-                e.what(), mol->getType().c_str());
+                 "MoleculeCreator Error: %s "
+                 "for molecule %s\n",
+                 e.what(), mol->getType().c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -591,12 +591,12 @@ namespace OpenMD {
 
       if (inversionType == NULL) {
         snprintf(
-                painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, 
-                "No Matching Inversion Type for[%s, %s, %s, %s]\n"
-                "\t(May not be a problem: not all inversions are parametrized)\n",
-                atomA->getType().c_str(), atomB->getType().c_str(),
-                atomC->getType().c_str(), atomD->getType().c_str());
-        
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+            "No Matching Inversion Type for[%s, %s, %s, %s]\n"
+            "\t(May not be a problem: not all inversions are parametrized)\n",
+            atomA->getType().c_str(), atomB->getType().c_str(),
+            atomC->getType().c_str(), atomD->getType().c_str());
+
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;
         simError();
@@ -646,7 +646,7 @@ namespace OpenMD {
   }
 
   CutoffGroup* MoleculeCreator::createCutoffGroup(
-      Molecule* mol, Atom* atom, LocalIndexManager* localIndexMan) {
+      Molecule*, Atom* atom, LocalIndexManager* localIndexMan) {
     CutoffGroup* cg;
     cg = new CutoffGroup();
     cg->addAtom(atom);
