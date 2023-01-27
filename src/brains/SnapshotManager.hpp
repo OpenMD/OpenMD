@@ -89,15 +89,22 @@ namespace OpenMD {
      */
     Snapshot* getCurrentSnapshot() { return currentSnapshot_; }
 
-    int getStorageLayout() { return storageLayout_; }
+    int getAtomStorageLayout() { return atomStorageLayout_; }
+    int getRigidBodyStorageLayout() { return rigidBodyStorageLayout_; }
+    int getCutoffGroupStorageLayout() { return cutoffGroupStorageLayout_; }
 
   private:
-    int storageLayout_;
+    int atomStorageLayout_;
+    int rigidBodyStorageLayout_;
+    int cutoffGroupStorageLayout_;
 
   protected:
-    SnapshotManager(int storageLayout) :
-        storageLayout_(storageLayout), currentSnapshot_(NULL),
-        previousSnapshot_(NULL) {}
+    SnapshotManager(int atomStorageLayout, int rigidBodyStorageLayout,
+		    int cutoffGroupStorageLayout) :
+      atomStorageLayout_(atomStorageLayout),
+      rigidBodyStorageLayout_(rigidBodyStorageLayout),
+      cutoffGroupStorageLayout_(cutoffGroupStorageLayout),
+      currentSnapshot_(NULL), previousSnapshot_(NULL) {}
 
     Snapshot* currentSnapshot_;
     Snapshot* previousSnapshot_;

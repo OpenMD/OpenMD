@@ -58,7 +58,7 @@
 namespace OpenMD {
 
   BaseAtomVisitor::BaseAtomVisitor(SimInfo* info) : BaseVisitor() {
-    storageLayout_ = info->getStorageLayout();
+    storageLayout_ = info->getAtomStorageLayout();
   }
 
   void BaseAtomVisitor::visit(RigidBody* rb) {

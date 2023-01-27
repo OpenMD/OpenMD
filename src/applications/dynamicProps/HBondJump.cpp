@@ -54,10 +54,10 @@ namespace OpenMD {
   HBondJump::HBondJump(SimInfo* info, const std::string& filename,
                        const std::string& sele1, const std::string& sele2,
                        double OOcut, double thetaCut, double OHcut) :
-      TimeCorrFunc<RealType>(info, filename, sele1, sele2,
-                             DataStorage::dslPosition | DataStorage::dslAmat),
-      OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut),
-      sele1_minus_common_(info), sele2_minus_common_(info), common_(info) {
+    TimeCorrFunc<RealType>(info, filename, sele1, sele2),
+    OOCut_(OOcut), thetaCut_(thetaCut), OHCut_(OHcut),
+    sele1_minus_common_(info), sele2_minus_common_(info), common_(info) {
+    
     setCorrFuncType("HBondJump");
     setOutputName(getPrefix(dumpFilename_) + ".jump");
 

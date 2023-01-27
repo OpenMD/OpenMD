@@ -103,7 +103,7 @@ namespace OpenMD {
      * Figure out the data storage layout based on what kinds of
      * objects are being simulated
      */
-    int computeStorageLayout(SimInfo* info);
+    void computeStorageLayouts(SimInfo* info);
 
     /**
      * Sets the global index for atoms, rigidbodies and cutoff groups

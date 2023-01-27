@@ -49,8 +49,11 @@
 #include "utils/simError.h"
 namespace OpenMD {
 
-  SimSnapshotManager::SimSnapshotManager(SimInfo* info, int storageLayout) :
-      SnapshotManager(storageLayout), info_(info) {
+  SimSnapshotManager::SimSnapshotManager(SimInfo* info, int atomStorageLayout,
+					 int rigidBodyStorageLayout,
+					 int cutoffGroupStorageLayout) :
+    SnapshotManager(atomStorageLayout, rigidBodyStorageLayout,
+		    cutoffGroupStorageLayout), info_(info) {
     int nAtoms        = info_->getNAtoms();
     int nRigidBodies  = info_->getNRigidBodies();
     int nCutoffGroups = info_->getNCutoffGroups();
@@ -58,9 +61,11 @@ namespace OpenMD {
 
     // allocate memory for snapshots
     previousSnapshot_ = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
-                                     storageLayout, usePBC);
+                                     atomStorageLayout, rigidBodyStorageLayout,
+				     cutoffGroupStorageLayout, usePBC);
     currentSnapshot_  = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups,
-                                    storageLayout, usePBC);
+				     atomStorageLayout, rigidBodyStorageLayout,
+				     cutoffGroupStorageLayout, usePBC);
   }
 
   SimSnapshotManager::~SimSnapshotManager() {

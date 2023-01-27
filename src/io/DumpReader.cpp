@@ -80,7 +80,8 @@ namespace OpenMD {
           new std::ifstream(filename_.c_str(), ifstream::in | ifstream::binary);
 
       if (inFile_->fail()) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader: Cannot open file: %s\n",
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		 "DumpReader: Cannot open file: %s\n",
                 filename_.c_str());
         painCave.isFatal = 1;
         simError();
@@ -176,7 +177,8 @@ namespace OpenMD {
       // only found <Snapshot> for the last frame means the file is
       // corrupted, we should discard it and give a warning message
       if (foundOpenSnapshotTag) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader: last frame in %s is invalid\n",
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		 "DumpReader: last frame in %s is invalid\n",
                 filename_.c_str());
         painCave.isFatal = 0;
         simError();
@@ -204,19 +206,25 @@ namespace OpenMD {
   void DumpReader::readFrame(int whichFrame) {
     if (!isScanned_) scanFile();
 
-    int storageLayout = info_->getSnapshotManager()->getStorageLayout();
+    int asl = info_->getSnapshotManager()->getAtomStorageLayout();
+    int rbsl = info_->getSnapshotManager()->getRigidBodyStorageLayout();
 
-    needPos_ = (storageLayout & DataStorage::dslPosition) ? true : false;
-    needVel_ = (storageLayout & DataStorage::dslVelocity) ? true : false;
-    needQuaternion_ = (storageLayout & DataStorage::dslAmat ||
-		       storageLayout & DataStorage::dslDipole ||
-		       storageLayout & DataStorage::dslQuadrupole) ? true : false;
-    needAngMom_ = (storageLayout &
-		   DataStorage::dslAngularMomentum) ? true : false;
+    needPos_ = (asl & DataStorage::dslPosition ||
+		rbsl & DataStorage::dslPosition) ? true : false;
+    needVel_ = (asl & DataStorage::dslVelocity ||
+		rbsl & DataStorage::dslVelocity)  ? true : false;
+    needQuaternion_ = (asl & DataStorage::dslAmat ||
+		       asl & DataStorage::dslDipole ||
+		       asl & DataStorage::dslQuadrupole ||
+		       rbsl & DataStorage::dslAmat ||
+		       rbsl & DataStorage::dslDipole ||
+		       rbsl & DataStorage::dslQuadrupole) ? true : false;
+    needAngMom_ = (asl & DataStorage::dslAngularMomentum ||
+		   rbsl & DataStorage::dslAngularMomentum) ? true : false;
     
     // some dump files contain the efield, but we should only parse
     // and set the field if we have actually allocated memory for it
-    readField_ = (storageLayout &
+    readField_ = (asl &
 		  DataStorage::dslElectricField) ? true : false;
 
     readSet(whichFrame);
@@ -286,7 +294,8 @@ namespace OpenMD {
 
     line = buffer;
     if (line.find("<Snapshot>") == std::string::npos) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader Error: can not find <Snapshot>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+	       "DumpReader Error: can not find <Snapshot>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -329,7 +338,8 @@ namespace OpenMD {
     nTokens = tokenizer.countTokens();
 
     if (nTokens < 2) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader Error: Not enough Tokens.\n%s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+	       "DumpReader Error: Not enough Tokens.\n%s\n",
               line.c_str());
       painCave.isFatal = 1;
       simError();
@@ -519,7 +529,8 @@ namespace OpenMD {
     nTokens = tokenizer.countTokens();
 
     if (nTokens < 2) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader Error: Not enough Tokens.\n%s\n",
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+	       "DumpReader Error: Not enough Tokens.\n%s\n",
               line.c_str());
       painCave.isFatal = 1;
       simError();
@@ -675,7 +686,8 @@ namespace OpenMD {
     std::string line(buffer);
 
     if (line.find("<FrameData>") == std::string::npos) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader Error: Missing <FrameData>\n");
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+	       "DumpReader Error: Missing <FrameData>\n");
       painCave.isFatal = 1;
       simError();
     }
@@ -687,8 +699,9 @@ namespace OpenMD {
 
       StringTokenizer tokenizer(line, " ;\t\n\r{}:,");
       if (!tokenizer.hasMoreTokens()) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "DumpReader Error: Not enough Tokens.\n%s\n",
-                line.c_str());
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		 "DumpReader Error: Not enough Tokens.\n%s\n",
+		 line.c_str());
         painCave.isFatal = 1;
         simError();
       }

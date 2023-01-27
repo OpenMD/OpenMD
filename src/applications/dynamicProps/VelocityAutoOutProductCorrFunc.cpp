@@ -52,8 +52,8 @@ namespace OpenMD {
   VelocityAutoOutProductCorrFunc::VelocityAutoOutProductCorrFunc(
       SimInfo* info, const std::string& filename, const std::string& sele1,
       const std::string& sele2) :
-      ObjectACF<Mat3x3d>(info, filename, sele1, sele2,
-                         DataStorage::dslVelocity) {
+    ObjectACF<Mat3x3d>(info, filename, sele1, sele2) {
+    
     setCorrFuncType(
         "Velocity - Velocity Auto Outer Product Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".vaOutProdcorr");

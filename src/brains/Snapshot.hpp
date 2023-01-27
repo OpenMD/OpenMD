@@ -141,8 +141,9 @@ namespace OpenMD {
   class Snapshot {
   public:
     Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, bool usePBC);
-    Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, int storageLayout,
-             bool usePBC);
+    Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups,
+	     int atomStorageLayout, int rigidBodyStorageLayout,
+	     int cutoffGroupStorageLayout, bool usePBC);
     /** Returns the id of this Snapshot */
     int getID();
     /** Sets the id of this Snapshot */

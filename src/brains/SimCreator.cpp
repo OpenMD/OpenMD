@@ -448,11 +448,15 @@ namespace OpenMD {
 
     // find the storage layout
 
-    int storageLayout = computeStorageLayout(info);
+    computeStorageLayouts(info);
 
+    int asl = info->getAtomStorageLayout();
+    int rbsl = info->getRigidBodyStorageLayout();
+    int cgsl = info->getCutoffGroupStorageLayout();    
+    
     // allocate memory for DataStorage(circular reference, need to
     // break it)
-    info->setSnapshotManager(new SimSnapshotManager(info, storageLayout));
+    info->setSnapshotManager(new SimSnapshotManager(info, asl, rbsl, cgsl));
 
     // set the global index of atoms, rigidbodies and cutoffgroups
     //(only need to be set once, the global index will never change
@@ -666,8 +670,8 @@ namespace OpenMD {
 #endif
     }
   }
-
-  int SimCreator::computeStorageLayout(SimInfo* info) {
+  
+  void SimCreator::computeStorageLayouts(SimInfo* info) {
     Globals* simParams       = info->getSimParams();
     int nRigidBodies         = info->getNGlobalRigidBodies();
     set<AtomType*> atomTypes = info->getSimulatedAtomTypes();
@@ -679,10 +683,14 @@ namespace OpenMD {
     bool hasPolarizable       = false;
     bool hasFluctuatingCharge = false;
     bool hasMetallic          = false;
-    int storageLayout         = 0;
-    storageLayout |= DataStorage::dslPosition;
-    storageLayout |= DataStorage::dslVelocity;
-    storageLayout |= DataStorage::dslForce;
+    int atomStorageLayout        = 0;
+    int rigidBodyStorageLayout   = 0;
+    int cutoffGroupStorageLayout = 0;
+    
+    atomStorageLayout |= DataStorage::dslPosition;
+    atomStorageLayout |= DataStorage::dslVelocity;
+    atomStorageLayout |= DataStorage::dslForce;
+    cutoffGroupStorageLayout |= DataStorage::dslPosition;
 
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
       DirectionalAdapter da        = DirectionalAdapter((*i));
@@ -702,33 +710,43 @@ namespace OpenMD {
       if (pa.isPolarizable()) { hasPolarizable = true; }
     }
 
-    if (nRigidBodies > 0 || hasDirectionalAtoms) {
-      storageLayout |= DataStorage::dslAmat;
-      if (storageLayout & DataStorage::dslVelocity) {
-        storageLayout |= DataStorage::dslAngularMomentum;
+    if (nRigidBodies > 0) {
+      rigidBodyStorageLayout |= DataStorage::dslPosition;
+      rigidBodyStorageLayout |= DataStorage::dslVelocity;
+      rigidBodyStorageLayout |= DataStorage::dslForce;   
+      rigidBodyStorageLayout |= DataStorage::dslAmat;
+      rigidBodyStorageLayout |= DataStorage::dslAngularMomentum;
+      rigidBodyStorageLayout |= DataStorage::dslTorque;      
+    }
+    if (hasDirectionalAtoms) {
+      atomStorageLayout |= DataStorage::dslAmat;
+      if (atomStorageLayout & DataStorage::dslVelocity) {
+        atomStorageLayout |= DataStorage::dslAngularMomentum;
       }
-      if (storageLayout & DataStorage::dslForce) {
-        storageLayout |= DataStorage::dslTorque;
+      if (atomStorageLayout & DataStorage::dslForce) {
+        atomStorageLayout |= DataStorage::dslTorque;
       }
     }
-    if (hasDipoles) { storageLayout |= DataStorage::dslDipole; }
-    if (hasQuadrupoles) { storageLayout |= DataStorage::dslQuadrupole; }
+    if (hasDipoles) { atomStorageLayout |= DataStorage::dslDipole; }
+    if (hasQuadrupoles) { atomStorageLayout |= DataStorage::dslQuadrupole; }
     if (hasFixedCharge || hasFluctuatingCharge) {
-      storageLayout |= DataStorage::dslSkippedCharge;
+      atomStorageLayout |= DataStorage::dslSkippedCharge;
     }
     if (hasMetallic) {
-      storageLayout |= DataStorage::dslDensity;
-      storageLayout |= DataStorage::dslFunctional;
-      storageLayout |= DataStorage::dslFunctionalDerivative;
+      atomStorageLayout |= DataStorage::dslDensity;
+      atomStorageLayout |= DataStorage::dslFunctional;
+      atomStorageLayout |= DataStorage::dslFunctionalDerivative;
     }
-    if (hasPolarizable) { storageLayout |= DataStorage::dslElectricField; }
+    if (hasPolarizable) {
+      atomStorageLayout |= DataStorage::dslElectricField;
+    }
     if (hasFluctuatingCharge) {
-      storageLayout |= DataStorage::dslFlucQPosition;
-      if (storageLayout & DataStorage::dslVelocity) {
-        storageLayout |= DataStorage::dslFlucQVelocity;
+      atomStorageLayout |= DataStorage::dslFlucQPosition;
+      if (atomStorageLayout & DataStorage::dslVelocity) {
+        atomStorageLayout |= DataStorage::dslFlucQVelocity;
       }
-      if (storageLayout & DataStorage::dslForce) {
-        storageLayout |= DataStorage::dslFlucQForce;
+      if (atomStorageLayout & DataStorage::dslForce) {
+        atomStorageLayout |= DataStorage::dslFlucQForce;
       }
     }
 
@@ -736,12 +754,12 @@ namespace OpenMD {
     // objects defined.
 
     if (simParams->getOutputParticlePotential()) {
-      storageLayout |= DataStorage::dslParticlePot;
+      atomStorageLayout |= DataStorage::dslParticlePot;
     }
 
     if (simParams->havePrintHeatFlux()) {
       if (simParams->getPrintHeatFlux()) {
-        storageLayout |= DataStorage::dslParticlePot;
+        atomStorageLayout |= DataStorage::dslParticlePot;
       }
     }
 
@@ -750,30 +768,35 @@ namespace OpenMD {
         simParams->haveUniformGradientStrength() |
         simParams->haveUniformGradientDirection1() |
         simParams->haveUniformGradientDirection2()) {
-      storageLayout |= DataStorage::dslElectricField;
+      atomStorageLayout |= DataStorage::dslElectricField;
+      rigidBodyStorageLayout |= DataStorage::dslElectricField;
     }
 
     if (simParams->getRNEMDParameters()->haveUseRNEMD()) {
       if (simParams->getRNEMDParameters()->getUseRNEMD()) {
         if (simParams->getRNEMDParameters()->requiresElectricField()) {
-          storageLayout |= DataStorage::dslElectricField;
+	  atomStorageLayout |= DataStorage::dslElectricField;
+	  rigidBodyStorageLayout |= DataStorage::dslElectricField;
         }
       }
     }
 
     if (simParams->getOutputSitePotential()) {
-      storageLayout |= DataStorage::dslSitePotential;
+      atomStorageLayout |= DataStorage::dslSitePotential;
+      rigidBodyStorageLayout |= DataStorage::dslSitePotential;
     }
 
     if (simParams->getOutputFluctuatingCharges()) {
-      storageLayout |= DataStorage::dslFlucQPosition;
-      storageLayout |= DataStorage::dslFlucQVelocity;
-      storageLayout |= DataStorage::dslFlucQForce;
+      atomStorageLayout |= DataStorage::dslFlucQPosition;
+      atomStorageLayout |= DataStorage::dslFlucQVelocity;
+      atomStorageLayout |= DataStorage::dslFlucQForce;
     }
 
-    info->setStorageLayout(storageLayout);
+    info->setAtomStorageLayout(atomStorageLayout);
+    info->setRigidBodyStorageLayout(rigidBodyStorageLayout);
+    info->setCutoffGroupStorageLayout(cutoffGroupStorageLayout);
 
-    return storageLayout;
+    return;
   }
 
   void SimCreator::setGlobalIndex(SimInfo* info) {

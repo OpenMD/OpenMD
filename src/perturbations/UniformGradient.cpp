@@ -149,7 +149,7 @@ namespace OpenMD {
       }
     }
 
-    int storageLayout_ = info_->getSnapshotManager()->getStorageLayout();
+    int storageLayout_ = info_->getSnapshotManager()->getAtomStorageLayout();
     if (storageLayout_ & DataStorage::dslParticlePot) doParticlePot = true;
     initialized = true;
   }
