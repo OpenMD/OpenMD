@@ -257,33 +257,6 @@ ELSE(OPENBABEL3_FOUND)
   ENDIF(OPENBABEL2_FOUND)
 ENDIF(OPENBABEL3_FOUND)
 
-
-# option(WITH_JSON "Build JSON support" ON)
-# option(OPENMD_USE_SYSTEM_nlohmann_json "Use the system nlohmann_json if available." ON)
-# if(WITH_JSON)
-#   set(nlohmann_json_VERSION_MIN 3.10.5)
-#   # First try find system nlohmann_json
-#   if(OPENMD_USE_SYSTEM_nlohmann_json)
-#     find_package(nlohmann_json ${nlohmann_json_VERSION_MIN})
-#  endif()
-# # Otherwise download nlohmann_json to OpenMD source directory
-#  if (NOT nlohmann_json_FOUND OR nlohmann_json_VERSION VERSION_LESS ${nlohmann_json_VERSION_MIN})
-#   set(nlohmann_json_VERSION 3.11.2)
-#    if(NOT EXISTS "${openbabel_SOURCE_DIR}/external/nlohmann_json-${nlohmann_json_VERSION}")
-#      file(DOWNLOAD "https://github.com/nlohmann/json/releases/download/v${nlohmann_json_VERSION}/json.hpp"
-#        "${OPENMD_SOURCE_DIR}/external/nlohmann_json-${nlohmann_json_VERSION}/json.hpp" STATUS status)
-#      message(STATUS "Downloaded nlohmann_json to ${OPENMD_SOURCE_DIR}/external/nlohmann_json-${nlohmann_json_VERSION}.")
-#    endif()
-#    set(nlohmann_json_FOUND TRUE)
-#    set(nlohmann_json_INCLUDE_DIRS ${OPENMD_SOURCE_DIR}/external/nlohmann_json-${nlohmann_json_VERSION})
-#  endif()
-#  if(nlohmann_json_FOUND)
-#    message(STATUS "Hydro JSON formats will be supported. Using nlohmann_json ${nlohmann_json_VERSION} at ${nlohmann_json_INCLUDE_DIRS}")
-#    add_definitions(-DHAVE_NLOHMANN_JDON)
-#    include_directories(${nlohmann_json_INCLUDE_DIRS})
-#  endif()
-# endif()
-
 #Look for QHULL Libraries
 find_package(Qhull)
 IF(QHULL_FOUND)
@@ -809,6 +782,7 @@ src/applications/staticProps/KirkwoodBuff.cpp
 src/applications/staticProps/CoordinationNumber.cpp
 src/applications/staticProps/Hxy.cpp
 src/applications/staticProps/HBondGeometric.cpp
+src/applications/staticProps/HBondZ.cpp
 src/applications/staticProps/Kirkwood.cpp
 src/applications/staticProps/Field.cpp
 src/applications/staticProps/MultipoleSum.cpp
