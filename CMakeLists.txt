@@ -24,7 +24,19 @@ if (NOT nlohmann_json_FOUND)
    set(nlohmann_json_INCLUDE_DIR ${nlohmann_json_SOURCE_DIR}/include)
 endif()
 message(STATUS "Adding include for json to ${nlohmann_json_INCLUDE_DIR}")
-include_directories(${nlohmann_json_INCLUDE_DIR}) 
+include_directories(${nlohmann_json_INCLUDE_DIR})
+
+find_package(stl_reader REQUIRED)
+if (NOT stl_reader_FOUND)
+   FetchContent_Declare(stl_reader
+      GIT_REPOSITORY https://github.com/sreiter/stl_reader.git
+      GIT_TAG a878405a7b2f52b0f24e7b02b9f8ea2390b0ab04
+   )
+   FetchContent_MakeAvailable(stl_reader)
+   set(stl_reader_INCLUDE_DIR ${stl_reader_SOURCE_DIR})
+endif()
+message(STATUS "Adding include for json to ${stl_reader_INCLUDE_DIR}")
+include_directories(${stl_reader_INCLUDE_DIR}) 
 
 if (NOT NO_PARALLEL)
     if(WIN32)
@@ -1080,6 +1092,7 @@ message( STATUS "OPENBABEL_DIR .............. = ${OPENBABEL_DIR}")
 message( STATUS "OPENBABEL_INCLUDE_DIR ...... = ${OPENBABEL_INCLUDE_DIR}")
 message( STATUS "OPENBABEL_LIBRARIES ........ = ${OPENBABEL_LIBRARIES}")
 message( STATUS "nlohmann_json_INCLUDE_DIR .. = ${nlohmann_json_INCLUDE_DIR}")
+message( STATUS "stl_reader_INCLUDE_DIR ..... = ${stl_reader_INCLUDE_DIR}")
 message( STATUS "QHULL_ROOT ................. = ${QHULL_ROOT}")
 message( STATUS "QHULL_INCLUDE_DIR .......... = ${QHULL_INCLUDE_DIR}")
 message( STATUS "QHULL_LIBRARIES ............ = ${QHULL_LIBRARIES}")
