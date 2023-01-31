@@ -64,7 +64,7 @@
 #include "hydrodynamics/Sphere.hpp"
 #include "io/MSMSFormat.hpp"
 #include "io/XYZFormat.hpp"
-#include "io/stl_reader.h"
+#include "stl_reader.h"
 #include "utils/ElementsTable.hpp"
 #include "utils/MemoryUtils.hpp"
 #include "utils/StringTokenizer.hpp"
