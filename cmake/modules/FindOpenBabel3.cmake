@@ -42,6 +42,12 @@ else()
         /opt/local/openbabel/include
         /opt/local/openbabel3/include/openbabel3
         /opt/local/openbabel3/include
+        /opt/homebrew/include/openbabel3
+        /opt/homebrew/include
+        /opt/homebrew/openbabel/include/openbabel3
+        /opt/homebrew/openbabel/include
+        /opt/homebrew/openbabel3/include/openbabel3
+        /opt/homebrew/openbabel3/include
         ~/include/openbabel3
         ~/include
       )
