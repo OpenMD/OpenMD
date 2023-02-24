@@ -62,8 +62,8 @@ struct gengetopt_args_info
   double beadSize_arg;	/**< @brief bead size (diameter) for RoughShell model (in angstroms) (default='0.2').  */
   char * beadSize_orig;	/**< @brief bead size (diameter) for RoughShell model (in angstroms) original value given at command line.  */
   const char *beadSize_help; /**< @brief bead size (diameter) for RoughShell model (in angstroms) help description.  */
-  int beads_flag;	/**< @brief generate the beads only, hydrodynamics will not be performed (default=off).  */
-  const char *beads_help; /**< @brief generate the beads only, hydrodynamics will not be performed help description.  */
+  int elements_flag;	/**< @brief output the hydrodynamic elements (beads or triangles) only, hydrodynamics calculation will not be performed (default=off).  */
+  const char *elements_help; /**< @brief output the hydrodynamic elements (beads or triangles) only, hydrodynamics calculation will not be performed help description.  */
   double viscosity_arg;	/**< @brief viscosity (in poise) (default='0.01').  */
   char * viscosity_orig;	/**< @brief viscosity (in poise) original value given at command line.  */
   const char *viscosity_help; /**< @brief viscosity (in poise) help description.  */
@@ -80,7 +80,7 @@ struct gengetopt_args_info
   unsigned int output_given ;	/**< @brief Whether output was given.  */
   unsigned int model_given ;	/**< @brief Whether model was given.  */
   unsigned int beadSize_given ;	/**< @brief Whether beadSize was given.  */
-  unsigned int beads_given ;	/**< @brief Whether beads was given.  */
+  unsigned int elements_given ;	/**< @brief Whether elements was given.  */
   unsigned int viscosity_given ;	/**< @brief Whether viscosity was given.  */
   unsigned int temperature_given ;	/**< @brief Whether temperature was given.  */
 

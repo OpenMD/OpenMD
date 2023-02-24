@@ -19,7 +19,10 @@ supports three approximate models: AtomicBead, RoughShell, and
 BoundaryElement. Additionally, Hydro can generate resistance tensor
 files using analytic solutions for simple shapes. 
 
-To generate a .hydro file, an input file is needed. 
+To generate a .hydro file, one form of an input file must be
+specified.  This can either be a MetaData (omd) file, or xyz, stl, or
+MSMS output files. For stl and MSMS files which both describe triangulated
+surfaces, the hydrodynamics model must be BoundaryElement. 
 
 Since the resistance tensor depends on viscosity of the solvent, and
 diffusion tensors depend on temperature, these must either be
@@ -37,6 +40,6 @@ groupoption  "msms"     -  "filename root for MSMS .vert and .face files"  strin
 option       "output"   o  "output file prefix"                  string   optional
 option       "model"    -  "hydrodynamics model"                 values="AtomicBead","RoughShell","BoundaryElement"  enum required
 option       "beadSize" s  "bead size (diameter) for RoughShell model (in angstroms)"  double  default="0.2"  optional
-option       "beads"    b  "generate the beads only, hydrodynamics will not be performed" flag  off
+option       "elements"    e  "output the hydrodynamic elements (beads or triangles) only, hydrodynamics calculation will not be performed" flag  off
 option       "viscosity" v "viscosity (in poise)"  double default="0.01" optional
 option       "temperature" t "temperature (in Kelvin" double default="300" optional

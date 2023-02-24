@@ -24,7 +24,7 @@
 
 #include "HydroCmd.hpp"
 
-const char *gengetopt_args_info_purpose = "Generates resistance tensor (.hydro) files which are required when\nusing the Langevin integrator with complex rigid bodies. Hydro\nsupports three approximate models: AtomicBead, RoughShell, and\nBoundaryElement. Additionally, Hydro can generate resistance tensor\nfiles using analytic solutions for simple shapes. \n\nTo generate a .hydro file, an input file is needed. \n\nSince the resistance tensor depends on viscosity of the solvent, and\ndiffusion tensors depend on temperature, these must either be\nspecified as arguments or listed in the MetaData (omd) file with the\nkeywords viscosity and targetTemp. If the approximate model in use is\nthe RoughShell model the beadSize (the diameter of the small beads\nused to approximate the surface of the body) must also be specified.";
+const char *gengetopt_args_info_purpose = "Generates resistance tensor (.hydro) files which are required when\nusing the Langevin integrator with complex rigid bodies. Hydro\nsupports three approximate models: AtomicBead, RoughShell, and\nBoundaryElement. Additionally, Hydro can generate resistance tensor\nfiles using analytic solutions for simple shapes. \n\nTo generate a .hydro file, one form of an input file must be\nspecified.  This can either be a MetaData (omd) file, or xyz, stl, or\nMSMS output files. For stl and MSMS files which both describe triangulated\nsurfaces, the hydrodynamics model must be BoundaryElement. \n\nSince the resistance tensor depends on viscosity of the solvent, and\ndiffusion tensors depend on temperature, these must either be\nspecified as arguments or listed in the MetaData (omd) file with the\nkeywords viscosity and targetTemp. If the approximate model in use is\nthe RoughShell model the beadSize (the diameter of the small beads\nused to approximate the surface of the body) must also be specified.";
 
 const char *gengetopt_args_info_usage = "Usage: Hydro [OPTION]... [FILE]...";
 
@@ -43,7 +43,7 @@ const char *gengetopt_args_info_help[] = {
   "  -o, --output=STRING       output file prefix",
   "      --model=ENUM          hydrodynamics model  (possible\n                              values=\"AtomicBead\", \"RoughShell\",\n                              \"BoundaryElement\") (mandatory)",
   "  -s, --beadSize=DOUBLE     bead size (diameter) for RoughShell model (in\n                              angstroms)  (default=`0.2')",
-  "  -b, --beads               generate the beads only, hydrodynamics will not be\n                              performed  (default=off)",
+  "  -e, --elements            output the hydrodynamic elements (beads or\n                              triangles) only, hydrodynamics calculation will\n                              not be performed  (default=off)",
   "  -v, --viscosity=DOUBLE    viscosity (in poise)  (default=`0.01')",
   "  -t, --temperature=DOUBLE  temperature (in Kelvin  (default=`300')",
     0
@@ -85,7 +85,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->output_given = 0 ;
   args_info->model_given = 0 ;
   args_info->beadSize_given = 0 ;
-  args_info->beads_given = 0 ;
+  args_info->elements_given = 0 ;
   args_info->viscosity_given = 0 ;
   args_info->temperature_given = 0 ;
   args_info->input_file_group_counter = 0 ;
@@ -109,7 +109,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->model_orig = NULL;
   args_info->beadSize_arg = 0.2;
   args_info->beadSize_orig = NULL;
-  args_info->beads_flag = 0;
+  args_info->elements_flag = 0;
   args_info->viscosity_arg = 0.01;
   args_info->viscosity_orig = NULL;
   args_info->temperature_arg = 300;
@@ -131,7 +131,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->output_help = gengetopt_args_info_help[7] ;
   args_info->model_help = gengetopt_args_info_help[8] ;
   args_info->beadSize_help = gengetopt_args_info_help[9] ;
-  args_info->beads_help = gengetopt_args_info_help[10] ;
+  args_info->elements_help = gengetopt_args_info_help[10] ;
   args_info->viscosity_help = gengetopt_args_info_help[11] ;
   args_info->temperature_help = gengetopt_args_info_help[12] ;
   
@@ -334,8 +334,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "model", args_info->model_orig, cmdline_parser_model_values);
   if (args_info->beadSize_given)
     write_into_file(outfile, "beadSize", args_info->beadSize_orig, 0);
-  if (args_info->beads_given)
-    write_into_file(outfile, "beads", 0, 0 );
+  if (args_info->elements_given)
+    write_into_file(outfile, "elements", 0, 0 );
   if (args_info->viscosity_given)
     write_into_file(outfile, "viscosity", args_info->viscosity_orig, 0);
   if (args_info->temperature_given)
@@ -1258,7 +1258,7 @@ cmdline_parser_internal (
         { "output",	1, NULL, 'o' },
         { "model",	1, NULL, 0 },
         { "beadSize",	1, NULL, 's' },
-        { "beads",	0, NULL, 'b' },
+        { "elements",	0, NULL, 'e' },
         { "viscosity",	1, NULL, 'v' },
         { "temperature",	1, NULL, 't' },
         { 0,  0, 0, 0 }
@@ -1269,7 +1269,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVi:x:o:s:bv:t:", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVi:x:o:s:ev:t:", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1344,12 +1344,12 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 'b':	/* generate the beads only, hydrodynamics will not be performed.  */
+        case 'e':	/* output the hydrodynamic elements (beads or triangles) only, hydrodynamics calculation will not be performed.  */
         
         
-          if (update_arg((void *)&(args_info->beads_flag), 0, &(args_info->beads_given),
-              &(local_args_info.beads_given), optarg, 0, 0, ARG_FLAG,
-              check_ambiguity, override, 1, 0, "beads", 'b',
+          if (update_arg((void *)&(args_info->elements_flag), 0, &(args_info->elements_given),
+              &(local_args_info.elements_given), optarg, 0, 0, ARG_FLAG,
+              check_ambiguity, override, 1, 0, "elements", 'e',
               additional_error))
             goto failure;
         

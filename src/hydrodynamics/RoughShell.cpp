@@ -138,6 +138,6 @@ namespace OpenMD {
         }
       }
     }
-    return elements_.size();
+    return elements_.size();    
   }
 }  // namespace OpenMD

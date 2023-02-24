@@ -213,7 +213,7 @@ namespace OpenMD {
 
   Mat3x3d HydroProp::getPitchMatrix() {
     Mat3x3d P;
-    P = Constants::TWO_PI * getXitt().inverse() * getXirt();
+    P = - getXitt().inverse() * getXirt();
     return P;
   }
 

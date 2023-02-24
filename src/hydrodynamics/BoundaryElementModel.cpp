@@ -98,26 +98,30 @@ namespace OpenMD {
        << " " << name << std::endl;
     for (iter = elements_.begin(); iter != elements_.end(); ++iter) {
       Triangle t = iter->t;
-      os << "\t"
+      Vector3d n = t.getUnitNormal();
+      Vector3d v1 = t.vertex1();
+      Vector3d v2 = t.vertex2();
+      Vector3d v3 = t.vertex3();
+      os << "  "
          << "facet normal"
-         << " " << t.getUnitNormal() << std::endl;
-      os << "\t\t"
+         << " " << n[0] << " " << n[1] << " " << n[2] << std::endl;
+      os << "    "
          << "outer loop" << std::endl;
-      os << "\t\t\t"
+      os << "      "
          << " "
          << "vertex"
-         << " " << t.vertex1() << std::endl;
-      os << "\t\t\t"
+         << " " << v1[0] << " " << v1[1] << " " << v1[2] << std::endl;
+      os << "      "
          << " "
          << "vertex"
-         << " " << t.vertex2() << std::endl;
-      os << "\t\t\t"
+         << " " << v2[0] << " " << v2[1] << " " << v2[2] << std::endl;
+      os << "      "
          << " "
          << "vertex"
-         << " " << t.vertex3() << std::endl;
-      os << "\t\t"
+         << " " << v3[0] << " " << v3[1] << " " << v3[2] << std::endl;
+      os << "    "
          << "endloop" << std::endl;
-      os << "\t"
+      os << "  "
          << "endfacet" << std::endl;
     }
     os << "endsolid"

@@ -76,23 +76,25 @@ namespace OpenMD {
       if (inbuf[0] != '#') {
         line = inbuf;
         StringTokenizer tokenizer(line);
-        // do we have 9 tokens on this vertex line?
-        if (tokenizer.countTokens() == 9) {
+        // do we have at least 3 tokens on this vertex line?
+        if (tokenizer.countTokens() >= 3) {
           Vector3d vertex;
-          Vector3d normal;
           // int l0fa, atomid, l;
           vertex[0] = tokenizer.nextTokenAsDouble();
           vertex[1] = tokenizer.nextTokenAsDouble();
           vertex[2] = tokenizer.nextTokenAsDouble();
+          vertices_.push_back(vertex);
+        }
+        if (tokenizer.countTokens() >= 6) {
+          Vector3d normal;
           normal[0] = tokenizer.nextTokenAsDouble();
           normal[1] = tokenizer.nextTokenAsDouble();
           normal[2] = tokenizer.nextTokenAsDouble();
-          // l0fa = tokenizer.nextTokenAsInt();
-          // atomid = tokenizer.nextTokenAsInt();
-          // l = tokenizer.nextTokenAsInt();
-          vertices_.push_back(vertex);
-          normals_.push_back(normal);
+          normals_.push_back(normal);                    
         }
+        // l0fa = tokenizer.nextTokenAsInt();
+        // atomid = tokenizer.nextTokenAsInt();
+        // l = tokenizer.nextTokenAsInt();               
       }
     }
 
@@ -103,8 +105,8 @@ namespace OpenMD {
       if (inbuf[0] != '#') {
         line = inbuf;
         StringTokenizer tokenizer(line);
-        // do we have 5 tokens on this vertex line?
-        if (tokenizer.countTokens() == 5) {
+        // do we have at least 3 tokens on this vertex line?
+        if (tokenizer.countTokens() >= 3) {
           int v0, v1, v2;
           // int surftype, ana;
           v0 = tokenizer.nextTokenAsInt();
