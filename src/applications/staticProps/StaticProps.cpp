@@ -90,6 +90,7 @@
 #include "applications/staticProps/Field.hpp"
 #include "applications/staticProps/HBondGeometric.hpp"
 #include "applications/staticProps/HBondZ.hpp"
+#include "applications/staticProps/HBondZvol.hpp"
 #include "applications/staticProps/HBondR.hpp"
 #include "applications/staticProps/Kirkwood.hpp"
 #include "applications/staticProps/MomentumHistogram.hpp"
@@ -723,6 +724,7 @@ int main(int argc, char* argv[]) {
       painCave.isFatal  = 1;
       simError();
     }
+    
   } else if (args_info.hbondz_given) {
     if (args_info.rcut_given) {
       if (args_info.thetacut_given) {
@@ -747,7 +749,31 @@ int main(int argc, char* argv[]) {
       painCave.isFatal  = 1;
       simError();
     }
-  } else if (args_info.hbondr_given) {
+  } else if (args_info.hbondzvol_given) {
+    if (args_info.rcut_given) {
+      if (args_info.thetacut_given) {
+        analyser = std::make_unique<HBondZvol>(
+					    info, dumpFileName, sele1, sele2, args_info.rcut_arg,
+					    args_info.thetacut_arg, args_info.nbins_arg);
+      } else {
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "A cutoff angle (thetacut) must be specified when calculating "
+                 "Hydrogen "
+                 "Bonding Statistics");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal  = 1;
+        simError();
+      }
+    } else {
+      snprintf(
+	       painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+	       "A cutoff radius (rcut) must be specified when calculating Hydrogen "
+	       "Bonding Statistics");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+  } else if (args_info.hbondr_given) {   
     if (args_info.rcut_given) {
       if (args_info.thetacut_given) {
 	analyser = std::make_unique<HBondR>(

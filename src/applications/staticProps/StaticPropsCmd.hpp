@@ -206,6 +206,7 @@ struct gengetopt_args_info
   const char *gcn_help; /**< @brief Generalized Coordination Number Distribution help description.  */
   const char *hbond_help; /**< @brief Hydrogen Bonding statistics using geometric criteria (rcut and thetacut must be specified) help description.  */
   const char *hbondz_help; /**< @brief Hydrogen Bonding density binned by z (rcut and thetacut must be specified) help description.  */
+  const char *hbondzvol_help; /**< @brief Hydrogen Bonding density binned by z and normalized by bin volume (rcut and thetacut must be specified) help description.  */
   const char *hbondr_help; /**< @brief Hydrogen Bonding density binned by r (rcut and thetacut must be specified) help description.  */
   const char *potDiff_help; /**< @brief potential energy difference when charge on selection is set to zero help description.  */
   const char *tet_hb_help; /**< @brief hydrogen bond statistics binned by tetrahedrality of donor and acceptor molecules help description.  */
@@ -312,6 +313,7 @@ struct gengetopt_args_info
   unsigned int gcn_given ;	/**< @brief Whether gcn was given.  */
   unsigned int hbond_given ;	/**< @brief Whether hbond was given.  */
   unsigned int hbondz_given ;	/**< @brief Whether hbondz was given.  */
+  unsigned int hbondzvol_given ;	/**< @brief Whether hbondzvol was given.  */
   unsigned int hbondr_given ;	/**< @brief Whether hbondr was given.  */
   unsigned int potDiff_given ;	/**< @brief Whether potDiff was given.  */
   unsigned int tet_hb_given ;	/**< @brief Whether tet_hb was given.  */
