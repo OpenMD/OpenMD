@@ -113,6 +113,7 @@ groupoption "hbond"     -       "Hydrogen Bonding statistics using geometric cri
 groupoption "hbondz"     -      "Hydrogen Bonding density binned by z (rcut and thetacut must be specified)" group="staticProps"
 groupoption "hbondzvol"  -      "Hydrogen Bonding density binned by z and normalized by bin volume (rcut and thetacut must be specified)" group="staticProps"
 groupoption "hbondr"     -      "Hydrogen Bonding density binned by r (rcut and thetacut must be specified)" group="staticProps"
+groupoption "hbondrvol"     -      "Hydrogen Bonding density binned by r and normalized by bin volume (rcut and thetacut must be specified)" group="staticProps"
 groupoption "potDiff"   -       "potential energy difference when charge on selection is set to zero"  group="staticProps"
 groupoption "tet_hb"    -       "hydrogen bond statistics binned by tetrahedrality of donor and acceptor molecules" group="staticProps"
 groupoption "kirkwood"  k       "distance-dependent Kirkwood factor" group="staticProps"
