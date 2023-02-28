@@ -92,6 +92,7 @@
 #include "applications/staticProps/HBondZ.hpp"
 #include "applications/staticProps/HBondZvol.hpp"
 #include "applications/staticProps/HBondR.hpp"
+#include "applications/staticProps/HBondRvol.hpp"
 #include "applications/staticProps/Kirkwood.hpp"
 #include "applications/staticProps/MomentumHistogram.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
@@ -777,6 +778,30 @@ int main(int argc, char* argv[]) {
     if (args_info.rcut_given) {
       if (args_info.thetacut_given) {
 	analyser = std::make_unique<HBondR>(
+					    info, dumpFileName, sele1, sele2, sele3, args_info.rcut_arg,
+					    maxLen, args_info.thetacut_arg, args_info.nrbins_arg);
+      } else {
+	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		 "A cutoff angle (thetacut) must be specified when calculating "
+		 "Hydrogen "
+		 "Bonding Statistics");
+	painCave.severity = OPENMD_ERROR;
+	painCave.isFatal  = 1;
+	simError();
+      }
+    } else {
+      snprintf(
+	       painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+	       "A cutoff radius (rcut) must be specified when calculating Hydrogen "
+	       "Bonding Statistics");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+  } else if (args_info.hbondrvol_given) {   
+    if (args_info.rcut_given) {
+      if (args_info.thetacut_given) {
+	analyser = std::make_unique<HBondRvol>(
 					    info, dumpFileName, sele1, sele2, sele3, args_info.rcut_arg,
 					    maxLen, args_info.thetacut_arg, args_info.nrbins_arg);
       } else {

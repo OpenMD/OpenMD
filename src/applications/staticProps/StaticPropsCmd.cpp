@@ -121,6 +121,7 @@ const char *gengetopt_args_info_help[] = {
   "      --hbondz                  Hydrogen Bonding density binned by z (rcut and\n                                  thetacut must be specified)",
   "      --hbondzvol               Hydrogen Bonding density binned by z and\n                                  normalized by bin volume (rcut and thetacut\n                                  must be specified)",
   "      --hbondr                  Hydrogen Bonding density binned by r (rcut and\n                                  thetacut must be specified)",
+  "      --hbondrvol               Hydrogen Bonding density binned by r and\n                                  normalized by bin volume (rcut and thetacut\n                                  must be specified)",
   "      --potDiff                 potential energy difference when charge on\n                                  selection is set to zero",
   "      --tet_hb                  hydrogen bond statistics binned by\n                                  tetrahedrality of donor and acceptor\n                                  molecules",
   "  -k, --kirkwood                distance-dependent Kirkwood factor",
@@ -261,6 +262,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->hbondz_given = 0 ;
   args_info->hbondzvol_given = 0 ;
   args_info->hbondr_given = 0 ;
+  args_info->hbondrvol_given = 0 ;
   args_info->potDiff_given = 0 ;
   args_info->tet_hb_given = 0 ;
   args_info->kirkwood_given = 0 ;
@@ -446,25 +448,26 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->hbondz_help = gengetopt_args_info_help[85] ;
   args_info->hbondzvol_help = gengetopt_args_info_help[86] ;
   args_info->hbondr_help = gengetopt_args_info_help[87] ;
-  args_info->potDiff_help = gengetopt_args_info_help[88] ;
-  args_info->tet_hb_help = gengetopt_args_info_help[89] ;
-  args_info->kirkwood_help = gengetopt_args_info_help[90] ;
-  args_info->kirkwoodQ_help = gengetopt_args_info_help[91] ;
-  args_info->densityfield_help = gengetopt_args_info_help[92] ;
-  args_info->velocityfield_help = gengetopt_args_info_help[93] ;
-  args_info->velocityZ_help = gengetopt_args_info_help[94] ;
-  args_info->eam_density_help = gengetopt_args_info_help[95] ;
-  args_info->net_charge_help = gengetopt_args_info_help[96] ;
-  args_info->current_density_help = gengetopt_args_info_help[97] ;
-  args_info->chargez_help = gengetopt_args_info_help[98] ;
-  args_info->charger_help = gengetopt_args_info_help[99] ;
-  args_info->numberz_help = gengetopt_args_info_help[100] ;
-  args_info->numberr_help = gengetopt_args_info_help[101] ;
-  args_info->charge_density_z_help = gengetopt_args_info_help[102] ;
-  args_info->countz_help = gengetopt_args_info_help[103] ;
-  args_info->momentum_distribution_help = gengetopt_args_info_help[104] ;
-  args_info->dipole_orientation_help = gengetopt_args_info_help[105] ;
-  args_info->order_prob_help = gengetopt_args_info_help[106] ;
+  args_info->hbondrvol_help = gengetopt_args_info_help[88] ;
+  args_info->potDiff_help = gengetopt_args_info_help[89] ;
+  args_info->tet_hb_help = gengetopt_args_info_help[90] ;
+  args_info->kirkwood_help = gengetopt_args_info_help[91] ;
+  args_info->kirkwoodQ_help = gengetopt_args_info_help[92] ;
+  args_info->densityfield_help = gengetopt_args_info_help[93] ;
+  args_info->velocityfield_help = gengetopt_args_info_help[94] ;
+  args_info->velocityZ_help = gengetopt_args_info_help[95] ;
+  args_info->eam_density_help = gengetopt_args_info_help[96] ;
+  args_info->net_charge_help = gengetopt_args_info_help[97] ;
+  args_info->current_density_help = gengetopt_args_info_help[98] ;
+  args_info->chargez_help = gengetopt_args_info_help[99] ;
+  args_info->charger_help = gengetopt_args_info_help[100] ;
+  args_info->numberz_help = gengetopt_args_info_help[101] ;
+  args_info->numberr_help = gengetopt_args_info_help[102] ;
+  args_info->charge_density_z_help = gengetopt_args_info_help[103] ;
+  args_info->countz_help = gengetopt_args_info_help[104] ;
+  args_info->momentum_distribution_help = gengetopt_args_info_help[105] ;
+  args_info->dipole_orientation_help = gengetopt_args_info_help[106] ;
+  args_info->order_prob_help = gengetopt_args_info_help[107] ;
   
 }
 
@@ -855,6 +858,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "hbondzvol", 0, 0 );
   if (args_info->hbondr_given)
     write_into_file(outfile, "hbondr", 0, 0 );
+  if (args_info->hbondrvol_given)
+    write_into_file(outfile, "hbondrvol", 0, 0 );
   if (args_info->potDiff_given)
     write_into_file(outfile, "potDiff", 0, 0 );
   if (args_info->tet_hb_given)
@@ -991,6 +996,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->hbondz_given = 0 ;
   args_info->hbondzvol_given = 0 ;
   args_info->hbondr_given = 0 ;
+  args_info->hbondrvol_given = 0 ;
   args_info->potDiff_given = 0 ;
   args_info->tet_hb_given = 0 ;
   args_info->kirkwood_given = 0 ;
@@ -1945,6 +1951,7 @@ cmdline_parser_internal (
         { "hbondz",	0, NULL, 0 },
         { "hbondzvol",	0, NULL, 0 },
         { "hbondr",	0, NULL, 0 },
+        { "hbondrvol",	0, NULL, 0 },
         { "potDiff",	0, NULL, 0 },
         { "tet_hb",	0, NULL, 0 },
         { "kirkwood",	0, NULL, 'k' },
@@ -3370,6 +3377,23 @@ cmdline_parser_internal (
                 &(local_args_info.hbondr_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "hbondr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Hydrogen Bonding density binned by r and normalized by bin volume (rcut and thetacut must be specified).  */
+          else if (strcmp (long_options[option_index].name, "hbondrvol") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->hbondrvol_given),
+                &(local_args_info.hbondrvol_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "hbondrvol", '-',
                 additional_error))
               goto failure;
           

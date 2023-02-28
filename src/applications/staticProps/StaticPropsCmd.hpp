@@ -208,6 +208,7 @@ struct gengetopt_args_info
   const char *hbondz_help; /**< @brief Hydrogen Bonding density binned by z (rcut and thetacut must be specified) help description.  */
   const char *hbondzvol_help; /**< @brief Hydrogen Bonding density binned by z and normalized by bin volume (rcut and thetacut must be specified) help description.  */
   const char *hbondr_help; /**< @brief Hydrogen Bonding density binned by r (rcut and thetacut must be specified) help description.  */
+  const char *hbondrvol_help; /**< @brief Hydrogen Bonding density binned by r and normalized by bin volume (rcut and thetacut must be specified) help description.  */
   const char *potDiff_help; /**< @brief potential energy difference when charge on selection is set to zero help description.  */
   const char *tet_hb_help; /**< @brief hydrogen bond statistics binned by tetrahedrality of donor and acceptor molecules help description.  */
   const char *kirkwood_help; /**< @brief distance-dependent Kirkwood factor help description.  */
@@ -315,6 +316,7 @@ struct gengetopt_args_info
   unsigned int hbondz_given ;	/**< @brief Whether hbondz was given.  */
   unsigned int hbondzvol_given ;	/**< @brief Whether hbondzvol was given.  */
   unsigned int hbondr_given ;	/**< @brief Whether hbondr was given.  */
+  unsigned int hbondrvol_given ;	/**< @brief Whether hbondrvol was given.  */
   unsigned int potDiff_given ;	/**< @brief Whether potDiff was given.  */
   unsigned int tet_hb_given ;	/**< @brief Whether tet_hb was given.  */
   unsigned int kirkwood_given ;	/**< @brief Whether kirkwood was given.  */
