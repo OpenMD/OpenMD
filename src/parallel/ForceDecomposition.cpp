@@ -173,7 +173,7 @@ namespace OpenMD {
     }
   }
 
-  bool ForceDecomposition::checkNeighborList() {
+  bool ForceDecomposition::checkNeighborList(vector<Vector3d> savedPositions) {
     RealType st2        = pow(skinThickness_ / 2.0, 2);
     std::size_t nGroups = snap_->cgData.position.size();
     if (needVelocities_)
@@ -183,13 +183,13 @@ namespace OpenMD {
     // if we have changed the group identities or haven't set up the
     // saved positions we automatically will need a neighbor list update:
 
-    if (saved_CG_positions_.size() != nGroups) return true;
+    if (savedPositions.size() != nGroups) return true;
 
     RealType dispmax = 0.0;
     Vector3d disp;
 
     for (std::size_t i = 0; i < nGroups; i++) {
-      disp    = snap_->cgData.position[i] - saved_CG_positions_[i];
+      disp    = snap_->cgData.position[i] - savedPositions[i];
       dispmax = max(dispmax, disp.lengthSquare());
     }
 

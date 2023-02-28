@@ -111,6 +111,16 @@ namespace OpenMD::RNEMD {
     Snapshot* temporarySourceSnapshot_ {nullptr};
     Snapshot* temporarySinkSnapshot_ {nullptr};
 
+    // to preserve the Verlet Neighbor lists in source and sink snapshots:
+    
+    std::vector<int> sourceNeighborList_;
+    std::vector<int> sourcePoint_;
+    std::vector<Vector3d> sourceSavedPositions_;
+    
+    std::vector<int> sinkNeighborList_;
+    std::vector<int> sinkPoint_;
+    std::vector<Vector3d> sinkSavedPositions_;
+
     bool hasSelectedMolecule_ {false};
 
     Molecule* selectedMolecule_ {nullptr};

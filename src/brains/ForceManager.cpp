@@ -838,12 +838,12 @@ namespace OpenMD {
     }
     for (int iLoop = loopStart; iLoop <= loopEnd; iLoop++) {
       if (iLoop == loopStart) {
-        bool update_nlist = fDecomp_->checkNeighborList();
+        bool update_nlist = fDecomp_->checkNeighborList(savedPositions_);
 
         if (update_nlist) {
           if (!usePeriodicBoundaryConditions_)
             Mat3x3d bbox = thermo->getBoundingBox();
-          fDecomp_->buildNeighborList(neighborList_, point_);
+          fDecomp_->buildNeighborList(neighborList_, point_, savedPositions_);
         }
       }
 
@@ -1560,12 +1560,12 @@ namespace OpenMD {
     }
     for (int iLoop = loopStart; iLoop <= loopEnd; iLoop++) {
       if (iLoop == loopStart) {
-        bool update_nlist = fDecomp_->checkNeighborList();
+        bool update_nlist = fDecomp_->checkNeighborList(savedPositions_);
 
         if (update_nlist) {
           if (!usePeriodicBoundaryConditions_)
             Mat3x3d bbox = thermo->getBoundingBox();
-          fDecomp_->buildNeighborList(neighborList_, point_);
+          fDecomp_->buildNeighborList(neighborList_, point_, savedPositions_);
         }
       }
 

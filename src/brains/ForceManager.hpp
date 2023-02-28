@@ -130,6 +130,7 @@ namespace OpenMD {
     std::map<Inversion*, InversionDataSet> inversionDataSets;
     std::vector<int> neighborList_;
     std::vector<int> point_;
+    std::vector<Vector3d> savedPositions_;
 
     std::vector<RealType> vdwScale_;
     std::vector<RealType> electrostaticScale_;

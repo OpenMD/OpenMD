@@ -113,9 +113,10 @@ namespace OpenMD {
     virtual potVec getSelectedSelfPotential() { return selectedSelfPot; }
 
     // neighbor list routines
-    virtual bool checkNeighborList();
+    virtual bool checkNeighborList(vector<Vector3d> savedPositions);
     virtual void buildNeighborList(vector<int>& neighborList,
-                                   vector<int>& point) = 0;
+                                   vector<int>& point,
+                                   vector<Vector3d>& savedPositions) = 0;
 
     void setCutoffRadius(RealType rCut);
 
@@ -211,7 +212,6 @@ namespace OpenMD {
     vector<Vector3i> cellOffsets_;
     Vector3i nCells_;
     vector<vector<int>> cellList_;
-    vector<Vector3d> saved_CG_positions_;
   };
 }  // namespace OpenMD
 

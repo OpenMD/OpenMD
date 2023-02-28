@@ -111,6 +111,16 @@ namespace OpenMD::RNEMD {
 
       if (temporarySourceSnapshot_ && currentSnapshot_) {
         *temporarySourceSnapshot_ = *currentSnapshot_;
+
+        // Save source Verlet neighbor list information:
+        sourceNeighborList_ = neighborList_;
+        sourcePoint_ = point_;
+        sourceSavedPositions_ = savedPositions_;
+        // Use sink Verlet neighbor list information:
+        neighborList_ = sinkNeighborList_;
+        point_ = sinkPoint_;
+        savedPositions_ = sinkSavedPositions_;
+
         currentSnapshot_->clearDerivedProperties();
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
@@ -133,6 +143,16 @@ namespace OpenMD::RNEMD {
 
       if (temporarySinkSnapshot_ && currentSnapshot_) {
         *temporarySinkSnapshot_ = *currentSnapshot_;
+        
+        // Save source Verlet neighbor list information:
+        sinkNeighborList_ = neighborList_;
+        sinkPoint_ = point_;
+        sinkSavedPositions_ = savedPositions_;
+        // Use source Verlet neighbor list information:
+        neighborList_ = sourceNeighborList_;
+        point_ = sourcePoint_;
+        savedPositions_ = sourceSavedPositions_;
+
         currentSnapshot_->clearDerivedProperties();
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,

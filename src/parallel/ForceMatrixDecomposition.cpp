@@ -1331,7 +1331,8 @@ namespace OpenMD {
    * returned vector point.
    */
   void ForceMatrixDecomposition::buildNeighborList(vector<int>& neighborList,
-                                                   vector<int>& point) {
+                                                   vector<int>& point,
+                                                   vector<Vector3d>& savedPositions) {
     neighborList.clear();
     point.clear();
     int len = 0;
@@ -1621,10 +1622,10 @@ namespace OpenMD {
 
     // save the local cutoff group positions for the check that is
     // done on each loop:
-    saved_CG_positions_.clear();
-    saved_CG_positions_.reserve(nGroups_);
+    savedPositions.clear();
+    savedPositions.reserve(nGroups_);
     for (int i = 0; i < nGroups_; i++)
-      saved_CG_positions_.push_back(snap_->cgData.position[i]);
+      savedPositions.push_back(snap_->cgData.position[i]);
   }
 
   int ForceMatrixDecomposition::getGlobalIDRow(int atom1) {
