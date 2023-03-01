@@ -64,7 +64,7 @@ using namespace std;
 namespace OpenMD {
 
   LDForceModifier::LDForceModifier(SimInfo* info) :
-      ForceModifier {info}, maxIterNum_ {4}, forceTolerance_ {1e-6},
+      ForceModifier {info}, maxIterNum_ {6}, forceTolerance_ {1e-6},
       randNumGen_ {info->getRandomNumberGenerator()},
       simParams_ {info->getSimParams()} {
     RealType dt = simParams_->getDt();
@@ -345,7 +345,6 @@ namespace OpenMD {
             Vector3d randomForceLab  = Atrans * randomForceBody;
             Vector3d randomTorqueLab = Atrans * randomTorqueBody;
 
-            std::cerr << randomForceLab << "\t" << randomTorqueLab << "\n";
             sd->addFrc(randomForceLab);
             sd->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab));
 
@@ -361,7 +360,7 @@ namespace OpenMD {
 
             Vector3d vel    = sd->getVel();
             Vector3d angMom = sd->getJ();
-            std::cerr << "v = " << vel << " j = " << angMom << "\n";
+
             // estimate velocity at full-step using everything but
             // friction forces:
 
@@ -417,12 +416,6 @@ namespace OpenMD {
               frictionTorqueBody = -(hydroProps_[index]->getXitr() * vcdBody +
                                      hydroProps_[index]->getXirr() * omegaBody);
               frictionTorqueLab  = Atrans * frictionTorqueBody;
-
-              std::cerr << "vcd = " << vcdBody << " omega = " << omegaBody
-                        << "\n";
-
-              std::cerr << frictionForceLab << "\t" << frictionTorqueLab
-                        << "\n";
 
               // re-estimate velocities at full-step using friction forces:
 
