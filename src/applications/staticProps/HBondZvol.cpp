@@ -56,8 +56,8 @@
 namespace OpenMD {
 
   HBondZvol::HBondZvol(SimInfo* info, const std::string& filename,
-                 const std::string& sele1, const std::string& sele2,
-                 double rCut, double thetaCut, int nzbins, int axis) :
+                       const std::string& sele1, const std::string& sele2,
+                       double rCut, double thetaCut, int nzbins, int axis) :
       StaticAnalyser(info, filename, nzbins),
       selectionScript1_(sele1), seleMan1_(info), evaluator1_(info),
       selectionScript2_(sele2), seleMan2_(info), evaluator2_(info),
@@ -105,7 +105,6 @@ namespace OpenMD {
     setOutputName(getPrefix(filename) + ".hbondzvol");
   }
 
-
   void HBondZvol::process() {
     Molecule* mol1;
     Molecule* mol2;
@@ -120,7 +119,8 @@ namespace OpenMD {
     Vector3d dPos;
     Vector3d aPos;
     Vector3d hPos;
-    Vector3d DH;    Vector3d DA;
+    Vector3d DH;
+    Vector3d DA;
     RealType DAdist, DHdist, theta, ctheta;
     int ii, jj;
     int nHB, nA, nD;
@@ -137,9 +137,9 @@ namespace OpenMD {
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
       Mat3x3d hmat = currentSnapshot_->getHmat();
-      RealType Lx = hmat(0,0);
-      RealType Ly = hmat(1,1);
-      RealType Lz = hmat(2,2);
+      RealType Lx  = hmat(0, 0);
+      RealType Ly  = hmat(1, 1);
+      RealType Lz  = hmat(2, 2);
 
       zBox_.push_back(hmat(axis_, axis_));
 
@@ -230,11 +230,11 @@ namespace OpenMD {
           }
         }
         if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(mPos);
-	int binNo =
-        int(nBins_ * (halfBoxZ_ + mPos[axis_]) / hmat(axis_, axis_));
+        int binNo =
+            int(nBins_ * (halfBoxZ_ + mPos[axis_]) / hmat(axis_, axis_));
         sliceQ_[binNo] += nHB;
         sliceCount_[binNo] += 1;
-	vol_[binNo] = (Lx*Ly*Lz)/nBins_;
+        vol_[binNo] = (Lx * Ly * Lz) / nBins_;
       }
     }
     writeDensity();
@@ -251,7 +251,7 @@ namespace OpenMD {
     RealType zAve = zSum / zBox_.size();
 
     DumpReader reader(info_, dumpFilename_);
-    int nFrames   = reader.getNFrames();
+    int nFrames = reader.getNFrames();
 
     std::ofstream qZstream(outputFilename_.c_str());
     if (qZstream.is_open()) {
@@ -260,11 +260,12 @@ namespace OpenMD {
       qZstream << "#nFrames:\t" << zBox_.size() << "\n";
       qZstream << "#selection 1: (" << selectionScript1_ << ")\n";
       qZstream << "#selection 2: (" << selectionScript2_ << ")\n";
-      qZstream << "#" << axisLabel_ << "\tHydrogen Bond Density (molecules/A^3)\n";
+      qZstream << "#" << axisLabel_
+               << "\tHydrogen Bond Density (molecules/A^3)\n";
       for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
         RealType z = zAve * (i + 0.5) / sliceQ_.size();
         if (sliceCount_[i] != 0) {
-          qZstream << z << "\t" << sliceQ_[i] / vol_[i]/nFrames << "\n";
+          qZstream << z << "\t" << sliceQ_[i] / vol_[i] / nFrames << "\n";
         } else
           qZstream << z << "\t" << 0 << "\n";
       }

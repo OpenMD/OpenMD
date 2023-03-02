@@ -88,12 +88,12 @@ int main(int argc, char* argv[]) {
   std::string modelName;
   std::string modelSpecified;
   std::string modelRequired;
-  
+
   bool hasInput = false;
   bool hasModel = false;
 
   Shape* shape;
-  
+
   // Check to make sure the model has been given
   if (args_info.model_given) {
     switch (args_info.model_arg) {
@@ -112,23 +112,23 @@ int main(int argc, char* argv[]) {
   }
 
   // figure out what kind of input file we have
-  
+
   if (args_info.input_given) {
-    inFileName = args_info.input_arg;
+    inFileName    = args_info.input_arg;
     modelRequired = modelSpecified;
-    hasInput   = true;
+    hasInput      = true;
   } else if (args_info.stl_given) {
-    inFileName = args_info.stl_arg;
-    modelRequired  = "BoundaryElementModel";
-    hasInput   = true;
+    inFileName    = args_info.stl_arg;
+    modelRequired = "BoundaryElementModel";
+    hasInput      = true;
   } else if (args_info.msms_given) {
-    inFileName = args_info.msms_arg;
-    modelRequired  = "BoundaryElementModel";
-    hasInput   = true;
+    inFileName    = args_info.msms_arg;
+    modelRequired = "BoundaryElementModel";
+    hasInput      = true;
   } else if (args_info.xyz_given) {
-    inFileName = args_info.xyz_arg;
-    modelRequired  = "AtomicBeadModel";
-    hasInput   = true;      
+    inFileName    = args_info.xyz_arg;
+    modelRequired = "AtomicBeadModel";
+    hasInput      = true;
   }
 
   if (!hasInput) {
@@ -140,7 +140,8 @@ int main(int argc, char* argv[]) {
   if (hasModel) {
     if (modelSpecified.compare(modelRequired) != 0) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "Specified model (%s) does not match model required for input type (%s).\n",
+               "Specified model (%s) does not match model required for input "
+               "type (%s).\n",
                modelSpecified.c_str(), modelRequired.c_str());
       painCave.isFatal = 1;
       simError();
@@ -149,9 +150,9 @@ int main(int argc, char* argv[]) {
     }
   } else {
     modelName = modelRequired;
-    hasModel = true;
+    hasModel  = true;
   }
-  
+
   std::string prefix;
   if (args_info.output_given) {
     prefix = args_info.output_arg;
@@ -166,17 +167,17 @@ int main(int argc, char* argv[]) {
   RealType beadSize    = args_info.beadSize_arg;
 
   // read the files and create the shapes:
-  
+
   std::map<std::string, Shape*> uniqueShapes;
 
   if (args_info.stl_given) {
     try {
-      stl_reader::StlMesh<RealType, unsigned int> mesh (inFileName.c_str());
-      for(size_t isolid = 0; isolid < mesh.num_solids(); ++isolid) {
+      stl_reader::StlMesh<RealType, unsigned int> mesh(inFileName.c_str());
+      for (size_t isolid = 0; isolid < mesh.num_solids(); ++isolid) {
         shape = new Mesh();
         std::cout << "solid " << isolid << std::endl;
-        for(size_t itri = mesh.solid_tris_begin(isolid);
-            itri < mesh.solid_tris_end(isolid); ++itri) {
+        for (size_t itri = mesh.solid_tris_begin(isolid);
+             itri < mesh.solid_tris_end(isolid); ++itri) {
           const RealType* c0 = mesh.tri_corner_coords(itri, 0);
           const RealType* c1 = mesh.tri_corner_coords(itri, 1);
           const RealType* c2 = mesh.tri_corner_coords(itri, 2);
@@ -191,23 +192,19 @@ int main(int argc, char* argv[]) {
         } else {
           solidName = prefix;
         }
-        
+
         shape->setName(solidName);
         uniqueShapes.insert(
-             std::map<std::string, Shape*>::value_type(solidName, shape));
+            std::map<std::string, Shape*>::value_type(solidName, shape));
       }
-    }
-    catch (std::exception& e) {
-      std::cout << e.what() << std::endl;
-    }
+    } catch (std::exception& e) { std::cout << e.what() << std::endl; }
 
-    
   } else if (args_info.msms_given) {
     MSMSFormat* msms = new MSMSFormat(inFileName.c_str());
-    shape = msms->ReadShape();
+    shape            = msms->ReadShape();
     shape->setName(prefix);
     uniqueShapes.insert(
-          std::map<std::string, Shape*>::value_type(prefix, shape));
+        std::map<std::string, Shape*>::value_type(prefix, shape));
   } else if (args_info.xyz_given) {
     ifstream in(inFileName);
     if (!in) {
@@ -216,13 +213,13 @@ int main(int argc, char* argv[]) {
       painCave.isFatal = 1;
       simError();
     }
-    
+
     XYZFormat* xyz = new XYZFormat();
     xyz->ReadMolecule(in);
-    
+
     shape = new CompositeShape();
     shape->setName(xyz->title_);
-    
+
     Shape* currShape = NULL;
 
     size_t natoms = xyz->mol_.size();
@@ -236,20 +233,20 @@ int main(int argc, char* argv[]) {
         dynamic_cast<CompositeShape*>(shape)->addShape(currShape);
       }
     }
-    uniqueShapes.insert(std::map<std::string,
-                        Shape*>::value_type(xyz->title_, shape));
+    uniqueShapes.insert(
+        std::map<std::string, Shape*>::value_type(xyz->title_, shape));
   } else {
     // parse md file and set up the system
     SimCreator creator;
     SimInfo* info = creator.createSim(inFileName, true);
-    
+
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::IntegrableObjectIterator ii;
     StuntDouble* sd;
-    
+
     Globals* simParams = info->getSimParams();
-    
+
     if (simParams->haveViscosity()) {
       viscosity = simParams->getViscosity();
     } else {
@@ -258,7 +255,7 @@ int main(int argc, char* argv[]) {
       painCave.isFatal = 1;
       simError();
     }
-    
+
     if (simParams->haveTargetTemp()) {
       temperature = simParams->getTargetTemp();
     } else {
@@ -279,10 +276,10 @@ int main(int argc, char* argv[]) {
             RigidBody* rb = static_cast<RigidBody*>(sd);
             rb->updateAtoms();
           }
-          
+
           Shape* tmp = ShapeBuilder::createShape(sd);
           uniqueShapes.insert(
-               std::map<std::string, Shape*>::value_type(sd->getType(), tmp));
+              std::map<std::string, Shape*>::value_type(sd->getType(), tmp));
         }
       }
     }
@@ -290,26 +287,26 @@ int main(int argc, char* argv[]) {
   }
 
   HydrodynamicsModel* model =
-    HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(modelName);
-  
+      HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(
+          modelName);
+
   if (model == NULL) {
     snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
              "Could not create HydrodynamicsModel\n");
     painCave.isFatal = 1;
     simError();
   } else {
-    
     model->init();
 
     if (modelName.compare("RoughShell") == 0) {
       dynamic_cast<RoughShell*>(model)->setSigma(beadSize);
     }
-    
+
     std::ofstream outputHydro;
     outputHydro.open(outputFilename.c_str());
     HydroIO* hio = new HydroIO();
     hio->openWriter(outputHydro);
-       
+
     std::map<std::string, Shape*>::iterator si;
     for (si = uniqueShapes.begin(); si != uniqueShapes.end(); ++si) {
       shape = si->second;
@@ -319,7 +316,7 @@ int main(int argc, char* argv[]) {
       std::ofstream ofs;
       std::stringstream elementFile;
       elementFile << prefix << "_" << shape->getName();
-      if (modelName.compare("BoundaryElementModel")==0) {
+      if (modelName.compare("BoundaryElementModel") == 0) {
         elementFile << ".stl";
       } else {
         elementFile << ".xyz";
@@ -335,14 +332,14 @@ int main(int argc, char* argv[]) {
         hio->interpretHydroProp(hp, viscosity, temperature);
       }
     }
-    
+
     hio->closeWriter(outputHydro);
     outputHydro.close();
-    
+
     delete model;
   }
 }
-  
+
 void registerHydrodynamicsModels() {
   HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(
       new HydrodynamicsModelBuilder<RoughShell>("RoughShell"));

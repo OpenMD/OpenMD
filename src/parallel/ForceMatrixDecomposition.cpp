@@ -1330,9 +1330,9 @@ namespace OpenMD {
    * neighborList for each row-ordered CutoffGroup is given by the
    * returned vector point.
    */
-  void ForceMatrixDecomposition::buildNeighborList(vector<int>& neighborList,
-                                                   vector<int>& point,
-                                                   vector<Vector3d>& savedPositions) {
+  void ForceMatrixDecomposition::buildNeighborList(
+      vector<int>& neighborList, vector<int>& point,
+      vector<Vector3d>& savedPositions) {
     neighborList.clear();
     point.clear();
     int len = 0;

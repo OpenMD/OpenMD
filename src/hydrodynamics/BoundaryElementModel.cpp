@@ -97,8 +97,8 @@ namespace OpenMD {
     os << "solid"
        << " " << name << std::endl;
     for (iter = elements_.begin(); iter != elements_.end(); ++iter) {
-      Triangle t = iter->t;
-      Vector3d n = t.getUnitNormal();
+      Triangle t  = iter->t;
+      Vector3d n  = t.getUnitNormal();
       Vector3d v1 = t.vertex1();
       Vector3d v2 = t.vertex2();
       Vector3d v3 = t.vertex3();

@@ -113,12 +113,12 @@ namespace OpenMD::RNEMD {
         *temporarySourceSnapshot_ = *currentSnapshot_;
 
         // Save source Verlet neighbor list information:
-        sourceNeighborList_ = neighborList_;
-        sourcePoint_ = point_;
+        sourceNeighborList_   = neighborList_;
+        sourcePoint_          = point_;
         sourceSavedPositions_ = savedPositions_;
         // Use sink Verlet neighbor list information:
-        neighborList_ = sinkNeighborList_;
-        point_ = sinkPoint_;
+        neighborList_   = sinkNeighborList_;
+        point_          = sinkPoint_;
         savedPositions_ = sinkSavedPositions_;
 
         currentSnapshot_->clearDerivedProperties();
@@ -143,14 +143,14 @@ namespace OpenMD::RNEMD {
 
       if (temporarySinkSnapshot_ && currentSnapshot_) {
         *temporarySinkSnapshot_ = *currentSnapshot_;
-        
+
         // Save source Verlet neighbor list information:
-        sinkNeighborList_ = neighborList_;
-        sinkPoint_ = point_;
+        sinkNeighborList_   = neighborList_;
+        sinkPoint_          = point_;
         sinkSavedPositions_ = savedPositions_;
         // Use source Verlet neighbor list information:
-        neighborList_ = sourceNeighborList_;
-        point_ = sourcePoint_;
+        neighborList_   = sourceNeighborList_;
+        point_          = sourcePoint_;
         savedPositions_ = sourceSavedPositions_;
 
         currentSnapshot_->clearDerivedProperties();
@@ -216,6 +216,10 @@ namespace OpenMD::RNEMD {
           selectedMolecule_->setCom(currentSinkCom_);
           selectedMolecule_ = nullptr;
         }
+
+        neighborList_   = sinkNeighborList_;
+        point_          = sinkPoint_;
+        savedPositions_ = sinkSavedPositions_;
 
         hasSelectedMolecule_   = false;
         updateSelectedMolecule = true;

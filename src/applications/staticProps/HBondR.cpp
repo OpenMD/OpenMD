@@ -44,9 +44,10 @@
  */
 
 #include "HBondR.hpp"
-#include <vector>
+
 #include <algorithm>
 #include <fstream>
+#include <vector>
 
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
@@ -62,12 +63,9 @@ namespace OpenMD {
       StaticAnalyser(info, filename, nrbins),
       selectionScript1_(sele1), seleMan1_(info), evaluator1_(info),
       selectionScript2_(sele2), seleMan2_(info), evaluator2_(info),
-      selectionScript3_(sele3), seleMan3_(info), evaluator3_(info),
-      len_(len), nBins_(nrbins) {
-
-
+      selectionScript3_(sele3), seleMan3_(info), evaluator3_(info), len_(len),
+      nBins_(nrbins) {
     ff_ = info_->getForceField();
-
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -81,7 +79,6 @@ namespace OpenMD {
     if (!evaluator3_.isDynamic()) {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
     }
-
 
     // Set up cutoff values:
 
@@ -222,8 +219,8 @@ namespace OpenMD {
             }
           }
         }
-        r = mPos.length();
-	int binNo = int(r / deltaR_);	
+        r         = mPos.length();
+        int binNo = int(r / deltaR_);
         sliceQ_[binNo] += nHB;
         sliceCount_[binNo] += 1;
       }
@@ -231,34 +228,34 @@ namespace OpenMD {
     }
   }
 
-    void HBondR::writeDensityR() {
-      // compute average box length:
+  void HBondR::writeDensityR() {
+    // compute average box length:
 
-      std::ofstream qRstream(outputFilename_.c_str());
-      if (qRstream.is_open()) {
-        qRstream << "# " << getAnalysisType() << "\n";
-        qRstream << "#selection 1: (" << selectionScript1_ << ")\n";
-        qRstream << "#selection 2: (" << selectionScript2_ << ")\n";
-        qRstream << "#selection 3: (" << selectionScript3_ << ")\n";
-        if (!paramString_.empty())
-          qRstream << "# parameters: " << paramString_ << "\n";
+    std::ofstream qRstream(outputFilename_.c_str());
+    if (qRstream.is_open()) {
+      qRstream << "# " << getAnalysisType() << "\n";
+      qRstream << "#selection 1: (" << selectionScript1_ << ")\n";
+      qRstream << "#selection 2: (" << selectionScript2_ << ")\n";
+      qRstream << "#selection 3: (" << selectionScript3_ << ")\n";
+      if (!paramString_.empty())
+        qRstream << "# parameters: " << paramString_ << "\n";
 
-        qRstream << "#distance"
-                 << "\tH Bonds\n";
-        for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
-          RealType Rval = (i + 0.5) * deltaR_;
-          if (sliceCount_[i] != 0) {
-            qRstream << Rval << "\t" << sliceQ_[i] / (RealType)sliceCount_[i]
-                     << "\n";
-          }
+      qRstream << "#distance"
+               << "\tH Bonds\n";
+      for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
+        RealType Rval = (i + 0.5) * deltaR_;
+        if (sliceCount_[i] != 0) {
+          qRstream << Rval << "\t" << sliceQ_[i] / (RealType)sliceCount_[i]
+                   << "\n";
         }
-
-      } else {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                 "HBondR: unable to open %s\n", outputFilename_.c_str());
-        painCave.isFatal = 1;
-        simError();
       }
-      qRstream.close();
+
+    } else {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "HBondR: unable to open %s\n", outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
     }
-  }  // namespace OpenMD
+    qRstream.close();
+  }
+}  // namespace OpenMD

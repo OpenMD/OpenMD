@@ -61,9 +61,10 @@ namespace OpenMD {
    */
   class HBondRvol : public StaticAnalyser {
   public:
-    HBondRvol(SimInfo* info, const std::string& filename, const std::string& sele1,
-           const std::string& sele2, const std::string& sele3, double rCut,
-           RealType len, double thetaCut, int nrbins);
+    HBondRvol(SimInfo* info, const std::string& filename,
+              const std::string& sele1, const std::string& sele2,
+              const std::string& sele3, double rCut, RealType len,
+              double thetaCut, int nrbins);
 
     virtual void process();
 

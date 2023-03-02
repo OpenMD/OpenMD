@@ -90,11 +90,11 @@ namespace OpenMD {
           normal[0] = tokenizer.nextTokenAsDouble();
           normal[1] = tokenizer.nextTokenAsDouble();
           normal[2] = tokenizer.nextTokenAsDouble();
-          normals_.push_back(normal);                    
+          normals_.push_back(normal);
         }
         // l0fa = tokenizer.nextTokenAsInt();
         // atomid = tokenizer.nextTokenAsInt();
-        // l = tokenizer.nextTokenAsInt();               
+        // l = tokenizer.nextTokenAsInt();
       }
     }
 

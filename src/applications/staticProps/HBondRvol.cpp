@@ -44,9 +44,10 @@
  */
 
 #include "HBondRvol.hpp"
-#include <vector>
+
 #include <algorithm>
 #include <fstream>
+#include <vector>
 
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
@@ -56,18 +57,15 @@
 namespace OpenMD {
 
   HBondRvol::HBondRvol(SimInfo* info, const std::string& filename,
-                 const std::string& sele1, const std::string& sele2,
-                 const std::string& sele3, double rCut, RealType len,
-                 double thetaCut, int nrbins) :
+                       const std::string& sele1, const std::string& sele2,
+                       const std::string& sele3, double rCut, RealType len,
+                       double thetaCut, int nrbins) :
       StaticAnalyser(info, filename, nrbins),
       selectionScript1_(sele1), seleMan1_(info), evaluator1_(info),
       selectionScript2_(sele2), seleMan2_(info), evaluator2_(info),
-      selectionScript3_(sele3), seleMan3_(info), evaluator3_(info),
-      len_(len), nBins_(nrbins) {
-
-
+      selectionScript3_(sele3), seleMan3_(info), evaluator3_(info), len_(len),
+      nBins_(nrbins) {
     ff_ = info_->getForceField();
-
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -82,14 +80,13 @@ namespace OpenMD {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
     }
 
-
     // Set up cutoff values:
 
     rCut_     = rCut;
     thetaCut_ = thetaCut;
     deltaR_   = len_ / nBins_;
     nBins_    = nrbins;
-    
+
     // fixed number of bins
 
     nHBonds_.resize(nBins_);
@@ -224,8 +221,8 @@ namespace OpenMD {
             }
           }
         }
-        r = mPos.length();
-	int binNo = int(r / deltaR_);
+        r         = mPos.length();
+        int binNo = int(r / deltaR_);
         sliceQ_[binNo] += nHB;
         sliceCount_[binNo] += 1;
       }
@@ -233,41 +230,40 @@ namespace OpenMD {
     }
   }
 
-    void HBondRvol::writeDensityR() {
-      // compute average box length:
+  void HBondRvol::writeDensityR() {
+    // compute average box length:
 
-      double pi = acos(-1.0);
-      DumpReader reader(info_, dumpFilename_);
-      int nFrames   = reader.getNFrames();
-      std::ofstream qRstream(outputFilename_.c_str());
-      if (qRstream.is_open()) {
-        
-        qRstream << "# " << getAnalysisType() << "\n";
-        qRstream << "#selection 1: (" << selectionScript1_ << ")\n";
-        qRstream << "#selection 2: (" << selectionScript2_ << ")\n";
-        qRstream << "#selection 3: (" << selectionScript3_ << ")\n";
-        if (!paramString_.empty())
-          qRstream << "# parameters: " << paramString_ << "\n";
+    double pi = acos(-1.0);
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
+    std::ofstream qRstream(outputFilename_.c_str());
+    if (qRstream.is_open()) {
+      qRstream << "# " << getAnalysisType() << "\n";
+      qRstream << "#selection 1: (" << selectionScript1_ << ")\n";
+      qRstream << "#selection 2: (" << selectionScript2_ << ")\n";
+      qRstream << "#selection 3: (" << selectionScript3_ << ")\n";
+      if (!paramString_.empty())
+        qRstream << "# parameters: " << paramString_ << "\n";
 
-        qRstream << "#distance"
-                 << "\tH Bonds\n";
-        for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
-          RealType Rval = (i + 0.5) * deltaR_;
-	  binvol_[i] = (4*pi*(Rval*Rval)*deltaR_);
-          if (sliceCount_[i] != 0 && binvol_[i] !=0) {
-            qRstream << Rval << "\t" << sliceQ_[i] / (binvol_[i]) / nFrames
-                     << "\n";
-          } else {
-              qRstream << Rval << "\t" << 0 << "\n";          
-          }
+      qRstream << "#distance"
+               << "\tH Bonds\n";
+      for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
+        RealType Rval = (i + 0.5) * deltaR_;
+        binvol_[i]    = (4 * pi * (Rval * Rval) * deltaR_);
+        if (sliceCount_[i] != 0 && binvol_[i] != 0) {
+          qRstream << Rval << "\t" << sliceQ_[i] / (binvol_[i]) / nFrames
+                   << "\n";
+        } else {
+          qRstream << Rval << "\t" << 0 << "\n";
         }
-
-      } else {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                 "HBondRvol: unable to open %s\n", outputFilename_.c_str());
-        painCave.isFatal = 1;
-        simError();
       }
-      qRstream.close();
+
+    } else {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "HBondRvol: unable to open %s\n", outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();
     }
-  }  // namespace OpenMD
+    qRstream.close();
+  }
+}  // namespace OpenMD

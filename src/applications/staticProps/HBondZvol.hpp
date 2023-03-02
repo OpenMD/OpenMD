@@ -63,9 +63,9 @@ namespace OpenMD {
    */
   class HBondZvol : public StaticAnalyser {
   public:
-    HBondZvol(SimInfo* info, const std::string& filename, const std::string& sele1,
-           const std::string& sele2, double rCut, double thetaCut, int nzbins,
-           int axis = 2);
+    HBondZvol(SimInfo* info, const std::string& filename,
+              const std::string& sele1, const std::string& sele2, double rCut,
+              double thetaCut, int nzbins, int axis = 2);
     int getNZBins() { return nZBins_; }
 
     virtual void process();

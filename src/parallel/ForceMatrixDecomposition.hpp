@@ -70,7 +70,8 @@ namespace OpenMD {
     void collectData();
 
     // neighbor list routines
-    void buildNeighborList(vector<int>& neighborList, vector<int>& point, vector<Vector3d>& savedPositions);
+    void buildNeighborList(vector<int>& neighborList, vector<int>& point,
+                           vector<Vector3d>& savedPositions);
 
     // group bookkeeping
     Vector3d& getGroupVelocityColumn(int cg2);

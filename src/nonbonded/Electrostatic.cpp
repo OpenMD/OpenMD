@@ -226,31 +226,35 @@ namespace OpenMD {
         dampingAlpha_ = 0.425 - cutoffRadius_ * 0.02;
         if (dampingAlpha_ < 0.0) {
           screeningMethod_ = UNDAMPED;
-          dampingAlpha_ = 0.0;
+          dampingAlpha_    = 0.0;
           // throw warning
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-            "Electrostatic::initialize: dampingAlpha was not specified in the\n"
-            "\tinput file, but the computed value would be 0.0 with a\n"
-            "\tcutoff of %f (ang). Switching to UNDAMPED electrostatics.\n",
-                   cutoffRadius_);
+          snprintf(
+              painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+              "Electrostatic::initialize: dampingAlpha was not specified in "
+              "the\n"
+              "\tinput file, but the computed value would be 0.0 with a\n"
+              "\tcutoff of %f (ang). Switching to UNDAMPED electrostatics.\n",
+              cutoffRadius_);
           painCave.severity = OPENMD_INFO;
           painCave.isFatal  = 0;
           simError();
         } else {
           // throw warning
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-            "Electrostatic::initialize: dampingAlpha was not specified in the\n"
-            "\tinput file.  A default value of %f (1/ang) will be used for "
-            "the\n"
-            "\tcutoff of %f (ang).\n",
-                   dampingAlpha_, cutoffRadius_);
+          snprintf(
+              painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+              "Electrostatic::initialize: dampingAlpha was not specified in "
+              "the\n"
+              "\tinput file.  A default value of %f (1/ang) will be used for "
+              "the\n"
+              "\tcutoff of %f (ang).\n",
+              dampingAlpha_, cutoffRadius_);
           painCave.severity = OPENMD_INFO;
           painCave.isFatal  = 0;
           simError();
           haveDampingAlpha_ = true;
         }
       } else {
-        dampingAlpha_ = simParams_->getDampingAlpha();
+        dampingAlpha_     = simParams_->getDampingAlpha();
         haveDampingAlpha_ = true;
       }
     }
