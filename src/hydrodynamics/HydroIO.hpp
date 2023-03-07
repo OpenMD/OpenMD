@@ -88,9 +88,8 @@ namespace OpenMD {
     rapidjson::OStreamWrapper* osw_;
     rapidjson::PrettyWriter<rapidjson::OStreamWrapper> w_;
     rapidjson::Document d_;
-    bool documentOpen_;
-    bool writerOpen_;
 #endif
+    bool writerOpen_;
 
   };
 }  // namespace OpenMD
