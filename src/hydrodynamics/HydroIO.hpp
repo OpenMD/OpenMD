@@ -44,14 +44,22 @@
 
 #ifndef HYDRODYNAMICS_HYDROIO_HPP
 #define HYDRODYNAMICS_HYDROIO_HPP
+
 #include <map>
-
-#include <nlohmann/json.hpp>
-
 #include "hydrodynamics/HydroProp.hpp"
 
+#if defined(NLOHMANN_JSON)
+#include <nlohmann/json.hpp>
 using ordered_json = nlohmann::ordered_json;
-using json         = nlohmann::json;
+using json = nlohmann::json;
+#elif defined(RAPID_JSON)
+#include <rapidjson/document.h>
+#include <rapidjson/error/en.h>
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/prettywriter.h>
+using namespace rapidjson;
+#endif
 
 namespace OpenMD {
   class HydroIO {
@@ -73,7 +81,17 @@ namespace OpenMD {
                             RealType temperature);
 
   private:
+#if defined(NLOHMANN_JSON)
     ordered_json j_;
+#elif defined(RAPID_JSON)
+    std::ostream* os_;
+    rapidjson::OStreamWrapper* osw_;
+    rapidjson::PrettyWriter<rapidjson::OStreamWrapper> w_;
+    rapidjson::Document d_;
+    bool documentOpen_;
+    bool writerOpen_;
+#endif
+
   };
 }  // namespace OpenMD
 

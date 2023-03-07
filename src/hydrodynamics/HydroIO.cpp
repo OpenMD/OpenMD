@@ -43,6 +43,7 @@
  */
 
 #include "hydrodynamics/HydroIO.hpp"
+#include "utils/simError.h"
 
 #include <fstream>
 #include <iomanip>
@@ -55,41 +56,34 @@ namespace OpenMD {
 
   void HydroIO::openWriter(std::ostream& os) {
     std::string h = "OpenMD-Hydro";
-
+#if defined(NLOHMANN_JSON)    
     j_[h] = ordered_json::array();
+    writerOpen_ = true;
+#elif defined(RAPID_JSON)
+    osw_ = new OStreamWrapper(os);
+    w_.Reset(*osw_);
+    writerOpen_ = true; 
+
+    w_.SetMaxDecimalPlaces(7);
+    w_.SetIndent(' ', 2);
+
+    w_.StartObject();
+    w_.Key(h.c_str());
+    w_.StartArray();
+#endif
   }
 
   void HydroIO::writeHydroProp(HydroProp* hp, RealType viscosity,
                                RealType temperature, std::ostream& os) {
+
+    if (!writerOpen_) openWriter(os);
+
     std::string h = "OpenMD-Hydro";
-    ordered_json o;
-
-    o["name"]      = hp->getName();
-    o["viscosity"] = viscosity;
-
-    Vector3d cor            = hp->getCenterOfResistance();
-    o["centerOfResistance"] = {cor[0], cor[1], cor[2]};
-
-    Mat6x6d Xi            = hp->getResistanceTensor();
-    o["resistanceTensor"] = json::array();
-    for (unsigned int i = 0; i < 6; i++) {
-      o["resistanceTensor"][i] = {Xi(i, 0), Xi(i, 1), Xi(i, 2),
-                                  Xi(i, 3), Xi(i, 4), Xi(i, 5)};
-    }
-
+    std::string name = hp->getName();
+    Vector3d cor = hp->getCenterOfResistance();
+    Mat6x6d Xi   = hp->getResistanceTensor();
     Vector3d cod = hp->getCenterOfDiffusion(temperature);
     Mat6x6d Xid  = hp->getDiffusionTensorAtPos(cod, temperature);
-
-    o["temperature"] = temperature;
-
-    o["centerOfDiffusion"] = {cod[0], cod[1], cod[2]};
-
-    o["diffusionTensor"] = json::array();
-    for (unsigned int i = 0; i < 6; i++) {
-      o["diffusionTensor"][i] = {Xid(i, 0), Xid(i, 1), Xid(i, 2),
-                                 Xid(i, 3), Xid(i, 4), Xid(i, 5)};
-    }
-
     Vector3d cop = hp->getCenterOfPitch();
     Mat3x3d pitchAxes;
     Vector3d pitches;
@@ -97,9 +91,31 @@ namespace OpenMD {
 
     hp->pitchAxes(pitchAxes, pitches, pitchScalar);
 
-    o["pitch"]         = pitchScalar;
+#if defined(NLOHMANN_JSON)    
+    
+    ordered_json o;
+    o["name"] = name;
+    o["viscosity"] = viscosity;
+    o["centerOfResistance"] = {cor[0], cor[1], cor[2]};
+    o["resistanceTensor"] = json::array();
+    
+    for (unsigned int i = 0; i < 6; i++) {
+      o["resistanceTensor"][i] = {Xi(i, 0), Xi(i, 1), Xi(i, 2),
+                                  Xi(i, 3), Xi(i, 4), Xi(i, 5)};
+    }
+
+    o["temperature"] = temperature;
+    o["centerOfDiffusion"] = {cod[0], cod[1], cod[2]};
+    o["diffusionTensor"] = json::array();
+    
+    for (unsigned int i = 0; i < 6; i++) {
+      o["diffusionTensor"][i] = {Xid(i, 0), Xid(i, 1), Xid(i, 2),
+                                 Xid(i, 3), Xid(i, 4), Xid(i, 5)};
+    }
+    
+    o["pitch"] = pitchScalar;
     o["centerOfPitch"] = {cop[0], cop[1], cop[2]};
-    o["pitches"]       = {pitches[0], pitches[1], pitches[2]};
+    o["pitches"] = {pitches[0], pitches[1], pitches[2]};
 
     o["pitchAxes"] = json::array();
     for (unsigned int i = 0; i < 3; i++) {
@@ -107,42 +123,201 @@ namespace OpenMD {
     }
 
     j_[h].push_back(o);
+    
+#elif defined(RAPID_JSON)
+
+    w_.StartObject();
+    w_.Key("name");
+    w_.String(name.c_str());
+
+    w_.Key("viscosity");
+    w_.Double(viscosity);
+    w_.Key("centerOfResistance");
+    w_.StartArray();
+    w_.SetFormatOptions(kFormatSingleLineArray);
+
+    for (unsigned i = 0; i < 3; i++)
+      w_.Double( cor[i] );
+    w_.EndArray();
+    w_.SetFormatOptions(kFormatDefault);
+
+    w_.Key("resistanceTensor");
+    w_.StartArray();
+    for (unsigned i = 0; i < 6; i++) {
+      w_.StartArray();
+      w_.SetFormatOptions(kFormatSingleLineArray);
+      
+      for (unsigned j = 0; j < 6; j++) {
+        w_.Double( Xi(i, j) );
+      }
+      w_.EndArray();
+      w_.SetFormatOptions(kFormatDefault);
+
+    }
+    w_.EndArray();
+
+    w_.Key("temperature");
+    w_.Double(temperature);
+    w_.Key("centerOfDiffusion");
+    w_.StartArray();
+    w_.SetFormatOptions(kFormatSingleLineArray);
+
+    for (unsigned i = 0; i < 3; i++)
+      w_.Double( cod[i] );
+    w_.EndArray();
+    w_.SetFormatOptions(kFormatDefault);
+
+    w_.Key("diffusionTensor");
+    w_.StartArray();
+    for (unsigned i = 0; i < 6; i++) {
+      w_.StartArray();
+      w_.SetFormatOptions(kFormatSingleLineArray);
+      
+      for (unsigned j = 0; j < 6; j++) {
+        w_.Double( Xid(i, j) );
+      }
+      w_.EndArray();
+      w_.SetFormatOptions(kFormatDefault);
+
+    }
+    w_.EndArray();
+
+    w_.Key("pitch");
+    w_.Double(pitchScalar);
+    w_.Key("centerOfPitch");
+    w_.StartArray();
+    w_.SetFormatOptions(kFormatSingleLineArray);
+
+    for (unsigned i = 0; i < 3; i++)
+      w_.Double( cop[i] );
+    w_.EndArray();
+    w_.SetFormatOptions(kFormatDefault);
+    
+    w_.Key("pitchAxes");
+    w_.StartArray();
+    for (unsigned i = 0; i < 3; i++) {
+      w_.StartArray();
+      w_.SetFormatOptions(kFormatSingleLineArray);
+      for (unsigned j = 0; j < 3; j++) {
+        w_.Double( pitchAxes(i, j) );
+      }
+      w_.EndArray();
+      w_.SetFormatOptions(kFormatDefault);
+    }
+    w_.EndArray();
+    
+    w_.EndObject();
+#endif
   }
 
-  void HydroIO::closeWriter(std::ostream& os) { os << j_.dump(2) << std::endl; }
+  void HydroIO::closeWriter(std::ostream& os) {
+#if defined(NLOHMANN_JSON)    
+    os << j_.dump(2) << std::endl;
+#elif defined(RAPID_JSON)
+    w_.EndArray();
+    w_.EndObject();
+    writerOpen_ = false;
+    delete osw_;
+#endif    
+  }
 
   map<string, HydroProp*> HydroIO::parseHydroFile(const string& f) {
     map<string, HydroProp*> props;
 
     ifstream ifs(f);
+    
+    if (!ifs.good()) {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+	       "HydroIO: Cannot open file: %s\n", f.c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+          
+#if defined(NLOHMANN_JSON)    
     json ij = json::parse(ifs);
-
+    
     auto& entries = ij["OpenMD-Hydro"];
-
+    
     for (auto& entry : entries) {
       HydroProp* hp = new HydroProp();
       std::string name;
       Vector3d cor;
       Mat6x6d Xi;
-
+      
       name = entry["name"].get<std::string>();
-
+      
       for (unsigned int i = 0; i < 3; i++) {
-        cor[i] = entry["centerOfResistance"].get<vector<RealType>>()[i];
+	cor[i] = entry["centerOfResistance"].get<vector<RealType>>()[i];
       }
-
+      
       for (unsigned int i = 0; i < 6; i++) {
-        for (unsigned int j = 0; j < 6; j++) {
-          Xi(i, j) =
-              entry["resistanceTensor"].get<vector<vector<RealType>>>()[i][j];
-        }
+	for (unsigned int j = 0; j < 6; j++) {
+	  Xi(i, j) =
+	    entry["resistanceTensor"].get<vector<vector<RealType>>>()[i][j];
+	}
       }
-
+      
       hp->setName(name);
       hp->setCenterOfResistance(cor);
       hp->setResistanceTensor(Xi);
       props.insert(map<string, HydroProp*>::value_type(name, hp));
     }
+#elif defined(RAPID_JSON)
+    // Parse entire file into memory once, then reuse d_ for subsequent
+    // hydroProps.
+    
+    if (ifs.peek() != EOF) {
+      rapidjson::IStreamWrapper isw(ifs);
+      d_.ParseStream(isw);
+      if (d_.HasParseError()) {
+	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		 "HydroIO: JSON parse error in file %s\n"
+		 "\tError: %zu : %s\n", f.c_str(), d_.GetErrorOffset(),
+		 rapidjson::GetParseError_En(d_.GetParseError()));
+	painCave.isFatal = 1;
+	simError();	
+      }
+      if (!d_.IsObject()) {
+	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		 "HydroIO: OpenMD-Hydro should be a single object.\n");
+	painCave.isFatal = 1;
+	simError();
+      }
+      // OpenMD-Hydro has a single object, but check that it's really OpenMD-Hydro
+      if (!d_.HasMember("OpenMD-Hydro")) {
+	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		 "HydroIO: File %s does not have a OpenMD-Hydro object.\n",
+		 f.c_str());
+	painCave.isFatal = 1;
+	simError();
+      }
+    }
+    const Value& entries = d_["OpenMD-Hydro"];
+    for (auto& entry : entries.GetArray()) {
+      HydroProp* hp = new HydroProp();
+      std::string name;
+      Vector3d cor;
+      Mat6x6d Xi;
+      
+      name = entry["name"].GetString();
+      
+      for (unsigned int i = 0; i < 3; i++) {
+	cor[i] = entry["centerOfResistance"][i].GetDouble();
+      }
+      
+      for (unsigned int i = 0; i < 6; i++) {
+	for (unsigned int j = 0; j < 6; j++) {
+	  Xi(i, j) =
+	    entry["resistanceTensor"][i][j].GetDouble();
+	}
+      }
+      
+      hp->setName(name);
+      hp->setCenterOfResistance(cor);
+      hp->setResistanceTensor(Xi);
+      props.insert(map<string, HydroProp*>::value_type(name, hp));
+    }               
+#endif
     return props;
   }
 
@@ -180,10 +355,9 @@ namespace OpenMD {
     std::cout << "viscosity = " << viscosity << " Poise" << std::endl;
     std::cout << "temperature = " << temperature << " K" << std::endl;
     std::cout << "-----------------------------------------\n";
-    std::cout << "The centers are based on the beads generated by Hydro (.xyz "
-                 "file), i.e.,"
-              << std::endl;
-    std::cout << "not based on the geometry in the .omd file.\n" << std::endl;
+    std::cout << "The centers are based on the elements generated by Hydro " << std::endl;
+    std::cout << "which have been placed in an .xyz or .stl file." << std::endl;
+    std::cout << "They are not based on the geometry in the .omd file.\n" << std::endl;
     std::cout << "-----------------------------------------\n\n";
     std::cout << "Center of resistance :" << std::endl;
     std::cout << ror << "\n" << std::endl;

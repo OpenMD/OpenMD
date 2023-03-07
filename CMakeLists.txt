@@ -1,5 +1,5 @@
 # Top level cmake script for OpenMD.
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.5)
 
 project(OpenMD VERSION 3.0.0 LANGUAGES CXX)
 
@@ -17,14 +17,40 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include(FetchContent)
-find_package(nlohmann_json REQUIRED)
-if (NOT nlohmann_json_FOUND)
-   FetchContent_Declare(nlohmann_json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
-   FetchContent_MakeAvailable(nlohmann_json)
-   set(nlohmann_json_INCLUDE_DIR ${nlohmann_json_SOURCE_DIR}/include)
+
+#find_package(nlohmann_json REQUIRED)
+#if (NOT nlohmann_json_FOUND)
+#   FetchContent_Declare(nlohmann_json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+#   FetchContent_MakeAvailable(nlohmann_json)
+#   set(nlohmann_json_INCLUDE_DIR ${nlohmann_json_SOURCE_DIR}/include)
+#endif()
+#message(STATUS "Adding include for json to ${nlohmann_json_INCLUDE_DIR}")
+#include_directories(${nlohmann_json_INCLUDE_DIR})
+
+find_package(RapidJSON)
+if (RAPIDJSON_FOUND)
+   set(RAPID_JSON 1)
+else()
+   find_package(nlohmann_json)
+   if (nlohmann_json_FOUND)
+      set(NLOHMANN_JSON 1)
+   else()
+   	message(STATUS "Fetching RapidJSON")
+	FetchContent_Declare(
+		rapidjson
+		GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
+		GIT_TAG        master
+	)
+	FetchContent_GetProperties(rapidjson)
+	if(NOT rapidjson_POPULATED)
+	       FetchContent_Populate(rapidjson)
+	endif()
+	include_directories( ${rapidjson_SOURCE_DIR}/include )
+	message(STATUS "Adding include for json to ${rapidjson_SOURCE_DIR}/include")
+	set(RAPID_JSON 1)
+   endif()
 endif()
-message(STATUS "Adding include for json to ${nlohmann_json_INCLUDE_DIR}")
-include_directories(${nlohmann_json_INCLUDE_DIR})
+
 
 find_package(stl_reader REQUIRED)
 if (NOT stl_reader_FOUND)
@@ -35,7 +61,7 @@ if (NOT stl_reader_FOUND)
    FetchContent_MakeAvailable(stl_reader)
    set(stl_reader_INCLUDE_DIR ${stl_reader_SOURCE_DIR})
 endif()
-message(STATUS "Adding include for json to ${stl_reader_INCLUDE_DIR}")
+message(STATUS "Adding include for stl_reader to ${stl_reader_INCLUDE_DIR}")
 include_directories(${stl_reader_INCLUDE_DIR}) 
 
 if (NOT NO_PARALLEL)
@@ -1093,7 +1119,8 @@ message( STATUS "MPI_CXX_LIBRARIES .......... = ${MPI_CXX_LIBRARIES}")
 message( STATUS "OPENBABEL_DIR .............. = ${OPENBABEL_DIR}")
 message( STATUS "OPENBABEL_INCLUDE_DIR ...... = ${OPENBABEL_INCLUDE_DIR}")
 message( STATUS "OPENBABEL_LIBRARIES ........ = ${OPENBABEL_LIBRARIES}")
-message( STATUS "nlohmann_json_INCLUDE_DIR .. = ${nlohmann_json_INCLUDE_DIR}")
+message( STATUS "NLOHMANN_JSON .............. = ${NLOHMANN_JSON}")
+message( STATUS "RAPID_JSON ................. = ${RAPID_JSON}")
 message( STATUS "stl_reader_INCLUDE_DIR ..... = ${stl_reader_INCLUDE_DIR}")
 message( STATUS "QHULL_ROOT ................. = ${QHULL_ROOT}")
 message( STATUS "QHULL_INCLUDE_DIR .......... = ${QHULL_INCLUDE_DIR}")
