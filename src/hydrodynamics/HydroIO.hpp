@@ -53,6 +53,7 @@
 using ordered_json = nlohmann::ordered_json;
 using json = nlohmann::json;
 #elif defined(RAPID_JSON)
+#define RAPIDJSON_NOMEMBERITERATORCLASS
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/ostreamwrapper.h>
