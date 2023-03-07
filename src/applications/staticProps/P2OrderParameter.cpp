@@ -273,7 +273,7 @@ namespace OpenMD {
     os << "#P2 Order parameter\n";
     os << "#selection1: (" << selectionScript1_ << ")\t";
     if (!doVect_) { os << "selection2: (" << selectionScript2_ << ")\n"; }
-    os << "#p2\tdirector_x\tdirector_y\tdiretor_z\tangle(degree)\n";
+    os << "#p2\tdirector_x\tdirector_y\tdirector_z\tangle(degree)\n";
 
     RealType p2Sum {};
     RealType angleSum {};
