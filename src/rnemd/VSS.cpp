@@ -70,7 +70,6 @@
 #include "rnemd/RNEMDParameters.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
-#include "utils/Accumulator.hpp"
 #include "utils/Constants.hpp"
 
 namespace OpenMD::RNEMD {

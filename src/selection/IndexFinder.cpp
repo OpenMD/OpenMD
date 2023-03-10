@@ -44,6 +44,10 @@
 
 #include "selection/IndexFinder.hpp"
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "primitives/Molecule.hpp"
 
 namespace OpenMD {
@@ -113,14 +117,41 @@ namespace OpenMD {
   }
 
   SelectionSet IndexFinder::find(int molIndex) {
-    return selectionSets_[molIndex];
+#ifdef IS_MPI
+    int proc;
+    int worldRank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
+    proc = info_->getMolToProc(molIndex);
+
+    if (proc == worldRank) {
+#endif
+      return selectionSets_[molIndex];
+#ifdef IS_MPI
+    } else {
+      return SelectionSet(nObjects_);
+    }
+#endif
   }
 
   SelectionSet IndexFinder::find(int begMolIndex, int endMolIndex) {
     SelectionSet ss(nObjects_);
 
+#ifdef IS_MPI
+    int proc;
+    int worldRank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
+#endif
+
     for (int i = begMolIndex; i < endMolIndex; ++i) {
-      ss |= selectionSets_[i];
+#ifdef IS_MPI
+      proc = info_->getMolToProc(i);
+
+      if (proc == worldRank) {
+#endif
+        ss |= selectionSets_[i];
+#ifdef IS_MPI
+      }
+#endif
     }
     return ss;
   }

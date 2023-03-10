@@ -45,10 +45,13 @@
 #ifndef OPENMD_RNEMD_SPF_HPP
 #define OPENMD_RNEMD_SPF_HPP
 
+#include <string>
+
 #include "brains/ForceManager.hpp"
 #include "brains/SimInfo.hpp"
 #include "rnemd/RNEMD.hpp"
 #include "rnemd/SPFForceManager.hpp"
+#include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 
 namespace OpenMD::RNEMD {
@@ -65,6 +68,10 @@ namespace OpenMD::RNEMD {
     RealType deltaLambda_ {};
 
     SPFForceManager* forceManager_ {nullptr};
+
+    std::string selectedMoleculeStr_;
+    SelectionEvaluator selectedMoleculeEvaluator_;
+    SelectionManager selectedMoleculeMan_;
   };
 }  // namespace OpenMD::RNEMD
 

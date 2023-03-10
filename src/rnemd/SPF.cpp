@@ -70,8 +70,13 @@
 namespace OpenMD::RNEMD {
 
   SPFMethod::SPFMethod(SimInfo* info, ForceManager* forceMan) :
-      RNEMD {info, forceMan} {
+      RNEMD {info, forceMan}, selectedMoleculeMan_(info),
+      selectedMoleculeEvaluator_(info) {
     rnemdMethodLabel_ = "SPF";
+
+    selectedMoleculeStr_ = "select none";
+    selectedMoleculeEvaluator_.loadScriptString(selectedMoleculeStr_);
+    selectedMoleculeMan_.setSelectionSet(selectedMoleculeEvaluator_.evaluate());
 
     if (SPFForceManager* spfForceManager =
             dynamic_cast<SPFForceManager*>(forceMan)) {
@@ -133,6 +138,13 @@ namespace OpenMD::RNEMD {
   void SPFMethod::doRNEMDImpl(SelectionManager& smanA,
                               SelectionManager& smanB) {
     if (!doRNEMD_) return;
+
+    // Remove selected molecule from the source selection manager
+    if (particleTarget_ > 0.0) {
+      smanA -= selectedMoleculeMan_;
+    } else {
+      smanB -= selectedMoleculeMan_;
+    }
 
     failedLastTrial_ = false;
 
@@ -315,8 +327,9 @@ namespace OpenMD::RNEMD {
 
 #ifdef IS_MPI
       for (int i {}; i < size; ++i) {
-        if (i != worldRank)
+        if (i != worldRank) {
           MPI_Send(&globalSelectedID, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+        }
       }
     } else {
       MPI_Recv(&globalSelectedID, 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD,
@@ -325,8 +338,7 @@ namespace OpenMD::RNEMD {
     }
 
     if (globalSelectedID >= 0) {
-      currentObjectSelection_ =
-          rnemdObjectSelection_ + " && ! " + std::to_string(globalSelectedID);
+      selectedMoleculeStr_ = "select " + std::to_string(globalSelectedID);
 
       int axis0 = (rnemdPrivilegedAxis_ + 1) % 3;
       int axis1 = (rnemdPrivilegedAxis_ + 2) % 3;
@@ -346,14 +358,17 @@ namespace OpenMD::RNEMD {
         newCom[axis0] = distr0(*randNumGen);
         newCom[axis1] = distr1(*randNumGen);
         newCom[axis2] = distr2(*randNumGen);
-        forceManager_->setSelectedMolecule(selectedMolecule, newCom);
 
+        forceManager_->setSelectedMolecule(selectedMolecule, newCom);
 #ifdef IS_MPI
       }
 #endif
 
       hasSelectedMolecule = true;
     }
+
+    selectedMoleculeEvaluator_.loadScriptString(selectedMoleculeStr_);
+    selectedMoleculeMan_.setSelectionSet(selectedMoleculeEvaluator_.evaluate());
 
     forceManager_->setHasSelectedMolecule(hasSelectedMolecule);
   }

@@ -70,7 +70,6 @@
 #include "rnemd/RNEMDParameters.hpp"
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
-#include "utils/Accumulator.hpp"
 #include "utils/Constants.hpp"
 
 #define HONKING_LARGE_VALUE 1.0e10

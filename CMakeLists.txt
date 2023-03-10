@@ -133,15 +133,6 @@ include(CheckCXXCompilerFlag)
 include(CheckIncludeFileCXX)
 include(CheckCXXSymbolExists)
 
-if(WIN32)
-  add_compile_options("/W4 /Wall /DNOMINMAX /WX")
-else()
-  # add_compile_options(-pedantic-errors -Wall -Wextra -Werror)
-
-  if(CMAKE_COMPILER_IS_GNUCXX)
-    add_compile_options(-Wno-unused-parameter -Wno-cast-function-type -Wno-clobbered)
-  endif()
-endif()
 
 # OpenMD version number.
 set (VERSION_MAJOR "3")
@@ -565,7 +556,6 @@ src/primitives/UreyBradleyBend.cpp
 src/restraints/MolecularRestraint.cpp
 src/restraints/ObjectRestraint.cpp
 src/selection/HullFinder.cpp
-src/selection/IndexFinder.cpp
 src/selection/NameFinder.cpp
 src/selection/SelectionCompiler.cpp
 src/selection/SelectionEvaluator.cpp
@@ -673,6 +663,7 @@ src/perturbations/UniformGradient.cpp
 src/restraints/RestraintForceModifier.cpp
 src/restraints/ThermoIntegrationForceModifier.cpp
 src/selection/DistanceFinder.cpp
+src/selection/IndexFinder.cpp
 src/selection/SelectionManager.cpp
 src/selection/SelectionSet.cpp
 src/utils/ProgressBar.cpp
