@@ -288,12 +288,12 @@ def writeHeaderFile(plates):
     headerFile.write("#define _HEADER_INC_ \n\n")
     headerFile.write("molecule{ \n")
     headerFile.write("  name = \"Plates\"; \n\n")
-    for i in range(0, len(plates)/2):
+    for i in range(0, int(len(plates)/2)):
         headerFile.write("  atom[" + str(i) +"]{ \n")
         headerFile.write("    type = \"PosPlate\"; \n")
         headerFile.write("    position( " + str(plates[i][0]) + ", " + str(plates[i][1]) + ", " +str(plates[i][2]) + "  ); \n")
         headerFile.write("  } \n")
-    for i in range(len(plates)/2, len(plates)):
+    for i in range(int(len(plates)/2), len(plates)):
         headerFile.write("  atom[" + str(i) +"]{ \n")
         headerFile.write("    type = \"NegPlate\"; \n")
         headerFile.write("    position( " + str(plates[i][0]) + ", " + str(plates[i][1]) + ", " +str(plates[i][2]) + "  ); \n")
