@@ -55,8 +55,32 @@
 
 namespace OpenMD {
 
+  /* Internally convert CHARMM torsion functions to two polynomials
+   * based on Chebyshev polynomials in cos(phi):
+   *
+   * \f[ V_{\text{torsion}}(\phi) = \sum_n K_n + \sum_n K_n cos(\delta_n) T_n(cos(\phi)) - \sum_n K_n sin(\delta_n) U_{n-1}((cos \phi)) sin(\phi) \f]
+   *
+   * This conversion has used the cosine addition formula, and two
+   * identities of Chebyshev polynomials:
+   *
+   * \f[ T_n (cos \phi) = cos(n \phi) \f]
+   *
+   * for Chebyshev polynomials of the first type, and:
+   *
+   * \f[ U_{n-1} (cos \phi) sin(\phi) = sin( n \phi ) \f]
+   * 
+   * for Chebyshev polynomials of the second type. We're left with a
+   * simpler equation for the torsion potential in terms of only
+   * polynomials of the cosine and an additional sine of the angle:
+   *
+   * \f[ V_{\text{torsion}}(\phi) = C + T(cos(\phi)) + U(cos(\phi)) * sin(\phi) \f]
+   * \f[ C \sum_n K_n \f]
+   * \f[ T(cos(\phi)) = \sum_n K_n cos(\delta_n) T_n(cos(\phi)) \f]
+   * \f[ U(cos(\phi)) = \sum_n -K_n sin(\delta_n) U_{n-1}(cos(\phi)) \f]
+   */
   CharmmTorsionType::CharmmTorsionType(
-      std::vector<CharmmTorsionParameter>& parameters) {
+	std::vector<CharmmTorsionParameter>& parameters) : TorsionType() {
+    
     std::vector<CharmmTorsionParameter>::iterator i;
     i = std::max_element(parameters.begin(), parameters.end(),
                          LessThanPeriodicityFunctor());
@@ -66,24 +90,42 @@ namespace OpenMD {
       ChebyshevU U(maxPower);
 
       // convert parameters of charmm type torsion into
-      // PolynomialTorsion's parameters
-      DoublePolynomial finalPolynomial;
+      // Polynomial parameters
+
       for (i = parameters.begin(); i != parameters.end(); ++i) {
         DoublePolynomial cosTerm = T.getChebyshevPolynomial(i->n);
-        cosTerm.operator*=(cos(i->delta) * i->kchi * 0.5);
+        cosTerm *= (cos(i->delta) * i->kchi);
 
-        DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n);
-        sinTerm *= -sin(i->delta) * i->kchi * 0.5;
-
-        finalPolynomial += cosTerm + sinTerm;
-
-        finalPolynomial += (i->kchi * 0.5);
+	// should check that i->n is >= 1
+        DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n - 1);
+        sinTerm *= -(sin(i->delta) * i->kchi);
+	
+	T_ += cosTerm;
+	U_ += sinTerm;
+	C_ += i->kchi;
       }
-      this->setPolynomial(finalPolynomial);
-
-      /*std::ofstream myfile;
-    myfile.open("MyParameters", std::ios::app);
-    myfile << "The Polynomial contains below terms:" << std::endl;*/
     }
+  }
+
+  void CharmmTorsionType::calcForce(RealType cosPhi, RealType& V,
+				    RealType& dVdCosPhi) {
+    // check roundoff
+    if (cosPhi > 1.0) {
+      cosPhi = 1.0;
+    } else if (cosPhi < -1.0) {
+      cosPhi = -1.0;
+    }
+      
+    RealType sinPhi = sqrt(1.0 - cosPhi * cosPhi);
+
+    // trick to avoid divergence in angles near 0 and pi:
+    
+    if (fabs(sinPhi) < 1.0E-6) { sinPhi = copysign(1.0E-6, sinPhi); }
+
+    V = C_ + T_.evaluate(cosPhi) + U_.evaluate(cosPhi) * sinPhi;
+    dVdCosPhi = T_.evaluateDerivative(cosPhi);
+    // Chain rule for U * sinPhi term:
+    dVdCosPhi += U_.evaluateDerivative(cosPhi) * sinPhi;
+    dVdCosPhi += U_.evaluate(cosPhi) / (2.0 * sinPhi); 
   }
 }  // namespace OpenMD
