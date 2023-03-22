@@ -55,29 +55,6 @@
 
 namespace OpenMD {
 
-  /* Internally convert CHARMM torsion functions to two polynomials
-   * based on Chebyshev polynomials in cos(phi):
-   *
-   * \f[ V_{\text{torsion}}(\phi) = \sum_n K_n + \sum_n K_n cos(\delta_n) T_n(cos(\phi)) - \sum_n K_n sin(\delta_n) U_{n-1}((cos \phi)) sin(\phi) \f]
-   *
-   * This conversion has used the cosine addition formula, and two
-   * identities of Chebyshev polynomials:
-   *
-   * \f[ T_n (cos \phi) = cos(n \phi) \f]
-   *
-   * for Chebyshev polynomials of the first type, and:
-   *
-   * \f[ U_{n-1} (cos \phi) sin(\phi) = sin( n \phi ) \f]
-   * 
-   * for Chebyshev polynomials of the second type. We're left with a
-   * simpler equation for the torsion potential in terms of only
-   * polynomials of the cosine and an additional sine of the angle:
-   *
-   * \f[ V_{\text{torsion}}(\phi) = C + T(cos(\phi)) + U(cos(\phi)) * sin(\phi) \f]
-   * \f[ C \sum_n K_n \f]
-   * \f[ T(cos(\phi)) = \sum_n K_n cos(\delta_n) T_n(cos(\phi)) \f]
-   * \f[ U(cos(\phi)) = \sum_n -K_n sin(\delta_n) U_{n-1}(cos(\phi)) \f]
-   */
   CharmmTorsionType::CharmmTorsionType(
 	std::vector<CharmmTorsionParameter>& parameters) : TorsionType() {
     
