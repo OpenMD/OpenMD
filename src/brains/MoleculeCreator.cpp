@@ -672,7 +672,7 @@ namespace OpenMD {
         ConstraintElem* consElemA = new ConstraintElem(bond->getAtomA());
         ConstraintElem* consElemB = new ConstraintElem(bond->getAtomB());
         cPair                     = new ConstraintPair(consElemA, consElemB,
-                                   fbt->getEquilibriumBondLength(), false);
+                                                       fbt->getEquilibriumBondLength(), false);
         mol->addConstraintPair(cPair);
       }
     }

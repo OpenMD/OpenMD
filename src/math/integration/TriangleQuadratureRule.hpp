@@ -17,11 +17,11 @@ namespace OpenMD {
   /// triangular domains.
   class TriangleQuadratureRule {
   public:
-    TriangleQuadratureRule(const TriangleQuadratureRule&) = default;
+    TriangleQuadratureRule(const TriangleQuadratureRule&)            = default;
     TriangleQuadratureRule& operator=(const TriangleQuadratureRule&) = default;
     TriangleQuadratureRule(TriangleQuadratureRule&&)                 = default;
-    TriangleQuadratureRule& operator=(TriangleQuadratureRule&&) = default;
-    TriangleQuadratureRule()                                    = default;
+    TriangleQuadratureRule& operator=(TriangleQuadratureRule&&)      = default;
+    TriangleQuadratureRule()                                         = default;
     virtual ~TriangleQuadratureRule() {}
 
     /// Returns the order of this rule.

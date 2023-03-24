@@ -42,51 +42,39 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef UTILS_ACCUMULATOR_HPP
-#define UTILS_ACCUMULATOR_HPP
+#ifndef OPENMD_UTILS_ACCUMULATOR_HPP
+#define OPENMD_UTILS_ACCUMULATOR_HPP
 
 #include <cassert>
 #include <cmath>
+#include <cstddef>
+#include <limits>
+#include <type_traits>
+#include <vector>
 
+#include "math/SquareMatrix.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/Vector.hpp"
 #include "math/Vector3.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
+#include "utils/simError.h"
 
-namespace OpenMD {
+namespace OpenMD::Utils {
 
-  class BaseAccumulator {
-  public:
-    virtual void clear() = 0;
-    /**
-     * get the number of accumulated values
-     */
-    virtual size_t count() { return Count_; }
-    virtual ~BaseAccumulator() {};
-
-  protected:
-    size_t Count_ {};
-  };
-
-  /**
-   * Basic Accumulator class for numbers.
-   */
-  class Accumulator : public BaseAccumulator {
-    using ElementType = RealType;
-    using ResultType  = RealType;
+  template<typename T>
+  class Accumulator {
+    static_assert(std::is_default_constructible_v<T>,
+                  "Accumulator type parameters must be default constructible.");
 
   public:
-    Accumulator() : BaseAccumulator() { this->clear(); }
-
-    ~Accumulator() {};
-
-    /**
-     * Accumulate another value
-     */
-    virtual void add(ElementType const& val) {
+    void add(const T& val) {
       Count_++;
-      Avg_ += (val - Avg_) / Count_;
-      Avg2_ += (val * val - Avg2_) / Count_;
+
       Val_ = val;
       Total_ += val;
+      Avg_ += (val - Avg_) / static_cast<RealType>(Count_);
+      Avg2_ += (val * val - Avg2_) / static_cast<RealType>(Count_);
+
       if (Count_ <= 1) {
         Max_ = val;
         Min_ = val;
@@ -96,607 +84,316 @@ namespace OpenMD {
       }
     }
 
-    /**
-     * reset the Accumulator to the empty state
-     */
-    void clear() {
-      Count_ = 0;
-      Avg_   = 0;
-      Avg2_  = 0;
-      Total_ = 0;
-      Val_   = 0;
-    }
+    std::size_t getCount() const { return Count_; }
 
-    /**
-     * return the most recently added value
-     */
-    void getLastValue(ElementType& ret) {
-      ret = Val_;
-      return;
-    }
+    T getLastValue() const { return Val_; }
 
-    /**
-     * compute the Mean
-     */
-    void getAverage(ResultType& ret) {
+    T getTotal() const {
       assert(Count_ != 0);
-      ret = Avg_;
-      return;
+      return Total_;
     }
 
-    /**
-     * return the Total accumulated sum
-     */
-    void getTotal(ResultType& ret) {
+    RealType getMax() const {
+      static_assert(std::is_arithmetic<T>::value,
+                    "getMax() requires a RealType Accumulator.");
       assert(Count_ != 0);
-      ret = Total_;
-      return;
+      return Max_;
     }
 
-    /**
-     * compute the Variance
-     */
-    void getVariance(ResultType& ret) {
+    RealType getMin() const {
+      static_assert(std::is_arithmetic<T>::value,
+                    "getMin() requires a RealType Accumulator.");
       assert(Count_ != 0);
-      ret = (Avg2_ - Avg_ * Avg_);
-      if (ret < 0) ret = 0;
-      return;
+      return Min_;
     }
 
-    /**
-     * compute error of average value
-     */
-    void getStdDev(ResultType& ret) {
+    RealType getAverage() const {
       assert(Count_ != 0);
-      RealType var;
-      this->getVariance(var);
-      ret = sqrt(var);
-      return;
+      return Avg_;
     }
 
-    /**
-     * return the largest value
-     */
-    void getMax(ElementType& ret) {
+    RealType getVariance() const {
       assert(Count_ != 0);
-      ret = Max_;
-      return;
+      T var = (Avg2_ - Avg_ * Avg_);
+      if (var < 0) var = 0;
+
+      return var;
     }
 
-    /**
-     * return the smallest value
-     */
-    void getMin(ElementType& ret) {
+    RealType getStdDev() const {
       assert(Count_ != 0);
-      ret = Max_;
-      return;
+      T sd = std::sqrt(this->getVariance());
+
+      return sd;
     }
 
-    /**
-     * return the 95% confidence interval:
-     *
-     * That is returns c, such that we have 95% confidence that the
-     * true mean is within 2c of the Average (x):
-     *
-     *   x - c <= true mean <= x + c
-     *
-     */
-    void get95percentConfidenceInterval(ResultType& ret) {
+    RealType get95percentConfidenceInterval() const {
       assert(Count_ != 0);
-      RealType sd;
-      this->getStdDev(sd);
-      ret = 1.960 * sd / sqrt(RealType(Count_));
-      return;
+      T ci =
+          1.960 * this->getStdDev() / std::sqrt(static_cast<RealType>(Count_));
+
+      return ci;
     }
 
   private:
-    ElementType Val_;
-    ResultType Avg_;
-    ResultType Avg2_;
-    ResultType Total_;
-    ElementType Min_;
-    ElementType Max_;
+    std::size_t Count_ {};
+    T Val_ {}, Total_ {};
+    RealType Max_ {}, Min_ {}, Avg_ {}, Avg2_ {};
   };
 
-  class VectorAccumulator : public BaseAccumulator {
-    using ElementType = Vector3d;
-    using ResultType  = Vector3d;
-
+  // Specializations for commonly used Accumulator types
+  template<>
+  class Accumulator<std::vector<RealType>> {
   public:
-    VectorAccumulator() : BaseAccumulator() { this->clear(); }
+    /* A flag specifying that a given bin is empty and should be ignored
+      during calls to add() */
+    constexpr static RealType BinEmptyFlag =
+        std::numeric_limits<RealType>::max();
 
-    /**
-     * Accumulate another value
-     */
-    void add(ElementType const& val) {
-      Count_++;
-      RealType len(0.0);
-      for (unsigned int i = 0; i < 3; i++) {
-        Avg_[i] += (val[i] - Avg_[i]) / Count_;
-        Avg2_[i] += (val[i] * val[i] - Avg2_[i]) / Count_;
+    void add(const std::vector<RealType>& val) {
+      if (val.empty() || (val.size() != Avg_.size() && !Avg_.empty())) {
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Size of vector passed to add() did not "
+                 "match the size of the StaticAccumulator.");
+        painCave.isFatal = 1;
+        simError();
+      }
+
+      if (Avg_.empty()) {
+        Count_.resize(val.size());
+        Val_.resize(val.size());
+        Total_.resize(val.size());
+        Avg_.resize(val.size());
+        Avg2_.resize(val.size());
+      }
+
+      for (std::size_t i = 0; i < val.size(); i++) {
+        /* If our placeholder, BinEmptyFlag, is passed to add(), we should
+            not record data at the current index */
+        if (val[i] == BinEmptyFlag) continue;
+
+        Count_[i]++;
         Val_[i] = val[i];
         Total_[i] += val[i];
-        len += val[i] * val[i];
-      }
-      len = sqrt(len);
-      AvgLen_ += (len - AvgLen_) / Count_;
-      AvgLen2_ += (len * len - AvgLen2_) / Count_;
-
-      if (Count_ <= 1) {
-        Max_ = len;
-        Min_ = len;
-      } else {
-        Max_ = len > Max_ ? len : Max_;
-        Min_ = len < Min_ ? len : Min_;
+        Avg_[i] += (val[i] - Avg_[i]) / static_cast<RealType>(Count_[i]);
+        Avg2_[i] +=
+            (val[i] * val[i] - Avg2_[i]) / static_cast<RealType>(Count_[i]);
       }
     }
 
-    /**
-     * reset the Accumulator to the empty state
-     */
-    void clear() {
-      Count_   = 0;
-      Avg_     = V3Zero;
-      Avg2_    = V3Zero;
-      Total_   = V3Zero;
-      Val_     = V3Zero;
-      AvgLen_  = 0;
-      AvgLen2_ = 0;
-    }
+    std::vector<std::size_t> getCount() const { return Count_; }
 
-    /**
-     * return the most recently added value
-     */
-    void getLastValue(ElementType& ret) {
-      ret = Val_;
-      return;
-    }
+    std::vector<RealType> getLastValue() const { return Val_; }
 
-    /**
-     * compute the Mean
-     */
-    void getAverage(ResultType& ret) {
-      assert(Count_ != 0);
-      ret = Avg_;
-      return;
-    }
+    std::vector<RealType> getTotal() const { return Total_; }
 
-    /**
-     * return the Total accumulated sum
-     */
-    void getTotal(ResultType& ret) {
-      assert(Count_ != 0);
-      ret = Total_;
-      return;
-    }
+    std::vector<RealType> getAverage() const { return Avg_; }
 
-    /**
-     * compute the Variance
-     */
-    void getVariance(ResultType& ret) {
-      assert(Count_ != 0);
-      for (unsigned int i = 0; i < 3; i++) {
-        ret[i] = (Avg2_[i] - Avg_[i] * Avg_[i]);
-        if (ret[i] < 0) ret[i] = 0;
+    std::vector<RealType> getVariance() const {
+      std::vector<RealType> var(Avg_.size());
+
+      for (std::size_t i = 0; i < Avg_.size(); i++) {
+        var[i] = (Avg2_[i] - Avg_[i] * Avg_[i]);
+        if (var[i] < 0) var[i] = 0;
       }
-      return;
+
+      return var;
     }
 
-    /**
-     * compute error of average value
-     */
-    void getStdDev(ResultType& ret) {
-      assert(Count_ != 0);
-      ResultType var;
-      this->getVariance(var);
-      ret[0] = sqrt(var[0]);
-      ret[1] = sqrt(var[1]);
-      ret[2] = sqrt(var[2]);
-      return;
+    std::vector<RealType> getStdDev() const {
+      std::vector<RealType> sd(Avg_.size());
+      std::vector<RealType> variance = this->getVariance();
+
+      for (std::size_t i = 0; i < variance.size(); i++) {
+        sd[i] = std::sqrt(variance[i]);
+      }
+
+      return sd;
     }
 
-    /**
-     * return the 95% confidence interval:
-     *
-     * That is returns c, such that we have 95% confidence that the
-     * true mean is within 2c of the Average (x):
-     *
-     *   x - c <= true mean <= x + c
-     *
-     */
-    void get95percentConfidenceInterval(ResultType& ret) {
-      assert(Count_ != 0);
-      ResultType sd;
-      this->getStdDev(sd);
-      ret[0] = 1.960 * sd[0] / sqrt(RealType(Count_));
-      ret[1] = 1.960 * sd[1] / sqrt(RealType(Count_));
-      ret[2] = 1.960 * sd[2] / sqrt(RealType(Count_));
-      return;
-    }
+    std::vector<RealType> get95percentConfidenceInterval() const {
+      std::vector<RealType> ci(Avg_.size());
+      std::vector<RealType> stdDev = this->getStdDev();
 
-    /**
-     * return the largest length
-     */
-    void getMaxLength(RealType& ret) {
-      assert(Count_ != 0);
-      ret = Max_;
-      return;
-    }
+      for (std::size_t i = 0; i < stdDev.size(); i++) {
+        ci[i] = 1.960 * stdDev[i] / std::sqrt(static_cast<RealType>(Count_[i]));
+      }
 
-    /**
-     * return the smallest length
-     */
-    void getMinLength(RealType& ret) {
-      assert(Count_ != 0);
-      ret = Min_;
-      return;
-    }
-
-    /**
-     * return the largest length
-     */
-    void getAverageLength(RealType& ret) {
-      assert(Count_ != 0);
-      ret = AvgLen_;
-      return;
-    }
-
-    /**
-     * compute the Variance of the length
-     */
-    void getLengthVariance(RealType& ret) {
-      assert(Count_ != 0);
-      ret = (AvgLen2_ - AvgLen_ * AvgLen_);
-      if (ret < 0) ret = 0;
-      return;
-    }
-
-    /**
-     * compute error of average value
-     */
-    void getLengthStdDev(RealType& ret) {
-      assert(Count_ != 0);
-      RealType var;
-      this->getLengthVariance(var);
-      ret = sqrt(var);
-      return;
-    }
-
-    /**
-     * return the 95% confidence interval:
-     *
-     * That is returns c, such that we have 95% confidence that the
-     * true mean is within 2c of the Average (x):
-     *
-     *   x - c <= true mean <= x + c
-     *
-     */
-    void getLength95percentConfidenceInterval(ResultType& ret) {
-      assert(Count_ != 0);
-      RealType sd;
-      this->getLengthStdDev(sd);
-      ret = 1.960 * sd / sqrt(RealType(Count_));
-      return;
+      return ci;
     }
 
   private:
-    ResultType Val_;
-    ResultType Avg_;
-    ResultType Avg2_;
-    ResultType Total_;
-    RealType AvgLen_;
-    RealType AvgLen2_;
-    RealType Min_;
-    RealType Max_;
+    std::vector<std::size_t> Count_ {};
+    std::vector<RealType> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
   };
 
-  class PotVecAccumulator : public BaseAccumulator {
-    using ElementType = potVec;
-    using ResultType  = potVec;
-
+  template<unsigned int Dim>
+  class Accumulator<Vector<RealType, Dim>> {
   public:
-    PotVecAccumulator() : BaseAccumulator() { this->clear(); }
-
-    /**
-     * Accumulate another value
-     */
-    void add(ElementType const& val) {
+    void add(const Vector<RealType, Dim>& val) {
       Count_++;
-      RealType len(0.0);
-      for (unsigned int i = 0; i < N_INTERACTION_FAMILIES; i++) {
-        Avg_[i] += (val[i] - Avg_[i]) / Count_;
-        Avg2_[i] += (val[i] * val[i] - Avg2_[i]) / Count_;
+
+      for (std::size_t i = 0; i < Dim; i++) {
         Val_[i] = val[i];
         Total_[i] += val[i];
-        len += val[i] * val[i];
-      }
-      len = sqrt(len);
-      AvgLen_ += (len - AvgLen_) / Count_;
-      AvgLen2_ += (len * len - AvgLen2_) / Count_;
-
-      if (Count_ <= 1) {
-        Max_ = len;
-        Min_ = len;
-      } else {
-        Max_ = len > Max_ ? len : Max_;
-        Min_ = len < Min_ ? len : Min_;
+        Avg_[i] += (val[i] - Avg_[i]) / static_cast<RealType>(Count_);
+        Avg2_[i] +=
+            (val[i] * val[i] - Avg2_[i]) / static_cast<RealType>(Count_);
       }
     }
 
-    /**
-     * reset the Accumulator to the empty state
-     */
-    void clear() {
-      Count_ = 0;
-      const Vector<RealType, N_INTERACTION_FAMILIES> potVecZero(0.0);
-      Avg_     = potVecZero;
-      Avg2_    = potVecZero;
-      Val_     = potVecZero;
-      Total_   = potVecZero;
-      AvgLen_  = 0;
-      AvgLen2_ = 0;
+    std::size_t getCount() const { return Count_; }
+
+    Vector<RealType, Dim> getLastValue() const { return Val_; }
+
+    Vector<RealType, Dim> getTotal() const {
+      assert(Count_ != 0);
+
+      return Total_;
     }
 
-    /**
-     * return the most recently added value
-     */
-    void getLastValue(ElementType& ret) {
-      ret = Val_;
-      return;
+    Vector<RealType, Dim> getAverage() const {
+      assert(Count_ != 0);
+
+      return Avg_;
     }
 
-    /**
-     * compute the Mean
-     */
-    void getAverage(ResultType& ret) {
+    Vector<RealType, Dim> getVariance() const {
       assert(Count_ != 0);
-      ret = Avg_;
-      return;
-    }
 
-    /**
-     * return the Total accumulated sum
-     */
-    void getTotal(ResultType& ret) {
-      assert(Count_ != 0);
-      ret = Total_;
-      return;
-    }
-    /**
-     * compute the Variance
-     */
-    void getVariance(ResultType& ret) {
-      assert(Count_ != 0);
-      for (unsigned int i = 0; i < N_INTERACTION_FAMILIES; i++) {
-        ret[i] = (Avg2_[i] - Avg_[i] * Avg_[i]);
-        if (ret[i] < 0) ret[i] = 0;
+      Vector<RealType, Dim> var {};
+
+      for (std::size_t i = 0; i < Dim; i++) {
+        var[i] = (Avg2_[i] - Avg_[i] * Avg_[i]);
+        if (var[i] < 0) var[i] = 0;
       }
-      return;
+
+      return var;
     }
 
-    /**
-     * compute error of average value
-     */
-    void getStdDev(ResultType& ret) {
+    Vector<RealType, Dim> getStdDev() const {
       assert(Count_ != 0);
-      ResultType var;
-      this->getVariance(var);
-      for (unsigned int i = 0; i < N_INTERACTION_FAMILIES; i++) {
-        ret[i] = sqrt(var[i]);
+
+      Vector<RealType, Dim> sd {};
+      Vector<RealType, Dim> variance = this->getVariance();
+
+      for (std::size_t i = 0; i < Dim; i++) {
+        sd[i] = std::sqrt(variance[i]);
       }
-      return;
+
+      return sd;
     }
 
-    /**
-     * return the 95% confidence interval:
-     *
-     * That is returns c, such that we have 95% confidence that the
-     * true mean is within 2c of the Average (x):
-     *
-     *   x - c <= true mean <= x + c
-     *
-     */
-    void get95percentConfidenceInterval(ResultType& ret) {
+    Vector<RealType, Dim> get95percentConfidenceInterval() const {
       assert(Count_ != 0);
-      ResultType sd;
-      this->getStdDev(sd);
-      for (unsigned int i = 0; i < N_INTERACTION_FAMILIES; i++) {
-        ret[i] = 1.960 * sd[i] / sqrt(RealType(Count_));
+
+      Vector<RealType, Dim> ci {};
+      Vector<RealType, Dim> stdDev = this->getStdDev();
+
+      for (std::size_t i = 0; i < Dim; i++) {
+        ci[i] = 1.960 * stdDev[i] / std::sqrt(static_cast<RealType>(Count_));
       }
-      return;
-    }
 
-    /**
-     * return the largest length
-     */
-    void getMaxLength(RealType& ret) {
-      assert(Count_ != 0);
-      ret = Max_;
-      return;
-    }
-
-    /**
-     * return the smallest length
-     */
-    void getMinLength(RealType& ret) {
-      assert(Count_ != 0);
-      ret = Min_;
-      return;
-    }
-
-    /**
-     * return the largest length
-     */
-    void getAverageLength(RealType& ret) {
-      assert(Count_ != 0);
-      ret = AvgLen_;
-      return;
-    }
-
-    /**
-     * compute the Variance of the length
-     */
-    void getLengthVariance(RealType& ret) {
-      assert(Count_ != 0);
-      ret = (AvgLen2_ - AvgLen_ * AvgLen_);
-      if (ret < 0) ret = 0;
-      return;
-    }
-
-    /**
-     * compute error of average value
-     */
-    void getLengthStdDev(RealType& ret) {
-      assert(Count_ != 0);
-      RealType var;
-      this->getLengthVariance(var);
-      ret = sqrt(var);
-      return;
-    }
-
-    /**
-     * return the 95% confidence interval:
-     *
-     * That is returns c, such that we have 95% confidence that the
-     * true mean is within 2c of the Average (x):
-     *
-     *   x - c <= true mean <= x + c
-     *
-     */
-    void getLength95percentConfidenceInterval(ResultType& ret) {
-      assert(Count_ != 0);
-      RealType sd;
-      this->getLengthStdDev(sd);
-      ret = 1.960 * sd / sqrt(RealType(Count_));
-      return;
+      return ci;
     }
 
   private:
-    ResultType Val_;
-    ResultType Avg_;
-    ResultType Avg2_;
-    ResultType Total_;
-    RealType AvgLen_;
-    RealType AvgLen2_;
-    RealType Min_;
-    RealType Max_;
+    std::size_t Count_ {};
+    Vector<RealType, Dim> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
   };
 
-  class MatrixAccumulator : public BaseAccumulator {
-    using ElementType = Mat3x3d;
-    using ResultType  = Mat3x3d;
-
+  template<unsigned int Dim>
+  class Accumulator<SquareMatrix<RealType, Dim>> {
   public:
-    MatrixAccumulator() : BaseAccumulator() { this->clear(); }
-
-    /**
-     * Accumulate another value
-     */
-    void add(ElementType const& val) {
+    void add(const SquareMatrix<RealType, Dim>& val) {
       Count_++;
-      for (unsigned int i = 0; i < 3; i++) {
-        for (unsigned int j = 0; j < 3; j++) {
-          Avg_(i, j) += (val(i, j) - Avg_(i, j)) / Count_;
-          Avg2_(i, j) += (val(i, j) * val(i, j) - Avg2_(i, j)) / Count_;
+
+      for (std::size_t i = 0; i < Dim; i++) {
+        for (std::size_t j = 0; j < Dim; j++) {
           Val_(i, j) = val(i, j);
           Total_(i, j) += val(i, j);
+          Avg_(i, j) +=
+              (val(i, j) - Avg_(i, j)) / static_cast<RealType>(Count_);
+          Avg2_(i, j) += (val(i, j) * val(i, j) - Avg2_(i, j)) /
+                         static_cast<RealType>(Count_);
         }
       }
     }
 
-    /**
-     * reset the Accumulator to the empty state
-     */
-    void clear() {
-      Count_ = 0;
-      Avg_ *= 0.0;
-      Avg2_ *= 0.0;
-      Val_ *= 0.0;
-      Total_ *= 0.0;
-    }
+    std::size_t getCount() const { return Count_; }
 
-    /**
-     * return the most recently added value
-     */
-    void getLastValue(ElementType& ret) {
-      ret = Val_;
-      return;
-    }
+    SquareMatrix<RealType, Dim> getLastValue() const { return Val_; }
 
-    /**
-     * compute the Mean
-     */
-    void getAverage(ResultType& ret) {
+    SquareMatrix<RealType, Dim> getTotal() const {
       assert(Count_ != 0);
-      ret = Avg_;
-      return;
+
+      return Total_;
     }
 
-    /**
-     * return the Total accumulated sum
-     */
-    void getTotal(ResultType& ret) {
+    SquareMatrix<RealType, Dim> getAverage() const {
       assert(Count_ != 0);
-      ret = Total_;
-      return;
+
+      return Avg_;
     }
 
-    /**
-     * compute the Variance
-     */
-    void getVariance(ResultType& ret) {
+    SquareMatrix<RealType, Dim> getVariance() const {
       assert(Count_ != 0);
-      for (unsigned int i = 0; i < 3; i++) {
-        for (unsigned int j = 0; j < 3; j++) {
-          ret(i, j) = (Avg2_(i, j) - Avg_(i, j) * Avg_(i, j));
-          if (ret(i, j) < 0) ret(i, j) = 0;
+
+      SquareMatrix<RealType, Dim> var {};
+
+      for (std::size_t i = 0; i < Dim; i++) {
+        for (std::size_t j = 0; j < Dim; j++) {
+          var(i, j) = (Avg2_(i, j) - Avg_(i, j) * Avg_(i, j));
+          if (var(i, j) < 0) var(i, j) = 0;
         }
       }
-      return;
+
+      return var;
     }
 
-    /**
-     * compute error of average value
-     */
-    void getStdDev(ResultType& ret) {
+    SquareMatrix<RealType, Dim> getStdDev() const {
       assert(Count_ != 0);
-      Mat3x3d var;
-      this->getVariance(var);
-      for (unsigned int i = 0; i < 3; i++) {
-        for (unsigned int j = 0; j < 3; j++) {
-          ret(i, j) = sqrt(var(i, j));
+
+      SquareMatrix<RealType, Dim> sd {};
+      SquareMatrix<RealType, Dim> variance = this->getVariance();
+
+      for (std::size_t i = 0; i < Dim; i++) {
+        for (std::size_t j = 0; j < Dim; j++) {
+          sd(i, j) = std::sqrt(variance(i, j));
         }
       }
-      return;
+
+      return sd;
     }
 
-    /**
-     * return the 95% confidence interval:
-     *
-     * That is returns c, such that we have 95% confidence that the
-     * true mean is within 2c of the Average (x):
-     *
-     *   x - c <= true mean <= x + c
-     *
-     */
-    void get95percentConfidenceInterval(ResultType& ret) {
+    SquareMatrix<RealType, Dim> get95percentConfidenceInterval() const {
       assert(Count_ != 0);
-      Mat3x3d sd;
-      this->getStdDev(sd);
-      for (unsigned int i = 0; i < 3; i++) {
-        for (unsigned int j = 0; j < 3; j++) {
-          ret(i, j) = 1.960 * sd(i, j) / sqrt(RealType(Count_));
+
+      SquareMatrix<RealType, Dim> ci {};
+      SquareMatrix<RealType, Dim> stdDev = this->getStdDev();
+
+      for (std::size_t i = 0; i < Dim; i++) {
+        for (std::size_t j = 0; j < Dim; j++) {
+          ci(i, j) =
+              1.960 * stdDev(i, j) / std::sqrt(static_cast<RealType>(Count_));
         }
       }
-      return;
+
+      return ci;
     }
 
   private:
-    ElementType Val_;
-    ResultType Avg_;
-    ResultType Avg2_;
-    ResultType Total_;
+    std::size_t Count_ {};
+    SquareMatrix<RealType, Dim> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
   };
-}  // namespace OpenMD
 
-#endif
+  // Type aliases for the most commonly used Accumulators
+  using RealAccumulator      = Accumulator<RealType>;
+  using StdVectorAccumulator = Accumulator<std::vector<RealType>>;
+  using Vector3dAccumulator  = Accumulator<Vector<RealType, 3>>;
+  using PotVecAccumulator =
+      Accumulator<Vector<RealType, N_INTERACTION_FAMILIES>>;
+  using Mat3x3dAccumulator = Accumulator<SquareMatrix<RealType, 3>>;
+}  // namespace OpenMD::Utils
+
+#endif  // OPENMD_UTILS_STATICACCUMULATOR_HPP

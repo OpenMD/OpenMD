@@ -46,18 +46,19 @@
 #define HYDRODYNAMICS_HYDROIO_HPP
 
 #include <map>
+
 #include "hydrodynamics/HydroProp.hpp"
 
 #if defined(NLOHMANN_JSON)
 #include <nlohmann/json.hpp>
 using ordered_json = nlohmann::ordered_json;
-using json = nlohmann::json;
+using json         = nlohmann::json;
 #elif defined(RAPID_JSON)
 #define RAPIDJSON_NOMEMBERITERATORCLASS
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
-#include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/istreamwrapper.h>
+#include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/prettywriter.h>
 using namespace rapidjson;
 #endif
@@ -91,7 +92,6 @@ namespace OpenMD {
     rapidjson::Document d_;
 #endif
     bool writerOpen_;
-
   };
 }  // namespace OpenMD
 

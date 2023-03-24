@@ -51,7 +51,7 @@
 
 #include "brains/SimInfo.hpp"
 #include "math/SquareMatrix3.hpp"
-#include "utils/Accumulator.hpp"
+#include "utils/OldAccumulator.hpp"
 
 using namespace std;
 namespace OpenMD {

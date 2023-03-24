@@ -64,25 +64,34 @@ namespace OpenMD {
     //! Default constructor
     PotDiff(SimInfo* info, const std::string& filename,
             const std::string& sele);
+
     //! Process the data
     virtual void process();
 
   private:
     //! Write the data
     void writeDiff();
+
     //! pointer to current Snapshot
     Snapshot* currentSnapshot_;
+
     //! computed potential energy differences
     std::vector<RealType> diff_;
+
     //! times pulled from the frame data
     std::vector<RealType> times_;
-    Accumulator data_;
+
+    Utils::RealAccumulator data_;
+
     //! selection script for StuntDouble objects to remove charge
     std::string selectionScript_;
+
     //! persistent SelectionManager
     SelectionManager seleMan_;
+
     //! persistent SelectionEvaluator
     SelectionEvaluator evaluator_;
+
     std::vector<bool> selectionWasFlucQ_;
   };
 }  // namespace OpenMD

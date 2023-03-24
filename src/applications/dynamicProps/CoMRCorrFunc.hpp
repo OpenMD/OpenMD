@@ -51,7 +51,6 @@
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "brains/SimInfo.hpp"
 #include "math/Vector3.hpp"
-#include "utils/StaticAccumulator.hpp"
 
 namespace OpenMD {
 

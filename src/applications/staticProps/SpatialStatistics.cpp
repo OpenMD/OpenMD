@@ -55,7 +55,7 @@
 #include "primitives/StuntDouble.hpp"
 #include "rnemd/RNEMDParameters.hpp"
 #include "utils/Accumulator.hpp"
-#include "utils/MemoryUtils.hpp"
+#include "utils/AccumulatorView.hpp"
 #include "utils/StringUtils.hpp"
 
 namespace OpenMD {
@@ -71,28 +71,6 @@ namespace OpenMD {
     }
 
     setOutputName(getPrefix(filename) + ".spst");
-  }
-
-  SpatialStatistics::~SpatialStatistics() {
-    // Here we need to delete the accumulators...
-    for (auto& data : data_) {
-      // Avoid deleting data that wasn't actually written to
-      if (data) {
-        if (!data->accumulatorArray2d.empty())
-          Utils::deletePointers(data->accumulatorArray2d);
-        else
-          Utils::deletePointers(data->accumulator);
-      }
-    }
-
-    // ...and the output data
-    std::vector<OutputData*>::iterator i;
-    OutputData* outputData;
-
-    for (outputData = beginOutputData(i); outputData;
-         outputData = nextOutputData(i)) {
-      delete outputData;
-    }
   }
 
   void SpatialStatistics::process() {
@@ -147,26 +125,11 @@ namespace OpenMD {
       axisLabel_ = "z";
       break;
     }
-
-    z_               = new OutputData;
-    z_->units        = "Angstroms";
-    z_->title        = axisLabel_;
-    z_->dataType     = odtReal;
-    z_->dataHandling = odhAverage;
-    z_->accumulator.reserve(nbins);
-    for (int i = 0; i < nbins; i++)
-      z_->accumulator.push_back(new Accumulator());
-    data_.push_back(z_);
   }
 
   void SlabStatistics::processFrame(int istep) {
     RealType z;
     hmat_ = currentSnapshot_->getHmat();
-
-    for (unsigned int i = 0; i < nBins_; i++) {
-      z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_, axis_);
-      dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
-    }
 
     volume_ = currentSnapshot_->getVolume();
 
@@ -231,21 +194,6 @@ namespace OpenMD {
       } else {
         coordinateOrigin_ = V3Zero;
       }
-    }
-
-    r_               = new OutputData;
-    r_->units        = "Angstroms";
-    r_->title        = "R";
-    r_->dataType     = odtReal;
-    r_->dataHandling = odhAverage;
-    r_->accumulator.reserve(nbins);
-    for (int i = 0; i < nbins; i++)
-      r_->accumulator.push_back(new Accumulator());
-    data_.push_back(r_);
-
-    for (int i = 0; i < nbins; i++) {
-      RealType r = (((RealType)i + 0.5) * binWidth_);
-      dynamic_cast<Accumulator*>(r_->accumulator[i])->add(r);
     }
   }
 

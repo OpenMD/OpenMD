@@ -68,8 +68,12 @@
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/Accumulator.hpp"
+#include "utils/AccumulatorView.hpp"
+#include "utils/BaseAccumulator.hpp"
 #include "utils/Constants.hpp"
 #include "utils/StringUtils.hpp"
+
+using namespace OpenMD::Utils;
 
 namespace OpenMD {
 
@@ -83,94 +87,91 @@ namespace OpenMD {
     AtomTypeSet osTypes = seleMan_.getSelectedAtomTypes();
     std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
 
+    // Pre-load the OutputData
     data_.resize(RNEMDZ::ENDINDEX);
 
-    temperature               = new OutputData;
-    temperature->units        = "K";
-    temperature->title        = "Temperature";
-    temperature->dataType     = odtReal;
-    temperature->dataHandling = odhAverage;
-    temperature->accumulator.reserve(nBins_);
+    OutputData z;
+    z.units        = "Angstroms";
+    z.title        = axisLabel_;
+    z.dataHandling = DataHandling::Average;
     for (unsigned int i = 0; i < nBins_; i++)
-      temperature->accumulator.push_back(new Accumulator());
-    addOutputDataAt(temperature, TEMPERATURE);
+      z.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[Z] = std::move(z);
 
-    velocity               = new OutputData;
-    velocity->units        = "angstroms/fs";
-    velocity->title        = "Velocity";
-    velocity->dataType     = odtVector3;
-    velocity->dataHandling = odhAverage;
-    velocity->accumulator.reserve(nBins_);
+    OutputData temperature;
+    temperature.units        = "K";
+    temperature.title        = "Temperature";
+    temperature.dataHandling = DataHandling::Average;
     for (unsigned int i = 0; i < nBins_; i++)
-      velocity->accumulator.push_back(new VectorAccumulator());
-    addOutputDataAt(velocity, VELOCITY);
+      temperature.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[TEMPERATURE] = std::move(temperature);
 
-    density               = new OutputData;
-    density->units        = "g cm^-3";
-    density->title        = "Density";
-    density->dataType     = odtReal;
-    density->dataHandling = odhAverage;
-    density->accumulator.reserve(nBins_);
+    OutputData velocity;
+    velocity.units        = "angstroms/fs";
+    velocity.title        = "Velocity";
+    velocity.dataHandling = DataHandling::Average;
     for (unsigned int i = 0; i < nBins_; i++)
-      density->accumulator.push_back(new Accumulator());
-    addOutputDataAt(density, DENSITY);
+      velocity.accumulator.push_back(
+          std::make_unique<AccumulatorView<Vector3dAccumulator>>());
+    data_[VELOCITY] = std::move(velocity);
 
-    activity               = new OutputData;
-    activity->units        = "unitless";
-    activity->title        = "Activity";
-    activity->dataType     = odtArray2d;
-    activity->dataHandling = odhAverage;
-    unsigned int nTypes    = outputTypes_.size();
-    // don't do activities if we don't have any atoms in the selection
+    OutputData density;
+    density.units        = "g cm^-3";
+    density.title        = "Density";
+    density.dataHandling = DataHandling::Average;
+    for (unsigned int i = 0; i < nBins_; i++)
+      density.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[DENSITY] = std::move(density);
+
+    OutputData activity;
+    activity.units        = "unitless";
+    activity.title        = "Activity";
+    activity.dataHandling = DataHandling::Average;
+    unsigned int nTypes   = outputTypes_.size();
+    // Only do activities if we have atoms in the selection
     if (nTypes > 0) {
-      activity->accumulatorArray2d.resize(nBins_);
-      for (unsigned int i = 0; i < nBins_; i++) {
-        activity->accumulatorArray2d[i].resize(nTypes);
-        for (unsigned int j = 0; j < nTypes; j++) {
-          activity->accumulatorArray2d[i][j] = new Accumulator();
-        }
-      }
-      for (unsigned int j = 0; j < nTypes; j++)
-        activity->columnNames.push_back(outputTypes_[j]->getName());
-      addOutputDataAt(activity, ACTIVITY);
+      for (unsigned int i = 0; i < nBins_; i++)
+        activity.accumulator.push_back(
+            std::make_unique<AccumulatorView<StdVectorAccumulator>>());
+      data_[ACTIVITY] = std::move(activity);
     }
 
-    eField               = new OutputData;
-    eField->units        = "kcal/mol/angstroms/e";
-    eField->title        = "Electric Field";
-    eField->dataType     = odtVector3;
-    eField->dataHandling = odhAverage;
-    eField->accumulator.reserve(nBins_);
+    OutputData eField;
+    eField.units        = "kcal/mol/angstroms/e";
+    eField.title        = "Electric Field";
+    eField.dataHandling = DataHandling::Average;
     for (unsigned int i = 0; i < nBins_; i++)
-      eField->accumulator.push_back(new VectorAccumulator());
+      eField.accumulator.push_back(
+          std::make_unique<AccumulatorView<Vector3dAccumulator>>());
 
-    ePot               = new OutputData;
-    ePot->units        = "kcal/mol/e";
-    ePot->title        = "Electrostatic Potential";
-    ePot->dataType     = odtReal;
-    ePot->dataHandling = odhAverage;
-    ePot->accumulator.reserve(nBins_);
+    OutputData ePot;
+    ePot.units        = "kcal/mol/e";
+    ePot.title        = "Electrostatic Potential";
+    ePot.dataHandling = DataHandling::Average;
     for (unsigned int i = 0; i < nBins_; i++)
-      ePot->accumulator.push_back(new Accumulator());
+      ePot.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
 
-    charge               = new OutputData;
-    charge->units        = "e";
-    charge->title        = "Charge";
-    charge->dataType     = odtReal;
-    charge->dataHandling = odhAverage;
-    charge->accumulator.reserve(nBins_);
+    OutputData charge;
+    charge.units        = "e";
+    charge.title        = "Charge";
+    charge.dataHandling = DataHandling::Average;
     for (unsigned int i = 0; i < nBins_; i++)
-      charge->accumulator.push_back(new Accumulator());
+      charge.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
 
-    chargeVelocity               = new OutputData;
-    chargeVelocity->units        = "e/fs";
-    chargeVelocity->title        = "Charge_Velocity";
-    chargeVelocity->dataType     = odtReal;
-    chargeVelocity->dataHandling = odhAverage;
-    chargeVelocity->accumulator.reserve(nBins_);
+    OutputData chargeVelocity;
+    chargeVelocity.units        = "e/fs";
+    chargeVelocity.title        = "Charge_Velocity";
+    chargeVelocity.dataHandling = DataHandling::Average;
     for (unsigned int i = 0; i < nBins_; i++)
-      chargeVelocity->accumulator.push_back(new Accumulator());
+      chargeVelocity.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
 
+    outputMask_.set(Z);
     outputMask_.set(TEMPERATURE);
     outputMask_.set(VELOCITY);
     outputMask_.set(DENSITY);
@@ -183,19 +184,22 @@ namespace OpenMD {
     if (atomStorageLayout & DataStorage::dslElectricField) {
       outputMask_.set(ELECTRICFIELD);
       outputMask_.set(ELECTROSTATICPOTENTIAL);
-      addOutputDataAt(eField, ELECTRICFIELD);
-      addOutputDataAt(ePot, ELECTROSTATICPOTENTIAL);
+
+      data_[ELECTRICFIELD]          = std::move(eField);
+      data_[ELECTROSTATICPOTENTIAL] = std::move(ePot);
     }
 
     if (info_->usesElectrostaticAtoms() ||
         atomStorageLayout & DataStorage::dslFlucQPosition) {
       outputMask_.set(CHARGE);
-      addOutputDataAt(charge, CHARGE);
+
+      data_[CHARGE] = std::move(charge);
     }
 
     if (atomStorageLayout & DataStorage::dslFlucQVelocity) {
       outputMask_.set(CHARGEVELOCITY);
-      addOutputDataAt(chargeVelocity, CHARGEVELOCITY);
+
+      data_[CHARGEVELOCITY] = std::move(chargeVelocity);
     }
   }
 
@@ -370,7 +374,7 @@ namespace OpenMD {
       std::vector<RealType> nden(outputTypes_.size(), 0.0);
 
       z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_, axis_);
-      dynamic_cast<Accumulator*>(data_[Z]->accumulator[i])->add(z);
+      data_[Z].accumulator[i]->add(z);
 
       binVolume = volume_ / nBins_;
       dz        = hmat_(axis_, axis_) / (RealType)nBins_;
@@ -379,31 +383,27 @@ namespace OpenMD {
       //   of whether or not the selected species are present in the bin
       if (outputMask_[ELECTRICFIELD] && binEFieldCount[i] > 0) {
         eField = binEField[i] / RealType(binEFieldCount[i]);
-        dynamic_cast<VectorAccumulator*>(data_[ELECTRICFIELD]->accumulator[i])
-            ->add(eField);
+        data_[ELECTRICFIELD].accumulator[i]->add(eField);
       }
 
       if (outputMask_[ELECTROSTATICPOTENTIAL] && binEFieldCount[i] > 0) {
         ePot += eField[axis_] * dz;
-        dynamic_cast<Accumulator*>(
-            data_[ELECTROSTATICPOTENTIAL]->accumulator[i])
-            ->add(ePot);
+        data_[ELECTROSTATICPOTENTIAL].accumulator[i]->add(ePot);
       }
 
       // For the following properties, zero should be added if the selected
       //   species is not present in the bin
       if (outputMask_[DENSITY]) {
         den = binMass[i] * Constants::densityConvert / binVolume;
-        dynamic_cast<Accumulator*>(data_[DENSITY]->accumulator[i])->add(den);
+        data_[DENSITY].accumulator[i]->add(den);
       }
 
       if (outputMask_[ACTIVITY]) {
         for (unsigned int j = 0; j < outputTypes_.size(); j++) {
           nden[j] = (binTypeCounts[i][j] / binVolume) *
                     Constants::concentrationConvert;
-          dynamic_cast<Accumulator*>(data_[ACTIVITY]->accumulatorArray2d[i][j])
-              ->add(nden[j]);
         }
+        data_[ACTIVITY].accumulator[i]->add(nden);
       }
 
       if (binCount[i] > 0) {
@@ -411,23 +411,20 @@ namespace OpenMD {
         //   the selected species is not found in the bin
         if (outputMask_[VELOCITY]) {
           vel = binP[i] / binMass[i];
-          dynamic_cast<VectorAccumulator*>(data_[VELOCITY]->accumulator[i])
-              ->add(vel);
+          data_[VELOCITY].accumulator[i]->add(vel);
         }
 
         if (outputMask_[TEMPERATURE]) {
           temp = 2.0 * binKE[i] /
                  (binDOF[i] * Constants::kb * Constants::energyConvert);
-          dynamic_cast<Accumulator*>(data_[TEMPERATURE]->accumulator[i])
-              ->add(temp);
+          data_[TEMPERATURE].accumulator[i]->add(temp);
         }
 
         if (outputMask_[CHARGE])
-          dynamic_cast<Accumulator*>(data_[CHARGE]->accumulator[i])
-              ->add(binCharge[i]);
+          data_[CHARGE].accumulator[i]->add(binCharge[i]);
+
         if (outputMask_[CHARGEVELOCITY])
-          dynamic_cast<Accumulator*>(data_[CHARGEVELOCITY]->accumulator[i])
-              ->add(binChargeVelocity[i]);
+          data_[CHARGEVELOCITY].accumulator[i]->add(binChargeVelocity[i]);
       }
     }
   }
@@ -438,38 +435,46 @@ namespace OpenMD {
       ShellStatistics(info, filename, sele, comsele, nrbins) {
     setOutputName(getPrefix(filename) + ".rnemdR");
 
+    // Pre-load the OutputData
     data_.resize(RNEMDR::ENDINDEX);
 
-    temperature               = new OutputData;
-    temperature->units        = "K";
-    temperature->title        = "Temperature";
-    temperature->dataType     = odtReal;
-    temperature->dataHandling = odhAverage;
-    temperature->accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++)
-      temperature->accumulator.push_back(new Accumulator());
-    addOutputDataAt(temperature, TEMPERATURE);
+    OutputData r;
+    r.units        = "Angstroms";
+    r.title        = "R";
+    r.dataHandling = DataHandling::Average;
+    for (int i = 0; i < nBins_; i++)
+      r.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[R] = std::move(r);
 
-    angularVelocity               = new OutputData;
-    angularVelocity->units        = "angstroms/fs";
-    angularVelocity->title        = "Velocity";
-    angularVelocity->dataType     = odtVector3;
-    angularVelocity->dataHandling = odhAverage;
-    angularVelocity->accumulator.reserve(nBins_);
+    OutputData temperature;
+    temperature.units        = "K";
+    temperature.title        = "Temperature";
+    temperature.dataHandling = DataHandling::Average;
     for (unsigned int i = 0; i < nBins_; i++)
-      angularVelocity->accumulator.push_back(new VectorAccumulator());
-    addOutputDataAt(angularVelocity, ANGULARVELOCITY);
+      temperature.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[TEMPERATURE] = std::move(temperature);
 
-    density               = new OutputData;
-    density->units        = "g cm^-3";
-    density->title        = "Density";
-    density->dataType     = odtReal;
-    density->dataHandling = odhAverage;
-    density->accumulator.reserve(nBins_);
+    OutputData angularVelocity;
+    angularVelocity.units        = "angstroms/fs";
+    angularVelocity.title        = "Velocity";
+    angularVelocity.dataHandling = DataHandling::Average;
     for (unsigned int i = 0; i < nBins_; i++)
-      density->accumulator.push_back(new Accumulator());
-    addOutputDataAt(density, DENSITY);
+      angularVelocity.accumulator.push_back(
+          std::make_unique<AccumulatorView<Vector3dAccumulator>>());
+    data_[ANGULARVELOCITY] = std::move(angularVelocity);
 
+    OutputData density;
+    density.units        = "g cm^-3";
+    density.title        = "Density";
+    density.dataHandling = DataHandling::Average;
+    for (unsigned int i = 0; i < nBins_; i++)
+      density.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[DENSITY] = std::move(density);
+
+    outputMask_.set(R);
     outputMask_.set(TEMPERATURE);
     outputMask_.set(ANGULARVELOCITY);
     outputMask_.set(DENSITY);
@@ -573,24 +578,22 @@ namespace OpenMD {
       binVolume =
           (4.0 * Constants::PI * (pow(router, 3) - pow(rinner, 3))) / 3.0;
 
-      dynamic_cast<Accumulator*>(data_[R]->accumulator[i])->add(r);
+      data_[R].accumulator[i]->add(r);
 
       // For the following properties, zero should be added if the selected
       //   species is not present in the bin
       den = binMass[i] * Constants::densityConvert / binVolume;
-      dynamic_cast<Accumulator*>(data_[DENSITY]->accumulator[i])->add(den);
+      data_[DENSITY].accumulator[i]->add(den);
 
       if (binDOF[i] > 0) {
         // The calculations of the following properties are undefined if
         //   the selected species is not found in the bin
         omega = binI[i].inverse() * binL[i];
-        dynamic_cast<VectorAccumulator*>(data_[ANGULARVELOCITY]->accumulator[i])
-            ->add(omega);
+        data_[ANGULARVELOCITY].accumulator[i]->add(omega);
 
         temp = 2.0 * binKE[i] /
                (binDOF[i] * Constants::kb * Constants::energyConvert);
-        dynamic_cast<Accumulator*>(data_[TEMPERATURE]->accumulator[i])
-            ->add(temp);
+        data_[TEMPERATURE].accumulator[i]->add(temp);
       }
     }
   }
@@ -636,21 +639,19 @@ namespace OpenMD {
 
     setOutputName(getPrefix(filename) + ".rnemdRTheta");
 
-    data_.resize(RNEMDRTheta::ENDINDEX);
+    // Pre-load the OutputData
+    r_.units = "Angstroms";
+    r_.title = "R";
+    for (int i = 0; i < nBins_; i++)
+      r_.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
 
-    angularVelocity               = new OutputData;
-    angularVelocity->units        = "angstroms/fs";
-    angularVelocity->title        = "Velocity";
-    angularVelocity->dataType     = odtVector3;
-    angularVelocity->dataHandling = odhAverage;
-    angularVelocity->accumulatorArray2d.reserve(nBins_);
+    angularVelocity_.units = "1/fs";
+    angularVelocity_.title = "Projected Angular Velocity";
     for (unsigned int i = 0; i < nBins_; i++) {
-      angularVelocity->accumulatorArray2d[i].reserve(nAngleBins_);
-      for (int j = 0; j < nAngleBins_; j++) {
-        angularVelocity->accumulatorArray2d[i][j] = new Accumulator();
-      }
+      angularVelocity_.accumulator.push_back(
+          std::make_unique<AccumulatorView<StdVectorAccumulator>>());
     }
-    addOutputDataAt(angularVelocity, ANGULARVELOCITY);
   }
 
   std::pair<int, int> RNEMDRTheta::getBins(Vector3d pos) {
@@ -660,7 +661,7 @@ namespace OpenMD {
     RealType cosAngle = dot(rPos, fluxVector_) / rPos.length();
 
     result.first  = int(rPos.length() / binWidth_);
-    result.second = int((nAngleBins_ - 1) * 0.5 * (cosAngle + 1.0));
+    result.second = int((nAngleBins_)*0.5 * (cosAngle + 1.0));
     return result;
   }
 
@@ -674,9 +675,15 @@ namespace OpenMD {
     StuntDouble* sd;
     int i;
 
-    std::vector<std::vector<int>> binCount;
-    std::vector<std::vector<Mat3x3d>> binI;
-    std::vector<std::vector<Vector3d>> binL;
+    std::vector<std::vector<int>> binCount(nBins_);
+    std::vector<std::vector<Mat3x3d>> binI(nBins_);
+    std::vector<std::vector<Vector3d>> binL(nBins_);
+
+    for (std::size_t i {}; i < nBins_; ++i) {
+      binCount[i].resize(nAngleBins_);
+      binI[i].resize(nAngleBins_);
+      binL[i].resize(nAngleBins_);
+    }
 
     // loop over the selected atoms:
     for (sd = seleMan_.beginSelected(i); sd != NULL;
@@ -706,49 +713,51 @@ namespace OpenMD {
 
     for (unsigned int i = 0; i < nBins_; i++) {
       RealType r = (((RealType)i + 0.5) * binWidth_);
+      r_.accumulator[i]->add(r);
+
+      std::vector<RealType> projections(nAngleBins_);
 
       for (int j = 0; j < nAngleBins_; j++) {
         Vector3d omega(0.0);
+
         if (binCount[i][j] > 0) { omega = binI[i][j].inverse() * binL[i][j]; }
 
-        RealType omegaProj = dot(omega, fluxVector_);
-
-        dynamic_cast<Accumulator*>(data_[R]->accumulator[i])->add(r);
-        dynamic_cast<Accumulator*>(
-            data_[ANGULARVELOCITY]->accumulatorArray2d[i][j])
-            ->add(omegaProj);
+        // RealType omegaProj = dot(omega, fluxVector_);
+        projections[j] = dot(omega, fluxVector_);
       }
+
+      angularVelocity_.accumulator[i]->add(projections);
     }
   }
 
   void RNEMDRTheta::writeOutput() {
-    std::vector<OutputData*>::iterator i;
-    OutputData* outputData;
-
     std::ofstream outStream(outputFilename_.c_str());
+
     if (outStream.is_open()) {
       // write title
       outStream << "# SPATIAL STATISTICS\n";
-      outStream << "#";
-
-      for (outputData = beginOutputData(i); outputData;
-           outputData = nextOutputData(i)) {
-        outStream << "\t" << outputData->title << "(" << outputData->units
-                  << ")";
-        // add some extra tabs for column alignment
-        if (outputData->dataType == odtVector3) outStream << "\t\t";
-      }
+      outStream << "#nBins = " << nBins_ << "\t binWidth = " << binWidth_
+                << " maxR = " << nBins_ * binWidth_ << "\n";
+      outStream << "#fluxVector = " << fluxVector_ << "\tBins = " << nAngleBins_
+                << "\n";
+      outStream << "#\t" << angularVelocity_.title << "("
+                << angularVelocity_.units << ")\t\t";
 
       outStream << std::endl;
 
       outStream.precision(8);
 
-      for (unsigned int j = 0; j < nBins_; j++) {
-        for (outputData = beginOutputData(i); outputData;
-             outputData = nextOutputData(i)) {
-          int n = outputData->accumulator[j]->count();
-          if (n != 0) { writeData(outStream, outputData, j); }
+      for (unsigned int i = 0; i < nBins_; i++) {
+        std::size_t n {r_.accumulator[i]->getCount()};
+
+        if (n != 0) {
+          std::string message =
+              "StaticAnalyser detected a numerical error writing: " +
+              angularVelocity_.title + " for bin " + std::to_string(i);
+
+          angularVelocity_.accumulator[i]->writeData(outStream, message);
         }
+
         outStream << std::endl;
       }
     }

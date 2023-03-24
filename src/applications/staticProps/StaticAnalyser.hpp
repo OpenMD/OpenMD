@@ -45,34 +45,16 @@
 #ifndef APPLICATIONS_STATICPROPS_STATICANALYSER_HPP
 #define APPLICATIONS_STATICPROPS_STATICANALYSER_HPP
 
-#include <cassert>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "brains/SimInfo.hpp"
-#include "utils/Accumulator.hpp"
+#include "types/AtomType.hpp"
+#include "utils/BaseAccumulator.hpp"
 
 namespace OpenMD {
-
-  enum OutputDataType { odtReal, odtVector3, odtArray2d, odtUnknownDataType };
-
-  enum OutputDataHandling {
-    odhAverage,
-    odhTotal,
-    odhMax,
-    odhUnknownDataHandling
-  };
-
-  struct OutputData {
-    std::string title;
-    std::string units;
-    OutputDataType dataType;
-    OutputDataHandling dataHandling;
-    std::vector<BaseAccumulator*> accumulator;
-    std::vector<std::string> columnNames;
-    std::vector<std::vector<BaseAccumulator*>> accumulatorArray2d;
-  };
 
   class StaticAnalyser {
   public:
@@ -104,34 +86,26 @@ namespace OpenMD {
     }
 
   protected:
-    virtual void writeOutput();
-    virtual void writeData(std::ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeErrorBars(std::ostream& os, OutputData* dat,
-                                unsigned int bin);
-    virtual void writeReal(std::ostream& os, OutputData* dat, unsigned int bin);
-    virtual void writeVector(std::ostream& os, OutputData* dat,
-                             unsigned int bin);
-    virtual void writeArray(std::ostream& os, OutputData* dat,
-                            unsigned int bin);
-    virtual void writeRealErrorBars(std::ostream& os, OutputData* dat,
-                                    unsigned int bin);
-    virtual void writeVectorErrorBars(std::ostream& os, OutputData* dat,
-                                      unsigned int bin);
-    virtual void writeArrayErrorBars(std::ostream& os, OutputData* dat,
-                                     unsigned int bin);
-
-    OutputData* beginOutputData(std::vector<OutputData*>::iterator& i);
-    OutputData* nextOutputData(std::vector<OutputData*>::iterator& i);
+    struct OutputData {
+      std::string title;
+      std::string units;
+      Utils::DataHandling dataHandling;
+      std::vector<std::unique_ptr<Utils::BaseAccumulator>> accumulator;
+    };
 
     SimInfo* info_ {nullptr};
     std::string dumpFilename_;
-    std::string outputFilename_;
     int step_;
+    unsigned int nBins_;
+
+    std::string outputFilename_;
     std::string analysisType_;
     std::string paramString_;
 
-    unsigned int nBins_;
-    std::vector<OutputData*> data_;
+    std::vector<OutputData> data_;
+    std::vector<AtomType*> outputTypes_;
+
+    virtual void writeOutput();
   };
 }  // namespace OpenMD
 
