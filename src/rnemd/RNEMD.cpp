@@ -612,6 +612,8 @@ namespace OpenMD::RNEMD {
     Molecule* mol;
     StuntDouble* sd;
     AtomType* atype;
+    ConstraintPair* consPair;
+    Molecule::ConstraintPairIterator cpi;
 
     for (mol = info_->beginMolecule(miter); mol != NULL;
          mol = info_->nextMolecule(miter)) {
@@ -702,11 +704,19 @@ namespace OpenMD::RNEMD {
         // we need to subtract out degrees of freedom from constraints
         // belonging to in molecules in this bin:
         if (outputSeleMan_.isSelected(mol)) {
-          Vector3d pos    = mol->getCom();
-          binNo           = getBin(pos);
-          int constraints = mol->getNConstraintPairs();
-          binDOF[binNo] -= constraints;
-        }
+	  for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
+	       consPair = mol->nextConstraintPair(cpi)) {
+	    ConstraintElem* consElem1 = consPair->getConsElem1();
+	    ConstraintElem* consElem2 = consPair->getConsElem2();
+	    
+	    Vector3d posA = consElem1->getPos();
+	    Vector3d posB = consElem2->getPos();
+	    
+	    Vector3d coc = 0.5 * (posA + posB);
+	    int binCons = getBin(coc);
+	    binDOF[binCons] -= 1;
+	  }
+	}
       }
     }
 
