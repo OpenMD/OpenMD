@@ -249,11 +249,10 @@ namespace OpenMD {
         if (seleMan_.isSelected(sd)) {
           Vector3d pos = sd->getPos();
           binNo        = getBin(pos);
-	  
+
           mass = sd->getMass();
           vel  = sd->getVel();
           KE   = 0.5 * mass * vel.lengthSquare();
-
 
           if (outputMask_[ACTIVITY]) {
             typeIndex = -1;
@@ -332,7 +331,7 @@ namespace OpenMD {
                 binDOF[binNo] += 3;
               }
             }
-          } 	  
+          }
         }
 
         // Calculate the electric field (kcal/mol/e/Angstrom) for all atoms in
@@ -361,16 +360,16 @@ namespace OpenMD {
       if (seleMan_.isSelected(mol)) {
         for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
              consPair = mol->nextConstraintPair(cpi)) {
-	  ConstraintElem* consElem1 = consPair->getConsElem1();
-	  ConstraintElem* consElem2 = consPair->getConsElem2();
-	  
-	  Vector3d posA = consElem1->getPos();
-	  Vector3d posB = consElem2->getPos();
+          ConstraintElem* consElem1 = consPair->getConsElem1();
+          ConstraintElem* consElem2 = consPair->getConsElem2();
 
-	  Vector3d coc = 0.5 * (posA + posB);
-	  int binCons = getBin(coc);
-	  binDOF[binCons] -= 1;
-	}
+          Vector3d posA = consElem1->getPos();
+          Vector3d posB = consElem2->getPos();
+
+          Vector3d coc = 0.5 * (posA + posB);
+          int binCons  = getBin(coc);
+          binDOF[binCons] -= 1;
+        }
       }
     }
 
@@ -518,7 +517,7 @@ namespace OpenMD {
     StuntDouble* sd;
     ConstraintPair* consPair;
     Molecule::ConstraintPairIterator cpi;
-    
+
     // loop over the selected atoms:
     for (mol = info_->beginMolecule(miter); mol != NULL;
          mol = info_->nextMolecule(miter)) {
@@ -569,18 +568,18 @@ namespace OpenMD {
         }
       }
       if (seleMan_.isSelected(mol)) {
-	for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
+        for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
              consPair = mol->nextConstraintPair(cpi)) {
-	  ConstraintElem* consElem1 = consPair->getConsElem1();
-	  ConstraintElem* consElem2 = consPair->getConsElem2();
-	  
-	  Vector3d posA = consElem1->getPos();
-	  Vector3d posB = consElem2->getPos();
-	  
-	  Vector3d coc = 0.5 * (posA + posB);
-	  int binCons = getBin(coc);
-	  binDOF[binCons] -= 1;
-	}
+          ConstraintElem* consElem1 = consPair->getConsElem1();
+          ConstraintElem* consElem2 = consPair->getConsElem2();
+
+          Vector3d posA = consElem1->getPos();
+          Vector3d posB = consElem2->getPos();
+
+          Vector3d coc = 0.5 * (posA + posB);
+          int binCons  = getBin(coc);
+          binDOF[binCons] -= 1;
+        }
       }
     }
 
