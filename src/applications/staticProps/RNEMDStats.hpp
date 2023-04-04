@@ -94,6 +94,7 @@ namespace OpenMD {
     OutputData* chargeVelocity;
 
     OutputBitSet outputMask_;
+    bool usePeriodicBoundaryConditions_;
   };
 
   class RNEMDR : public ShellStatistics {

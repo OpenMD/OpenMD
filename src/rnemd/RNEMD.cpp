@@ -629,6 +629,7 @@ namespace OpenMD::RNEMD {
           rPos = sd->getPos() - coordinateOrigin_;
           KE   = 0.5 * mass * vel.lengthSquare();
           DOF  = 3;
+
           if (sd->isDirectional()) {
             Vector3d angMom = sd->getJ();
             Mat3x3d Ia      = sd->getI();
@@ -646,6 +647,7 @@ namespace OpenMD::RNEMD {
               DOF += 3;
             }
           }
+          
           L  = mass * cross(rPos, vel);
           I  = outProduct(rPos, rPos) * mass;
           r2 = rPos.lengthSquare();
