@@ -68,6 +68,9 @@ struct gengetopt_args_info
   int nrbins_arg;	/**< @brief number of radial bins (usually duplicates functionality of nbins) (default='100').  */
   char * nrbins_orig;	/**< @brief number of radial bins (usually duplicates functionality of nbins) original value given at command line.  */
   const char *nrbins_help; /**< @brief number of radial bins (usually duplicates functionality of nbins) help description.  */
+  double binWidth_arg;	/**< @brief width of radial bins in angstroms (default='1.0').  */
+  char * binWidth_orig;	/**< @brief width of radial bins in angstroms original value given at command line.  */
+  const char *binWidth_help; /**< @brief width of radial bins in angstroms help description.  */
   int nanglebins_arg;	/**< @brief number of bins for cos(angle) (default='50').  */
   char * nanglebins_orig;	/**< @brief number of bins for cos(angle) original value given at command line.  */
   const char *nanglebins_help; /**< @brief number of bins for cos(angle) help description.  */
@@ -158,8 +161,8 @@ struct gengetopt_args_info
   double v_radius_arg;	/**< @brief VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model.  */
   char * v_radius_orig;	/**< @brief VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model original value given at command line.  */
   const char *v_radius_help; /**< @brief VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model help description.  */
-  int gen_xyz_flag;	/**< @brief generats xyz file (default=off).  */
-  const char *gen_xyz_help; /**< @brief generats xyz file help description.  */
+  int gen_xyz_flag;	/**< @brief generates xyz file (default=off).  */
+  const char *gen_xyz_help; /**< @brief generates xyz file help description.  */
   char * atom_name_arg;	/**< @brief name of atom for with average charge to be generated.  */
   char * atom_name_orig;	/**< @brief name of atom for with average charge to be generated original value given at command line.  */
   const char *atom_name_help; /**< @brief name of atom for with average charge to be generated help description.  */
@@ -239,6 +242,7 @@ struct gengetopt_args_info
   unsigned int nbins_y_given ;	/**< @brief Whether nbins_y was given.  */
   unsigned int nbins_z_given ;	/**< @brief Whether nbins_z was given.  */
   unsigned int nrbins_given ;	/**< @brief Whether nrbins was given.  */
+  unsigned int binWidth_given ;	/**< @brief Whether binWidth was given.  */
   unsigned int nanglebins_given ;	/**< @brief Whether nanglebins was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
   unsigned int OOcut_given ;	/**< @brief Whether OOcut was given.  */

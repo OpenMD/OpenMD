@@ -260,6 +260,8 @@ int main(int argc, char* argv[]) {
     nanglebins = args_info.nbins_arg;
   }
 
+  RealType binWidth = args_info.binWidth_arg;
+  
   // override default vander waals radius for fictious atoms in a model
   RealType vRadius;
   if (args_info.v_radius_given) {
@@ -617,10 +619,11 @@ int main(int argc, char* argv[]) {
                                         args_info.nbins_arg, privilegedAxis);
   } else if (args_info.rnemdr_given) {
     analyser =
-        std::make_unique<RNEMDR>(info, dumpFileName, sele1, comsele, nrbins);
+      std::make_unique<RNEMDR>(info, dumpFileName, sele1, comsele,
+                               nrbins, binWidth);
   } else if (args_info.rnemdrt_given) {
     analyser = std::make_unique<RNEMDRTheta>(info, dumpFileName, sele1, comsele,
-                                             nrbins, nanglebins);
+                                             nrbins, binWidth, nanglebins);
   } else if (args_info.nitrile_given) {
     analyser = std::make_unique<NitrileFrequencyMap>(info, dumpFileName, sele1,
                                                      args_info.nbins_arg);

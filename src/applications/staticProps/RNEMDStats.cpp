@@ -454,8 +454,8 @@ namespace OpenMD {
 
   RNEMDR::RNEMDR(SimInfo* info, const std::string& filename,
                  const std::string& sele, const std::string& comsele,
-                 int nrbins) :
-      ShellStatistics(info, filename, sele, comsele, nrbins) {
+                 int nrbins, RealType binWidth) :
+    ShellStatistics(info, filename, sele, comsele, nrbins, binWidth) {
     setOutputName(getPrefix(filename) + ".rnemdR");
 
     data_.resize(RNEMDR::ENDINDEX);
@@ -588,7 +588,9 @@ namespace OpenMD {
 
           Vector3d coc = 0.5 * (posA + posB);
           int binCons  = getBin(coc);
-          binDOF[binCons] -= 1;
+          if (binCons >= 0 && binCons < int(nBins_)) {            
+            binDOF[binCons] -= 1;
+          }
         }
       }
     }
@@ -627,9 +629,9 @@ namespace OpenMD {
 
   RNEMDRTheta::RNEMDRTheta(SimInfo* info, const std::string& filename,
                            const std::string& sele, const std::string& comsele,
-                           int nrbins, int nangleBins) :
-      ShellStatistics(info, filename, sele, comsele, nrbins),
-      nAngleBins_(nangleBins) {
+                           int nrbins, RealType binWidth, int nangleBins) :
+    ShellStatistics(info, filename, sele, comsele, nrbins, binWidth),
+    nAngleBins_(nangleBins) {
     Globals* simParams                  = info->getSimParams();
     RNEMD::RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
     bool hasAngularMomentumFluxVector =

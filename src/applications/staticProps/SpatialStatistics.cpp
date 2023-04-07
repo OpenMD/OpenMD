@@ -185,11 +185,11 @@ namespace OpenMD {
 
   ShellStatistics::ShellStatistics(SimInfo* info, const std::string& filename,
                                    const std::string& sele,
-                                   const std::string& comsele, int nbins) :
+                                   const std::string& comsele, int nbins,
+                                   RealType binWidth) :
       SpatialStatistics(info, filename, sele, nbins),
       coordinateOrigin_(V3Zero), comSele_(comsele), comSeleMan_(info),
-      comEvaluator_(info) {
-    binWidth_ = 1.0;
+      comEvaluator_(info), binWidth_(binWidth) {
 
     Globals* simParams                  = info->getSimParams();
     RNEMD::RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
