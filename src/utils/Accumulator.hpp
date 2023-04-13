@@ -302,14 +302,14 @@ namespace OpenMD::Utils {
     Vector<RealType, Dim> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
   };
 
-  template<unsigned int Dim>
-  class Accumulator<SquareMatrix<RealType, Dim>> {
+  template<>
+  class Accumulator<Mat3x3d> {
   public:
-    void add(const SquareMatrix<RealType, Dim>& val) {
+    void add(const Mat3x3d& val) {
       Count_++;
 
-      for (std::size_t i = 0; i < Dim; i++) {
-        for (std::size_t j = 0; j < Dim; j++) {
+      for (std::size_t i = 0; i < 3; i++) {
+        for (std::size_t j = 0; j < 3; j++) {
           Val_(i, j) = val(i, j);
           Total_(i, j) += val(i, j);
           Avg_(i, j) +=
@@ -322,27 +322,27 @@ namespace OpenMD::Utils {
 
     std::size_t getCount() const { return Count_; }
 
-    SquareMatrix<RealType, Dim> getLastValue() const { return Val_; }
+    Mat3x3d getLastValue() const { return Val_; }
 
-    SquareMatrix<RealType, Dim> getTotal() const {
+    Mat3x3d getTotal() const {
       assert(Count_ != 0);
 
       return Total_;
     }
 
-    SquareMatrix<RealType, Dim> getAverage() const {
+    Mat3x3d getAverage() const {
       assert(Count_ != 0);
 
       return Avg_;
     }
 
-    SquareMatrix<RealType, Dim> getVariance() const {
+    Mat3x3d getVariance() const {
       assert(Count_ != 0);
 
-      SquareMatrix<RealType, Dim> var {};
+      Mat3x3d var {};
 
-      for (std::size_t i = 0; i < Dim; i++) {
-        for (std::size_t j = 0; j < Dim; j++) {
+      for (std::size_t i = 0; i < 3; i++) {
+        for (std::size_t j = 0; j < 3; j++) {
           var(i, j) = (Avg2_(i, j) - Avg_(i, j) * Avg_(i, j));
           if (var(i, j) < 0) var(i, j) = 0;
         }
@@ -351,14 +351,14 @@ namespace OpenMD::Utils {
       return var;
     }
 
-    SquareMatrix<RealType, Dim> getStdDev() const {
+    Mat3x3d getStdDev() const {
       assert(Count_ != 0);
 
-      SquareMatrix<RealType, Dim> sd {};
-      SquareMatrix<RealType, Dim> variance = this->getVariance();
+      Mat3x3d sd {};
+      Mat3x3d variance = this->getVariance();
 
-      for (std::size_t i = 0; i < Dim; i++) {
-        for (std::size_t j = 0; j < Dim; j++) {
+      for (std::size_t i = 0; i < 3; i++) {
+        for (std::size_t j = 0; j < 3; j++) {
           sd(i, j) = std::sqrt(variance(i, j));
         }
       }
@@ -366,14 +366,14 @@ namespace OpenMD::Utils {
       return sd;
     }
 
-    SquareMatrix<RealType, Dim> get95percentConfidenceInterval() const {
+    Mat3x3d get95percentConfidenceInterval() const {
       assert(Count_ != 0);
 
-      SquareMatrix<RealType, Dim> ci {};
-      SquareMatrix<RealType, Dim> stdDev = this->getStdDev();
+      Mat3x3d ci {};
+      Mat3x3d stdDev = this->getStdDev();
 
-      for (std::size_t i = 0; i < Dim; i++) {
-        for (std::size_t j = 0; j < Dim; j++) {
+      for (std::size_t i = 0; i < 3; i++) {
+        for (std::size_t j = 0; j < 3; j++) {
           ci(i, j) =
               1.960 * stdDev(i, j) / std::sqrt(static_cast<RealType>(Count_));
         }
@@ -384,7 +384,7 @@ namespace OpenMD::Utils {
 
   private:
     std::size_t Count_ {};
-    SquareMatrix<RealType, Dim> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
+    Mat3x3d Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
   };
 
   // Type aliases for the most commonly used Accumulators
@@ -393,7 +393,7 @@ namespace OpenMD::Utils {
   using Vector3dAccumulator  = Accumulator<Vector<RealType, 3>>;
   using PotVecAccumulator =
       Accumulator<Vector<RealType, N_INTERACTION_FAMILIES>>;
-  using Mat3x3dAccumulator = Accumulator<SquareMatrix<RealType, 3>>;
+  using Mat3x3dAccumulator = Accumulator<Mat3x3d>;
 }  // namespace OpenMD::Utils
 
 #endif  // OPENMD_UTILS_STATICACCUMULATOR_HPP
