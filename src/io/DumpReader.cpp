@@ -518,7 +518,7 @@ namespace OpenMD {
 
     nTokens = tokenizer.countTokens();
 
-    if (nTokens < 2) {
+    if (nTokens < 1) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str());
       painCave.isFatal = 1;
@@ -533,6 +533,10 @@ namespace OpenMD {
     StuntDouble* sd = info_->getIOIndexToIntegrableObject(index);
     if (sd == NULL) { return; }
 
+    // StuntDoubles have a line even if there is nothing stored in the
+    // site data:
+    if (nTokens == 1) { return; }
+    
     /**
      * Test to see if the next token is an integer or not.  If not,
      * we've got data on the integrable object itself.  If there is an
