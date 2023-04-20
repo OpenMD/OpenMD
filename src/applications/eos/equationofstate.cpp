@@ -89,12 +89,11 @@ int main(int argc, char* argv[]) {
     simError();
   }
 
-  // convert the input angles to radians for computation
-  double initial_affine = args_info.initial_arg;
-  double final_affine   = args_info.final_arg;
-  int number            = args_info.number_arg;
+  double start_affine = args_info.start_arg;
+  double end_affine   = args_info.end_arg;
+  int number          = args_info.number_arg;
 
-  RealType affine_step = (final_affine - initial_affine) / (number + 1);
+  RealType affine_step = (end_affine - start_affine) / (number + 1);
 
   registerAll();
 
@@ -125,10 +124,10 @@ int main(int argc, char* argv[]) {
   ofstream eos;
   eos.open(outFileName.c_str());
 
-  RealType current_affine = initial_affine;
+  RealType current_affine = start_affine;
   int countStep           = 0;
   std::cout << "Calculation for EOS started." << std::endl;
-  while (current_affine <= final_affine) {
+  while (current_affine <= end_affine) {
     // progressBar->setStatus(countStep,number);
     // progressBar->update();
     ++countStep;

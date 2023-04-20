@@ -45,12 +45,12 @@ struct gengetopt_args_info
   char * output_arg;	/**< @brief use specified output file.  */
   char * output_orig;	/**< @brief use specified output file original value given at command line.  */
   const char *output_help; /**< @brief use specified output file help description.  */
-  double initial_arg;	/**< @brief initial affine scale (default='0.5').  */
-  char * initial_orig;	/**< @brief initial affine scale original value given at command line.  */
-  const char *initial_help; /**< @brief initial affine scale help description.  */
-  double final_arg;	/**< @brief final affine scale (default='1.5').  */
-  char * final_orig;	/**< @brief final affine scale original value given at command line.  */
-  const char *final_help; /**< @brief final affine scale help description.  */
+  double start_arg;	/**< @brief starting affine scale (default='0.8').  */
+  char * start_orig;	/**< @brief starting affine scale original value given at command line.  */
+  const char *start_help; /**< @brief starting affine scale help description.  */
+  double end_arg;	/**< @brief ending affine scale (default='1.2').  */
+  char * end_orig;	/**< @brief ending affine scale original value given at command line.  */
+  const char *end_help; /**< @brief ending affine scale help description.  */
   int number_arg;	/**< @brief number of data points (default='50').  */
   char * number_orig;	/**< @brief number of data points original value given at command line.  */
   const char *number_help; /**< @brief number of data points help description.  */
@@ -59,8 +59,8 @@ struct gengetopt_args_info
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int input_given ;	/**< @brief Whether input was given.  */
   unsigned int output_given ;	/**< @brief Whether output was given.  */
-  unsigned int initial_given ;	/**< @brief Whether initial was given.  */
-  unsigned int final_given ;	/**< @brief Whether final was given.  */
+  unsigned int start_given ;	/**< @brief Whether start was given.  */
+  unsigned int end_given ;	/**< @brief Whether end was given.  */
   unsigned int number_given ;	/**< @brief Whether number was given.  */
 
   char **inputs ; /**< @brief unnamed options (options without names) */
