@@ -338,7 +338,51 @@ namespace OpenMD {
 
       return myEuler;
     }
-
+    
+    bool closeEnough(const Real& a, const Real& b,
+		     const Real& epsilon = std::numeric_limits<Real>::epsilon()) {
+      return (epsilon > std::abs(a - b));
+    }
+    
+    Vector3<Real> toRPY() {
+      const Real PI = 3.14159265358979323846264;
+      // check for gimbal lock
+      if (closeEnough(this->data_[0][2], -1.0)) {
+	Real x = 0; // gimbal lock, value of x doesn't matter
+	Real y = PI / 2;
+        Real z = x + atan2(this->data_[1][0], this->data_[2][0]);
+        return Vector3<Real>(x, y, z);
+      } else if (closeEnough(this->data_[0][2], 1.0)) {
+        Real x = 0;
+        Real y = -PI / 2;
+        Real z = -x + atan2(-this->data_[1][0], -this->data_[2][0]);
+        return Vector3<Real>(x, y, z);
+      } else {
+	// two solutions exist
+        Real x1 = -asin(this->data_[0][2]);
+        Real x2 = PI - x1;
+	
+        Real y1 = atan2(this->data_[1][2] / cos(x1),
+			    this->data_[2][2] / cos(x1));
+        Real y2 = atan2(this->data_[1][2] / cos(x2),
+			    this->data_[2][2] / cos(x2));
+	
+        Real z1 = atan2(this->data_[0][1] / cos(x1),
+			    this->data_[0][0] / cos(x1));
+        Real z2 = atan2(this->data_[0][1] / cos(x2),
+			    this->data_[0][0] / cos(x2));
+	
+        // choose one solution to return
+        // for example the "shortest" rotation
+        if ((std::abs(x1) + std::abs(y1) + std::abs(z1)) <=
+	    (std::abs(x2) + std::abs(y2) + std::abs(z2))) {
+	  return Vector3<Real>(x1, y1, z1);
+        } else {
+	  return Vector3<Real>(x2, y2, z2);
+        }
+      }
+    }
+   
     Vector<Real, 6> toVoigtTensor() {
       Vector<Real, 6> voigt;
       voigt[0] = this->data_[0][0];
