@@ -64,6 +64,7 @@
 #include "applications/staticProps/NanoVolume.hpp"
 #include "applications/staticProps/ObjectCount.hpp"
 #include "applications/staticProps/P2OrderParameter.hpp"
+#include "applications/staticProps/P2R.hpp"
 #include "applications/staticProps/PipeDensity.hpp"
 #include "applications/staticProps/RhoZ.hpp"
 #include "applications/staticProps/RippleOP.hpp"
@@ -724,6 +725,33 @@ int main(int argc, char* argv[]) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "At least one selection script (--sele1) must be specified when "
                "calculating Angle(r) values");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+  } else if (args_info.p2r_given) {
+    if (args_info.sele1_given) {
+      if (args_info.sele2_given)
+        analyser = std::make_unique<P2R>(info, dumpFileName, sele1, sele2,
+                                         args_info.nbins_arg);
+      else if (args_info.seleoffset_given) {
+        if (args_info.seleoffset2_given) {
+          analyser = std::make_unique<P2R>(info, dumpFileName, sele1,
+                                           args_info.seleoffset_arg,
+                                           args_info.seleoffset2_arg,
+                                           args_info.nbins_arg);
+        } else {
+          analyser = std::make_unique<P2R>(info, dumpFileName, sele1,
+                                           args_info.seleoffset_arg,
+                                           args_info.nbins_arg);
+        }
+      } else
+        analyser = std::make_unique<P2R>(info, dumpFileName, sele1,
+                                         args_info.nbins_arg);
+    } else {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "At least one selection script (--sele1) must be specified when "
+               "calculating P2R values");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();
