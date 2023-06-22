@@ -817,6 +817,8 @@ src/applications/staticProps/HBondR.cpp
 src/applications/staticProps/HBondRvol.cpp
 src/applications/staticProps/Kirkwood.cpp
 src/applications/staticProps/Field.cpp
+src/applications/staticProps/MassDensityR.cpp
+src/applications/staticProps/MassDensityZ.cpp
 src/applications/staticProps/MultipoleSum.cpp
 src/applications/staticProps/NanoLength.cpp
 src/applications/staticProps/NanoVolume.cpp

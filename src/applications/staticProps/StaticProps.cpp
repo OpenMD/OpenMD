@@ -95,6 +95,8 @@
 #include "applications/staticProps/HBondZ.hpp"
 #include "applications/staticProps/HBondZvol.hpp"
 #include "applications/staticProps/Kirkwood.hpp"
+#include "applications/staticProps/MassDensityR.hpp"
+#include "applications/staticProps/MassDensityZ.hpp"
 #include "applications/staticProps/MomentumHistogram.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
@@ -592,6 +594,19 @@ int main(int argc, char* argv[]) {
   } else if (args_info.charger_given) {
     analyser = std::make_unique<ChargeR>(info, dumpFileName, sele1,
 					 maxLen, args_info.nbins_arg);
+  } else if (args_info.numberz_given) {
+    analyser = std::make_unique<NumberZ>(info, dumpFileName, sele1,
+                                           args_info.nbins_arg, privilegedAxis);
+  } else if (args_info.numberr_given) {
+    analyser = std::make_unique<NumberR>(info, dumpFileName, sele1,
+                                           maxLen, args_info.nbins_arg);    
+  } else if (args_info.massdensityz_given) {
+    analyser = std::make_unique<MassDensityZ>(info, dumpFileName, sele1,
+                                              args_info.nbins_arg,
+                                              privilegedAxis);
+  } else if (args_info.massdensityr_given) {
+    analyser = std::make_unique<MassDensityR>(info, dumpFileName, sele1,
+                                              maxLen, args_info.nbins_arg);    
   } else if (args_info.charge_density_z_given) {
     analyser = std::make_unique<ChargeDensityZ>(
         info, dumpFileName, sele1, args_info.nbins_arg, vRadius,

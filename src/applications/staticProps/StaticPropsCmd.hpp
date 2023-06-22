@@ -225,6 +225,8 @@ struct gengetopt_args_info
   const char *current_density_help; /**< @brief computes the current density for the selected atom help description.  */
   const char *chargez_help; /**< @brief computes the charge distribution along selected axis and selected atom help description.  */
   const char *charger_help; /**< @brief computes the charge density as a function of the radius and selected atom help description.  */
+  const char *massdensityz_help; /**< @brief computes the mass density of the selection along selected axis help description.  */
+  const char *massdensityr_help; /**< @brief computes the mass density of the selection as a function of the radius from the center of mass help description.  */
   const char *numberz_help; /**< @brief computes the number density along selected axis and selected molcule help description.  */
   const char *numberr_help; /**< @brief computes the number density as a function of the radius and selected molecule help description.  */
   const char *charge_density_z_help; /**< @brief computes the continuous charge distribution along selected axis and selected atom help description.  */
@@ -335,6 +337,8 @@ struct gengetopt_args_info
   unsigned int current_density_given ;	/**< @brief Whether current_density was given.  */
   unsigned int chargez_given ;	/**< @brief Whether chargez was given.  */
   unsigned int charger_given ;	/**< @brief Whether charger was given.  */
+  unsigned int massdensityz_given ;	/**< @brief Whether massdensityz was given.  */
+  unsigned int massdensityr_given ;	/**< @brief Whether massdensityr was given.  */
   unsigned int numberz_given ;	/**< @brief Whether numberz was given.  */
   unsigned int numberr_given ;	/**< @brief Whether numberr was given.  */
   unsigned int charge_density_z_given ;	/**< @brief Whether charge_density_z was given.  */

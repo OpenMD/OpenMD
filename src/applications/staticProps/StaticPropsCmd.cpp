@@ -136,6 +136,8 @@ const char *gengetopt_args_info_help[] = {
   "  -J, --current_density         computes the current density for the selected\n                                  atom",
   "      --chargez                 computes the charge distribution along selected\n                                  axis and selected atom",
   "      --charger                 computes the charge density as a function of\n                                  the radius and selected atom",
+  "      --massdensityz            computes the mass density of the selection\n                                  along selected axis",
+  "      --massdensityr            computes the mass density of the selection as a\n                                  function of the radius from the center of\n                                  mass",
   "      --numberz                 computes the number density along selected axis\n                                  and selected molcule",
   "      --numberr                 computes the number density as a function of\n                                  the radius and selected molecule",
   "      --charge_density_z        computes the continuous charge distribution\n                                  along selected axis and selected atom",
@@ -279,6 +281,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->current_density_given = 0 ;
   args_info->chargez_given = 0 ;
   args_info->charger_given = 0 ;
+  args_info->massdensityz_given = 0 ;
+  args_info->massdensityr_given = 0 ;
   args_info->numberz_given = 0 ;
   args_info->numberr_given = 0 ;
   args_info->charge_density_z_given = 0 ;
@@ -469,13 +473,15 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->current_density_help = gengetopt_args_info_help[100] ;
   args_info->chargez_help = gengetopt_args_info_help[101] ;
   args_info->charger_help = gengetopt_args_info_help[102] ;
-  args_info->numberz_help = gengetopt_args_info_help[103] ;
-  args_info->numberr_help = gengetopt_args_info_help[104] ;
-  args_info->charge_density_z_help = gengetopt_args_info_help[105] ;
-  args_info->countz_help = gengetopt_args_info_help[106] ;
-  args_info->momentum_distribution_help = gengetopt_args_info_help[107] ;
-  args_info->dipole_orientation_help = gengetopt_args_info_help[108] ;
-  args_info->order_prob_help = gengetopt_args_info_help[109] ;
+  args_info->massdensityz_help = gengetopt_args_info_help[103] ;
+  args_info->massdensityr_help = gengetopt_args_info_help[104] ;
+  args_info->numberz_help = gengetopt_args_info_help[105] ;
+  args_info->numberr_help = gengetopt_args_info_help[106] ;
+  args_info->charge_density_z_help = gengetopt_args_info_help[107] ;
+  args_info->countz_help = gengetopt_args_info_help[108] ;
+  args_info->momentum_distribution_help = gengetopt_args_info_help[109] ;
+  args_info->dipole_orientation_help = gengetopt_args_info_help[110] ;
+  args_info->order_prob_help = gengetopt_args_info_help[111] ;
   
 }
 
@@ -897,6 +903,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "chargez", 0, 0 );
   if (args_info->charger_given)
     write_into_file(outfile, "charger", 0, 0 );
+  if (args_info->massdensityz_given)
+    write_into_file(outfile, "massdensityz", 0, 0 );
+  if (args_info->massdensityr_given)
+    write_into_file(outfile, "massdensityr", 0, 0 );
   if (args_info->numberz_given)
     write_into_file(outfile, "numberz", 0, 0 );
   if (args_info->numberr_given)
@@ -1023,6 +1033,8 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->current_density_given = 0 ;
   args_info->chargez_given = 0 ;
   args_info->charger_given = 0 ;
+  args_info->massdensityz_given = 0 ;
+  args_info->massdensityr_given = 0 ;
   args_info->numberz_given = 0 ;
   args_info->numberr_given = 0 ;
   args_info->charge_density_z_given = 0 ;
@@ -1980,6 +1992,8 @@ cmdline_parser_internal (
         { "current_density",	0, NULL, 'J' },
         { "chargez",	0, NULL, 0 },
         { "charger",	0, NULL, 0 },
+        { "massdensityz",	0, NULL, 0 },
+        { "massdensityr",	0, NULL, 0 },
         { "numberz",	0, NULL, 0 },
         { "numberr",	0, NULL, 0 },
         { "charge_density_z",	0, NULL, 0 },
@@ -3577,6 +3591,40 @@ cmdline_parser_internal (
                 &(local_args_info.charger_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "charger", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* computes the mass density of the selection along selected axis.  */
+          else if (strcmp (long_options[option_index].name, "massdensityz") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->massdensityz_given),
+                &(local_args_info.massdensityz_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "massdensityz", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* computes the mass density of the selection as a function of the radius from the center of mass.  */
+          else if (strcmp (long_options[option_index].name, "massdensityr") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->massdensityr_given),
+                &(local_args_info.massdensityr_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "massdensityr", '-',
                 additional_error))
               goto failure;
           

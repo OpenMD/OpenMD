@@ -128,6 +128,8 @@ groupoption "net_charge" q "computes an average charge profile of the selected a
 groupoption "current_density" J "computes the current density for the selected atom" group="staticProps"
 groupoption "chargez" - "computes the charge distribution along selected axis and selected atom" group="staticProps"
 groupoption "charger" - "computes the charge density as a function of the radius and selected atom" group="staticProps"
+groupoption "massdensityz" - "computes the mass density of the selection along selected axis" group="staticProps"
+groupoption "massdensityr" - "computes the mass density of the selection as a function of the radius from the center of mass" group="staticProps"
 groupoption "numberz" - "computes the number density along selected axis and selected molcule" group="staticProps"
 groupoption "numberr" - "computes the number density as a function of the radius and selected molecule" group="staticProps"
 groupoption "charge_density_z" - "computes the continuous charge distribution along selected axis and selected atom" group="staticProps"
