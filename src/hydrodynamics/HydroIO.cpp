@@ -216,9 +216,9 @@ namespace OpenMD {
 #elif defined(RAPID_JSON)
     w_.EndArray();
     w_.EndObject();
-    writerOpen_ = false;
     delete osw_;
-#endif    
+#endif
+    writerOpen_ = false;
   }
 
   map<string, HydroProp*> HydroIO::parseHydroFile(const string& f) {
@@ -283,7 +283,8 @@ namespace OpenMD {
 	painCave.isFatal = 1;
 	simError();
       }
-      // OpenMD-Hydro has a single object, but check that it's really OpenMD-Hydro
+      // OpenMD-Hydro has a single object, but check that it's really
+      // OpenMD-Hydro
       if (!d_.HasMember("OpenMD-Hydro")) {
 	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
 		 "HydroIO: File %s does not have a OpenMD-Hydro object.\n",
