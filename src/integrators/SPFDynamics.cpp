@@ -88,6 +88,12 @@ namespace OpenMD {
           snap->rigidbodyData.velocity = tempSourceSnap.rigidbodyData.velocity;
           snap->cgData.velocity        = tempSourceSnap.cgData.velocity;
 
+          // Angular velocities
+          snap->atomData.angularMomentum =
+              tempSourceSnap.atomData.angularMomentum;
+          snap->rigidbodyData.angularMomentum =
+              tempSourceSnap.rigidbodyData.angularMomentum;
+
           this->moveB();
         }
       } else {

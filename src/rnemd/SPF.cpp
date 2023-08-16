@@ -167,6 +167,22 @@ namespace OpenMD::RNEMD {
       P_a += mass * vel;
       M_a += mass;
       K_a += mass * vel.lengthSquare();
+
+      if (sd->isDirectional()) {
+        Vector3d angMom = sd->getJ();
+        Mat3x3d I       = sd->getI();
+        if (sd->isLinear()) {
+          int i = sd->linearAxis();
+          int j = (i + 1) % 3;
+          int k = (i + 2) % 3;
+          K_a +=
+              angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
+        } else {
+          K_a += angMom[0] * angMom[0] / I(0, 0) +
+                 angMom[1] * angMom[1] / I(1, 1) +
+                 angMom[2] * angMom[2] / I(2, 2);
+        }
+      }
     }
 
     for (sd = smanB.beginSelected(selej); sd != NULL;
@@ -177,6 +193,22 @@ namespace OpenMD::RNEMD {
       P_b += mass * vel;
       M_b += mass;
       K_b += mass * vel.lengthSquare();
+
+      if (sd->isDirectional()) {
+        Vector3d angMom = sd->getJ();
+        Mat3x3d I       = sd->getI();
+        if (sd->isLinear()) {
+          int i = sd->linearAxis();
+          int j = (i + 1) % 3;
+          int k = (i + 2) % 3;
+          K_b +=
+              angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
+        } else {
+          K_b += angMom[0] * angMom[0] / I(0, 0) +
+                 angMom[1] * angMom[1] / I(1, 1) +
+                 angMom[2] * angMom[2] / I(2, 2);
+        }
+      }
     }
 
     K_a *= 0.5;
@@ -226,6 +258,11 @@ namespace OpenMD::RNEMD {
             vel = (sd2->getVel() - v_a) * a + v_a;
 
             sd2->setVel(vel);
+
+            if (sd2->isDirectional()) {
+              Vector3d angMom = sd2->getJ() * a;
+              sd2->setJ(angMom);
+            }
           }
 
           for (sd2 = smanB.beginSelected(selei2); sd2 != NULL;
@@ -233,9 +270,15 @@ namespace OpenMD::RNEMD {
             vel = (sd2->getVel() - v_b) * a + v_b;
 
             sd2->setVel(vel);
+
+            if (sd2->isDirectional()) {
+              Vector3d angMom = sd2->getJ() * a;
+              sd2->setJ(angMom);
+            }
           }
 
           currentSnap_->hasTranslationalKineticEnergy = false;
+          currentSnap_->hasRotationalKineticEnergy    = false;
           currentSnap_->hasKineticEnergy              = false;
           currentSnap_->hasTotalEnergy                = false;
 
