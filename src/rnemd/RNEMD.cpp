@@ -105,6 +105,7 @@ namespace OpenMD::RNEMD {
     stringToFluxType["Lz"]         = rnemdLz;
     stringToFluxType["Lvector"]    = rnemdLvector;
     stringToFluxType["Particle"]   = rnemdParticle;
+    stringToFluxType["Particle+KE"]= rnemdParticleKE;
     stringToFluxType["KE+Px"]      = rnemdKePx;
     stringToFluxType["KE+Py"]      = rnemdKePy;
     stringToFluxType["KE+Pvector"] = rnemdKePvector;
@@ -548,7 +549,7 @@ namespace OpenMD::RNEMD {
       simError();
     }
 
-    if (rnemdFluxType_ == rnemdParticle) {
+    if (rnemdFluxType_ == rnemdParticle || rnemdFluxType_ == rnemdParticleKE) {
       SelectionManager tempCommonA = seleManA_ & outputSeleMan_;
       SelectionManager tempCommonB = seleManB_ & outputSeleMan_;
 

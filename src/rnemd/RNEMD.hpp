@@ -92,6 +92,7 @@ namespace OpenMD::RNEMD {
       rnemdLz,         // flux of angular momentum along z axis
       rnemdLvector,    // flux of angular momentum vector
       rnemdParticle,   // flux of particles
+      rnemdParticleKE, // flux of particles and total kinetic energy
       rnemdKePx,       // flux of translational KE and x-momentum
       rnemdKePy,       // flux of translational KE and y-momentum
       rnemdKePvector,  // full combo flying platter

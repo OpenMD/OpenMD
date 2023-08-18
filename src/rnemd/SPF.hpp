@@ -72,6 +72,7 @@ namespace OpenMD::RNEMD {
     std::string selectedMoleculeStr_;
     SelectionEvaluator selectedMoleculeEvaluator_;
     SelectionManager selectedMoleculeMan_;
+    bool uniformKineticScaling_;
   };
 }  // namespace OpenMD::RNEMD
 
