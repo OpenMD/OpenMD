@@ -55,8 +55,7 @@
 
 namespace OpenMD {
 
-  CharmmTorsionType::CharmmTorsionType(
-	std::vector<CharmmTorsionParameter>& parameters) : TorsionType() {
+  CharmmTorsionType::CharmmTorsionType( std::vector<CharmmTorsionParameter>& parameters) : TorsionType(), C_(0.0) {
     
     std::vector<CharmmTorsionParameter>::iterator i;
     i = std::max_element(parameters.begin(), parameters.end(),
@@ -103,6 +102,7 @@ namespace OpenMD {
     dVdCosPhi = T_.evaluateDerivative(cosPhi);
     // Chain rule for U * sinPhi term:
     dVdCosPhi += U_.evaluateDerivative(cosPhi) * sinPhi;
-    dVdCosPhi += U_.evaluate(cosPhi) / (2.0 * sinPhi); 
+    dVdCosPhi += U_.evaluate(cosPhi) / (2.0 * sinPhi);
+    
   }
 }  // namespace OpenMD
