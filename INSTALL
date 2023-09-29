@@ -9,12 +9,12 @@ Requirements
 
    * The source code for the latest release of OpenMD
    * A C++ compiler
-   * CMake 3.12 or newer
+   * CMake 3.5 or newer
 
   OpenMD uses CMake as its build system. CMake is an open source
   cross-platform build system from KitWare.
 
-  You need to install CMake 3.12 or newer. This is available as a
+  You need to install CMake 3.5 or newer. This is available as a
   binary package from the KitWare website; alternatively, it may be
   available through your package manager (on Linux). If necessary, you
   can also compile it yourself from the source code.
@@ -43,9 +43,6 @@ Requirements
    * fftw - a library for computing discrete Fourier transforms.  This
      is required for surface undulation spectra (Hxy in
      staticProps). Get version 3.
-
-   * nlohmann-json - a parser for JavaScript Object Notation, which is used 
-     for hydrodynamic interchange files.
 
    * zlib - required to support reading gzipped trajectory files
 

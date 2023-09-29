@@ -59,7 +59,6 @@ in the `docs` directory. Sample simulations are available in the
 
       + Open Babel:  [openbabel.org](http://openbabel.org)
       + Qhull:       [www.qhull.org](http://www.qhull.org)
-      + nlohmann-json: [json.nlohmann.me](https://json.nlohmann.me/)
       + FFTW:        [www.fftw.org](http://www.fftw.org)
       + Doxygen:     [www.doxygen.org](http://www.doxygen.org)
 
