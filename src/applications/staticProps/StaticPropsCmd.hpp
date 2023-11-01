@@ -68,6 +68,9 @@ struct gengetopt_args_info
   int nrbins_arg;	/**< @brief number of radial bins (usually duplicates functionality of nbins) (default='100').  */
   char * nrbins_orig;	/**< @brief number of radial bins (usually duplicates functionality of nbins) original value given at command line.  */
   const char *nrbins_help; /**< @brief number of radial bins (usually duplicates functionality of nbins) help description.  */
+  double binWidth_arg;	/**< @brief width of radial bins in angstroms (default='1.0').  */
+  char * binWidth_orig;	/**< @brief width of radial bins in angstroms original value given at command line.  */
+  const char *binWidth_help; /**< @brief width of radial bins in angstroms help description.  */
   int nanglebins_arg;	/**< @brief number of bins for cos(angle) (default='50').  */
   char * nanglebins_orig;	/**< @brief number of bins for cos(angle) original value given at command line.  */
   const char *nanglebins_help; /**< @brief number of bins for cos(angle) help description.  */
@@ -158,8 +161,8 @@ struct gengetopt_args_info
   double v_radius_arg;	/**< @brief VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model.  */
   char * v_radius_orig;	/**< @brief VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model original value given at command line.  */
   const char *v_radius_help; /**< @brief VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model help description.  */
-  int gen_xyz_flag;	/**< @brief generats xyz file (default=off).  */
-  const char *gen_xyz_help; /**< @brief generats xyz file help description.  */
+  int gen_xyz_flag;	/**< @brief generates xyz file (default=off).  */
+  const char *gen_xyz_help; /**< @brief generates xyz file help description.  */
   char * atom_name_arg;	/**< @brief name of atom for with average charge to be generated.  */
   char * atom_name_orig;	/**< @brief name of atom for with average charge to be generated original value given at command line.  */
   const char *atom_name_help; /**< @brief name of atom for with average charge to be generated help description.  */
@@ -179,6 +182,7 @@ struct gengetopt_args_info
   const char *twodgofr_help; /**< @brief 2D g(r) (Slab width --dz must be specified) help description.  */
   const char *kirkwood_buff_help; /**< @brief Kirkwood-Buff integrals (--sele1 and --sele2 must both be specified) help description.  */
   const char *p2_help; /**< @brief p2 order parameter (--sele1 must be specified, --sele2 is optional) help description.  */
+  const char *p2r_help; /**< @brief p2 order parameter using r as director axis help description.  */
   const char *rp2_help; /**< @brief rp2 order parameter (--sele1 and --sele2 must be specified) help description.  */
   const char *scd_help; /**< @brief scd order parameter (either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified) help description.  */
   const char *density_help; /**< @brief density plot help description.  */
@@ -221,6 +225,8 @@ struct gengetopt_args_info
   const char *current_density_help; /**< @brief computes the current density for the selected atom help description.  */
   const char *chargez_help; /**< @brief computes the charge distribution along selected axis and selected atom help description.  */
   const char *charger_help; /**< @brief computes the charge density as a function of the radius and selected atom help description.  */
+  const char *massdensityz_help; /**< @brief computes the mass density of the selection along selected axis help description.  */
+  const char *massdensityr_help; /**< @brief computes the mass density of the selection as a function of the radius from the center of mass help description.  */
   const char *numberz_help; /**< @brief computes the number density along selected axis and selected molcule help description.  */
   const char *numberr_help; /**< @brief computes the number density as a function of the radius and selected molecule help description.  */
   const char *charge_density_z_help; /**< @brief computes the continuous charge distribution along selected axis and selected atom help description.  */
@@ -239,6 +245,7 @@ struct gengetopt_args_info
   unsigned int nbins_y_given ;	/**< @brief Whether nbins_y was given.  */
   unsigned int nbins_z_given ;	/**< @brief Whether nbins_z was given.  */
   unsigned int nrbins_given ;	/**< @brief Whether nrbins was given.  */
+  unsigned int binWidth_given ;	/**< @brief Whether binWidth was given.  */
   unsigned int nanglebins_given ;	/**< @brief Whether nanglebins was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
   unsigned int OOcut_given ;	/**< @brief Whether OOcut was given.  */
@@ -287,6 +294,7 @@ struct gengetopt_args_info
   unsigned int twodgofr_given ;	/**< @brief Whether twodgofr was given.  */
   unsigned int kirkwood_buff_given ;	/**< @brief Whether kirkwood_buff was given.  */
   unsigned int p2_given ;	/**< @brief Whether p2 was given.  */
+  unsigned int p2r_given ;	/**< @brief Whether p2r was given.  */
   unsigned int rp2_given ;	/**< @brief Whether rp2 was given.  */
   unsigned int scd_given ;	/**< @brief Whether scd was given.  */
   unsigned int density_given ;	/**< @brief Whether density was given.  */
@@ -329,6 +337,8 @@ struct gengetopt_args_info
   unsigned int current_density_given ;	/**< @brief Whether current_density was given.  */
   unsigned int chargez_given ;	/**< @brief Whether chargez was given.  */
   unsigned int charger_given ;	/**< @brief Whether charger was given.  */
+  unsigned int massdensityz_given ;	/**< @brief Whether massdensityz was given.  */
+  unsigned int massdensityr_given ;	/**< @brief Whether massdensityr was given.  */
   unsigned int numberz_given ;	/**< @brief Whether numberz was given.  */
   unsigned int numberr_given ;	/**< @brief Whether numberr was given.  */
   unsigned int charge_density_z_given ;	/**< @brief Whether charge_density_z was given.  */

@@ -44,7 +44,7 @@
 
 /* Calculates Angle(R) for DirectionalAtoms*/
 
-#include "applications/staticProps/AngleR.hpp"
+#include "applications/staticProps/P2R.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -59,39 +59,31 @@
 
 namespace OpenMD {
 
-  AngleR::AngleR(SimInfo* info, const std::string& filename,
-                 const std::string& sele1, RealType len, int nrbins) :
-      StaticAnalyser(info, filename, nrbins),
+  P2R::P2R(SimInfo* info, const std::string& filename, const std::string& sele1,
+           unsigned int nbins) :
+      StaticAnalyser(info, filename, nbins),
       doVect_(true), doOffset_(false), selectionScript1_(sele1),
-      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
-      len_(len), nRBins_(nrbins) {
+      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info) {
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
-    deltaR_ = len_ / nRBins_;
-
-    histogram_.resize(nRBins_);
-    count_.resize(nRBins_);
-    avgAngleR_.resize(nRBins_);
-
-    setAnalysisType("radial density function Angle(r)");
-    setOutputName(getPrefix(filename) + ".AngleR");
+    setAnalysisType(
+        "2nd order Legendre Polynomial Correlation using r as reference axis");
+    setOutputName(getPrefix(filename) + ".P2R");
     std::stringstream params;
-    params << " len = " << len_ << ", nrbins = " << nRBins_;
     const std::string paramString = params.str();
     setParameterString(paramString);
   }
 
-  AngleR::AngleR(SimInfo* info, const std::string& filename,
-                 const std::string& sele1, const std::string& sele2,
-                 RealType len, int nrbins) :
-      StaticAnalyser(info, filename, nrbins),
+  P2R::P2R(SimInfo* info, const std::string& filename, const std::string& sele1,
+           const std::string& sele2, unsigned int nbins) :
+      StaticAnalyser(info, filename, nbins),
       doVect_(false), doOffset_(false), selectionScript1_(sele1),
       selectionScript2_(sele2), seleMan1_(info), seleMan2_(info),
-      evaluator1_(info), evaluator2_(info), len_(len), nRBins_(nrbins) {
-    setOutputName(getPrefix(filename) + ".AngleR");
+      evaluator1_(info), evaluator2_(info) {
+    setOutputName(getPrefix(filename) + ".P2R");
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -103,82 +95,62 @@ namespace OpenMD {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }
 
-    deltaR_ = len_ / nRBins_;
-
-    histogram_.resize(nRBins_);
-    count_.resize(nRBins_);
-    avgAngleR_.resize(nRBins_);
-
-    setAnalysisType("radial density function Angle(r)");
-    setOutputName(getPrefix(filename) + ".AngleR");
+    setAnalysisType(
+        "2nd order Legendre Polynomial Correlation using r as reference axis");
+    setOutputName(getPrefix(filename) + ".P2R");
     std::stringstream params;
-    params << " len = " << len_ << ", nrbins = " << nRBins_;
     const std::string paramString = params.str();
     setParameterString(paramString);
   }
 
-  AngleR::AngleR(SimInfo* info, const std::string& filename,
-                 const std::string& sele1, int seleOffset, RealType len,
-                 int nrbins) :
-      StaticAnalyser(info, filename, nrbins),
+  P2R::P2R(SimInfo* info, const std::string& filename, const std::string& sele1,
+           int seleOffset, unsigned int nbins) :
+      StaticAnalyser(info, filename, nbins),
       doVect_(false), doOffset_(true), doOffset2_(false),
       selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
-      evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset), len_(len),
-      nRBins_(nrbins) {
-    setOutputName(getPrefix(filename) + ".AngleR");
+      evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset) {
+    setOutputName(getPrefix(filename) + ".P2R");
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
-    deltaR_ = len_ / nRBins_;
-
-    histogram_.resize(nRBins_);
-    count_.resize(nRBins_);
-    avgAngleR_.resize(nRBins_);
-
-    setAnalysisType("radial density function Angle(r)");
-    setOutputName(getPrefix(filename) + ".AngleR");
+    setAnalysisType(
+        "2nd order Legendre Polynomial Correlation using r as reference axis");
+    setOutputName(getPrefix(filename) + ".P2R");
     std::stringstream params;
-    params << " len = " << len_ << ", nrbins = " << nRBins_;
     const std::string paramString = params.str();
     setParameterString(paramString);
   }
 
-  AngleR::AngleR(SimInfo* info, const std::string& filename,
-                 const std::string& sele1, int seleOffset, int seleOffset2,
-                 RealType len, int nrbins) :
-      StaticAnalyser(info, filename, nrbins),
+  P2R::P2R(SimInfo* info, const std::string& filename, const std::string& sele1,
+           int seleOffset, int seleOffset2, unsigned int nbins) :
+      StaticAnalyser(info, filename, nbins),
       doVect_(false), doOffset_(true), doOffset2_(true),
       selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
       evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset),
-      seleOffset2_(seleOffset2), len_(len), nRBins_(nrbins) {
-    setOutputName(getPrefix(filename) + ".AngleR");
+      seleOffset2_(seleOffset2) {
+    setOutputName(getPrefix(filename) + ".P2R");
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
-    histogram_.resize(nRBins_);
-    count_.resize(nRBins_);
-    avgAngleR_.resize(nRBins_);
-
-    setAnalysisType("radial density function Angle(r)");
-    setOutputName(getPrefix(filename) + ".AngleR");
+    setAnalysisType(
+        "2nd order Legendre Polynomial Correlation using r as reference axis");
+    setOutputName(getPrefix(filename) + ".P2R");
     std::stringstream params;
-    params << " len = " << len_ << ", nrbins = " << nRBins_;
     const std::string paramString = params.str();
     setParameterString(paramString);
   }
 
-  void AngleR::process() {
+  void P2R::process() {
     StuntDouble* sd1;
     StuntDouble* sd2;
     int ii;
     int jj;
-    RealType distance;
     bool usePeriodicBoundaryConditions_ =
         info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
@@ -187,10 +159,6 @@ namespace OpenMD {
     int nFrames = reader.getNFrames();
 
     nProcessed_ = nFrames / step_;
-
-    std::fill(avgAngleR_.begin(), avgAngleR_.end(), 0.0);
-    std::fill(histogram_.begin(), histogram_.end(), 0.0);
-    std::fill(count_.begin(), count_.end(), 0);
 
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
@@ -208,7 +176,6 @@ namespace OpenMD {
           Vector3d pos = sd1->getPos();
 
           Vector3d r1 = CenterOfMass - pos;
-          distance    = r1.length();
           // only do this if the stunt double actually has a vector associated
           // with it
           if (sd1->isDirectional()) {
@@ -217,11 +184,8 @@ namespace OpenMD {
             r1.normalize();
             RealType cosangle = dot(r1, vec);
 
-            if (distance < len_) {
-              int whichBin = int(distance / deltaR_);
-              histogram_[whichBin] += cosangle;
-              count_[whichBin] += 1;
-            }
+            P2_ += 0.5 * (3.0 * cosangle * cosangle - 1.0);
+            count_++;
           }
         }
       } else {
@@ -255,8 +219,6 @@ namespace OpenMD {
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(rc);
 
-            distance = rc.length();
-
             Vector3d vec = r1 - r2;
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(vec);
@@ -264,11 +226,8 @@ namespace OpenMD {
             rc.normalize();
             vec.normalize();
             RealType cosangle = dot(rc, vec);
-            if (distance < len_) {
-              int whichBin = int(distance / deltaR_);
-              histogram_[whichBin] += cosangle;
-              count_[whichBin] += 1;
-            }
+            P2_ += 0.5 * (3.0 * cosangle * cosangle - 1.0);
+            count_++;
           }
         } else {
           if (evaluator2_.isDynamic()) {
@@ -305,37 +264,24 @@ namespace OpenMD {
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(vec);
 
-            distance = rc.length();
-
             rc.normalize();
             vec.normalize();
             RealType cosangle = dot(rc, vec);
-            if (distance < len_) {
-              int whichBin = int(distance / deltaR_);
-              histogram_[whichBin] += cosangle;
-              count_[whichBin] += 1;
-            }
+            P2_ += 0.5 * (3.0 * cosangle * cosangle - 1.0);
+            count_++;
           }
         }
       }
     }
     processHistogram();
-    writeAngleR();
+    writeP2R();
   }
 
-  void AngleR::processHistogram() {
-    for (unsigned int i = 0; i < histogram_.size(); ++i) {
-      if (count_[i] > 0)
-        avgAngleR_[i] += histogram_[i] / count_[i];
-      else
-        avgAngleR_[i] = 0.0;
-
-      std::cerr << " count = " << count_[i] << " avgAngle = " << avgAngleR_[i]
-                << "\n";
-    }
+  void P2R::processHistogram() {
+    if (count_ > 0) P2_ /= count_;
   }
 
-  void AngleR::writeAngleR() {
+  void P2R::writeP2R() {
     std::ofstream ofs(outputFilename_.c_str());
     if (ofs.is_open()) {
       Revision rev;
@@ -346,18 +292,16 @@ namespace OpenMD {
       ofs << "#nFrames:\t" << nProcessed_ << "\n";
       ofs << "#selection1: (" << selectionScript1_ << ")";
       if (!doVect_) { ofs << "\tselection2: (" << selectionScript2_ << ")"; }
+      ofs << "\n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
 
-      ofs << "#r\tcorrValue\n";
-      for (unsigned int i = 0; i < avgAngleR_.size(); ++i) {
-        RealType r = deltaR_ * (i + 0.5);
-        ofs << r << "\t" << avgAngleR_[i] << "\n";
-      }
+      ofs << "#P2 correlation:\n";
+      ofs << P2_ << "\n";
 
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "AngleR: unable to open %s\n", outputFilename_.c_str());
+               "P2R: unable to open %s\n", outputFilename_.c_str());
       painCave.isFatal = 1;
       simError();
     }

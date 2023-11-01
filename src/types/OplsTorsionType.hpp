@@ -69,13 +69,14 @@ namespace OpenMD {
    *
    * This torsion potential has the form:
    *
-   *  Vtors = 0.5* (v1*(1+cos(phi)) + v2*(1-cos(2*phi)) + v3*(1+cos(3*phi)))
+   *  \f[ V_{tors} = 0.5 (v_1 (1+\cos(\phi)) + v_2 (1-\cos(2 \phi)) + v_3
+   * (1+\cos(3 \phi))) \f]
    *
    * Notes:
    *
-   * 1) OpenMD converts internally to a Polynomial torsion type because
+   * 1. OpenMD converts internally to a Polynomial torsion type because
    *    all of the phase angles are zero in the OPLS paper.
-   * 2) Coefficients are assumed to be in kcal / mol, and be careful about
+   * 2. Coefficients are assumed to be in kcal / mol, and be careful about
    *    that factor of 1/2 when importing the coefficients!
    */
   class OplsTorsionType : public PolynomialTorsionType {

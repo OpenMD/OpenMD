@@ -13,14 +13,18 @@ package "equationofstate"
 version "" 
 
 purpose
-"This takes omd file and generates equation of state of crystal.
+"This takes an OpenMD (.omd) file and generates equation of state for a 
+crystal. The periodic box is affine-scaled between starting and ending 
+ratios of the original box geometry, the energy is calculated at each 
+scaled geometry, and the energy vs. scaling data is put into a
+specified output file.
+
 Example:
-  equationofstate -i Al2O3.omd -o Al2O3.eos -s 0.5 -f 1.5 -n 50"
+  equationofstate -i Al2O3.omd -o Al2O3.eos -s 0.5 -e 1.5 -n 50"
 
 # Options
 option	"input"         i	"use specified input (.omd) file"          string	typestr="filename" 	yes
 option	"output"	o	"use specified output file"				string	typestr="filename"	yes
-option	"initial"	s	"initial affine scale"		double	default="0.5"		no
-option	"final"	e	"final affine scale"		double	default="1.5"		no
+option	"start"	s	"starting affine scale"		double	default="0.8"		no
+option	"end"	e	"ending affine scale"		double	default="1.2"		no
 option	"number"	n	"number of data points"		int	default="50"		no
-

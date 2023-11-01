@@ -92,6 +92,7 @@ namespace OpenMD::RNEMD {
     RNEMDParameters* rnemdParams = info->getSimParams()->getRNEMDParameters();
 
     bool hasParticleFlux = rnemdParams->haveParticleFlux();
+    bool hasKineticFlux  = rnemdParams->haveKineticFlux();
 
     bool methodFluxMismatch = false;
     bool hasCorrectFlux     = false;
@@ -99,6 +100,9 @@ namespace OpenMD::RNEMD {
     switch (rnemdFluxType_) {
     case rnemdParticle:
       hasCorrectFlux = hasParticleFlux;
+      break;
+    case rnemdParticleKE:
+      hasCorrectFlux = hasParticleFlux && hasKineticFlux;
       break;
     default:
       methodFluxMismatch = true;
@@ -118,8 +122,8 @@ namespace OpenMD::RNEMD {
     if (!hasCorrectFlux) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "RNEMD: The current method, SPF, and flux type, %s,\n"
-               "\tdid not have the correct flux value specified. Options\n"
-               "\tinclude: particleFlux.\n",
+               "\tdid not have the correct flux type specified. Options\n"
+               "\tinclude: particleFlux and particleFlux + kineticFlux.\n",
                rnemdFluxTypeLabel_.c_str());
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
@@ -132,6 +136,13 @@ namespace OpenMD::RNEMD {
       setParticleFlux(0.0);
     }
 
+    if (hasKineticFlux) {
+      setKineticFlux(rnemdParams->getKineticFlux());
+    } else {
+      setKineticFlux(0.0);
+    }
+
+    uniformKineticScaling_ = rnemdParams->getSPFUniformKineticScaling();
     selectNewMolecule();
   }
 
@@ -167,6 +178,22 @@ namespace OpenMD::RNEMD {
       P_a += mass * vel;
       M_a += mass;
       K_a += mass * vel.lengthSquare();
+
+      if (sd->isDirectional()) {
+        Vector3d angMom = sd->getJ();
+        Mat3x3d I       = sd->getI();
+        if (sd->isLinear()) {
+          int i = sd->linearAxis();
+          int j = (i + 1) % 3;
+          int k = (i + 2) % 3;
+          K_a +=
+              angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
+        } else {
+          K_a += angMom[0] * angMom[0] / I(0, 0) +
+                 angMom[1] * angMom[1] / I(1, 1) +
+                 angMom[2] * angMom[2] / I(2, 2);
+        }
+      }
     }
 
     for (sd = smanB.beginSelected(selej); sd != NULL;
@@ -177,6 +204,22 @@ namespace OpenMD::RNEMD {
       P_b += mass * vel;
       M_b += mass;
       K_b += mass * vel.lengthSquare();
+
+      if (sd->isDirectional()) {
+        Vector3d angMom = sd->getJ();
+        Mat3x3d I       = sd->getI();
+        if (sd->isLinear()) {
+          int i = sd->linearAxis();
+          int j = (i + 1) % 3;
+          int k = (i + 2) % 3;
+          K_b +=
+              angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
+        } else {
+          K_b += angMom[0] * angMom[0] / I(0, 0) +
+                 angMom[1] * angMom[1] / I(1, 1) +
+                 angMom[2] * angMom[2] / I(2, 2);
+        }
+      }
     }
 
     K_a *= 0.5;
@@ -194,6 +237,7 @@ namespace OpenMD::RNEMD {
 #endif
 
     bool successfulExchange = false;
+    bool doExchange         = false;
 
     if ((M_a > 0.0) && (M_b > 0.0) &&
         forceManager_->getHasSelectedMolecule()) {  // both slabs are not empty
@@ -203,52 +247,95 @@ namespace OpenMD::RNEMD {
       RealType tempParticleTarget =
           (particleTarget_ != deltaLambda_) ? deltaLambda_ : particleTarget_;
 
-      RealType numerator = forceManager_->getScaledDeltaU(tempParticleTarget) *
-                           Constants::energyConvert;
+      RealType deltaU = forceManager_->getScaledDeltaU(tempParticleTarget) *
+                        Constants::energyConvert;
+      RealType a {};
+      RealType b {};
 
-      RealType denominator = K_a + K_b;
-      denominator -= 0.5 * M_a * v_a.lengthSquare();
-      denominator -= 0.5 * M_b * v_b.lengthSquare();
+      if (uniformKineticScaling_) {
+        RealType numerator   = deltaU;
+        RealType denominator = K_a + K_b;
+        denominator -= 0.5 * M_a * v_a.lengthSquare();
+        denominator -= 0.5 * M_b * v_b.lengthSquare();
 
-      RealType a2 = (numerator / denominator) + 1.0;
+        RealType a2 = (numerator / denominator) + 1.0;
 
-      if (a2 > 0.0) {
-        RealType a = std::sqrt(a2);
-
-        if ((a > 0.999) && (a < 1.001)) {  // restrict scaling coefficients
-          Vector3d vel;
-
-          int selei2 {}, selej2 {};
-          StuntDouble* sd2;
-
-          for (sd2 = smanA.beginSelected(selei2); sd2 != NULL;
-               sd2 = smanA.nextSelected(selei2)) {
-            vel = (sd2->getVel() - v_a) * a + v_a;
-
-            sd2->setVel(vel);
+        if (a2 > 0.0) {
+          a = std::sqrt(a2);
+          b = a;
+          if ((a > 0.999) && (a < 1.001)) {  // restrict scaling coefficients
+            doExchange = true;
           }
-
-          for (sd2 = smanB.beginSelected(selei2); sd2 != NULL;
-               sd2 = smanB.nextSelected(selei2)) {
-            vel = (sd2->getVel() - v_b) * a + v_b;
-
-            sd2->setVel(vel);
-          }
-
-          currentSnap_->hasTranslationalKineticEnergy = false;
-          currentSnap_->hasKineticEnergy              = false;
-          currentSnap_->hasTotalEnergy                = false;
-
-          RealType deltaLambda = particleTarget_;
-
-          bool updateSelectedMolecule =
-              forceManager_->updateLambda(deltaLambda, deltaLambda_);
-
-          if (updateSelectedMolecule) this->selectNewMolecule();
-
-          successfulExchange = true;
-          particleExchange_ += deltaLambda;
         }
+
+      } else {
+        RealType aNumerator   = deltaU - kineticTarget_;
+        RealType aDenominator = 2.0 * K_a;
+        aDenominator -= M_a * v_a.lengthSquare();
+
+        RealType bNumerator   = deltaU + kineticTarget_;
+        RealType bDenominator = 2.0 * K_b;
+        bDenominator -= M_b * v_b.lengthSquare();
+
+        RealType a2 = (aNumerator / aDenominator) + 1.0;
+        RealType b2 = (bNumerator / bDenominator) + 1.0;
+
+        if (a2 > 0.0 && b2 > 0.0) {
+          a = std::sqrt(a2);
+          b = std::sqrt(b2);
+
+          if ((a > 0.999) && (a < 1.001) && (b > 0.999) && (b < 1.001)) {
+            // restrict scaling coefficients
+            doExchange = true;
+          }
+        }
+      }
+
+      if (doExchange) {
+        Vector3d vel;
+
+        int selei2 {}, selej2 {};
+        StuntDouble* sd2;
+
+        for (sd2 = smanA.beginSelected(selei2); sd2 != NULL;
+             sd2 = smanA.nextSelected(selei2)) {
+          vel = (sd2->getVel() - v_a) * a + v_a;
+
+          sd2->setVel(vel);
+
+          if (sd2->isDirectional()) {
+            Vector3d angMom = sd2->getJ() * a;
+            sd2->setJ(angMom);
+          }
+        }
+
+        for (sd2 = smanB.beginSelected(selei2); sd2 != NULL;
+             sd2 = smanB.nextSelected(selei2)) {
+          vel = (sd2->getVel() - v_b) * b + v_b;
+
+          sd2->setVel(vel);
+
+          if (sd2->isDirectional()) {
+            Vector3d angMom = sd2->getJ() * b;
+            sd2->setJ(angMom);
+          }
+        }
+
+        currentSnap_->hasTranslationalKineticEnergy = false;
+        currentSnap_->hasRotationalKineticEnergy    = false;
+        currentSnap_->hasKineticEnergy              = false;
+        currentSnap_->hasTotalEnergy                = false;
+
+        RealType deltaLambda = particleTarget_;
+
+        bool updateSelectedMolecule =
+            forceManager_->updateLambda(deltaLambda, deltaLambda_);
+
+        if (updateSelectedMolecule) this->selectNewMolecule();
+
+        successfulExchange = true;
+        particleExchange_ += deltaLambda;
+        kineticExchange_ += kineticTarget_;
       }
     }
 

@@ -35,8 +35,8 @@ in the `docs` directory. Sample simulations are available in the
 
 | Architecture                   |  CXX | Notes                                 |
 |--------------------------------|:----:|---------------------------------------|
-| macOS 13.2 (intel & arm)       | c++  | (Apple clang 14.2, Open MPI 4.1.4)    |
-| Linux (Ubuntu 22.10 - x86\_64) | g++  | (GNU version 12.2.0, Open MPI 4.1.4)  |
+| macOS Sonoma (intel & arm)     | c++  | (Apple clang 15, Open MPI 4.1.5)      |
+| Linux (Ubuntu 23.04 - x86\_64) | g++  | (GNU version 12.3  Open MPI 4.1.4)    |
 | Linux (RHEL 8.7 - x86\_64)     | icpc | (Intel version 19.1.3, Open MPI 4.0.1)|
 
   OpenMD uses features in the C++ standard library. Most (but
@@ -59,7 +59,6 @@ in the `docs` directory. Sample simulations are available in the
 
       + Open Babel:  [openbabel.org](http://openbabel.org)
       + Qhull:       [www.qhull.org](http://www.qhull.org)
-      + nlohmann-json: [json.nlohmann.me](https://json.nlohmann.me/)
       + FFTW:        [www.fftw.org](http://www.fftw.org)
       + Doxygen:     [www.doxygen.org](http://www.doxygen.org)
 

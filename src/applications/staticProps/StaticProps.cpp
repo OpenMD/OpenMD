@@ -64,6 +64,7 @@
 #include "applications/staticProps/NanoVolume.hpp"
 #include "applications/staticProps/ObjectCount.hpp"
 #include "applications/staticProps/P2OrderParameter.hpp"
+#include "applications/staticProps/P2R.hpp"
 #include "applications/staticProps/PipeDensity.hpp"
 #include "applications/staticProps/RhoZ.hpp"
 #include "applications/staticProps/RippleOP.hpp"
@@ -94,6 +95,8 @@
 #include "applications/staticProps/HBondZ.hpp"
 #include "applications/staticProps/HBondZvol.hpp"
 #include "applications/staticProps/Kirkwood.hpp"
+#include "applications/staticProps/MassDensityR.hpp"
+#include "applications/staticProps/MassDensityZ.hpp"
 #include "applications/staticProps/MomentumHistogram.hpp"
 #include "applications/staticProps/MultipoleSum.hpp"
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
@@ -262,6 +265,8 @@ int main(int argc, char* argv[]) {
   } else {
     nanglebins = args_info.nbins_arg;
   }
+
+  RealType binWidth = args_info.binWidth_arg;
 
   // override default vander waals radius for fictious atoms in a model
   RealType vRadius;
@@ -589,6 +594,21 @@ int main(int argc, char* argv[]) {
   } else if (args_info.chargez_given) {
     analyser = std::make_unique<ChargeZ>(info, dumpFileName, sele1,
                                          args_info.nbins_arg, privilegedAxis);
+  } else if (args_info.charger_given) {
+    analyser = std::make_unique<ChargeR>(info, dumpFileName, sele1, maxLen,
+                                         args_info.nbins_arg);
+  } else if (args_info.numberz_given) {
+    analyser = std::make_unique<NumberZ>(info, dumpFileName, sele1,
+                                         args_info.nbins_arg, privilegedAxis);
+  } else if (args_info.numberr_given) {
+    analyser = std::make_unique<NumberR>(info, dumpFileName, sele1, maxLen,
+                                         args_info.nbins_arg);
+  } else if (args_info.massdensityz_given) {
+    analyser = std::make_unique<MassDensityZ>(
+        info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
+  } else if (args_info.massdensityr_given) {
+    analyser = std::make_unique<MassDensityR>(info, dumpFileName, sele1, maxLen,
+                                              args_info.nbins_arg);
   } else if (args_info.charge_density_z_given) {
     analyser = std::make_unique<ChargeDensityZ>(
         info, dumpFileName, sele1, args_info.nbins_arg, vRadius,
@@ -619,11 +639,11 @@ int main(int argc, char* argv[]) {
     analyser = std::make_unique<RNEMDZ>(info, dumpFileName, sele1,
                                         args_info.nbins_arg, privilegedAxis);
   } else if (args_info.rnemdr_given) {
-    analyser =
-        std::make_unique<RNEMDR>(info, dumpFileName, sele1, comsele, nrbins);
+    analyser = std::make_unique<RNEMDR>(info, dumpFileName, sele1, comsele,
+                                        nrbins, binWidth);
   } else if (args_info.rnemdrt_given) {
     analyser = std::make_unique<RNEMDRTheta>(info, dumpFileName, sele1, comsele,
-                                             nrbins, nanglebins);
+                                             nrbins, binWidth, nanglebins);
   } else if (args_info.nitrile_given) {
     analyser = std::make_unique<NitrileFrequencyMap>(info, dumpFileName, sele1,
                                                      args_info.nbins_arg);
@@ -702,8 +722,57 @@ int main(int argc, char* argv[]) {
   } else if (args_info.rodlength_given) {
     analyser = std::make_unique<NanoLength>(info, dumpFileName, sele1);
   } else if (args_info.angle_r_given) {
-    analyser =
-        std::make_unique<AngleR>(info, dumpFileName, sele1, maxLen, nrbins);
+    if (args_info.sele1_given) {
+      if (args_info.sele2_given)
+        analyser = std::make_unique<AngleR>(info, dumpFileName, sele1, sele2,
+                                            maxLen, nrbins);
+      else if (args_info.seleoffset_given) {
+        if (args_info.seleoffset2_given) {
+          analyser = std::make_unique<AngleR>(
+              info, dumpFileName, sele1, args_info.seleoffset_arg,
+              args_info.seleoffset2_arg, maxLen, nrbins);
+        } else {
+          analyser = std::make_unique<AngleR>(info, dumpFileName, sele1,
+                                              args_info.seleoffset_arg, maxLen,
+                                              nrbins);
+        }
+      } else
+        analyser =
+            std::make_unique<AngleR>(info, dumpFileName, sele1, maxLen, nrbins);
+    } else {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "At least one selection script (--sele1) must be specified when "
+               "calculating Angle(r) values");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+  } else if (args_info.p2r_given) {
+    if (args_info.sele1_given) {
+      if (args_info.sele2_given)
+        analyser = std::make_unique<P2R>(info, dumpFileName, sele1, sele2,
+                                         args_info.nbins_arg);
+      else if (args_info.seleoffset_given) {
+        if (args_info.seleoffset2_given) {
+          analyser = std::make_unique<P2R>(
+              info, dumpFileName, sele1, args_info.seleoffset_arg,
+              args_info.seleoffset2_arg, args_info.nbins_arg);
+        } else {
+          analyser = std::make_unique<P2R>(info, dumpFileName, sele1,
+                                           args_info.seleoffset_arg,
+                                           args_info.nbins_arg);
+        }
+      } else
+        analyser = std::make_unique<P2R>(info, dumpFileName, sele1,
+                                         args_info.nbins_arg);
+    } else {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "At least one selection script (--sele1) must be specified when "
+               "calculating P2R values");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
   } else if (args_info.hbond_given) {
     if (args_info.rcut_given) {
       if (args_info.thetacut_given) {

@@ -68,6 +68,7 @@
 #include "applications/dynamicProps/LegendreCorrFuncZ.hpp"
 #include "applications/dynamicProps/MomAngMomCorrFunc.hpp"
 #include "applications/dynamicProps/RCorrFunc.hpp"
+#include "applications/dynamicProps/RotAngleDisplacement.hpp"
 #include "applications/dynamicProps/SelectionCorrFunc.hpp"
 #include "applications/dynamicProps/StressCorrFunc.hpp"
 #include "applications/dynamicProps/SystemDipoleCorrFunc.hpp"
@@ -344,6 +345,9 @@ int main(int argc, char* argv[]) {
   } else if (args_info.wvOutProdcorr_given) {
     corrFunc = std::make_unique<AngularVelVelOutProdCorrFunc>(
         info, dumpFileName, sele1, sele2);
+  } else if (args_info.rotAngleDisp_given) {
+    corrFunc = std::make_unique<RotAngleDisplacement>(info, dumpFileName, sele1,
+                                                      sele2);
   }
 
   if (args_info.output_given) { corrFunc->setOutputName(args_info.output_arg); }

@@ -86,8 +86,9 @@ namespace OpenMD {
     seleMan_.setSelectionSet(evaluator_.evaluate());
     AtomTypeSet osTypes = seleMan_.getSelectedAtomTypes();
     std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
+    bool usePeriodicBoundaryConditions_ =
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
-    // Pre-load the OutputData
     data_.resize(RNEMDZ::ENDINDEX);
 
     OutputData z;
@@ -210,14 +211,15 @@ namespace OpenMD {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
-    int binNo;
+    int binNo {};
     int typeIndex(-1);
-    RealType mass;
-    Vector3d vel;
-    RealType KE;
-    RealType q = 0.0;
-    RealType w = 0.0;
-    Vector3d eField;
+    RealType mass {};
+    Vector3d vel {};
+    RealType KE {};
+    RealType q {};
+    RealType w {};
+    Vector3d eField {};
+    int DOF {};
 
     std::vector<RealType> binMass(nBins_, 0.0);
     std::vector<Vector3d> binP(nBins_, V3Zero);
@@ -243,6 +245,8 @@ namespace OpenMD {
     Molecule* mol;
     StuntDouble* sd;
     AtomType* atype;
+    ConstraintPair* consPair;
+    Molecule::ConstraintPairIterator cpi;
 
     for (mol = info_->beginMolecule(miter); mol != NULL;
          mol = info_->nextMolecule(miter)) {
@@ -255,6 +259,25 @@ namespace OpenMD {
           mass = sd->getMass();
           vel  = sd->getVel();
           KE   = 0.5 * mass * vel.lengthSquare();
+          DOF  = 3;
+
+          if (sd->isDirectional()) {
+            Vector3d angMom = sd->getJ();
+            Mat3x3d Ia      = sd->getI();
+            if (sd->isLinear()) {
+              int i = sd->linearAxis();
+              int j = (i + 1) % 3;
+              int k = (i + 2) % 3;
+              KE += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) +
+                           angMom[k] * angMom[k] / Ia(k, k));
+              DOF += 2;
+            } else {
+              KE += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
+                           angMom[1] * angMom[1] / Ia(1, 1) +
+                           angMom[2] * angMom[2] / Ia(2, 2));
+              DOF += 3;
+            }
+          }
 
           if (outputMask_[ACTIVITY]) {
             typeIndex = -1;
@@ -272,7 +295,7 @@ namespace OpenMD {
             binMass[binNo] += mass;
             binP[binNo] += mass * vel;
             binKE[binNo] += KE;
-            binDOF[binNo] += 3;
+            binDOF[binNo] += DOF;
 
             if (outputMask_[ACTIVITY] && typeIndex != -1)
               binTypeCounts[binNo][typeIndex]++;
@@ -315,24 +338,6 @@ namespace OpenMD {
                 }
               }
             }
-
-            if (sd->isDirectional()) {
-              Vector3d angMom = sd->getJ();
-              Mat3x3d Ia      = sd->getI();
-              if (sd->isLinear()) {
-                int i = sd->linearAxis();
-                int j = (i + 1) % 3;
-                int k = (i + 2) % 3;
-                binKE[binNo] += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) +
-                                       angMom[k] * angMom[k] / Ia(k, k));
-                binDOF[binNo] += 2;
-              } else {
-                binKE[binNo] += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
-                                       angMom[1] * angMom[1] / Ia(1, 1) +
-                                       angMom[2] * angMom[2] / Ia(2, 2));
-                binDOF[binNo] += 3;
-              }
-            }
           }
         }
 
@@ -360,10 +365,20 @@ namespace OpenMD {
         }
       }
       if (seleMan_.isSelected(mol)) {
-        Vector3d pos    = mol->getCom();
-        binNo           = getBin(pos);
-        int constraints = mol->getNConstraintPairs();
-        binDOF[binNo] -= constraints;
+        for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
+             consPair = mol->nextConstraintPair(cpi)) {
+          Vector3d posA = consPair->getConsElem1()->getPos();
+          Vector3d posB = consPair->getConsElem2()->getPos();
+
+          if (usePeriodicBoundaryConditions_) {
+            currentSnapshot_->wrapVector(posA);
+            currentSnapshot_->wrapVector(posB);
+          }
+
+          Vector3d coc = 0.5 * (posA + posB);
+          int binCons  = getBin(coc);
+          binDOF[binCons] -= 1;
+        }
       }
     }
 
@@ -415,9 +430,13 @@ namespace OpenMD {
         }
 
         if (outputMask_[TEMPERATURE]) {
-          temp = 2.0 * binKE[i] /
-                 (binDOF[i] * Constants::kb * Constants::energyConvert);
-          data_[TEMPERATURE].accumulator[i]->add(temp);
+          if (binDOF[i] > 0) {
+            temp = 2.0 * binKE[i] /
+                   (binDOF[i] * Constants::kb * Constants::energyConvert);
+            data_[TEMPERATURE].accumulator[i]->add(temp);
+          } else {
+            std::cerr << "No degrees of freedom in this bin?\n";
+          }
         }
 
         if (outputMask_[CHARGE])
@@ -431,8 +450,8 @@ namespace OpenMD {
 
   RNEMDR::RNEMDR(SimInfo* info, const std::string& filename,
                  const std::string& sele, const std::string& comsele,
-                 int nrbins) :
-      ShellStatistics(info, filename, sele, comsele, nrbins) {
+                 int nrbins, RealType binWidth) :
+      ShellStatistics(info, filename, sele, comsele, nrbins, binWidth) {
     setOutputName(getPrefix(filename) + ".rnemdR");
 
     // Pre-load the OutputData
@@ -487,14 +506,15 @@ namespace OpenMD {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
-    int binNo;
-    RealType mass;
-    Vector3d vel;
-    Vector3d rPos;
-    RealType KE;
-    Vector3d L;
-    Mat3x3d I;
-    RealType r2;
+    int binNo {};
+    RealType mass {};
+    Vector3d vel {};
+    Vector3d rPos {};
+    RealType KE {};
+    Vector3d L {};
+    Mat3x3d I {};
+    RealType r2 {};
+    int DOF {};
 
     std::vector<int> binCount(nBins_, 0);
     std::vector<RealType> binMass(nBins_, 0.0);
@@ -510,6 +530,8 @@ namespace OpenMD {
     std::vector<AtomType*>::iterator at;
     Molecule* mol;
     StuntDouble* sd;
+    ConstraintPair* consPair;
+    Molecule::ConstraintPairIterator cpi;
 
     // loop over the selected atoms:
     for (mol = info_->beginMolecule(miter); mol != NULL;
@@ -525,9 +547,29 @@ namespace OpenMD {
             vel  = sd->getVel();
             rPos = sd->getPos() - coordinateOrigin_;
             KE   = 0.5 * mass * vel.lengthSquare();
-            L    = mass * cross(rPos, vel);
-            I    = outProduct(rPos, rPos) * mass;
-            r2   = rPos.lengthSquare();
+            DOF  = 3;
+
+            if (sd->isDirectional()) {
+              Vector3d angMom = sd->getJ();
+              Mat3x3d Ia      = sd->getI();
+              if (sd->isLinear()) {
+                int i = sd->linearAxis();
+                int j = (i + 1) % 3;
+                int k = (i + 2) % 3;
+                KE += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) +
+                             angMom[k] * angMom[k] / Ia(k, k));
+                DOF += 2;
+              } else {
+                KE += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
+                             angMom[1] * angMom[1] / Ia(1, 1) +
+                             angMom[2] * angMom[2] / Ia(2, 2));
+                DOF += 3;
+              }
+            }
+
+            L  = mass * cross(rPos, vel);
+            I  = outProduct(rPos, rPos) * mass;
+            r2 = rPos.lengthSquare();
             I(0, 0) += mass * r2;
             I(1, 1) += mass * r2;
             I(2, 2) += mass * r2;
@@ -538,33 +580,20 @@ namespace OpenMD {
             binKE[binNo] += KE;
             binI[binNo] += I;
             binL[binNo] += L;
-            binDOF[binNo] += 3;
-
-            if (sd->isDirectional()) {
-              Vector3d angMom = sd->getJ();
-              Mat3x3d Ia      = sd->getI();
-              if (sd->isLinear()) {
-                int i = sd->linearAxis();
-                int j = (i + 1) % 3;
-                int k = (i + 2) % 3;
-                binKE[binNo] += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) +
-                                       angMom[k] * angMom[k] / Ia(k, k));
-                binDOF[binNo] += 2;
-              } else {
-                binKE[binNo] += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
-                                       angMom[1] * angMom[1] / Ia(1, 1) +
-                                       angMom[2] * angMom[2] / Ia(2, 2));
-                binDOF[binNo] += 3;
-              }
-            }
+            binDOF[binNo] += DOF;
           }
         }
       }
       if (seleMan_.isSelected(mol)) {
-        Vector3d pos    = mol->getCom();
-        binNo           = getBin(pos);
-        int constraints = mol->getNConstraintPairs();
-        binDOF[binNo] -= constraints;
+        for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
+             consPair = mol->nextConstraintPair(cpi)) {
+          Vector3d posA = consPair->getConsElem1()->getPos();
+          Vector3d posB = consPair->getConsElem2()->getPos();
+
+          Vector3d coc = 0.5 * (posA + posB);
+          int binCons  = getBin(coc);
+          if (binCons >= 0 && binCons < int(nBins_)) { binDOF[binCons] -= 1; }
+        }
       }
     }
 
@@ -600,8 +629,8 @@ namespace OpenMD {
 
   RNEMDRTheta::RNEMDRTheta(SimInfo* info, const std::string& filename,
                            const std::string& sele, const std::string& comsele,
-                           int nrbins, int nangleBins) :
-      ShellStatistics(info, filename, sele, comsele, nrbins),
+                           int nrbins, RealType binWidth, int nangleBins) :
+      ShellStatistics(info, filename, sele, comsele, nrbins, binWidth),
       nAngleBins_(nangleBins) {
     Globals* simParams                  = info->getSimParams();
     RNEMD::RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();

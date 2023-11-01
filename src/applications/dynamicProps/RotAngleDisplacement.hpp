@@ -42,38 +42,38 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef OPENMD_RNEMD_SPF_HPP
-#define OPENMD_RNEMD_SPF_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_ROTANGLEDISPLACEMENT_HPP
+#define APPLICATIONS_DYNAMICPROPS_ROTANGLEDISPLACEMENT_HPP
 
-#include <string>
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
+#include "math/Vector3.hpp"
 
-#include "brains/ForceManager.hpp"
-#include "brains/SimInfo.hpp"
-#include "rnemd/RNEMD.hpp"
-#include "rnemd/SPFForceManager.hpp"
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
+using namespace std;
+namespace OpenMD {
 
-namespace OpenMD::RNEMD {
-
-  class SPFMethod : public RNEMD {
+  class RotAngleDisplacement : public MoleculeACF<Vector3d> {
   public:
-    explicit SPFMethod(SimInfo* info, ForceManager* forceMan);
-
-    void doRNEMDImpl(SelectionManager& smanA, SelectionManager& smanB) override;
+    RotAngleDisplacement(SimInfo* info, const std::string& filename,
+                         const std::string& sele1, const std::string& sele2);
 
   private:
-    void selectNewMolecule();
+    virtual void validateSelection(SelectionManager& seleMan);
+    virtual void computeFrame(int frame);
+    virtual int computeProperty1(int frame, Molecule* mol);
+    virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2);
+    virtual void correlateFrames(int frame1, int frame2, int timeBin);
+    virtual void postCorrelate();
+    virtual void writeCorrelate();
 
-    RealType deltaLambda_ {};
+    int axis_;
+    int xaxis_;
+    int yaxis_;
+    std::string axisLabel_;
 
-    SPFForceManager* forceManager_ {nullptr};
-
-    std::string selectedMoleculeStr_;
-    SelectionEvaluator selectedMoleculeEvaluator_;
-    SelectionManager selectedMoleculeMan_;
-    bool uniformKineticScaling_;
+    std::vector<std::vector<RotMat3x3d>> rotMats_;
+    std::vector<Vector3d> histogram_;
+    std::vector<int> counts_;
   };
-}  // namespace OpenMD::RNEMD
+}  // namespace OpenMD
 
-#endif  // OPENMD_RNEMD_SPF_HPP
+#endif

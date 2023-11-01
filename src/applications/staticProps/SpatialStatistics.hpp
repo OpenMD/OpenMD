@@ -96,12 +96,11 @@ namespace OpenMD {
   public:
     ShellStatistics(SimInfo* info, const std::string& filename,
                     const std::string& sele, const std::string& comsele,
-                    int nbins);
+                    int nbins, RealType binWidth);
 
     virtual void processFrame(int frame);
     virtual int getBin(Vector3d pos);
     void setCoordinateOrigin(Vector3d co) { coordinateOrigin_ = co; }
-    void setBinWidth(RealType bw) { binWidth_ = bw; }
 
   protected:
     Vector3d coordinateOrigin_;

@@ -42,38 +42,43 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef OPENMD_RNEMD_SPF_HPP
-#define OPENMD_RNEMD_SPF_HPP
+#ifndef APPLICATIONS_STATICPROPS_MASSDENSITYZ_HPP
+#define APPLICATIONS_STATICPROPS_MASSDENSITYZ_HPP
 
 #include <string>
+#include <vector>
 
-#include "brains/ForceManager.hpp"
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "brains/SimInfo.hpp"
-#include "rnemd/RNEMD.hpp"
-#include "rnemd/SPFForceManager.hpp"
+#include "brains/Thermo.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 
-namespace OpenMD::RNEMD {
+namespace OpenMD {
 
-  class SPFMethod : public RNEMD {
+  class MassDensityZ : public StaticAnalyser {
   public:
-    explicit SPFMethod(SimInfo* info, ForceManager* forceMan);
+    MassDensityZ(SimInfo* info, const std::string& filename,
+                 const std::string& sele, int nzbins, int axis = 2);
 
-    void doRNEMDImpl(SelectionManager& smanA, SelectionManager& smanB) override;
+    virtual void process();
 
   private:
-    void selectNewMolecule();
+    virtual void writeMassDensityZ();
 
-    RealType deltaLambda_ {};
+    Snapshot* currentSnapshot_;
+    int nProcessed_;
+    std::string selectionScript_;
+    SelectionEvaluator evaluator_;
+    SelectionManager seleMan_;
+    Thermo thermo_;
 
-    SPFForceManager* forceManager_ {nullptr};
-
-    std::string selectedMoleculeStr_;
-    SelectionEvaluator selectedMoleculeEvaluator_;
-    SelectionManager selectedMoleculeMan_;
-    bool uniformKineticScaling_;
+    std::vector<RealType> zBox_;
+    std::vector<RealType> areas_;
+    std::vector<RealType> massZ_;
+    int axis_;
+    std::string axisLabel_;
   };
-}  // namespace OpenMD::RNEMD
 
-#endif  // OPENMD_RNEMD_SPF_HPP
+}  // namespace OpenMD
+#endif

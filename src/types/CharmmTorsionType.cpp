@@ -56,7 +56,9 @@
 namespace OpenMD {
 
   CharmmTorsionType::CharmmTorsionType(
-      std::vector<CharmmTorsionParameter>& parameters) {
+      std::vector<CharmmTorsionParameter>& parameters) :
+      TorsionType(),
+      C_(0.0) {
     std::vector<CharmmTorsionParameter>::iterator i;
     i = std::max_element(parameters.begin(), parameters.end(),
                          LessThanPeriodicityFunctor());
@@ -66,24 +68,42 @@ namespace OpenMD {
       ChebyshevU U(maxPower);
 
       // convert parameters of charmm type torsion into
-      // PolynomialTorsion's parameters
-      DoublePolynomial finalPolynomial;
+      // Polynomial parameters
+
       for (i = parameters.begin(); i != parameters.end(); ++i) {
         DoublePolynomial cosTerm = T.getChebyshevPolynomial(i->n);
-        cosTerm.operator*=(cos(i->delta) * i->kchi * 0.5);
+        cosTerm *= (cos(i->delta) * i->kchi);
 
-        DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n);
-        sinTerm *= -sin(i->delta) * i->kchi * 0.5;
+        // should check that i->n is >= 1
+        DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n - 1);
+        sinTerm *= -(sin(i->delta) * i->kchi);
 
-        finalPolynomial += cosTerm + sinTerm;
-
-        finalPolynomial += (i->kchi * 0.5);
+        T_ += cosTerm;
+        U_ += sinTerm;
+        C_ += i->kchi;
       }
-      this->setPolynomial(finalPolynomial);
-
-      /*std::ofstream myfile;
-    myfile.open("MyParameters", std::ios::app);
-    myfile << "The Polynomial contains below terms:" << std::endl;*/
     }
+  }
+
+  void CharmmTorsionType::calcForce(RealType cosPhi, RealType& V,
+                                    RealType& dVdCosPhi) {
+    // check roundoff
+    if (cosPhi > 1.0) {
+      cosPhi = 1.0;
+    } else if (cosPhi < -1.0) {
+      cosPhi = -1.0;
+    }
+
+    RealType sinPhi = sqrt(1.0 - cosPhi * cosPhi);
+
+    // trick to avoid divergence in angles near 0 and pi:
+
+    if (fabs(sinPhi) < 1.0E-6) { sinPhi = copysign(1.0E-6, sinPhi); }
+
+    V         = C_ + T_.evaluate(cosPhi) + U_.evaluate(cosPhi) * sinPhi;
+    dVdCosPhi = T_.evaluateDerivative(cosPhi);
+    // Chain rule for U * sinPhi term:
+    dVdCosPhi += U_.evaluateDerivative(cosPhi) * sinPhi;
+    dVdCosPhi += U_.evaluate(cosPhi) / (2.0 * sinPhi);
   }
 }  // namespace OpenMD

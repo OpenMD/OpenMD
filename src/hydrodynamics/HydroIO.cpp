@@ -214,9 +214,9 @@ namespace OpenMD {
 #elif defined(RAPID_JSON)
     w_.EndArray();
     w_.EndObject();
-    writerOpen_ = false;
     delete osw_;
 #endif
+    writerOpen_ = false;
   }
 
   map<string, HydroProp*> HydroIO::parseHydroFile(const string& f) {

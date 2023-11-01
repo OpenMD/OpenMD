@@ -24,7 +24,7 @@
 
 #include "equationofstateCmd.hpp"
 
-const char *gengetopt_args_info_purpose = "This takes omd file and generates equation of state of crystal.\nExample:\n  equationofstate -i Al2O3.omd -o Al2O3.eos -s 0.5 -f 1.5 -n 50";
+const char *gengetopt_args_info_purpose = "This takes an OpenMD (.omd) file and generates equation of state for a \ncrystal. The periodic box is affine-scaled between starting and ending \nratios of the original box geometry, the energy is calculated at each \nscaled geometry, and the energy vs. scaling data is put into a\nspecified output file.\n\nExample:\n  equationofstate -i Al2O3.omd -o Al2O3.eos -s 0.5 -e 1.5 -n 50";
 
 const char *gengetopt_args_info_usage = "Usage: equationofstate [OPTION]... [FILE]...";
 
@@ -37,8 +37,8 @@ const char *gengetopt_args_info_help[] = {
   "  -V, --version          Print version and exit",
   "  -i, --input=filename   use specified input (.omd) file (mandatory)",
   "  -o, --output=filename  use specified output file (mandatory)",
-  "  -s, --initial=DOUBLE   initial affine scale  (default=`0.5')",
-  "  -e, --final=DOUBLE     final affine scale  (default=`1.5')",
+  "  -s, --start=DOUBLE     starting affine scale  (default=`0.8')",
+  "  -e, --end=DOUBLE       ending affine scale  (default=`1.2')",
   "  -n, --number=INT       number of data points  (default=`50')",
     0
 };
@@ -71,8 +71,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->version_given = 0 ;
   args_info->input_given = 0 ;
   args_info->output_given = 0 ;
-  args_info->initial_given = 0 ;
-  args_info->final_given = 0 ;
+  args_info->start_given = 0 ;
+  args_info->end_given = 0 ;
   args_info->number_given = 0 ;
 }
 
@@ -84,10 +84,10 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->input_orig = NULL;
   args_info->output_arg = NULL;
   args_info->output_orig = NULL;
-  args_info->initial_arg = 0.5;
-  args_info->initial_orig = NULL;
-  args_info->final_arg = 1.5;
-  args_info->final_orig = NULL;
+  args_info->start_arg = 0.8;
+  args_info->start_orig = NULL;
+  args_info->end_arg = 1.2;
+  args_info->end_orig = NULL;
   args_info->number_arg = 50;
   args_info->number_orig = NULL;
   
@@ -102,8 +102,8 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->version_help = gengetopt_args_info_help[1] ;
   args_info->input_help = gengetopt_args_info_help[2] ;
   args_info->output_help = gengetopt_args_info_help[3] ;
-  args_info->initial_help = gengetopt_args_info_help[4] ;
-  args_info->final_help = gengetopt_args_info_help[5] ;
+  args_info->start_help = gengetopt_args_info_help[4] ;
+  args_info->end_help = gengetopt_args_info_help[5] ;
   args_info->number_help = gengetopt_args_info_help[6] ;
   
 }
@@ -201,8 +201,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->input_orig));
   free_string_field (&(args_info->output_arg));
   free_string_field (&(args_info->output_orig));
-  free_string_field (&(args_info->initial_orig));
-  free_string_field (&(args_info->final_orig));
+  free_string_field (&(args_info->start_orig));
+  free_string_field (&(args_info->end_orig));
   free_string_field (&(args_info->number_orig));
   
   
@@ -247,10 +247,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "input", args_info->input_orig, 0);
   if (args_info->output_given)
     write_into_file(outfile, "output", args_info->output_orig, 0);
-  if (args_info->initial_given)
-    write_into_file(outfile, "initial", args_info->initial_orig, 0);
-  if (args_info->final_given)
-    write_into_file(outfile, "final", args_info->final_orig, 0);
+  if (args_info->start_given)
+    write_into_file(outfile, "start", args_info->start_orig, 0);
+  if (args_info->end_given)
+    write_into_file(outfile, "end", args_info->end_orig, 0);
   if (args_info->number_given)
     write_into_file(outfile, "number", args_info->number_orig, 0);
   
@@ -1130,8 +1130,8 @@ cmdline_parser_internal (
         { "version",	0, NULL, 'V' },
         { "input",	1, NULL, 'i' },
         { "output",	1, NULL, 'o' },
-        { "initial",	1, NULL, 's' },
-        { "final",	1, NULL, 'e' },
+        { "start",	1, NULL, 's' },
+        { "end",	1, NULL, 'e' },
         { "number",	1, NULL, 'n' },
         { 0,  0, 0, 0 }
       };
@@ -1186,26 +1186,26 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 's':	/* initial affine scale.  */
+        case 's':	/* starting affine scale.  */
         
         
-          if (update_arg( (void *)&(args_info->initial_arg), 
-               &(args_info->initial_orig), &(args_info->initial_given),
-              &(local_args_info.initial_given), optarg, 0, "0.5", ARG_DOUBLE,
+          if (update_arg( (void *)&(args_info->start_arg), 
+               &(args_info->start_orig), &(args_info->start_given),
+              &(local_args_info.start_given), optarg, 0, "0.8", ARG_DOUBLE,
               check_ambiguity, override, 0, 0,
-              "initial", 's',
+              "start", 's',
               additional_error))
             goto failure;
         
           break;
-        case 'e':	/* final affine scale.  */
+        case 'e':	/* ending affine scale.  */
         
         
-          if (update_arg( (void *)&(args_info->final_arg), 
-               &(args_info->final_orig), &(args_info->final_given),
-              &(local_args_info.final_given), optarg, 0, "1.5", ARG_DOUBLE,
+          if (update_arg( (void *)&(args_info->end_arg), 
+               &(args_info->end_orig), &(args_info->end_given),
+              &(local_args_info.end_given), optarg, 0, "1.2", ARG_DOUBLE,
               check_ambiguity, override, 0, 0,
-              "final", 'e',
+              "end", 'e',
               additional_error))
             goto failure;
         

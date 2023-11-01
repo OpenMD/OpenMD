@@ -34,6 +34,7 @@ option	"nbins_x"    	x       "number of bins in x axis"				int	default="100"		op
 option	"nbins_y"    	y       "number of bins in y axis"				int	default="100"		optional
 option	"nbins_z"    	-       "number of bins in z axis"				int	default="100"		optional
 option	"nrbins"    	r       "number of radial bins (usually duplicates functionality of nbins)"				int	default="100"		optional
+option  "binWidth"      -       "width of radial bins in angstroms"                     double  default="1.0"           optional
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		optional
 option  "rcut"          c       "cutoff radius (rcut)"                                  double                          optional
 option  "OOcut"         -       "Oxygen-Oxygen cutoff radius (angstroms)"   double  default="3.5"             optional
@@ -84,6 +85,7 @@ groupoption "gxyz"	-       "g(x, y, z)" group="staticProps"
 groupoption "twodgofr"  -       "2D g(r) (Slab width --dz must be specified)" group="staticProps"
 groupoption "kirkwood_buff" -    "Kirkwood-Buff integrals (--sele1 and --sele2 must both be specified)" group="staticProps"
 groupoption "p2"        p       "p2 order parameter (--sele1 must be specified, --sele2 is optional)" group="staticProps"
+groupoption "p2r"       -       "p2 order parameter using r as director axis" group="staticProps"
 groupoption "rp2"       -       "rp2 order parameter (--sele1 and --sele2 must be specified)" group="staticProps"
 groupoption "scd"       s       "scd order parameter (either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified)" group="staticProps"
 groupoption "density"   d       "density plot" group="staticProps"
@@ -126,6 +128,8 @@ groupoption "net_charge" q "computes an average charge profile of the selected a
 groupoption "current_density" J "computes the current density for the selected atom" group="staticProps"
 groupoption "chargez" - "computes the charge distribution along selected axis and selected atom" group="staticProps"
 groupoption "charger" - "computes the charge density as a function of the radius and selected atom" group="staticProps"
+groupoption "massdensityz" - "computes the mass density of the selection along selected axis" group="staticProps"
+groupoption "massdensityr" - "computes the mass density of the selection as a function of the radius from the center of mass" group="staticProps"
 groupoption "numberz" - "computes the number density along selected axis and selected molcule" group="staticProps"
 groupoption "numberr" - "computes the number density as a function of the radius and selected molecule" group="staticProps"
 groupoption "charge_density_z" - "computes the continuous charge distribution along selected axis and selected atom" group="staticProps"

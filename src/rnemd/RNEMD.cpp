@@ -100,23 +100,24 @@ namespace OpenMD::RNEMD {
     // Determine Flux Type
     std::map<std::string, RNEMDFluxType> stringToFluxType;
 
-    stringToFluxType["KE"]         = rnemdKE;
-    stringToFluxType["Px"]         = rnemdPx;
-    stringToFluxType["Py"]         = rnemdPy;
-    stringToFluxType["Pz"]         = rnemdPz;
-    stringToFluxType["Pvector"]    = rnemdPvector;
-    stringToFluxType["Lx"]         = rnemdLx;
-    stringToFluxType["Ly"]         = rnemdLy;
-    stringToFluxType["Lz"]         = rnemdLz;
-    stringToFluxType["Lvector"]    = rnemdLvector;
-    stringToFluxType["Particle"]   = rnemdParticle;
-    stringToFluxType["KE+Px"]      = rnemdKePx;
-    stringToFluxType["KE+Py"]      = rnemdKePy;
-    stringToFluxType["KE+Pvector"] = rnemdKePvector;
-    stringToFluxType["KE+Lx"]      = rnemdKeLx;
-    stringToFluxType["KE+Ly"]      = rnemdKeLy;
-    stringToFluxType["KE+Lz"]      = rnemdKeLz;
-    stringToFluxType["KE+Lvector"] = rnemdKeLvector;
+    stringToFluxType["KE"]          = rnemdKE;
+    stringToFluxType["Px"]          = rnemdPx;
+    stringToFluxType["Py"]          = rnemdPy;
+    stringToFluxType["Pz"]          = rnemdPz;
+    stringToFluxType["Pvector"]     = rnemdPvector;
+    stringToFluxType["Lx"]          = rnemdLx;
+    stringToFluxType["Ly"]          = rnemdLy;
+    stringToFluxType["Lz"]          = rnemdLz;
+    stringToFluxType["Lvector"]     = rnemdLvector;
+    stringToFluxType["Particle"]    = rnemdParticle;
+    stringToFluxType["Particle+KE"] = rnemdParticleKE;
+    stringToFluxType["KE+Px"]       = rnemdKePx;
+    stringToFluxType["KE+Py"]       = rnemdKePy;
+    stringToFluxType["KE+Pvector"]  = rnemdKePvector;
+    stringToFluxType["KE+Lx"]       = rnemdKeLx;
+    stringToFluxType["KE+Ly"]       = rnemdKeLy;
+    stringToFluxType["KE+Lz"]       = rnemdKeLz;
+    stringToFluxType["KE+Lvector"]  = rnemdKeLvector;
 
     if (rnemdParams->haveFluxType()) {
       rnemdFluxTypeLabel_ = rnemdParams->getFluxType();
@@ -532,7 +533,7 @@ namespace OpenMD::RNEMD {
       simError();
     }
 
-    if (rnemdFluxType_ == rnemdParticle) {
+    if (rnemdFluxType_ == rnemdParticle || rnemdFluxType_ == rnemdParticleKE) {
       SelectionManager tempCommonA = seleManA_ & outputSeleMan_;
       SelectionManager tempCommonB = seleManB_ & outputSeleMan_;
 
@@ -560,16 +561,17 @@ namespace OpenMD::RNEMD {
       outputSeleMan_.setSelectionSet(outputEvaluator_.evaluate());
     }
 
-    int binNo;
+    int binNo {};
     int typeIndex(-1);
-    RealType mass;
-    Vector3d vel;
-    Vector3d rPos;
-    RealType KE;
-    Vector3d L;
-    Mat3x3d I;
-    RealType r2;
-    Vector3d eField;
+    RealType mass {};
+    Vector3d vel {};
+    Vector3d rPos {};
+    RealType KE {};
+    Vector3d L {};
+    Mat3x3d I {};
+    RealType r2 {};
+    Vector3d eField {};
+    int DOF {};
 
     vector<RealType> binMass(nBins_, 0.0);
     vector<Vector3d> binP(nBins_, V3Zero);
@@ -596,6 +598,8 @@ namespace OpenMD::RNEMD {
     Molecule* mol;
     StuntDouble* sd;
     AtomType* atype;
+    ConstraintPair* consPair;
+    Molecule::ConstraintPairIterator cpi;
 
     for (mol = info_->beginMolecule(miter); mol != NULL;
          mol = info_->nextMolecule(miter)) {
@@ -609,9 +613,29 @@ namespace OpenMD::RNEMD {
           vel  = sd->getVel();
           rPos = sd->getPos() - coordinateOrigin_;
           KE   = 0.5 * mass * vel.lengthSquare();
-          L    = mass * cross(rPos, vel);
-          I    = outProduct(rPos, rPos) * mass;
-          r2   = rPos.lengthSquare();
+          DOF  = 3;
+
+          if (sd->isDirectional()) {
+            Vector3d angMom = sd->getJ();
+            Mat3x3d Ia      = sd->getI();
+            if (sd->isLinear()) {
+              int i = sd->linearAxis();
+              int j = (i + 1) % 3;
+              int k = (i + 2) % 3;
+              KE += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) +
+                           angMom[k] * angMom[k] / Ia(k, k));
+              DOF += 2;
+            } else {
+              KE += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
+                           angMom[1] * angMom[1] / Ia(1, 1) +
+                           angMom[2] * angMom[2] / Ia(2, 2));
+              DOF += 3;
+            }
+          }
+
+          L  = mass * cross(rPos, vel);
+          I  = outProduct(rPos, rPos) * mass;
+          r2 = rPos.lengthSquare();
           I(0, 0) += mass * r2;
           I(1, 1) += mass * r2;
           I(2, 2) += mass * r2;
@@ -634,62 +658,55 @@ namespace OpenMD::RNEMD {
             binKE[binNo] += KE;
             binI[binNo] += I;
             binL[binNo] += L;
-            binDOF[binNo] += 3;
+            binDOF[binNo] += DOF;
 
             if (outputMask_[ACTIVITY] && typeIndex != -1)
               binTypeCounts[binNo][typeIndex]++;
-
-            if (sd->isDirectional()) {
-              Vector3d angMom = sd->getJ();
-              Mat3x3d Ia      = sd->getI();
-              if (sd->isLinear()) {
-                int i = sd->linearAxis();
-                int j = (i + 1) % 3;
-                int k = (i + 2) % 3;
-                binKE[binNo] += 0.5 * (angMom[j] * angMom[j] / Ia(j, j) +
-                                       angMom[k] * angMom[k] / Ia(k, k));
-                binDOF[binNo] += 2;
-              } else {
-                binKE[binNo] += 0.5 * (angMom[0] * angMom[0] / Ia(0, 0) +
-                                       angMom[1] * angMom[1] / Ia(1, 1) +
-                                       angMom[2] * angMom[2] / Ia(2, 2));
-                binDOF[binNo] += 3;
-              }
-            }
           }
         }
 
         // Calculate the electric field (kcal/mol/e/Angstrom) for all atoms in
         // the box
         if (outputMask_[ELECTRICFIELD]) {
+          int atomBinNo;
           if (sd->isRigidBody()) {
             RigidBody* rb = static_cast<RigidBody*>(sd);
             std::vector<Atom*>::iterator ai;
             Atom* atom;
             for (atom = rb->beginAtom(ai); atom != NULL;
                  atom = rb->nextAtom(ai)) {
-              binNo  = getBin(atom->getPos());
-              eField = atom->getElectricField();
+              atomBinNo = getBin(atom->getPos());
+              eField    = atom->getElectricField();
 
-              binEFieldCount[binNo]++;
-              binEField[binNo] += eField;
+              binEFieldCount[atomBinNo]++;
+              binEField[atomBinNo] += eField;
             }
           } else {
-            eField = sd->getElectricField();
-            binNo  = getBin(sd->getPos());
+            eField    = sd->getElectricField();
+            atomBinNo = getBin(sd->getPos());
 
-            binEFieldCount[binNo]++;
-            binEField[binNo] += eField;
+            binEFieldCount[atomBinNo]++;
+            binEField[atomBinNo] += eField;
           }
         }
+      }
 
-        // we need to subtract out degrees of freedom from constraints
-        // belonging to in molecules in this bin:
-        if (outputSeleMan_.isSelected(mol)) {
-          Vector3d pos    = mol->getCom();
-          binNo           = getBin(pos);
-          int constraints = mol->getNConstraintPairs();
-          binDOF[binNo] -= constraints;
+      // we need to subtract out degrees of freedom from constraints
+      // belonging in this bin:
+      if (outputSeleMan_.isSelected(mol)) {
+        for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
+             consPair = mol->nextConstraintPair(cpi)) {
+          Vector3d posA = consPair->getConsElem1()->getPos();
+          Vector3d posB = consPair->getConsElem2()->getPos();
+
+          if (usePeriodicBoundaryConditions_) {
+            currentSnap_->wrapVector(posA);
+            currentSnap_->wrapVector(posB);
+          }
+
+          Vector3d coc = 0.5 * (posA + posB);
+          int binCons  = getBin(coc);
+          binDOF[binCons] -= 1;
         }
       }
     }
@@ -792,9 +809,13 @@ namespace OpenMD::RNEMD {
         }
 
         if (outputMask_[TEMPERATURE]) {
-          temp = 2.0 * binKE[i] /
-                 (binDOF[i] * Constants::kb * Constants::energyConvert);
-          data_[TEMPERATURE].accumulator[i]->add(temp);
+          if (binDOF[i] > 0) {
+            temp = 2.0 * binKE[i] /
+                   (binDOF[i] * Constants::kb * Constants::energyConvert);
+            data_[TEMPERATURE].accumulator[i]->add(temp);
+          } else {
+            std::cerr << "No degrees of freedom in this bin?\n";
+          }
         }
       }
     }

@@ -47,12 +47,20 @@
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
 
+using namespace std;
 namespace OpenMD {
 
   class AngleR : public StaticAnalyser {
   public:
-    AngleR(SimInfo* info, const std::string& filename, const std::string& sele,
+    AngleR(SimInfo* info, const string& filename, const string& sele1,
            RealType len, int nrbins);
+    AngleR(SimInfo* info, const string& filename, const string& sele1,
+           const string& sele2, RealType len, int nrbins);
+    AngleR(SimInfo* info, const string& filename, const string& sele,
+           const int seleOffset, RealType len, int nrbins);
+    AngleR(SimInfo* info, const string& filename, const string& sele,
+           const int seleOffset, const int seleOffset2, RealType len,
+           int nrbins);
 
     int getNRBins() { return nRBins_; }
 
@@ -65,10 +73,20 @@ namespace OpenMD {
     void writeAngleR();
 
     Snapshot* currentSnapshot_;
+
+    bool doVect_;
+    bool doOffset_;
+    bool doOffset2_;
+    string selectionScript1_;
+    string selectionScript2_;
+    SelectionManager seleMan1_;
+    SelectionManager seleMan2_;
+    SelectionEvaluator evaluator1_;
+    SelectionEvaluator evaluator2_;
+    int seleOffset_;
+    int seleOffset2_;
+
     int nProcessed_;
-    std::string selectionScript_;
-    SelectionEvaluator evaluator_;
-    SelectionManager seleMan_;
 
     RealType len_;
     int nRBins_;

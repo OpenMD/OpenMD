@@ -760,6 +760,7 @@ src/applications/dynamicProps/ForceAutoCorrFunc.cpp
 src/applications/dynamicProps/TorForCorrFunc.cpp
 src/applications/dynamicProps/TorqueAutoCorrFunc.cpp
 src/applications/dynamicProps/RCorrFunc.cpp
+src/applications/dynamicProps/RotAngleDisplacement.cpp
 src/applications/dynamicProps/SelectionCorrFunc.cpp
 src/applications/dynamicProps/StressCorrFunc.cpp
 src/applications/dynamicProps/SystemDipoleCorrFunc.cpp
@@ -816,6 +817,8 @@ src/applications/staticProps/HBondR.cpp
 src/applications/staticProps/HBondRvol.cpp
 src/applications/staticProps/Kirkwood.cpp
 src/applications/staticProps/Field.cpp
+src/applications/staticProps/MassDensityR.cpp
+src/applications/staticProps/MassDensityZ.cpp
 src/applications/staticProps/MultipoleSum.cpp
 src/applications/staticProps/NanoLength.cpp
 src/applications/staticProps/NanoVolume.cpp
@@ -824,6 +827,7 @@ src/applications/staticProps/NumberR.cpp
 src/applications/staticProps/NumberZ.cpp
 src/applications/staticProps/ObjectCount.cpp
 src/applications/staticProps/P2OrderParameter.cpp
+src/applications/staticProps/P2R.cpp
 src/applications/staticProps/PipeDensity.cpp
 src/applications/staticProps/PotDiff.cpp
 src/applications/staticProps/pAngle.cpp
@@ -946,6 +950,10 @@ if (USE_OPENBABEL)
   src/applications/atom2omd/openmdformat.cpp
   )
   add_executable(atom2omd ${ATOM2OMDSOURCE} ${GETOPT_SOURCE})
+  # This compile definition allows compilation (with warnings) in
+  # Xcode 15.  It should be removed when openbabel is released without
+  # std::binary_function calls.
+  target_compile_definitions(atom2omd PUBLIC _LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION) 
   target_link_libraries(atom2omd openmd_single openmd_core openmd_single openmd_core ${OPENBABEL_LIBRARIES})
   INSTALL(TARGETS atom2omd RUNTIME DESTINATION bin
           PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)

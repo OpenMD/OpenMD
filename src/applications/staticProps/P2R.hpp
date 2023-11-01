@@ -42,38 +42,50 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef OPENMD_RNEMD_SPF_HPP
-#define OPENMD_RNEMD_SPF_HPP
+#ifndef APPLICATIONS_STATICPROPS_P2R_HPP
+#define APPLICATIONS_STATICPROPS_P2R_HPP
 
-#include <string>
+#include "applications/staticProps/RadialDistrFunc.hpp"
 
-#include "brains/ForceManager.hpp"
-#include "brains/SimInfo.hpp"
-#include "rnemd/RNEMD.hpp"
-#include "rnemd/SPFForceManager.hpp"
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
+using namespace std;
+namespace OpenMD {
 
-namespace OpenMD::RNEMD {
-
-  class SPFMethod : public RNEMD {
+  class P2R : public StaticAnalyser {
   public:
-    explicit SPFMethod(SimInfo* info, ForceManager* forceMan);
+    P2R(SimInfo* info, const string& filename, const string& sele1,
+        unsigned int nbins);
+    P2R(SimInfo* info, const string& filename, const string& sele1,
+        const string& sele2, unsigned int nbins);
+    P2R(SimInfo* info, const string& filename, const string& sele,
+        const int seleOffset, unsigned int nbins);
+    P2R(SimInfo* info, const string& filename, const string& sele,
+        const int seleOffset, const int seleOffset2, unsigned int nbins);
 
-    void doRNEMDImpl(SelectionManager& smanA, SelectionManager& smanB) override;
+    virtual void process();
 
   private:
-    void selectNewMolecule();
+    void processHistogram();
+    void writeP2R();
 
-    RealType deltaLambda_ {};
+    Snapshot* currentSnapshot_;
 
-    SPFForceManager* forceManager_ {nullptr};
+    bool doVect_;
+    bool doOffset_;
+    bool doOffset2_;
+    string selectionScript1_;
+    string selectionScript2_;
+    SelectionManager seleMan1_;
+    SelectionManager seleMan2_;
+    SelectionEvaluator evaluator1_;
+    SelectionEvaluator evaluator2_;
+    int seleOffset_;
+    int seleOffset2_;
 
-    std::string selectedMoleculeStr_;
-    SelectionEvaluator selectedMoleculeEvaluator_;
-    SelectionManager selectedMoleculeMan_;
-    bool uniformKineticScaling_;
+    int nProcessed_;
+
+    RealType P2_;
+    int count_;
   };
-}  // namespace OpenMD::RNEMD
+}  // namespace OpenMD
 
-#endif  // OPENMD_RNEMD_SPF_HPP
+#endif
