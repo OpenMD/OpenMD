@@ -80,9 +80,9 @@ namespace OpenMD {
 
 #ifdef IS_MPI
         for (int index {1}; index < nProcessors; ++index)
-          MPI_Send(&seeds[index], 1, MPI_INT, index, 10, MPI_COMM_WORLD);
+          MPI_Send(&seeds[index], 1, MPI_UINT32_T, index, 10, MPI_COMM_WORLD);
       } else {
-        MPI_Recv(&result, 1, MPI_INT, 0, 10, MPI_COMM_WORLD, &status);
+        MPI_Recv(&result, 1, MPI_UINT32_T, 0, 10, MPI_COMM_WORLD, &status);
       }
 #endif
 
