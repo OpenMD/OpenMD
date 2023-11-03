@@ -18,15 +18,6 @@ ENDIF(WIN32)
 
 include(FetchContent)
 
-#find_package(nlohmann_json REQUIRED)
-#if (NOT nlohmann_json_FOUND)
-#   FetchContent_Declare(nlohmann_json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
-#   FetchContent_MakeAvailable(nlohmann_json)
-#   set(nlohmann_json_INCLUDE_DIR ${nlohmann_json_SOURCE_DIR}/include)
-#endif()
-#message(STATUS "Adding include for json to ${nlohmann_json_INCLUDE_DIR}")
-#include_directories(${nlohmann_json_INCLUDE_DIR})
-
 find_package(RapidJSON)
 if (RAPIDJSON_FOUND)
    set(RAPID_JSON 1)
@@ -122,8 +113,6 @@ if (NOT NO_PARALLEL)
       if(DEFINED $ENV{CXX})
         message(STATUS "Found MPI compiler, but using the CXX compiler set in the CXX environment variable, $ENV{CXX}")
       else()
-        set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
-        set(ENV{CXX} ${MPI_CXX_COMPILER})
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_FLAGS}")
       endif()
    ENDIF()
@@ -714,7 +703,7 @@ add_executable(openmd_MPI src/applications/openmd/openmd.cpp)
 set_target_properties(openmd_MPI PROPERTIES
 COMPILE_DEFINITIONS IS_MPI
 )
-target_link_libraries(openmd_MPI openmd_parallel openmd_core openmd_parallel openmd_core)
+target_link_libraries(openmd_MPI openmd_parallel openmd_core openmd_parallel openmd_core ${MPI_CXX_LIBRARIES})
   INSTALL(TARGETS
         openmd_parallel openmd_MPI
   RUNTIME DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
@@ -1112,7 +1101,7 @@ message( STATUS "CMAKE_BUILD_TYPE ........... = ${CMAKE_BUILD_TYPE}")
 message( STATUS "CMAKE_INSTALL_PREFIX ....... = ${CMAKE_INSTALL_PREFIX}")
 message( STATUS "Build as SINGLE_PRECISION .. = ${SINGLE_PRECISION}")
 message( STATUS "CMAKE_CXX_COMPILER ......... = ${CMAKE_CXX_COMPILER}")
-message( STATUS "MPI_CXX_COMPILER ........... = ${MPI_CXX_COMPILER}")
+# message( STATUS "MPI_CXX_COMPILER ........... = ${MPI_CXX_COMPILER}")
 message( STATUS "MPI_CXX_INCLUDE_PATH ....... = ${MPI_CXX_INCLUDE_PATH}")
 message( STATUS "MPI_CXX_LIBRARIES .......... = ${MPI_CXX_LIBRARIES}")
 message( STATUS "OPENBABEL_DIR .............. = ${OPENBABEL_DIR}")
