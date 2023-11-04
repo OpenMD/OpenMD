@@ -733,6 +733,14 @@ namespace OpenMD {
         eta(2, 1) = tokenizer.nextTokenAsDouble();
         eta(2, 2) = tokenizer.nextTokenAsDouble();
         s->setBarostat(eta);
+      } else if (propertyName == "SPFData") {
+        std::shared_ptr<SPFData> spfData = s->getSPFData();
+
+        spfData->pos[0]   = tokenizer.nextTokenAsDouble();
+        spfData->pos[1]   = tokenizer.nextTokenAsDouble();
+        spfData->pos[2]   = tokenizer.nextTokenAsDouble();
+        spfData->lambda   = tokenizer.nextTokenAsDouble();
+        spfData->globalID = tokenizer.nextTokenAsInt();
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                  "DumpReader Error: %s is an invalid property in <FrameData>\n",

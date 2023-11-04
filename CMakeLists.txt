@@ -18,39 +18,33 @@ ENDIF(WIN32)
 
 include(FetchContent)
 
-#find_package(nlohmann_json REQUIRED)
-#if (NOT nlohmann_json_FOUND)
-#   FetchContent_Declare(nlohmann_json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
-#   FetchContent_MakeAvailable(nlohmann_json)
-#   set(nlohmann_json_INCLUDE_DIR ${nlohmann_json_SOURCE_DIR}/include)
-#endif()
-#message(STATUS "Adding include for json to ${nlohmann_json_INCLUDE_DIR}")
-#include_directories(${nlohmann_json_INCLUDE_DIR})
-
 find_package(RapidJSON)
+
 if (RAPIDJSON_FOUND)
+   include_directories(${RAPIDJSON_INCLUDE_DIRS})
+   message(STATUS "Adding include for json to ${RAPIDJSON_INCLUDE_DIRS}")
    set(RAPID_JSON 1)
 else()
-   find_package(nlohmann_json)
-   if (nlohmann_json_FOUND)
-      set(NLOHMANN_JSON 1)
-   else()
+  find_package(nlohmann_json)
+  
+  if (nlohmann_json_FOUND)
+    set(NLOHMANN_JSON 1)
+  else()
    	message(STATUS "Fetching RapidJSON")
-	FetchContent_Declare(
-		rapidjson
-		GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
-		GIT_TAG        master
-	)
-	FetchContent_GetProperties(rapidjson)
-	if(NOT rapidjson_POPULATED)
-	       FetchContent_Populate(rapidjson)
-	endif()
-	include_directories( ${rapidjson_SOURCE_DIR}/include )
-	message(STATUS "Adding include for json to ${rapidjson_SOURCE_DIR}/include")
-	set(RAPID_JSON 1)
-   endif()
-endif()
+	  FetchContent_Declare(rapidjson
+		                     GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
+		                     GIT_TAG        master)
+	  FetchContent_GetProperties(rapidjson)
+	
+    if (NOT rapidjson_POPULATED)
+	    FetchContent_Populate(rapidjson)
+	  endif()
 
+	  include_directories(${rapidjson_SOURCE_DIR}/include)
+	  message(STATUS "Adding include for json to ${rapidjson_SOURCE_DIR}/include")
+	  set(RAPID_JSON 1)
+  endif()
+endif()
 
 find_package(stl_reader REQUIRED)
 if (NOT stl_reader_FOUND)
@@ -61,6 +55,7 @@ if (NOT stl_reader_FOUND)
    FetchContent_MakeAvailable(stl_reader)
    set(stl_reader_INCLUDE_DIR ${stl_reader_SOURCE_DIR})
 endif()
+
 message(STATUS "Adding include for stl_reader to ${stl_reader_INCLUDE_DIR}")
 include_directories(${stl_reader_INCLUDE_DIR}) 
 
@@ -122,8 +117,6 @@ if (NOT NO_PARALLEL)
       if(DEFINED $ENV{CXX})
         message(STATUS "Found MPI compiler, but using the CXX compiler set in the CXX environment variable, $ENV{CXX}")
       else()
-        set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
-        set(ENV{CXX} ${MPI_CXX_COMPILER})
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_FLAGS}")
       endif()
    ENDIF()
@@ -216,7 +209,7 @@ check_cxx_symbol_exists(strncasecmp   "string.h"   HAVE_STRNCASECMP)
 option(FORMAT_OPENMD "Builds specified libraries while also formatting the code." OFF)
 
 if (FORMAT_OPENMD AND NOT WIN32)
-  find_program(formatter clang-format HINTS /opt/local/libexec/llvm-15/bin/)
+  find_program(formatter clang-format HINTS /opt/local/libexec/llvm-16/bin/)
 
   if (NOT formatter_NOTFOUND)
     message(STATUS "Formatting OpenMD")
@@ -714,7 +707,7 @@ add_executable(openmd_MPI src/applications/openmd/openmd.cpp)
 set_target_properties(openmd_MPI PROPERTIES
 COMPILE_DEFINITIONS IS_MPI
 )
-target_link_libraries(openmd_MPI openmd_parallel openmd_core openmd_parallel openmd_core)
+target_link_libraries(openmd_MPI openmd_parallel openmd_core openmd_parallel openmd_core ${MPI_CXX_LIBRARIES})
   INSTALL(TARGETS
         openmd_parallel openmd_MPI
   RUNTIME DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
@@ -741,7 +734,7 @@ set (DYNAMICPROPSSOURCE
 src/applications/dynamicProps/ActionCorrFunc.cpp
 src/applications/dynamicProps/CollectiveDipoleDisplacement.cpp
 src/applications/dynamicProps/CurrentDensityAutoCorrFunc.cpp
-src/applications/dynamicProps/CoMRCorrFunc.cpp
+src/applications/dynamicProps/OnsagerCorrFunc.cpp
 src/applications/dynamicProps/DipoleCorrFunc.cpp
 src/applications/dynamicProps/DirectionalRCorrFunc.cpp
 src/applications/dynamicProps/Displacement.cpp
@@ -1112,7 +1105,7 @@ message( STATUS "CMAKE_BUILD_TYPE ........... = ${CMAKE_BUILD_TYPE}")
 message( STATUS "CMAKE_INSTALL_PREFIX ....... = ${CMAKE_INSTALL_PREFIX}")
 message( STATUS "Build as SINGLE_PRECISION .. = ${SINGLE_PRECISION}")
 message( STATUS "CMAKE_CXX_COMPILER ......... = ${CMAKE_CXX_COMPILER}")
-message( STATUS "MPI_CXX_COMPILER ........... = ${MPI_CXX_COMPILER}")
+# message( STATUS "MPI_CXX_COMPILER ........... = ${MPI_CXX_COMPILER}")
 message( STATUS "MPI_CXX_INCLUDE_PATH ....... = ${MPI_CXX_INCLUDE_PATH}")
 message( STATUS "MPI_CXX_LIBRARIES .......... = ${MPI_CXX_LIBRARIES}")
 message( STATUS "OPENBABEL_DIR .............. = ${OPENBABEL_DIR}")

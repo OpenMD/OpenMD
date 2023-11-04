@@ -63,7 +63,10 @@ namespace OpenMD::RNEMD {
     void doRNEMDImpl(SelectionManager& smanA, SelectionManager& smanB) override;
 
   private:
-    void selectNewMolecule();
+    void selectMolecule();
+
+    bool getSelectedMolecule();
+    bool setSelectedMolecule();
 
     RealType deltaLambda_ {};
 

@@ -143,7 +143,7 @@ namespace OpenMD::RNEMD {
     }
 
     uniformKineticScaling_ = rnemdParams->getSPFUniformKineticScaling();
-    selectNewMolecule();
+    selectMolecule();
   }
 
   void SPFMethod::doRNEMDImpl(SelectionManager& smanA,
@@ -263,11 +263,10 @@ namespace OpenMD::RNEMD {
         if (a2 > 0.0) {
           a = std::sqrt(a2);
           b = a;
-          if ((a > 0.999) && (a < 1.001)) {  // restrict scaling coefficients
-            doExchange = true;
-          }
-        }
 
+          // restrict scaling coefficients
+          if ((a > 0.999) && (a < 1.001)) { doExchange = true; }
+        }
       } else {
         RealType aNumerator   = deltaU - kineticTarget_;
         RealType aDenominator = 2.0 * K_a;
@@ -284,8 +283,8 @@ namespace OpenMD::RNEMD {
           a = std::sqrt(a2);
           b = std::sqrt(b2);
 
+          // restrict scaling coefficients
           if ((a > 0.999) && (a < 1.001) && (b > 0.999) && (b < 1.001)) {
-            // restrict scaling coefficients
             doExchange = true;
           }
         }
@@ -331,7 +330,7 @@ namespace OpenMD::RNEMD {
         bool updateSelectedMolecule =
             forceManager_->updateLambda(deltaLambda, deltaLambda_);
 
-        if (updateSelectedMolecule) this->selectNewMolecule();
+        if (updateSelectedMolecule) selectMolecule();
 
         successfulExchange = true;
         particleExchange_ += deltaLambda;
@@ -340,7 +339,7 @@ namespace OpenMD::RNEMD {
     }
 
     if (!forceManager_->getHasSelectedMolecule()) {
-      selectNewMolecule();
+      selectMolecule();
       deltaLambda_ = particleTarget_;
       failTrialCount_++;
       failedLastTrial_ = true;
@@ -350,7 +349,8 @@ namespace OpenMD::RNEMD {
     if (!successfulExchange) {
       //   snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
       //           "SPF exchange NOT performed - roots that solve\n"
-      //           "\tthe constraint equations may not exist or there may be\n"
+      //           "\tthe constraint equations may not exist or there may
+      //           be\n"
       //           "\tno selected objects in one or both slabs.\n");
       //   painCave.isFatal  = 0;
       //   painCave.severity = OPENMD_INFO;
@@ -360,7 +360,38 @@ namespace OpenMD::RNEMD {
     }
   }
 
-  void SPFMethod::selectNewMolecule() {
+  void SPFMethod::selectMolecule() {
+    bool hasSelectedMolecule = (currentSnap_->getSPFData()->globalID == -1) ?
+                                   setSelectedMolecule() :
+                                   getSelectedMolecule();
+
+    if (hasSelectedMolecule) {
+      selectedMoleculeStr_ =
+          "select " + std::to_string(currentSnap_->getSPFData()->globalID);
+
+      selectedMoleculeEvaluator_.loadScriptString(selectedMoleculeStr_);
+      selectedMoleculeMan_.setSelectionSet(
+          selectedMoleculeEvaluator_.evaluate());
+    }
+
+    forceManager_->setHasSelectedMolecule(hasSelectedMolecule);
+  }
+
+  bool SPFMethod::getSelectedMolecule() {
+    std::shared_ptr<SPFData> spfData = currentSnap_->getSPFData();
+
+    Molecule* selectedMolecule;
+
+    selectedMolecule = info_->getMoleculeByGlobalIndex(spfData->globalID);
+
+    if (selectedMolecule) {
+      forceManager_->setSelectedMolecule(selectedMolecule);
+    }
+
+    return true;
+  }
+
+  bool SPFMethod::setSelectedMolecule() {
     SelectionManager sourceSman {info_};
     RealType targetSlabCenter {};
 
@@ -375,16 +406,15 @@ namespace OpenMD::RNEMD {
     }
 
     if (sourceSman.getMoleculeSelectionCount() == 0) {
-      forceManager_->setSelectedMolecule(nullptr, V3Zero);
-      return;
+      forceManager_->setSelectedMolecule(nullptr);
+      return false;
     }
 
-    int whichSelectedID {};
+    int whichSelectedID {-1};
     Molecule* selectedMolecule;
 
-    bool hasSelectedMolecule {false};
-
-    Utils::RandNumGenPtr randNumGen = info_->getRandomNumberGenerator();
+    std::shared_ptr<SPFData> spfData = currentSnap_->getSPFData();
+    Utils::RandNumGenPtr randNumGen  = info_->getRandomNumberGenerator();
 
 #ifdef IS_MPI
     int worldRank {}, size {};
@@ -407,7 +437,7 @@ namespace OpenMD::RNEMD {
 
     selectedMolecule = sourceSman.nthSelectedMolecule(whichSelectedID);
 
-    int globalSelectedID = -1;
+    int globalSelectedID {-1};
 
     if (selectedMolecule) {
       globalSelectedID = selectedMolecule->getGlobalIndex();
@@ -424,39 +454,32 @@ namespace OpenMD::RNEMD {
 #endif
     }
 
-    if (globalSelectedID >= 0) {
-      selectedMoleculeStr_ = "select " + std::to_string(globalSelectedID);
+    int axis0 = (rnemdPrivilegedAxis_ + 1) % 3;
+    int axis1 = (rnemdPrivilegedAxis_ + 2) % 3;
+    int axis2 = rnemdPrivilegedAxis_;
 
-      int axis0 = (rnemdPrivilegedAxis_ + 1) % 3;
-      int axis1 = (rnemdPrivilegedAxis_ + 2) % 3;
-      int axis2 = rnemdPrivilegedAxis_;
+    spfData->globalID = globalSelectedID;
+
 #ifdef IS_MPI
-      if (info_->getMolToProc(globalSelectedID) == worldRank) {
+    if (info_->getMolToProc(globalSelectedID) == worldRank) {
 #endif
-        std::uniform_real_distribution<RealType> distr0 {0,
-                                                         hmat_(axis0, axis0)};
-        std::uniform_real_distribution<RealType> distr1 {0,
-                                                         hmat_(axis1, axis1)};
-        std::normal_distribution<RealType> distr2 {targetSlabCenter,
-                                                   0.25 * slabWidth_};
+      std::uniform_real_distribution<RealType> distr0 {0, hmat_(axis0, axis0)};
+      std::uniform_real_distribution<RealType> distr1 {0, hmat_(axis1, axis1)};
+      std::normal_distribution<RealType> distr2 {targetSlabCenter,
+                                                 0.25 * slabWidth_};
 
-        Vector3d newCom {V3Zero};
+      spfData->pos[axis0] = distr0(*randNumGen);
+      spfData->pos[axis1] = distr1(*randNumGen);
+      spfData->pos[axis2] = distr2(*randNumGen);
 
-        newCom[axis0] = distr0(*randNumGen);
-        newCom[axis1] = distr1(*randNumGen);
-        newCom[axis2] = distr2(*randNumGen);
+      forceManager_->setSelectedMolecule(selectedMolecule);
 
-        forceManager_->setSelectedMolecule(selectedMolecule, newCom);
 #ifdef IS_MPI
-      }
-#endif
-
-      hasSelectedMolecule = true;
     }
+    MPI_Bcast(&spfData->pos[0], 3, MPI_REALTYPE,
+              info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
+#endif
 
-    selectedMoleculeEvaluator_.loadScriptString(selectedMoleculeStr_);
-    selectedMoleculeMan_.setSelectionSet(selectedMoleculeEvaluator_.evaluate());
-
-    forceManager_->setHasSelectedMolecule(hasSelectedMolecule);
+    return true;
   }
 }  // namespace OpenMD::RNEMD

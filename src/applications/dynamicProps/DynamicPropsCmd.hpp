@@ -128,7 +128,7 @@ struct gengetopt_args_info
   const char *disp_help; /**< @brief Displacement correlation function help description.  */
   const char *dispZ_help; /**< @brief Displacement correlation function binned by Z help description.  */
   const char *current_help; /**< @brief Current density auto correlation function help description.  */
-  const char *comrcorr_help; /**< @brief Center of mass mean squared displacement (for objects defined by sele1) help description.  */
+  const char *onsager_help; /**< @brief Onsager coefficient correlation functions help description.  */
   const char *ddisp_help; /**< @brief Collective Dipole displacement function (Helfand moment of Current Density) help description.  */
   const char *rotAngleDisp_help; /**< @brief Displacement correlation function for rotation angles help description.  */
   
@@ -187,7 +187,7 @@ struct gengetopt_args_info
   unsigned int disp_given ;	/**< @brief Whether disp was given.  */
   unsigned int dispZ_given ;	/**< @brief Whether dispZ was given.  */
   unsigned int current_given ;	/**< @brief Whether current was given.  */
-  unsigned int comrcorr_given ;	/**< @brief Whether comrcorr was given.  */
+  unsigned int onsager_given ;	/**< @brief Whether onsager was given.  */
   unsigned int ddisp_given ;	/**< @brief Whether ddisp was given.  */
   unsigned int rotAngleDisp_given ;	/**< @brief Whether rotAngleDisp was given.  */
 

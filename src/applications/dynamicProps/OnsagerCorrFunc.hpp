@@ -42,55 +42,30 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#include "applications/dynamicProps/CoMRCorrFunc.hpp"
+#ifndef APPLICATIONS_DYNAMICPROPS_ONSAGERCORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_ONSAGERCORRFUNC_HPP
 
 #include <string>
+#include <vector>
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
-#include "brains/DataStorage.hpp"
-#include "brains/ForceManager.hpp"
 #include "brains/SimInfo.hpp"
-#include "brains/Thermo.hpp"
-#include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
-#include "primitives/StuntDouble.hpp"
-#include "utils/Constants.hpp"
-#include "utils/Revision.hpp"
-#include "utils/StringUtils.hpp"
 
 namespace OpenMD {
-  CoMRCorrFunc::CoMRCorrFunc(SimInfo* info, const std::string& filename,
-                             const std::string& sele1,
-                             const std::string& sele2) :
-      SystemACF<RealType>(info, filename, sele1, sele2) {
-    setCorrFuncType("CoMRCorrFunc");
-    setOutputName(getPrefix(dumpFilename_) + ".comrcorr");
-    setLabelString("CoMR^2");
 
-    rCoM_.resize(nTimeBins_);
-  }
+  class OnsagerCorrFunc : public SystemCCF<Vector3d> {
+  public:
+    OnsagerCorrFunc(SimInfo* info, const std::string& filename,
+                    const std::string& sele1, const std::string& sele2);
 
-  void CoMRCorrFunc::computeProperty1(int frame) {
-    RealType totalMass {};
+  protected:
+    virtual void computeProperty1(int frame1);
+    virtual void computeProperty2(int frame1);
+    Vector3d calcCorrVal(int frame1, int frame2);
 
-    int i;
-    StuntDouble* sd;
-
-    for (sd = seleMan1_.beginSelected(i); sd != NULL;
-         sd = seleMan1_.nextSelected(i)) {
-      Vector3d r = sd->getPos();
-      RealType m = sd->getMass();
-
-      totalMass += m;
-      rCoM_[frame] += m * r;
-    }
-
-    rCoM_[frame] /= totalMass;
-  }
-
-  RealType CoMRCorrFunc::calcCorrVal(int frame1, int frame2) {
-    Vector3d corrVector = rCoM_[frame1] - rCoM_[frame2];
-
-    return corrVector.lengthSquare();
-  }
+    std::vector<Vector3d> R1_, R2_;
+  };
 }  // namespace OpenMD
+
+#endif

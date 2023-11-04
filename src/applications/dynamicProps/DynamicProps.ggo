@@ -86,6 +86,6 @@ groupoption "tacorr"       -  "Torque auto correlation function" group = "correl
 groupoption "disp"         -  "Displacement correlation function" group = "correlation function"
 groupoption "dispZ"        -  "Displacement correlation function binned by Z" group = "correlation function"
 groupoption "current"      -  "Current density auto correlation function" group = "correlation function"
-groupoption "comrcorr"     -  "Center of mass mean squared displacement (for objects defined by sele1)" group = "correlation function"
+groupoption "onsager"      -  "Onsager coefficient correlation functions" group = "correlation function"
 groupoption "ddisp"        -  "Collective Dipole displacement function (Helfand moment of Current Density)" group = "correlation function"
 groupoption "rotAngleDisp" -  "Displacement correlation function for rotation angles" group = "correlation function"

@@ -42,29 +42,61 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-#ifndef APPLICATIONS_DYNAMICPROPS_COMRCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_COMRCORRFUNC_HPP
+#include "applications/dynamicProps/OnsagerCorrFunc.hpp"
 
 #include <string>
-#include <vector>
 
 #include "applications/dynamicProps/TimeCorrFunc.hpp"
+#include "brains/DataStorage.hpp"
+#include "brains/ForceManager.hpp"
 #include "brains/SimInfo.hpp"
+#include "brains/Thermo.hpp"
+#include "math/SquareMatrix3.hpp"
 #include "math/Vector3.hpp"
+#include "primitives/StuntDouble.hpp"
+#include "utils/Constants.hpp"
+#include "utils/Revision.hpp"
+#include "utils/StringUtils.hpp"
 
 namespace OpenMD {
+  OnsagerCorrFunc::OnsagerCorrFunc(SimInfo* info, const std::string& filename,
+                                   const std::string& sele1,
+                                   const std::string& sele2) :
+      SystemCCF<Vector3d>(info, filename, sele1, sele2) {
+    setCorrFuncType("OnsagerCorrFunc");
+    setOutputName(getPrefix(dumpFilename_) + ".onsager");
+    setLabelString("L_ii\tL_ij\tL_jj");
 
-  class CoMRCorrFunc : public SystemACF<RealType> {
-  public:
-    CoMRCorrFunc(SimInfo* info, const std::string& filename,
-                 const std::string& sele1, const std::string& sele2);
+    R1_.resize(nTimeBins_);
+    R2_.resize(nTimeBins_);
+  }
 
-  protected:
-    virtual void computeProperty1(int frame1);
-    RealType calcCorrVal(int frame1, int frame2);
+  void OnsagerCorrFunc::computeProperty1(int frame) {
+    int i;
+    StuntDouble* sd;
 
-    std::vector<Vector3d> rCoM_;
-  };
+    for (sd = seleMan1_.beginSelected(i); sd != NULL;
+         sd = seleMan1_.nextSelected(i)) {
+      R1_[frame] += sd->getPos();
+    }
+  }
+
+  void OnsagerCorrFunc::computeProperty2(int frame) {
+    int j;
+    StuntDouble* sd;
+
+    for (sd = seleMan2_.beginSelected(j); sd != NULL;
+         sd = seleMan2_.nextSelected(j)) {
+      R2_[frame] += sd->getPos();
+    }
+  }
+
+  Vector3d OnsagerCorrFunc::calcCorrVal(int frame1, int frame2) {
+    Vector3d v1 = R1_[frame2] - R1_[frame1];
+    Vector3d v2 = R2_[frame2] - R2_[frame1];
+
+    Vector3d result {dot(v1, v1), dot(v1, v2), dot(v2, v2)};
+
+    return result;
+  }
 }  // namespace OpenMD
-
-#endif

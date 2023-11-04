@@ -1192,7 +1192,7 @@ namespace OpenMD::RNEMD {
         volumeB_ = surfaceMeshB->getVolume();
         delete surfaceMeshB;
 #else
-        sprintf(
+        snprintf(
             painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "RNEMD::getDividingArea : Hull calculation is not possible\n"
             "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");

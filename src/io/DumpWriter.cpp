@@ -300,6 +300,26 @@ namespace OpenMD {
         eta(0, 2), eta(1, 2), eta(2, 2));
     os << buffer;
 
+    // SPF Data
+    std::shared_ptr<SPFData> spfData = s->getSPFData();
+
+    if (std::isinf(spfData->pos[0]) || std::isnan(spfData->pos[0]) ||
+        std::isinf(spfData->pos[1]) || std::isnan(spfData->pos[1]) ||
+        std::isinf(spfData->pos[2]) || std::isnan(spfData->pos[2]) ||
+        std::isinf(spfData->lambda) || std::isnan(spfData->lambda) ||
+        std::isinf(spfData->globalID) || std::isnan(spfData->globalID)) {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "DumpWriter detected a numerical error writing the spf data "
+               "structure");
+      painCave.isFatal = 1;
+      simError();
+    }
+    snprintf(buffer, 1024,
+             "     SPFData: {{ %.10g, %.10g, %.10g }, %.10g, %d }\n",
+             spfData->pos[0], spfData->pos[1], spfData->pos[2], spfData->lambda,
+             spfData->globalID);
+    os << buffer;
+
     os << "    </FrameData>\n";
   }
 
