@@ -53,7 +53,6 @@
 #include "applications/dynamicProps/BondCorrFunc.hpp"
 #include "applications/dynamicProps/ChargeKineticCorrFunc.hpp"
 #include "applications/dynamicProps/ChargeOrientationCorrFunc.hpp"
-#include "applications/dynamicProps/CoMRCorrFunc.hpp"
 #include "applications/dynamicProps/CollectiveDipoleDisplacement.hpp"
 #include "applications/dynamicProps/CurrentDensityAutoCorrFunc.hpp"
 #include "applications/dynamicProps/DipoleCorrFunc.hpp"
@@ -67,6 +66,7 @@
 #include "applications/dynamicProps/LegendreCorrFunc.hpp"
 #include "applications/dynamicProps/LegendreCorrFuncZ.hpp"
 #include "applications/dynamicProps/MomAngMomCorrFunc.hpp"
+#include "applications/dynamicProps/OnsagerCorrFunc.hpp"
 #include "applications/dynamicProps/RCorrFunc.hpp"
 #include "applications/dynamicProps/RotAngleDisplacement.hpp"
 #include "applications/dynamicProps/SelectionCorrFunc.hpp"
@@ -319,10 +319,10 @@ int main(int argc, char* argv[]) {
   } else if (args_info.current_given) {
     corrFunc = std::make_unique<CurrentDensityAutoCorrFunc>(info, dumpFileName,
                                                             sele1, sele2);
-  } else if (args_info.comrcorr_given) {
+  } else if (args_info.onsager_given) {
     if (args_info.sele1_given) {
       corrFunc =
-          std::make_unique<CoMRCorrFunc>(info, dumpFileName, sele1, sele2);
+          std::make_unique<OnsagerCorrFunc>(info, dumpFileName, sele1, sele2);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "--sele1 must be set for Center of Mass Rcorr\n");

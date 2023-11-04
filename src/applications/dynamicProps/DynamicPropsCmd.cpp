@@ -89,7 +89,7 @@ const char *gengetopt_args_info_help[] = {
   "      --disp                    Displacement correlation function",
   "      --dispZ                   Displacement correlation function binned by Z",
   "      --current                 Current density auto correlation function",
-  "      --comrcorr                Center of mass mean squared displacement (for\n                                  objects defined by sele1)",
+  "      --onsager                 Onsager coefficient correlation functions",
   "      --ddisp                   Collective Dipole displacement function\n                                  (Helfand moment of Current Density)",
   "      --rotAngleDisp            Displacement correlation function for rotation\n                                  angles",
     0
@@ -177,7 +177,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->disp_given = 0 ;
   args_info->dispZ_given = 0 ;
   args_info->current_given = 0 ;
-  args_info->comrcorr_given = 0 ;
+  args_info->onsager_given = 0 ;
   args_info->ddisp_given = 0 ;
   args_info->rotAngleDisp_given = 0 ;
   args_info->correlation_function_group_counter = 0 ;
@@ -282,7 +282,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->disp_help = gengetopt_args_info_help[53] ;
   args_info->dispZ_help = gengetopt_args_info_help[54] ;
   args_info->current_help = gengetopt_args_info_help[55] ;
-  args_info->comrcorr_help = gengetopt_args_info_help[56] ;
+  args_info->onsager_help = gengetopt_args_info_help[56] ;
   args_info->ddisp_help = gengetopt_args_info_help[57] ;
   args_info->rotAngleDisp_help = gengetopt_args_info_help[58] ;
   
@@ -585,8 +585,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "dispZ", 0, 0 );
   if (args_info->current_given)
     write_into_file(outfile, "current", 0, 0 );
-  if (args_info->comrcorr_given)
-    write_into_file(outfile, "comrcorr", 0, 0 );
+  if (args_info->onsager_given)
+    write_into_file(outfile, "onsager", 0, 0 );
   if (args_info->ddisp_given)
     write_into_file(outfile, "ddisp", 0, 0 );
   if (args_info->rotAngleDisp_given)
@@ -680,7 +680,7 @@ reset_group_correlation_function(struct gengetopt_args_info *args_info)
   args_info->disp_given = 0 ;
   args_info->dispZ_given = 0 ;
   args_info->current_given = 0 ;
-  args_info->comrcorr_given = 0 ;
+  args_info->onsager_given = 0 ;
   args_info->ddisp_given = 0 ;
   args_info->rotAngleDisp_given = 0 ;
 
@@ -1582,7 +1582,7 @@ cmdline_parser_internal (
         { "disp",	0, NULL, 0 },
         { "dispZ",	0, NULL, 0 },
         { "current",	0, NULL, 0 },
-        { "comrcorr",	0, NULL, 0 },
+        { "onsager",	0, NULL, 0 },
         { "ddisp",	0, NULL, 0 },
         { "rotAngleDisp",	0, NULL, 0 },
         { 0,  0, 0, 0 }
@@ -2436,8 +2436,8 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* Center of mass mean squared displacement (for objects defined by sele1).  */
-          else if (strcmp (long_options[option_index].name, "comrcorr") == 0)
+          /* Onsager coefficient correlation functions.  */
+          else if (strcmp (long_options[option_index].name, "onsager") == 0)
           {
           
             if (args_info->correlation_function_group_counter && override)
@@ -2445,10 +2445,10 @@ cmdline_parser_internal (
             args_info->correlation_function_group_counter += 1;
           
             if (update_arg( 0 , 
-                 0 , &(args_info->comrcorr_given),
-                &(local_args_info.comrcorr_given), optarg, 0, 0, ARG_NO,
+                 0 , &(args_info->onsager_given),
+                &(local_args_info.onsager_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
-                "comrcorr", '-',
+                "onsager", '-',
                 additional_error))
               goto failure;
           

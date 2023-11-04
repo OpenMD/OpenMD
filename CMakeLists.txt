@@ -19,29 +19,32 @@ ENDIF(WIN32)
 include(FetchContent)
 
 find_package(RapidJSON)
+
 if (RAPIDJSON_FOUND)
+   include_directories(${RAPIDJSON_INCLUDE_DIRS})
+   message(STATUS "Adding include for json to ${RAPIDJSON_INCLUDE_DIRS}")
    set(RAPID_JSON 1)
 else()
-   find_package(nlohmann_json)
-   if (nlohmann_json_FOUND)
-      set(NLOHMANN_JSON 1)
-   else()
+  find_package(nlohmann_json)
+  
+  if (nlohmann_json_FOUND)
+    set(NLOHMANN_JSON 1)
+  else()
    	message(STATUS "Fetching RapidJSON")
-	FetchContent_Declare(
-		rapidjson
-		GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
-		GIT_TAG        master
-	)
-	FetchContent_GetProperties(rapidjson)
-	if(NOT rapidjson_POPULATED)
-	       FetchContent_Populate(rapidjson)
-	endif()
-	include_directories( ${rapidjson_SOURCE_DIR}/include )
-	message(STATUS "Adding include for json to ${rapidjson_SOURCE_DIR}/include")
-	set(RAPID_JSON 1)
-   endif()
-endif()
+	  FetchContent_Declare(rapidjson
+		                     GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
+		                     GIT_TAG        master)
+	  FetchContent_GetProperties(rapidjson)
+	
+    if (NOT rapidjson_POPULATED)
+	    FetchContent_Populate(rapidjson)
+	  endif()
 
+	  include_directories(${rapidjson_SOURCE_DIR}/include)
+	  message(STATUS "Adding include for json to ${rapidjson_SOURCE_DIR}/include")
+	  set(RAPID_JSON 1)
+  endif()
+endif()
 
 find_package(stl_reader REQUIRED)
 if (NOT stl_reader_FOUND)
@@ -52,6 +55,7 @@ if (NOT stl_reader_FOUND)
    FetchContent_MakeAvailable(stl_reader)
    set(stl_reader_INCLUDE_DIR ${stl_reader_SOURCE_DIR})
 endif()
+
 message(STATUS "Adding include for stl_reader to ${stl_reader_INCLUDE_DIR}")
 include_directories(${stl_reader_INCLUDE_DIR}) 
 
@@ -730,7 +734,7 @@ set (DYNAMICPROPSSOURCE
 src/applications/dynamicProps/ActionCorrFunc.cpp
 src/applications/dynamicProps/CollectiveDipoleDisplacement.cpp
 src/applications/dynamicProps/CurrentDensityAutoCorrFunc.cpp
-src/applications/dynamicProps/CoMRCorrFunc.cpp
+src/applications/dynamicProps/OnsagerCorrFunc.cpp
 src/applications/dynamicProps/DipoleCorrFunc.cpp
 src/applications/dynamicProps/DirectionalRCorrFunc.cpp
 src/applications/dynamicProps/Displacement.cpp
