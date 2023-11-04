@@ -119,7 +119,7 @@ namespace OpenMD {
     OptimizationFactory() = default;
     ~OptimizationFactory();
 
-    OptimizationFactory(const OptimizationFactory&) = delete;
+    OptimizationFactory(const OptimizationFactory&)            = delete;
     OptimizationFactory& operator=(const OptimizationFactory&) = delete;
 
     CreatorMapType creatorMap_;

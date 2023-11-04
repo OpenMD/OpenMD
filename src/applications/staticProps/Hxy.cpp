@@ -162,11 +162,11 @@ namespace OpenMD {
       fftw_complex *in1, *in2, *out1, *out2;
 
       in1  = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) *
-                                       (nBinsX_ * nBinsY_));
+                                        (nBinsX_ * nBinsY_));
       out1 = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) *
                                         (nBinsX_ * nBinsY_));
       in2  = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) *
-                                       (nBinsX_ * nBinsY_));
+                                        (nBinsX_ * nBinsY_));
       out2 = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) *
                                         (nBinsX_ * nBinsY_));
 

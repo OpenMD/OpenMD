@@ -258,7 +258,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
     qh_init_B(&globalCoords[0], globalHullSites, dim_, ismalloc);
     qh_qhull();
     qh_check_output();
-    exitcode = qh_ERRnone;
+    exitcode     = qh_ERRnone;
     qh NOerrexit = True; /* no more setjmp */
   } else {
     snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
@@ -320,7 +320,7 @@ void ConvexHull::computeHull(vector<StuntDouble*> bodydoubles) {
 
 #ifdef IS_MPI
       vel  = Vector3d(globalVels[dim_ * id], globalVels[dim_ * id + 1],
-                     globalVels[dim_ * id + 2]);
+                      globalVels[dim_ * id + 2]);
       mass = globalMasses[id];
 
       // localID will be between 0 and hullSitesOnProc[myrank] if we

@@ -59,31 +59,30 @@
 
 namespace OpenMD {
 
-  P2R::P2R(SimInfo* info, const std::string& filename,
-           const std::string& sele1, unsigned int nbins) :
-    StaticAnalyser(info, filename, nbins),
-    doVect_(true), doOffset_(false), selectionScript1_(sele1),
-    seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info) {
-
+  P2R::P2R(SimInfo* info, const std::string& filename, const std::string& sele1,
+           unsigned int nbins) :
+      StaticAnalyser(info, filename, nbins),
+      doVect_(true), doOffset_(false), selectionScript1_(sele1),
+      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info) {
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
-    setAnalysisType("2nd order Legendre Polynomial Correlation using r as reference axis");
+    setAnalysisType(
+        "2nd order Legendre Polynomial Correlation using r as reference axis");
     setOutputName(getPrefix(filename) + ".P2R");
     std::stringstream params;
     const std::string paramString = params.str();
     setParameterString(paramString);
   }
 
-  P2R::P2R(SimInfo* info, const std::string& filename,
-           const std::string& sele1, const std::string& sele2,
-           unsigned int nbins) :
-    StaticAnalyser(info, filename, nbins),
-    doVect_(false), doOffset_(false), selectionScript1_(sele1),
-    selectionScript2_(sele2), seleMan1_(info), seleMan2_(info),
-    evaluator1_(info), evaluator2_(info) {
+  P2R::P2R(SimInfo* info, const std::string& filename, const std::string& sele1,
+           const std::string& sele2, unsigned int nbins) :
+      StaticAnalyser(info, filename, nbins),
+      doVect_(false), doOffset_(false), selectionScript1_(sele1),
+      selectionScript2_(sele2), seleMan1_(info), seleMan2_(info),
+      evaluator1_(info), evaluator2_(info) {
     setOutputName(getPrefix(filename) + ".P2R");
 
     evaluator1_.loadScriptString(sele1);
@@ -96,19 +95,20 @@ namespace OpenMD {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }
 
-    setAnalysisType("2nd order Legendre Polynomial Correlation using r as reference axis");
+    setAnalysisType(
+        "2nd order Legendre Polynomial Correlation using r as reference axis");
     setOutputName(getPrefix(filename) + ".P2R");
     std::stringstream params;
     const std::string paramString = params.str();
     setParameterString(paramString);
   }
 
-  P2R::P2R(SimInfo* info, const std::string& filename,
-           const std::string& sele1, int seleOffset, unsigned int nbins) :
-    StaticAnalyser(info, filename, nbins),
-    doVect_(false), doOffset_(true), doOffset2_(false),
-    selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
-    evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset) {
+  P2R::P2R(SimInfo* info, const std::string& filename, const std::string& sele1,
+           int seleOffset, unsigned int nbins) :
+      StaticAnalyser(info, filename, nbins),
+      doVect_(false), doOffset_(true), doOffset2_(false),
+      selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
+      evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset) {
     setOutputName(getPrefix(filename) + ".P2R");
 
     evaluator1_.loadScriptString(sele1);
@@ -116,21 +116,21 @@ namespace OpenMD {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
-    setAnalysisType("2nd order Legendre Polynomial Correlation using r as reference axis");
+    setAnalysisType(
+        "2nd order Legendre Polynomial Correlation using r as reference axis");
     setOutputName(getPrefix(filename) + ".P2R");
     std::stringstream params;
     const std::string paramString = params.str();
     setParameterString(paramString);
   }
 
-  P2R::P2R(SimInfo* info, const std::string& filename,
-           const std::string& sele1, int seleOffset, int seleOffset2,
-           unsigned int nbins) :
-    StaticAnalyser(info, filename, nbins),
-    doVect_(false), doOffset_(true), doOffset2_(true),
-    selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
-    evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset),
-    seleOffset2_(seleOffset2) {
+  P2R::P2R(SimInfo* info, const std::string& filename, const std::string& sele1,
+           int seleOffset, int seleOffset2, unsigned int nbins) :
+      StaticAnalyser(info, filename, nbins),
+      doVect_(false), doOffset_(true), doOffset2_(true),
+      selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
+      evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset),
+      seleOffset2_(seleOffset2) {
     setOutputName(getPrefix(filename) + ".P2R");
 
     evaluator1_.loadScriptString(sele1);
@@ -138,21 +138,21 @@ namespace OpenMD {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
-    setAnalysisType("2nd order Legendre Polynomial Correlation using r as reference axis");
+    setAnalysisType(
+        "2nd order Legendre Polynomial Correlation using r as reference axis");
     setOutputName(getPrefix(filename) + ".P2R");
     std::stringstream params;
     const std::string paramString = params.str();
     setParameterString(paramString);
   }
 
-  
   void P2R::process() {
     StuntDouble* sd1;
     StuntDouble* sd2;
     int ii;
     int jj;
     bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     Thermo thermo(info_);
     DumpReader reader(info_, dumpFilename_);
@@ -184,9 +184,8 @@ namespace OpenMD {
             r1.normalize();
             RealType cosangle = dot(r1, vec);
 
-            P2_ += 0.5 * (3.0 * cosangle*cosangle - 1.0);
+            P2_ += 0.5 * (3.0 * cosangle * cosangle - 1.0);
             count_++;
-
           }
         }
       } else {
@@ -205,7 +204,7 @@ namespace OpenMD {
             } else {
               r1 = CenterOfMass - sd1->getPos();
             }
-	    
+
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(r1);
 
@@ -227,7 +226,7 @@ namespace OpenMD {
             rc.normalize();
             vec.normalize();
             RealType cosangle = dot(rc, vec);
-            P2_ += 0.5 * (3.0 * cosangle*cosangle - 1.0);
+            P2_ += 0.5 * (3.0 * cosangle * cosangle - 1.0);
             count_++;
           }
         } else {
@@ -245,10 +244,10 @@ namespace OpenMD {
             simError();
           }
 
-          for (sd1 = seleMan1_.beginSelected(ii),
-		 sd2 = seleMan2_.beginSelected(jj);
+          for (sd1                             = seleMan1_.beginSelected(ii),
+              sd2                              = seleMan2_.beginSelected(jj);
                sd1 != NULL && sd2 != NULL; sd1 = seleMan1_.nextSelected(ii),
-		 sd2 = seleMan2_.nextSelected(jj)) {
+              sd2                              = seleMan2_.nextSelected(jj)) {
             Vector3d r1 = CenterOfMass - sd1->getPos();
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(r1);
@@ -264,15 +263,15 @@ namespace OpenMD {
             Vector3d vec = r1 - r2;
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(vec);
-	    
+
             rc.normalize();
             vec.normalize();
             RealType cosangle = dot(rc, vec);
-            P2_ += 0.5 * (3.0 * cosangle*cosangle - 1.0);
+            P2_ += 0.5 * (3.0 * cosangle * cosangle - 1.0);
             count_++;
           }
         }
-      }      
+      }
     }
     processHistogram();
     writeP2R();
@@ -292,9 +291,7 @@ namespace OpenMD {
       ofs << "# " << rev.getBuildDate() << "\n";
       ofs << "#nFrames:\t" << nProcessed_ << "\n";
       ofs << "#selection1: (" << selectionScript1_ << ")";
-      if (!doVect_) {
-        ofs << "\tselection2: (" << selectionScript2_ << ")";
-      }
+      if (!doVect_) { ofs << "\tselection2: (" << selectionScript2_ << ")"; }
       ofs << "\n";
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";

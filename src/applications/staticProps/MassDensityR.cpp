@@ -54,11 +54,11 @@
 namespace OpenMD {
 
   MassDensityR::MassDensityR(SimInfo* info, const std::string& filename,
-			     const std::string& sele, RealType len,
-			     int nrbins) :
-    StaticAnalyser(info, filename, nrbins),
-    selectionScript_(sele), evaluator_(info), seleMan_(info), thermo_(info),
-    len_(len) {
+                             const std::string& sele, RealType len,
+                             int nrbins) :
+      StaticAnalyser(info, filename, nrbins),
+      selectionScript_(sele), evaluator_(info), seleMan_(info), thermo_(info),
+      len_(len) {
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -97,9 +97,9 @@ namespace OpenMD {
       // determine which StuntDouble belongs to which slice
       for (sd = seleMan_.beginSelected(ii); sd != NULL;
            sd = seleMan_.nextSelected(ii)) {
-        Vector3d pos = CenterOfMass - sd->getPos();
+        Vector3d pos      = CenterOfMass - sd->getPos();
         RealType distance = pos.length();
-	RealType mass = sd->getMass();
+        RealType mass     = sd->getMass();
 
         if (distance < len_) {
           int binNo = int(distance / deltaR_);
@@ -128,8 +128,8 @@ namespace OpenMD {
 
         RealType r = deltaR_ * (i + 0.5);
 
-        massDensity = Constants::densityConvert * massR_[i] /
-          (volShell * nProcessed_);
+        massDensity =
+            Constants::densityConvert * massR_[i] / (volShell * nProcessed_);
 
         rdfStream << r << "\t" << massDensity << "\n";
       }

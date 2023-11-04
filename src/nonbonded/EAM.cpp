@@ -597,7 +597,7 @@ namespace OpenMD {
       // eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
       eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re));
       // eamAtomData.rcut = re + (20.0 * re / beta);
-      RealType dr      = eamAtomData.rcut / (RealType)(Nr - 1);
+      RealType dr = eamAtomData.rcut / (RealType)(Nr - 1);
       RealType r;
 
       int Nrho = 3000;
@@ -688,7 +688,7 @@ namespace OpenMD {
       // eamAtomData.rcut = re * (pow(10.0, 0.3) + lambda);
       eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re));
       // eamAtomData.rcut = re + (20.0 * re / beta);
-      RealType dr      = eamAtomData.rcut / (RealType)(Nr - 1);
+      RealType dr = eamAtomData.rcut / (RealType)(Nr - 1);
       RealType r;
       RealType phiCC, phiCV;
 
@@ -739,7 +739,7 @@ namespace OpenMD {
 
       eamAtomData.rcut = std::min(12.0, std::max(9.0, 4.0 * re));
       // eamAtomData.rcut = re + (20.0 * re / beta);
-      RealType dr      = eamAtomData.rcut / (RealType)(Nr - 1);
+      RealType dr = eamAtomData.rcut / (RealType)(Nr - 1);
       RealType r;
 
       int Nrho = 3000;

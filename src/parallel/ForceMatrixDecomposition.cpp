@@ -934,8 +934,8 @@ namespace OpenMD {
                                               int cg2) {
     int unique_id_1 = AtomLocalToGlobal[atom1];
     int unique_id_2 = AtomLocalToGlobal[atom2];
-    int group1 = cgLocalToGlobal[cg1];
-    int group2 = cgLocalToGlobal[cg2];
+    int group1      = cgLocalToGlobal[cg1];
+    int group2      = cgLocalToGlobal[cg2];
 
     if (unique_id_1 == unique_id_2) return true;
 
@@ -1600,7 +1600,7 @@ namespace OpenMD {
       // include all groups here.
       for (int j1 = 0; j1 < nGroups_; j1++) {
         point[j1] = len;
-        rs = snap_->cgData.position[j1];
+        rs        = snap_->cgData.position[j1];
         // include self group interactions j2 == j1
         for (int j2 = j1; j2 < nGroups_; j2++) {
           dr = snap_->cgData.position[j2] - rs;

@@ -190,7 +190,6 @@ namespace OpenMD {
       SpatialStatistics(info, filename, sele, nbins),
       coordinateOrigin_(V3Zero), comSele_(comsele), comSeleMan_(info),
       comEvaluator_(info), binWidth_(binWidth) {
-
     Globals* simParams                  = info->getSimParams();
     RNEMD::RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
     bool hasCoordinateOrigin            = rnemdParams->haveCoordinateOrigin();

@@ -95,24 +95,24 @@ namespace OpenMD::RNEMD {
     // Determine Flux Type
     std::map<std::string, RNEMDFluxType> stringToFluxType;
 
-    stringToFluxType["KE"]         = rnemdKE;
-    stringToFluxType["Px"]         = rnemdPx;
-    stringToFluxType["Py"]         = rnemdPy;
-    stringToFluxType["Pz"]         = rnemdPz;
-    stringToFluxType["Pvector"]    = rnemdPvector;
-    stringToFluxType["Lx"]         = rnemdLx;
-    stringToFluxType["Ly"]         = rnemdLy;
-    stringToFluxType["Lz"]         = rnemdLz;
-    stringToFluxType["Lvector"]    = rnemdLvector;
-    stringToFluxType["Particle"]   = rnemdParticle;
-    stringToFluxType["Particle+KE"]= rnemdParticleKE;
-    stringToFluxType["KE+Px"]      = rnemdKePx;
-    stringToFluxType["KE+Py"]      = rnemdKePy;
-    stringToFluxType["KE+Pvector"] = rnemdKePvector;
-    stringToFluxType["KE+Lx"]      = rnemdKeLx;
-    stringToFluxType["KE+Ly"]      = rnemdKeLy;
-    stringToFluxType["KE+Lz"]      = rnemdKeLz;
-    stringToFluxType["KE+Lvector"] = rnemdKeLvector;
+    stringToFluxType["KE"]          = rnemdKE;
+    stringToFluxType["Px"]          = rnemdPx;
+    stringToFluxType["Py"]          = rnemdPy;
+    stringToFluxType["Pz"]          = rnemdPz;
+    stringToFluxType["Pvector"]     = rnemdPvector;
+    stringToFluxType["Lx"]          = rnemdLx;
+    stringToFluxType["Ly"]          = rnemdLy;
+    stringToFluxType["Lz"]          = rnemdLz;
+    stringToFluxType["Lvector"]     = rnemdLvector;
+    stringToFluxType["Particle"]    = rnemdParticle;
+    stringToFluxType["Particle+KE"] = rnemdParticleKE;
+    stringToFluxType["KE+Px"]       = rnemdKePx;
+    stringToFluxType["KE+Py"]       = rnemdKePy;
+    stringToFluxType["KE+Pvector"]  = rnemdKePvector;
+    stringToFluxType["KE+Lx"]       = rnemdKeLx;
+    stringToFluxType["KE+Ly"]       = rnemdKeLy;
+    stringToFluxType["KE+Lz"]       = rnemdKeLz;
+    stringToFluxType["KE+Lvector"]  = rnemdKeLvector;
 
     if (rnemdParams->haveFluxType()) {
       rnemdFluxTypeLabel_ = rnemdParams->getFluxType();
@@ -648,7 +648,7 @@ namespace OpenMD::RNEMD {
               DOF += 3;
             }
           }
-          
+
           L  = mass * cross(rPos, vel);
           I  = outProduct(rPos, rPos) * mass;
           r2 = rPos.lengthSquare();
@@ -1227,7 +1227,7 @@ namespace OpenMD::RNEMD {
         volumeB_ = surfaceMeshB->getVolume();
         delete surfaceMeshB;
 #else
-        sprintf(
+        snprintf(
             painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
             "RNEMD::getDividingArea : Hull calculation is not possible\n"
             "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");

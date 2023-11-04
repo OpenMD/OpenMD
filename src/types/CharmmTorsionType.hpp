@@ -50,8 +50,8 @@
 #include <iostream>
 #include <vector>
 
-#include "types/TorsionType.hpp"
 #include "math/Polynomial.hpp"
+#include "types/TorsionType.hpp"
 
 namespace OpenMD {
 
@@ -70,9 +70,9 @@ namespace OpenMD {
   };
 
   /**
-   * @class CharmmTorsionType CharmmTorsionType.hpp "types/CharmmTorsionType.hpp"
-   * These torsion types are defined identically with functional form given
-   * in the following paper:
+   * @class CharmmTorsionType CharmmTorsionType.hpp
+   * "types/CharmmTorsionType.hpp" These torsion types are defined identically
+   * with functional form given in the following paper:
    *
    * "A. D. MacKerell, Jr. et al., CHARMM: The energy function and its
    * parameterization with an overview of the program," in The
@@ -82,7 +82,8 @@ namespace OpenMD {
    *
    * This torsion potential has the form:
    *
-   * \f[ V_{\text{torsion}}(\phi) = \sum_n K_n \left( 1 + \cos(n \phi - \delta_n) \right) \f]
+   * \f[ V_{\text{torsion}}(\phi) = \sum_n K_n \left( 1 + \cos(n \phi -
+   * \delta_n) \right) \f]
    *
    * Notes:
    *
@@ -95,7 +96,9 @@ namespace OpenMD {
    * Internally convert CHARMM torsion functions to two polynomials
    * based on Chebyshev polynomials in cos(phi):
    *
-   * \f[ V_{\text{torsion}}(\phi) = \sum_n K_n + \sum_n K_n \cos(\delta_n) T_n(\cos(\phi)) - \sum_n K_n \sin(\delta_n) U_{n-1}((\cos \phi)) \sin(\phi) \f]
+   * \f[ V_{\text{torsion}}(\phi) = \sum_n K_n + \sum_n K_n \cos(\delta_n)
+   * T_n(\cos(\phi)) - \sum_n K_n \sin(\delta_n) U_{n-1}((\cos \phi)) \sin(\phi)
+   * \f]
    *
    * This conversion has used the cosine addition formula, and two
    * identities of Chebyshev polynomials:
@@ -105,22 +108,21 @@ namespace OpenMD {
    * for Chebyshev polynomials of the first type, and:
    *
    * \f[ U_{n-1} (\cos \phi) \sin(\phi) = \sin( n \phi ) \f]
-   * 
+   *
    * for Chebyshev polynomials of the second type. We're left with a
    * simpler equation for the torsion potential in terms of only
    * polynomials of the cosine and an additional sine of the angle:
    *
-   * \f[ V_{\text{torsion}}(\phi) = C + T(\cos(\phi)) + U(\cos(\phi)) \sin(\phi) \f]
-   * where:
-   * \f[ C = \sum_n K_n \f]
-   * \f[ T(\cos(\phi)) = \sum_n K_n \cos(\delta_n) T_n(\cos(\phi)) \f]
-   * \f[ U(\cos(\phi)) = \sum_n -K_n \sin(\delta_n) U_{n-1}(\cos(\phi)) \f]
+   * \f[ V_{\text{torsion}}(\phi) = C + T(\cos(\phi)) + U(\cos(\phi)) \sin(\phi)
+   * \f] where: \f[ C = \sum_n K_n \f] \f[ T(\cos(\phi)) = \sum_n K_n
+   * \cos(\delta_n) T_n(\cos(\phi)) \f] \f[ U(\cos(\phi)) = \sum_n -K_n
+   * \sin(\delta_n) U_{n-1}(\cos(\phi)) \f]
    */
   class CharmmTorsionType : public TorsionType {
   public:
     CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters);
     virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi);
-    
+
   private:
     DoublePolynomial T_;
     DoublePolynomial U_;

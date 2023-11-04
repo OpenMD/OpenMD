@@ -61,11 +61,10 @@ namespace OpenMD {
 
   AngleR::AngleR(SimInfo* info, const std::string& filename,
                  const std::string& sele1, RealType len, int nrbins) :
-    StaticAnalyser(info, filename, nrbins),
-    doVect_(true), doOffset_(false), selectionScript1_(sele1),
-    seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
-    len_(len), nRBins_(nrbins) {
-
+      StaticAnalyser(info, filename, nrbins),
+      doVect_(true), doOffset_(false), selectionScript1_(sele1),
+      seleMan1_(info), seleMan2_(info), evaluator1_(info), evaluator2_(info),
+      len_(len), nRBins_(nrbins) {
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
@@ -88,10 +87,10 @@ namespace OpenMD {
   AngleR::AngleR(SimInfo* info, const std::string& filename,
                  const std::string& sele1, const std::string& sele2,
                  RealType len, int nrbins) :
-    StaticAnalyser(info, filename, nrbins),
-    doVect_(false), doOffset_(false), selectionScript1_(sele1),
-    selectionScript2_(sele2), seleMan1_(info), seleMan2_(info),
-    evaluator1_(info), evaluator2_(info), len_(len), nRBins_(nrbins) {
+      StaticAnalyser(info, filename, nrbins),
+      doVect_(false), doOffset_(false), selectionScript1_(sele1),
+      selectionScript2_(sele2), seleMan1_(info), seleMan2_(info),
+      evaluator1_(info), evaluator2_(info), len_(len), nRBins_(nrbins) {
     setOutputName(getPrefix(filename) + ".AngleR");
 
     evaluator1_.loadScriptString(sele1);
@@ -120,12 +119,12 @@ namespace OpenMD {
 
   AngleR::AngleR(SimInfo* info, const std::string& filename,
                  const std::string& sele1, int seleOffset, RealType len,
-		 int nrbins) :
-    StaticAnalyser(info, filename, nrbins),
-    doVect_(false), doOffset_(true), doOffset2_(false),
-    selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
-    evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset),
-    len_(len), nRBins_(nrbins) {
+                 int nrbins) :
+      StaticAnalyser(info, filename, nrbins),
+      doVect_(false), doOffset_(true), doOffset2_(false),
+      selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
+      evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset), len_(len),
+      nRBins_(nrbins) {
     setOutputName(getPrefix(filename) + ".AngleR");
 
     evaluator1_.loadScriptString(sele1);
@@ -150,11 +149,11 @@ namespace OpenMD {
   AngleR::AngleR(SimInfo* info, const std::string& filename,
                  const std::string& sele1, int seleOffset, int seleOffset2,
                  RealType len, int nrbins) :
-    StaticAnalyser(info, filename, nrbins),
-    doVect_(false), doOffset_(true), doOffset2_(true),
-    selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
-    evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset),
-    seleOffset2_(seleOffset2),len_(len), nRBins_(nrbins) {
+      StaticAnalyser(info, filename, nrbins),
+      doVect_(false), doOffset_(true), doOffset2_(true),
+      selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
+      evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset),
+      seleOffset2_(seleOffset2), len_(len), nRBins_(nrbins) {
     setOutputName(getPrefix(filename) + ".AngleR");
 
     evaluator1_.loadScriptString(sele1);
@@ -174,7 +173,6 @@ namespace OpenMD {
     setParameterString(paramString);
   }
 
-  
   void AngleR::process() {
     StuntDouble* sd1;
     StuntDouble* sd2;
@@ -182,7 +180,7 @@ namespace OpenMD {
     int jj;
     RealType distance;
     bool usePeriodicBoundaryConditions_ =
-      info_->getSimParams()->getUsePeriodicBoundaryConditions();
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
     Thermo thermo(info_);
     DumpReader reader(info_, dumpFilename_);
@@ -210,7 +208,7 @@ namespace OpenMD {
           Vector3d pos = sd1->getPos();
 
           Vector3d r1 = CenterOfMass - pos;
-	  distance = r1.length();
+          distance    = r1.length();
           // only do this if the stunt double actually has a vector associated
           // with it
           if (sd1->isDirectional()) {
@@ -219,11 +217,11 @@ namespace OpenMD {
             r1.normalize();
             RealType cosangle = dot(r1, vec);
 
-	    if (distance < len_) {
-	      int whichBin = int(distance / deltaR_);
-	      histogram_[whichBin] += cosangle;
-	      count_[whichBin] += 1;
-	    }
+            if (distance < len_) {
+              int whichBin = int(distance / deltaR_);
+              histogram_[whichBin] += cosangle;
+              count_[whichBin] += 1;
+            }
           }
         }
       } else {
@@ -242,7 +240,7 @@ namespace OpenMD {
             } else {
               r1 = CenterOfMass - sd1->getPos();
             }
-	    
+
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(r1);
 
@@ -257,7 +255,7 @@ namespace OpenMD {
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(rc);
 
-	    distance = rc.length();
+            distance = rc.length();
 
             Vector3d vec = r1 - r2;
             if (usePeriodicBoundaryConditions_)
@@ -266,11 +264,11 @@ namespace OpenMD {
             rc.normalize();
             vec.normalize();
             RealType cosangle = dot(rc, vec);
-	    if (distance < len_) {
-	      int whichBin = int(distance / deltaR_);
-	      histogram_[whichBin] += cosangle;
-	      count_[whichBin] += 1;
-	    }
+            if (distance < len_) {
+              int whichBin = int(distance / deltaR_);
+              histogram_[whichBin] += cosangle;
+              count_[whichBin] += 1;
+            }
           }
         } else {
           if (evaluator2_.isDynamic()) {
@@ -287,10 +285,10 @@ namespace OpenMD {
             simError();
           }
 
-          for (sd1 = seleMan1_.beginSelected(ii),
-		 sd2 = seleMan2_.beginSelected(jj);
+          for (sd1                             = seleMan1_.beginSelected(ii),
+              sd2                              = seleMan2_.beginSelected(jj);
                sd1 != NULL && sd2 != NULL; sd1 = seleMan1_.nextSelected(ii),
-		 sd2 = seleMan2_.nextSelected(jj)) {
+              sd2                              = seleMan2_.nextSelected(jj)) {
             Vector3d r1 = CenterOfMass - sd1->getPos();
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(r1);
@@ -307,19 +305,19 @@ namespace OpenMD {
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(vec);
 
-	    distance = rc.length();
-	    
+            distance = rc.length();
+
             rc.normalize();
             vec.normalize();
             RealType cosangle = dot(rc, vec);
-	    if (distance < len_) {
-	      int whichBin = int(distance / deltaR_);
-	      histogram_[whichBin] += cosangle;
-	      count_[whichBin] += 1;
-	    }
+            if (distance < len_) {
+              int whichBin = int(distance / deltaR_);
+              histogram_[whichBin] += cosangle;
+              count_[whichBin] += 1;
+            }
           }
         }
-      }      
+      }
     }
     processHistogram();
     writeAngleR();
@@ -347,9 +345,7 @@ namespace OpenMD {
       ofs << "# " << rev.getBuildDate() << "\n";
       ofs << "#nFrames:\t" << nProcessed_ << "\n";
       ofs << "#selection1: (" << selectionScript1_ << ")";
-      if (!doVect_) {
-        ofs << "\tselection2: (" << selectionScript2_ << ")";
-      }
+      if (!doVect_) { ofs << "\tselection2: (" << selectionScript2_ << ")"; }
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
 

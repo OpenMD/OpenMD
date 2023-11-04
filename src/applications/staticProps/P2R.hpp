@@ -60,7 +60,7 @@ namespace OpenMD {
         const int seleOffset, unsigned int nbins);
     P2R(SimInfo* info, const string& filename, const string& sele,
         const int seleOffset, const int seleOffset2, unsigned int nbins);
-    
+
     virtual void process();
 
   private:
@@ -84,7 +84,7 @@ namespace OpenMD {
     int nProcessed_;
 
     RealType P2_;
-    int count_;    
+    int count_;
   };
 }  // namespace OpenMD
 

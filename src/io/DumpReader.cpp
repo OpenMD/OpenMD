@@ -536,7 +536,7 @@ namespace OpenMD {
     // StuntDoubles have a line even if there is nothing stored in the
     // site data:
     if (nTokens == 1) { return; }
-    
+
     /**
      * Test to see if the next token is an integer or not.  If not,
      * we've got data on the integrable object itself.  If there is an

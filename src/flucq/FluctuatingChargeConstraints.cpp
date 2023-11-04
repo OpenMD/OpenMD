@@ -287,7 +287,7 @@ namespace OpenMD {
       MPI_Allreduce(MPI_IN_PLACE, &regionCMom_[0], regionCMom_.size(),
                     MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, &regionChargeMass_[0],
-                    regionChargeMass_.size(), MPI_REALTYPE, MPI_SUM, 
+                    regionChargeMass_.size(), MPI_REALTYPE, MPI_SUM,
                     MPI_COMM_WORLD);
     }
 #endif

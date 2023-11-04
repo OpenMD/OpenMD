@@ -618,7 +618,7 @@ namespace OpenMD {
 
   std::string DumpWriter::prepareSiteLine(StuntDouble* sd, int ioIndex,
                                           int siteIndex) {
-    int asl = info_->getSnapshotManager()->getAtomStorageLayout();
+    int asl  = info_->getSnapshotManager()->getAtomStorageLayout();
     int rbsl = info_->getSnapshotManager()->getRigidBodyStorageLayout();
     int sl {};
 

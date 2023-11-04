@@ -54,7 +54,7 @@ namespace OpenMD {
   class RotAngleDisplacement : public MoleculeACF<Vector3d> {
   public:
     RotAngleDisplacement(SimInfo* info, const std::string& filename,
-			 const std::string& sele1, const std::string& sele2);
+                         const std::string& sele1, const std::string& sele2);
 
   private:
     virtual void validateSelection(SelectionManager& seleMan);

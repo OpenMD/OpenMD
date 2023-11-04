@@ -51,10 +51,10 @@
 
 namespace OpenMD {
   RotAngleDisplacement::RotAngleDisplacement(SimInfo* info,
-					     const std::string& filename,
-					     const std::string& sele1,
-					     const std::string& sele2) :
-    MoleculeACF<Vector3d>(info, filename, sele1, sele2) {
+                                             const std::string& filename,
+                                             const std::string& sele1,
+                                             const std::string& sele2) :
+      MoleculeACF<Vector3d>(info, filename, sele1, sele2) {
     setCorrFuncType("Rotational Angle Displacement Function");
     setOutputName(getPrefix(dumpFilename_) + ".rotAngDisp");
 
@@ -78,18 +78,18 @@ namespace OpenMD {
   }
 
   Vector3d RotAngleDisplacement::calcCorrVal(int frame1, int frame2, int id1,
-					     int id2) {
+                                             int id2) {
     RotMat3x3d A1 = rotMats_[frame1][id1];
     RotMat3x3d A2 = rotMats_[frame2][id2];
 
     RotMat3x3d A21 = A1.transpose() * A2;
-    Vector3d rpy = A21.toRPY();
-   
+    Vector3d rpy   = A21.toRPY();
+
     return rpy;
   }
 
   void RotAngleDisplacement::correlateFrames(int frame1, int frame2,
-					     int timeBin) {
+                                             int timeBin) {
     std::vector<int> s1;
     std::vector<int> s2;
 
@@ -107,7 +107,6 @@ namespace OpenMD {
 
     for (i1 = s1.begin(), i2 = s2.begin(); i1 != s1.end() && i2 != s2.end();
          ++i1, ++i2) {
-      
       // If the selections are dynamic, they might not have the
       // same objects in both frames, so we need to roll either of
       // the selections until we have the same object to
@@ -123,7 +122,7 @@ namespace OpenMD {
 
       if (i1 == s1.end() || i2 == s2.end()) break;
 
-      corrVal  = calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin());
+      corrVal = calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin());
 
       histogram_[timeBin] += corrVal;
       counts_[timeBin]++;
@@ -151,42 +150,41 @@ namespace OpenMD {
     }
     if (seleMan1_.getMoleculeSelectionCount() < 1) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-	       "RotAngleDisplacement::validateSelection Error: "
-	       "There needs to be at least one selected molecule.\n");
+               "RotAngleDisplacement::validateSelection Error: "
+               "There needs to be at least one selected molecule.\n");
       painCave.isFatal = 1;
       simError();
     }
-	
   }
 
   void RotAngleDisplacement::writeCorrelate() {
-    std::string Anglefile  = getOutputFileName();
+    std::string Anglefile = getOutputFileName();
     std::ofstream ofs1(Anglefile.c_str());
-    
+
     if (ofs1.is_open()) {
       Revision r;
-      
+
       ofs1 << "# " << getCorrFuncType() << "\n";
       ofs1 << "# OpenMD " << r.getFullRevision() << "\n";
       ofs1 << "# " << r.getBuildDate() << "\n";
       ofs1 << "# selection script1: \"" << selectionScript1_;
       ofs1 << "\"\tselection script2: \"" << selectionScript2_ << "\"\n";
-      
+
       ofs1 << "#time\troll\tpitch\tyaw\n";
-      
+
       for (unsigned int i = 0; i < nTimeBins_; ++i) {
         ofs1 << times_[i] - times_[0];
-	
-	ofs1 << "\t" << histogram_[i][0];
-	ofs1 << "\t" << histogram_[i][1];
-	ofs1 << "\t" << histogram_[i][2] << "\n";
-	
+
+        ofs1 << "\t" << histogram_[i][0];
+        ofs1 << "\t" << histogram_[i][1];
+        ofs1 << "\t" << histogram_[i][2] << "\n";
       }
-    
+
     } else {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "RotAngleDisplacement::writeCorrelate Error: failed to open %s\n",
-               Anglefile.c_str());
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "RotAngleDisplacement::writeCorrelate Error: failed to open %s\n",
+          Anglefile.c_str());
       painCave.isFatal = 1;
       simError();
     }

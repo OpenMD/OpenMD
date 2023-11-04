@@ -55,8 +55,10 @@
 
 namespace OpenMD {
 
-  CharmmTorsionType::CharmmTorsionType( std::vector<CharmmTorsionParameter>& parameters) : TorsionType(), C_(0.0) {
-    
+  CharmmTorsionType::CharmmTorsionType(
+      std::vector<CharmmTorsionParameter>& parameters) :
+      TorsionType(),
+      C_(0.0) {
     std::vector<CharmmTorsionParameter>::iterator i;
     i = std::max_element(parameters.begin(), parameters.end(),
                          LessThanPeriodicityFunctor());
@@ -72,37 +74,36 @@ namespace OpenMD {
         DoublePolynomial cosTerm = T.getChebyshevPolynomial(i->n);
         cosTerm *= (cos(i->delta) * i->kchi);
 
-	// should check that i->n is >= 1
+        // should check that i->n is >= 1
         DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n - 1);
         sinTerm *= -(sin(i->delta) * i->kchi);
-	
-	T_ += cosTerm;
-	U_ += sinTerm;
-	C_ += i->kchi;
+
+        T_ += cosTerm;
+        U_ += sinTerm;
+        C_ += i->kchi;
       }
     }
   }
 
   void CharmmTorsionType::calcForce(RealType cosPhi, RealType& V,
-				    RealType& dVdCosPhi) {
+                                    RealType& dVdCosPhi) {
     // check roundoff
     if (cosPhi > 1.0) {
       cosPhi = 1.0;
     } else if (cosPhi < -1.0) {
       cosPhi = -1.0;
     }
-      
+
     RealType sinPhi = sqrt(1.0 - cosPhi * cosPhi);
 
     // trick to avoid divergence in angles near 0 and pi:
-    
+
     if (fabs(sinPhi) < 1.0E-6) { sinPhi = copysign(1.0E-6, sinPhi); }
 
-    V = C_ + T_.evaluate(cosPhi) + U_.evaluate(cosPhi) * sinPhi;
+    V         = C_ + T_.evaluate(cosPhi) + U_.evaluate(cosPhi) * sinPhi;
     dVdCosPhi = T_.evaluateDerivative(cosPhi);
     // Chain rule for U * sinPhi term:
     dVdCosPhi += U_.evaluateDerivative(cosPhi) * sinPhi;
     dVdCosPhi += U_.evaluate(cosPhi) / (2.0 * sinPhi);
-    
   }
 }  // namespace OpenMD

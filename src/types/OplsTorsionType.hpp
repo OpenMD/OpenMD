@@ -69,7 +69,8 @@ namespace OpenMD {
    *
    * This torsion potential has the form:
    *
-   *  \f[ V_{tors} = 0.5 (v_1 (1+\cos(\phi)) + v_2 (1-\cos(2 \phi)) + v_3 (1+\cos(3 \phi))) \f]
+   *  \f[ V_{tors} = 0.5 (v_1 (1+\cos(\phi)) + v_2 (1-\cos(2 \phi)) + v_3
+   * (1+\cos(3 \phi))) \f]
    *
    * Notes:
    *

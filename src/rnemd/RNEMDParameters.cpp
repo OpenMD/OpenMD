@@ -87,8 +87,7 @@ namespace OpenMD::RNEMD {
     DefineOptionalParameterWithDefaultValue(SPFScalingPower, "spfScalingPower",
                                             3);
     DefineOptionalParameterWithDefaultValue(SPFUniformKineticScaling,
-                                            "spfUniformKineticScaling",
-                                            false);
+                                            "spfUniformKineticScaling", false);
   }
 
   void RNEMDParameters::validate() {
@@ -108,7 +107,7 @@ namespace OpenMD::RNEMD {
             isEqualIgnoreCase("KE+Py") || isEqualIgnoreCase("KE+Lx") ||
             isEqualIgnoreCase("KE+Ly") || isEqualIgnoreCase("KE+Lz") ||
             isEqualIgnoreCase("KE+Pvector") ||
-            isEqualIgnoreCase("KE+Lvector") || isEqualIgnoreCase("Particle")||
+            isEqualIgnoreCase("KE+Lvector") || isEqualIgnoreCase("Particle") ||
             isEqualIgnoreCase("Particle+KE"));
     CheckParameter(PrivilegedAxis, isEqualIgnoreCase("x") ||
                                        isEqualIgnoreCase("y") ||

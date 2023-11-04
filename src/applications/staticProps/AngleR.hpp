@@ -53,15 +53,15 @@ namespace OpenMD {
   class AngleR : public StaticAnalyser {
   public:
     AngleR(SimInfo* info, const string& filename, const string& sele1,
-            RealType len, int nrbins);
+           RealType len, int nrbins);
     AngleR(SimInfo* info, const string& filename, const string& sele1,
-           const string& sele2,  RealType len, int nrbins);
+           const string& sele2, RealType len, int nrbins);
     AngleR(SimInfo* info, const string& filename, const string& sele,
-           const int seleOffset,  RealType len, int nrbins);
+           const int seleOffset, RealType len, int nrbins);
     AngleR(SimInfo* info, const string& filename, const string& sele,
            const int seleOffset, const int seleOffset2, RealType len,
-	   int nrbins);
-    
+           int nrbins);
+
     int getNRBins() { return nRBins_; }
 
     RealType getLength() { return len_; }

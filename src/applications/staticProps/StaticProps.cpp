@@ -264,7 +264,7 @@ int main(int argc, char* argv[]) {
   }
 
   RealType binWidth = args_info.binWidth_arg;
-  
+
   // override default vander waals radius for fictious atoms in a model
   RealType vRadius;
   if (args_info.v_radius_given) {
@@ -592,21 +592,20 @@ int main(int argc, char* argv[]) {
     analyser = std::make_unique<ChargeZ>(info, dumpFileName, sele1,
                                          args_info.nbins_arg, privilegedAxis);
   } else if (args_info.charger_given) {
-    analyser = std::make_unique<ChargeR>(info, dumpFileName, sele1,
-					 maxLen, args_info.nbins_arg);
+    analyser = std::make_unique<ChargeR>(info, dumpFileName, sele1, maxLen,
+                                         args_info.nbins_arg);
   } else if (args_info.numberz_given) {
     analyser = std::make_unique<NumberZ>(info, dumpFileName, sele1,
-                                           args_info.nbins_arg, privilegedAxis);
+                                         args_info.nbins_arg, privilegedAxis);
   } else if (args_info.numberr_given) {
-    analyser = std::make_unique<NumberR>(info, dumpFileName, sele1,
-                                           maxLen, args_info.nbins_arg);    
+    analyser = std::make_unique<NumberR>(info, dumpFileName, sele1, maxLen,
+                                         args_info.nbins_arg);
   } else if (args_info.massdensityz_given) {
-    analyser = std::make_unique<MassDensityZ>(info, dumpFileName, sele1,
-                                              args_info.nbins_arg,
-                                              privilegedAxis);
+    analyser = std::make_unique<MassDensityZ>(
+        info, dumpFileName, sele1, args_info.nbins_arg, privilegedAxis);
   } else if (args_info.massdensityr_given) {
-    analyser = std::make_unique<MassDensityR>(info, dumpFileName, sele1,
-                                              maxLen, args_info.nbins_arg);    
+    analyser = std::make_unique<MassDensityR>(info, dumpFileName, sele1, maxLen,
+                                              args_info.nbins_arg);
   } else if (args_info.charge_density_z_given) {
     analyser = std::make_unique<ChargeDensityZ>(
         info, dumpFileName, sele1, args_info.nbins_arg, vRadius,
@@ -637,9 +636,8 @@ int main(int argc, char* argv[]) {
     analyser = std::make_unique<RNEMDZ>(info, dumpFileName, sele1,
                                         args_info.nbins_arg, privilegedAxis);
   } else if (args_info.rnemdr_given) {
-    analyser =
-      std::make_unique<RNEMDR>(info, dumpFileName, sele1, comsele,
-                               nrbins, binWidth);
+    analyser = std::make_unique<RNEMDR>(info, dumpFileName, sele1, comsele,
+                                        nrbins, binWidth);
   } else if (args_info.rnemdrt_given) {
     analyser = std::make_unique<RNEMDRTheta>(info, dumpFileName, sele1, comsele,
                                              nrbins, binWidth, nanglebins);
@@ -727,18 +725,17 @@ int main(int argc, char* argv[]) {
                                             maxLen, nrbins);
       else if (args_info.seleoffset_given) {
         if (args_info.seleoffset2_given) {
-          analyser = std::make_unique<AngleR>(info, dumpFileName, sele1,
-					      args_info.seleoffset_arg,
-					      args_info.seleoffset2_arg,
-					      maxLen, nrbins);
+          analyser = std::make_unique<AngleR>(
+              info, dumpFileName, sele1, args_info.seleoffset_arg,
+              args_info.seleoffset2_arg, maxLen, nrbins);
         } else {
           analyser = std::make_unique<AngleR>(info, dumpFileName, sele1,
-                                              args_info.seleoffset_arg,
-                                              maxLen, nrbins);
+                                              args_info.seleoffset_arg, maxLen,
+                                              nrbins);
         }
       } else
-        analyser = std::make_unique<AngleR>(info, dumpFileName, sele1,
-                                            maxLen, nrbins);
+        analyser =
+            std::make_unique<AngleR>(info, dumpFileName, sele1, maxLen, nrbins);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "At least one selection script (--sele1) must be specified when "
@@ -754,10 +751,9 @@ int main(int argc, char* argv[]) {
                                          args_info.nbins_arg);
       else if (args_info.seleoffset_given) {
         if (args_info.seleoffset2_given) {
-          analyser = std::make_unique<P2R>(info, dumpFileName, sele1,
-                                           args_info.seleoffset_arg,
-                                           args_info.seleoffset2_arg,
-                                           args_info.nbins_arg);
+          analyser = std::make_unique<P2R>(
+              info, dumpFileName, sele1, args_info.seleoffset_arg,
+              args_info.seleoffset2_arg, args_info.nbins_arg);
         } else {
           analyser = std::make_unique<P2R>(info, dumpFileName, sele1,
                                            args_info.seleoffset_arg,

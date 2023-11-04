@@ -57,12 +57,12 @@
 #include "utils/simError.h"
 
 namespace OpenMD {
-  
+
   MassDensityZ::MassDensityZ(SimInfo* info, const std::string& filename,
                              const std::string& sele, int nzbins, int axis) :
-    StaticAnalyser(info, filename, nzbins),
-    selectionScript_(sele), evaluator_(info), seleMan_(info), thermo_(info),
-    axis_(axis) {
+      StaticAnalyser(info, filename, nzbins),
+      selectionScript_(sele), evaluator_(info), seleMan_(info), thermo_(info),
+      axis_(axis) {
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -127,7 +127,7 @@ namespace OpenMD {
 
       for (sd = seleMan_.beginSelected(ii); sd != NULL;
            sd = seleMan_.nextSelected(ii)) {
-        Vector3d pos = sd->getPos();
+        Vector3d pos  = sd->getPos();
         RealType mass = sd->getMass();
         if (usePeriodicBoundaryConditions_) currentSnapshot_->wrapVector(pos);
         // shift molecules by half a box to have bins start at 0
@@ -160,15 +160,15 @@ namespace OpenMD {
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
       rdfStream << "#" << axisLabel_ << "\tdensity (g cm^-3)\n";
       rdfStream.precision(8);  // same precision as the RNEMD files
-            
+
       RealType massDensity;
       for (unsigned int i = 0; i < massZ_.size(); ++i) {
         RealType z = zAve * (i + 0.5) / nBins_;
 
         RealType volSlice = areaAve * zAve / nBins_;
 
-        massDensity = Constants::densityConvert * massZ_[i] /
-          (volSlice * nProcessed_);
+        massDensity =
+            Constants::densityConvert * massZ_[i] / (volSlice * nProcessed_);
 
         rdfStream << z << "\t" << massDensity << "\n";
       }

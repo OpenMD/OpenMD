@@ -84,7 +84,7 @@ namespace OpenMD {
     std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
     bool usePeriodicBoundaryConditions_ =
         info_->getSimParams()->getUsePeriodicBoundaryConditions();
-    
+
     data_.resize(RNEMDZ::ENDINDEX);
 
     temperature               = new OutputData;
@@ -366,7 +366,7 @@ namespace OpenMD {
              consPair = mol->nextConstraintPair(cpi)) {
           Vector3d posA = consPair->getConsElem1()->getPos();
           Vector3d posB = consPair->getConsElem2()->getPos();
-          
+
           if (usePeriodicBoundaryConditions_) {
             currentSnapshot_->wrapVector(posA);
             currentSnapshot_->wrapVector(posB);
@@ -432,14 +432,14 @@ namespace OpenMD {
         }
 
         if (outputMask_[TEMPERATURE]) {
-          if (binDOF[i] > 0) {          
+          if (binDOF[i] > 0) {
             temp = 2.0 * binKE[i] /
-              (binDOF[i] * Constants::kb * Constants::energyConvert);
+                   (binDOF[i] * Constants::kb * Constants::energyConvert);
             dynamic_cast<Accumulator*>(data_[TEMPERATURE]->accumulator[i])
-              ->add(temp);
+                ->add(temp);
           } else {
             std::cerr << "No degrees of freedom in this bin?\n";
-          }            
+          }
         }
 
         if (outputMask_[CHARGE])
@@ -455,7 +455,7 @@ namespace OpenMD {
   RNEMDR::RNEMDR(SimInfo* info, const std::string& filename,
                  const std::string& sele, const std::string& comsele,
                  int nrbins, RealType binWidth) :
-    ShellStatistics(info, filename, sele, comsele, nrbins, binWidth) {
+      ShellStatistics(info, filename, sele, comsele, nrbins, binWidth) {
     setOutputName(getPrefix(filename) + ".rnemdR");
 
     data_.resize(RNEMDR::ENDINDEX);
@@ -544,7 +544,7 @@ namespace OpenMD {
             rPos = sd->getPos() - coordinateOrigin_;
             KE   = 0.5 * mass * vel.lengthSquare();
             DOF  = 3;
-            
+
             if (sd->isDirectional()) {
               Vector3d angMom = sd->getJ();
               Mat3x3d Ia      = sd->getI();
@@ -562,10 +562,10 @@ namespace OpenMD {
                 DOF += 3;
               }
             }
-            
-            L    = mass * cross(rPos, vel);
-            I    = outProduct(rPos, rPos) * mass;
-            r2   = rPos.lengthSquare();
+
+            L  = mass * cross(rPos, vel);
+            I  = outProduct(rPos, rPos) * mass;
+            r2 = rPos.lengthSquare();
             I(0, 0) += mass * r2;
             I(1, 1) += mass * r2;
             I(2, 2) += mass * r2;
@@ -588,9 +588,7 @@ namespace OpenMD {
 
           Vector3d coc = 0.5 * (posA + posB);
           int binCons  = getBin(coc);
-          if (binCons >= 0 && binCons < int(nBins_)) {            
-            binDOF[binCons] -= 1;
-          }
+          if (binCons >= 0 && binCons < int(nBins_)) { binDOF[binCons] -= 1; }
         }
       }
     }
@@ -630,8 +628,8 @@ namespace OpenMD {
   RNEMDRTheta::RNEMDRTheta(SimInfo* info, const std::string& filename,
                            const std::string& sele, const std::string& comsele,
                            int nrbins, RealType binWidth, int nangleBins) :
-    ShellStatistics(info, filename, sele, comsele, nrbins, binWidth),
-    nAngleBins_(nangleBins) {
+      ShellStatistics(info, filename, sele, comsele, nrbins, binWidth),
+      nAngleBins_(nangleBins) {
     Globals* simParams                  = info->getSimParams();
     RNEMD::RNEMDParameters* rnemdParams = simParams->getRNEMDParameters();
     bool hasAngularMomentumFluxVector =
