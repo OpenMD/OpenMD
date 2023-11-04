@@ -64,7 +64,7 @@ namespace OpenMD::RNEMD {
     SPFForceManager(SimInfo* info);
     ~SPFForceManager();
 
-    void setSelectedMolecule(Molecule* selectedMolecule, Vector3d newCom);
+    void setSelectedMolecule(Molecule* selectedMolecule);
     bool updateLambda(RealType& particleTarget, RealType& deltaLambda);
 
     bool getHasSelectedMolecule() const { return hasSelectedMolecule_; }
@@ -74,7 +74,9 @@ namespace OpenMD::RNEMD {
     }
 
     RealType getScaledDeltaU(RealType d_lambda) const {
-      return -(f_lambda(lambda_ + d_lambda) - f_lambda(lambda_)) *
+      RealType lambda = currentSnapshot_->getSPFData()->lambda;
+
+      return -(f_lambda(lambda + d_lambda) - f_lambda(lambda)) *
              (potentialSink_ - potentialSource_);
     }
 
@@ -100,7 +102,7 @@ namespace OpenMD::RNEMD {
 
     template<typename T>
     T linearCombination(T quantityA, T quantityB) {
-      RealType result = f_lambda(lambda_);
+      RealType result = f_lambda(currentSnapshot_->getSPFData()->lambda);
 
       return T {(1.0 - result) * quantityA + result * quantityB};
     }
@@ -112,7 +114,6 @@ namespace OpenMD::RNEMD {
     Snapshot* temporarySinkSnapshot_ {nullptr};
 
     // to preserve the Verlet Neighbor lists in source and sink snapshots:
-
     std::vector<int> sourceNeighborList_;
     std::vector<int> sourcePoint_;
     std::vector<Vector3d> sourceSavedPositions_;
@@ -121,12 +122,9 @@ namespace OpenMD::RNEMD {
     std::vector<int> sinkPoint_;
     std::vector<Vector3d> sinkSavedPositions_;
 
-    bool hasSelectedMolecule_ {false};
+    bool hasSelectedMolecule_ {};
 
     Molecule* selectedMolecule_ {nullptr};
-    Vector3d currentSinkCom_ {};
-
-    RealType lambda_ {};
     int k_ {};
 
     RealType potentialSource_ {};

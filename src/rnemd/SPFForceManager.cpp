@@ -48,6 +48,10 @@
 
 #include <vector>
 
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
+
 #include "brains/ForceManager.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/Snapshot.hpp"
@@ -61,7 +65,7 @@
 namespace OpenMD::RNEMD {
 
   SPFForceManager::SPFForceManager(SimInfo* info) :
-      ForceManager {info}, lambda_ {}, potentialSource_ {}, potentialSink_ {} {
+      ForceManager {info}, potentialSource_ {}, potentialSink_ {} {
     thermo_          = std::make_unique<Thermo>(info);
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -133,9 +137,16 @@ namespace OpenMD::RNEMD {
 
       // Only the processor with the selected molecule should do this step:
       if (selectedMolecule_) {
-        currentSinkCom_ += delta;
-        selectedMolecule_->setCom(currentSinkCom_);
+        currentSnapshot_->getSPFData()->pos += delta;
+        selectedMolecule_->setCom(currentSnapshot_->getSPFData()->pos);
       }
+
+#ifdef IS_MPI
+      int globalSelectedID = currentSnapshot_->getSPFData()->globalID;
+
+      MPI_Bcast(&currentSnapshot_->getSPFData()->pos[0], 3, MPI_REALTYPE,
+                info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
+#endif
 
       // Current snapshot with selected molecule in sink slab
       ForceManager::calcForces();
@@ -169,6 +180,7 @@ namespace OpenMD::RNEMD {
 
       // Only the processor with the selected molecule should do this step:
       if (selectedMolecule_) { selectedMolecule_->setCom(currentSourceCom); }
+
     } else {
       *temporarySourceSnapshot_ = *currentSnapshot_;
       *temporarySinkSnapshot_   = *currentSnapshot_;
@@ -176,11 +188,9 @@ namespace OpenMD::RNEMD {
     }
   }
 
-  void SPFForceManager::setSelectedMolecule(Molecule* selectedMolecule,
-                                            Vector3d newCom) {
+  void SPFForceManager::setSelectedMolecule(Molecule* selectedMolecule) {
     if (selectedMolecule) {
       selectedMolecule_ = selectedMolecule;
-      currentSinkCom_   = newCom;
     } else {
       selectedMolecule_ = nullptr;
     }
@@ -191,12 +201,15 @@ namespace OpenMD::RNEMD {
     bool updateSelectedMolecule {false};
 
     if (hasSelectedMolecule_) {
-      lambda_ += std::fabs(particleTarget);
+      currentSnapshot_->getSPFData()->lambda += std::fabs(particleTarget);
 
-      if (f_lambda(lambda_ + std::fabs(particleTarget)) > 1.0 &&
-          f_lambda(lambda_) < 1.0) {
-        deltaLambda = particleTarget -
-                      (f_lambda(lambda_ + std::fabs(particleTarget)) - 1.0);
+      if (f_lambda(currentSnapshot_->getSPFData()->lambda +
+                   std::fabs(particleTarget)) > 1.0 &&
+          f_lambda(currentSnapshot_->getSPFData()->lambda) < 1.0) {
+        deltaLambda =
+            particleTarget - (f_lambda(currentSnapshot_->getSPFData()->lambda +
+                                       std::fabs(particleTarget)) -
+                              1.0);
       } else {
         deltaLambda = particleTarget;
       }
@@ -207,13 +220,15 @@ namespace OpenMD::RNEMD {
       updatePotentials();
       updateVirialTensor();
 
-      if (f_lambda(lambda_) > 1.0 ||
-          std::fabs(f_lambda(lambda_) - 1.0) < 1e-6) {
-        lambda_ = 0.0;
+      if (f_lambda(currentSnapshot_->getSPFData()->lambda) > 1.0 ||
+          std::fabs(f_lambda(currentSnapshot_->getSPFData()->lambda) - 1.0) <
+              1e-6) {
+        currentSnapshot_->getSPFData()->lambda   = 0.0;
+        currentSnapshot_->getSPFData()->globalID = -1;
 
         // Only the processor with the selected molecule should do this step:
         if (selectedMolecule_) {
-          selectedMolecule_->setCom(currentSinkCom_);
+          selectedMolecule_->setCom(currentSnapshot_->getSPFData()->pos);
           selectedMolecule_ = nullptr;
         }
 
@@ -236,7 +251,7 @@ namespace OpenMD::RNEMD {
     Molecule::IntegrableObjectIterator ii;
     StuntDouble* sd;
 
-    RealType result = f_lambda(lambda_);
+    RealType result = f_lambda(currentSnapshot_->getSPFData()->lambda);
 
     // Now scale forces and torques of all the sds
     for (mol = info_->beginMolecule(mi); mol != NULL;

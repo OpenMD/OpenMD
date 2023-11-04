@@ -54,6 +54,12 @@
 using namespace std;
 namespace OpenMD {
 
+  struct SPFData {
+    Vector3d pos {V3Zero};
+    RealType lambda {0.0};
+    int globalID {-1};
+  };
+
   /**
    * FrameData is a structure for holding system-wide dynamic data
    * about the simulation.
@@ -127,6 +133,8 @@ namespace OpenMD {
     Vector3d conductiveHeatFlux; /**< heat flux vector (conductive only) */
     Vector3d convectiveHeatFlux; /**< heat flux vector (convective only) */
     RealType conservedQuantity;  /**< anything conserved by the integrator */
+    std::shared_ptr<SPFData> spfData {
+        nullptr}; /**< parameters for restarting an SPF simulation */
   };
 
   /**
@@ -290,6 +298,9 @@ namespace OpenMD {
 
     Mat3x3d getBarostat();
     void setBarostat(const Mat3x3d& barostat);
+
+    std::shared_ptr<SPFData> getSPFData();
+    void setSPFData(std::shared_ptr<SPFData> data);
 
     Mat3x3d getInertiaTensor();
     void setInertiaTensor(const Mat3x3d& inertiaTensor);

@@ -89,6 +89,7 @@ namespace OpenMD {
     frameData.barostat             = Mat3x3d(0.0);
     frameData.virialTensor         = Mat3x3d(0.0);
     frameData.conductiveHeatFlux   = Vector3d(0.0, 0.0, 0.0);
+    frameData.spfData              = std::make_shared<SPFData>();
     clearDerivedProperties();
   }
 
@@ -126,6 +127,7 @@ namespace OpenMD {
     frameData.barostat             = Mat3x3d(0.0);
     frameData.virialTensor         = Mat3x3d(0.0);
     frameData.conductiveHeatFlux   = Vector3d(0.0, 0.0, 0.0);
+    frameData.spfData              = std::make_shared<SPFData>();
 
     clearDerivedProperties();
   }
@@ -737,6 +739,12 @@ namespace OpenMD {
   }
 
   Mat3x3d Snapshot::getBarostat() { return frameData.barostat; }
+
+  void Snapshot::setSPFData(std::shared_ptr<SPFData> data) {
+    frameData.spfData = data;
+  }
+
+  std::shared_ptr<SPFData> Snapshot::getSPFData() { return frameData.spfData; }
 
   void Snapshot::setInertiaTensor(const Mat3x3d& inertiaTensor) {
     frameData.inertiaTensor = inertiaTensor;
