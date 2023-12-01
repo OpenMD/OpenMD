@@ -47,9 +47,12 @@
 #include <algorithm>
 #include <cmath>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <string>
+#include <typeinfo>
+#include <utility>
 #include <vector>
 
 #ifdef IS_MPI
@@ -70,8 +73,10 @@
 #include "types/FixedChargeAdapter.hpp"
 #include "types/FluctuatingChargeAdapter.hpp"
 #include "utils/Accumulator.hpp"
+#include "utils/AccumulatorView.hpp"
 #include "utils/Constants.hpp"
-#include "utils/MemoryUtils.hpp"
+
+using namespace OpenMD::Utils;
 
 namespace OpenMD::RNEMD {
 
@@ -162,8 +167,7 @@ namespace OpenMD::RNEMD {
     runTime_    = simParams->getRunTime();
     statusTime_ = simParams->getStatusTime();
 
-    rnemdObjectSelection_   = rnemdParams->getObjectSelection();
-    currentObjectSelection_ = rnemdObjectSelection_;
+    rnemdObjectSelection_ = rnemdParams->getObjectSelection();
 
     bool hasSlabWidth     = rnemdParams->haveSlabWidth();
     bool hasSlabACenter   = rnemdParams->haveSlabACenter();
@@ -214,101 +218,88 @@ namespace OpenMD::RNEMD {
     nBins_    = rnemdParams->getOutputBins();
     binWidth_ = rnemdParams->getOutputBinWidth();
 
+    // Pre-load the OutputData
     data_.resize(RNEMD::ENDINDEX);
 
     OutputData z;
-    z.units    = "Angstroms";
-    z.title    = rnemdAxisLabel_;
-    z.dataType = "RealType";
-    z.accumulator.reserve(nBins_);
+    z.units = "Angstroms";
+    z.title = rnemdAxisLabel_;
     for (unsigned int i = 0; i < nBins_; i++)
-      z.accumulator.push_back(new Accumulator());
-    data_[Z]        = z;
+      z.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[Z]        = std::move(z);
     outputMap_["Z"] = Z;
 
     OutputData r;
-    r.units    = "Angstroms";
-    r.title    = "R";
-    r.dataType = "RealType";
-    r.accumulator.reserve(nBins_);
+    r.units = "Angstroms";
+    r.title = "R";
     for (unsigned int i = 0; i < nBins_; i++)
-      r.accumulator.push_back(new Accumulator());
-    data_[R]        = r;
+      r.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[R]        = std::move(r);
     outputMap_["R"] = R;
 
     OutputData temperature;
-    temperature.units    = "K";
-    temperature.title    = "Temperature";
-    temperature.dataType = "RealType";
-    temperature.accumulator.reserve(nBins_);
+    temperature.units = "K";
+    temperature.title = "Temperature";
     for (unsigned int i = 0; i < nBins_; i++)
-      temperature.accumulator.push_back(new Accumulator());
-    data_[TEMPERATURE]        = temperature;
+      temperature.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[TEMPERATURE]        = std::move(temperature);
     outputMap_["TEMPERATURE"] = TEMPERATURE;
 
     OutputData velocity;
-    velocity.units    = "angstroms/fs";
-    velocity.title    = "Velocity";
-    velocity.dataType = "Vector3d";
-    velocity.accumulator.reserve(nBins_);
+    velocity.units = "angstroms/fs";
+    velocity.title = "Velocity";
     for (unsigned int i = 0; i < nBins_; i++)
-      velocity.accumulator.push_back(new VectorAccumulator());
-    data_[VELOCITY]        = velocity;
+      velocity.accumulator.push_back(
+          std::make_unique<AccumulatorView<Vector3dAccumulator>>());
+    data_[VELOCITY]        = std::move(velocity);
     outputMap_["VELOCITY"] = VELOCITY;
 
     OutputData angularVelocity;
-    angularVelocity.units    = "angstroms^2/fs";
-    angularVelocity.title    = "AngularVelocity";
-    angularVelocity.dataType = "Vector3d";
-    angularVelocity.accumulator.reserve(nBins_);
+    angularVelocity.units = "angstroms^2/fs";
+    angularVelocity.title = "AngularVelocity";
     for (unsigned int i = 0; i < nBins_; i++)
-      angularVelocity.accumulator.push_back(new VectorAccumulator());
-    data_[ANGULARVELOCITY]        = angularVelocity;
+      angularVelocity.accumulator.push_back(
+          std::make_unique<AccumulatorView<Vector3dAccumulator>>());
+    data_[ANGULARVELOCITY]        = std::move(angularVelocity);
     outputMap_["ANGULARVELOCITY"] = ANGULARVELOCITY;
 
     OutputData density;
-    density.units    = "g cm^-3";
-    density.title    = "Density";
-    density.dataType = "RealType";
-    density.accumulator.reserve(nBins_);
+    density.units = "g cm^-3";
+    density.title = "Density";
     for (unsigned int i = 0; i < nBins_; i++)
-      density.accumulator.push_back(new Accumulator());
-    data_[DENSITY]        = density;
+      density.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[DENSITY]        = std::move(density);
     outputMap_["DENSITY"] = DENSITY;
 
     OutputData activity;
-    activity.units      = "unitless";
-    activity.title      = "Activity";
-    activity.dataType   = "Array2d";
-    unsigned int nTypes = outputTypes_.size();
-    activity.accumulatorArray2d.resize(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++) {
-      activity.accumulatorArray2d[i].resize(nTypes);
-      for (unsigned int j = 0; j < nTypes; j++) {
-        activity.accumulatorArray2d[i][j] = new Accumulator();
-      }
-    }
-    data_[ACTIVITY]        = (activity);
+    activity.units = "unitless";
+    activity.title = "Activity";
+    for (unsigned int i = 0; i < nBins_; i++)
+      activity.accumulator.push_back(
+          std::make_unique<AccumulatorView<StdVectorAccumulator>>());
+    data_[ACTIVITY]        = std::move(activity);
     outputMap_["ACTIVITY"] = ACTIVITY;
 
     OutputData eField;
-    eField.units    = "kcal/mol/angstroms/e";
-    eField.title    = "Electric Field";
-    eField.dataType = "Vector3d";
-    eField.accumulator.reserve(nBins_);
+    eField.units = "kcal/mol/angstroms/e";
+    eField.title = "Electric Field";
     for (unsigned int i = 0; i < nBins_; i++)
-      eField.accumulator.push_back(new VectorAccumulator());
-    data_[ELECTRICFIELD]        = eField;
+      eField.accumulator.push_back(
+          std::make_unique<AccumulatorView<Vector3dAccumulator>>());
+    data_[ELECTRICFIELD]        = std::move(eField);
     outputMap_["ELECTRICFIELD"] = ELECTRICFIELD;
 
     OutputData ePot;
-    ePot.units    = "kcal/mol/e";
-    ePot.title    = "Electrostatic Potential";
-    ePot.dataType = "RealType";
-    ePot.accumulator.reserve(nBins_);
+    ePot.units = "kcal/mol/e";
+    ePot.title = "Electrostatic Potential";
     for (unsigned int i = 0; i < nBins_; i++)
-      ePot.accumulator.push_back(new Accumulator());
-    data_[ELECTROSTATICPOTENTIAL]        = ePot;
+      ePot.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[ELECTROSTATICPOTENTIAL]        = std::move(ePot);
     outputMap_["ELECTROSTATICPOTENTIAL"] = ELECTROSTATICPOTENTIAL;
 
     if (hasOutputFields) {
@@ -447,7 +438,7 @@ namespace OpenMD::RNEMD {
     }
 
     // Static object evaluators
-    evaluator_.loadScriptString(currentObjectSelection_);
+    evaluator_.loadScriptString(rnemdObjectSelection_);
     if (!evaluator_.isDynamic())
       seleMan_.setSelectionSet(evaluator_.evaluate());
 
@@ -472,7 +463,7 @@ namespace OpenMD::RNEMD {
                "\tis only %d.  This is almost certainly not what you want\n"
                "\tto do.  A likely cause of this is forgetting the _RB_0\n"
                "\tselector in the selection script!\n",
-               currentObjectSelection_.c_str(), selectionCount, nIntegrable);
+               rnemdObjectSelection_.c_str(), selectionCount, nIntegrable);
       painCave.isFatal  = 0;
       painCave.severity = OPENMD_WARNING;
       simError();
@@ -490,13 +481,6 @@ namespace OpenMD::RNEMD {
 #ifdef IS_MPI
     }
 #endif
-
-    for (auto& data : data_) {
-      if (!data.accumulatorArray2d.empty())
-        Utils::deletePointers(data.accumulatorArray2d);
-      else
-        Utils::deletePointers(data.accumulator);
-    }
   }
 
   void RNEMD::getStarted() {
@@ -767,14 +751,14 @@ namespace OpenMD::RNEMD {
       if (usePeriodicBoundaryConditions_) {
         z = (((RealType)i + 0.5) / (RealType)nBins_) *
             hmat_(rnemdPrivilegedAxis_, rnemdPrivilegedAxis_);
-        dynamic_cast<Accumulator*>(data_[Z].accumulator[i])->add(z);
+        data_[Z].accumulator[i]->add(z);
 
         binVolume = boxVolume / nBins_;
         dz        = hmat_(rnemdPrivilegedAxis_, rnemdPrivilegedAxis_) /
              (RealType)nBins_;
       } else {
         r = (((RealType)i + 0.5) * binWidth_);
-        dynamic_cast<Accumulator*>(data_[R].accumulator[i])->add(r);
+        data_[R].accumulator[i]->add(r);
 
         RealType rinner = (RealType)i * binWidth_;
         RealType router = (RealType)(i + 1) * binWidth_;
@@ -786,16 +770,13 @@ namespace OpenMD::RNEMD {
       //   of whether or not the selected species are present in the bin
       if (outputMask_[ELECTRICFIELD] && binEFieldCount[i] > 0) {
         eField = binEField[i] / RealType(binEFieldCount[i]);
-        dynamic_cast<VectorAccumulator*>(data_[ELECTRICFIELD].accumulator[i])
-            ->add(eField);
+        data_[ELECTRICFIELD].accumulator[i]->add(eField);
       }
 
       if (outputMask_[ELECTROSTATICPOTENTIAL]) {
         if (usePeriodicBoundaryConditions_ && binEFieldCount[i] > 0) {
           ePot += eField[rnemdPrivilegedAxis_] * dz;
-          dynamic_cast<Accumulator*>(
-              data_[ELECTROSTATICPOTENTIAL].accumulator[i])
-              ->add(ePot);
+          data_[ELECTROSTATICPOTENTIAL].accumulator[i]->add(ePot);
         }
       }
 
@@ -803,16 +784,15 @@ namespace OpenMD::RNEMD {
       //   species is not present in the bin
       if (outputMask_[DENSITY]) {
         den = binMass[i] * Constants::densityConvert / binVolume;
-        dynamic_cast<Accumulator*>(data_[DENSITY].accumulator[i])->add(den);
+        data_[DENSITY].accumulator[i]->add(den);
       }
 
       if (outputMask_[ACTIVITY]) {
         for (unsigned int j = 0; j < outputTypes_.size(); j++) {
           nden[j] = (binTypeCounts[i][j] / binVolume) *
                     Constants::concentrationConvert;
-          dynamic_cast<Accumulator*>(data_[ACTIVITY].accumulatorArray2d[i][j])
-              ->add(nden[j]);
         }
+        data_[ACTIVITY].accumulator[i]->add(nden);
       }
 
       if (binCount[i] > 0) {
@@ -820,23 +800,19 @@ namespace OpenMD::RNEMD {
         //   the selected species is not found in the bin
         if (outputMask_[VELOCITY]) {
           vel = binP[i] / binMass[i];
-          dynamic_cast<VectorAccumulator*>(data_[VELOCITY].accumulator[i])
-              ->add(vel);
+          data_[VELOCITY].accumulator[i]->add(vel);
         }
 
         if (outputMask_[ANGULARVELOCITY]) {
           omega = binI[i].inverse() * binL[i];
-          dynamic_cast<VectorAccumulator*>(
-              data_[ANGULARVELOCITY].accumulator[i])
-              ->add(omega);
+          data_[ANGULARVELOCITY].accumulator[i]->add(omega);
         }
 
         if (outputMask_[TEMPERATURE]) {
           if (binDOF[i] > 0) {
             temp = 2.0 * binKE[i] /
                    (binDOF[i] * Constants::kb * Constants::energyConvert);
-            dynamic_cast<Accumulator*>(data_[TEMPERATURE].accumulator[i])
-                ->add(temp);
+            data_[TEMPERATURE].accumulator[i]->add(temp);
           } else {
             std::cerr << "No degrees of freedom in this bin?\n";
           }
@@ -894,9 +870,6 @@ namespace OpenMD::RNEMD {
       rnemdFile_ << "#    exchangeTime = " << exchangeTime_ << ";\n";
       rnemdFile_ << "#    objectSelection = \"" << rnemdObjectSelection_
                  << "\";\n";
-      // if (rnemdFluxType_ == particleFlux_)
-      rnemdFile_ << "#    currentObjectSelection = \""
-                 << currentObjectSelection_ << "\";\n";
       rnemdFile_ << "#    selectionA = \"" << selectionA_ << "\";\n";
       rnemdFile_ << "#    selectionB = \"" << selectionB_ << "\";\n";
       rnemdFile_ << "#    outputSelection = \"" << outputSelection_ << "\";\n";
@@ -955,40 +928,39 @@ namespace OpenMD::RNEMD {
       for (unsigned int i = 0; i < outputMask_.size(); ++i) {
         if (outputMask_[i]) {
           rnemdFile_ << "\t" << data_[i].title << "(" << data_[i].units << ")";
+
           // add some extra tabs for column alignment
-          if (data_[i].dataType == "Vector3d") rnemdFile_ << "\t\t";
-          if (data_[i].dataType == "Array2d") {
+          if (data_[i].accumulator[0]->getType() ==
+              std::type_index(typeid(Vector3d))) {
+            rnemdFile_ << "\t\t";
+          }
+
+          if (data_[i].accumulator[0]->getType() ==
+              std::type_index(typeid(std::vector<RealType>))) {
             rnemdFile_ << "(";
-            for (unsigned int j = 0; j < data_[i].accumulatorArray2d[0].size();
-                 j++) {
-              rnemdFile_ << outputTypes_[j]->getName() << "\t";
+            for (unsigned int type = 0; type < outputTypes_.size(); type++) {
+              rnemdFile_ << outputTypes_[type]->getName() << "\t";
             }
             rnemdFile_ << ")\t";
           }
         }
       }
+
       rnemdFile_ << std::endl;
 
       rnemdFile_.precision(8);
 
-      for (unsigned int j = 0; j < nBins_; j++) {
+      for (unsigned int bin = 0; bin < nBins_; bin++) {
         for (unsigned int i = 0; i < outputMask_.size(); ++i) {
           if (outputMask_[i]) {
-            if (data_[i].dataType == "RealType")
-              writeReal(i, j);
-            else if (data_[i].dataType == "Vector3d")
-              writeVector(i, j);
-            else if (data_[i].dataType == "Array2d")
-              writeArray(i, j);
-            else {
-              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                       "RNEMD found an unknown data type for: %s ",
-                       data_[i].title.c_str());
-              painCave.isFatal = 1;
-              simError();
-            }
+            std::string message =
+                "RNEMD detected a numerical error writing: " + data_[i].title +
+                " for bin " + std::to_string(bin);
+
+            data_[i].accumulator[bin]->writeData(rnemdFile_, message);
           }
         }
+
         rnemdFile_ << std::endl;
       }
 
@@ -996,31 +968,24 @@ namespace OpenMD::RNEMD {
       rnemdFile_ << "# 95% confidence intervals in those quantities follow:\n";
       rnemdFile_ << "#######################################################\n";
 
-      for (unsigned int j = 0; j < nBins_; j++) {
+      for (unsigned int bin = 0; bin < nBins_; bin++) {
         rnemdFile_ << "#";
+
         for (unsigned int i = 0; i < outputMask_.size(); ++i) {
           if (outputMask_[i]) {
-            if (data_[i].dataType == "RealType")
-              writeRealErrorBars(i, j);
-            else if (data_[i].dataType == "Vector3d")
-              writeVectorErrorBars(i, j);
-            else if (data_[i].dataType == "Array2d")
-              writeArrayErrorBars(i, j);
-            else {
-              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                       "RNEMD found an unknown data type for: %s ",
-                       data_[i].title.c_str());
-              painCave.isFatal = 1;
-              simError();
-            }
+            std::string message =
+                "RNEMD detected a numerical error writing: " + data_[i].title +
+                " std. dev. for bin " + std::to_string(bin);
+
+            data_[i].accumulator[bin]->writeErrorBars(rnemdFile_, message);
           }
         }
+
         rnemdFile_ << std::endl;
       }
 
       rnemdFile_.flush();
       rnemdFile_.close();
-
 #ifdef IS_MPI
     }
 #endif
@@ -1280,178 +1245,6 @@ namespace OpenMD::RNEMD {
     } else {
       Vector3d rPos = pos - coordinateOrigin_;
       return int(rPos.length() / binWidth_);
-    }
-  }
-
-  void RNEMD::writeReal(int index, unsigned int bin) {
-    if (!doRNEMD_) return;
-    assert(index >= 0 && index < ENDINDEX);
-    assert(bin < nBins_);
-
-    RealType s;
-    std::size_t count = data_[index].accumulator[bin]->count();
-
-    if (count == 0) {
-      rnemdFile_ << "\t";
-    } else {
-      dynamic_cast<Accumulator*>(data_[index].accumulator[bin])->getAverage(s);
-
-      if (std::isinf(s) || std::isnan(s)) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                 "RNEMD detected a numerical error writing: %s for bin %u",
-                 data_[index].title.c_str(), bin);
-        painCave.isFatal = 1;
-        simError();
-      } else {
-        rnemdFile_ << "\t" << s;
-      }
-    }
-  }
-
-  void RNEMD::writeVector(int index, unsigned int bin) {
-    if (!doRNEMD_) return;
-    assert(index >= 0 && index < ENDINDEX);
-    assert(bin < nBins_);
-
-    Vector3d s;
-    std::size_t count = data_[index].accumulator[bin]->count();
-
-    if (count == 0) {
-      rnemdFile_ << "\t\t\t";
-    } else {
-      dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])
-          ->getAverage(s);
-
-      if (std::isinf(s[0]) || std::isnan(s[0]) || std::isinf(s[1]) ||
-          std::isnan(s[1]) || std::isinf(s[2]) || std::isnan(s[2])) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                 "RNEMD detected a numerical error writing: %s for bin %u",
-                 data_[index].title.c_str(), bin);
-        painCave.isFatal = 1;
-        simError();
-      } else {
-        rnemdFile_ << "\t" << s[0] << "\t" << s[1] << "\t" << s[2];
-      }
-    }
-  }
-
-  void RNEMD::writeArray(int index, unsigned int bin) {
-    if (!doRNEMD_) return;
-    assert(index >= 0 && index < ENDINDEX);
-    assert(bin < nBins_);
-
-    RealType s;
-    std::size_t columns = data_[index].accumulatorArray2d[0].size();
-
-    for (std::size_t i = 0; i < columns; i++) {
-      std::size_t count = data_[index].accumulatorArray2d[bin][i]->count();
-
-      if (count == 0) {
-        rnemdFile_ << "\t";
-      } else {
-        dynamic_cast<Accumulator*>(data_[index].accumulatorArray2d[bin][i])
-            ->getAverage(s);
-
-        if (std::isinf(s) || std::isnan(s)) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "RNEMD detected a numerical error writing: %s for bin %u, "
-                   "column %u",
-                   data_[index].title.c_str(), bin,
-                   static_cast<unsigned int>(i));
-          painCave.isFatal = 1;
-          simError();
-        } else {
-          rnemdFile_ << "\t" << s;
-        }
-      }
-    }
-  }
-
-  void RNEMD::writeRealErrorBars(int index, unsigned int bin) {
-    if (!doRNEMD_) return;
-    assert(index >= 0 && index < ENDINDEX);
-    assert(bin < nBins_);
-
-    RealType s;
-    std::size_t count = data_[index].accumulator[bin]->count();
-
-    if (count == 0) {
-      rnemdFile_ << "\t";
-    } else {
-      dynamic_cast<Accumulator*>(data_[index].accumulator[bin])
-          ->get95percentConfidenceInterval(s);
-
-      if (std::isinf(s) || std::isnan(s)) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                 "RNEMD detected a numerical error writing: %s std. dev. for "
-                 "bin %u",
-                 data_[index].title.c_str(), bin);
-        painCave.isFatal = 1;
-        simError();
-      } else {
-        rnemdFile_ << "\t" << s;
-      }
-    }
-  }
-
-  void RNEMD::writeVectorErrorBars(int index, unsigned int bin) {
-    if (!doRNEMD_) return;
-    assert(index >= 0 && index < ENDINDEX);
-    assert(bin < nBins_);
-
-    Vector3d s;
-    std::size_t count = data_[index].accumulator[bin]->count();
-
-    if (count == 0) {
-      rnemdFile_ << "\t\t\t";
-    } else {
-      dynamic_cast<VectorAccumulator*>(data_[index].accumulator[bin])
-          ->get95percentConfidenceInterval(s);
-
-      if (std::isinf(s[0]) || std::isnan(s[0]) || std::isinf(s[1]) ||
-          std::isnan(s[1]) || std::isinf(s[2]) || std::isnan(s[2])) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                 "RNEMD detected a numerical error writing: %s std. dev. for "
-                 "bin %u",
-                 data_[index].title.c_str(), bin);
-        painCave.isFatal = 1;
-        simError();
-      } else {
-        rnemdFile_ << "\t" << s[0] << "\t" << s[1] << "\t" << s[2];
-      }
-    }
-  }
-
-  void RNEMD::writeArrayErrorBars(int index, unsigned int bin) {
-    if (!doRNEMD_) return;
-    assert(index >= 0 && index < ENDINDEX);
-    assert(bin < nBins_);
-
-    RealType s;
-    std::size_t columns = data_[index].accumulatorArray2d[0].size();
-
-    for (std::size_t i = 0; i < columns; i++) {
-      std::size_t count = data_[index].accumulatorArray2d[bin][i]->count();
-
-      if (count == 0)
-        rnemdFile_ << "\t";
-      else {
-        dynamic_cast<Accumulator*>(data_[index].accumulatorArray2d[bin][i])
-            ->get95percentConfidenceInterval(s);
-
-        if (std::isinf(s) || std::isnan(s)) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "RNEMD detected a numerical error writing: %s std. dev. for "
-                   "bin %u, "
-                   "column %u",
-                   data_[index].title.c_str(), bin,
-                   static_cast<unsigned int>(i));
-          painCave.isFatal = 1;
-          simError();
-        } else {
-          rnemdFile_ << "\t" << s;
-        }
-      }
     }
   }
 }  // namespace OpenMD::RNEMD

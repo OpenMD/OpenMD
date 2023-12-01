@@ -53,7 +53,7 @@
 #include "brains/SimInfo.hpp"
 #include "brains/Thermo.hpp"
 #include "math/SquareMatrix3.hpp"
-#include "utils/StaticAccumulator.hpp"
+#include "utils/Accumulator.hpp"
 
 namespace OpenMD {
 

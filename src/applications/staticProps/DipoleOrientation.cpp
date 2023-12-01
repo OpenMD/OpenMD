@@ -53,7 +53,11 @@
 #include "math/Vector3.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "utils/Accumulator.hpp"
+#include "utils/AccumulatorView.hpp"
+#include "utils/BaseAccumulator.hpp"
 #include "utils/StringUtils.hpp"
+
+using namespace OpenMD::Utils;
 
 namespace OpenMD {
 
@@ -83,25 +87,35 @@ namespace OpenMD {
     dipoleVector_ = Vector3d(dipoleX, dipoleY, dipoleZ);
     dipoleVector_.normalize();
 
-    orderS_               = new OutputData;
-    orderS_->units        = "";
-    orderS_->title        = "Orientational Order parameter";
-    orderS_->dataType     = odtReal;
-    orderS_->dataHandling = odhAverage;
-    orderS_->accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++)
-      orderS_->accumulator.push_back(new Accumulator());
-    data_.push_back(orderS_);
+    // Pre-load the OutputData
+    data_.resize(DipoleOrientation::ENDINDEX);
 
-    orderSCos_               = new OutputData;
-    orderSCos_->units        = "";
-    orderSCos_->title        = "Orientational Order parameter cosine Theta";
-    orderSCos_->dataType     = odtReal;
-    orderSCos_->dataHandling = odhAverage;
-    orderSCos_->accumulator.reserve(nBins_);
+    OutputData z;
+    z.units        = "Angstroms";
+    z.title        = axisLabel_;
+    z.dataHandling = DataHandling::Average;
     for (unsigned int i = 0; i < nBins_; i++)
-      orderSCos_->accumulator.push_back(new Accumulator());
-    data_.push_back(orderSCos_);
+      z.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[Z] = std::move(z);
+
+    OutputData orderS;
+    orderS.units        = "";
+    orderS.title        = "Orientational Order parameter";
+    orderS.dataHandling = DataHandling::Average;
+    for (unsigned int i = 0; i < nBins_; i++)
+      orderS.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[ORDERS] = std::move(orderS);
+
+    OutputData orderSCos;
+    orderSCos.units        = "";
+    orderSCos.title        = "Orientational Order parameter cosine Theta";
+    orderSCos.dataHandling = DataHandling::Average;
+    for (unsigned int i = 0; i < nBins_; i++)
+      orderSCos.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[ORDERSCOS] = std::move(orderSCos);
   }
 
   void DipoleOrientation::processFrame(int) {
@@ -111,7 +125,7 @@ namespace OpenMD {
 
     for (unsigned int i = 0; i < nBins_; i++) {
       z = (((RealType)i + 0.5) / (RealType)nBins_) * hmat_(axis_, axis_);
-      dynamic_cast<Accumulator*>(z_->accumulator[i])->add(z);
+      data_[Z].accumulator[i]->add(z);
     }
 
     volume_ = currentSnapshot_->getVolume();
@@ -157,14 +171,11 @@ namespace OpenMD {
     }
 
     for (unsigned int i = 0; i < nBins_; i++) {
+      count[i] != 0 ? data_[ORDERS].accumulator[i]->add(binS[i] / count[i]) :
+                      data_[ORDERS].accumulator[i]->add(binS[i]);
       count[i] != 0 ?
-          dynamic_cast<Accumulator*>(orderS_->accumulator[i])
-              ->add(binS[i] / count[i]) :
-          dynamic_cast<Accumulator*>(orderS_->accumulator[i])->add(binS[i]);
-      count[i] != 0 ? dynamic_cast<Accumulator*>(orderSCos_->accumulator[i])
-                          ->add(binSCos[i] / count[i]) :
-                      dynamic_cast<Accumulator*>(orderSCos_->accumulator[i])
-                          ->add(binSCos[i]);
+          data_[ORDERSCOS].accumulator[i]->add(binSCos[i] / count[i]) :
+          data_[ORDERSCOS].accumulator[i]->add(binSCos[i]);
     }
   }
 }  // namespace OpenMD

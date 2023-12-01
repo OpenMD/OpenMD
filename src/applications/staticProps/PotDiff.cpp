@@ -115,11 +115,9 @@ namespace OpenMD {
     int nFrames = reader.getNFrames();
 
     // We'll need the force manager to compute the potential
-
     ForceManager* forceMan = new ForceManager(info_);
 
     // We'll need thermo to report the potential
-
     Thermo* thermo = new Thermo(info_);
 
     for (int i = 0; i < nFrames; i += step_) {
@@ -169,12 +167,11 @@ namespace OpenMD {
   }
 
   void PotDiff::writeDiff() {
-    RealType mu, sigma, m95;
     std::ofstream ofs(outputFilename_.c_str(), std::ios::binary);
     if (ofs.is_open()) {
-      data_.getAverage(mu);
-      data_.getStdDev(sigma);
-      data_.get95percentConfidenceInterval(m95);
+      RealType mu    = data_.getAverage();
+      RealType sigma = data_.getStdDev();
+      RealType m95   = data_.get95percentConfidenceInterval();
 
       ofs << "#potDiff\n";
       ofs << "#selection: (" << selectionScript_ << ")\n";

@@ -65,7 +65,7 @@ namespace OpenMD {
     void processFrame(int frame);
     void processStuntDouble(StuntDouble*, int) {}
 
-  protected:
+  private:
     enum OutputFields {
       BEGININDEX = 0,
       Z          = BEGININDEX,
@@ -82,17 +82,6 @@ namespace OpenMD {
 
     using OutputBitSet = std::bitset<ENDINDEX - BEGININDEX>;
 
-    std::vector<AtomType*> outputTypes_;
-
-    OutputData* temperature;
-    OutputData* velocity;
-    OutputData* density;
-    OutputData* activity;
-    OutputData* eField;
-    OutputData* ePot;
-    OutputData* charge;
-    OutputData* chargeVelocity;
-
     OutputBitSet outputMask_;
     bool usePeriodicBoundaryConditions_;
   };
@@ -104,7 +93,7 @@ namespace OpenMD {
     void processFrame(int frame);
     void processStuntDouble(StuntDouble*, int) {}
 
-  protected:
+  private:
     enum OutputFields {
       BEGININDEX = 0,
       R          = BEGININDEX,
@@ -115,10 +104,6 @@ namespace OpenMD {
     };
 
     using OutputBitSet = std::bitset<ENDINDEX - BEGININDEX>;
-
-    OutputData* temperature;
-    OutputData* angularVelocity;
-    OutputData* density;
 
     OutputBitSet outputMask_;
   };
@@ -133,22 +118,12 @@ namespace OpenMD {
     std::pair<int, int> getBins(Vector3d pos);
     void writeOutput();
 
-  protected:
-    enum OutputFields {
-      BEGININDEX = 0,
-      R          = BEGININDEX,
-      ANGULARVELOCITY,
-      ENDINDEX
-    };
-
-    using OutputBitSet = std::bitset<ENDINDEX - BEGININDEX>;
-
+  private:
     int nAngleBins_;
     Vector3d fluxVector_;
 
-    OutputData* angularVelocity;
-
-    OutputBitSet outputMask_;
+    OutputData r_;
+    OutputData angularVelocity_;
   };
 }  // namespace OpenMD
 

@@ -56,8 +56,13 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "types/LennardJonesAdapter.hpp"
+#include "utils/Accumulator.hpp"
+#include "utils/AccumulatorView.hpp"
+#include "utils/BaseAccumulator.hpp"
 #include "utils/Utility.hpp"
 #include "utils/simError.h"
+
+using namespace OpenMD::Utils;
 
 namespace OpenMD {
 
@@ -92,36 +97,35 @@ namespace OpenMD {
     mag2.resize(nBinsX_ * nBinsY_);
     newmag2.resize(nBinsX_ * nBinsY_);
 
-    // Pre-load an OutputData
-    freq_               = new OutputData;
-    freq_->units        = "Angstroms^-1";
-    freq_->title        = "Spatial Frequency";
-    freq_->dataType     = odtReal;
-    freq_->dataHandling = odhAverage;
-    freq_->accumulator.reserve(nBins_);
-    for (unsigned int i = 0; i < nBins_; i++)
-      freq_->accumulator.push_back(new Accumulator());
-    data_.push_back(freq_);
+    // Pre-load the OutputData
+    data_.resize(Hxy::ENDINDEX);
 
-    top_               = new OutputData;
-    top_->units        = "Angstroms";
-    top_->title        = "Hxy (Upper surface)";
-    top_->dataType     = odtReal;
-    top_->dataHandling = odhMax;
-    top_->accumulator.reserve(nBins_);
+    OutputData freq;
+    freq.units        = "Angstroms^-1";
+    freq.title        = "Spatial Frequency";
+    freq.dataHandling = DataHandling::Average;
     for (unsigned int i = 0; i < nBins_; i++)
-      top_->accumulator.push_back(new Accumulator());
-    data_.push_back(top_);
+      freq.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[FREQUECY] = std::move(freq);
 
-    bottom_               = new OutputData;
-    bottom_->units        = "Angstroms";
-    bottom_->title        = "Hxy (Lower surface)";
-    bottom_->dataType     = odtReal;
-    bottom_->dataHandling = odhMax;
-    bottom_->accumulator.reserve(nBins_);
+    OutputData top;
+    top.units         = "Angstroms";
+    top.title         = "Hxy (Upper surface)";
+    freq.dataHandling = DataHandling::Max;
     for (unsigned int i = 0; i < nBins_; i++)
-      bottom_->accumulator.push_back(new Accumulator());
-    data_.push_back(bottom_);
+      top.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[TOP] = std::move(top);
+
+    OutputData bottom;
+    bottom.units      = "Angstroms";
+    bottom.title      = "Hxy (Lower surface)";
+    freq.dataHandling = DataHandling::Max;
+    for (unsigned int i = 0; i < nBins_; i++)
+      bottom.accumulator.push_back(
+          std::make_unique<AccumulatorView<RealAccumulator>>());
+    data_[BOTTOM] = std::move(bottom);
 
     setOutputName(getPrefix(filename) + ".Hxy");
   }
@@ -491,11 +495,9 @@ namespace OpenMD {
 
           newindex = i * nBinsY_ + j;
 
-          dynamic_cast<Accumulator*>(freq_->accumulator[whichbin])->add(freq);
-          dynamic_cast<Accumulator*>(top_->accumulator[whichbin])
-              ->add(newmag1[newindex]);
-          dynamic_cast<Accumulator*>(bottom_->accumulator[whichbin])
-              ->add(newmag2[newindex]);
+          data_[FREQUECY].accumulator[whichbin]->add(freq);
+          data_[TOP].accumulator[whichbin]->add(newmag1[newindex]);
+          data_[BOTTOM].accumulator[whichbin]->add(newmag2[newindex]);
         }
       }
     }

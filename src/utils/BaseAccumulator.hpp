@@ -42,49 +42,57 @@
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
  */
 
-/*! \file FreqFlucCorrFunc.hpp
-  \brief Frequency Fluctuation Correlation Function
-*/
+#ifndef OPENMD_UTILS_BASEACCUMULATOR_HPP
+#define OPENMD_UTILS_BASEACCUMULATOR_HPP
 
-#ifndef APPLICATIONS_DYNAMICPROPS_FREQFLUCCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_FREQFLUCCORRFUNC_HPP
-
+#include <iostream>
 #include <string>
+#include <typeindex>
 #include <vector>
 
-#include "applications/dynamicProps/TimeCorrFunc.hpp"
-#include "brains/SimInfo.hpp"
-#include "primitives/StuntDouble.hpp"
-#include "selection/SelectionManager.hpp"
-#include "utils/Accumulator.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/Vector3.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
+#include "utils/simError.h"
 
-namespace OpenMD {
+namespace OpenMD::Utils {
 
-  //! Frequency Fluctuation Correlation Function
-  /*! See <http://dx.doi.org/10.1021/jp010798o>
+  enum class DataHandling { Average, Last, Max, Min, Total };
+  enum class ErrorHandling { CI95, StdDev, Variance };
 
-    Williams, Loring, and Fayer, J. Phys. Chem. B 2001, 105, 4068-4071 for
-    details
-
-    Makes an assumption that the frequency depends on the
-    orientation of the dipole relative to the local Electric
-    Field.  Requires a preCorrelate to compute the mean of
-    \f$ = \langle \mathbf{E} \cdot \mathbf{u} \rangle \f$
-  */
-
-  class FreqFlucCorrFunc : public ObjectACF<RealType> {
+  class BaseAccumulator {
   public:
-    FreqFlucCorrFunc(SimInfo* info, const std::string& filename,
-                     const std::string& sele1, const std::string& sele2);
+    virtual ~BaseAccumulator() = default;
 
-  private:
-    virtual int computeProperty1(int frame, StuntDouble* sd);
-    virtual RealType calcCorrVal(int frame1, int frame2, int id1, int id2);
-    virtual void validateSelection(SelectionManager& seleMan);
+    // Each desired type must have a add() function defined here and a matching
+    // Accumulator specialization
+    virtual void add(RealType)                     = 0;
+    virtual void add(const std::vector<RealType>&) = 0;
+    virtual void add(const Vector3d&)              = 0;
+    virtual void add(const potVec&)                = 0;
+    virtual void add(const Mat3x3d&)               = 0;
 
-    std::vector<std::vector<RealType>> ue_;
-    Utils::RealAccumulator ueStats_ {};
+    virtual std::type_index getType() const = 0;
+
+    virtual std::size_t getCount(std::size_t elem = 0) const = 0;
+
+    virtual void writeData(
+        std::ostream& stream, const std::string& errorMessage,
+        DataHandling dataHandling = DataHandling::Average) const = 0;
+
+    virtual void writeErrorBars(
+        std::ostream& stream, const std::string& errorMessage,
+        ErrorHandling errorHandling = ErrorHandling::CI95) const = 0;
+
+  protected:
+    void accumulatorFunctionCallMismatch() const {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "The accumulator used and the function called did not\n"
+               "\tmatch type parameters.");
+      painCave.isFatal = 1;
+      simError();
+    }
   };
-}  // namespace OpenMD
+}  // namespace OpenMD::Utils
 
 #endif

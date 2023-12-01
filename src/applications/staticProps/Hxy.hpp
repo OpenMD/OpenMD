@@ -81,6 +81,14 @@ namespace OpenMD {
     virtual void process();
 
   private:
+    enum OutputFields {
+      BEGININDEX = 0,
+      FREQUECY   = BEGININDEX,
+      TOP,
+      BOTTOM,
+      ENDINDEX
+    };
+
     RealType getDensity(RealType dist, RealType sigma, RealType rcut);
 
     Snapshot* currentSnapshot_;
@@ -100,10 +108,6 @@ namespace OpenMD {
     std::vector<std::vector<RealType>> maxHeight_;
     std::vector<RealType> mag1, newmag1;
     std::vector<RealType> mag2, newmag2;
-
-    OutputData* freq_;
-    OutputData* top_;
-    OutputData* bottom_;
   };
 }  // namespace OpenMD
 

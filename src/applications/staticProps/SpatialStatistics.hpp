@@ -56,7 +56,6 @@
 #include "primitives/StuntDouble.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "utils/Accumulator.hpp"
 
 namespace OpenMD {
 
@@ -64,12 +63,7 @@ namespace OpenMD {
   public:
     SpatialStatistics(SimInfo* info, const std::string& filename,
                       const std::string& sele, int nbins);
-    virtual ~SpatialStatistics();
 
-    void addOutputData(OutputData* dat) { data_.push_back(dat); }
-    void addOutputDataAt(OutputData* dat, unsigned int loc) {
-      data_[loc] = dat;
-    }
     virtual void process();
     virtual void processFrame(int frame);
     virtual int getBin(Vector3d pos)                          = 0;
@@ -92,7 +86,6 @@ namespace OpenMD {
     virtual void processFrame(int frame);
 
   protected:
-    OutputData* z_;
     Mat3x3d hmat_;
     RealType volume_;
     int axis_;
@@ -110,7 +103,6 @@ namespace OpenMD {
     void setCoordinateOrigin(Vector3d co) { coordinateOrigin_ = co; }
 
   protected:
-    OutputData* r_;
     Vector3d coordinateOrigin_;
     RealType binWidth_;
     std::string comSele_;

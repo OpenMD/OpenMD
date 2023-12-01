@@ -202,6 +202,9 @@ int main(int argc, char* argv[]) {
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName);
 
+  // important step until we move this into SimCreator:
+  info->update();
+
   // convert privilegedAxis to corresponding integer
   // x axis -> 0
   // y axis -> 1

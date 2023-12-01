@@ -63,12 +63,17 @@ namespace OpenMD {
     void processFrame(int frame);
     void processStuntDouble(StuntDouble*, int) {};
 
-  protected:
-    OutputData* orderS_;
-    OutputData* orderSCos_;
+  private:
+    enum OutputFields {
+      BEGININDEX = 0,
+      Z          = BEGININDEX,
+      ORDERS,
+      ORDERSCOS,
+      ENDINDEX
+    };
+
     int axis_;
 
-  private:
     Vector3d refAxis_, dipoleVector_;
     std::string axisLabel_;
   };

@@ -48,6 +48,7 @@
 #include <bitset>
 #include <fstream>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -60,7 +61,7 @@
 #include "selection/SelectionManager.hpp"
 #include "types/AtomType.hpp"
 #include "utils/Accumulator.hpp"
-#include "utils/StaticAccumulator.hpp"
+#include "utils/BaseAccumulator.hpp"
 
 namespace OpenMD::RNEMD {
 
@@ -109,7 +110,6 @@ namespace OpenMD::RNEMD {
     RealType slabWidth_;
 
     std::string rnemdObjectSelection_;
-    std::string currentObjectSelection_;
 
     SelectionManager commonA_;
     SelectionManager commonB_;
@@ -169,9 +169,7 @@ namespace OpenMD::RNEMD {
     struct OutputData {
       std::string title;
       std::string units;
-      std::string dataType;
-      std::vector<BaseAccumulator*> accumulator;
-      std::vector<std::vector<BaseAccumulator*>> accumulatorArray2d;
+      std::vector<std::unique_ptr<Utils::BaseAccumulator>> accumulator;
     };
 
     using OutputBitSet  = std::bitset<ENDINDEX - BEGININDEX>;
@@ -236,12 +234,6 @@ namespace OpenMD::RNEMD {
     std::string setSelection(RealType& slabCenter);
     RealType getDefaultDividingArea();
     int getBin(Vector3d pos);
-    void writeReal(int index, unsigned int bin);
-    void writeVector(int index, unsigned int bin);
-    void writeArray(int index, unsigned int bin);
-    void writeRealErrorBars(int index, unsigned int bin);
-    void writeVectorErrorBars(int index, unsigned int bin);
-    void writeArrayErrorBars(int index, unsigned int bin);
 
     virtual void doRNEMDImpl(SelectionManager& smanA,
                              SelectionManager& smanB) = 0;
