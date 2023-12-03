@@ -275,7 +275,8 @@ namespace OpenMD {
                        isEqualIgnoreCase("SHIFTED_POTENTIAL") ||
                        isEqualIgnoreCase("SHIFTED_FORCE") ||
                        isEqualIgnoreCase("REACTION_FIELD") ||
-                       isEqualIgnoreCase("TAYLOR_SHIFTED"));
+                       isEqualIgnoreCase("TAYLOR_SHIFTED") ||
+                       isEqualIgnoreCase("EWALD_FULL"));
     CheckParameter(
         ElectrostaticScreeningMethod,
         isEqualIgnoreCase("UNDAMPED") || isEqualIgnoreCase("DAMPED"));
