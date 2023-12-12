@@ -74,7 +74,7 @@ namespace OpenMD::Utils {
 
     virtual std::type_index getType() const = 0;
 
-    virtual std::size_t getCount(std::size_t elem = 0) const = 0;
+    virtual std::size_t getCount() const = 0;
 
     virtual void writeData(
         std::ostream& stream, const std::string& errorMessage,

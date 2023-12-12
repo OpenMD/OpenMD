@@ -109,10 +109,11 @@ namespace OpenMD::Utils {
                  errorMessage.c_str());
         painCave.isFatal = 1;
         simError();
-      } else if (count == 0) {
-        stream << "\t";
       } else {
-        stream << "\t" << dat;
+        if (count == 0)
+          stream << "\t";
+        else
+          stream << "\t" << dat;
       }
     }
 
@@ -135,22 +136,26 @@ namespace OpenMD::Utils {
         break;
       }
 
-      if (std::isinf(err) || std::isnan(err)) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s",
-                 errorMessage.c_str());
-        painCave.isFatal = 1;
-        simError();
+      if (count == 0 && errorHandling == ErrorHandling::CI95) {
+        stream << "\t";
       } else {
-        if (count == 0)
-          stream << "\t";
-        else
-          stream << "\t" << err;
+        if (std::isinf(err) || std::isnan(err)) {
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s",
+                   errorMessage.c_str());
+          painCave.isFatal = 1;
+          simError();
+        } else {
+          if (count == 0)
+            stream << "\t";
+          else
+            stream << "\t" << err;
+        }
       }
     }
 
     std::type_index getType() const override { return typeid(RealType); }
 
-    std::size_t getCount(std::size_t) const override {
+    std::size_t getCount() const override {
       return RealAccumulator::getCount();
     }
   };
@@ -173,7 +178,7 @@ namespace OpenMD::Utils {
     void writeData(std::ostream& stream, const std::string& errorMessage,
                    DataHandling dataHandling) const override {
       std::vector<RealType> dat;
-      std::vector<std::size_t> count = StdVectorAccumulator::getCount();
+      std::size_t count = StdVectorAccumulator::getCount();
 
       switch (dataHandling) {
       case DataHandling::Average:
@@ -204,7 +209,7 @@ namespace OpenMD::Utils {
           painCave.isFatal = 1;
           simError();
         } else {
-          if (count[i] == 0)
+          if (count == 0)
             stream << '\t';
           else
             stream << '\t' << dat[i];
@@ -215,7 +220,7 @@ namespace OpenMD::Utils {
     void writeErrorBars(std::ostream& stream, const std::string& errorMessage,
                         ErrorHandling errorHandling) const override {
       std::vector<RealType> err;
-      std::vector<std::size_t> count = StdVectorAccumulator::getCount();
+      std::size_t count = StdVectorAccumulator::getCount();
 
       switch (errorHandling) {
       case ErrorHandling::CI95:
@@ -232,16 +237,20 @@ namespace OpenMD::Utils {
       }
 
       for (int i = 0; i < StdVectorAccumulator::getAverage().size(); i++) {
-        if (std::isinf(err[i]) || std::isnan(err[i])) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s",
-                   errorMessage.c_str());
-          painCave.isFatal = 1;
-          simError();
+        if (count == 0 && errorHandling == ErrorHandling::CI95) {
+          stream << "\t";
         } else {
-          if (count[i] == 0)
-            stream << "\t";
-          else
-            stream << "\t" << err[i];
+          if (std::isinf(err[i]) || std::isnan(err[i])) {
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s",
+                     errorMessage.c_str());
+            painCave.isFatal = 1;
+            simError();
+          } else {
+            if (count == 0)
+              stream << "\t";
+            else
+              stream << "\t" << err[i];
+          }
         }
       }
     }
@@ -250,10 +259,10 @@ namespace OpenMD::Utils {
       return typeid(std::vector<RealType>);
     }
 
-    std::size_t getCount(std::size_t elem) const override {
-      std::vector<std::size_t> counts = StdVectorAccumulator::getCount();
+    std::size_t getCount() const override {
+      std::size_t count = StdVectorAccumulator::getCount();
 
-      return counts[elem];
+      return count;
     }
   };
 
@@ -334,23 +343,27 @@ namespace OpenMD::Utils {
       }
 
       for (int i = 0; i < Vector3dAccumulator::getAverage().size(); i++) {
-        if (std::isinf(err[i]) || std::isnan(err[i])) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s",
-                   errorMessage.c_str());
-          painCave.isFatal = 1;
-          simError();
+        if (count == 0 && errorHandling == ErrorHandling::CI95) {
+          stream << "\t";
         } else {
-          if (count == 0)
-            stream << "\t";
-          else
-            stream << "\t" << err[i];
+          if (std::isinf(err[i]) || std::isnan(err[i])) {
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s",
+                     errorMessage.c_str());
+            painCave.isFatal = 1;
+            simError();
+          } else {
+            if (count == 0)
+              stream << "\t";
+            else
+              stream << "\t" << err[i];
+          }
         }
       }
     }
 
     std::type_index getType() const override { return typeid(Vector3d); }
 
-    std::size_t getCount(std::size_t) const override {
+    std::size_t getCount() const override {
       return Vector3dAccumulator::getCount();
     }
   };
@@ -432,23 +445,27 @@ namespace OpenMD::Utils {
       }
 
       for (int i = 0; i < PotVecAccumulator::getAverage().size(); i++) {
-        if (std::isinf(err[i]) || std::isnan(err[i])) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s",
-                   errorMessage.c_str());
-          painCave.isFatal = 1;
-          simError();
+        if (count == 0 && errorHandling == ErrorHandling::CI95) {
+          stream << "\t";
         } else {
-          if (count == 0)
-            stream << "\t";
-          else
-            stream << "\t" << err[i];
+          if (std::isinf(err[i]) || std::isnan(err[i])) {
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s",
+                     errorMessage.c_str());
+            painCave.isFatal = 1;
+            simError();
+          } else {
+            if (count == 0)
+              stream << "\t";
+            else
+              stream << "\t" << err[i];
+          }
         }
       }
     }
 
     std::type_index getType() const override { return typeid(potVec); }
 
-    std::size_t getCount(std::size_t) const override {
+    std::size_t getCount() const override {
       return PotVecAccumulator::getCount();
     }
   };
@@ -533,16 +550,20 @@ namespace OpenMD::Utils {
 
       for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int j = 0; j < 3; j++) {
-          if (std::isinf(err(i, j)) || std::isnan(err(i, j))) {
-            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s",
-                     errorMessage.c_str());
-            painCave.isFatal = 1;
-            simError();
+          if (count == 0 && errorHandling == ErrorHandling::CI95) {
+            stream << "\t";
           } else {
-            if (count == 0)
-              stream << "\t";
-            else
-              stream << "\t" << err(i, j);
+            if (std::isinf(err(i, j)) || std::isnan(err(i, j))) {
+              snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s",
+                       errorMessage.c_str());
+              painCave.isFatal = 1;
+              simError();
+            } else {
+              if (count == 0)
+                stream << "\t";
+              else
+                stream << "\t" << err(i, j);
+            }
           }
         }
       }
@@ -550,7 +571,7 @@ namespace OpenMD::Utils {
 
     std::type_index getType() const override { return typeid(Mat3x3d); }
 
-    std::size_t getCount(std::size_t) const override {
+    std::size_t getCount() const override {
       return Mat3x3dAccumulator::getCount();
     }
   };

@@ -159,8 +159,9 @@ namespace OpenMD::Utils {
         simError();
       }
 
+      Count_++;
+
       if (Avg_.empty()) {
-        Count_.resize(val.size());
         Val_.resize(val.size());
         Total_.resize(val.size());
         Avg_.resize(val.size());
@@ -171,17 +172,15 @@ namespace OpenMD::Utils {
         /* If our placeholder, BinEmptyFlag, is passed to add(), we should
             not record data at the current index */
         if (val[i] == BinEmptyFlag) continue;
-
-        Count_[i]++;
         Val_[i] = val[i];
         Total_[i] += val[i];
-        Avg_[i] += (val[i] - Avg_[i]) / static_cast<RealType>(Count_[i]);
+        Avg_[i] += (val[i] - Avg_[i]) / static_cast<RealType>(Count_);
         Avg2_[i] +=
-            (val[i] * val[i] - Avg2_[i]) / static_cast<RealType>(Count_[i]);
+            (val[i] * val[i] - Avg2_[i]) / static_cast<RealType>(Count_);
       }
     }
 
-    std::vector<std::size_t> getCount() const { return Count_; }
+    std::size_t getCount() const { return Count_; }
 
     std::vector<RealType> getLastValue() const { return Val_; }
 
@@ -216,14 +215,14 @@ namespace OpenMD::Utils {
       std::vector<RealType> stdDev = this->getStdDev();
 
       for (std::size_t i = 0; i < stdDev.size(); i++) {
-        ci[i] = 1.960 * stdDev[i] / std::sqrt(static_cast<RealType>(Count_[i]));
+        ci[i] = 1.960 * stdDev[i] / std::sqrt(static_cast<RealType>(Count_));
       }
 
       return ci;
     }
 
   private:
-    std::vector<std::size_t> Count_ {};
+    std::size_t Count_ {};
     std::vector<RealType> Val_ {}, Total_ {}, Avg_ {}, Avg2_ {};
   };
 

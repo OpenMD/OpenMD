@@ -948,20 +948,36 @@ namespace OpenMD::RNEMD {
 
       rnemdFile_ << std::endl;
 
+      std::vector<int> nonEmptyAccumulators(nBins_);
+      int numberOfAccumulators {};
+
+      for (unsigned int i = 0; i < outputMask_.size(); ++i) {
+        if (outputMask_[i]) {
+          for (unsigned int bin = 0; bin < nBins_; bin++) {
+            nonEmptyAccumulators[bin] +=
+                static_cast<int>(data_[i].accumulator[bin]->getCount() != 0);
+          }
+
+          numberOfAccumulators++;
+        }
+      }
+
       rnemdFile_.precision(8);
 
       for (unsigned int bin = 0; bin < nBins_; bin++) {
-        for (unsigned int i = 0; i < outputMask_.size(); ++i) {
-          if (outputMask_[i]) {
-            std::string message =
-                "RNEMD detected a numerical error writing: " + data_[i].title +
-                " for bin " + std::to_string(bin);
+        if (nonEmptyAccumulators[bin] == numberOfAccumulators) {
+          for (unsigned int i = 0; i < outputMask_.size(); ++i) {
+            if (outputMask_[i]) {
+              std::string message =
+                  "RNEMD detected a numerical error writing: " +
+                  data_[i].title + " for bin " + std::to_string(bin);
 
-            data_[i].accumulator[bin]->writeData(rnemdFile_, message);
+              data_[i].accumulator[bin]->writeData(rnemdFile_, message);
+            }
           }
-        }
 
-        rnemdFile_ << std::endl;
+          rnemdFile_ << std::endl;
+        }
       }
 
       rnemdFile_ << "#######################################################\n";
@@ -969,19 +985,21 @@ namespace OpenMD::RNEMD {
       rnemdFile_ << "#######################################################\n";
 
       for (unsigned int bin = 0; bin < nBins_; bin++) {
-        rnemdFile_ << "#";
+        if (nonEmptyAccumulators[bin] == numberOfAccumulators) {
+          rnemdFile_ << "#";
 
-        for (unsigned int i = 0; i < outputMask_.size(); ++i) {
-          if (outputMask_[i]) {
-            std::string message =
-                "RNEMD detected a numerical error writing: " + data_[i].title +
-                " std. dev. for bin " + std::to_string(bin);
+          for (unsigned int i = 0; i < outputMask_.size(); ++i) {
+            if (outputMask_[i]) {
+              std::string message =
+                  "RNEMD detected a numerical error writing: " +
+                  data_[i].title + " std. dev. for bin " + std::to_string(bin);
 
-            data_[i].accumulator[bin]->writeErrorBars(rnemdFile_, message);
+              data_[i].accumulator[bin]->writeErrorBars(rnemdFile_, message);
+            }
           }
-        }
 
-        rnemdFile_ << std::endl;
+          rnemdFile_ << std::endl;
+        }
       }
 
       rnemdFile_.flush();
