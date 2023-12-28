@@ -60,8 +60,9 @@ namespace OpenMD {
    *
    * This impropertorsion potential has the form:
    *
-   *  Vimptors = 0.5*v2*(1-cos(2*(phi-phi0)))
+   *  \f[ V_\mathrm{imptors} = 0.5*v2*(1-\cos(2*(\phi-\phi_0))) \f]
    *
+   * although the parameter \f$\phi_0\f$ is usually assumed to be 0.
    */
   class AmberImproperTorsionType : public PolynomialInversionType {
   public:

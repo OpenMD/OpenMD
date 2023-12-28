@@ -72,7 +72,7 @@ namespace OpenMD {
    * than \f$\alpha\f$.  To carry out this calculation, all points are
    * lifted to 4D so that each point is \f$(x, y, z, x^2+y^2+z^2)\f$.
    * The convex hull is computed in 4D, and tetrahedral facets with
-   * circumsphere radii larger than alpha are removed.
+   * circumsphere radii larger than \f$\alpha\f$ are removed.
    *
    *   \param alpha the circumsphere radius to test tetrahedra for elimination
    */

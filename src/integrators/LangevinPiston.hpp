@@ -65,7 +65,7 @@ namespace OpenMD {
    * control implemented using Langevin dynamics as in S.E. Feller,
    * Y. Zhang, R.W. Pastor and B.R. Brooks, "Constant pressure
    * molecular dynamics simulation: The Langevin piston method",
-   * J. Chem. Phys. 103, 4613 (1995); https://doi.org/10.1063/1.47064
+   * J. Chem. Phys. 103, 4613 (1995); https://doi.org/10.1063/1.470648
    */
   class LangevinPiston : public NPT {
   public:

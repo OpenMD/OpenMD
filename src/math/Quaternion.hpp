@@ -67,10 +67,10 @@ namespace OpenMD {
   /**
    * @class Quaternion Quaternion.hpp "math/Quaternion.hpp"
    * Quaternion is a sort of a higher-level complex number.
-   * It is defined as Q = w + x*i + y*j + z*k,
+   * It is defined as \f$Q = w + x*i + y*j + z*k\f$,
    * where w, x, y, and z are numbers of type T (e.g. RealType), and
-   * i*i = -1; j*j = -1; k*k = -1;
-   * i*j = k; j*k = i; k*i = j;
+   * \f$i*i = -1\f$; \f$j*j = -1\f$; \f$k*k = -1\f$;
+   * \f$i*j = k\f$; \f$j*k = i\f$; \f$k*i = j\f$;
    */
   template<typename Real>
   class Quaternion : public Vector<Real, 4> {

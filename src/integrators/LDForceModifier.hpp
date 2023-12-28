@@ -72,7 +72,7 @@ namespace OpenMD {
 
   /**
    * @class LDForceModifier
-   * Force modifier for Lagevin Dynamics applying friction and random
+   * Force modifier for Langevin Dynamics applying friction and random
    * forces as well as torques.
    */
   class LDForceModifier : public ForceModifier {

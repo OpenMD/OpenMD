@@ -60,7 +60,7 @@ namespace OpenMD {
    *
    * A simple harmonic bend using the cosine of the angle instead of
    * the angle itself:
-   * \f[ Vbend = (\cos(\theta) - \cos(\theta_0))^2 \f]
+   * \f[ V_\mathrm{bend} = (\cos(\theta) - \cos(\theta_0))^2 \f]
    */
   class CosineBendType : public BendType {
   public:

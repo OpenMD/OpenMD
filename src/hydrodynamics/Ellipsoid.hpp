@@ -56,9 +56,9 @@ namespace OpenMD {
    * equatorial semi-axes.  OpenMD treats the "special" axis as the
    * z-coordinate in the body fixed reference frame.  That is:
    *
-   *   z^2 / a^2  +  (x^2 + y^2) / b^2   = 1
+   *  \f[ z^2 / a^2  +  (x^2 + y^2) / b^2   = 1 \f]
    *
-   * If a >= b, the ellipsoid is a prolate spheroid, and if a < b,
+   * If  \f$a >= b\f$, the ellipsoid is a prolate spheroid, and if \f$a < b\f$,
    * the ellipsoid is oblate.  Ellipsoids are specified in the constructor
    * using an axial length (a), and a equatorial length (b).  A Vector3d
    * can be used to position the center of the ellipsoid, and a rotation

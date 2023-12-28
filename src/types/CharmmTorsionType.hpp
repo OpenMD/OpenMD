@@ -82,7 +82,7 @@ namespace OpenMD {
    *
    * This torsion potential has the form:
    *
-   * \f[ V_{\text{torsion}}(\phi) = \sum_n K_n \left( 1 + \cos(n \phi -
+   * \f[ V_{\mathrm{torsion}}(\phi) = \sum_n K_n \left( 1 + \cos(n \phi -
    * \delta_n) \right) \f]
    *
    * Notes:
@@ -96,7 +96,7 @@ namespace OpenMD {
    * Internally convert CHARMM torsion functions to two polynomials
    * based on Chebyshev polynomials in cos(phi):
    *
-   * \f[ V_{\text{torsion}}(\phi) = \sum_n K_n + \sum_n K_n \cos(\delta_n)
+   * \f[ V_{\mathrm{torsion}}(\phi) = \sum_n K_n + \sum_n K_n \cos(\delta_n)
    * T_n(\cos(\phi)) - \sum_n K_n \sin(\delta_n) U_{n-1}((\cos \phi)) \sin(\phi)
    * \f]
    *
@@ -113,7 +113,7 @@ namespace OpenMD {
    * simpler equation for the torsion potential in terms of only
    * polynomials of the cosine and an additional sine of the angle:
    *
-   * \f[ V_{\text{torsion}}(\phi) = C + T(\cos(\phi)) + U(\cos(\phi)) \sin(\phi)
+   * \f[ V_{\mathrm{torsion}}(\phi) = C + T(\cos(\phi)) + U(\cos(\phi)) \sin(\phi)
    * \f] where: \f[ C = \sum_n K_n \f] \f[ T(\cos(\phi)) = \sum_n K_n
    * \cos(\delta_n) T_n(\cos(\phi)) \f] \f[ U(\cos(\phi)) = \sum_n -K_n
    * \sin(\delta_n) U_{n-1}(\cos(\phi)) \f]
