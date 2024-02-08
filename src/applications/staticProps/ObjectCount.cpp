@@ -121,5 +121,53 @@ namespace OpenMD {
     }
     ofs.close();
   }
+  
+  MoleculeCount::MoleculeCount(SimInfo* info, const std::string& filename,
+			       const std::string& sele) :
+    ObjectCount(info, filename, sele) {
+    
+    setOutputName(getPrefix(filename) + ".mcounts");
+
+    evaluator_.loadScriptString(sele);
+
+    if (!evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+  }
+
+  void MoleculeCount::process() {
+    counts_.clear();
+    counts_.resize(10, 0);
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames             = reader.getNFrames();
+    unsigned long int nsum  = 0;
+    unsigned long int n2sum = 0;
+
+    for (int i = 0; i < nFrames; i += step_) {
+      reader.readFrame(i);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+
+      if (evaluator_.isDynamic()) {
+        seleMan_.setSelectionSet(evaluator_.evaluate());
+      }
+
+      unsigned int count = seleMan_.getMoleculeSelectionCount();
+
+      if (counts_.size() < count + 1) { counts_.resize(count + 1, 0); }
+
+      counts_[count]++;
+
+      nsum += count;
+      n2sum += count * count;
+    }
+
+    int nProcessed = nFrames / step_;
+
+    nAvg  = nsum / nProcessed;
+    n2Avg = n2sum / nProcessed;
+    sDev  = sqrt(n2Avg - nAvg * nAvg);
+    writeCounts();
+  }
+
 
 }  // namespace OpenMD

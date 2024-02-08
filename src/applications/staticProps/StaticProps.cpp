@@ -575,6 +575,8 @@ int main(int argc, char* argv[]) {
                                              maxLen, args_info.nbins_arg);
   } else if (args_info.count_given) {
     analyser = std::make_unique<ObjectCount>(info, dumpFileName, sele1);
+  } else if (args_info.mcount_given) {
+    analyser = std::make_unique<MoleculeCount>(info, dumpFileName, sele1);
   } else if (args_info.slab_density_given) {
     analyser = std::make_unique<RhoZ>(info, dumpFileName, sele1,
                                       args_info.nbins_arg, privilegedAxis);

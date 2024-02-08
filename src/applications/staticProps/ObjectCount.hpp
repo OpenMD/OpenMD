@@ -58,7 +58,7 @@ namespace OpenMD {
                 const std::string& sele);
     virtual void process();
 
-  private:
+  protected:
     void writeCounts();
 
     Snapshot* currentSnapshot_;
@@ -71,6 +71,14 @@ namespace OpenMD {
     std::string selectionScript_;
     SelectionManager seleMan_;
     SelectionEvaluator evaluator_;
+  };
+
+  class MoleculeCount : public ObjectCount {
+  public:
+    MoleculeCount(SimInfo* info, const std::string& filename,
+		  const std::string& sele);
+    virtual void process();
+    
   };
 }  // namespace OpenMD
 

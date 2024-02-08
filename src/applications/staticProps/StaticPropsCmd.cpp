@@ -81,7 +81,8 @@ const char *gengetopt_args_info_help[] = {
   "      --ior                     icosahedral bond order parameter as a function\n                                  of radius (--rcut must be specified)",
   "      --for                     FCC bond order parameter as a function of\n                                  radius (--rcut must be specified)",
   "      --bad                     N(theta) bond angle density within (--rcut must\n                                  be specified)",
-  "      --count                   count of molecules matching selection criteria\n                                  (and associated statistics)",
+  "      --count                   count of objects matching selection criteria\n                                  (and associated statistics)",
+  "      --mcount                  count of molecules matching selection criteria\n                                  (and associated statistics)",
   "  -g, --gofr                    g(r)",
   "      --gofz                    g(z)",
   "      --r_theta                 g(r, cos(theta))",
@@ -227,6 +228,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->for_given = 0 ;
   args_info->bad_given = 0 ;
   args_info->count_given = 0 ;
+  args_info->mcount_given = 0 ;
   args_info->gofr_given = 0 ;
   args_info->gofz_given = 0 ;
   args_info->r_theta_given = 0 ;
@@ -419,69 +421,70 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->for_help = gengetopt_args_info_help[46] ;
   args_info->bad_help = gengetopt_args_info_help[47] ;
   args_info->count_help = gengetopt_args_info_help[48] ;
-  args_info->gofr_help = gengetopt_args_info_help[49] ;
-  args_info->gofz_help = gengetopt_args_info_help[50] ;
-  args_info->r_theta_help = gengetopt_args_info_help[51] ;
-  args_info->r_omega_help = gengetopt_args_info_help[52] ;
-  args_info->r_z_help = gengetopt_args_info_help[53] ;
-  args_info->theta_omega_help = gengetopt_args_info_help[54] ;
-  args_info->r_theta_omega_help = gengetopt_args_info_help[55] ;
-  args_info->gxyz_help = gengetopt_args_info_help[56] ;
-  args_info->twodgofr_help = gengetopt_args_info_help[57] ;
-  args_info->kirkwood_buff_help = gengetopt_args_info_help[58] ;
-  args_info->p2_help = gengetopt_args_info_help[59] ;
-  args_info->p2r_help = gengetopt_args_info_help[60] ;
-  args_info->rp2_help = gengetopt_args_info_help[61] ;
-  args_info->scd_help = gengetopt_args_info_help[62] ;
-  args_info->density_help = gengetopt_args_info_help[63] ;
-  args_info->slab_density_help = gengetopt_args_info_help[64] ;
-  args_info->pipe_density_help = gengetopt_args_info_help[65] ;
-  args_info->p_angle_help = gengetopt_args_info_help[66] ;
-  args_info->hxy_help = gengetopt_args_info_help[67] ;
-  args_info->rho_r_help = gengetopt_args_info_help[68] ;
-  args_info->angle_r_help = gengetopt_args_info_help[69] ;
-  args_info->hullvol_help = gengetopt_args_info_help[70] ;
-  args_info->rodlength_help = gengetopt_args_info_help[71] ;
-  args_info->tet_param_help = gengetopt_args_info_help[72] ;
-  args_info->tet_param_z_help = gengetopt_args_info_help[73] ;
-  args_info->tet_param_r_help = gengetopt_args_info_help[74] ;
-  args_info->tet_param_dens_help = gengetopt_args_info_help[75] ;
-  args_info->tet_param_xyz_help = gengetopt_args_info_help[76] ;
-  args_info->rnemdz_help = gengetopt_args_info_help[77] ;
-  args_info->rnemdr_help = gengetopt_args_info_help[78] ;
-  args_info->rnemdrt_help = gengetopt_args_info_help[79] ;
-  args_info->nitrile_help = gengetopt_args_info_help[80] ;
-  args_info->multipole_help = gengetopt_args_info_help[81] ;
-  args_info->surfDiffusion_help = gengetopt_args_info_help[82] ;
-  args_info->cn_help = gengetopt_args_info_help[83] ;
-  args_info->scn_help = gengetopt_args_info_help[84] ;
-  args_info->gcn_help = gengetopt_args_info_help[85] ;
-  args_info->hbond_help = gengetopt_args_info_help[86] ;
-  args_info->hbondz_help = gengetopt_args_info_help[87] ;
-  args_info->hbondzvol_help = gengetopt_args_info_help[88] ;
-  args_info->hbondr_help = gengetopt_args_info_help[89] ;
-  args_info->hbondrvol_help = gengetopt_args_info_help[90] ;
-  args_info->potDiff_help = gengetopt_args_info_help[91] ;
-  args_info->tet_hb_help = gengetopt_args_info_help[92] ;
-  args_info->kirkwood_help = gengetopt_args_info_help[93] ;
-  args_info->kirkwoodQ_help = gengetopt_args_info_help[94] ;
-  args_info->densityfield_help = gengetopt_args_info_help[95] ;
-  args_info->velocityfield_help = gengetopt_args_info_help[96] ;
-  args_info->velocityZ_help = gengetopt_args_info_help[97] ;
-  args_info->eam_density_help = gengetopt_args_info_help[98] ;
-  args_info->net_charge_help = gengetopt_args_info_help[99] ;
-  args_info->current_density_help = gengetopt_args_info_help[100] ;
-  args_info->chargez_help = gengetopt_args_info_help[101] ;
-  args_info->charger_help = gengetopt_args_info_help[102] ;
-  args_info->massdensityz_help = gengetopt_args_info_help[103] ;
-  args_info->massdensityr_help = gengetopt_args_info_help[104] ;
-  args_info->numberz_help = gengetopt_args_info_help[105] ;
-  args_info->numberr_help = gengetopt_args_info_help[106] ;
-  args_info->charge_density_z_help = gengetopt_args_info_help[107] ;
-  args_info->countz_help = gengetopt_args_info_help[108] ;
-  args_info->momentum_distribution_help = gengetopt_args_info_help[109] ;
-  args_info->dipole_orientation_help = gengetopt_args_info_help[110] ;
-  args_info->order_prob_help = gengetopt_args_info_help[111] ;
+  args_info->mcount_help = gengetopt_args_info_help[49] ;
+  args_info->gofr_help = gengetopt_args_info_help[50] ;
+  args_info->gofz_help = gengetopt_args_info_help[51] ;
+  args_info->r_theta_help = gengetopt_args_info_help[52] ;
+  args_info->r_omega_help = gengetopt_args_info_help[53] ;
+  args_info->r_z_help = gengetopt_args_info_help[54] ;
+  args_info->theta_omega_help = gengetopt_args_info_help[55] ;
+  args_info->r_theta_omega_help = gengetopt_args_info_help[56] ;
+  args_info->gxyz_help = gengetopt_args_info_help[57] ;
+  args_info->twodgofr_help = gengetopt_args_info_help[58] ;
+  args_info->kirkwood_buff_help = gengetopt_args_info_help[59] ;
+  args_info->p2_help = gengetopt_args_info_help[60] ;
+  args_info->p2r_help = gengetopt_args_info_help[61] ;
+  args_info->rp2_help = gengetopt_args_info_help[62] ;
+  args_info->scd_help = gengetopt_args_info_help[63] ;
+  args_info->density_help = gengetopt_args_info_help[64] ;
+  args_info->slab_density_help = gengetopt_args_info_help[65] ;
+  args_info->pipe_density_help = gengetopt_args_info_help[66] ;
+  args_info->p_angle_help = gengetopt_args_info_help[67] ;
+  args_info->hxy_help = gengetopt_args_info_help[68] ;
+  args_info->rho_r_help = gengetopt_args_info_help[69] ;
+  args_info->angle_r_help = gengetopt_args_info_help[70] ;
+  args_info->hullvol_help = gengetopt_args_info_help[71] ;
+  args_info->rodlength_help = gengetopt_args_info_help[72] ;
+  args_info->tet_param_help = gengetopt_args_info_help[73] ;
+  args_info->tet_param_z_help = gengetopt_args_info_help[74] ;
+  args_info->tet_param_r_help = gengetopt_args_info_help[75] ;
+  args_info->tet_param_dens_help = gengetopt_args_info_help[76] ;
+  args_info->tet_param_xyz_help = gengetopt_args_info_help[77] ;
+  args_info->rnemdz_help = gengetopt_args_info_help[78] ;
+  args_info->rnemdr_help = gengetopt_args_info_help[79] ;
+  args_info->rnemdrt_help = gengetopt_args_info_help[80] ;
+  args_info->nitrile_help = gengetopt_args_info_help[81] ;
+  args_info->multipole_help = gengetopt_args_info_help[82] ;
+  args_info->surfDiffusion_help = gengetopt_args_info_help[83] ;
+  args_info->cn_help = gengetopt_args_info_help[84] ;
+  args_info->scn_help = gengetopt_args_info_help[85] ;
+  args_info->gcn_help = gengetopt_args_info_help[86] ;
+  args_info->hbond_help = gengetopt_args_info_help[87] ;
+  args_info->hbondz_help = gengetopt_args_info_help[88] ;
+  args_info->hbondzvol_help = gengetopt_args_info_help[89] ;
+  args_info->hbondr_help = gengetopt_args_info_help[90] ;
+  args_info->hbondrvol_help = gengetopt_args_info_help[91] ;
+  args_info->potDiff_help = gengetopt_args_info_help[92] ;
+  args_info->tet_hb_help = gengetopt_args_info_help[93] ;
+  args_info->kirkwood_help = gengetopt_args_info_help[94] ;
+  args_info->kirkwoodQ_help = gengetopt_args_info_help[95] ;
+  args_info->densityfield_help = gengetopt_args_info_help[96] ;
+  args_info->velocityfield_help = gengetopt_args_info_help[97] ;
+  args_info->velocityZ_help = gengetopt_args_info_help[98] ;
+  args_info->eam_density_help = gengetopt_args_info_help[99] ;
+  args_info->net_charge_help = gengetopt_args_info_help[100] ;
+  args_info->current_density_help = gengetopt_args_info_help[101] ;
+  args_info->chargez_help = gengetopt_args_info_help[102] ;
+  args_info->charger_help = gengetopt_args_info_help[103] ;
+  args_info->massdensityz_help = gengetopt_args_info_help[104] ;
+  args_info->massdensityr_help = gengetopt_args_info_help[105] ;
+  args_info->numberz_help = gengetopt_args_info_help[106] ;
+  args_info->numberr_help = gengetopt_args_info_help[107] ;
+  args_info->charge_density_z_help = gengetopt_args_info_help[108] ;
+  args_info->countz_help = gengetopt_args_info_help[109] ;
+  args_info->momentum_distribution_help = gengetopt_args_info_help[110] ;
+  args_info->dipole_orientation_help = gengetopt_args_info_help[111] ;
+  args_info->order_prob_help = gengetopt_args_info_help[112] ;
   
 }
 
@@ -795,6 +798,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "bad", 0, 0 );
   if (args_info->count_given)
     write_into_file(outfile, "count", 0, 0 );
+  if (args_info->mcount_given)
+    write_into_file(outfile, "mcount", 0, 0 );
   if (args_info->gofr_given)
     write_into_file(outfile, "gofr", 0, 0 );
   if (args_info->gofz_given)
@@ -979,6 +984,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->for_given = 0 ;
   args_info->bad_given = 0 ;
   args_info->count_given = 0 ;
+  args_info->mcount_given = 0 ;
   args_info->gofr_given = 0 ;
   args_info->gofz_given = 0 ;
   args_info->r_theta_given = 0 ;
@@ -1938,6 +1944,7 @@ cmdline_parser_internal (
         { "for",	0, NULL, 0 },
         { "bad",	0, NULL, 0 },
         { "count",	0, NULL, 0 },
+        { "mcount",	0, NULL, 0 },
         { "gofr",	0, NULL, 'g' },
         { "gofz",	0, NULL, 0 },
         { "r_theta",	0, NULL, 0 },
@@ -2830,7 +2837,7 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* count of molecules matching selection criteria (and associated statistics).  */
+          /* count of objects matching selection criteria (and associated statistics).  */
           else if (strcmp (long_options[option_index].name, "count") == 0)
           {
           
@@ -2843,6 +2850,23 @@ cmdline_parser_internal (
                 &(local_args_info.count_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "count", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* count of molecules matching selection criteria (and associated statistics).  */
+          else if (strcmp (long_options[option_index].name, "mcount") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->mcount_given),
+                &(local_args_info.mcount_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "mcount", '-',
                 additional_error))
               goto failure;
           
