@@ -57,9 +57,6 @@ namespace OpenMD {
 
   ElementsTable::ElementsTable() {
     init_     = false;
-    dir_      = std::string("TO_STRING(FRC_PATH)");
-    envvar_   = "FORCE_PARAM_PATH";
-    filename_ = "element.txt";
   }
 
   ElementsTable::~ElementsTable() {
@@ -302,48 +299,49 @@ namespace OpenMD {
     if (init_) return;
     init_ = true;
 
-    std::string buffer, subbuffer;
-    ifstrstream ifs;
+    char* tempPath;
     char charBuffer[BUFF_SIZE];
+    tempPath = getenv("FORCE_PARAM_PATH");
 
-    // First, look for an environment variable
-    if (getenv(envvar_.c_str()) != NULL) {
-      buffer = getenv(envvar_.c_str());
-      buffer += FILE_SEP_CHAR;
-
-      if (!subdir_.empty()) {
-        subbuffer = buffer;
-        subbuffer += subdir_;
-        subbuffer += FILE_SEP_CHAR;
-      }
-
-      buffer += filename_;
-      subbuffer += filename_;
+    if (tempPath == NULL) {
+      // convert a macro from compiler to a string in c++
+      STR_DEFINE(dir_, FRC_PATH);
+    } else {
+      dir_ = tempPath;
     }
 
-    ifs.clear();
-    ifs.open(subbuffer.c_str());
+    std::string filename_("element.txt");
 
-    if (!(&ifs)->is_open()) {
-      ifs.clear();
-      ifs.open(buffer.c_str());
+    ifstrstream* efStream = new ifstrstream();
 
-      if (!(&ifs)->is_open()) {
+    // Try to open the elements file in current directory first
+    efStream->open(filename_.c_str());
+
+    if (!efStream->is_open()) {
+      // If current directory does not contain the elements file,
+      // try to open it in ffPath_:
+      filename_ = dir_ + FILE_SEP_CHAR + filename_;
+      efStream->open(filename_.c_str());
+
+      if (!efStream->is_open()) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                 "ElementsTable error.\n"
-                 "\tunable to open datafile %s \n",
+                 "Error opening the ElementsTable file:\n"
+                 "\t%s\n"
+                 "\tHave you tried setting the FORCE_PARAM_PATH environment "
+                 "variable?\n",
                  filename_.c_str());
-        painCave.isFatal = 0;
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal  = 1;
         simError();
       }
     }
 
-    if (ifs) {
-      while (ifs.getline(charBuffer, BUFF_SIZE))
+    if (efStream->is_open()) {
+      while (efStream->getline(charBuffer, BUFF_SIZE))
         ParseLine(charBuffer);
     }
 
-    if (ifs) ifs.close();
+    if (efStream->is_open()) efStream->close();
 
     if (GetSize() == 0) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
