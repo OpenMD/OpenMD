@@ -113,9 +113,9 @@ namespace OpenMD {
                                  Xid(i, 3), Xid(i, 4), Xid(i, 5)};
     }
 
-    o["pitch"]         = pitchScalar;
-    o["centerOfPitch"] = {cop[0], cop[1], cop[2]};
-    o["pitches"]       = {pitches[0], pitches[1], pitches[2]};
+    o["pitch"]          = pitchScalar;
+    o["centerOfPitch"]  = {cop[0], cop[1], cop[2]};
+    o["momentsOfPitch"] = {pitches[0], pitches[1], pitches[2]};
 
     o["pitchAxes"] = json::array();
     for (unsigned int i = 0; i < 3; i++) {
@@ -182,15 +182,23 @@ namespace OpenMD {
 
     w_.Key("pitch");
     w_.Double(pitchScalar);
+    
     w_.Key("centerOfPitch");
     w_.StartArray();
     w_.SetFormatOptions(kFormatSingleLineArray);
-
     for (unsigned i = 0; i < 3; i++)
       w_.Double(cop[i]);
     w_.EndArray();
     w_.SetFormatOptions(kFormatDefault);
 
+    w_.Key("momentsOfPitch");
+    w_.StartArray();
+    w_.SetFormatOptions(kFormatSingleLineArray);    
+    for (unsigned i = 0; i < 3; i++)
+      w_.Double(pitches[i]);
+    w_.EndArray();
+    w_.SetFormatOptions(kFormatDefault);
+    
     w_.Key("pitchAxes");
     w_.StartArray();
     for (unsigned i = 0; i < 3; i++) {

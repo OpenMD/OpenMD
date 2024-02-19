@@ -43,30 +43,27 @@
  */
 
 /*=========================================================================
-
+  
   Program:   Visualization Toolkit
-  Module:    $RCSfile: LU.hpp,v $
-
-  Copyright (c) 1993-2003 Ken Martin, Will Schroeder, Bill Lorensen
+  Module:    Excerpted from vtkMath.cxx
+  
+  Copyright (c) 1993-2015 Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
-
+  
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
-
+  
   * Redistributions of source code must retain the above copyright notice,
-  this list of conditions and the following disclaimer.
-
+    this list of conditions and the following disclaimer.
+  
   * Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+  
   * Neither name of Ken Martin, Will Schroeder, or Bill Lorensen nor the names
-  of any contributors may be used to endorse or promote products derived
-  from this software without specific prior written permission.
-
-  * Modified source versions must be plainly marked as such, and must not be
-  misrepresented as being the original software.
-
+    of any contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+  
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -77,7 +74,7 @@
   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+  
   =========================================================================*/
 #ifndef MATH_LU_HPP
 #define MATH_LU_HPP
@@ -87,6 +84,9 @@
 
 namespace OpenMD {
 
+constexpr double SMALL_NUMBER = 1.0e-12;
+constexpr int MAX_SCRATCH_ARRAY_SIZE = 10;
+  
   /**
    * Invert input square matrix A into matrix AI.
    * @param A input square matrix
@@ -104,26 +104,20 @@ namespace OpenMD {
     }
 
     int size     = A.getNRow();
-    int *index   = NULL, iScratch[10];
-    Real *column = NULL, dScratch[10];
 
     // Check on allocation of working vectors
     //
-    if (size <= 10) {
-      index  = iScratch;
-      column = dScratch;
-    } else {
-      index  = new int[size];
-      column = new Real[size];
-    }
-
+    int iScratch[MAX_SCRATCH_ARRAY_SIZE];
+    int* index = (size <= MAX_SCRATCH_ARRAY_SIZE ? iScratch : new int[size]);
+    Real dScratch[MAX_SCRATCH_ARRAY_SIZE];
+    Real* column = (size <= MAX_SCRATCH_ARRAY_SIZE ? dScratch : new Real[size]);
+    
     bool retVal = invertMatrix(A, AI, size, index, column);
 
-    if (size > 10) {
+    if (size > MAX_SCRATCH_ARRAY_SIZE) {
       delete[] index;
       delete[] column;
     }
-
     return retVal;
   }
 
@@ -157,8 +151,8 @@ namespace OpenMD {
       return false;
     }
 
-    for (j = 0; j < size; j++) {
-      for (i = 0; i < size; i++) {
+    for (j = 0; j < size; ++j) {
+      for (i = 0; i < size; ++i) {
         tmp2Size[i] = 0.0;
       }
       tmp2Size[j] = 1.0;
@@ -195,9 +189,11 @@ namespace OpenMD {
     //
     // Loop over rows to get implicit scaling information
     //
-    for (i = 0; i < size; i++) {
-      for (largest = 0.0, j = 0; j < size; j++) {
-        if ((temp2 = abs(A(i, j))) > largest) { largest = temp2; }
+    for (i = 0; i < size; ++i) {
+      for (largest = 0.0, j = 0; j < size; ++j) {
+        if ((temp2 = std::abs(A(i, j))) > largest) {
+	  largest = temp2;
+	}
       }
 
       if (largest == 0.0) {
@@ -209,10 +205,10 @@ namespace OpenMD {
     //
     // Loop over all columns using Crout's method
     //
-    for (j = 0; j < size; j++) {
-      for (i = 0; i < j; i++) {
+    for (j = 0; j < size; ++j) {
+      for (i = 0; i < j; ++i) {
         sum = A(i, j);
-        for (k = 0; k < i; k++) {
+        for (k = 0; k < i; ++k) {
           sum -= A(i, k) * A(k, j);
         }
         A(i, j) = sum;
@@ -220,14 +216,14 @@ namespace OpenMD {
       //
       // Begin search for largest pivot element
       //
-      for (largest = 0.0, i = j; i < size; i++) {
+      for (largest = 0.0, i = j; i < size; ++i) {
         sum = A(i, j);
-        for (k = 0; k < j; k++) {
+        for (k = 0; k < j; ++k) {
           sum -= A(i, k) * A(k, j);
         }
         A(i, j) = sum;
 
-        if ((temp1 = tmpSize[i] * abs(sum)) >= largest) {
+        if ((temp1 = tmpSize[i] * std::abs(sum)) >= largest) {
           largest = temp1;
           maxI    = i;
         }
@@ -236,10 +232,8 @@ namespace OpenMD {
       // Check for row interchange
       //
       if (j != maxI) {
-        for (k = 0; k < size; k++) {
-          temp1      = A(maxI, k);
-          A(maxI, k) = A(j, k);
-          A(j, k)    = temp1;
+        for (k = 0; k < size; ++k) {
+	  std::swap( A(maxI,k), A(j,k) );
         }
         tmpSize[maxI] = tmpSize[j];
       }
@@ -248,14 +242,14 @@ namespace OpenMD {
       //
       index[j] = maxI;
 
-      if (abs(A(j, j)) <= std::numeric_limits<Real>::epsilon()) {
+      if (std::abs(A(j, j)) <= SMALL_NUMBER) {
         std::cerr << "Unable to factor linear system";
         return false;
       }
 
       if (j != (size - 1)) {
         temp1 = 1.0 / A(j, j);
-        for (i = j + 1; i < size; i++) {
+        for (i = j + 1; i < size; ++i) {
           A(i, j) *= temp1;
         }
       }
@@ -286,16 +280,16 @@ namespace OpenMD {
     // Proceed with forward and backsubstitution for L and U
     // matrices.  First, forward substitution.
     //
-    for (ii = -1, i = 0; i < size; i++) {
+    for (ii = -1, i = 0; i < size; ++i) {
       idx    = index[i];
       sum    = x[idx];
       x[idx] = x[i];
 
       if (ii >= 0) {
-        for (j = ii; j <= (i - 1); j++) {
+        for (j = ii; j <= (i - 1); ++j) {
           sum -= A(i, j) * x[j];
         }
-      } else if (sum) {
+      } else if (sum != 0.0) {
         ii = i;
       }
 
@@ -306,7 +300,7 @@ namespace OpenMD {
     //
     for (i = size - 1; i >= 0; i--) {
       sum = x[i];
-      for (j = i + 1; j < size; j++) {
+      for (j = i + 1; j < size; ++j) {
         sum -= A(i, j) * x[j];
       }
       x[i] = sum / A(i, i);

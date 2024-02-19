@@ -184,7 +184,6 @@ namespace OpenMD {
     Do.getSubMatrix(3, 3, Dorr);
 
     Mat3x3d tmp;
-    Mat3x3d tmpInv;
     Vector3d tmpVec;
 
     // Find center of diffusion
@@ -203,11 +202,8 @@ namespace OpenMD {
     tmpVec[1] = Dotr(2, 0) - Dotr(0, 2);
     tmpVec[2] = Dotr(0, 1) - Dotr(1, 0);
 
-    // invert tmp Matrix
-    invertMatrix(tmp, tmpInv);
-
     // center of difussion
-    Vector3d cod = tmpInv * tmpVec;
+    Vector3d cod = tmp.inverse() * tmpVec;
     return cod;
   }
 

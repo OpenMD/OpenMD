@@ -127,7 +127,7 @@ namespace OpenMD {
       }
     }
     std::cerr << " done.\n";
-
+    
     // invert B Matrix
     std::cerr << "Inverting B matrix...";
     invertMatrix(B, C);  // B is modified during the inversion
@@ -176,7 +176,6 @@ namespace OpenMD {
 
     // calculate center of resistance
     Mat3x3d tmp;
-    Mat3x3d tmpInv;
     Vector3d tmpVec;
     tmp(0, 0) = Xiott(1, 1) + Xiott(2, 2);
     tmp(0, 1) = -Xiott(0, 1);
@@ -192,11 +191,8 @@ namespace OpenMD {
     tmpVec[1] = Xiotr(0, 2) - Xiotr(2, 0);
     tmpVec[2] = Xiotr(1, 0) - Xiotr(0, 1);
 
-    // invert tmp Matrix
-    invertMatrix(tmp, tmpInv);
-
     // center of resistance
-    Vector3d ror = tmpInv * tmpVec;
+    Vector3d ror = tmp.inverse() * tmpVec;
 
     // calculate Resistance Tensor at center of resistance
     Mat3x3d Uor;
