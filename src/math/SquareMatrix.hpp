@@ -260,28 +260,50 @@ namespace OpenMD {
                       SquareMatrix<Real, Dim>& v);
   };  // end SquareMatrix
 
-  /*=========================================================================
+ /*=========================================================================
+  
+  Program:   Visualization Toolkit
+  Module:    Excerpted from vtkMath.cxx
+  
+  Copyright (c) 1993-2015 Ken Martin, Will Schroeder, Bill Lorensen
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  
+  * Redistributions of source code must retain the above copyright notice,
+    this list of conditions and the following disclaimer.
+  
+  * Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+  
+  * Neither name of Ken Martin, Will Schroeder, or Bill Lorensen nor the names
+    of any contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR
+  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  
+  =========================================================================*/
 
-    Program:   Visualization Toolkit
-    Module:    $RCSfile: SquareMatrix.hpp,v $
-
-    Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-    All rights reserved.
-    See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
-
-    This software is distributed WITHOUT ANY WARRANTY; without even
-    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-    PURPOSE.  See the above copyright notice for more information.
-
-    =========================================================================*/
-
-#define VTK_ROTATE(a, i, j, k, l)  \
+#define ROTATE(a, i, j, k, l)  \
   g       = a(i, j);               \
   h       = a(k, l);               \
   a(i, j) = g - s * (h + g * tau); \
   a(k, l) = h + s * (g - h * tau)
 
-#define VTK_MAX_ROTATIONS 20
+#define MAX_ROTATIONS 20
+
+  // Note that MAX_SCRATCH_ARRAY_SIZE is defined in LU.hpp
 
   // Jacobi iteration for the solution of eigenvectors/eigenvalues of a nxn
   // real symmetric matrix. Square nxn matrix a; size of matrix in n;
@@ -295,16 +317,10 @@ namespace OpenMD {
     const int n = Dim;
     int i, j, k, iq, ip, numPos;
     Real tresh, theta, tau, t, sm, s, h, g, c, tmp;
-    Real bspace[4], zspace[4];
-    Real* b = bspace;
-    Real* z = zspace;
-
-    // only allocate memory if the matrix is large
-    if (n > 4) {
-      b = new Real[n];
-      z = new Real[n];
-    }
-
+    Real bspace[MAX_SCRATCH_ARRAY_SIZE], zspace[MAX_SCRATCH_ARRAY_SIZE];
+    Real* b = (n <= MAX_SCRATCH_ARRAY_SIZE) ? bspace : new Real[n];
+    Real* z = (n <= MAX_SCRATCH_ARRAY_SIZE) ? zspace : new Real[n];
+    
     // initialize
     for (ip = 0; ip < n; ip++) {
       for (iq = 0; iq < n; iq++) {
@@ -318,14 +334,16 @@ namespace OpenMD {
     }
 
     // begin rotation sequence
-    for (i = 0; i < VTK_MAX_ROTATIONS; i++) {
+    for (i = 0; i < MAX_ROTATIONS; ++i) {
       sm = 0.0;
       for (ip = 0; ip < n - 1; ip++) {
         for (iq = ip + 1; iq < n; iq++) {
-          sm += fabs(a(ip, iq));
+          sm += std::abs(a(ip, iq));
         }
       }
-      if (sm == 0.0) { break; }
+      if (sm == 0.0) {
+	break;
+      }
 
       if (i < 3) {  // first 3 sweeps
         tresh = 0.2 * sm / (n * n);
@@ -335,22 +353,22 @@ namespace OpenMD {
 
       for (ip = 0; ip < n - 1; ip++) {
         for (iq = ip + 1; iq < n; iq++) {
-          g = 100.0 * fabs(a(ip, iq));
+          g = 100.0 * std::abs(a(ip, iq));
 
           // after 4 sweeps
-          if (i > 3 && (fabs(w[ip]) + g) == fabs(w[ip]) &&
-              (fabs(w[iq]) + g) == fabs(w[iq])) {
+          if (i > 3 && (std::abs(w[ip]) + g) == std::abs(w[ip]) &&
+              (std::abs(w[iq]) + g) == std::abs(w[iq])) {
             a(ip, iq) = 0.0;
-          } else if (fabs(a(ip, iq)) > tresh) {
+          } else if (std::abs(a(ip, iq)) > tresh) {
             h = w[iq] - w[ip];
-            if ((fabs(h) + g) == fabs(h)) {
+            if ((std::abs(h) + g) == std::abs(h)) {
               t = (a(ip, iq)) / h;
             } else {
               theta = 0.5 * h / (a(ip, iq));
-              t     = 1.0 / (fabs(theta) + sqrt(1.0 + theta * theta));
+              t     = 1.0 / (std::abs(theta) + std::sqrt(1.0 + theta * theta));
               if (theta < 0.0) { t = -t; }
             }
-            c   = 1.0 / sqrt(1 + t * t);
+            c   = 1.0 / std::sqrt(1 + t * t);
             s   = t * c;
             tau = s / (1.0 + c);
             h   = t * a(ip, iq);
@@ -361,19 +379,19 @@ namespace OpenMD {
             a(ip, iq) = 0.0;
 
             // ip already shifted left by 1 unit
-            for (j = 0; j <= ip - 1; j++) {
-              VTK_ROTATE(a, j, ip, j, iq);
+            for (j = 0; j <= ip - 1; ++j) {
+              ROTATE(a, j, ip, j, iq);
             }
             // ip and iq already shifted left by 1 unit
-            for (j = ip + 1; j <= iq - 1; j++) {
-              VTK_ROTATE(a, ip, j, j, iq);
+            for (j = ip + 1; j <= iq - 1; ++j) {
+              ROTATE(a, ip, j, j, iq);
             }
             // iq already shifted left by 1 unit
-            for (j = iq + 1; j < n; j++) {
-              VTK_ROTATE(a, ip, j, iq, j);
+            for (j = iq + 1; j < n; ++j) {
+              ROTATE(a, ip, j, iq, j);
             }
-            for (j = 0; j < n; j++) {
-              VTK_ROTATE(v, j, ip, j, iq);
+            for (j = 0; j < n; ++j) {
+              ROTATE(v, j, ip, j, iq);
             }
           }
         }
@@ -387,22 +405,22 @@ namespace OpenMD {
     }
 
     //// this is NEVER called
-    if (i >= VTK_MAX_ROTATIONS) {
-      std::cout << "vtkMath::Jacobi: Error extracting eigenfunctions"
+    if (i >= MAX_ROTATIONS) {
+      std::cout << "SquareMatrix::Jacobi: Error extracting eigenfunctions"
                 << std::endl;
-      if (n > 4) {
-        delete[] b;
-        delete[] z;
-      }
-      return 0;
+    if (n > MAX_SCRATCH_ARRAY_SIZE) {
+      delete[] b;
+      delete[] z;
+    }
+    return 0;
     }
 
-    // sort eigenfunctions                 these changes do not affect accuracy
-    for (j = 0; j < n - 1; j++) {  // boundary incorrect
+    // sort eigenfunctions             these changes do not affect accuracy
+    for (j = 0; j < n - 1; ++j) {   // boundary incorrect
       k   = j;
       tmp = w[k];
-      for (i = j + 1; i < n; i++) {  // boundary incorrect, shifted already
-        if (w[i] >= tmp) {           // why exchage if same?
+      for (i = j + 1; i < n; ++i) { // boundary incorrect, shifted already
+        if (w[i] >= tmp) {          // why exchage if same?
           k   = i;
           tmp = w[k];
         }
@@ -417,30 +435,33 @@ namespace OpenMD {
         }
       }
     }
-    // insure eigenvector consistency (i.e., Jacobi can compute vectors that
-    // are negative of one another (.707,.707,0) and (-.707,-.707,0). This can
-    // reek havoc in hyperstreamline/other stuff. We will select the most
-    // positive eigenvector.
+    // insure eigenvector consistency (i.e., Jacobi can compute
+    // vectors that are negative of one another (.707,.707,0) and
+    // (-.707,-.707,0). This can wreak havoc in other stuff. We will
+    // select the most positive eigenvector.
     int ceil_half_n = (n >> 1) + (n & 1);
-    for (j = 0; j < n; j++) {
-      for (numPos = 0, i = 0; i < n; i++) {
-        if (v(i, j) >= 0.0) { numPos++; }
+    for (j = 0; j < n; ++j) {
+      for (numPos = 0, i = 0; i < n; ++i) {
+        if (v(i, j) >= 0.0) {
+	  numPos++;
+	}
       }
-      //    if ( numPos < ceil(RealType(n)/RealType(2.0)) )
       if (numPos < ceil_half_n) {
-        for (i = 0; i < n; i++) {
+        for (i = 0; i < n; ++i) {
           v(i, j) *= -1.0;
         }
       }
     }
-
-    if (n > 4) {
+    
+    if (n > MAX_SCRATCH_ARRAY_SIZE) {
       delete[] b;
       delete[] z;
     }
     return 1;
   }
-
+#undef ROTATE
+#undef MAX_ROTATIONS
+  
   using Mat6x6d = SquareMatrix<RealType, 6>;
 }  // namespace OpenMD
 
