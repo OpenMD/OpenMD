@@ -315,6 +315,23 @@ ELSE(FFTW3_FOUND)
   MESSAGE(STATUS "No fftw3 found - will be missing some analysis modules")
 endif (FFTW3_FOUND)
 
+#find_package(TensorFlow)
+#IF(TensorFlow_FOUND)
+#  SET(HAVE_TensorFLow 1)
+#  include_directories(${TensorFlow_INCLUDE_DIR})
+#  LINK_LIBRARIES(${TensorFlow_LIBRARY})
+#ELSE(TensorFlow_FOUND)
+#  MESSAGE(STATUS "No TensorFlow found - will be missing some features")
+#ENDIF(TensorFlow_FOUND)
+
+find_package(DeePMD)
+IF(DeePMD_FOUND)
+  SET(HAVE_DeePMD 1)
+  include_directories(${DeePMD_INCLUDE_DIR})
+  LINK_LIBRARIES(${DeePMD_LIBRARY})
+ELSE(DeePMD_FOUND)
+  MESSAGE(STATUS "No DeePMD found - will be missing some features")
+ENDIF(DeePMD_FOUND)
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
@@ -840,6 +857,7 @@ src/applications/staticProps/TetrahedralityParamDens.cpp
 src/applications/staticProps/TetrahedralityParamR.cpp
 src/applications/staticProps/TetrahedralityParamZ.cpp
 src/applications/staticProps/TetrahedralityParamXYZ.cpp
+src/applications/staticProps/TranslationalOrderParamZ.cpp
 src/applications/staticProps/TwoDGofR.cpp
 src/applications/staticProps/StaticPropsCmd.cpp
 src/applications/staticProps/VelocityZ.cpp

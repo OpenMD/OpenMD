@@ -104,6 +104,7 @@ groupoption "tet_param_z" -     "spatially-resolved tetrahedrality order paramet
 groupoption "tet_param_r" -     "spatially-resolved tetrahedrality order parameter Qk(r) around a third selection" group="staticProps"
 groupoption "tet_param_dens" -  "computes density of the tetrahedrality order parameter Qk" group="staticProps"
 groupoption "tet_param_xyz" -   "volume-resolved tetrahedrality order parameter Qk(x,y,z).  (voxelSize, rcut, and gaussWidth must be specified)" group="staticProps"
+groupoption "trans_param_z" -   "spatially-resolved translational order parameter t(z)" group="staticProps"
 groupoption "rnemdz"    -       "slab-resolved RNEMD statistics (temperature, density, velocity)" group="staticProps"
 groupoption "rnemdr"    -       "shell-resolved RNEMD statistics (temperature, density, angular velocity)" group="staticProps"
 groupoption "rnemdrt"   -       "shell and angle-resolved RNEMD statistics (temperature, density, angular velocity)" group="staticProps"

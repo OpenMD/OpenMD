@@ -114,6 +114,7 @@
 #include "applications/staticProps/TetrahedralityParamR.hpp"
 #include "applications/staticProps/TetrahedralityParamXYZ.hpp"
 #include "applications/staticProps/TetrahedralityParamZ.hpp"
+#include "applications/staticProps/TranslationalOrderParamZ.hpp"
 #include "applications/staticProps/VelocityZ.hpp"
 
 using namespace OpenMD;
@@ -998,6 +999,21 @@ int main(int argc, char* argv[]) {
     else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "Dipole components must be provided.");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+  } else if (args_info.trans_param_z_given) {
+    if (args_info.rcut_given) {
+      analyser = std::make_unique<TranslationalOrderParamZ>(
+          info, dumpFileName, sele1, sele2, args_info.rcut_arg,
+          args_info.nbins_arg, args_info.nbins_z_arg, maxLen, zmaxLen,
+          privilegedAxis);
+    } else {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (rcut) must be specified when calculating "
+               "Translational Order "
+               "Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal  = 1;
       simError();

@@ -201,6 +201,7 @@ struct gengetopt_args_info
   const char *tet_param_r_help; /**< @brief spatially-resolved tetrahedrality order parameter Qk(r) around a third selection help description.  */
   const char *tet_param_dens_help; /**< @brief computes density of the tetrahedrality order parameter Qk help description.  */
   const char *tet_param_xyz_help; /**< @brief volume-resolved tetrahedrality order parameter Qk(x,y,z).  (voxelSize, rcut, and gaussWidth must be specified) help description.  */
+  const char *trans_param_z_help; /**< @brief spatially-resolved translational order parameter t(z) help description.  */
   const char *rnemdz_help; /**< @brief slab-resolved RNEMD statistics (temperature, density, velocity) help description.  */
   const char *rnemdr_help; /**< @brief shell-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
   const char *rnemdrt_help; /**< @brief shell and angle-resolved RNEMD statistics (temperature, density, angular velocity) help description.  */
@@ -315,6 +316,7 @@ struct gengetopt_args_info
   unsigned int tet_param_r_given ;	/**< @brief Whether tet_param_r was given.  */
   unsigned int tet_param_dens_given ;	/**< @brief Whether tet_param_dens was given.  */
   unsigned int tet_param_xyz_given ;	/**< @brief Whether tet_param_xyz was given.  */
+  unsigned int trans_param_z_given ;	/**< @brief Whether trans_param_z was given.  */
   unsigned int rnemdz_given ;	/**< @brief Whether rnemdz was given.  */
   unsigned int rnemdr_given ;	/**< @brief Whether rnemdr was given.  */
   unsigned int rnemdrt_given ;	/**< @brief Whether rnemdrt was given.  */
