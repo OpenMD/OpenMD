@@ -78,13 +78,13 @@ namespace OpenMD {
     SelectionManager seleMan2_;
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
-    int seleOffset_;
-    int seleOffset2_;
+    int seleOffset_{};
+    int seleOffset2_{};
 
-    int nProcessed_;
+    int nProcessed_{};
 
-    RealType P2_;
-    int count_;
+    RealType P2_{};
+    int count_{};
   };
 }  // namespace OpenMD
 

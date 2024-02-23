@@ -159,6 +159,8 @@ namespace OpenMD {
     int nFrames = reader.getNFrames();
 
     nProcessed_ = nFrames / step_;
+    P2_ = 0.0;
+    count_ =  0;
 
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
