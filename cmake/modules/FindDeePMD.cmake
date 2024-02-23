@@ -7,7 +7,7 @@
 #  DeePMD_LIBRARIES - Link these to use DeePMD-kit
 #  IF DeePMD_DIR is defined, will look there first
 
-if(OPENBABEL_INCLUDE_DIR AND DeePMD_LIBRARIES)
+if(DeePMD_INCLUDE_DIR AND DeePMD_LIBRARIES)
   # in cache already or user-specified
   set(DeePMD_FOUND TRUE)
 

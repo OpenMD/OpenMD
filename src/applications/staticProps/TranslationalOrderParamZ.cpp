@@ -176,6 +176,12 @@ namespace OpenMD {
           Tz_[j] += std::fabs(avgGofr_[i][j] - 1.0) * deltaR_;
       }
     }
+
+    // normalize by cutoff radius
+    for (unsigned int j = 0; j < Tz_.size(); ++j) {
+	Tz_[j] /= rCut_;
+    }
+    
   }
 
 
