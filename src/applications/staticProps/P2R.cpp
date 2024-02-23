@@ -212,7 +212,7 @@ namespace OpenMD {
 
             Vector3d r2 = CenterOfMass - sd2->getPos();
             if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(r1);
+              currentSnapshot_->wrapVector(r2);
 
             Vector3d rc = 0.5 * (r1 + r2);
             if (usePeriodicBoundaryConditions_)
@@ -253,7 +253,7 @@ namespace OpenMD {
 
             Vector3d r2 = CenterOfMass - sd2->getPos();
             if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(r1);
+              currentSnapshot_->wrapVector(r2);
 
             Vector3d rc = 0.5 * (r1 + r2);
             if (usePeriodicBoundaryConditions_)
