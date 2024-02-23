@@ -184,6 +184,7 @@ struct gengetopt_args_info
   const char *kirkwood_buff_help; /**< @brief Kirkwood-Buff integrals (--sele1 and --sele2 must both be specified) help description.  */
   const char *p2_help; /**< @brief p2 order parameter (--sele1 must be specified, --sele2 is optional) help description.  */
   const char *p2r_help; /**< @brief p2 order parameter using r as director axis help description.  */
+  const char *p2z_help; /**< @brief p2 order parameter using z (or privilegedAxis) as director axis help description.  */
   const char *rp2_help; /**< @brief rp2 order parameter (--sele1 and --sele2 must be specified) help description.  */
   const char *scd_help; /**< @brief scd order parameter (either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified) help description.  */
   const char *density_help; /**< @brief density plot help description.  */
@@ -297,6 +298,7 @@ struct gengetopt_args_info
   unsigned int kirkwood_buff_given ;	/**< @brief Whether kirkwood_buff was given.  */
   unsigned int p2_given ;	/**< @brief Whether p2 was given.  */
   unsigned int p2r_given ;	/**< @brief Whether p2r was given.  */
+  unsigned int p2z_given ;	/**< @brief Whether p2z was given.  */
   unsigned int rp2_given ;	/**< @brief Whether rp2 was given.  */
   unsigned int scd_given ;	/**< @brief Whether scd was given.  */
   unsigned int density_given ;	/**< @brief Whether density was given.  */

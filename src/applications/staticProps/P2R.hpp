@@ -45,7 +45,9 @@
 #ifndef APPLICATIONS_STATICPROPS_P2R_HPP
 #define APPLICATIONS_STATICPROPS_P2R_HPP
 
-#include "applications/staticProps/RadialDistrFunc.hpp"
+#include "applications/staticProps/StaticAnalyser.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -63,7 +65,7 @@ namespace OpenMD {
 
     virtual void process();
 
-  private:
+  protected:
     void processHistogram();
     void writeP2R();
 
@@ -86,6 +88,27 @@ namespace OpenMD {
     RealType P2_{};
     int count_{};
   };
+
+  class P2Z : public P2R {
+  public:
+    P2Z(SimInfo* info, const string& filename, const string& sele1,
+        unsigned int nbins, int axis);
+    P2Z(SimInfo* info, const string& filename, const string& sele1,
+        const string& sele2, unsigned int nbins, int axis);
+    P2Z(SimInfo* info, const string& filename, const string& sele,
+        const int seleOffset, unsigned int nbins, int axis);
+    P2Z(SimInfo* info, const string& filename, const string& sele,
+        const int seleOffset, const int seleOffset2, unsigned int nbins,
+	int axis);
+
+    virtual void process();
+  private:
+    int axis_;
+    std::string axisLabel_;
+
+  };
+
+  
 }  // namespace OpenMD
 
 #endif

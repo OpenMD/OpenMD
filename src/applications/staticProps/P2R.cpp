@@ -83,7 +83,6 @@ namespace OpenMD {
       doVect_(false), doOffset_(false), selectionScript1_(sele1),
       selectionScript2_(sele2), seleMan1_(info), seleMan2_(info),
       evaluator1_(info), evaluator2_(info) {
-    setOutputName(getPrefix(filename) + ".P2R");
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -109,7 +108,6 @@ namespace OpenMD {
       doVect_(false), doOffset_(true), doOffset2_(false),
       selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
       evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset) {
-    setOutputName(getPrefix(filename) + ".P2R");
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -131,7 +129,6 @@ namespace OpenMD {
       selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
       evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset),
       seleOffset2_(seleOffset2) {
-    setOutputName(getPrefix(filename) + ".P2R");
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
@@ -311,4 +308,217 @@ namespace OpenMD {
     ofs.close();
   }
 
+  P2Z::P2Z(SimInfo* info, const std::string& filename, const std::string& sele1,
+           unsigned int nbins, int axis) :
+    P2R(info, filename, sele1, nbins), axis_(axis) {
+    
+    switch (axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
+
+    setAnalysisType("2nd order Legendre Polynomial Correlation using " +
+		    axisLabel_ + " as reference axis");
+    setOutputName(getPrefix(filename) + ".P2Z");
+    std::stringstream params;
+    const std::string paramString = params.str();
+    setParameterString(paramString);
+  }
+
+  P2Z::P2Z(SimInfo* info, const std::string& filename, const std::string& sele1,
+           const std::string& sele2, unsigned int nbins, int axis) :
+      P2R(info, filename, sele1, sele2, nbins), axis_(axis) {
+
+    switch (axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
+
+    setAnalysisType("2nd order Legendre Polynomial Correlation using " +
+		    axisLabel_ + " as reference axis");
+    setOutputName(getPrefix(filename) + ".P2Z");
+    std::stringstream params;
+    const std::string paramString = params.str();
+    setParameterString(paramString);
+  }
+
+  P2Z::P2Z(SimInfo* info, const std::string& filename, const std::string& sele1,
+           int seleOffset, unsigned int nbins, int axis) :
+      P2R(info, filename, sele1, seleOffset, nbins), axis_(axis) {
+
+    switch (axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
+
+    setAnalysisType("2nd order Legendre Polynomial Correlation using " +
+		    axisLabel_ + " as reference axis");
+    setOutputName(getPrefix(filename) + ".P2Z");
+    std::stringstream params;
+    const std::string paramString = params.str();
+    setParameterString(paramString);
+  }
+
+  P2Z::P2Z(SimInfo* info, const std::string& filename, const std::string& sele1,
+           int seleOffset, int seleOffset2, unsigned int nbins, int axis) :
+      P2R(info, filename, sele1, seleOffset, seleOffset2, nbins), axis_(axis) {
+
+    switch (axis_) {
+    case 0:
+      axisLabel_ = "x";
+      break;
+    case 1:
+      axisLabel_ = "y";
+      break;
+    case 2:
+    default:
+      axisLabel_ = "z";
+      break;
+    }
+
+    setAnalysisType("2nd order Legendre Polynomial Correlation using " +
+		    axisLabel_ + " as reference axis");
+    setOutputName(getPrefix(filename) + ".P2Z");
+    std::stringstream params;
+    const std::string paramString = params.str();
+    setParameterString(paramString);
+  }
+
+  void P2Z::process() {
+
+    Vector3d zhat = V3Zero;
+    zhat[axis_] = 1.0; // unit vector along preferred axis
+
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    int ii;
+    int jj;
+    bool usePeriodicBoundaryConditions_ =
+        info_->getSimParams()->getUsePeriodicBoundaryConditions();
+
+    DumpReader reader(info_, dumpFilename_);
+    int nFrames = reader.getNFrames();
+
+    nProcessed_ = nFrames / step_;
+    P2_ = 0.0;
+    count_ =  0;
+
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+
+      if (evaluator1_.isDynamic()) {
+        seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      }
+
+      if (doVect_) {
+        for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
+             sd1 = seleMan1_.nextSelected(ii)) {
+          // only do this if the stunt double actually has a vector associated
+          // with it
+          if (sd1->isDirectional()) {
+            Vector3d vec = sd1->getA().transpose() * V3Z;
+            vec.normalize();
+            RealType cosangle = dot(zhat, vec);
+
+            P2_ += 0.5 * (3.0 * cosangle * cosangle - 1.0);
+            count_++;
+          }
+        }
+      } else {
+        if (doOffset_) {
+          for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
+               sd1 = seleMan1_.nextSelected(ii)) {
+            // This will require careful rewriting if StaticProps is
+            // ever parallelized.  For an example, see
+            // Thermo::getTaggedAtomPairDistance
+            Vector3d r1;
+
+            if (doOffset2_) {
+              int sd1Aind       = sd1->getGlobalIndex() + seleOffset2_;
+              StuntDouble* sd1A = info_->getIOIndexToIntegrableObject(sd1Aind);
+              r1                =  sd1A->getPos();
+            } else {
+              r1 = sd1->getPos();
+            }
+
+            int sd2Index = sd1->getGlobalIndex() + seleOffset_;
+            sd2          = info_->getIOIndexToIntegrableObject(sd2Index);
+
+            Vector3d r2 = sd2->getPos();
+            Vector3d vec = r1 - r2;
+	    
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(vec);
+
+            vec.normalize();
+            RealType cosangle = dot(zhat, vec);
+            P2_ += 0.5 * (3.0 * cosangle * cosangle - 1.0);
+            count_++;
+          }
+        } else {
+          if (evaluator2_.isDynamic()) {
+            seleMan2_.setSelectionSet(evaluator2_.evaluate());
+          }
+
+          if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount()) {
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "In frame %d, the number of selected StuntDoubles are\n"
+                     "\tnot the same in --sele1 and sele2\n",
+                     istep);
+            painCave.severity = OPENMD_INFO;
+            painCave.isFatal  = 0;
+            simError();
+          }
+
+          for (sd1                             = seleMan1_.beginSelected(ii),
+              sd2                              = seleMan2_.beginSelected(jj);
+               sd1 != NULL && sd2 != NULL; sd1 = seleMan1_.nextSelected(ii),
+              sd2                              = seleMan2_.nextSelected(jj)) {
+
+            Vector3d r1 = sd1->getPos();
+            Vector3d r2 = sd2->getPos();
+            Vector3d vec = r1 - r2;
+	    
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(vec);
+
+            vec.normalize();
+            RealType cosangle = dot(zhat, vec);
+            P2_ += 0.5 * (3.0 * cosangle * cosangle - 1.0);
+            count_++;
+          }
+        }
+      }
+    }
+    processHistogram();
+    writeP2R();
+  }
+
+
+  
 }  // namespace OpenMD
