@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
            "    "
            "      |\n"
         << "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright "
-           "2004-2023 by "
+           "2004-2024 by "
            "the     |\n"
         << "  |     /_/                                   University of Notre "
            "Dame.      |\n"
