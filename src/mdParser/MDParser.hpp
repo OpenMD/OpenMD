@@ -54,6 +54,7 @@ public:
 	public: void restraintblock();
 	public: void flucqblock();
 	public: void rnemdblock();
+	public: void lightblock();
 	public: void minimizerblock();
 	public: void constant();
 	protected: void intConst();
@@ -94,10 +95,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 80;
+	static const int NUM_TOKENS = 81;
 #else
 	enum {
-		NUM_TOKENS = 80
+		NUM_TOKENS = 81
 	};
 #endif
 	

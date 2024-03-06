@@ -768,7 +768,8 @@ namespace OpenMD {
         simParams->haveUniformField() |
         simParams->haveUniformGradientStrength() |
         simParams->haveUniformGradientDirection1() |
-        simParams->haveUniformGradientDirection2()) {
+        simParams->haveUniformGradientDirection2() |
+	simParams->getLightParameters()->getUseLight() ) {
       atomStorageLayout |= DataStorage::dslElectricField;
       rigidBodyStorageLayout |= DataStorage::dslElectricField;
     }

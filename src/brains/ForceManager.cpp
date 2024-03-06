@@ -65,6 +65,8 @@
 #include "perturbations/MagneticField.hpp"
 #include "perturbations/UniformField.hpp"
 #include "perturbations/UniformGradient.hpp"
+#include "perturbations/Light.hpp"
+#include "perturbations/LightParameters.hpp"
 #include "primitives/Bend.hpp"
 #include "primitives/Bond.hpp"
 #include "primitives/Inversion.hpp"
@@ -470,6 +472,11 @@ namespace OpenMD {
       forceModifiers_.push_back(eGrad);
     }
 
+    if (info_->getSimParams()->getLightParameters()->getUseLight()) {
+      Perturbations::Light* light = new Perturbations::Light(info_);
+      forceModifiers_.push_back(light);
+    }
+    
     // Initialize the force modifiers (order matters)
     if (info_->getSimParams()->getUseThermodynamicIntegration()) {
       ThermoIntegrationForceModifier* thermoInt =

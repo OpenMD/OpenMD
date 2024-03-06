@@ -197,8 +197,16 @@ namespace OpenMD {
       RealType nuclearKE =
           this->getTranslationalKinetic() + this->getRotationalKinetic();
 
-      RealType temperature =
-          (2.0 * nuclearKE) / (info_->getNdf() * Constants::kb);
+      RealType temperature{};
+
+      // With no degrees of freedom, T is not well defined, but we'll
+      // set to zero.
+      
+      if (info_->getNdf() > 0)
+	temperature = (2.0 * nuclearKE) / (info_->getNdf() * Constants::kb);
+      else
+	temperature = 0.0;
+      
 
       snap->setTemperature(temperature);
     }

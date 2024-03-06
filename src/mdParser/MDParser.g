@@ -47,6 +47,7 @@ tokens
   ORIENTATION       = "orientation";
   FLUCQ             = "flucQ";
   RNEMD             = "RNEMD";
+  LIGHT             = "light";
   MINIMIZER         = "minimizer";
   FIXED             = "Fixed";
   HARMONIC          = "Harmonic";
@@ -82,6 +83,7 @@ statement : assignment
     | restraintblock
     | flucqblock
     | rnemdblock
+    | lightblock
     | minimizerblock
     ;
 
@@ -108,6 +110,9 @@ flucqblock  : FLUCQ^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
     ;
 
 rnemdblock  : RNEMD^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
+    ;
+
+lightblock  : LIGHT^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
     ;
 
 minimizerblock  : MINIMIZER^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}

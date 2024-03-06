@@ -57,6 +57,7 @@ public:
 	public: void restraintblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void flucqblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void rnemdblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void lightblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void minimizerblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void constant(ANTLR_USE_NAMESPACE(antlr)RefAST _t,
 		ANTLR_USE_NAMESPACE(antlr)RefAST id
@@ -99,10 +100,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 80;
+	static const int NUM_TOKENS = 81;
 #else
 	enum {
-		NUM_TOKENS = 80
+		NUM_TOKENS = 81
 	};
 #endif
 	

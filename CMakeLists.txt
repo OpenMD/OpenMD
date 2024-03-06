@@ -551,6 +551,7 @@ src/nonbonded/Mie.cpp
 src/nonbonded/SC.cpp
 src/nonbonded/Sticky.cpp
 src/nonbonded/SwitchingFunction.cpp
+src/perturbations/LightParameters.cpp
 src/primitives/Atom.cpp
 src/primitives/Bend.cpp
 src/primitives/DirectionalAtom.cpp
@@ -667,6 +668,7 @@ src/nonbonded/Electrostatic.cpp
 src/optimization/PotentialEnergyObjectiveFunction.cpp
 src/parallel/ForceDecomposition.cpp
 src/parallel/ForceMatrixDecomposition.cpp
+src/perturbations/Light.cpp
 src/perturbations/UniformField.cpp
 src/perturbations/MagneticField.cpp
 src/perturbations/UniformGradient.cpp

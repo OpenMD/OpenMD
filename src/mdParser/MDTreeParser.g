@@ -42,6 +42,7 @@ statement : assignment
     | restraintblock
     | flucqblock
     | rnemdblock
+    | lightblock
     | minimizerblock
     ;
 
@@ -91,6 +92,11 @@ flucqblock  : #(FLUCQ  {FluctuatingChargeParameters* flucQpars = new Fluctuating
 rnemdblock  : #(RNEMD  {RNEMD::RNEMDParameters* rnemdPars = new RNEMD::RNEMDParameters(); blockStack.push(rnemdPars);}
             (assignment)* 
             ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addRNEMDParameters(rnemdPars);}
+    ;
+
+lightblock  : #(LIGHT  {Perturbations::LightParameters* lightPars = new Perturbations::LightParameters(); blockStack.push(lightPars);}
+            (assignment)* 
+            ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addLightParameters(lightPars);}
     ;
 
 minimizerblock  : #(MINIMIZER  {MinimizerParameters* minimizerPars = new MinimizerParameters(); blockStack.push(minimizerPars);}
