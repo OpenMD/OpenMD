@@ -1,7 +1,7 @@
 # Top level cmake script for OpenMD.
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
 
-project(OpenMD VERSION 3.1.0 LANGUAGES CXX)
+project(OpenMD VERSION 3.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -129,7 +129,7 @@ include(CheckCXXSymbolExists)
 
 # OpenMD version number.
 set (VERSION_MAJOR "3")
-set (VERSION_MINOR "1")
+set (VERSION_MINOR "0")
 set (VERSION_TINY "0")
 option(SINGLE_PRECISION "Build Single precision (float) version" OFF)
 
@@ -354,17 +354,17 @@ ENDIF(PERL_FOUND)
 SET(PERL_INSTALLDIRS "site" CACHE STRING "Perl installation
 locations")
 
-FIND_PACKAGE(Python3 COMPONENTS Interpreter)
+set (Python3_FIND_STRATEGY LOCATION)
+find_package(Python3 COMPONENTS Interpreter NumPy)
 IF(Python3_Interpreter_FOUND)
   SET(PYTHON ${Python3_EXECUTABLE})
 ELSE(Python3_Interpreter_FOUND)
-  MESSAGE(STATUS "Failed to find python - some scripts will not be made")
+  MESSAGE(STATUS "Failed to find python3 - some scripts will not be made")
 ENDIF(Python3_Interpreter_FOUND)
 
-FIND_PACKAGE(NumPy)
-IF(NOT NUMPY_FOUND)
+IF(NOT Python3_NumPy_FOUND)
   MESSAGE(STATUS "Failed to find NumPy - some scripts will not be made")
-ENDIF(NOT NUMPY_FOUND)
+ENDIF(NOT Python3_NumPy_FOUND)
 
 FIND_PACKAGE(SciPy)
 IF(NOT SCIPY_FOUND)
