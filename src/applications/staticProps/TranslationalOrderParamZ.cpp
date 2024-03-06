@@ -132,8 +132,8 @@ namespace OpenMD {
 
     if (distance < len_) {
       int whichBin = int(distance / deltaR_);
-      int zBin1 = int(nBins_ * (0.5 * boxZ + pos1[axis_]) / boxZ);
-      int zBin2 = int(nBins_ * (0.5 * boxZ + pos2[axis_]) / boxZ);
+      int zBin1 = int(nZBins_ * (0.5 * boxZ + pos1[axis_]) / boxZ);
+      int zBin2 = int(nZBins_ * (0.5 * boxZ + pos2[axis_]) / boxZ);
 
       histogram_[whichBin][zBin1] += 1;
       histogram_[whichBin][zBin2] += 1;      
