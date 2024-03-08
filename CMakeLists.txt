@@ -1,7 +1,7 @@
 # Top level cmake script for OpenMD.
 cmake_minimum_required(VERSION 3.15)
 
-project(OpenMD VERSION 3.0.0 LANGUAGES CXX)
+project(OpenMD VERSION 3.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -129,7 +129,7 @@ include(CheckCXXSymbolExists)
 
 # OpenMD version number.
 set (VERSION_MAJOR "3")
-set (VERSION_MINOR "0")
+set (VERSION_MINOR "1")
 set (VERSION_TINY "0")
 option(SINGLE_PRECISION "Build Single precision (float) version" OFF)
 
