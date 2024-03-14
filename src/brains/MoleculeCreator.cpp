@@ -54,6 +54,7 @@
 #include <cassert>
 #include <set>
 #include <typeinfo>
+#include <format>  // C++20
 
 #include "primitives/GhostBend.hpp"
 #include "primitives/GhostTorsion.hpp"
@@ -63,6 +64,7 @@
 #include "types/FixedBondType.hpp"
 #include "types/InversionTypeParser.hpp"
 #include "types/TorsionTypeParser.hpp"
+#include "types/FixedChargeAdapter.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
 
@@ -234,17 +236,50 @@ namespace OpenMD {
                                     LocalIndexManager* localIndexMan) {
     AtomType* atomType;
     Atom* atom;
-
+    
     atomType = ff->getAtomType(stamp->getType());
     if (atomType == NULL) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "Can not find Matching Atom Type for[%s]",
                stamp->getType().c_str());
-
+      
       painCave.isFatal = 1;
       simError();
     }
 
+    if (stamp->hasOverride()) {        
+      std::string baseType = atomType->getName();
+      RealType oc = stamp->getOverrideCharge();
+      
+      // Create a new atom type name that builds in the override charge:
+      std::ostringstream ss;
+      ss << oc;
+      std::string atomTypeOverrideName = baseType + "_q=" + ss.str();
+      
+      // Maybe we've seen this before?
+      
+      AtomType* atB = ff->getAtomType(atomTypeOverrideName);
+        
+      if (atB == NULL) {
+        // Nope, we've never seen it before, so make a new one:        
+        AtomType* atomTypeOverride = new AtomType();
+        // Base points to the atomType we already found
+        atomTypeOverride->useBase(atomType);
+        int ident = ff->getNAtomType();
+        atomTypeOverride->setIdent(ident);
+        atomTypeOverride->setName(atomTypeOverrideName);
+        ff->addAtomType(atomTypeOverrideName, atomTypeOverride);
+        FixedChargeAdapter fca = FixedChargeAdapter(atomTypeOverride);
+        RealType charge = ff->getForceFieldOptions().getChargeUnitScaling() * oc;
+        fca.makeFixedCharge(charge);
+        // officially use override type for this atom
+        atomType = atomTypeOverride;
+      } else {
+        // we've previously created the override type for this atom, so use that one:
+        atomType = atB;
+      }        
+    }
+    
     // below code still have some kind of hard-coding smell
     if (atomType->isDirectional()) {
       DirectionalAtom* dAtom;
