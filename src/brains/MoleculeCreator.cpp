@@ -54,7 +54,6 @@
 #include <cassert>
 #include <set>
 #include <typeinfo>
-#include <format>  // C++20
 
 #include "primitives/GhostBend.hpp"
 #include "primitives/GhostTorsion.hpp"
