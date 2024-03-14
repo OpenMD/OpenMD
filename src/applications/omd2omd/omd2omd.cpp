@@ -178,8 +178,12 @@ int main(int argc, char* argv[]) {
 
     newSnap->setThermostat(oldSnap->getThermostat());
     newSnap->setBarostat(oldSnap->getBarostat());
-
-    COM = thermo.getCom();
+    
+    if (args_info.noCOM_flag) {
+      COM = V3Zero;
+    } else {
+      COM = thermo.getCom();
+    }
 
     int newIndex = 0;
     for (mol = oldInfo->beginMolecule(miter); mol != NULL;
@@ -195,12 +199,16 @@ int main(int argc, char* argv[]) {
               if (args_info.repairMolecules_arg == 1) {
                 relPos = sd->getPos() - molCOM;
                 oldPos = molCOM - COM + translate;
-                oldSnap->wrapVector(relPos);
-                oldSnap->wrapVector(oldPos);
+                if (!args_info.noWrap_flag) {
+                  oldSnap->wrapVector(relPos);
+                  oldSnap->wrapVector(oldPos);
+                }
                 oldPos += relPos;
               } else {
                 oldPos = sd->getPos() - COM + translate;
-                oldSnap->wrapVector(oldPos);
+                if (!args_info.noWrap_flag) {                 
+                  oldSnap->wrapVector(oldPos);
+                }
               }
 
               newPos = rotMatrix * oldPos + trans * oldHmat;

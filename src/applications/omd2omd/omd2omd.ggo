@@ -33,3 +33,5 @@ option	"rotatePhi"	p	"rotate all coordinates Euler angle Phi"	        double def
 option	"rotateTheta"	q	"rotate all coordinates Euler angle Theta"              double default="0.0"		no
 option	"rotatePsi"	r	"rotate all coordinates Euler angle Psi"                double default="0.0"		no
 option  "repairMolecules" m     "rewrap molecules around the molecular center of mass"  int    default="1"              no
+option  "noWrap"        -       "do not rewrap coordinates into the box"                flag   off
+option  "noCOM"        -        "do not use Center of Mass as origin of the box"                flag   off

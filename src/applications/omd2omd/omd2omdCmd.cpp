@@ -47,10 +47,13 @@ const char *gengetopt_args_info_help[] = {
   "  -q, --rotateTheta=DOUBLE   rotate all coordinates Euler angle Theta\n                               (default=`0.0')",
   "  -r, --rotatePsi=DOUBLE     rotate all coordinates Euler angle Psi\n                               (default=`0.0')",
   "  -m, --repairMolecules=INT  rewrap molecules around the molecular center of\n                               mass  (default=`1')",
+  "      --noWrap               do not rewrap coordinates into the box\n                               (default=off)",
+  "      --noCOM                do not use Center of Mass as origin of the box\n                               (default=off)",
     0
 };
 
 typedef enum {ARG_NO
+  , ARG_FLAG
   , ARG_STRING
   , ARG_INT
   , ARG_DOUBLE
@@ -88,6 +91,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->rotateTheta_given = 0 ;
   args_info->rotatePsi_given = 0 ;
   args_info->repairMolecules_given = 0 ;
+  args_info->noWrap_given = 0 ;
+  args_info->noCOM_given = 0 ;
 }
 
 static
@@ -118,6 +123,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->rotatePsi_orig = NULL;
   args_info->repairMolecules_arg = 1;
   args_info->repairMolecules_orig = NULL;
+  args_info->noWrap_flag = 0;
+  args_info->noCOM_flag = 0;
   
 }
 
@@ -140,6 +147,8 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->rotateTheta_help = gengetopt_args_info_help[11] ;
   args_info->rotatePsi_help = gengetopt_args_info_help[12] ;
   args_info->repairMolecules_help = gengetopt_args_info_help[13] ;
+  args_info->noWrap_help = gengetopt_args_info_help[14] ;
+  args_info->noCOM_help = gengetopt_args_info_help[15] ;
   
 }
 
@@ -309,6 +318,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "rotatePsi", args_info->rotatePsi_orig, 0);
   if (args_info->repairMolecules_given)
     write_into_file(outfile, "repairMolecules", args_info->repairMolecules_orig, 0);
+  if (args_info->noWrap_given)
+    write_into_file(outfile, "noWrap", 0, 0 );
+  if (args_info->noCOM_given)
+    write_into_file(outfile, "noCOM", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -1083,6 +1096,9 @@ int update_arg(void *field, char **orig_field,
     val = possible_values[found];
 
   switch(arg_type) {
+  case ARG_FLAG:
+    *((int *)field) = !*((int *)field);
+    break;
   case ARG_INT:
     if (val) *((int *)field) = strtol (val, &stop_char, 0);
     break;
@@ -1117,6 +1133,7 @@ int update_arg(void *field, char **orig_field,
   /* store the original value */
   switch(arg_type) {
   case ARG_NO:
+  case ARG_FLAG:
     break;
   default:
     if (value && orig_field) {
@@ -1196,6 +1213,8 @@ cmdline_parser_internal (
         { "rotateTheta",	1, NULL, 'q' },
         { "rotatePsi",	1, NULL, 'r' },
         { "repairMolecules",	1, NULL, 'm' },
+        { "noWrap",	0, NULL, 0 },
+        { "noCOM",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -1371,6 +1390,32 @@ cmdline_parser_internal (
           break;
 
         case 0:	/* Long option with no short option */
+          /* do not rewrap coordinates into the box.  */
+          if (strcmp (long_options[option_index].name, "noWrap") == 0)
+          {
+          
+          
+            if (update_arg((void *)&(args_info->noWrap_flag), 0, &(args_info->noWrap_given),
+                &(local_args_info.noWrap_given), optarg, 0, 0, ARG_FLAG,
+                check_ambiguity, override, 1, 0, "noWrap", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* do not use Center of Mass as origin of the box.  */
+          else if (strcmp (long_options[option_index].name, "noCOM") == 0)
+          {
+          
+          
+            if (update_arg((void *)&(args_info->noCOM_flag), 0, &(args_info->noCOM_given),
+                &(local_args_info.noCOM_given), optarg, 0, 0, ARG_FLAG,
+                check_ambiguity, override, 1, 0, "noCOM", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          
+          break;
         case '?':	/* Invalid option.  */
           /* `getopt_long' already printed an error message.  */
           goto failure;

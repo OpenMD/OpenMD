@@ -75,6 +75,10 @@ struct gengetopt_args_info
   int repairMolecules_arg;	/**< @brief rewrap molecules around the molecular center of mass (default='1').  */
   char * repairMolecules_orig;	/**< @brief rewrap molecules around the molecular center of mass original value given at command line.  */
   const char *repairMolecules_help; /**< @brief rewrap molecules around the molecular center of mass help description.  */
+  int noWrap_flag;	/**< @brief do not rewrap coordinates into the box (default=off).  */
+  const char *noWrap_help; /**< @brief do not rewrap coordinates into the box help description.  */
+  int noCOM_flag;	/**< @brief do not use Center of Mass as origin of the box (default=off).  */
+  const char *noCOM_help; /**< @brief do not use Center of Mass as origin of the box help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -90,6 +94,8 @@ struct gengetopt_args_info
   unsigned int rotateTheta_given ;	/**< @brief Whether rotateTheta was given.  */
   unsigned int rotatePsi_given ;	/**< @brief Whether rotatePsi was given.  */
   unsigned int repairMolecules_given ;	/**< @brief Whether repairMolecules was given.  */
+  unsigned int noWrap_given ;	/**< @brief Whether noWrap was given.  */
+  unsigned int noCOM_given ;	/**< @brief Whether noCOM was given.  */
 
   char **inputs ; /**< @brief unnamed options (options without names) */
   unsigned inputs_num ; /**< @brief unnamed options number */

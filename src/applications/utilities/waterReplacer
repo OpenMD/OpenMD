@@ -11,6 +11,7 @@ Options:
   -h, --help              show this help
   -x,                     use the specified input (.xyz) file
   -o, --output-file=...   use specified output (.omd) file
+  -s, --starting-index=.  start the water objects with an index
 
 
 Example:
@@ -117,7 +118,7 @@ def findWaters():
                 ux = [0.0, 0.0, 0.0]
                 uy = [0.0, 0.0, 0.0]
                 uz = [0.0, 0.0, 0.0]
-                RotMat = numpy.zeros((3, 3), numpy.float)
+                RotMat = numpy.zeros((3, 3), numpy.float_)
 
                 for j in range(3):
                     bisector[j] = 0.5*(positions[H[0]][j] + positions[H[1]][j])
@@ -175,7 +176,7 @@ def findWaters():
                 Eliminate.append(H[1])
 
 
-def writeFile(outputFileName):
+def writeFile(outputFileName, startingIndex):
     outputFile = open(outputFileName, 'w')
 
     outputFile.write("<OpenMD version=1>\n");
@@ -192,7 +193,7 @@ def writeFile(outputFileName):
 
     sdFormat = 'pvqj'
 
-    index = 0
+    index = startingIndex        
     for i in range(len(WaterPos)):
         outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (index, sdFormat, WaterPos[i][0], WaterPos[i][1], WaterPos[i][2], 0.0, 0.0, 0.0, WaterQuats[i][0], WaterQuats[i][1], WaterQuats[i][2], WaterQuats[i][3], 0.0, 0.0, 0.0))
         index = index + 1
@@ -233,10 +234,11 @@ def cross(L1, L2):
 
 def main(argv):                         
     try:                                
-        opts, args = getopt.getopt(argv, "hx:o:", ["help", "xyz-file=", "output-file="]) 
+        opts, args = getopt.getopt(argv, "hx:o:s:", ["help", "xyz-file=", "output-file=", "starting-index="]) 
     except getopt.GetoptError:           
         usage()                          
-        sys.exit(2)                     
+        sys.exit(2)
+    startingIndex = 0
     for opt, arg in opts:                
         if opt in ("-h", "--help"):      
             usage()                     
@@ -249,6 +251,8 @@ def main(argv):
             outputFileName = arg
             global _haveOutputFileName
             _haveOutputFileName = 1
+        elif opt in ("-s", "--starting-index"): 
+            startingIndex = int(arg)
     if (_haveXYZFileName != 1):
         usage() 
         print("No XYZ file was specified")
@@ -259,7 +263,7 @@ def main(argv):
         sys.exit()
     readFile(xyzFileName)
     findWaters()
-    writeFile(outputFileName)
+    writeFile(outputFileName, startingIndex)
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
