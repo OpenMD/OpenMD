@@ -55,9 +55,7 @@ namespace OpenMD {
 
   ElementsTable etab;
 
-  ElementsTable::ElementsTable() {
-    init_     = false;
-  }
+  ElementsTable::ElementsTable() { init_ = false; }
 
   ElementsTable::~ElementsTable() {
     std::vector<Element*>::iterator i;

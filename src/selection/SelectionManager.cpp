@@ -618,6 +618,65 @@ namespace OpenMD {
     return atomTypes;
   }
 
+  SelectionManager SelectionManager::replaceRigidBodiesWithAtoms() const {
+    SelectionSet ssAtoms(nObjects_);
+    ssAtoms.clearAll();
+
+    SelectionSet ssRBs(nObjects_);
+    ssRBs.clearAll();
+
+    SelectionManager tempSeleMan = *this;
+
+    StuntDouble* sd;
+    int isd;
+    std::vector<Atom*>::iterator ai;
+    Atom* atom;
+    for (sd = tempSeleMan.beginSelected(isd); sd != NULL;
+         sd = tempSeleMan.nextSelected(isd)) {
+      if (sd->isRigidBody()) {
+        RigidBody* rb = static_cast<RigidBody*>(sd);
+        for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
+          ssAtoms.bitsets_[STUNTDOUBLE].setBitOn(atom->getGlobalIndex());
+        }
+
+        ssRBs.bitsets_[STUNTDOUBLE].setBitOn(rb->getGlobalIndex());
+      }
+    }
+
+    // Add the atoms in rigid bodies and remove those rigid bodies from our
+    // selection set.
+    tempSeleMan.ss_ |= ssAtoms;
+    tempSeleMan.ss_ -= ssRBs;
+
+    return tempSeleMan;
+  }
+
+  SelectionManager SelectionManager::removeAtomsInRigidBodies() const {
+    SelectionSet ssAtoms(nObjects_);
+    ssAtoms.clearAll();
+
+    SelectionManager tempSeleMan = *this;
+
+    StuntDouble* sd;
+    int isd;
+    std::vector<Atom*>::iterator ai;
+    Atom* atom;
+    for (sd = tempSeleMan.beginSelected(isd); sd != NULL;
+         sd = tempSeleMan.nextSelected(isd)) {
+      if (sd->isRigidBody()) {
+        RigidBody* rb = static_cast<RigidBody*>(sd);
+        for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
+          ssAtoms.bitsets_[STUNTDOUBLE].setBitOn(atom->getGlobalIndex());
+        }
+      }
+    }
+
+    // Remove the atoms in rigid bodies from our selection set.
+    tempSeleMan.ss_ -= ssAtoms;
+
+    return tempSeleMan;
+  }
+
   SelectionManager operator|(const SelectionManager& sman1,
                              const SelectionManager& sman2) {
     SelectionManager result(sman1);

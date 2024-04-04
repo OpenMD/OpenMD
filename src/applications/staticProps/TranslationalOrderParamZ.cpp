@@ -58,11 +58,10 @@ namespace OpenMD {
       SimInfo* info, const std::string& filename, const std::string& sele1,
       const std::string& sele2, double rCut, int nrbins, int nzbins,
       RealType len, RealType zlen, int axis) :
-    RadialDistrFunc(info, filename, sele1, sele2, nrbins), rCut_(rCut),
-    nZBins_(nzbins), len_(len), zLen_(zlen), axis_(axis) {
-    
+      RadialDistrFunc(info, filename, sele1, sele2, nrbins),
+      rCut_(rCut), nZBins_(nzbins), len_(len), zLen_(zlen), axis_(axis) {
     setOutputName(getPrefix(filename) + ".Tz");
-    
+
     deltaR_ = len_ / (double)nBins_;
     deltaZ_ = zLen_ / (double)nZBins_;
 
@@ -73,10 +72,10 @@ namespace OpenMD {
       avgGofr_[i].resize(nZBins_);
     }
     Tz_.resize(nZBins_);
-    
+
     // Set up cutoff radius:
     rCut_ = rCut;
-    
+
     // Compute complementary axes to the privileged axis
     xaxis_ = (axis_ + 1) % 3;
     yaxis_ = (axis_ + 2) % 3;
@@ -110,7 +109,7 @@ namespace OpenMD {
     Mat3x3d hmat = currentSnapshot_->getHmat();
     zBox_.push_back(hmat(axis_, axis_));
   }
-     
+
   void TranslationalOrderParamZ::collectHistogram(StuntDouble* sd1,
                                                   StuntDouble* sd2) {
     if (sd1 == sd2) { return; }
@@ -132,11 +131,11 @@ namespace OpenMD {
 
     if (distance < len_) {
       int whichBin = int(distance / deltaR_);
-      int zBin1 = int(nZBins_ * (0.5 * boxZ + pos1[axis_]) / boxZ);
-      int zBin2 = int(nZBins_ * (0.5 * boxZ + pos2[axis_]) / boxZ);
+      int zBin1    = int(nZBins_ * (0.5 * boxZ + pos1[axis_]) / boxZ);
+      int zBin2    = int(nZBins_ * (0.5 * boxZ + pos2[axis_]) / boxZ);
 
       histogram_[whichBin][zBin1] += 1;
-      histogram_[whichBin][zBin2] += 1;      
+      histogram_[whichBin][zBin2] += 1;
     }
   }
 
@@ -144,46 +143,42 @@ namespace OpenMD {
     int nPairs = getNPairs();
     RealType volume =
         info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
-    RealType pairDensity  = 2 * nPairs / volume;
+    RealType pairDensity = 2 * nPairs / volume;
 
     for (unsigned int i = 0; i < histogram_.size(); ++i) {
       RealType rLower = i * deltaR_;
       RealType rUpper = rLower + deltaR_;
-      RealType volSlice = 4.0 * Constants::PI *
-        (pow(rUpper, 3) - pow(rLower, 3)) / 3.0;
+      RealType volSlice =
+          4.0 * Constants::PI * (pow(rUpper, 3) - pow(rLower, 3)) / 3.0;
       RealType nIdeal = volSlice * pairDensity / nZBins_;
-    
-      for (unsigned int j = 0; j < histogram_[i].size(); ++j) {        
+
+      for (unsigned int j = 0; j < histogram_[i].size(); ++j) {
         avgGofr_[i][j] += histogram_[i][j] / nIdeal;
       }
     }
   }
 
   void TranslationalOrderParamZ::postProcess() {
-    
     for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
       for (unsigned int j = 0; j < avgGofr_[i].size(); ++j) {
         avgGofr_[i][j] /= nProcessed_;
       }
     }
-    
+
     for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
       RealType rLower = i * deltaR_;
       RealType rUpper = rLower + deltaR_;
 
       for (unsigned int j = 0; j < avgGofr_[i].size(); ++j) {
-        if (rUpper < rCut_)
-          Tz_[j] += std::fabs(avgGofr_[i][j] - 1.0) * deltaR_;
+        if (rUpper < rCut_) Tz_[j] += std::fabs(avgGofr_[i][j] - 1.0) * deltaR_;
       }
     }
 
     // normalize by cutoff radius
     for (unsigned int j = 0; j < Tz_.size(); ++j) {
-	Tz_[j] /= rCut_;
+      Tz_[j] /= rCut_;
     }
-    
   }
-
 
   void TranslationalOrderParamZ::writeRdf() {
     // compute average box length:
@@ -215,7 +210,7 @@ namespace OpenMD {
 
       for (unsigned int i = 0; i < Tz_.size(); ++i) {
         RealType z = zAve * (i + 0.5) / Tz_.size();
-        tZstream << z << "\t" << Tz_[i] << "\n";        
+        tZstream << z << "\t" << Tz_[i] << "\n";
       }
 
     } else {

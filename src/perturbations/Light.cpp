@@ -58,90 +58,87 @@
 
 namespace OpenMD::Perturbations {
   Light::Light(SimInfo* info) :
-    ForceModifier {info}, initialized {false}, doLight {false},
-    doParticlePot {false}, info_(info) {
-      lightParams = info_->getSimParams()->getLightParameters();
-      
-    }
+      ForceModifier {info}, initialized {false}, doLight {false},
+      doParticlePot {false}, info_(info) {
+    lightParams = info_->getSimParams()->getLightParameters();
+  }
 
-  void Light::initialize() {    
-    bool haveE0 = false;
-    bool haveDirection = false;
-    bool haveFrequency = false;
+  void Light::initialize() {
+    bool haveE0           = false;
+    bool haveDirection    = false;
+    bool haveFrequency    = false;
     bool havePolarization = false;
 
     if (lightParams->haveWaveVector()) {
       std::vector<RealType> k = lightParams->getWaveVector();
       // wave vectors are input in inverse angstroms, so no unit conversion:
-      k_.x() = k[0];
-      k_.y() = k[1];
-      k_.z() = k[2];
-      kmag_ = k_.length();
-      lambda_ = 2.0 * Constants::PI / kmag_;
-      omega_ =  2.0 * Constants::PI * Constants::c / lambda_;
+      k_.x()        = k[0];
+      k_.y()        = k[1];
+      k_.z()        = k[2];
+      kmag_         = k_.length();
+      lambda_       = 2.0 * Constants::PI / kmag_;
+      omega_        = 2.0 * Constants::PI * Constants::c / lambda_;
       haveFrequency = true;
-      khat_ = k_;
+      khat_         = k_;
       khat_.normalize();
       haveDirection = true;
     }
 
     if (lightParams->havePropagationDirection()) {
       if (haveDirection) {
-	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                  "light: please specify either waveVector or "
-		 "propagationDirection, but not both.\n");
+                 "propagationDirection, but not both.\n");
         painCave.isFatal = 1;
         simError();
       }
       std::vector<RealType> pd = lightParams->getPropagationDirection();
-      khat_.x() = pd[0];
-      khat_.y() = pd[1];
-      khat_.z() = pd[2];
+      khat_.x()                = pd[0];
+      khat_.y()                = pd[1];
+      khat_.z()                = pd[2];
       khat_.normalize();
       haveDirection = true;
     }
 
     if (lightParams->haveWavelength()) {
       if (haveFrequency) {
-	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                  "light: please specify one of: waveVector, wavelength, or"
-		 "frequency (but only one of these).\n");
+                 "frequency (but only one of these).\n");
         painCave.isFatal = 1;
         simError();
       }
       // wavelengths are entered in nm to work with experimentalists.
       // Convert to angstroms:
-      lambda_ = lightParams->getWavelength() * 10.0;      
-      omega_ =  2.0 * Constants::PI * Constants::c / lambda_;
-      kmag_ = 2.0 * Constants::PI / lambda_;
+      lambda_       = lightParams->getWavelength() * 10.0;
+      omega_        = 2.0 * Constants::PI * Constants::c / lambda_;
+      kmag_         = 2.0 * Constants::PI / lambda_;
       haveFrequency = true;
     }
-    
+
     if (lightParams->haveFrequency()) {
       if (haveFrequency) {
-	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                  "light: please specify one of: waveVector, wavelength, or"
-		 "frequency (but only one of these).\n");
+                 "frequency (but only one of these).\n");
         painCave.isFatal = 1;
         simError();
       }
       // frequencies are entered in Hz to work with experimentalists.
       // Convert to fs^-1
-      omega_ = lightParams->getFrequency() * 1.0e-15;
-      lambda_ = 2.0 * Constants::PI * Constants::c / omega_;
-      kmag_ = 2.0 * Constants::PI / lambda_;
+      omega_        = lightParams->getFrequency() * 1.0e-15;
+      lambda_       = 2.0 * Constants::PI * Constants::c / omega_;
+      kmag_         = 2.0 * Constants::PI / lambda_;
       haveFrequency = true;
     }
 
-    if (haveFrequency && haveDirection) {
-      k_ = khat_ * kmag_;
-    }
+    if (haveFrequency && haveDirection) { k_ = khat_ * kmag_; }
 
     if (lightParams->haveIntensity()) {
       RealType intense = lightParams->getIntensity();
       // intensities are input in W/cm^2
-      intense *= 1.439326e-11; 
-      E0_ = std::sqrt( 2.0 * intense / (Constants::epsilon0 * Constants::c));
+      intense *= 1.439326e-11;
+      E0_ = std::sqrt(2.0 * intense / (Constants::epsilon0 * Constants::c));
       // E0 now has units of kcal/mol e^-1 Angstroms^-1
       haveE0 = true;
     }
@@ -150,76 +147,77 @@ namespace OpenMD::Perturbations {
     jones_.clear();
     jones_.reserve(2);
     std::map<std::string, LightPolarization> stringToPolarization;
-    
-    stringToPolarization["X"]          = lightX;
-    stringToPolarization["Y"]          = lightY;
-    stringToPolarization["+"]          = lightPlus;
-    stringToPolarization["-"]          = lightMinus;                 
-    
+
+    stringToPolarization["X"] = lightX;
+    stringToPolarization["Y"] = lightY;
+    stringToPolarization["+"] = lightPlus;
+    stringToPolarization["-"] = lightMinus;
+
     if (lightParams->havePolarization()) {
-      std::string lpl = lightParams->getPolarization();
+      std::string lpl      = lightParams->getPolarization();
       LightPolarization lp = stringToPolarization.find(lpl)->second;
       switch (lp) {
       case lightX:
-	jones_[0] = {1.0, 0.0};
-	jones_[1] = {0.0, 0.0};
-	havePolarization = true;
-	break;
+        jones_[0]        = {1.0, 0.0};
+        jones_[1]        = {0.0, 0.0};
+        havePolarization = true;
+        break;
       case lightY:
-	jones_[0] = {0.0, 0.0};
-	jones_[1] = {1.0, 0.0};
-	havePolarization = true;
-	break;
+        jones_[0]        = {0.0, 0.0};
+        jones_[1]        = {1.0, 0.0};
+        havePolarization = true;
+        break;
       case lightPlus:
-	jones_[0] = {1.0, 0.0};
-	jones_[1] = {0.0, 1.0};
-	havePolarization = true;       	
-	break;
+        jones_[0]        = {1.0, 0.0};
+        jones_[1]        = {0.0, 1.0};
+        havePolarization = true;
+        break;
       case lightMinus:
-	jones_[0] = {1.0, 0.0};
-	jones_[1] = {0.0, -1.0};
-	havePolarization = true;
-	break;
-      default:	      
-	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-		 "Light: Unknown polarization type\n"); 
-	painCave.isFatal  = 1;
-	painCave.severity = OPENMD_ERROR;
-	simError();
-	break;
+        jones_[0]        = {1.0, 0.0};
+        jones_[1]        = {0.0, -1.0};
+        havePolarization = true;
+        break;
+      default:
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Light: Unknown polarization type\n");
+        painCave.isFatal  = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
+        break;
       }
-	
+
     } else {
       std::string allowedPolarizations;
       int currentLineLength = 0;
-      
+
       for (std::map<std::string, LightPolarization>::iterator polStrIter =
-	     stringToPolarization.begin();
+               stringToPolarization.begin();
            polStrIter != stringToPolarization.end(); ++polStrIter) {
         allowedPolarizations += polStrIter->first + ", ";
         currentLineLength += polStrIter->first.length() + 2;
-	
+
         if (currentLineLength >= 50) {
           allowedPolarizations += "\n\t\t";
           currentLineLength = 0;
         }
       }
-      
+
       allowedPolarizations.erase(allowedPolarizations.length() - 2, 2);
-      
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "Light: No polarization was set in the omd file. This parameter\n"
-               "\tmust be set to use Light, and can take any of these values:\n"
-               "\t\t%s.\n",
-               allowedPolarizations.c_str());
+
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "Light: No polarization was set in the omd file. This parameter\n"
+          "\tmust be set to use Light, and can take any of these values:\n"
+          "\t\t%s.\n",
+          allowedPolarizations.c_str());
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
-      simError();      
+      simError();
     }
 
     if (haveE0 && haveDirection && haveFrequency && havePolarization) {
       doLight = true;
-    } else {   
+    } else {
       if (!haveDirection) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                  "Light: could not determine direction of propagation.\n");
@@ -252,17 +250,16 @@ namespace OpenMD::Perturbations {
     // Relatively simple Euler angles between khat_ and lab frame:
 
     RealType psi = 0.0;
-    RealType theta = acos(
-          std::min((RealType)1.0, std::max((RealType)-1.0, khat_[2])));    
+    RealType theta =
+        acos(std::min((RealType)1.0, std::max((RealType)-1.0, khat_[2])));
     RealType phi = std::atan2(-khat_[1], khat_[0]);
-    
+
     if (phi < 0) phi += 2.0 * Constants::PI;
 
     A_.setupRotMat(phi, theta, psi);
     Ainv_ = A_.inverse();
-        
-    initialized = true;
 
+    initialized = true;
   }
 
   void Light::modifyForces() {
@@ -274,19 +271,18 @@ namespace OpenMD::Perturbations {
     Atom* atom;
     AtomType* atype;
     potVec longRangePotential(0.0);
-    int l, m, n;       
-    RealType C{}, U{}, fPot{};
-    Vector3d r{}, rp{}, v{}, f{}, trq{}, D{}, J{}, av{};    
-    Vector3d EFk{}, EF{}, BF{};
-    Mat3x3d I{};
+    int l, m, n;
+    RealType C {}, U {}, fPot {};
+    Vector3d r {}, rp {}, v {}, f {}, trq {}, D {}, J {}, av {};
+    Vector3d EFk {}, EF {}, BF {};
+    Mat3x3d I {};
 
     bool isCharge;
-    
-    if (doLight) {
 
-      RealType t = info_->getSnapshotManager()->getCurrentSnapshot()->getTime();      
-      U    = 0.0;
-      fPot = 0.0;
+    if (doLight) {
+      RealType t = info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
+      U          = 0.0;
+      fPot       = 0.0;
 
       for (mol = info_->beginMolecule(i); mol != NULL;
            mol = info_->nextMolecule(i)) {
@@ -295,50 +291,50 @@ namespace OpenMD::Perturbations {
           C        = 0.0;
 
           atype = atom->getAtomType();
-	  
-	  // We are not wrapping coordinates for light interactions:	  
-          r = atom->getPos();  
-	  v = atom->getVel();
 
-	  rp = A_ * r;  // atom's position in frame of light propagation
-	  
-	  // e^{ i (k*z - omega * t) } is the main oscillatory component:
-	  std::complex<RealType> argument(0.0, kmag_ * rp.z() - omega_ * t);
-	  std::complex<RealType> Ex = E0_ * jones_[0] * std::exp(argument);
-	  std::complex<RealType> Ey = E0_ * jones_[1] * std::exp(argument);
-	  
-	  EFk.x() = Ex.real();
-	  EFk.y() = Ey.real();
-	  EFk.z() = 0.0;
+          // We are not wrapping coordinates for light interactions:
+          r = atom->getPos();
+          v = atom->getVel();
 
-	  EF = Ainv_ * EFk; // electric field rotated back into lab coordinates
+          rp = A_ * r;  // atom's position in frame of light propagation
 
-	  // The magnetic field (BF) is perpendicular to both electric field
-	  // and light propagation direction:
-	  
-	  BF = cross(EF, khat_) / Constants::c; 
-	  
+          // e^{ i (k*z - omega * t) } is the main oscillatory component:
+          std::complex<RealType> argument(0.0, kmag_ * rp.z() - omega_ * t);
+          std::complex<RealType> Ex = E0_ * jones_[0] * std::exp(argument);
+          std::complex<RealType> Ey = E0_ * jones_[1] * std::exp(argument);
+
+          EFk.x() = Ex.real();
+          EFk.y() = Ey.real();
+          EFk.z() = 0.0;
+
+          EF = Ainv_ * EFk;  // electric field rotated back into lab coordinates
+
+          // The magnetic field (BF) is perpendicular to both electric field
+          // and light propagation direction:
+
+          BF = cross(EF, khat_) / Constants::c;
+
           atom->addElectricField(EF);
 
           FixedChargeAdapter fca = FixedChargeAdapter(atype);
           if (fca.isFixedCharge()) {
             isCharge = true;
-            C = fca.getCharge();
+            C        = fca.getCharge();
           }
 
           FluctuatingChargeAdapter fqa = FluctuatingChargeAdapter(atype);
           if (fqa.isFluctuatingCharge()) {
             isCharge = true;
             C += atom->getFlucQPos();
-            atom->addFlucQFrc( dot(r, EF) );
+            atom->addFlucQFrc(dot(r, EF));
           }
 
           if (isCharge) {
             f = C * (EF + cross(v, BF));
-	    atom->addFrc(f);
-	    U = -dot(r, f);
-	    if (doParticlePot) { atom->addParticlePot(U); }
-            fPot += U;	    
+            atom->addFrc(f);
+            U = -dot(r, f);
+            if (doParticlePot) { atom->addParticlePot(U); }
+            fPot += U;
           }
 
           MultipoleAdapter ma = MultipoleAdapter(atype);
@@ -352,9 +348,9 @@ namespace OpenMD::Perturbations {
             J = atom->getJ();
             I = atom->getI();
             if (atom->isLinear()) {
-              l = atom->linearAxis();
-              m = (l + 1) % 3;
-              n = (l + 2) % 3;
+              l     = atom->linearAxis();
+              m     = (l + 1) % 3;
+              n     = (l + 2) % 3;
               av[l] = 0;
               av[m] = J[m] / I(m, m);
               av[n] = J[n] / I(n, n);
@@ -364,10 +360,10 @@ namespace OpenMD::Perturbations {
 
             f = cross(cross(av, D), BF);
             atom->addFrc(f);
-	    
+
             U = -dot(D, EF);
-	    if (doParticlePot) { atom->addParticlePot(U); }
-	    fPot += U;
+            if (doParticlePot) { atom->addParticlePot(U); }
+            fPot += U;
           }
         }
       }
@@ -383,4 +379,4 @@ namespace OpenMD::Perturbations {
       snap->setLongRangePotentials(longRangePotential);
     }
   }
-}  // namespace OpenMD
+}  // namespace OpenMD::Perturbations

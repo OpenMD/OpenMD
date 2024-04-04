@@ -178,7 +178,7 @@ int main(int argc, char* argv[]) {
 
     newSnap->setThermostat(oldSnap->getThermostat());
     newSnap->setBarostat(oldSnap->getBarostat());
-    
+
     if (args_info.noCOM_flag) {
       COM = V3Zero;
     } else {
@@ -206,9 +206,7 @@ int main(int argc, char* argv[]) {
                 oldPos += relPos;
               } else {
                 oldPos = sd->getPos() - COM + translate;
-                if (!args_info.noWrap_flag) {                 
-                  oldSnap->wrapVector(oldPos);
-                }
+                if (!args_info.noWrap_flag) { oldSnap->wrapVector(oldPos); }
               }
 
               newPos = rotMatrix * oldPos + trans * oldHmat;

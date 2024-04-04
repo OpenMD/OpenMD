@@ -76,9 +76,8 @@ namespace OpenMD {
   class MoleculeCount : public ObjectCount {
   public:
     MoleculeCount(SimInfo* info, const std::string& filename,
-		  const std::string& sele);
+                  const std::string& sele);
     virtual void process();
-    
   };
 }  // namespace OpenMD
 

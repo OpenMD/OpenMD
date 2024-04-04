@@ -55,8 +55,8 @@ namespace OpenMD {
    *
    * Computes local translational order parameter t as introduced in:
    *
-   * "Towards a quantification of disorder in materials: Distinguishing 
-   *  equilibrium and glassy sphere packings," by T. M. Truskett, S. Torquato, 
+   * "Towards a quantification of disorder in materials: Distinguishing
+   *  equilibrium and glassy sphere packings," by T. M. Truskett, S. Torquato,
    *  and P. G. Debenedetti, Phys. Rev. E 62(1), pp. 994-1001 (2000).
    *
    * and in:
@@ -83,7 +83,7 @@ namespace OpenMD {
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
     virtual void postProcess();
     virtual void writeRdf();
-    
+
     RealType len_;
     RealType zLen_;
     int nRBins_;

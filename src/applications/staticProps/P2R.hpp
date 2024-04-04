@@ -80,13 +80,13 @@ namespace OpenMD {
     SelectionManager seleMan2_;
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
-    int seleOffset_{};
-    int seleOffset2_{};
+    int seleOffset_ {};
+    int seleOffset2_ {};
 
-    int nProcessed_{};
+    int nProcessed_ {};
 
-    RealType P2_{};
-    int count_{};
+    RealType P2_ {};
+    int count_ {};
   };
 
   class P2Z : public P2R {
@@ -99,16 +99,15 @@ namespace OpenMD {
         const int seleOffset, unsigned int nbins, int axis);
     P2Z(SimInfo* info, const string& filename, const string& sele,
         const int seleOffset, const int seleOffset2, unsigned int nbins,
-	int axis);
+        int axis);
 
     virtual void process();
+
   private:
     int axis_;
     std::string axisLabel_;
-
   };
 
-  
 }  // namespace OpenMD
 
 #endif

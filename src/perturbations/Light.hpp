@@ -49,11 +49,11 @@
 #ifndef PERTURBATIONS_LIGHT_HPP
 #define PERTURBATIONS_LIGHT_HPP
 
+#include <complex>
+
 #include "brains/ForceModifier.hpp"
 #include "brains/SimInfo.hpp"
 #include "perturbations/LightParameters.hpp"
-
-#include <complex>
 
 namespace OpenMD::Perturbations {
 
@@ -121,18 +121,18 @@ namespace OpenMD::Perturbations {
     RealType lambda_;
     RealType kmag_;
     RealType E0_;
-    std::vector<std::complex<RealType>> jones_;  // Jones vector for polarization
+    std::vector<std::complex<RealType>>
+        jones_;  // Jones vector for polarization
     RotMat3x3d A_;
     RotMat3x3d Ainv_;
 
-    enum LightPolarization { 
-      lightX,       // x-plane polarized light
-      lightY,       // y-plane polarized light
-      lightPlus,    // circularly polarized light (clockwise)
-      lightMinus,   // circularly polarized light (counterclockwise)
+    enum LightPolarization {
+      lightX,      // x-plane polarized light
+      lightY,      // y-plane polarized light
+      lightPlus,   // circularly polarized light (clockwise)
+      lightMinus,  // circularly polarized light (counterclockwise)
       lightUnknownPolarization
     };
-
   };
 }  // namespace OpenMD::Perturbations
 

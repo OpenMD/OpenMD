@@ -348,7 +348,7 @@ namespace OpenMD {
     lightPars_ = lightPars;
     return true;
   }
-  
+
   bool Globals::addMinimizerParameters(MinimizerParameters* miniPars) {
     if (minimizerPars_ != NULL) delete minimizerPars_;
 
