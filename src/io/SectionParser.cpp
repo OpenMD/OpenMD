@@ -94,7 +94,7 @@ namespace OpenMD {
         continue;
 
       // Check for beginning of comments and set the approproate flags
-      else if (line[i] == '/' && line[i + 1] == '/')
+      else if ((line[i] == '/' && line[i + 1] == '/') || (line[i] == '#'))
         s_cmt = true, i++;
       else if (line[i] == '/' && line[i + 1] == '*')
         m_cmt = true, i++;

@@ -109,8 +109,8 @@ int main(int argc, char* argv[]) {
   repeatD(2, 2)   = repeat.z();
 
   Vector3d translate =
-      Vector3d(args_info.translateX_arg, args_info.translateY_arg,
-               args_info.translateZ_arg);
+    Vector3d(args_info.translateX_arg, args_info.translateY_arg,
+	     args_info.translateZ_arg);
 
   // parse md file and set up the system
 
@@ -178,38 +178,69 @@ int main(int argc, char* argv[]) {
 
     newSnap->setThermostat(oldSnap->getThermostat());
     newSnap->setBarostat(oldSnap->getBarostat());
+    
+    // Do one loop to re-center and re-rewrap the old system
 
     if (args_info.noCOM_flag) {
       COM = V3Zero;
     } else {
       COM = thermo.getCom();
     }
+    
+    for (mol = oldInfo->beginMolecule(miter); mol != NULL;
+         mol = oldInfo->nextMolecule(miter)) {
+      
+      if (args_info.repairMolecules_arg == 1) {
+	molCOM = mol->getCom();
+      }
+      
+      for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
+	   sd = mol->nextIntegrableObject(iiter)) {
+	
+	if (args_info.repairMolecules_arg == 1) {
+
+	  relPos = sd->getPos() - molCOM;
+	  oldPos = molCOM - COM;
+	  
+	  if (!args_info.noWrap_flag) {
+	    oldSnap->wrapVector(relPos);
+	    oldSnap->wrapVector(oldPos);
+	  }
+	  
+	  oldPos += relPos;
+	  
+	} else {
+	  
+	  oldPos = sd->getPos() - COM;
+
+	  if (!args_info.noWrap_flag) {                 
+	    oldSnap->wrapVector(oldPos);
+	  }
+
+	}
+	sd->setPos(oldPos);
+      }
+    }
+
+    // now a second pass through to translate and rotate into the new
 
     int newIndex = 0;
     for (mol = oldInfo->beginMolecule(miter); mol != NULL;
          mol = oldInfo->nextMolecule(miter)) {
-      if (args_info.repairMolecules_arg == 1) { molCOM = mol->getCom(); }
 
       for (int ii = 0; ii < repeat.x(); ii++) {
         for (int jj = 0; jj < repeat.y(); jj++) {
           for (int kk = 0; kk < repeat.z(); kk++) {
+	    
             Vector3d trans = Vector3d(ii, jj, kk);
+	    
             for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
                  sd = mol->nextIntegrableObject(iiter)) {
-              if (args_info.repairMolecules_arg == 1) {
-                relPos = sd->getPos() - molCOM;
-                oldPos = molCOM - COM + translate;
-                if (!args_info.noWrap_flag) {
-                  oldSnap->wrapVector(relPos);
-                  oldSnap->wrapVector(oldPos);
-                }
-                oldPos += relPos;
-              } else {
-                oldPos = sd->getPos() - COM + translate;
-                if (!args_info.noWrap_flag) { oldSnap->wrapVector(oldPos); }
-              }
+	      
+	      oldPos = sd->getPos();
 
               newPos = rotMatrix * oldPos + trans * oldHmat;
+
               sdNew  = newInfo->getIOIndexToIntegrableObject(newIndex);
               sdNew->setPos(newPos);
               sdNew->setVel(rotMatrix * sd->getVel());
@@ -218,7 +249,6 @@ int main(int argc, char* argv[]) {
                 Mat3x3d bodyRotMat = sd->getA();
                 bodyRotMat         = bodyRotMat * rotMatrix.inverse();
                 sdNew->setA(bodyRotMat);
-
                 sdNew->setJ(rotMatrix * sd->getJ());
               }
 
