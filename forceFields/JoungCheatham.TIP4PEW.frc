@@ -1,0 +1,65 @@
+// Paramters from "Determination of Alkali and Halide Monovalent
+// Ion Parameters for Use in Explicitly Solvated Biomolecular
+// Simulations," by In Suk Joung and Thomas E. Cheatham III
+// The Journal of Physical Chemistry B 2008 112 (30), 9020-9041
+// DOI: 10.1021/jp8001614
+//
+// This version is for use with the TIP4P-EW water model.
+
+begin Options
+      Name      "JoungCheatham-TIP4P-EW"
+      DistanceMixingRule     Arithmetic
+      EnergyMixingRule       Geometric
+end Options
+
+begin BaseAtomTypes
+//name  mass (amu)
+Li      6.941
+Na      22.989769
+K       39.0983
+Rb      85.4678
+Cs      132.90545
+F       18.998403
+Cl      35.453
+Br      79.904
+I       126.90447
+end BaseAtomTypes
+
+begin AtomTypes
+//name  baseatomtype
+Li+     Li
+Na+     Na
+K+      K
+Rb+     Rb
+Cs+     Cs
+F-      F
+Cl-     Cl
+Br-     Br
+I-      I
+end AtomTypes
+
+begin ChargeAtomTypes
+//name  charge
+Li+     1.0
+Na+     1.0
+K+      1.0
+Rb+     1.0
+Cs+     1.0
+F-      -1.0
+Cl-     -1.0
+Br-     -1.0
+I-      -1.0
+end ChargeAtomTypes
+
+begin LennardJonesAtomTypes
+//name  epsilon(kcal/mol) sigma(Angstroms)
+Li+	0.1039884	1.43969232851479
+Na+	0.1684375	2.18448365688011
+K+	0.2794651	2.833
+Rb+	0.4331494	3.04509181860368
+Cs+	0.3944318	3.36403355969792
+F-	0.0015752	4.52220189328036
+Cl-	0.0116615	4.918
+Br-	0.0303773	4.93201530362492
+I-	0.0417082	5.25986603190056
+end LennardJonesAtomTypes
