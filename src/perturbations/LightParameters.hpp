@@ -66,7 +66,6 @@ namespace OpenMD::Perturbations {
     LightParameters();
     virtual ~LightParameters() = default;
     virtual void validate();
-
   };
 }  // namespace OpenMD::Perturbations
 

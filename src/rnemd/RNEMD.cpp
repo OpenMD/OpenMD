@@ -212,7 +212,11 @@ namespace OpenMD::RNEMD {
 
     outputEvaluator_.loadScriptString(outputSelection_);
     outputSeleMan_.setSelectionSet(outputEvaluator_.evaluate());
-    AtomTypeSet osTypes = outputSeleMan_.getSelectedAtomTypes();
+
+    SelectionManager tempOutputSeleMan =
+        outputSeleMan_.replaceRigidBodiesWithAtoms();
+
+    AtomTypeSet osTypes = tempOutputSeleMan.getSelectedAtomTypes();
     std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
 
     nBins_    = rnemdParams->getOutputBins();
@@ -451,8 +455,9 @@ namespace OpenMD::RNEMD {
       seleManB_.setSelectionSet(evaluatorB_.evaluate());
 
     // Do some sanity checking
-    int selectionCount = seleMan_.getSelectionCount();
-    int nIntegrable    = info->getNGlobalIntegrableObjects();
+    int selectionCount =
+        seleMan_.removeAtomsInRigidBodies().getSelectionCount();
+    int nIntegrable = info->getNGlobalIntegrableObjects();
 
     if (selectionCount > nIntegrable) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
@@ -461,8 +466,7 @@ namespace OpenMD::RNEMD {
                "\thas resulted in %d selected objects.  However,\n"
                "\tthe total number of integrable objects in the system\n"
                "\tis only %d.  This is almost certainly not what you want\n"
-               "\tto do.  A likely cause of this is forgetting the _RB_0\n"
-               "\tselector in the selection script!\n",
+               "\tto do.\n",
                rnemdObjectSelection_.c_str(), selectionCount, nIntegrable);
       painCave.isFatal  = 0;
       painCave.severity = OPENMD_WARNING;
@@ -509,6 +513,9 @@ namespace OpenMD::RNEMD {
     commonA_ = seleManA_ & seleMan_;
     commonB_ = seleManB_ & seleMan_;
 
+    auto reducedCommonA = commonA_.removeAtomsInRigidBodies();
+    auto reducedCommonB = commonB_.removeAtomsInRigidBodies();
+
     // Target exchange quantities (in each exchange) = flux * dividingArea *
     // dt flux = target flux dividingArea = smallest dividing surface between
     // the two regions dt = exchange time interval
@@ -537,9 +544,12 @@ namespace OpenMD::RNEMD {
       SelectionManager tempCommonA = seleManA_ & outputSeleMan_;
       SelectionManager tempCommonB = seleManB_ & outputSeleMan_;
 
-      this->doRNEMDImpl(tempCommonA, tempCommonB);
+      auto reducedTempCommonA = tempCommonA.removeAtomsInRigidBodies();
+      auto reducedTempCommonB = tempCommonB.removeAtomsInRigidBodies();
+
+      this->doRNEMDImpl(reducedTempCommonA, reducedTempCommonB);
     } else {
-      this->doRNEMDImpl(commonA_, commonB_);
+      this->doRNEMDImpl(reducedCommonA, reducedCommonB);
     }
   }
 
@@ -642,7 +652,26 @@ namespace OpenMD::RNEMD {
 
           if (outputMask_[ACTIVITY]) {
             typeIndex = -1;
-            if (sd->isAtom()) {
+            if (sd->isRigidBody()) {
+              int atomBinNo;
+              RigidBody* rb = static_cast<RigidBody*>(sd);
+              std::vector<Atom*>::iterator ai;
+              Atom* atom;
+              for (atom = rb->beginAtom(ai); atom != NULL;
+                   atom = rb->nextAtom(ai)) {
+                atomBinNo = getBin(atom->getPos());
+
+                atype = static_cast<Atom*>(atom)->getAtomType();
+                at = std::find(outputTypes_.begin(), outputTypes_.end(), atype);
+                if (at != outputTypes_.end()) {
+                  typeIndex = std::distance(outputTypes_.begin(), at);
+                }
+
+                if (atomBinNo >= 0 && atomBinNo < int(nBins_)) {
+                  if (typeIndex != -1) binTypeCounts[atomBinNo][typeIndex]++;
+                }
+              }
+            } else if (sd->isAtom()) {
               atype = static_cast<Atom*>(sd)->getAtomType();
               at = std::find(outputTypes_.begin(), outputTypes_.end(), atype);
               if (at != outputTypes_.end()) {

@@ -220,6 +220,9 @@ namespace OpenMD {
         ss_.bitsets_[i].clearAll();
     }
 
+    SelectionManager replaceRigidBodiesWithAtoms() const;
+    SelectionManager removeAtomsInRigidBodies() const;
+
     void clearSelection(StuntDouble* sd) {
       ss_.bitsets_[STUNTDOUBLE].setBitOff(sd->getGlobalIndex());
     }

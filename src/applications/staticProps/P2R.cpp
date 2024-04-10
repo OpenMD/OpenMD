@@ -83,7 +83,6 @@ namespace OpenMD {
       doVect_(false), doOffset_(false), selectionScript1_(sele1),
       selectionScript2_(sele2), seleMan1_(info), seleMan2_(info),
       evaluator1_(info), evaluator2_(info) {
-
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
@@ -108,7 +107,6 @@ namespace OpenMD {
       doVect_(false), doOffset_(true), doOffset2_(false),
       selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
       evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset) {
-
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
@@ -129,7 +127,6 @@ namespace OpenMD {
       selectionScript1_(sele1), seleMan1_(info), seleMan2_(info),
       evaluator1_(info), evaluator2_(info), seleOffset_(seleOffset),
       seleOffset2_(seleOffset2) {
-
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
@@ -156,8 +153,8 @@ namespace OpenMD {
     int nFrames = reader.getNFrames();
 
     nProcessed_ = nFrames / step_;
-    P2_ = 0.0;
-    count_ =  0;
+    P2_         = 0.0;
+    count_      = 0;
 
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
@@ -310,8 +307,8 @@ namespace OpenMD {
 
   P2Z::P2Z(SimInfo* info, const std::string& filename, const std::string& sele1,
            unsigned int nbins, int axis) :
-    P2R(info, filename, sele1, nbins), axis_(axis) {
-    
+      P2R(info, filename, sele1, nbins),
+      axis_(axis) {
     switch (axis_) {
     case 0:
       axisLabel_ = "x";
@@ -326,7 +323,7 @@ namespace OpenMD {
     }
 
     setAnalysisType("2nd order Legendre Polynomial Correlation using " +
-		    axisLabel_ + " as reference axis");
+                    axisLabel_ + " as reference axis");
     setOutputName(getPrefix(filename) + ".P2Z");
     std::stringstream params;
     const std::string paramString = params.str();
@@ -335,8 +332,8 @@ namespace OpenMD {
 
   P2Z::P2Z(SimInfo* info, const std::string& filename, const std::string& sele1,
            const std::string& sele2, unsigned int nbins, int axis) :
-      P2R(info, filename, sele1, sele2, nbins), axis_(axis) {
-
+      P2R(info, filename, sele1, sele2, nbins),
+      axis_(axis) {
     switch (axis_) {
     case 0:
       axisLabel_ = "x";
@@ -351,7 +348,7 @@ namespace OpenMD {
     }
 
     setAnalysisType("2nd order Legendre Polynomial Correlation using " +
-		    axisLabel_ + " as reference axis");
+                    axisLabel_ + " as reference axis");
     setOutputName(getPrefix(filename) + ".P2Z");
     std::stringstream params;
     const std::string paramString = params.str();
@@ -360,8 +357,8 @@ namespace OpenMD {
 
   P2Z::P2Z(SimInfo* info, const std::string& filename, const std::string& sele1,
            int seleOffset, unsigned int nbins, int axis) :
-      P2R(info, filename, sele1, seleOffset, nbins), axis_(axis) {
-
+      P2R(info, filename, sele1, seleOffset, nbins),
+      axis_(axis) {
     switch (axis_) {
     case 0:
       axisLabel_ = "x";
@@ -376,7 +373,7 @@ namespace OpenMD {
     }
 
     setAnalysisType("2nd order Legendre Polynomial Correlation using " +
-		    axisLabel_ + " as reference axis");
+                    axisLabel_ + " as reference axis");
     setOutputName(getPrefix(filename) + ".P2Z");
     std::stringstream params;
     const std::string paramString = params.str();
@@ -385,8 +382,8 @@ namespace OpenMD {
 
   P2Z::P2Z(SimInfo* info, const std::string& filename, const std::string& sele1,
            int seleOffset, int seleOffset2, unsigned int nbins, int axis) :
-      P2R(info, filename, sele1, seleOffset, seleOffset2, nbins), axis_(axis) {
-
+      P2R(info, filename, sele1, seleOffset, seleOffset2, nbins),
+      axis_(axis) {
     switch (axis_) {
     case 0:
       axisLabel_ = "x";
@@ -401,7 +398,7 @@ namespace OpenMD {
     }
 
     setAnalysisType("2nd order Legendre Polynomial Correlation using " +
-		    axisLabel_ + " as reference axis");
+                    axisLabel_ + " as reference axis");
     setOutputName(getPrefix(filename) + ".P2Z");
     std::stringstream params;
     const std::string paramString = params.str();
@@ -409,9 +406,8 @@ namespace OpenMD {
   }
 
   void P2Z::process() {
-
     Vector3d zhat = V3Zero;
-    zhat[axis_] = 1.0; // unit vector along preferred axis
+    zhat[axis_]   = 1.0;  // unit vector along preferred axis
 
     StuntDouble* sd1;
     StuntDouble* sd2;
@@ -424,8 +420,8 @@ namespace OpenMD {
     int nFrames = reader.getNFrames();
 
     nProcessed_ = nFrames / step_;
-    P2_ = 0.0;
-    count_ =  0;
+    P2_         = 0.0;
+    count_      = 0;
 
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
@@ -461,7 +457,7 @@ namespace OpenMD {
             if (doOffset2_) {
               int sd1Aind       = sd1->getGlobalIndex() + seleOffset2_;
               StuntDouble* sd1A = info_->getIOIndexToIntegrableObject(sd1Aind);
-              r1                =  sd1A->getPos();
+              r1                = sd1A->getPos();
             } else {
               r1 = sd1->getPos();
             }
@@ -469,9 +465,9 @@ namespace OpenMD {
             int sd2Index = sd1->getGlobalIndex() + seleOffset_;
             sd2          = info_->getIOIndexToIntegrableObject(sd2Index);
 
-            Vector3d r2 = sd2->getPos();
+            Vector3d r2  = sd2->getPos();
             Vector3d vec = r1 - r2;
-	    
+
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(vec);
 
@@ -499,11 +495,10 @@ namespace OpenMD {
               sd2                              = seleMan2_.beginSelected(jj);
                sd1 != NULL && sd2 != NULL; sd1 = seleMan1_.nextSelected(ii),
               sd2                              = seleMan2_.nextSelected(jj)) {
-
-            Vector3d r1 = sd1->getPos();
-            Vector3d r2 = sd2->getPos();
+            Vector3d r1  = sd1->getPos();
+            Vector3d r2  = sd2->getPos();
             Vector3d vec = r1 - r2;
-	    
+
             if (usePeriodicBoundaryConditions_)
               currentSnapshot_->wrapVector(vec);
 
@@ -519,6 +514,4 @@ namespace OpenMD {
     writeP2R();
   }
 
-
-  
 }  // namespace OpenMD

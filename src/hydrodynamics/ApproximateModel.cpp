@@ -127,7 +127,7 @@ namespace OpenMD {
       }
     }
     std::cerr << " done.\n";
-    
+
     // invert B Matrix
     std::cerr << "Inverting B matrix...";
     invertMatrix(B, C);  // B is modified during the inversion

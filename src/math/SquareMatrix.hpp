@@ -260,42 +260,42 @@ namespace OpenMD {
                       SquareMatrix<Real, Dim>& v);
   };  // end SquareMatrix
 
- /*=========================================================================
-  
-  Program:   Visualization Toolkit
-  Module:    Excerpted from vtkMath.cxx
-  
-  Copyright (c) 1993-2015 Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are met:
-  
-  * Redistributions of source code must retain the above copyright notice,
-    this list of conditions and the following disclaimer.
-  
-  * Redistributions in binary form must reproduce the above copyright notice,
-    this list of conditions and the following disclaimer in the documentation
-    and/or other materials provided with the distribution.
-  
-  * Neither name of Ken Martin, Will Schroeder, or Bill Lorensen nor the names
-    of any contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-  
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
-  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-  ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR
-  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  
-  =========================================================================*/
+  /*=========================================================================
 
-#define ROTATE(a, i, j, k, l)  \
+   Program:   Visualization Toolkit
+   Module:    Excerpted from vtkMath.cxx
+
+   Copyright (c) 1993-2015 Ken Martin, Will Schroeder, Bill Lorensen
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+   * Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+
+   * Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+
+   * Neither name of Ken Martin, Will Schroeder, or Bill Lorensen nor the names
+     of any contributors may be used to endorse or promote products derived
+     from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
+   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+   ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR
+   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+   DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+   =========================================================================*/
+
+#define ROTATE(a, i, j, k, l)      \
   g       = a(i, j);               \
   h       = a(k, l);               \
   a(i, j) = g - s * (h + g * tau); \
@@ -320,7 +320,7 @@ namespace OpenMD {
     Real bspace[MAX_SCRATCH_ARRAY_SIZE], zspace[MAX_SCRATCH_ARRAY_SIZE];
     Real* b = (n <= MAX_SCRATCH_ARRAY_SIZE) ? bspace : new Real[n];
     Real* z = (n <= MAX_SCRATCH_ARRAY_SIZE) ? zspace : new Real[n];
-    
+
     // initialize
     for (ip = 0; ip < n; ip++) {
       for (iq = 0; iq < n; iq++) {
@@ -341,9 +341,7 @@ namespace OpenMD {
           sm += std::abs(a(ip, iq));
         }
       }
-      if (sm == 0.0) {
-	break;
-      }
+      if (sm == 0.0) { break; }
 
       if (i < 3) {  // first 3 sweeps
         tresh = 0.2 * sm / (n * n);
@@ -408,19 +406,19 @@ namespace OpenMD {
     if (i >= MAX_ROTATIONS) {
       std::cout << "SquareMatrix::Jacobi: Error extracting eigenfunctions"
                 << std::endl;
-    if (n > MAX_SCRATCH_ARRAY_SIZE) {
-      delete[] b;
-      delete[] z;
-    }
-    return 0;
+      if (n > MAX_SCRATCH_ARRAY_SIZE) {
+        delete[] b;
+        delete[] z;
+      }
+      return 0;
     }
 
     // sort eigenfunctions             these changes do not affect accuracy
-    for (j = 0; j < n - 1; ++j) {   // boundary incorrect
+    for (j = 0; j < n - 1; ++j) {  // boundary incorrect
       k   = j;
       tmp = w[k];
-      for (i = j + 1; i < n; ++i) { // boundary incorrect, shifted already
-        if (w[i] >= tmp) {          // why exchage if same?
+      for (i = j + 1; i < n; ++i) {  // boundary incorrect, shifted already
+        if (w[i] >= tmp) {           // why exchage if same?
           k   = i;
           tmp = w[k];
         }
@@ -442,9 +440,7 @@ namespace OpenMD {
     int ceil_half_n = (n >> 1) + (n & 1);
     for (j = 0; j < n; ++j) {
       for (numPos = 0, i = 0; i < n; ++i) {
-        if (v(i, j) >= 0.0) {
-	  numPos++;
-	}
+        if (v(i, j) >= 0.0) { numPos++; }
       }
       if (numPos < ceil_half_n) {
         for (i = 0; i < n; ++i) {
@@ -452,7 +448,7 @@ namespace OpenMD {
         }
       }
     }
-    
+
     if (n > MAX_SCRATCH_ARRAY_SIZE) {
       delete[] b;
       delete[] z;
@@ -461,7 +457,7 @@ namespace OpenMD {
   }
 #undef ROTATE
 #undef MAX_ROTATIONS
-  
+
   using Mat6x6d = SquareMatrix<RealType, 6>;
 }  // namespace OpenMD
 

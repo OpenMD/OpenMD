@@ -106,8 +106,10 @@ namespace OpenMD {
     if (ofs.is_open()) {
       ofs << "#counts\n";
       ofs << "#selection: (" << selectionScript_ << ")\n";
-      ofs << "# <N> = " << std::fixed << std::setw(11) << std::setprecision(6) << nAvg << "\n";
-      ofs << "# <N^2> = " << std::fixed << std::setw(11) << std::setprecision(6) << n2Avg << "\n";
+      ofs << "# <N> = " << std::fixed << std::setw(11) << std::setprecision(6)
+          << nAvg << "\n";
+      ofs << "# <N^2> = " << std::fixed << std::setw(11) << std::setprecision(6)
+          << n2Avg << "\n";
       ofs << "# sqrt(<N^2> - <N>^2)  = " << sDev << "\n";
       ofs << "# N\tcounts[N]\n";
       for (unsigned int i = 0; i < counts_.size(); ++i) {
@@ -122,11 +124,10 @@ namespace OpenMD {
     }
     ofs.close();
   }
-  
+
   MoleculeCount::MoleculeCount(SimInfo* info, const std::string& filename,
-			       const std::string& sele) :
-    ObjectCount(info, filename, sele) {
-    
+                               const std::string& sele) :
+      ObjectCount(info, filename, sele) {
     setOutputName(getPrefix(filename) + ".mcounts");
 
     evaluator_.loadScriptString(sele);
@@ -169,6 +170,5 @@ namespace OpenMD {
     sDev  = sqrt(n2Avg - nAvg * nAvg);
     writeCounts();
   }
-
 
 }  // namespace OpenMD

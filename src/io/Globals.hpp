@@ -53,8 +53,8 @@
 
 #include "flucq/FluctuatingChargeParameters.hpp"
 #include "optimization/MinimizerParameters.hpp"
-#include "rnemd/RNEMDParameters.hpp"
 #include "perturbations/LightParameters.hpp"
+#include "rnemd/RNEMDParameters.hpp"
 #include "types/Component.hpp"
 #include "types/FragmentStamp.hpp"
 #include "types/MoleculeStamp.hpp"
@@ -204,7 +204,7 @@ namespace OpenMD {
     std::pair<int, int> taggedAtomPair_;
     FluctuatingChargeParameters* flucQpars_;
     RNEMD::RNEMDParameters* rnemdPars_;
-    Perturbations::LightParameters* lightPars_;    
+    Perturbations::LightParameters* lightPars_;
     MinimizerParameters* minimizerPars_;
   };
 }  // namespace OpenMD

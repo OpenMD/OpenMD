@@ -1,0 +1,83 @@
+// 12-6 LJ Paramters from "Systematic Parameterization of Monovalent Ions
+// Employing the Nonbonded Model," by  Pengfei Li, Lin Frank Song, and Kenneth M. Merz Jr.
+// Journal of Chemical Theory and Computation 2015 11 (4), 1645-1657
+// DOI: 10.1021/ct500918t 
+//
+// This version is for use with the TIP4P-EW water model.
+
+begin Options
+      Name      "LiSongMerz-TIP4PEW"
+      DistanceMixingRule     Arithmetic
+      EnergyMixingRule       Geometric
+end Options
+
+begin BaseAtomTypes
+//name  mass (amu)
+Li      6.941
+Na      22.989769
+K       39.0983
+Rb      85.4678
+Cs      132.90545
+F       18.998403
+Cl      35.453
+Br      79.904
+I       126.90447
+Tl      204.3833
+Cu      63.546
+Ag      107.8682
+NH4+    18.0379
+H       1.00784
+H3O+    19.0232
+end BaseAtomTypes
+
+begin AtomTypes
+//name  baseatomtype
+Li+     Li
+Na+     Na
+K+      K
+Rb+     Rb
+Cs+     Cs
+F-      F
+Cl-     Cl
+Br-     Br
+I-      I
+Tl+     Tl
+Cu+     Cu
+Ag+     Ag
+end AtomTypes
+
+begin ChargeAtomTypes
+//name  charge
+Li+     1.0
+Na+     1.0
+K+      1.0
+Rb+     1.0
+Cs+     1.0
+F-      -1.0
+Cl-     -1.0
+Br-     -1.0
+I-      -1.0
+Tl+     1.0
+Cu+     1.0
+Ag+     1.0
+NH4+    1.0
+H3O+    1.0     // Hydronium
+end ChargeAtomTypes
+
+begin LennardJonesAtomTypes
+//name  epsilon(kcal/mol) sigma(Angstroms)
+Li+	0.00168686	2.18448365688011
+Na+	0.02154025	2.55153392875393
+K+	0.11803919	2.97381992115245
+Rb+	0.18689752	3.14843606990796
+Cs+	0.33132862	3.44955983663939
+Tl+	0.10417397	2.932838580118
+Cu+	0.00050520	2.05975783634046
+Ag+	0.00452863	2.3056458825472
+NH4+	0.14295367	3.04152822373112
+H3O+	0.00440914	2.30208228767464
+F–	0.24821230	3.28207087762901
+Cl–	0.65269755	4.13555184960745
+Br–	0.77034233	4.490
+I–	0.88281946	5.02288697287523
+end LennardJonesAtomTypes

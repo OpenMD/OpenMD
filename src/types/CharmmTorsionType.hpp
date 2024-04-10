@@ -113,8 +113,8 @@ namespace OpenMD {
    * simpler equation for the torsion potential in terms of only
    * polynomials of the cosine and an additional sine of the angle:
    *
-   * \f[ V_{\mathrm{torsion}}(\phi) = C + T(\cos(\phi)) + U(\cos(\phi)) \sin(\phi)
-   * \f] where: \f[ C = \sum_n K_n \f] \f[ T(\cos(\phi)) = \sum_n K_n
+   * \f[ V_{\mathrm{torsion}}(\phi) = C + T(\cos(\phi)) + U(\cos(\phi))
+   * \sin(\phi) \f] where: \f[ C = \sum_n K_n \f] \f[ T(\cos(\phi)) = \sum_n K_n
    * \cos(\delta_n) T_n(\cos(\phi)) \f] \f[ U(\cos(\phi)) = \sum_n -K_n
    * \sin(\delta_n) U_{n-1}(\cos(\phi)) \f]
    */

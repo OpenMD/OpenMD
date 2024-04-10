@@ -84,7 +84,10 @@ namespace OpenMD {
 
     evaluator_.loadScriptString(sele);
     seleMan_.setSelectionSet(evaluator_.evaluate());
-    AtomTypeSet osTypes = seleMan_.getSelectedAtomTypes();
+
+    SelectionManager tempSeleMan = seleMan_.replaceRigidBodiesWithAtoms();
+
+    AtomTypeSet osTypes = tempSeleMan.getSelectedAtomTypes();
     std::copy(osTypes.begin(), osTypes.end(), std::back_inserter(outputTypes_));
     bool usePeriodicBoundaryConditions_ =
         info_->getSimParams()->getUsePeriodicBoundaryConditions();
@@ -211,6 +214,8 @@ namespace OpenMD {
       seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
+    auto reducedSeleMan = seleMan_.removeAtomsInRigidBodies();
+
     int binNo {};
     int typeIndex(-1);
     RealType mass {};
@@ -252,7 +257,7 @@ namespace OpenMD {
          mol = info_->nextMolecule(miter)) {
       for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
            sd = mol->nextIntegrableObject(iiter)) {
-        if (seleMan_.isSelected(sd)) {
+        if (reducedSeleMan.isSelected(sd)) {
           Vector3d pos = sd->getPos();
           binNo        = getBin(pos);
 
@@ -281,7 +286,26 @@ namespace OpenMD {
 
           if (outputMask_[ACTIVITY]) {
             typeIndex = -1;
-            if (sd->isAtom()) {
+            if (sd->isRigidBody()) {
+              int atomBinNo;
+              RigidBody* rb = static_cast<RigidBody*>(sd);
+              std::vector<Atom*>::iterator ai;
+              Atom* atom;
+              for (atom = rb->beginAtom(ai); atom != NULL;
+                   atom = rb->nextAtom(ai)) {
+                atomBinNo = getBin(atom->getPos());
+
+                atype = static_cast<Atom*>(atom)->getAtomType();
+                at = std::find(outputTypes_.begin(), outputTypes_.end(), atype);
+                if (at != outputTypes_.end()) {
+                  typeIndex = std::distance(outputTypes_.begin(), at);
+                }
+
+                if (atomBinNo >= 0 && atomBinNo < int(nBins_)) {
+                  if (typeIndex != -1) binTypeCounts[atomBinNo][typeIndex]++;
+                }
+              }
+            } else if (sd->isAtom()) {
               atype = static_cast<Atom*>(sd)->getAtomType();
               at = std::find(outputTypes_.begin(), outputTypes_.end(), atype);
               if (at != outputTypes_.end()) {
@@ -364,7 +388,7 @@ namespace OpenMD {
           }
         }
       }
-      if (seleMan_.isSelected(mol)) {
+      if (reducedSeleMan.isSelected(mol)) {
         for (consPair = mol->beginConstraintPair(cpi); consPair != NULL;
              consPair = mol->nextConstraintPair(cpi)) {
           Vector3d posA = consPair->getConsElem1()->getPos();

@@ -60,7 +60,6 @@ namespace OpenMD::Perturbations {
     DefineOptionalParameter(Polarization, "polarization");
   }
 
-  void LightParameters::validate() {
-  }
+  void LightParameters::validate() {}
 
 }  // namespace OpenMD::Perturbations

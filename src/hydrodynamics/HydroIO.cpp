@@ -182,7 +182,7 @@ namespace OpenMD {
 
     w_.Key("pitch");
     w_.Double(pitchScalar);
-    
+
     w_.Key("centerOfPitch");
     w_.StartArray();
     w_.SetFormatOptions(kFormatSingleLineArray);
@@ -193,12 +193,12 @@ namespace OpenMD {
 
     w_.Key("momentsOfPitch");
     w_.StartArray();
-    w_.SetFormatOptions(kFormatSingleLineArray);    
+    w_.SetFormatOptions(kFormatSingleLineArray);
     for (unsigned i = 0; i < 3; i++)
       w_.Double(pitches[i]);
     w_.EndArray();
     w_.SetFormatOptions(kFormatDefault);
-    
+
     w_.Key("pitchAxes");
     w_.StartArray();
     for (unsigned i = 0; i < 3; i++) {

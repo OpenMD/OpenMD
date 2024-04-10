@@ -63,22 +63,22 @@ namespace OpenMD::Constants {
   // time = fs (1.0e-15 s)
   // mass = amu
   // charge = electron charge (1.602176634e-19 Coulombs)
-  // energy = kcal/mol 
+  // energy = kcal/mol
   // temperature = K
   // velocity = Angstroms / fs
   // force = kcal/mol / Angstroms
-  
+
   inline constexpr RealType kb =
       1.9872156E-3;  //!< boltzman's constant in kcal/(mol K)
   inline constexpr RealType kB =
       8.31451e-7;  //!< boltzmann constant amu*Ang^2*fs^-2/K
   inline constexpr RealType c =
-    299792458. * 1e-5; //! speed of light in Ang fs^-1
+      299792458. * 1e-5;  //! speed of light in Ang fs^-1
   inline constexpr RealType epsilon0 =
-    2.396451e-4; //! vacuum permittivity in e^2 Ang^-1 (kcal/mol)^-1
+      2.396451e-4;  //! vacuum permittivity in e^2 Ang^-1 (kcal/mol)^-1
   inline constexpr RealType mu0 =
-    1.25663706212e-6; //! vacuum permeability in N Amp^-2
-    
+      1.25663706212e-6;  //! vacuum permeability in N Amp^-2
+
   inline constexpr RealType energyConvert =
       4.184E-4;  //!< convert kcal/mol -> (amu A^2)/fs^2
   inline constexpr RealType rotationalEnergyConvert = energyConvert * TWO_PI;
