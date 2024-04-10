@@ -11,9 +11,11 @@ have examples shown here.
 + SPC, SPC-HW
 + SPC/E
 + TIP3P
++ TIP3P-FB
++ OPC3
 
 ### Four site models
-+ TIP4P, TIP4P-Ew, TIP4P/2005, TIP4P/Ice
++ TIP4P, TIP4P-Ew, TIP4P/2005, TIP4P/Ice, TIP4P-FB, OPC
 
 ### Five site models
 + TIP5P, TIP5P-E
@@ -86,10 +88,14 @@ and functionalities when passed *-h*.
 | SPC-HW     | 3 |[10.1063/1.1359183](https://doi.org/10.1063/1.1359183)     |
 | SPC/E      | 3 |[10.1021/j100308a038](https://doi.org/10.1021/j100308a038) |
 | TIP3P      | 3 |[10.1063/1.445869](https://doi.org/10.1063/1.445869)       |
+| TIP3P-FB   | 3 |[10.1021/jz500737m](https://doi.org/10.1021/jz500737m)     |
+| OPC3       | 3 |[10.1063/1.4960175](https://doi.org/10.1063/1.4960175)     |
 | TIP4P      | 4 |[10.1063/1.445869](https://doi.org/10.1063/1.445869)       |
 | TIP4P-Ew   | 4 |[10.1063/1.1683075](https://doi.org/10.1063/1.1683075)     |
 | TIP4P/2005 | 4 |[10.1063/1.2121687](https://doi.org/10.1063/1.2121687)     |
 | TIP4P/Ice  | 4 |[10.1063/1.1931662](https://doi.org/10.1063/1.1931662)     |
+| TIP4P-FB   | 4 |[10.1021/jz500737m](https://doi.org/10.1021/jz500737m)     |
+| OPC        | 4 |[10.1021/jz501780a](https://doi.org/10.1021/jz501780a)     |
 | TIP5P      | 5 |[10.1063/1.481505](https://doi.org/10.1063/1.481505)       |
 | TIP5P-E    | 5 |[10.1063/1.1652434](https://doi.org/10.1063/1.1652434)     |
 | NE6        | 6 |[10.1063/1.1562610](https://doi.org/10.1063/1.1562610)     |

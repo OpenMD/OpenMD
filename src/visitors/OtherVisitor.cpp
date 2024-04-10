@@ -464,16 +464,20 @@ namespace OpenMD {
   WaterTypeVisitor::WaterTypeVisitor() {
     visitorName = "WaterTypeVisitor";
     waterTypeList.insert("TIP3P_RB_0");
+    waterTypeList.insert("TIP3P-FB_RB_0");
     waterTypeList.insert("TIP4P_RB_0");
     waterTypeList.insert("TIP4P-Ice_RB_0");
     waterTypeList.insert("TIP4P-Ew_RB_0");
     waterTypeList.insert("TIP4P-2005_RB_0");
+    waterTypeList.insert("TIP4P-FB_RB_0");
     waterTypeList.insert("TIP5P_RB_0");
     waterTypeList.insert("TIP5P-E_RB_0");
     waterTypeList.insert("SPCE_RB_0");
     waterTypeList.insert("SPC_RB_0");
     waterTypeList.insert("SPC-HW_RB_0");
     waterTypeList.insert("NE6_RB_0");
+    waterTypeList.insert("OPC_RB_0");
+    waterTypeList.insert("OPC3_RB_0");    
   }
 
   void WaterTypeVisitor::visit(RigidBody* rb) {

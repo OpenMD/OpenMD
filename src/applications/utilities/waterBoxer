@@ -247,12 +247,12 @@ if ($lattice == 0) {
   for ($z = 0; $z < $nz; $z++) {
     for ($y = 0; $y < $ny; $y++) {
       for ($x = 0; $x < $nx; $x++) {
-	for ($uc = 0; $uc < 4; $uc++) {
-	  $xCorr[$uc+$counter] = $xCorr[$uc] + $cellLengthX*$x;
-	  $yCorr[$uc+$counter] = $yCorr[$uc] + $cellLengthY*$y;
-	  $zCorr[$uc+$counter] = $zCorr[$uc] + $cellLengthZ*$z;
-	}
-	$counter = $counter + 4;
+	      for ($uc = 0; $uc < 4; $uc++) {
+	        $xCorr[$uc+$counter] = $xCorr[$uc] + $cellLengthX*$x;
+	        $yCorr[$uc+$counter] = $yCorr[$uc] + $cellLengthY*$y;
+	        $zCorr[$uc+$counter] = $zCorr[$uc] + $cellLengthZ*$z;
+	      }
+	      $counter = $counter + 4;
       }
     }
   }
@@ -268,11 +268,10 @@ if ($lattice == 0) {
   for ($z = 0; $z < $nz; $z++) {
     for ($y = 0; $y < $ny; $y++) {
       for ($x = 0; $x < $nx; $x++) {
-	$xCorr[$counter] = $xCorr[0] + $cellLengthX*$x;
-	$yCorr[$counter] = $yCorr[0] + $cellLengthY*$y;
-	$zCorr[$counter] = $zCorr[0] + $cellLengthZ*$z;
-
-	$counter++;
+	      $xCorr[$counter] = $xCorr[0] + $cellLengthX*$x;
+	      $yCorr[$counter] = $yCorr[0] + $cellLengthY*$y;
+	      $zCorr[$counter] = $zCorr[0] + $cellLengthZ*$z;
+	      $counter++;
       }
     }
   }
@@ -428,6 +427,10 @@ sub printWaterMD {
   printSPCHW();
   printDPD();
   printCG2();
+  printTIP3PFB();
+  printTIP4PFB();
+  printOPC3();
+  printOPC();
   print WATERMD "\n\n#endif";
 }
 
@@ -879,7 +882,7 @@ print $waterFileHandle "\n\nmolecule{
 }"
 }
 
-sub printTIP3P-FB {
+sub printTIP3PFB {
 print $waterFileHandle "\n\nmolecule{
   name = \"TIP3P-FB\";
   
@@ -902,7 +905,7 @@ print $waterFileHandle "\n\nmolecule{
 }"
 }
 
-sub printTIP4P-FB {
+sub printTIP4PFB {
 print $waterFileHandle "\n\nmolecule{
   name = \"TIP4P-FB\";
   
@@ -1011,7 +1014,7 @@ sub validateWater {
   elsif ($waterName eq 'NE6')	   { $waterCase == 20;  }
   elsif ($waterName eq 'TIP3P-FB') { $waterCase == 21;  }
   elsif ($waterName eq 'TIP4P-FB') { $waterCase == 22;  }
-  elsif ($waterName eq 'OPC')      { $waterCase == 23; }
+  elsif ($waterName eq 'OPC')      { $waterCase == 23;  }
   elsif ($waterName eq 'OPC3')     { $waterCase == 24;  }    
   else                             { $invalidWater = 1; }
 }
@@ -1038,8 +1041,8 @@ sub printWaterModel {
   elsif ($waterCase == 18) { printTIP4P2005();}
   elsif ($waterCase == 19) { printSPCHW();   }
   elsif ($waterCase == 20) { printNE6();     }
-  elsif ($waterCase == 21) { printTIP3P-FB();     }
-  elsif ($waterCase == 22) { printTIP4P-FB();     }
+  elsif ($waterCase == 21) { printTIP3PFB(); }
+  elsif ($waterCase == 22) { printTIP4PFB(); }
   elsif ($waterCase == 23) { printOPC();     }
-  elsif ($waterCase == 24) { printOPC3();     }	  
+  elsif ($waterCase == 24) { printOPC3();    }
 }

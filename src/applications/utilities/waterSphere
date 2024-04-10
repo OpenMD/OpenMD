@@ -249,10 +249,10 @@ if ($lattice == 0) {
 	  $ztest = $zref[$uc] + $cellLengthZ*$z - $centerz;
           $rtest = sqrt($xtest*$xtest + $ytest*$ytest + $ztest*$ztest);
           if (($rtest > $inner) && ($rtest < $outer)) {
-	  	  $xCorr[$counter] = $xref[$uc] + $cellLengthX*$x - $centerx;
-		  $yCorr[$counter] = $yref[$uc] + $cellLengthY*$y - $centery;
-	  	  $zCorr[$counter] = $zref[$uc] + $cellLengthZ*$z - $centerz;
-          	  $counter++;
+	     $xCorr[$counter] = $xref[$uc] + $cellLengthX*$x - $centerx;
+	     $yCorr[$counter] = $yref[$uc] + $cellLengthY*$y - $centery;
+	     $zCorr[$counter] = $zref[$uc] + $cellLengthZ*$z - $centerz;
+             $counter++;
           }
 	}
       }
@@ -270,15 +270,15 @@ if ($lattice == 0) {
   for ($z = 0; $z < $nz ; $z++) {
     for ($y = 0; $y < $ny; $y++) {
       for ($x = 0; $x < $nx; $x++) {
-          $xtest = $xref[0] + $cellLengthX*$x - $centerx;
+      	  $xtest = $xref[0] + $cellLengthX*$x - $centerx;
 	  $ytest = $yref[0] + $cellLengthY*$y - $centery;
 	  $ztest = $zref[0] + $cellLengthZ*$z - $centerz;
           $rtest = sqrt($xtest*$xtest + $ytest*$ytest + $ztest*$ztest);
           if (($rtest > $inner) && ($rtest < $outer)) {
-	  	  $xCorr[$counter] = $xref[0] + $cellLengthX*$x - $centerx;
-		  $yCorr[$counter] = $yref[0] + $cellLengthY*$y - $centery;
-	  	  $zCorr[$counter] = $zref[0] + $cellLengthZ*$z - $centerz;
-          	  $counter++;
+	     $xCorr[$counter] = $xref[0] + $cellLengthX*$x - $centerx;
+	     $yCorr[$counter] = $yref[0] + $cellLengthY*$y - $centery;
+	     $zCorr[$counter] = $zref[0] + $cellLengthZ*$z - $centerz;
+	     $counter++;
           }
       }
     }
@@ -435,6 +435,10 @@ sub printWaterMD {
   printSPCHW();
   printDPD();
   printCG2();
+  printTIP3PFB();
+  printTIP4PFB();
+  printOPC3();
+  printOPC();
   print WATERMD "\n\n#endif";
 }
 
@@ -836,6 +840,106 @@ print $waterFileHandle "\n\nmolecule{
 }"
 }
 
+sub printOPC {
+print $waterFileHandle "\n\nmolecule{
+  name = \"OPC\";
+  
+  atom[0]{
+    type = \"O_OPC\";
+    position( 0.0, 0.0, -0.0603651 );
+  }
+  atom[1]{
+    type = \"H_OPC\";
+    position( 0.0, 0.685582, 0.479134 );
+  }
+  atom[2]{
+    type = \"H_OPC\";
+    position( 0.0, -0.685582, 0.479134 );
+  }
+  atom[3]{
+    type = \"EP_OPC\";
+    position( 0.0, 0.0, 0.0990349 );
+  }
+  
+  rigidBody[0]{    
+    members(0, 1, 2, 3);
+  }  
+}"
+}
+
+sub printOPC3 {
+print $waterFileHandle "\n\nmolecule{
+  name = \"OPC3\";
+  
+  atom[0]{
+    type = \"O_OPC3\";
+    position( 0.0, 0.0, -0.0632382 );
+  }
+  atom[1]{
+    type = \"H_OPC3\";
+    position( 0.0, 0.799262, 0.501939 );
+  }
+  atom[2]{
+    type = \"H_OPC3\";
+    position( 0.0, -0.799262, 0.501939 );
+  }
+  
+  rigidBody[0]{    
+    members(0, 1, 2);
+  }
+}"
+}
+
+sub printTIP3PFB {
+print $waterFileHandle "\n\nmolecule{
+  name = \"TIP3P-FB\";
+  
+  atom[0]{
+    type = \"O_TIP3P-FB\";
+    position( 0.0, 0.0, -0.066424 );
+  }
+  atom[1]{
+    type = \"H_TIP3P-FB\";
+    position( 0.0, 0.819341, 0.527225 );
+  }
+  atom[2]{
+    type = \"H_TIP3P-FB\";
+    position( 0.0, -0.819341, 0.527225 );
+  }
+  
+  rigidBody[0]{     
+    members(0, 1, 2);
+  }  
+}"
+}
+
+sub printTIP4PFB {
+print $waterFileHandle "\n\nmolecule{
+  name = \"TIP4P-FB\";
+  
+  atom[0]{
+    type = \"O_TIP4P-FB\";
+    position( 0.0, 0.0, -0.0655549 );
+  }
+  atom[1]{
+    type = \"H_TIP4P-FB\";
+    position( 0.0, 0.75695, 0.520327 );
+  }
+  atom[2]{
+    type = \"H_TIP4P-FB\";
+    position( 0.0, -0.75695, 0.520327 );
+  }
+  atom[3]{
+    type = \"EP_TIP4P-FB\";
+    position( 0.0, 0.0, 0.0397151 );
+  }
+  
+  rigidBody[0]{    
+    members(0, 1, 2, 3);
+  }  
+}"
+}
+
 
 sub printSPCHW {
 print $waterFileHandle "\n\nmolecule{
@@ -913,10 +1017,14 @@ sub validateWater {
   elsif ($waterName eq 'CG2')      { $waterCase = 14;   }
   elsif ($waterName eq 'SSDQ')     { $waterCase = 15;   }
   elsif ($waterName eq 'SSDQO')    { $waterCase = 16;   }
-  elsif ($waterName eq 'TIP4P-Ice'){ $waterCase = 17;	}
+  elsif ($waterName eq 'TIP4P-Ice'){ $waterCase = 17;   }
   elsif ($waterName eq 'TIP4P-2005'){ $switchCase = 18; }
   elsif ($waterName eq 'SPC-HW')   { $waterCase == 19;	}
   elsif ($waterName eq 'NE6')	   { $waterCase == 20;  }
+  elsif ($waterName eq 'TIP3P-FB') { $waterCase == 21;  }
+  elsif ($waterName eq 'TIP4P-FB') { $waterCase == 22;  }
+  elsif ($waterName eq 'OPC')      { $waterCase == 23;  }
+  elsif ($waterName eq 'OPC3')     { $waterCase == 24;  }    
   else                             { $invalidWater = 1; }
 }
 
@@ -942,4 +1050,8 @@ sub printWaterModel {
   elsif ($waterCase == 18) { printTIP4P2005();}
   elsif ($waterCase == 19) { printSPCHW();   }
   elsif ($waterCase == 20) { printNE6();     }
+  elsif ($waterCase == 21) { printTIP3PFB(); }
+  elsif ($waterCase == 22) { printTIP4PFB(); }
+  elsif ($waterCase == 23) { printOPC();     }
+  elsif ($waterCase == 24) { printOPC3();    }
 }
