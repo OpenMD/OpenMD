@@ -12,6 +12,10 @@
 //  TIP3P water model comes from: J. Chem. Phys. 79 (1983) 926-935
 //    W.L.Jorgensen, J.Chandrasekhar, J.D.Madura, R.W.Impey, M.L.Klein
 //
+//  TIP3P-FB water model comes from: J. Phys. Chem. Lett. 5, 1885-1891 (2014)
+//    Lee-Ping Wang, Todd J. Martinez, Vijay S. Pande.
+//    DOI: 10.1021/jz500737m
+//
 //  TIP4P water model comes from: Mol. Phys. 56 (1985) 1382-1392
 //    W.L.Jorgensen and J.D.Madura
 //
@@ -25,17 +29,25 @@
 //  TIP4P/2005 water model comes from: J.Chem.Phys. 123 (2005) 234505
 //    J.L.Abascal, C.Vega
 //
+//  TIP4P-FB water model comes from: J. Phys. Chem. Lett. 5, 1885-1891 (2014)
+//    Lee-Ping Wang, Todd J. Martinez, Vijay S. Pande.
+//    DOI: 10.1021/jz500737m
+//
 //  TIP5P water model comes from: J.Chem.Phys. 112 (2000) 8910-8922
 //    M.W.Mahoney and W.L.Jorgensen
 //
 //  TIP5P/Ew water model comes from: J.Chem.Phys. 120 (2004) 6085-6093
-//    S.W.Rick
+//    S.W. Rick
 //
-//  OPC water model comes from: J.Phys.Chem.Lett. 5, (2014) 3863-3871
-//    S.Izadi, R.Anandakrishnan, A.V.Onufriev
+//  OPC water model comes from: J. Phys. Chem. Lett. 5, (2014) 3863-3871
+//    S. Izadi, R. Anandakrishnan, A.V. Onufriev
+//
+//  OPC3 water model comes from: J. Chem. Phys. 145, 074501 (2016)
+//    S. Izadi, A.V. Onufriev, DOI: 10.1063/1.4960175
 //
 //  NE6 water model comes from: J. Chem. Phys. Vol. 118, No. 16 (2003) 7401 
 //    H. Nada and J. van der Eerden
+
 
 begin Options
       Name	"Water"
@@ -66,35 +78,42 @@ DW		D
 TIP3P-O                 OW
 TIP3P-H                 HW
 O_TIP3P                 OW
+O_TIP3P-FB		OW
 O_TIP4P                 OW
 O_TIP4P-Ice		OW
 O_TIP4P-2005		OW
 O_TIP4P-Ew              OW
+O_TIP4P-FB		OW
 O_TIP5P                 OW
 O_TIP5P-E               OW
 O_SPCE                  OW
 O_SPC                   OW
 O_POL3                  OW
 O_OPC			OW
+O_OPC3			OW
 O_SPC-HW		OW
 O_DIP3P			OW
 O_NE6			OW
 H_TIP3P                 HW
+H_TIP3P-FB		HW
 H_TIP4P                 HW
 H_TIP4P-Ice		HW
 H_TIP4P-2005		HW
 H_TIP4P-Ew              HW
+H_TIP4P-FB		HW
 H_TIP5P                 HW
 H_SPCE                  HW
 H_SPC                   HW
 H_POL3                  HW
 H_OPC			HW
+H_OPC3			HW
 H_NE6			HW
 D_SPC-HW		DW
 EP_TIP4P                EP
 EP_TIP4P-Ice		EP
 EP_TIP4P-2005		EP
 EP_TIP4P-Ew             EP
+EP_TIP4P-FB		EP
 EP_TIP5P                EP
 EP_OPC			EP
 EP_TRED			EP
@@ -105,26 +124,30 @@ end AtomTypes
 begin ChargeAtomTypes
 //name			charge
 O_TIP3P                -0.834
-H_TIP3P		       0.417
-O_TIP3P			-0.834
+H_TIP3P		        0.417
+O_TIP3P-FB	       -0.84844
+H_TIP3P-FB	        0.42422
 O_SPCE			-0.8476
 O_SPC			-0.82
 O_SPC-HW		-0.87
-H_TIP3P			0.417
+O_OPC3			-0.89517
 H_TIP4P			0.520
 H_TIP4P-Ice		0.5897
 H_TIP4P-Ew		0.52422
 H_TIP4P-2005		0.5564
+H_TIP4P-FB		0.42422
 H_TIP5P			0.241
 H_SPCE			0.4238
 H_SPC			0.42
 D_SPC-HW		0.435
 H_OPC			0.6791
+H_OPC3			0.447585
 H_NE6			0.477
 EP_TIP4P		-1.040
 EP_TIP4P-Ice		-1.1794
 EP_TIP4P-Ew		-1.04844
 EP_TIP4P-2005		-1.1128
+EP_TIP4P-FB		-1.05174
 EP_TIP5P		-0.241
 EP_OPC			-1.3582
 EP_NE6			-0.866
@@ -137,17 +160,20 @@ SSD	  	0.152	    	3.051
 SSD1      	0.152           3.016 
 SSD_E	 	0.152	        3.035
 SSD_RF    	0.152           3.019
-O_TIP3P         0.1521          3.15061 
+O_TIP3P         0.1521          3.15061
+O_TIP3P-FB	0.1558652008	3.1780	
 O_TIP4P         0.1550          3.15365
 O_TIP4P-Ice	0.210842	3.1668
 O_TIP4P-Ew      0.16275         3.16435
 O_TIP4P-2005	0.185207	3.1589
+O_TIP4P-FB	0.179082218	3.1655
 O_TIP5P         0.16            3.12   
 O_TIP5P-E       0.178           3.097   
 O_SPCE          0.15532         3.16549
 O_SPC           0.15532         3.16549
 O_SPC-HW	0.15532		3.16549
-O_OPC		0.89036		3.16655
+O_OPC		0.2128011472	3.16655
+O_OPC3		0.1634058317	3.17427
 O_NE6		0.170853052	3.115
 H_NE6		0.027585771	0.673
 end LennardJonesAtomTypes

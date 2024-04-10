@@ -99,6 +99,27 @@ molecule{
 }
 
 molecule{
+  name = "TIP3P-FB";
+  
+  atom[0]{
+    type = "O_TIP3P-FB";
+    position( 0.0, 0.0, -0.066424 );
+  }
+  atom[1]{
+    type = "H_TIP3P-FB";
+    position( 0.0, 0.819341, 0.527225 );
+  }
+  atom[2]{
+    type = "H_TIP3P-FB";
+    position( 0.0, -0.819341, 0.527225 );
+  }
+  
+  rigidBody[0]{     
+    members(0, 1, 2);
+  }  
+}
+
+molecule{
   name = "TIP4P";
   
   atom[0]{
@@ -174,6 +195,56 @@ molecule{
 }
 
 molecule{
+  name = "TIP4P-2005";
+  
+  atom[0]{
+    type = "O_TIP4P-2005";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = "H_TIP4P-2005";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = "H_TIP4P-2005";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = "EP_TIP4P-2005";
+    position( 0.0, 0.0, 0.08904 );
+  }
+  
+  rigidBody[0]{    
+    members(0, 1, 2, 3);
+  }  
+}
+
+molecule{
+  name = "TIP4P-FB";
+  
+  atom[0]{
+    type = "O_TIP4P-FB";
+    position( 0.0, 0.0, -0.0655549 );
+  }
+  atom[1]{
+    type = "H_TIP4P-FB";
+    position( 0.0, 0.75695, 0.520327 );
+  }
+  atom[2]{
+    type = "H_TIP4P-FB";
+    position( 0.0, -0.75695, 0.520327 );
+  }
+  atom[3]{
+    type = "EP_TIP4P-FB";
+    position( 0.0, 0.0, 0.0397151 );
+  }
+  
+  rigidBody[0]{    
+    members(0, 1, 2, 3);
+  }  
+}
+
+molecule{
   name = "TIP5P";
   
   atom[0]{
@@ -232,6 +303,39 @@ molecule{
 }
 
 molecule{
+  name = "NE6";
+  
+  atom[0]{
+    type = "O_NE6";
+    position( 0.0, 0.0, 0.0 );
+  }
+  atom[1]{
+    type = "H_NE6";
+    position( 0.0, 0.576029, 0.79283665 );
+  }
+  atom[2]{
+    type = "H_NE6";
+    position( 0.0, -0.576029, 0.79283665 );
+  }
+  atom[3]{
+    type = "EP_NE6";
+    position( 0.0, 0.23, 0.0 );
+  }
+  atom[4]{
+    type = "LP_NE6";
+    position( 0.732813007, -0.50364843, 0.0  );
+  }
+  atom[5]{
+    type = "LP_NE6";
+    position( -0.732813007, -0.50364843, 0.0  );
+  }
+ 
+  rigidBody[0]{    
+    members(0, 1, 2, 3, 4, 5);
+  }
+}
+
+molecule{
   name = "SPCE";
   
   atom[0]{
@@ -273,6 +377,28 @@ molecule{
   }
 }
 
+
+molecule{
+  name = "SPC-HW";
+  
+  atom[0]{
+    type = "O_SPC-HW";
+    position( 0.0, 0.0, -0.06461 );
+  }
+  atom[1]{
+    type = "D_SPC-HW";
+    position( 0.0, 0.81649, 0.51275 );
+  }
+  atom[2]{
+    type = "D_SPC-HW";
+    position( 0.0, -0.81649, 0.51275 );
+  }
+  
+  rigidBody[0]{    
+    members(0, 1, 2);
+  }
+}
+
 molecule{
   name = "DPD";
   
@@ -281,5 +407,52 @@ molecule{
     position(0.0, 0.0, 0.0);
   }
 }
+
+molecule{
+  name = "OPC";
+  
+  atom[0]{
+    type = "O_OPC";
+    position( 0.0, 0.0, -0.0603651 );
+  }
+  atom[1]{
+    type = "H_OPC";
+    position( 0.0, 0.685582, 0.479134 );
+  }
+  atom[2]{
+    type = "H_OPC";
+    position( 0.0, -0.685582, 0.479134 );
+  }
+  atom[3]{
+    type = "EP_OPC";
+    position( 0.0, 0.0, 0.0990349 );
+  }
+  
+  rigidBody[0]{    
+    members(0, 1, 2, 3);
+  }  
+}
+
+molecule{
+  name = "OPC3";
+  
+  atom[0]{
+    type = "O_OPC3";
+    position( 0.0, 0.0, -0.0632382 );
+  }
+  atom[1]{
+    type = "H_OPC3";
+    position( 0.0, 0.799262, 0.501939 );
+  }
+  atom[2]{
+    type = "H_OPC3";
+    position( 0.0, -0.799262, 0.501939 );
+  }
+  
+  rigidBody[0]{    
+    members(0, 1, 2);
+  }
+}
+
 
 #endif
