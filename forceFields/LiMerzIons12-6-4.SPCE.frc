@@ -1,0 +1,327 @@
+// 12-6-4 Paramters from three papers:
+//
+// "Systematic Parameterization of Monovalent Ions Employing the
+// Nonbonded Model," Pengfei Li, Lin Frank Song, and Kenneth M. Merz Jr.
+// Journal of Chemical Theory and Computation 2015 11 (4), 1645-1657
+// DOI: 10.1021/ct500918t
+//
+// "Taking into Account the Ion-Induced Dipole Interaction in the
+// Nonbonded Model of Ions," by Pengfei Li and Kenneth/ M. Merz Jr.
+// Journal of Chemical Theory and Computation 2014 10 (1), 289-297
+// DOI: 10.1021/ct400751u
+//
+// "Parameterization of Highly Charged Metal Ions Using the 12-6-4
+// LJ-Type Nonbonded Model in Explicit Water," Pengfei Li, Lin Frank
+// Song, and Kenneth M. Merz Jr.  The Journal of Physical Chemistry B
+// 2015 119 (3), 883-895 DOI: 10.1021/jp505875v
+//
+// This version is for use with the SPC/E water model. C4 terms for
+// direct non-bonded interactions between O_SPCE and the ions are
+// included. Care should be taken to generate similar C4 terms for
+// ion-ion interactions using the atomic polarizabilities.  Note that
+// OpenMD assumes positive coefficients for all InversePowerSeries, so
+// comparing signs with A and B coefficients in other codes may differ.
+
+begin Options
+      Name      "LiSMerzIons12-6-4-SPCE"
+      DistanceMixingRule     Arithmetic
+      EnergyMixingRule       Geometric
+end Options
+
+begin BaseAtomTypes
+Li   6.941
+Na   22.989769
+K    39.0983
+Rb   85.4678
+Cs   132.90545
+Tl   204.3833
+Cu   63.546
+Ag   107.8682
+F    18.998403
+Cl   35.453
+Br   79.904
+I    126.90447
+NH4+ 18.039
+H    1.00784
+H3O+ 19.0232
+Be   9.012182
+Ni   58.6934
+Zn   65.38
+Co   58.933195
+Cr   51.9961
+Fe   55.845
+Mg   24.305
+V    50.9415
+Mn   54.938044
+Hg   200.59
+Cd   112.414
+Ca   40.078
+Sn   118.71
+Sr   87.62
+Ba   137.327
+Al   26.981539
+In   114.818
+Y    88.90585
+La   138.90547
+Ce   140.116
+Pr   140.90765
+Nd   144.242
+Sm   150.36
+Eu   151.964
+Gd   157.25
+Tb   158.92535
+Dy   162.5
+Er   167.259
+Tm   168.93421
+Lu   174.967
+Hf   178.49
+Zr   91.224
+Ce   140.116
+U    238.02891
+Pu   244
+Th   232.03806
+O    15.9994
+end BaseAtomTypes
+
+begin AtomTYpes
+Li+   Li
+Na+   Na
+K+    K 
+Rb+   Rb
+Cs+   Cs
+Tl+   Tl
+Cu+   Cu
+Ag+   Ag
+F-    F 
+Cl-   Cl
+Br-   Br
+I-    I 
+NH4+  NH4+
+HZ+   H
+HE+   H
+H3O+  H3O+
+Be2+  Be
+Cu2+  Cu
+Ni2+  Ni
+Zn2+  Zn
+Co2+  Co
+Cr2+  Cr
+Fe2+  Fe
+Mg2+  Mg
+V2+   V 
+Mn2+  Mn
+Hg2+  Hg
+Cd2+  Cd
+Ca2+  Ca
+Sn2+  Sn
+Sr2+  Sr
+Ba2+  Ba
+Al3+  Al
+Fe3+  Fe
+Cr3+  Cr
+In3+  In
+Tl3+  Tl
+Y3+   Y 
+La3+  La
+Ce3+  Ce
+Pr3+  Pr
+Nd3+  Nd
+Sm3+  Sm
+Eu3+  Eu
+Gd3+  Gd
+Tb3+  Tb
+Dy3+  Dy
+Er3+  Er
+Tm3+  Tm
+Lu3+  Lu
+Hf4+  Hf
+Zr4+  Zr
+Ce4+  Ce
+U4+   U 
+Pu4+  Pu
+Th4+  Th
+OW      O
+HW      H
+O_SPCE  OW
+H_SPCE  HW
+end AtomTypes
+
+begin ChargeAtomTypes
+Li+   1.0
+Na+   1.0
+K+    1.0
+Rb+   1.0
+Cs+   1.0
+Tl+   1.0
+Cu+   1.0
+Ag+   1.0
+F-    -1.0
+Cl-   -1.0
+Br-   -1.0
+I-    -1.0
+NH4+  1.0
+HZ+   1.0
+HE+   1.0
+H3O+  1.0
+Be2+  2.0
+Cu2+  2.0
+Ni2+  2.0
+Zn2+  2.0
+Co2+  2.0
+Cr2+  2.0
+Fe2+  2.0
+Mg2+  2.0
+V2+   2.0
+Mn2+  2.0
+Hg2+  2.0
+Cd2+  2.0
+Ca2+  2.0
+Sn2+  2.0
+Sr2+  2.0
+Ba2+  2.0
+Al3+  3.0
+Fe3+  3.0
+Cr3+  3.0
+In3+  3.0
+Tl3+  3.0
+Y3+   3.0
+La3+  3.0
+Ce3+  3.0
+Pr3+  3.0
+Nd3+  3.0
+Sm3+  3.0
+Eu3+  3.0
+Gd3+  3.0
+Tb3+  3.0
+Dy3+  3.0
+Er3+  3.0
+Tm3+  3.0
+Lu3+  3.0
+Hf4+  4.0
+Zr4+  4.0
+Ce4+  4.0
+U4+   4.0
+Pu4+  4.0
+Th4+  4.0
+O_SPCE -0.8476
+H_SPCE  0.4238
+end ChargeAtomTypes
+
+begin LennardJonesAtomTypes
+Li+	0.00691068	2.36444519794446
+Na+	0.03091095	2.62280582620516
+K+	0.18150763	3.136
+Rb+	0.23464849	3.25356211864852
+Cs+	0.39306142	3.57072206230648
+Tl+	0.28918714	3.3658153571342
+Cu+	0.00148497	2.17022927738987
+Ag+	0.05140063	2.73684086212712
+F-	0.15629366	3.07538237502045
+Cl-	0.52404590	3.8362098803123
+Br-	0.65475744	4.1408972419163
+I-	0.79809803	4.59525558816787
+NH4+	0.21069138	3.20188999299638 // Ammonium
+HZ+	0.00000988	1.75863406960903 // Zundel
+HE+	0.00000021	1.550            // Eigen
+H3O+	0.19156806	3.15912685452564 // Hydronium
+Be2+	0.00120058	2.14706591071822
+Cu2+	0.03364841	2.64062380056797
+Ni2+	0.01995146	2.53727954926369
+Zn2+	0.02639002	2.59073347235211
+Co2+	0.02710805	2.59607886466095
+Cr2+	0.01995146	2.53727954926369
+Fe2+	0.02545423	2.584
+Mg2+	0.02093385	2.54618853644509
+V2+	0.03962711	2.67625974929358
+Mn2+	0.03745682	2.66378716723961
+Hg2+	0.10128575	2.92392959293659
+Cd2+	0.05330850	2.74574984930853
+Ca2+	0.09731901	2.91145701088263
+Sn2+	0.19549490	3.16803584170705
+Sr2+	0.19549490	3.16803584170705
+Ba2+	0.33223312	3.45134163407567
+Al3+	0.01205473	2.44997147488593
+Fe3+	0.02545423	2.584
+Cr3+	0.01809021	2.51946157490088
+In3+	0.03507938	2.64953278774937
+Tl3+	0.06484979	2.79564017752438
+Y3+	0.09180886	2.89363903651982
+La3+	0.18380968	3.14130888016284
+Ce3+	0.20184160	3.18229022119729
+Pr3+	0.19865859	3.17516303145217
+Nd3+	0.16280564	3.09141855194698
+Sm3+	0.14021803	3.034401033986
+Eu3+	0.15272873	3.06647338783905
+Gd3+	0.10417397	2.932838580118
+Tb3+	0.11617738	2.96847452884361
+Dy3+	0.09900804	2.91680240319147
+Er3+	0.09454081	2.90254802370123
+Tm3+	0.09675968	2.90967521344635
+Lu3+	0.08965674	2.887
+Hf4+	0.07543075	2.83662151855884
+Zr4+	0.08389240	2.86691207497561
+Ce4+	0.18227365	3.13774528529027
+U4+	0.20584696	3.1911992083787
+Pu4+	0.17392181	3.118
+Th4+	0.19156806	3.15912685452564
+O_SPCE  0.15532         3.16549
+end LennardJonesAtomTypes
+
+begin NonBondedInteractions
+Li+	O_SPCE	InversePowerSeries	12	26164.63205	6	-58.55640	4	-33
+Na+	O_SPCE	InversePowerSeries	12	95714.67667	6	-162.87491	4	-6
+K+	O_SPCE	InversePowerSeries	12	642761.71059	6	-657.03055	4	-19
+Rb+	O_SPCE	InversePowerSeries	12	912375.13191	6	-834.69536	4	-7
+Cs+	O_SPCE	InversePowerSeries	12	2106361.71580	6	-1442.84083	4	-12
+Tl+	O_SPCE	InversePowerSeries	12	1247105.19335	6	-1028.21309	4	-61
+Cu+	O_SPCE	InversePowerSeries	12	7897.47471	6	-21.90334	4	-9
+Ag+	O_SPCE	InversePowerSeries	12	155984.18377	6	-236.11264	4	-92
+F-	O_SPCE	InversePowerSeries	12	531163.26575	6	-575.35541	4	53
+Cl-	O_SPCE	InversePowerSeries	12	3867588.80217	6	-2100.87068	4	55
+Br-	O_SPCE	InversePowerSeries	12	7207525.56144	6	-3032.14557	4	51
+I-	O_SPCE	InversePowerSeries	12	16412820.29019	6	-4807.75699	4	51
+NH4+	O_SPCE	InversePowerSeries	12	784632.58617	6	-753.49731	4	-13
+HZ+	O_SPCE	InversePowerSeries	12	245.83293	6	-1.10369	4	-106
+HE+	O_SPCE	InversePowerSeries	12	21.32683	6	-0.12412	4	-51
+H3O+	O_SPCE	InversePowerSeries	12	690058.54524	6	-690.01826	4	-205
+Be2+	O_SPCE	InversePowerSeries	12	6739.86894	6	-19.18714	4	-188.1
+Cu2+	O_SPCE	InversePowerSeries	12	103614.97681	6	-173.09688	4	-304.4
+Ni2+	O_SPCE	InversePowerSeries	12	64317.76422	6	-119.67295	4	-205.2
+Zn2+	O_SPCE	InversePowerSeries	12	82734.25254	6	-145.55913	4	-231.2
+Co2+	O_SPCE	InversePowerSeries	12	84791.42993	6	-148.34995	4	-209.2
+Cr2+	O_SPCE	InversePowerSeries	12	64317.76422	6	-119.67295	4	-131.2
+Fe2+	O_SPCE	InversePowerSeries	12	80055.04411	6	-141.89634	4	-155.4
+Mg2+	O_SPCE	InversePowerSeries	12	67127.94740	6	-123.73735	4	-122.2
+V2+	O_SPCE	InversePowerSeries	12	121011.13050	6	-194.87117	4	-206.6
+Mn2+	O_SPCE	InversePowerSeries	12	114671.54177	6	-187.04556	4	-154.9
+Hg2+	O_SPCE	InversePowerSeries	12	318418.80783	6	-399.69000	4	-300.2
+Cd2+	O_SPCE	InversePowerSeries	12	161753.96726	6	-242.64058	4	-198.8
+Ca2+	O_SPCE	InversePowerSeries	12	304535.53038	6	-386.99490	4	-89.0
+Sn2+	O_SPCE	InversePowerSeries	12	708970.25291	6	-702.96662	4	-201.1
+Sr2+	O_SPCE	InversePowerSeries	12	708970.25291	6	-702.96662	4	-96.3
+Ba2+	O_SPCE	InversePowerSeries	12	1562558.21523	6	-1191.55934	4	-85.8
+Al3+	O_SPCE	InversePowerSeries	12	41544.91778	6	-84.79791	4	-406
+Fe3+	O_SPCE	InversePowerSeries	12	80055.04411	6	-141.89634	4	-442
+Cr3+	O_SPCE	InversePowerSeries	12	58987.06329	6	-111.83459	4	-254
+In3+	O_SPCE	InversePowerSeries	12	107759.79114	6	-178.37262	4	-349
+Tl3+	O_SPCE	InversePowerSeries	12	197338.25934	6	-281.46191	4	-455
+Y3+	O_SPCE	InversePowerSeries	12	285547.55725	6	-369.31523	4	-209
+La3+	O_SPCE	InversePowerSeries	12	653439.98536	6	-664.55631	4	-165
+Ce3+	O_SPCE	InversePowerSeries	12	740085.09263	6	-723.98629	4	-242
+Pr3+	O_SPCE	InversePowerSeries	12	724394.71556	6	-713.42991	4	-272
+Nd3+	O_SPCE	InversePowerSeries	12	559069.94888	6	-596.33085	4	-235
+Sm3+	O_SPCE	InversePowerSeries	12	464862.31968	6	-523.84159	4	-224
+Eu3+	O_SPCE	InversePowerSeries	12	516146.30644	6	-563.90174	4	-273
+Gd3+	O_SPCE	InversePowerSeries	12	328642.09439	6	-408.91989	4	-186
+Tb3+	O_SPCE	InversePowerSeries	12	372194.23913	6	-447.20027	4	-227
+Dy3+	O_SPCE	InversePowerSeries	12	310424.86722	6	-392.40335	4	-206
+Er3+	O_SPCE	InversePowerSeries	12	294919.11121	6	-378.08820	4	-247
+Tm3+	O_SPCE	InversePowerSeries	12	302592.43263	6	-385.20284	4	-262
+Lu3+	O_SPCE	InversePowerSeries	12	278223.51245	6	-362.39274	4	-247
+Hf4+	O_SPCE	InversePowerSeries	12	231066.33261	6	-316.29497	4	-810
+Zr4+	O_SPCE	InversePowerSeries	12	258856.10509	6	-343.79274	4	-760
+Ce4+	O_SPCE	InversePowerSeries	12	646305.57732	6	-659.53336	4	-694
+U4+	O_SPCE	InversePowerSeries	12	760077.19855	6	-737.31286	4	-1043
+Pu4+	O_SPCE	InversePowerSeries	12	608166.62706	6	-632.31960	4	-828
+Th4+	O_SPCE	InversePowerSeries	12	690058.54524	6	-690.01826	4	-513
+end NonBondedInteractions
