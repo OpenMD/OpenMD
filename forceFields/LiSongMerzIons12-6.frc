@@ -1,12 +1,18 @@
 // 12-6 LJ Paramters from "Systematic Parameterization of Monovalent Ions
-// Employing the Nonbonded Model," by  Pengfei Li, Lin Frank Song, and Kenneth M. Merz Jr.
+// Employing the Nonbonded Model," by  Pengfei Li, Lin Frank Song, and
+// Kenneth M. Merz Jr.
 // Journal of Chemical Theory and Computation 2015 11 (4), 1645-1657
 // DOI: 10.1021/ct500918t 
 //
-// This version is for use with the SPC/E water model.
+// This version is for general use with the multiple water models,
+// and was tuned for ion-oxygen distances (IOD). It was adapted from
+// table 3 in the paper above.
+//
+// Note that this force field file cannot be used alone, as it does not
+// define a water model.
 
 begin Options
-      Name      "LiSongMerz-SPCE"
+      Name      "LiSongMerzIons12-6"
       DistanceMixingRule     Arithmetic
       EnergyMixingRule       Geometric
 end Options
@@ -44,6 +50,8 @@ I-      I
 Tl+     Tl
 Cu+     Cu
 Ag+     Ag
+HZ+     H        // H+ in Zundel
+HE+     H        // H+ in Eigen
 end AtomTypes
 
 begin ChargeAtomTypes
@@ -61,23 +69,27 @@ Tl+     1.0
 Cu+     1.0
 Ag+     1.0
 NH4+    1.0
+HZ+     1.0     // H+ in Zundel
+HE+     1.0     // H+ in Eigen
 H3O+    1.0     // Hydronium
 end ChargeAtomTypes
 
 begin LennardJonesAtomTypes
 //name  epsilon(kcal/mol) sigma(Angstroms)
-Li+	0.00274091	2.24150117484109
-Na+	0.02639002	2.59073347235211
-K+	0.12693448	2.99876508526038
-Rb+	0.20665151	3.19298100581498
-Cs+	0.34673208	3.47985039305617
-Tl+	0.11741683	2.97203812371617
-Cu+	0.00096394	2.12390254404657
-Ag+	0.00716930	2.370
-NH4+	0.16869420	3.10567293143722
-H3O+	0.00691068	2.36444519794446
-F–	0.22878796	3.24108953659455
-Cl–	0.64367011	4.11238848293581
-Br–	0.74435812	4.401
-I–	0.86877007	4.936
+Li+	0.00594975	2.34306362870909
+Na+	0.02909167	2.61033324415119
+K+	0.17018074	3.10923652630978
+Rb+	0.22962229	3.243
+Cs+	0.38943250	3.564
+Tl+	0.27244486	3.332
+Cu+	0.00139196	2.16310208764474
+Ag+	0.03899838	2.673
+NH4+	0.20504355	3.189
+HZ+	0.00000147	1.64816262855963
+HE+	0.0000000661	1.49849164391205
+H3O+	0.15202035	3.065
+F–	0.16573832	3.0985457416921
+Cl–	0.53154665	3.85224605723883
+Br–	0.65952968	4.15336982397026
+I–	0.80293907	4.615
 end LennardJonesAtomTypes

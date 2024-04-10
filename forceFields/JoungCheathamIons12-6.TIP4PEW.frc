@@ -7,7 +7,7 @@
 // This version is for use with the TIP4P-EW water model.
 
 begin Options
-      Name      "JoungCheatham-TIP4P-EW"
+      Name      "JoungCheathamIons12-6-TIP4P-EW"
       DistanceMixingRule     Arithmetic
       EnergyMixingRule       Geometric
 end Options

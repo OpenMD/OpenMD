@@ -4,10 +4,10 @@
 // The Journal of Physical Chemistry B 2008 112 (30), 9020-9041
 // DOI: 10.1021/jp8001614
 //
-// This version is for use with the TIP3P water model.
+// This version is for use with the SPC/E water model.
 
 begin Options
-      Name      "JoungCheatham-TIP3P"
+      Name      "JoungCheathamIons12-6-SPCE"
       DistanceMixingRule     Arithmetic
       EnergyMixingRule       Geometric
 end Options
@@ -53,13 +53,13 @@ end ChargeAtomTypes
 
 begin LennardJonesAtomTypes
 //name  epsilon(kcal/mol) sigma(Angstroms)
-Li+	0.0279896	1.8263423721877
-Na+	0.0874393	2.43928069026825
-K+	0.1936829	3.03796462885856
-Rb+	0.3278219	3.23039875197687
-Cs+	0.4065394	3.52083173409062
-F-	0.0033640	4.1034794957544
-Cl-	0.0355910	4.47765695737335
-Br-	0.0586554	4.64692771382001
-I-	0.0536816	5.096
+Li+	0.3367344	1.40940177209802
+Na+	0.3526418	2.15953849277218
+K+	0.4297054	2.83840331599512
+Rb+	0.4451036	3.09498214681954
+Cs+	0.0898565	3.60101261872325
+F-	0.0074005	4.02151681368549
+Cl-	0.0127850	4.83045284975692
+Br-	0.0269586	4.90172474720815
+I-	0.0427845	5.2010667165033
 end LennardJonesAtomTypes
