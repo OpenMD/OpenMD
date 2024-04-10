@@ -23,6 +23,8 @@ F       18.998403
 Cl      35.453
 Br      79.904
 I       126.90447
+O       15.9994
+H       1.00784
 end BaseAtomTypes
 
 begin AtomTypes
@@ -36,6 +38,10 @@ F-      F
 Cl-     Cl
 Br-     Br
 I-      I
+OW      O
+HW      H
+O_TIP3P OW
+H_TIP3P HW
 end AtomTypes
 
 begin ChargeAtomTypes
@@ -49,6 +55,8 @@ F-      -1.0
 Cl-     -1.0
 Br-     -1.0
 I-      -1.0
+O_TIP3P -0.834
+H_TIP3P  0.417
 end ChargeAtomTypes
 
 begin LennardJonesAtomTypes
@@ -62,4 +70,5 @@ F-	0.0033640	4.1034794957544
 Cl-	0.0355910	4.47765695737335
 Br-	0.0586554	4.64692771382001
 I-	0.0536816	5.096
+O_TIP3P 0.1521          3.15061 
 end LennardJonesAtomTypes

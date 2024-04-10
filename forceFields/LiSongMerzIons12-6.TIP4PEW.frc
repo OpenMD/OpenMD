@@ -30,6 +30,8 @@ Ag      107.8682
 NH4+    18.0379
 H       1.00784
 H3O+    19.0232
+O       15.9994
+EP      0.0
 end BaseAtomTypes
 
 begin AtomTypes
@@ -46,6 +48,11 @@ I-      I
 Tl+     Tl
 Cu+     Cu
 Ag+     Ag
+OW      O
+HW      H
+O_TIP4P-Ew  OW
+H_TIP4P-Ew  HW
+EP_TIP4P-Ew EP
 end AtomTypes
 
 begin ChargeAtomTypes
@@ -64,6 +71,8 @@ Cu+     1.0
 Ag+     1.0
 NH4+    1.0
 H3O+    1.0     // Hydronium
+H_TIP4P-Ew     0.52422
+EP_TIP4P-Ew   -1.04844
 end ChargeAtomTypes
 
 begin LennardJonesAtomTypes
@@ -82,4 +91,5 @@ F–	0.24821230	3.28207087762901
 Cl–	0.65269755	4.13555184960745
 Br–	0.77034233	4.490
 I–	0.88281946	5.02288697287523
+O_TIP4P-Ew 0.16275      3.16435
 end LennardJonesAtomTypes
