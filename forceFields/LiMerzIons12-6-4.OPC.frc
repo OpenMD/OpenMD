@@ -82,7 +82,7 @@ O    15.9994
 EP   0.0
 end BaseAtomTypes
 
-begin AtomTYpes
+begin AtomTypes
 Li+   Li
 Na+   Na
 K+    K 

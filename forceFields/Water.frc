@@ -60,14 +60,10 @@ H		1.0079
 D		2.0141
 EP		0.0
 LP		0.0
-DIP         	9.00764		
 SSD		18.0153		
 SSD1        	18.0153 
 SSD_E       	18.0153
 SSD_RF      	18.0153
-TAP		18.0153
-TRED        	18.0153
-H_DIP3P		1.0079
 end BaseAtomTypes
 
 begin AtomTypes
@@ -75,83 +71,79 @@ begin AtomTypes
 OW              O
 HW              H
 DW		D
-TIP3P-O                 OW
-TIP3P-H                 HW
-O_TIP3P                 OW
-O_TIP3P-FB		OW
-O_TIP4P                 OW
-O_TIP4P-Ice		OW
-O_TIP4P-2005		OW
-O_TIP4P-Ew              OW
-O_TIP4P-FB		OW
-O_TIP5P                 OW
-O_TIP5P-E               OW
-O_SPCE                  OW
-O_SPC                   OW
-O_POL3                  OW
-O_OPC			OW
-O_OPC3			OW
-O_SPC-HW		OW
-O_DIP3P			OW
-O_NE6			OW
-H_TIP3P                 HW
-H_TIP3P-FB		HW
-H_TIP4P                 HW
-H_TIP4P-Ice		HW
-H_TIP4P-2005		HW
-H_TIP4P-Ew              HW
-H_TIP4P-FB		HW
-H_TIP5P                 HW
-H_SPCE                  HW
-H_SPC                   HW
-H_POL3                  HW
-H_OPC			HW
-H_OPC3			HW
-H_NE6			HW
-D_SPC-HW		DW
-EP_TIP4P                EP
-EP_TIP4P-Ice		EP
-EP_TIP4P-2005		EP
-EP_TIP4P-Ew             EP
-EP_TIP4P-FB		EP
-EP_TIP5P                EP
-EP_OPC			EP
-EP_TRED			EP
-EP_NE6			EP
-LP_NE6			LP
+TIP3P-O         OW  // Used in Amber.frc
+TIP3P-H         HW  // Used in Amber.frc
+O_TIP3P         OW
+O_TIP3P-FB	OW
+O_TIP4P         OW
+O_TIP4P-Ice	OW
+O_TIP4P-2005	OW
+O_TIP4P-Ew      OW
+O_TIP4P-FB	OW
+O_TIP5P         OW
+O_TIP5P-E       OW
+O_SPCE          OW
+O_SPC           OW
+O_OPC		OW
+O_OPC3		OW
+O_SPC-HW	OW
+O_NE6		OW
+H_TIP3P         HW
+H_TIP3P-FB	HW
+H_TIP4P         HW
+H_TIP4P-Ice	HW
+H_TIP4P-2005	HW
+H_TIP4P-Ew      HW
+H_TIP4P-FB	HW
+H_TIP5P         HW
+H_SPCE          HW
+H_SPC           HW
+H_OPC		HW
+H_OPC3		HW
+H_NE6		HW
+D_SPC-HW	DW
+EP_TIP4P        EP
+EP_TIP4P-Ice	EP
+EP_TIP4P-2005	EP
+EP_TIP4P-Ew     EP
+EP_TIP4P-FB	EP
+EP_TIP5P        EP
+EP_OPC		EP
+EP_NE6		EP
+LP_NE6		LP
 end AtomTypes
 
 begin ChargeAtomTypes
-//name			charge
-O_TIP3P                -0.834
-H_TIP3P		        0.417
-O_TIP3P-FB	       -0.848448690103
-H_TIP3P-FB	        0.4242243450515
-O_SPCE		       -0.8476
-O_SPC			-0.82
-O_SPC-HW		-0.87
-O_OPC3			-0.89517
-H_TIP4P			0.520
-H_TIP4P-Ice		0.5897
-H_TIP4P-Ew		0.52422
-H_TIP4P-2005		0.5564
-H_TIP4P-FB              0.5258681107
-H_TIP5P			0.241
-H_SPCE			0.4238
-H_SPC			0.42
-D_SPC-HW		0.435
-H_OPC			0.6791
-H_OPC3			0.447585
-H_NE6			0.477
-EP_TIP4P		-1.040
-EP_TIP4P-Ice		-1.1794
-EP_TIP4P-Ew		-1.04844
-EP_TIP4P-2005		-1.1128
-EP_TIP4P-FB             -1.0517362213526
-EP_TIP5P		-0.241
-EP_OPC			-1.3582
-EP_NE6			-0.866
-LP_NE6			-0.044
+//name           charge
+O_TIP3P         -0.834
+H_TIP3P		 0.417
+O_TIP3P-FB	-0.848448690103
+H_TIP3P-FB	 0.4242243450515
+O_SPCE		-0.8476
+H_SPCE		 0.4238
+O_SPC           -0.820
+H_SPC		 0.410
+O_SPC-HW        -0.87
+D_SPC-HW	 0.435
+O_OPC3          -0.89517
+H_OPC3           0.447585
+H_TIP4P	         0.520
+EP_TIP4P        -1.040
+H_TIP4P-Ice      0.5897
+EP_TIP4P-Ice    -1.1794
+H_TIP4P-Ew       0.52422
+EP_TIP4P-Ew     -1.04844
+H_TIP4P-2005     0.5564
+EP_TIP4P-2005   -1.1128
+H_TIP4P-FB       0.5258681107
+EP_TIP4P-FB     -1.0517362213526
+H_TIP5P          0.241
+EP_TIP5P        -0.241
+H_OPC            0.6791
+EP_OPC          -1.3582
+H_NE6            0.477
+EP_NE6          -0.866
+LP_NE6          -0.044
 end ChargeAtomTypes
 
 begin LennardJonesAtomTypes
@@ -167,8 +159,8 @@ O_TIP4P-Ice	0.210842	3.1668
 O_TIP4P-Ew      0.16275         3.16435
 O_TIP4P-2005	0.185207	3.1589
 O_TIP4P-FB	0.179082218	3.1655
-O_TIP5P         0.16            3.12   
-O_TIP5P-E       0.178           3.097   
+O_TIP5P         0.1600          3.1200
+O_TIP5P-E       0.1780          3.0970  
 O_SPCE          0.15532         3.16549
 O_SPC           0.15532         3.16549
 O_SPC-HW	0.15532		3.16549
@@ -180,14 +172,10 @@ end LennardJonesAtomTypes
 
 begin DirectionalAtomTypes
 //Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2))
-//H_DIP3P     	0       0       0
-DIP         	0.8202  0.8202  0
 SSD		1.7696	0.6145	1.1550  
 SSD1		1.7696	0.6145	1.1550  
 SSD_E		1.7696	0.6145	1.1550  
 SSD_RF		1.7696	0.6145	1.1550  
-TAP		1.7696  0.6145  1.1550
-TRED        	1.7696  0.6145  1.1550
 end DirectionalAtomTypes
 
 begin MultipoleAtomTypes
@@ -220,16 +208,10 @@ begin MultipoleAtomTypes
 // Quadrupole moments are given in units of 10^-26 esu cm^2 (also known as an
 //                                                           esu centi-barn)
 //
-H_DIP3P d       0.0     0.0     0.0     1.91
-DIP     d       0.0     0.0     0.0     1.91
 SSD_E   dq      0.0     0.0     0.0     2.42    -1.682  1.762   -0.08
 SSD_RF  dq      0.0     0.0     0.0     2.48    -1.682  1.762   -0.08
 SSD     dq      0.0     0.0     0.0     2.35    -1.682  1.762   -0.08
 SSD1    dq      0.0     0.0     0.0     2.35    -1.682  1.762   -0.08
-TAP	dq      0.0     0.0     0.0     2.12    -1.682  1.762   -0.08
-//TRED    q       0.0     0.0     0.0     -1.682  1.762   -0.08
-//PDIP	d       0.0     0.0     0.0     9.6064
-//HDP     s       0.0     0.0     0.0     20.6    4.63
 end MultipoleAtomTypes
 
 begin StickyAtomTypes
@@ -238,12 +220,4 @@ SSD_E	0.07715	3.90		3.90	2.40	  3.80	2.75	3.35
 SSD_RF	0.07715	3.90		3.90	2.40	  3.80	2.75	3.35
 SSD	0.07715	3.7284		3.7284	2.75	  3.35	2.75	4.0
 SSD1	0.07715	3.6613		3.6613	2.75	  3.35	2.75	4.0
-TRED    0.07715 4.22     	4.22    2.40	  4.00	2.40	4.0
 end StickyAtomTypes
-
-begin StickyPowerAtomTypes
-//name  w0	    v0 (kcal/mol)   v0p	    rl (Ang)  ru	rlp	    rup
-TAP	0.075	5.5		        0.25	2.75	  3.5	2.75	3.25
-end StickyPowerAtomTypes
-
-
