@@ -1,0 +1,313 @@
+// 12-6-4 Paramters from three papers:
+//
+// "Systematic Parameterization of Monovalent Ions Employing the
+// Nonbonded Model," Pengfei Li, Lin Frank Song, and Kenneth M. Merz Jr.
+// Journal of Chemical Theory and Computation 2015 11 (4), 1645-1657
+// DOI: 10.1021/ct500918t
+//
+// "Taking into Account the Ion-Induced Dipole Interaction in the
+// Nonbonded Model of Ions," by Pengfei Li and Kenneth/ M. Merz Jr.
+// Journal of Chemical Theory and Computation 2014 10 (1), 289-297
+// DOI: 10.1021/ct400751u
+//
+// "Parameterization of Highly Charged Metal Ions Using the 12-6-4
+// LJ-Type Nonbonded Model in Explicit Water," Pengfei Li, Lin Frank
+// Song, and Kenneth M. Merz Jr.  The Journal of Physical Chemistry B
+// 2015 119 (3), 883-895 DOI: 10.1021/jp505875v
+//
+// This version is for use with the TIP3P-FB water model. C4 terms for
+// direct non-bonded interactions between O_TIP3P-FB and the ions are
+// included. Care should be taken to generate similar C4 terms for
+// ion-ion interactions using the atomic polarizabilities.  Note that
+// OpenMD assumes positive coefficients for all InversePowerSeries, so
+// comparing signs with A and B coefficients in other codes may differ.
+
+begin Options
+      Name      "LiSMerzIons12-6-4-TIP3P-FB"
+      DistanceMixingRule     Arithmetic
+      EnergyMixingRule       Geometric
+end Options
+
+begin BaseAtomTypes
+Li   6.941
+Na   22.989769
+K    39.0983
+Rb   85.4678
+Cs   132.90545
+Tl   204.3833
+Cu   63.546
+Ag   107.8682
+F    18.998403
+Cl   35.453
+Br   79.904
+I    126.90447
+H    1.00784
+Be   9.012182
+Ni   58.6934
+Zn   65.38
+Co   58.933195
+Cr   51.9961
+Fe   55.845
+Mg   24.305
+V    50.9415
+Mn   54.938044
+Hg   200.59
+Cd   112.414
+Ca   40.078
+Sn   118.71
+Sr   87.62
+Ba   137.327
+Al   26.981539
+In   114.818
+Y    88.90585
+La   138.90547
+Ce   140.116
+Pr   140.90765
+Nd   144.242
+Sm   150.36
+Eu   151.964
+Gd   157.25
+Tb   158.92535
+Dy   162.5
+Er   167.259
+Tm   168.93421
+Lu   174.967
+Hf   178.49
+Zr   91.224
+Ce   140.116
+U    238.02891
+Pu   244
+Th   232.03806
+O    15.9994
+end BaseAtomTypes
+
+begin AtomTYpes
+Li+   Li
+Na+   Na
+K+    K 
+Rb+   Rb
+Cs+   Cs
+Tl+   Tl
+Cu+   Cu
+Ag+   Ag
+F-    F 
+Cl-   Cl
+Br-   Br
+I-    I 
+Be2+  Be
+Cu2+  Cu
+Ni2+  Ni
+Zn2+  Zn
+Co2+  Co
+Cr2+  Cr
+Fe2+  Fe
+Mg2+  Mg
+V2+   V 
+Mn2+  Mn
+Hg2+  Hg
+Cd2+  Cd
+Ca2+  Ca
+Sn2+  Sn
+Sr2+  Sr
+Ba2+  Ba
+Al3+  Al
+Fe3+  Fe
+Cr3+  Cr
+In3+  In
+Tl3+  Tl
+Y3+   Y 
+La3+  La
+Ce3+  Ce
+Pr3+  Pr
+Nd3+  Nd
+Sm3+  Sm
+Eu3+  Eu
+Gd3+  Gd
+Tb3+  Tb
+Dy3+  Dy
+Er3+  Er
+Tm3+  Tm
+Lu3+  Lu
+Hf4+  Hf
+Zr4+  Zr
+Ce4+  Ce
+U4+   U 
+Pu4+  Pu
+Th4+  Th
+OW      O
+HW      H
+O_TIP3P-FB  OW
+H_TIP3P-FB  HW
+end AtomTypes
+
+begin ChargeAtomTypes
+Li+   1.0
+Na+   1.0
+K+    1.0
+Rb+   1.0
+Cs+   1.0
+Tl+   1.0
+Cu+   1.0
+Ag+   1.0
+F-    -1.0
+Cl-   -1.0
+Br-   -1.0
+I-    -1.0
+NH4+  1.0
+HZ+   1.0
+HE+   1.0
+H3O+  1.0
+Be2+  2.0
+Cu2+  2.0
+Ni2+  2.0
+Zn2+  2.0
+Co2+  2.0
+Cr2+  2.0
+Fe2+  2.0
+Mg2+  2.0
+V2+   2.0
+Mn2+  2.0
+Hg2+  2.0
+Cd2+  2.0
+Ca2+  2.0
+Sn2+  2.0
+Sr2+  2.0
+Ba2+  2.0
+Al3+  3.0
+Fe3+  3.0
+Cr3+  3.0
+In3+  3.0
+Tl3+  3.0
+Y3+   3.0
+La3+  3.0
+Ce3+  3.0
+Pr3+  3.0
+Nd3+  3.0
+Sm3+  3.0
+Eu3+  3.0
+Gd3+  3.0
+Tb3+  3.0
+Dy3+  3.0
+Er3+  3.0
+Tm3+  3.0
+Lu3+  3.0
+Hf4+  4.0
+Zr4+  4.0
+Ce4+  4.0
+U4+   4.0
+Pu4+  4.0
+Th4+  4.0
+O_TIP3P-FB             -0.84844
+H_TIP3P-FB              0.42422
+end ChargeAtomTypes
+
+begin LennardJonesAtomTypes
+Li+	0.00641580	2.35375
+Na+	0.03038310	2.61924
+K+	0.17392181	3.11815
+Rb+	0.22546047	3.23396
+Cs+	0.39306142	3.57072
+Tl+	0.29184918	3.37116
+Cu+	0.00185305	2.19517
+Ag+	0.04525501	2.70655
+F-	0.17018074	3.10924
+Cl-	0.52822042	3.84512
+Br-	0.65544212	4.14268
+I-	0.80250319	4.61307
+Be2+	0.00128267	2.15419
+Cu2+	0.02960343	2.61390
+Ni2+	0.02257962	2.56044
+Zn2+	0.02454281	2.57648
+Co2+	0.02431873	2.57470
+Cr2+	0.02174524	2.55332
+Fe2+	0.02639002	2.59073
+Mg2+	0.02174524	2.55332
+V2+	0.04090549	2.68339
+Mn2+	0.03625449	2.65666
+Hg2+	0.09344247	2.89898
+Cd2+	0.05486796	2.75288
+Ca2+	0.09844319	2.91502
+Sn2+	0.19235093	3.16091
+Sr2+	0.18844925	3.15200
+Ba2+	0.31869290	3.42461
+Al3+	0.01091456	2.43394
+Fe3+	0.02591906	2.58717
+Cr3+	0.01636246	2.50164
+In3+	0.03537062	2.65131
+Tl3+	0.06617338	2.80099
+Y3+	0.09454081	2.90255
+La3+	0.17921760	3.13062
+Ce3+	0.20584696	3.19120
+Pr3+	0.20584696	3.19120
+Nd3+	0.14920231	3.05756
+Sm3+	0.13482489	3.02015
+Eu3+	0.14364160	3.04331
+Gd3+	0.10534198	2.93640
+Tb3+	0.11310961	2.95957
+Dy3+	0.10243558	2.92749
+Er3+	0.09731901	2.91146
+Tm3+	0.10359269	2.93106
+Lu3+	0.08912336	2.88473
+Hf4+	0.06978581	2.81524
+Zr4+	0.08492362	2.87048
+Ce4+	0.18150763	3.13596
+U4+	0.20344023	3.18585
+Pu4+	0.16943676	3.10745
+Th4+	0.18380968	3.14131
+O_TIP3P-FB  0.1558652008  3.1780  
+end LennardJonesAtomTypes
+
+begin NonBondedInteractions
+Li+	O_TIP3P-FB	InversePowerSeries	12	11660.46469	6	-38.40501	4	-30
+Na+	O_TIP3P-FB	InversePowerSeries	12	46200.25228	6	-112.77101	4	-2
+K+	O_TIP3P-FB	InversePowerSeries	12	316190.36621	6	-456.33115	4	-15
+Rb+	O_TIP3P-FB	InversePowerSeries	12	453716.32177	6	-583.28001	4	-7
+Cs+	O_TIP3P-FB	InversePowerSeries	12	1145754.04070	6	-1065.06985	4	-17
+Tl+	O_TIP3P-FB	InversePowerSeries	12	675152.84151	6	-758.94090	4	-65
+Cu+	O_TIP3P-FB	InversePowerSeries	12	4316.73297	6	-17.13037	4	-17
+Ag+	O_TIP3P-FB	InversePowerSeries	12	68230.73283	6	-151.39934	4	-85
+F-	O_TIP3P-FB	InversePowerSeries	12	307196.97262	6	-447.35609	4	45
+Cl-	O_TIP3P-FB	InversePowerSeries	12	2197791.51267	6	-1588.23342	4	49
+Br-	O_TIP3P-FB	InversePowerSeries	12	4131346.40138	6	-2298.24688	4	40
+I-	O_TIP3P-FB	InversePowerSeries	12	10005048.38230	6	-3762.17138	4	52
+Be2+	O_TIP3P-FB	InversePowerSeries	12	3255.40160	6	-13.56901	4	-193
+Cu2+	O_TIP3P-FB	InversePowerSeries	12	45069.81727	6	-110.66128	4	-279
+Ni2+	O_TIP3P-FB	InversePowerSeries	12	34967.12937	6	-91.09120	4	-223
+Zn2+	O_TIP3P-FB	InversePowerSeries	12	37778.18328	6	-96.67605	4	-217
+Co2+	O_TIP3P-FB	InversePowerSeries	12	37456.90975	6	-96.04361	4	-192
+Cr2+	O_TIP3P-FB	InversePowerSeries	12	33774.59923	6	-88.68567	4	-138
+Fe2+	O_TIP3P-FB	InversePowerSeries	12	40431.31528	6	-101.84416	4	-157
+Mg2+	O_TIP3P-FB	InversePowerSeries	12	33774.59923	6	-88.68567	4	-128
+V2+	O_TIP3P-FB	InversePowerSeries	12	61686.93917	6	-140.36515	4	-212
+Mn2+	O_TIP3P-FB	InversePowerSeries	12	54785.30450	6	-128.34820	4	-149
+Hg2+	O_TIP3P-FB	InversePowerSeries	12	147719.97229	6	-267.03794	4	-289
+Cd2+	O_TIP3P-FB	InversePowerSeries	12	83027.48713	6	-175.24996	4	-201
+Ca2+	O_TIP3P-FB	InversePowerSeries	12	156792.05365	6	-278.72488	4	-92
+Sn2+	O_TIP3P-FB	InversePowerSeries	12	362363.24043	6	-500.97139	4	-205
+Sr2+	O_TIP3P-FB	InversePowerSeries	12	352322.26558	6	-491.45746	4	-91
+Ba2+	O_TIP3P-FB	InversePowerSeries	12	782043.17341	6	-834.97938	4	-78
+Al3+	O_TIP3P-FB	InversePowerSeries	12	18283.84457	6	-54.92279	4	-387
+Fe3+	O_TIP3P-FB	InversePowerSeries	12	39754.03786	6	-100.53394	4	-446
+Cr3+	O_TIP3P-FB	InversePowerSeries	12	26096.33283	6	-72.60544	4	-232
+In3+	O_TIP3P-FB	InversePowerSeries	12	53484.24541	6	-126.03492	4	-343
+Tl3+	O_TIP3P-FB	InversePowerSeries	12	101067.18994	6	-202.62509	4	-464
+Y3+	O_TIP3P-FB	InversePowerSeries	12	149698.24824	6	-269.60657	4	-218
+La3+	O_TIP3P-FB	InversePowerSeries	12	329136.57821	6	-469.08390	4	-155
+Ce3+	O_TIP3P-FB	InversePowerSeries	12	398242.14075	6	-534.16694	4	-251
+Pr3+	O_TIP3P-FB	InversePowerSeries	12	398242.14075	6	-534.16694	4	-291
+Nd3+	O_TIP3P-FB	InversePowerSeries	12	259012.02130	6	-397.48536	4	-211
+Sm3+	O_TIP3P-FB	InversePowerSeries	12	228085.35477	6	-363.67086	4	-218
+Eu3+	O_TIP3P-FB	InversePowerSeries	12	246855.07743	6	-384.37787	4	-261
+Gd3+	O_TIP3P-FB	InversePowerSeries	12	169585.10828	6	-294.82310	4	-191
+Tb3+	O_TIP3P-FB	InversePowerSeries	12	184384.60867	6	-312.93526	4	-226
+Dy3+	O_TIP3P-FB	InversePowerSeries	12	164155.79636	6	-288.04352	4	-219
+Er3+	O_TIP3P-FB	InversePowerSeries	12	154738.03910	6	-276.09927	4	-256
+Tm3+	O_TIP3P-FB	InversePowerSeries	12	166310.36773	6	-290.74297	4	-285
+Lu3+	O_TIP3P-FB	InversePowerSeries	12	140017.61399	6	-256.92509	4	-250
+Hf4+	O_TIP3P-FB	InversePowerSeries	12	106985.52294	6	-211.26209	4	-787
+Zr4+	O_TIP3P-FB	InversePowerSeries	12	132644.29344	6	-247.06925	4	-769
+Ce4+	O_TIP3P-FB	InversePowerSeries	12	334814.14325	6	-474.61658	4	-701
+U4+	O_TIP3P-FB	InversePowerSeries	12	391710.96469	6	-528.21333	4	-1044
+Pu4+	O_TIP3P-FB	InversePowerSeries	12	305423.29962	6	-445.57445	4	-817
+Th4+	O_TIP3P-FB	InversePowerSeries	12	340570.39314	6	-480.18968	4	-507
+end NonBondedInteractions
