@@ -30,17 +30,17 @@ in the `docs` directory. Sample simulations are available in the
 
 ## Requirements
 
- 1) A good C++11-compliant compiler. We've built and tested OpenMD on the
+ 1) A good C++17-compliant compiler. We've built and tested OpenMD on the
     following architecture & compiler combinations:
 
 | Architecture                   |  CXX | Notes                                 |
 |--------------------------------|:----:|---------------------------------------|
-| macOS Sonoma (intel & arm)     | c++  | (Apple clang 15.2, Open MPI 5.0.2)    |
+| macOS Sonoma (intel & arm)     | c++  | (Apple clang 15.3, Open MPI 5.0.2)    |
 | Linux (Ubuntu 23.10 - x86\_64) | g++  | (GNU version 13.2  Open MPI 4.1.5)    |
 | Linux (RHEL 8.9 - x86\_64)     | icpc | (Intel version 19.1.3, Open MPI 4.0.1)|
 
-  OpenMD uses features in the C++ standard library. Most (but
-  not all) C++ compilers support these features.
+  OpenMD uses features in the C++ standard library and language features from
+  C++17. Most (but not all) C++ compilers support these features.
 
  2) CMake, a cross-platform build system which is available at
     [cmake.org](http://www.cmake.org). Most Linux and some Unix distributions
