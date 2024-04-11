@@ -1,0 +1,66 @@
+// 12-6-4 Paramters from three papers:
+//
+// "Systematic Parameterization of Monovalent Ions Employing the
+// Nonbonded Model," Pengfei Li, Lin Frank Song, and Kenneth M. Merz Jr.
+// Journal of Chemical Theory and Computation 2015 11 (4), 1645-1657
+// DOI: 10.1021/ct500918t
+//
+// "Taking into Account the Ion-Induced Dipole Interaction in the
+// Nonbonded Model of Ions," by Pengfei Li and Kenneth/ M. Merz Jr.
+// Journal of Chemical Theory and Computation 2014 10 (1), 289-297
+// DOI: 10.1021/ct400751u
+//
+// "Parameterization of Highly Charged Metal Ions Using the 12-6-4
+// LJ-Type Nonbonded Model in Explicit Water," Pengfei Li, Lin Frank
+// Song, and Kenneth M. Merz Jr.  The Journal of Physical Chemistry B
+// 2015 119 (3), 883-895 DOI: 10.1021/jp505875v
+//
+// This version is for use with the SPC/E water model. C4 terms for
+// direct non-bonded interactions between O_SPCE and the ions are
+// included. Care should be taken to generate similar C4 terms for
+// ion-ion interactions using the atomic polarizabilities.  Note that
+// OpenMD assumes positive coefficients for all InversePowerSeries, so
+// comparing signs with A and B coefficients in other codes may differ.
+
+begin Options
+      Name      "LiSMerzIons12-6-4-SPCE"
+      DistanceMixingRule     Arithmetic
+      EnergyMixingRule       Geometric
+end Options
+
+begin BaseAtomTypes
+Na   22.989769
+Cl   35.453
+H    1.00784
+O    15.9994
+end BaseAtomTypes
+
+begin AtomTypes
+Na+   Na
+Cl-   Cl
+OW      O
+HW      H
+O_SPCE  OW
+H_SPCE  HW
+end AtomTypes
+
+begin ChargeAtomTypes
+Na+   1.0
+Cl-   -1.0
+O_SPCE -0.8476
+H_SPCE  0.4238
+end ChargeAtomTypes
+
+begin LennardJonesAtomTypes
+Na+	0.03091095	2.62280582620516
+Cl-	0.52404590	3.8362098803123
+O_SPCE  0.15532         3.16549
+end LennardJonesAtomTypes
+
+begin NonBondedInteractions
+Na+	O_SPCE	InversePowerSeries	12	95714.67667	6	-162.87491	4	-6
+Cl-	O_SPCE	InversePowerSeries	12	3867588.80217	6	-2100.87068	4	55
+Na+	Na+	InversePowerSeries	12	13102.85758	6	-40.25030562	4	-1.036703601
+Na+	Cl-	InversePowerSeries	12	655295.1761	6	-577.5889834	4	-13.44182825
+Cl-	Cl-	InversePowerSeries	12	21294018.81	6	-6681.030834	4	9.503116343
+end NonBondedInteractions
