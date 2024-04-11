@@ -29,10 +29,14 @@ A few pieces of information are required:
 
 Additionally, the $C_{12}$ and $C_6$ parameters are also required when we override Lennard-Jones interactions with explicit pair interactions. These can be generated as follows:
 
-$$\sigma_{ij} = \frac{\sigma_i + \sigma_j}{2}$$
-$$\epsilon_{ij} = \sqrt{\epsilon_i \epsilon_j}$$
-$$C_{12} = 4 \epsilon_{ij} \sigma_{ij}^{12}$$
-$$C_{6} = - 4 \epsilon_{ij} \sigma_{ij}^{6}$$
+$$
+\begin{align}
+\sigma_{ij} &= \frac{\sigma_i + \sigma_j}{2} \\
+\epsilon_{ij} &= \sqrt{\epsilon_i \epsilon_j} \\
+C_{12} &= 4 \epsilon_{ij} \sigma_{ij}^{12} \\
+C_{6} &= - 4 \epsilon_{ij} \sigma_{ij}^{6}
+\end{align}
+$$
 
 where $\sigma$ and $\epsilon$ values for each atom are given in the frc file. Once all relevant parameters have been calculated for a pair of atom types, they should be added to the `NonBondedInteractionTypes` section of the frc file:
 
