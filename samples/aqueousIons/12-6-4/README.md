@@ -6,7 +6,7 @@ $$V_{12-6-4} = \frac{C_{12}}{r^{12}} + \frac{C_6}{r^6}  + \frac{C_4}{r^4}$$
 
 which is handled as an inverse power series in OpenMD. The $C_{12}$, $C_6$, and $C_4$ parameters between an ions and the relevant water model are part of the force field for 12-6-4 models.  However for ionic solutions, we need to generate **_all_** pairs of $C_4$ terms for the inter-ionic contributions. We use the following model:
 
-$$C_{4}(i-j) = C_{4}(i-H2O)  \left(\frac{\alpha_j}{\alpha_{H2O}}\right)$$ 
+$$C_{4}(i-j) = \left( C_{4}(i-H2O)  \left(\frac{\alpha_j}{\alpha_{H2O}}\right) + C_{4}(j-H2O) \left(\frac{\alpha_i}{\alpha_{H2O}}\right) \right)$$ 
 which was suggested in the original 12-6-4 paper:
 
 - "Systematic Parameterization of Monovalent Ions Employing the Nonbonded Model," Pengfei Li, Lin Frank Song, and Kenneth M. Merz Jr., *Journal of Chemical Theory and Computation*, **11** (4), 1645-1657, (2015) DOI: 10.1021/ct500918t 
