@@ -267,8 +267,10 @@ namespace OpenMD {
       }
     }
 
-    veloMunge->removeComDrift();
-    veloMunge->removeAngularDrift();
+    if (simParams_->getConserveLinearMomentum())
+      veloMunge->removeComDrift();
+    if (simParams_->getConserveAngularMomentum())
+      veloMunge->removeAngularDrift();
 
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     currSnapshot->setVolume(surfaceMesh_->getVolume());

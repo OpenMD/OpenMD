@@ -915,8 +915,9 @@ namespace OpenMD {
 
       Vector3d r(0.0);
       Vector3d v(0.0);
+      Mat3x3d Itmp{};
 
-      RealType m = 0.0;
+      RealType m = 0.0;      
 
       for (mol = info_->beginMolecule(i); mol != NULL;
            mol = info_->nextMolecule(i)) {
@@ -938,6 +939,12 @@ namespace OpenMD {
           yz += r[1] * r[2] * m;
 
           angularMomentum += cross(r, v) * m;
+
+          if (sd->isDirectional()) {
+            RotMat3x3d A = sd->getA();
+            Itmp += A.transpose() * sd->getI() * A;
+            angularMomentum += sd->getJ();
+          }          
         }
       }
 
@@ -950,6 +957,8 @@ namespace OpenMD {
       inertiaTensor(2, 0) = -xz;
       inertiaTensor(2, 1) = -yz;
       inertiaTensor(2, 2) = xx + yy;
+
+      inertiaTensor += Itmp;
 
 #ifdef IS_MPI
       MPI_Allreduce(MPI_IN_PLACE, inertiaTensor.getArrayPointer(), 9,

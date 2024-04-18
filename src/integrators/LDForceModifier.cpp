@@ -500,9 +500,10 @@ namespace OpenMD {
     }
 
     info_->setFdf(fdf);
-    veloMunge_->removeComDrift();
+    if(simParams_->getConserveLinearMomentum()) veloMunge_->removeComDrift();
     // Remove angular drift if we are not using periodic boundary conditions.
-    if (!simParams_->getUsePeriodicBoundaryConditions())
+    if (!simParams_->getUsePeriodicBoundaryConditions() &&
+        simParams_->getConserveAngularMomentum())
       veloMunge_->removeAngularDrift();
   }
 

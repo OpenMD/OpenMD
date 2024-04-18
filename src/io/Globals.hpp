@@ -84,6 +84,8 @@ namespace OpenMD {
     DeclareParameter(TempSet, bool);
     DeclareParameter(ThermalTime, RealType);
     DeclareParameter(UsePeriodicBoundaryConditions, bool);
+    DeclareParameter(ConserveLinearMomentum, bool);
+    DeclareParameter(ConserveAngularMomentum, bool);
     DeclareParameter(TargetPressure, RealType);
     DeclareParameter(UseAtomicVirial, bool);
     DeclareParameter(UseLongRangeCorrections, bool);
