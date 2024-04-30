@@ -239,7 +239,7 @@ int main(int argc, char* argv[]) {
 	      
 	      oldPos = sd->getPos();
 
-              newPos = rotMatrix * oldPos + trans * oldHmat;
+              newPos = rotMatrix * oldPos + trans * oldHmat + translate;
 
               sdNew  = newInfo->getIOIndexToIntegrableObject(newIndex);
               sdNew->setPos(newPos);
