@@ -110,6 +110,7 @@ namespace OpenMD::RNEMD {
     RealType slabWidth_;
 
     std::string rnemdObjectSelection_;
+    std::vector<MoleculeStamp*> objectTypes_;
 
     SelectionManager commonA_;
     SelectionManager commonB_;
@@ -124,6 +125,7 @@ namespace OpenMD::RNEMD {
 
     bool doRNEMD_ {false};
     bool usePeriodicBoundaryConditions_ {false};
+    bool useChargedSPF_ {false};
 
     Vector3d coordinateOrigin_;
 

@@ -454,6 +454,12 @@ namespace OpenMD::RNEMD {
     if (!evaluatorB_.isDynamic())
       seleManB_.setSelectionSet(evaluatorB_.evaluate());
 
+    // Charged-SPF
+    useChargedSPF_ = rnemdParams->getUseChargedSPF();
+
+    MoleculeStampSet obTypes = seleMan_.getSelectedMoleculeStamps();
+    std::copy(obTypes.begin(), obTypes.end(), std::back_inserter(objectTypes_));
+
     // Do some sanity checking
     int selectionCount =
         seleMan_.removeAtomsInRigidBodies().getSelectionCount();
@@ -914,8 +920,13 @@ namespace OpenMD::RNEMD {
                  << " (amu/A/fs^2)\n";
       rnemdFile_ << "#  angular momentum = " << angularMomentumFluxVector_
                  << " (amu/A^2/fs^2)\n";
-      rnemdFile_ << "#          particle = " << particleFlux_
-                 << " (particles/A^2/fs)\n";
+      if (useChargedSPF_) {
+        rnemdFile_ << "#   current density = " << particleFlux_
+                   << " (electrons/A^2/fs)\n";
+      } else {
+        rnemdFile_ << "#          particle = " << particleFlux_
+                   << " (particles/A^2/fs)\n";
+      }
 
       rnemdFile_ << "# Target one-time exchanges:\n";
       rnemdFile_ << "#          kinetic = "
@@ -925,8 +936,14 @@ namespace OpenMD::RNEMD {
                  << " (amu*A/fs)\n";
       rnemdFile_ << "#  angular momentum = " << angularMomentumTarget_
                  << " (amu*A^2/fs)\n";
-      rnemdFile_ << "#          particle = " << particleTarget_
-                 << " (particles)\n";
+      if (useChargedSPF_) {
+        rnemdFile_ << "#   current density = " << particleTarget_
+                   << " (electrons)\n";
+      } else {
+        rnemdFile_ << "#          particle = " << particleTarget_
+                   << " (particles)\n";
+      }
+
       rnemdFile_ << "# Actual exchange totals:\n";
       rnemdFile_ << "#          kinetic = "
                  << kineticExchange_ / Constants::energyConvert
@@ -935,15 +952,26 @@ namespace OpenMD::RNEMD {
                  << " (amu*A/fs)\n";
       rnemdFile_ << "#  angular momentum = " << angularMomentumExchange_
                  << " (amu*A^2/fs)\n";
-      rnemdFile_ << "#         particles = " << particleExchange_
-                 << " (particles)\n";
+      if (useChargedSPF_) {
+        rnemdFile_ << "#   current density = " << particleExchange_
+                   << " (electrons)\n";
+      } else {
+        rnemdFile_ << "#          particle = " << particleExchange_
+                   << " (particles)\n";
+      }
 
       rnemdFile_ << "# Actual flux:\n";
       rnemdFile_ << "#          kinetic = " << Jz << " (kcal/mol/A^2/fs)\n";
       rnemdFile_ << "#          momentum = " << JzP << " (amu/A/fs^2)\n";
       rnemdFile_ << "#  angular momentum = " << JzL << " (amu/A^2/fs^2)\n";
-      rnemdFile_ << "#          particle = " << Jpart
-                 << " (particles/A^2/fs)\n";
+      if (useChargedSPF_) {
+        rnemdFile_ << "#   current density = " << Jpart
+                   << " (electrons/A^2/fs)\n";
+      } else {
+        rnemdFile_ << "#          particle = " << Jpart
+                   << " (particles/A^2/fs)\n";
+      }
+
       rnemdFile_ << "# Exchange statistics:\n";
       rnemdFile_ << "#               attempted = " << trialCount_ << "\n";
       rnemdFile_ << "#                  failed = " << failTrialCount_ << "\n";
@@ -975,7 +1003,7 @@ namespace OpenMD::RNEMD {
         }
       }
 
-      rnemdFile_ << std::endl;
+      rnemdFile_ << '\n';
 
       std::vector<int> nonEmptyAccumulators(nBins_);
       int numberOfAccumulators {};
@@ -1005,7 +1033,7 @@ namespace OpenMD::RNEMD {
             }
           }
 
-          rnemdFile_ << std::endl;
+          rnemdFile_ << '\n';
         }
       }
 
@@ -1027,7 +1055,7 @@ namespace OpenMD::RNEMD {
             }
           }
 
-          rnemdFile_ << std::endl;
+          rnemdFile_ << '\n';
         }
       }
 

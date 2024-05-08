@@ -477,7 +477,7 @@ namespace OpenMD {
     waterTypeList.insert("SPC-HW_RB_0");
     waterTypeList.insert("NE6_RB_0");
     waterTypeList.insert("OPC_RB_0");
-    waterTypeList.insert("OPC3_RB_0");    
+    waterTypeList.insert("OPC3_RB_0");
   }
 
   void WaterTypeVisitor::visit(RigidBody* rb) {

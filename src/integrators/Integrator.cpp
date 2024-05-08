@@ -258,8 +258,7 @@ namespace OpenMD {
 
     // remove center of mass drift velocity (in case we passed in a
     // configuration that was drifting)
-    if(simParams->getConserveLinearMomentum())
-      velocitizer_->removeComDrift();
+    if (simParams->getConserveLinearMomentum()) velocitizer_->removeComDrift();
 
     // find the initial fluctuating charges.
     flucQ_->initialize();

@@ -55,15 +55,14 @@
 #include <memory>
 #include <set>
 
+#include "types/FixedChargeAdapter.hpp"
 #include "utils/MemoryUtils.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
-  Molecule::Molecule(int stampId, int globalIndex, const std::string& molName,
-                     int region) :
-      globalIndex_(globalIndex),
-      stampId_(stampId), region_(region), moleculeName_(molName),
+  Molecule::Molecule(int globalIndex, MoleculeStamp* molStamp) :
+      globalIndex_(globalIndex), molStamp_ {molStamp},
       constrainTotalCharge_(false) {}
 
   Molecule::~Molecule() {
@@ -274,6 +273,21 @@ namespace OpenMD {
     }
 
     return mass;
+  }
+
+  RealType Molecule::getFixedCharge() {
+    Atom* atom;
+    std::vector<Atom*>::iterator i;
+    RealType q = 0.0;
+
+    for (atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
+      AtomType* atomType = atom->getAtomType();
+
+      FixedChargeAdapter fca = FixedChargeAdapter(atomType);
+      if (fca.isFixedCharge()) { q += fca.getCharge(); }
+    }
+
+    return q;
   }
 
   Vector3d Molecule::getPrevCom() {

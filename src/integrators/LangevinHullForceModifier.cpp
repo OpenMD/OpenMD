@@ -267,8 +267,7 @@ namespace OpenMD {
       }
     }
 
-    if (simParams_->getConserveLinearMomentum())
-      veloMunge->removeComDrift();
+    if (simParams_->getConserveLinearMomentum()) veloMunge->removeComDrift();
     if (simParams_->getConserveAngularMomentum())
       veloMunge->removeAngularDrift();
 

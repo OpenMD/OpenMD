@@ -663,7 +663,7 @@ namespace OpenMD {
 
         stampId       = info->getMoleculeStampId(i);
         Molecule* mol = molCreator.createMolecule(
-            info->getForceField(), info->getMoleculeStamp(stampId), stampId, i,
+            info->getForceField(), info->getMoleculeStamp(stampId), i,
             info->getLocalIndexManager());
 
         info->addMolecule(mol);

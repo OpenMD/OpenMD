@@ -132,10 +132,10 @@ namespace OpenMD {
 
     DefineOptionalParameterWithDefaultValue(
         UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);
-    DefineOptionalParameterWithDefaultValue(
-        ConserveLinearMomentum, "conserveLinearMomentum", true);
-    DefineOptionalParameterWithDefaultValue(
-        ConserveAngularMomentum, "conserveAngularMomentum", true);
+    DefineOptionalParameterWithDefaultValue(ConserveLinearMomentum,
+                                            "conserveLinearMomentum", true);
+    DefineOptionalParameterWithDefaultValue(ConserveAngularMomentum,
+                                            "conserveAngularMomentum", true);
     DefineOptionalParameterWithDefaultValue(UseAtomicVirial, "useAtomicVirial",
                                             true);
     DefineOptionalParameterWithDefaultValue(UseLongRangeCorrections,

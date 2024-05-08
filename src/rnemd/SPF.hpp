@@ -70,6 +70,9 @@ namespace OpenMD::RNEMD {
 
     RealType deltaLambda_ {};
 
+    RealType q_anion {}, q_cation {};
+    SelectionManager anionMan_, cationMan_;
+
     SPFForceManager* forceManager_ {nullptr};
 
     std::string selectedMoleculeStr_;

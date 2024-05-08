@@ -63,6 +63,7 @@
 #include "rnemd/RNEMDParameters.hpp"
 #include "rnemd/SPFForceManager.hpp"
 #include "selection/SelectionManager.hpp"
+#include "types/FixedChargeAdapter.hpp"
 #include "utils/Constants.hpp"
 #include "utils/RandNumGen.hpp"
 #include "utils/simError.h"
@@ -70,8 +71,8 @@
 namespace OpenMD::RNEMD {
 
   SPFMethod::SPFMethod(SimInfo* info, ForceManager* forceMan) :
-      RNEMD {info, forceMan}, selectedMoleculeMan_(info),
-      selectedMoleculeEvaluator_(info) {
+      RNEMD {info, forceMan}, anionMan_ {info}, cationMan_ {info},
+      selectedMoleculeMan_ {info}, selectedMoleculeEvaluator_ {info} {
     rnemdMethodLabel_ = "SPF";
 
     selectedMoleculeStr_ = "select none";
@@ -90,6 +91,54 @@ namespace OpenMD::RNEMD {
     }
 
     RNEMDParameters* rnemdParams = info->getSimParams()->getRNEMDParameters();
+
+    // Calculate ion fixed charges for use in the Charged-SPF method
+    if (useChargedSPF_) {
+      SimInfo::MoleculeIterator i;
+      Molecule* mol;
+      std::vector<RealType> q_tot(objectTypes_.size());
+      std::vector<int> molCount(objectTypes_.size());
+
+      for (mol = info_->beginMolecule(i); mol != NULL;
+           mol = info_->nextMolecule(i)) {
+        for (std::size_t i {}; i < objectTypes_.size(); ++i) {
+          if (objectTypes_[i] == mol->getMolStamp()) {
+            q_tot[i] += mol->getFixedCharge();
+            molCount[i]++;
+          }
+        }
+      }
+
+#ifdef IS_MPI
+      MPI_Allreduce(MPI_IN_PLACE, &q_tot[0], q_tot.size(), MPI_REALTYPE,
+                    MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, &molCount[0], molCount.size(), MPI_INT,
+                    MPI_SUM, MPI_COMM_WORLD);
+#endif
+
+      for (std::size_t i {}; i < objectTypes_.size(); ++i) {
+        SelectionEvaluator ionEvaluator {info};
+        SelectionManager ionManager {info};
+
+        std::string ionStr = "select " + objectTypes_[i]->getName();
+        ionEvaluator.loadScriptString(ionStr);
+        ionManager.setSelectionSet(ionEvaluator.evaluate());
+
+        if (molCount[i] > 0) {
+          q_tot[i] /= molCount[i];
+
+          if (q_tot[i] > 0.0) {
+            q_cation += q_tot[i];
+            cationMan_ |= ionManager;
+          } else {
+            q_anion += q_tot[i];
+            anionMan_ |= ionManager;
+          }
+        } else {
+          q_tot[i] = 0.0;
+        }
+      }
+    }
 
     bool hasParticleFlux = rnemdParams->haveParticleFlux();
     bool hasKineticFlux  = rnemdParams->haveKineticFlux();
@@ -395,26 +444,7 @@ namespace OpenMD::RNEMD {
     SelectionManager sourceSman {info_};
     RealType targetSlabCenter {};
 
-    // The sign of our flux determines which slab is the source and which is
-    // the sink
-    if (particleTarget_ > 0.0) {
-      sourceSman       = commonA_;
-      targetSlabCenter = slabBCenter_;
-    } else {
-      sourceSman       = commonB_;
-      targetSlabCenter = slabACenter_;
-    }
-
-    if (sourceSman.getMoleculeSelectionCount() == 0) {
-      forceManager_->setSelectedMolecule(nullptr);
-      return false;
-    }
-
-    int whichSelectedID {-1};
-    Molecule* selectedMolecule;
-
-    std::shared_ptr<SPFData> spfData = currentSnap_->getSPFData();
-    Utils::RandNumGenPtr randNumGen  = info_->getRandomNumberGenerator();
+    Utils::RandNumGenPtr randNumGen = info_->getRandomNumberGenerator();
 
 #ifdef IS_MPI
     int worldRank {}, size {};
@@ -423,6 +453,59 @@ namespace OpenMD::RNEMD {
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Status ierr;
 
+    if (worldRank == 0) {
+#endif
+
+      if (useChargedSPF_) {
+        std::uniform_real_distribution<RealType> slabDistribution {0.0, 1.0};
+
+        RealType anionMagnitude  = std::abs(q_anion);
+        RealType cationMagnitude = std::abs(q_cation);
+
+        if (slabDistribution(*randNumGen) >
+            cationMagnitude / (anionMagnitude + cationMagnitude)) {
+          particleTarget_ *= q_cation / cationMagnitude;
+          // particleTarget_ *= q_anion / anionMagnitude;
+        } else {
+          // particleTarget_ *= q_cation / cationMagnitude;
+          particleTarget_ *= q_anion / anionMagnitude;
+        }
+      }
+
+#ifdef IS_MPI
+    }
+
+    if (useChargedSPF_) {
+      MPI_Bcast(&particleTarget_, 1, MPI_REALTYPE, 0, MPI_COMM_WORLD);
+    }
+#endif
+
+    // The sign of our flux determines which slab is the source and which is
+    // the sink
+    if (particleTarget_ > 0.0) {
+      sourceSman       = commonA_;
+      targetSlabCenter = slabBCenter_;
+
+      if (useChargedSPF_) { sourceSman -= anionMan_; }
+    } else {
+      sourceSman       = commonB_;
+      targetSlabCenter = slabACenter_;
+
+      if (useChargedSPF_) { sourceSman -= cationMan_; }
+    }
+
+    if (sourceSman.getMoleculeSelectionCount() == 0) {
+      forceManager_->setSelectedMolecule(nullptr);
+      return false;
+    }
+
+    // Choose a molecule to move from the designated source slab
+    int whichSelectedID {-1};
+    Molecule* selectedMolecule;
+
+    std::shared_ptr<SPFData> spfData = currentSnap_->getSPFData();
+
+#ifdef IS_MPI
     if (worldRank == 0) {
 #endif
       std::uniform_int_distribution<> selectedMoleculeDistribution {
@@ -441,6 +524,11 @@ namespace OpenMD::RNEMD {
 
     if (selectedMolecule) {
       globalSelectedID = selectedMolecule->getGlobalIndex();
+
+      // Scale the particle flux by the charge yielding a current denstiy
+      if (useChargedSPF_) {
+        particleTarget_ *= std::abs(selectedMolecule->getFixedCharge());
+      }
 
 #ifdef IS_MPI
       for (int i {}; i < size; ++i) {

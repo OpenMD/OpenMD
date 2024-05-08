@@ -71,10 +71,9 @@ namespace OpenMD {
 
   Molecule* MoleculeCreator::createMolecule(ForceField* ff,
                                             MoleculeStamp* molStamp,
-                                            int stampId, int globalIndex,
+                                            int globalIndex,
                                             LocalIndexManager* localIndexMan) {
-    Molecule* mol = new Molecule(stampId, globalIndex, molStamp->getName(),
-                                 molStamp->getRegion());
+    Molecule* mol = new Molecule(globalIndex, molStamp);
 
     // create atoms
     Atom* atom;

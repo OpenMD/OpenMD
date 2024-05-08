@@ -86,6 +86,8 @@ namespace OpenMD::RNEMD {
                                             "z");
     DefineOptionalParameterWithDefaultValue(SPFScalingPower, "spfScalingPower",
                                             3);
+    DefineOptionalParameterWithDefaultValue(UseChargedSPF, "useChargedSPF",
+                                            false);
     DefineOptionalParameterWithDefaultValue(SPFUniformKineticScaling,
                                             "spfUniformKineticScaling", false);
   }

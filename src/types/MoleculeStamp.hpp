@@ -77,8 +77,12 @@ namespace OpenMD {
     bool addFragmentStamp(FragmentStamp* fragment);
     bool addConstraintStamp(ConstraintStamp* constraint);
 
+    void setIdent(int id) { ident_ = id; }
+    int getIdent() { return ident_; }
+
     void setRegion(int r) { region_ = r; }
     int getRegion() { return region_; }
+
     std::size_t getNAtoms() { return atomStamps_.size(); }
     std::size_t getNBonds() { return bondStamps_.size(); }
     std::size_t getNBends() { return bendStamps_.size(); }
@@ -165,7 +169,17 @@ namespace OpenMD {
     std::vector<int> atom2Rigidbody;
     int nintegrable_;
     int region_;
+    int ident_;
   };
+
+  class MoleculeStampCompare {
+  public:
+    bool operator()(MoleculeStamp* lhs, MoleculeStamp* rhs) const {
+      return lhs->getIdent() < rhs->getIdent();
+    }
+  };
+
+  using MoleculeStampSet = std::set<MoleculeStamp*, MoleculeStampCompare>;
 }  // namespace OpenMD
 
 #endif

@@ -81,6 +81,7 @@ namespace OpenMD::RNEMD {
     DeclareParameter(OutputFields, std::string);
     DeclareParameter(PrivilegedAxis, std::string);
     DeclareParameter(SPFScalingPower, int);
+    DeclareParameter(UseChargedSPF, bool);
     DeclareParameter(SPFUniformKineticScaling, bool);
 
   public:

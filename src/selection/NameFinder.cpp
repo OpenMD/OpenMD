@@ -86,7 +86,7 @@ namespace OpenMD {
 
     for (mol = info_->beginMolecule(mi); mol != NULL;
          mol = info_->nextMolecule(mi)) {
-      std::string molName = mol->getMoleculeName();
+      std::string molName = mol->getType();
       TreeNodePtr molNode = createNode(root_, molName);
       molNode->bs.bitsets_[MOLECULE].setBitOn(mol->getGlobalIndex());
 
@@ -415,7 +415,7 @@ namespace OpenMD {
 
     for (mol = info_->beginMolecule(mi); mol != NULL;
          mol = info_->nextMolecule(mi)) {
-      if (isMatched(mol->getMoleculeName(), name)) {
+      if (isMatched(mol->getType(), name)) {
         int natoms       = mol->getNAtoms();
         int nrigidbodies = mol->getNRigidBodies();
         if (internalIndex >= natoms + nrigidbodies) {
