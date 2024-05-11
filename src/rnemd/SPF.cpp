@@ -455,23 +455,15 @@ namespace OpenMD::RNEMD {
 
     if (worldRank == 0) {
 #endif
-
       if (useChargedSPF_) {
-        std::uniform_real_distribution<RealType> slabDistribution {0.0, 1.0};
+        std::uniform_int_distribution<> slabDistribution {0, 1};
 
-        RealType anionMagnitude  = std::abs(q_anion);
-        RealType cationMagnitude = std::abs(q_cation);
-
-        if (slabDistribution(*randNumGen) >
-            cationMagnitude / (anionMagnitude + cationMagnitude)) {
-          particleTarget_ *= q_cation / cationMagnitude;
-          // particleTarget_ *= q_anion / anionMagnitude;
+        if (slabDistribution(*randNumGen) == 0) {
+          particleTarget_ *= std::copysign(1.0, q_cation);
         } else {
-          // particleTarget_ *= q_cation / cationMagnitude;
-          particleTarget_ *= q_anion / anionMagnitude;
+          particleTarget_ *= std::copysign(1.0, q_anion);
         }
       }
-
 #ifdef IS_MPI
     }
 
@@ -479,7 +471,6 @@ namespace OpenMD::RNEMD {
       MPI_Bcast(&particleTarget_, 1, MPI_REALTYPE, 0, MPI_COMM_WORLD);
     }
 #endif
-
     // The sign of our flux determines which slab is the source and which is
     // the sink
     if (particleTarget_ > 0.0) {
@@ -527,7 +518,7 @@ namespace OpenMD::RNEMD {
 
       // Scale the particle flux by the charge yielding a current denstiy
       if (useChargedSPF_) {
-        particleTarget_ *= std::abs(selectedMolecule->getFixedCharge());
+        particleTarget_ /= std::abs(selectedMolecule->getFixedCharge());
       }
 
 #ifdef IS_MPI

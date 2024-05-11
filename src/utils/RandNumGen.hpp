@@ -48,33 +48,31 @@
 #include <memory>
 #include <random>
 
-namespace OpenMD {
-  namespace Utils {
+namespace OpenMD::Utils {
 
-    /**
-     * Minimize the interface for the standard library's Mersenne Twister
-     *  PRNG while maintaining the @c UniformRandomBitGenerator named
-     *  requirement.
-     */
-    class RandNumGen {
-    public:
-      // Required to conform to the UniformRandomBitGenerator definition
-      using result_type = std::mt19937::result_type;
+  /**
+   * Minimize the interface for the standard library's Mersenne Twister
+   *  PRNG while maintaining the @c UniformRandomBitGenerator named
+   *  requirement.
+   */
+  class RandNumGen {
+  public:
+    // Required to conform to the UniformRandomBitGenerator definition
+    using result_type = std::mt19937::result_type;
 
-      static constexpr result_type min() { return std::mt19937::min(); }
-      static constexpr result_type max() { return std::mt19937::max(); }
+    static constexpr result_type min() { return std::mt19937::min(); }
+    static constexpr result_type max() { return std::mt19937::max(); }
 
-    public:
-      explicit RandNumGen(result_type seed);
+  public:
+    explicit RandNumGen(result_type seed);
 
-      result_type operator()() { return engine(); }
+    result_type operator()() { return engine(); }
 
-    private:
-      std::mt19937 engine;
-    };
+  private:
+    std::mt19937 engine;
+  };
 
-    using RandNumGenPtr = std::shared_ptr<RandNumGen>;
-  }  // namespace Utils
-}  // namespace OpenMD
+  using RandNumGenPtr = std::shared_ptr<RandNumGen>;
+}  // namespace OpenMD::Utils
 
 #endif  // OPENMD_UTILS_RANDNUMGEN_HPP
