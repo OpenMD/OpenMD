@@ -196,7 +196,7 @@ namespace OpenMD::RNEMD {
     }
   }
 
-  bool SPFForceManager::updateLambda(RealType& particleTarget,
+  bool SPFForceManager::updateLambda(RealType particleTarget,
                                      RealType& deltaLambda) {
     bool updateSelectedMolecule {false};
 
@@ -206,11 +206,11 @@ namespace OpenMD::RNEMD {
       if (f_lambda(currentSnapshot_->getSPFData()->lambda +
                    std::fabs(particleTarget)) > 1.0 &&
           f_lambda(currentSnapshot_->getSPFData()->lambda) < 1.0) {
-        deltaLambda =
-            particleTarget - (f_lambda(currentSnapshot_->getSPFData()->lambda +
-                                       std::fabs(particleTarget)) -
-                              1.0);
-      } else {
+        // New deltaLambda should be determined such that:
+        //  f_lambda(lambda + deltaLambda) = 1
+        deltaLambda = 1.0 - currentSnapshot_->getSPFData()->lambda;
+      } else if (deltaLambda != particleTarget) {
+        std::cout << "Made it here??\n";
         deltaLambda = particleTarget;
       }
 

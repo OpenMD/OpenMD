@@ -200,7 +200,7 @@ namespace OpenMD::RNEMD {
     if (!doRNEMD_) return;
 
     // Remove selected molecule from the source selection manager
-    if (particleTarget_ > 0.0) {
+    if (deltaLambda_ > 0.0 && !selectedMoleculeMan_.isEmpty()) {
       smanA -= selectedMoleculeMan_;
     } else {
       smanB -= selectedMoleculeMan_;
@@ -293,11 +293,9 @@ namespace OpenMD::RNEMD {
       Vector3d v_a = P_a / M_a;
       Vector3d v_b = P_b / M_b;
 
-      RealType tempParticleTarget =
-          (particleTarget_ != deltaLambda_) ? deltaLambda_ : particleTarget_;
+      RealType deltaU = Constants::energyConvert *
+                        forceManager_->getScaledDeltaU(std::fabs(deltaLambda_));
 
-      RealType deltaU = forceManager_->getScaledDeltaU(tempParticleTarget) *
-                        Constants::energyConvert;
       RealType a {};
       RealType b {};
 
@@ -374,7 +372,7 @@ namespace OpenMD::RNEMD {
         currentSnap_->hasKineticEnergy              = false;
         currentSnap_->hasTotalEnergy                = false;
 
-        RealType deltaLambda = particleTarget_;
+        RealType deltaLambda = deltaLambda_;
 
         bool updateSelectedMolecule =
             forceManager_->updateLambda(deltaLambda, deltaLambda_);
@@ -389,7 +387,6 @@ namespace OpenMD::RNEMD {
 
     if (!forceManager_->getHasSelectedMolecule()) {
       selectMolecule();
-      deltaLambda_ = particleTarget_;
       failTrialCount_++;
       failedLastTrial_ = true;
       return;
@@ -446,6 +443,9 @@ namespace OpenMD::RNEMD {
 
     Utils::RandNumGenPtr randNumGen = info_->getRandomNumberGenerator();
 
+    // Always reset deltaLambda_ before selecting a new particle
+    deltaLambda_ = particleTarget_;
+
 #ifdef IS_MPI
     int worldRank {}, size {};
 
@@ -459,21 +459,21 @@ namespace OpenMD::RNEMD {
         std::uniform_int_distribution<> slabDistribution {0, 1};
 
         if (slabDistribution(*randNumGen) == 0) {
-          particleTarget_ *= std::copysign(1.0, q_cation);
+          deltaLambda_ = std::copysign(deltaLambda_, q_cation);
         } else {
-          particleTarget_ *= std::copysign(1.0, q_anion);
+          deltaLambda_ = std::copysign(deltaLambda_, q_anion);
         }
       }
 #ifdef IS_MPI
     }
 
     if (useChargedSPF_) {
-      MPI_Bcast(&particleTarget_, 1, MPI_REALTYPE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&deltaLambda_, 1, MPI_REALTYPE, 0, MPI_COMM_WORLD);
     }
 #endif
     // The sign of our flux determines which slab is the source and which is
     // the sink
-    if (particleTarget_ > 0.0) {
+    if (deltaLambda_ > 0.0) {
       sourceSman       = commonA_;
       targetSlabCenter = slabBCenter_;
 
@@ -518,18 +518,21 @@ namespace OpenMD::RNEMD {
 
       // Scale the particle flux by the charge yielding a current denstiy
       if (useChargedSPF_) {
-        particleTarget_ /= std::abs(selectedMolecule->getFixedCharge());
+        deltaLambda_ /= std::fabs(selectedMolecule->getFixedCharge());
       }
 
 #ifdef IS_MPI
       for (int i {}; i < size; ++i) {
         if (i != worldRank) {
           MPI_Send(&globalSelectedID, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+          MPI_Send(&deltaLambda_, 1, MPI_REALTYPE, i, 0, MPI_COMM_WORLD);
         }
       }
     } else {
       MPI_Recv(&globalSelectedID, 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD,
                &ierr);
+      MPI_Recv(&deltaLambda_, 1, MPI_REALTYPE, MPI_ANY_SOURCE, 0,
+               MPI_COMM_WORLD, &ierr);
 #endif
     }
 

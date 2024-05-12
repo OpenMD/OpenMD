@@ -65,7 +65,7 @@ namespace OpenMD::RNEMD {
     ~SPFForceManager();
 
     void setSelectedMolecule(Molecule* selectedMolecule);
-    bool updateLambda(RealType& particleTarget, RealType& deltaLambda);
+    bool updateLambda(RealType particleTarget, RealType& deltaLambda);
 
     bool getHasSelectedMolecule() const { return hasSelectedMolecule_; }
 
