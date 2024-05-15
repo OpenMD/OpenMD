@@ -65,7 +65,7 @@ namespace OpenMD::RNEMD {
     ~SPFForceManager();
 
     void setSelectedMolecule(Molecule* selectedMolecule);
-    bool updateLambda(RealType particleTarget, RealType& deltaLambda);
+    bool updateLambda(RealType& particleTarget, RealType& deltaLambda);
 
     bool getHasSelectedMolecule() const { return hasSelectedMolecule_; }
 
@@ -123,6 +123,7 @@ namespace OpenMD::RNEMD {
     std::vector<Vector3d> sinkSavedPositions_;
 
     bool hasSelectedMolecule_ {};
+    bool useChargedSPF_ {};
 
     Molecule* selectedMolecule_ {nullptr};
     int k_ {};

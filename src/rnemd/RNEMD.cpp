@@ -657,7 +657,6 @@ namespace OpenMD::RNEMD {
           I(2, 2) += mass * r2;
 
           if (outputMask_[ACTIVITY]) {
-            typeIndex = -1;
             if (sd->isRigidBody()) {
               int atomBinNo;
               RigidBody* rb = static_cast<RigidBody*>(sd);
@@ -665,6 +664,7 @@ namespace OpenMD::RNEMD {
               Atom* atom;
               for (atom = rb->beginAtom(ai); atom != NULL;
                    atom = rb->nextAtom(ai)) {
+                typeIndex = -1;
                 atomBinNo = getBin(atom->getPos());
 
                 atype = static_cast<Atom*>(atom)->getAtomType();
@@ -678,10 +678,16 @@ namespace OpenMD::RNEMD {
                 }
               }
             } else if (sd->isAtom()) {
-              atype = static_cast<Atom*>(sd)->getAtomType();
+              typeIndex = -1;
+              atype     = static_cast<Atom*>(sd)->getAtomType();
               at = std::find(outputTypes_.begin(), outputTypes_.end(), atype);
               if (at != outputTypes_.end()) {
                 typeIndex = std::distance(outputTypes_.begin(), at);
+              }
+
+              if (binNo >= 0 && binNo < int(nBins_)) {
+                if (outputMask_[ACTIVITY] && typeIndex != -1)
+                  binTypeCounts[binNo][typeIndex]++;
               }
             }
           }
@@ -694,14 +700,11 @@ namespace OpenMD::RNEMD {
             binI[binNo] += I;
             binL[binNo] += L;
             binDOF[binNo] += DOF;
-
-            if (outputMask_[ACTIVITY] && typeIndex != -1)
-              binTypeCounts[binNo][typeIndex]++;
           }
         }
 
-        // Calculate the electric field (kcal/mol/e/Angstrom) for all atoms in
-        // the box
+        // Calculate the electric field (kcal/mol/e/Angstrom) for all atoms
+        // in the box
         if (outputMask_[ELECTRICFIELD]) {
           int atomBinNo;
           if (sd->isRigidBody()) {
@@ -1211,10 +1214,10 @@ namespace OpenMD::RNEMD {
         volumeA_ = surfaceMeshA->getVolume();
         delete surfaceMeshA;
 #else
-        snprintf(
-            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-            "RNEMD::getDividingArea : Hull calculation is not possible\n"
-            "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RNEMD::getDividingArea : Hull calculation is not possible\n"
+                 "\twithout libqhull. Please rebuild OpenMD with qhull "
+                 "enabled.");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
@@ -1267,10 +1270,10 @@ namespace OpenMD::RNEMD {
         volumeB_ = surfaceMeshB->getVolume();
         delete surfaceMeshB;
 #else
-        snprintf(
-            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-            "RNEMD::getDividingArea : Hull calculation is not possible\n"
-            "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RNEMD::getDividingArea : Hull calculation is not possible\n"
+                 "\twithout libqhull. Please rebuild OpenMD with qhull "
+                 "enabled.");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();

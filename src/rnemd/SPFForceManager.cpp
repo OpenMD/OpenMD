@@ -46,6 +46,7 @@
 
 #include <config.h>
 
+#include <cmath>
 #include <vector>
 
 #ifdef IS_MPI
@@ -61,6 +62,7 @@
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
+#include "rnemd/RNEMDParameters.hpp"
 
 namespace OpenMD::RNEMD {
 
@@ -69,7 +71,10 @@ namespace OpenMD::RNEMD {
     thermo_          = std::make_unique<Thermo>(info);
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-    k_ = info_->getSimParams()->getRNEMDParameters()->getSPFScalingPower();
+    RNEMDParameters* rnemdParams = info_->getSimParams()->getRNEMDParameters();
+
+    k_             = rnemdParams->getSPFScalingPower();
+    useChargedSPF_ = rnemdParams->getUseChargedSPF();
 
     int nAtoms        = info_->getNAtoms();
     int nRigidBodies  = info_->getNRigidBodies();
@@ -196,7 +201,7 @@ namespace OpenMD::RNEMD {
     }
   }
 
-  bool SPFForceManager::updateLambda(RealType particleTarget,
+  bool SPFForceManager::updateLambda(RealType& particleTarget,
                                      RealType& deltaLambda) {
     bool updateSelectedMolecule {false};
 
@@ -209,10 +214,19 @@ namespace OpenMD::RNEMD {
         // New deltaLambda should be determined such that:
         //  f_lambda(lambda + deltaLambda) = 1
         deltaLambda = 1.0 - currentSnapshot_->getSPFData()->lambda;
-      } else if (deltaLambda != particleTarget) {
-        std::cout << "Made it here??\n";
-        deltaLambda = particleTarget;
+        deltaLambda = std::copysign(deltaLambda, particleTarget);
       }
+
+#ifdef IS_MPI
+      int globalSelectedID = currentSnapshot_->getSPFData()->globalID;
+
+      if (selectedMolecule_ && useChargedSPF_) {
+        particleTarget *= selectedMolecule_->getFixedCharge();
+      }
+
+      MPI_Bcast(&particleTarget, 1, MPI_REALTYPE,
+                info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
+#endif
 
       currentSnapshot_->clearDerivedProperties();
 

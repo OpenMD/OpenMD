@@ -372,15 +372,16 @@ namespace OpenMD::RNEMD {
         currentSnap_->hasKineticEnergy              = false;
         currentSnap_->hasTotalEnergy                = false;
 
-        RealType deltaLambda = deltaLambda_;
+        RealType currentDeltaLambda = deltaLambda_;
 
+        // Synced across processors
         bool updateSelectedMolecule =
-            forceManager_->updateLambda(deltaLambda, deltaLambda_);
+            forceManager_->updateLambda(currentDeltaLambda, deltaLambda_);
 
         if (updateSelectedMolecule) selectMolecule();
 
         successfulExchange = true;
-        particleExchange_ += deltaLambda;
+        particleExchange_ += currentDeltaLambda;
         kineticExchange_ += kineticTarget_;
       }
     }
