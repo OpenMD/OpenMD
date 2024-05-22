@@ -777,6 +777,7 @@ src/applications/dynamicProps/ForceAutoCorrFunc.cpp
 src/applications/dynamicProps/TorForCorrFunc.cpp
 src/applications/dynamicProps/TorqueAutoCorrFunc.cpp
 src/applications/dynamicProps/RCorrFunc.cpp
+src/applications/dynamicProps/MeanDisplacement.cpp
 src/applications/dynamicProps/RotAngleDisplacement.cpp
 src/applications/dynamicProps/SelectionCorrFunc.cpp
 src/applications/dynamicProps/StressCorrFunc.cpp

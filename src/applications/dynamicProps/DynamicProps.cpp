@@ -80,6 +80,7 @@
 #include "applications/dynamicProps/VelocityAutoOutProductCorrFunc.hpp"
 #include "applications/dynamicProps/WCorrFunc.hpp"
 #include "applications/dynamicProps/cOHz.hpp"
+#include "applications/dynamicProps/MeanDisplacement.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
 #include "utils/Revision.hpp"
@@ -348,6 +349,9 @@ int main(int argc, char* argv[]) {
   } else if (args_info.rotAngleDisp_given) {
     corrFunc = std::make_unique<RotAngleDisplacement>(info, dumpFileName, sele1,
                                                       sele2);
+  } else if (args_info.meandisp_given) {
+    corrFunc = std::make_unique<MeanDisplacement>(info, dumpFileName, sele1,
+						  sele2);
   }
 
   if (args_info.output_given) { corrFunc->setOutputName(args_info.output_arg); }

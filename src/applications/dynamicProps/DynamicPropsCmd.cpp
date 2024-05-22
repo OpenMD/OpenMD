@@ -92,6 +92,7 @@ const char *gengetopt_args_info_help[] = {
   "      --onsager                 Onsager coefficient correlation functions",
   "      --ddisp                   Collective Dipole displacement function\n                                  (Helfand moment of Current Density)",
   "      --rotAngleDisp            Displacement correlation function for rotation\n                                  angles",
+  "      --meandisp                mean displacement",
     0
 };
 
@@ -180,6 +181,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->onsager_given = 0 ;
   args_info->ddisp_given = 0 ;
   args_info->rotAngleDisp_given = 0 ;
+  args_info->meandisp_given = 0 ;
   args_info->correlation_function_group_counter = 0 ;
 }
 
@@ -285,6 +287,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->onsager_help = gengetopt_args_info_help[56] ;
   args_info->ddisp_help = gengetopt_args_info_help[57] ;
   args_info->rotAngleDisp_help = gengetopt_args_info_help[58] ;
+  args_info->meandisp_help = gengetopt_args_info_help[59] ;
   
 }
 
@@ -591,6 +594,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "ddisp", 0, 0 );
   if (args_info->rotAngleDisp_given)
     write_into_file(outfile, "rotAngleDisp", 0, 0 );
+  if (args_info->meandisp_given)
+    write_into_file(outfile, "meandisp", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -683,6 +688,7 @@ reset_group_correlation_function(struct gengetopt_args_info *args_info)
   args_info->onsager_given = 0 ;
   args_info->ddisp_given = 0 ;
   args_info->rotAngleDisp_given = 0 ;
+  args_info->meandisp_given = 0 ;
 
   args_info->correlation_function_group_counter = 0;
 }
@@ -1585,6 +1591,7 @@ cmdline_parser_internal (
         { "onsager",	0, NULL, 0 },
         { "ddisp",	0, NULL, 0 },
         { "rotAngleDisp",	0, NULL, 0 },
+        { "meandisp",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -2483,6 +2490,23 @@ cmdline_parser_internal (
                 &(local_args_info.rotAngleDisp_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "rotAngleDisp", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* mean displacement.  */
+          else if (strcmp (long_options[option_index].name, "meandisp") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->meandisp_given),
+                &(local_args_info.meandisp_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "meandisp", '-',
                 additional_error))
               goto failure;
           
