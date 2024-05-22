@@ -65,6 +65,7 @@
 #include "applications/dynamicProps/HBondPersistence.hpp"
 #include "applications/dynamicProps/LegendreCorrFunc.hpp"
 #include "applications/dynamicProps/LegendreCorrFuncZ.hpp"
+#include "applications/dynamicProps/MeanDisplacement.hpp"
 #include "applications/dynamicProps/MomAngMomCorrFunc.hpp"
 #include "applications/dynamicProps/OnsagerCorrFunc.hpp"
 #include "applications/dynamicProps/RCorrFunc.hpp"
@@ -80,7 +81,6 @@
 #include "applications/dynamicProps/VelocityAutoOutProductCorrFunc.hpp"
 #include "applications/dynamicProps/WCorrFunc.hpp"
 #include "applications/dynamicProps/cOHz.hpp"
-#include "applications/dynamicProps/MeanDisplacement.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
 #include "utils/Revision.hpp"
@@ -350,8 +350,8 @@ int main(int argc, char* argv[]) {
     corrFunc = std::make_unique<RotAngleDisplacement>(info, dumpFileName, sele1,
                                                       sele2);
   } else if (args_info.meandisp_given) {
-    corrFunc = std::make_unique<MeanDisplacement>(info, dumpFileName, sele1,
-						  sele2);
+    corrFunc =
+        std::make_unique<MeanDisplacement>(info, dumpFileName, sele1, sele2);
   }
 
   if (args_info.output_given) { corrFunc->setOutputName(args_info.output_arg); }

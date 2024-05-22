@@ -50,8 +50,8 @@
 
 namespace OpenMD {
   MeanDisplacement::MeanDisplacement(SimInfo* info, const std::string& filename,
-				     const std::string& sele1,
-				     const std::string& sele2) :
+                                     const std::string& sele1,
+                                     const std::string& sele2) :
       ObjectACF<Vector3d>(info, filename, sele1, sele2) {
     setCorrFuncType("Mean Displacement");
     setOutputName(getPrefix(dumpFilename_) + ".meandisp");
@@ -59,15 +59,14 @@ namespace OpenMD {
     positions_.resize(nFrames_);
   }
 
-
   int MeanDisplacement::computeProperty1(int frame, StuntDouble* sd) {
     positions_[frame].push_back(sd->getPos());
     return positions_[frame].size() - 1;
   }
 
   Vector3d MeanDisplacement::calcCorrVal(int frame1, int frame2, int id1,
-					 int id2) {
+                                         int id2) {
     Vector3d diff = positions_[frame2][id2] - positions_[frame1][id1];
     return diff;
   }
-}
+}  // namespace OpenMD
