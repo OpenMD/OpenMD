@@ -131,6 +131,7 @@ struct gengetopt_args_info
   const char *onsager_help; /**< @brief Onsager coefficient correlation functions help description.  */
   const char *ddisp_help; /**< @brief Collective Dipole displacement function (Helfand moment of Current Density) help description.  */
   const char *rotAngleDisp_help; /**< @brief Displacement correlation function for rotation angles help description.  */
+  const char *meandisp_help; /**< @brief mean displacement help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -190,6 +191,7 @@ struct gengetopt_args_info
   unsigned int onsager_given ;	/**< @brief Whether onsager was given.  */
   unsigned int ddisp_given ;	/**< @brief Whether ddisp was given.  */
   unsigned int rotAngleDisp_given ;	/**< @brief Whether rotAngleDisp was given.  */
+  unsigned int meandisp_given ;	/**< @brief Whether meandisp was given.  */
 
   char **inputs ; /**< @brief unnamed options (options without names) */
   unsigned inputs_num ; /**< @brief unnamed options number */

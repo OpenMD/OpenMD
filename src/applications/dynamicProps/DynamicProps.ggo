@@ -89,3 +89,4 @@ groupoption "current"      -  "Current density auto correlation function" group 
 groupoption "onsager"      -  "Onsager coefficient correlation functions" group = "correlation function"
 groupoption "ddisp"        -  "Collective Dipole displacement function (Helfand moment of Current Density)" group = "correlation function"
 groupoption "rotAngleDisp" -  "Displacement correlation function for rotation angles" group = "correlation function"
+groupoption "meandisp"     -  "mean displacement" group="correlation function"
