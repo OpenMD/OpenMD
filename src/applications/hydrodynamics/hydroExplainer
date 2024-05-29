@@ -9,11 +9,10 @@ Usage: hydroExplainer
 Options:
   -h, --help              show this help
   -f, --hydro-file=...    use specified hydro file
-  -t, --temperature=...   temperature in Kelvin
 
 
 Example:
-   hydroExplainer -f ellipsoid.hydro -t 300
+   hydroExplainer -f ellipsoid.hydro
 
 """
 
@@ -23,11 +22,10 @@ __license__ = "OpenMD"
 
 import sys
 import getopt
-import string
 import math
+import json
 
 _haveHydroFileName = 0
-_haveTemperature = 0
 
 def usage():
     print(__doc__)
@@ -35,41 +33,37 @@ def usage():
 def readHydroFile(hydroFileName):
     hydroFile = open(hydroFileName, 'r')
 
-    global DTTxx
-    global DTTyy
-    global DTTzz
-
-    global XiRRxx
-    global XiRRyy
-    global XiRRzz
-
-    global DRRxx
-    global DRRyy
-    global DRRzz
+    data = json.load(hydroFile)
      
-    line = hydroFile.readline()
-    while 1:
-        L = line.split()
-        XiRRxx = float(L[31])
-        XiRRyy = float(L[35])
-        XiRRzz = float(L[39])
-        DTTxx = float(L[115])
-        DTTyy = float(L[119])
-        DTTzz = float(L[123])
-        DRRxx = float(L[142])
-        DRRyy = float(L[146])
-        DRRzz = float(L[150])              
-        line = hydroFile.readline()
-        if not line: break
+    for i in range(len(data)):
+        hydro = data["OpenMD-Hydro"][i]
+        name = hydro["name"]
+        viscosity = hydro["viscosity"]
+        centerOfResistance = hydro["centerOfResistance"]
+        resistanceTensor = hydro["resistanceTensor"]
+        temperature = hydro["temperature"]
+        centerOfDiffusion = hydro["centerOfDiffusion"]
+        diffusionTensor = hydro["diffusionTensor"]
+        pitch = hydro["pitch"]
+        centerOfPitch = hydro["centerOfPitch"]
+        momentsOfPitch = hydro["momentsOfPitch"]
+        pitchAxes = hydro["pitchAxes"]
+
+        computeProperties(name, diffusionTensor)
         
     hydroFile.close()
     
-def computeProperties(temperature):
+def computeProperties(name, diffusionTensor):
     
-    kb = 1.9872156E-3    
-    kt = kb * temperature
-
+    print("For object %s : " % name)
     print()
+    DTTxx = float(diffusionTensor[0][0])
+    DTTyy = float(diffusionTensor[1][1])
+    DTTzz = float(diffusionTensor[2][2])
+    DRRxx = float(diffusionTensor[3][3])
+    DRRyy = float(diffusionTensor[4][4])
+    DRRzz = float(diffusionTensor[5][5])
+
     print("Translational Diffusion Constant (angstroms^2 fs^-1): %.3e" % ((DTTxx + DTTyy + DTTzz)/3.0))
 
     Delta = math.sqrt(math.pow((DRRxx-DRRyy),2) +(DRRzz-DRRxx)*(DRRzz-DRRyy))
@@ -108,7 +102,7 @@ def computeProperties(temperature):
 
 def main(argv):                         
     try:                                
-        opts, args = getopt.getopt(argv, "hf:t:", ["help", "hydro-file=", "temperature="]) 
+        opts, args = getopt.getopt(argv, "hf:", ["help", "hydro-file="]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                     
@@ -120,21 +114,12 @@ def main(argv):
             hydroFileName = arg
             global _haveHydroFileName
             _haveHydroFileName = 1
-        elif opt in ("-t", "--temperature"): 
-            temperature = float(arg)
-            global _haveTemperature
-            _haveTemperature = 1
     if (_haveHydroFileName != 1):
         usage() 
         print("No hydro file was specified")
         sys.exit()
-    if (_haveTemperature != 1):
-        usage() 
-        print("No temperature was specified")
-        sys.exit()
         
     readHydroFile(hydroFileName);
-    computeProperties(temperature);
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
