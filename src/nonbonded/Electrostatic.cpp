@@ -373,8 +373,10 @@ namespace OpenMD {
     vector<RealType> v31v, v32v;
     vector<RealType> v41v, v42v, v43v;
 
-    for (int i = 1; i < np_ + 1; i++) {
-      r = RealType(i) * dx;
+    const RealType TINY_DISTANCE = 1.0e-7;
+
+    for (int i = 0; i < np_; i++) {
+      r = TINY_DISTANCE + RealType(i) * dx;
       rv.push_back(r);
 
       ri  = 1.0 / r;
