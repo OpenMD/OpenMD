@@ -205,7 +205,7 @@ namespace OpenMD {
       Atom* atom1   = bond->getAtomA();
       Atom* atom2   = bond->getAtomB();
       AtomType* at1 = atom1->getAtomType();
-      AtomType* at2 = atom1->getAtomType();
+      AtomType* at2 = atom2->getAtomType();
       // get the chain of base types for this atom type:
       std::vector<AtomType*> ayb1 = at1->allYourBase();
       std::vector<AtomType*> ayb2 = at2->allYourBase();
