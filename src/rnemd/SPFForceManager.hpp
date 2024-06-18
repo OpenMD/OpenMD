@@ -76,6 +76,22 @@ namespace OpenMD::RNEMD {
     RealType getScaledDeltaU(RealType d_lambda) const {
       RealType lambda = currentSnapshot_->getSPFData()->lambda;
 
+      const RealType MASSIVE_POTENTIAL = 1e12;
+
+      // Some checking against massive potentials
+      if (std::abs(potentialSink_) >= MASSIVE_POTENTIAL ||
+          std::abs(potentialSource_) >= MASSIVE_POTENTIAL ||
+          std::isinf(potentialSink_) || std::isnan(potentialSink_) ||
+          std::isinf(potentialSource_) || std::isnan(potentialSource_)) {
+        snprintf(
+            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+            "SPFForceManager detected a numerical error in the potential\n\t"
+            "  energy with a lambda value of %f\n",
+            lambda);
+        painCave.isFatal = 1;
+        simError();
+      }
+
       return -(f_lambda(lambda + d_lambda) - f_lambda(lambda)) *
              (potentialSink_ - potentialSource_);
     }

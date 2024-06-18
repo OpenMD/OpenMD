@@ -665,7 +665,7 @@ namespace OpenMD {
      * @param globalIndex global Index of the molecule
      */
     int getMolToProc(int globalIndex) {
-      // assert(globalIndex < molToProcMap_.size());
+      assert(globalIndex >= 0 && globalIndex < molToProcMap_.size());
       return molToProcMap_[globalIndex];
     }
 

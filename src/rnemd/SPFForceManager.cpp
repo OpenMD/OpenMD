@@ -160,7 +160,7 @@ namespace OpenMD::RNEMD {
       if (temporarySinkSnapshot_ && currentSnapshot_) {
         *temporarySinkSnapshot_ = *currentSnapshot_;
 
-        // Save source Verlet neighbor list information:
+        // Save sink Verlet neighbor list information:
         sinkNeighborList_   = neighborList_;
         sinkPoint_          = point_;
         sinkSavedPositions_ = savedPositions_;
@@ -211,19 +211,22 @@ namespace OpenMD::RNEMD {
       if (f_lambda(currentSnapshot_->getSPFData()->lambda +
                    std::fabs(particleTarget)) > 1.0 &&
           f_lambda(currentSnapshot_->getSPFData()->lambda) < 1.0) {
-        // New deltaLambda should be determined such that:
-        //  f_lambda(lambda + deltaLambda) = 1
+        /*
+         * New deltaLambda should be determined such that:
+         *  f_lambda(lambda + deltaLambda) = 1
+         */
         deltaLambda = 1.0 - currentSnapshot_->getSPFData()->lambda;
         deltaLambda = std::copysign(deltaLambda, particleTarget);
       }
-
-#ifdef IS_MPI
-      int globalSelectedID = currentSnapshot_->getSPFData()->globalID;
 
       if (selectedMolecule_ && useChargedSPF_) {
         particleTarget *= selectedMolecule_->getFixedCharge();
       }
 
+#ifdef IS_MPI
+      int globalSelectedID = currentSnapshot_->getSPFData()->globalID;
+
+      // if globalSelectedID is -1 (default), this will be an issue
       MPI_Bcast(&particleTarget, 1, MPI_REALTYPE,
                 info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
 #endif
