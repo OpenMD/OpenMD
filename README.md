@@ -35,9 +35,9 @@ in the `docs` directory. Sample simulations are available in the
 
 | Architecture                   |  CXX | Notes                                 |
 |--------------------------------|:----:|---------------------------------------|
-| macOS Sonoma (intel & arm)     | c++  | (Apple clang 15.3, Open MPI 5.0.2)    |
-| Linux (Ubuntu 23.10 - x86\_64) | g++  | (GNU version 13.2  Open MPI 4.1.5)    |
-| Linux (RHEL 8.9 - x86\_64)     | icpc | (Intel version 19.1.3, Open MPI 4.0.1)|
+| macOS Sonoma (intel & arm)     | c++  | (Apple clang 15.3, Open MPI 5.0.3)    |
+| Linux (Ubuntu 24.04 - x86\_64) | g++  | (GNU version 13.2  Open MPI 4.1.6)    |
+| Linux (RHEL 9.4 - x86\_64)     | icpx | (Intel version 23.0, Intel MPI 2021.8)|
 
   OpenMD uses features in the C++ standard library and language features from
   C++17. Most (but not all) C++ compilers support these features.
