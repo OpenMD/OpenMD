@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'docs/paper/**'
+      - '.github/workflows/draft-pdf.yml'
 
 jobs:
   paper:
