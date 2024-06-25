@@ -32,6 +32,7 @@ affiliations:
  - name: Department of Chemistry, Oklahoma State University, Stillwater, OK, 74078
    index: 3
  - name: Department of Biochemistry, Chemistry, Environment, and Physics, Suffolk University, Boston, MA 02108
+   index: 4
  - name: Center for Research Computing, University of Notre Dame, Notre Dame, IN 46556
    index: 5   
 date: 25 June 2024
