@@ -113,6 +113,8 @@ namespace OpenMD {
     std::vector<T> histogram_;
     std::vector<int> count_;
     std::vector<RealType> times_;
+    RealType dtMean_;
+    RealType dtSigma_;
 
     SimInfo* info_ {nullptr};
     DumpReader* reader_;
@@ -135,7 +137,6 @@ namespace OpenMD {
     bool doObjectProperties_;
     bool doAtomicProperties_;
     bool doBondProperties_;
-    bool allowTimeFuzz_;
 
     std::string corrFuncType_;
     std::string paramString_;

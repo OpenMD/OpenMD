@@ -98,6 +98,7 @@ namespace OpenMD {
       statusTime = sampleTime;
     }
 
+          
     if (simParams->haveStatusTime()) {
       statusTime = simParams->getStatusTime();
     }
