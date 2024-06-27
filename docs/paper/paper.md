@@ -1,5 +1,5 @@
 ---
-title: 'OpenMD: A parallel molecular dynamics engine for simulating complex phenomena'
+title: 'OpenMD: A parallel molecular dynamics engine for complex systems and interfaces'
 tags:
   - C++
   - Chemistry
@@ -133,7 +133,7 @@ We note that the infrastructure required to implement `DR-EAM` is a superset of 
 
 # Acknowledgements
 
-We would like to acknowledge the contributions of Matthew  A. Meineke and Teng Lin to the original `OOPSE` code. Contributions to the `OpenMD` codebase have also come from: Patrick B. Louden, Joseph R. Michalka, James M. Marr, Anderson D.S. Duraes, Suzanne M. Neidhart, Shenyu Kuang, Madan Lamichhane, Xiuquan Sun, Sydney A. Shavalier, Benjamin M. Harless, Veronica Freund, Minh Nhat Pham, Chunlei Li, Kyle Daily, Alexander Mazanek, and Yang Zheng.
+We would like to acknowledge the contributions of Matthew A. Meineke and Teng Lin to the original `OOPSE` code. Contributions to the `OpenMD` codebase have also come from: Patrick B. Louden, Joseph R. Michalka, James M. Marr, Anderson D.S. Duraes, Suzanne M. Neidhart, Shenyu Kuang, Madan Lamichhane, Xiuquan Sun, Sydney A. Shavalier, Benjamin M. Harless, Veronica Freund, Minh Nhat Pham, Chunlei Li, Kyle Daily, Alexander Mazanek, and Yang Zheng.
 
 Development of `OpenMD` was carried out with support from the National Science Foundation under grants CHE-0848243, CHE-1362211, CHE-1663773, and CHE-191954648.
 
