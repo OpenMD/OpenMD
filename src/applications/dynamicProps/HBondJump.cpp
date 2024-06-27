@@ -142,13 +142,15 @@ namespace OpenMD {
         RealType time2 = times_[j];
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "HBondJump::correlation Error: sampleTime (%f)\n"
-                   "\tin %s does not match actual time-spacing between\n"
-                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
-          painCave.isFatal = 1;
-          simError();
+          if (!allowTimeFuzz_) {            
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "HBondJump::correlation Error: sampleTime (%f)\n"
+                     "\tin %s does not match actual time-spacing between\n"
+                     "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                     deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+            painCave.isFatal = 1;
+            simError();
+          }
         }
 
         int timeBin = int((time2 - time1) / deltaTime_ + 0.5);
@@ -634,13 +636,15 @@ namespace OpenMD {
         RealType time2 = times_[j];
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "HBondJump::correlation Error: sampleTime (%f)\n"
-                   "\tin %s does not match actual time-spacing between\n"
-                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
-          painCave.isFatal = 1;
-          simError();
+          if (!allowTimeFuzz_) {                      
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "HBondJump::correlation Error: sampleTime (%f)\n"
+                     "\tin %s does not match actual time-spacing between\n"
+                     "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                     deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+            painCave.isFatal = 1;
+            simError();
+          }
         }
 
         int timeBin = int((time2 - time1) / deltaTime_ + 0.5);
@@ -937,13 +941,15 @@ namespace OpenMD {
         RealType time2 = times_[j];
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "HBondJump::correlation Error: sampleTime (%f)\n"
-                   "\tin %s does not match actual time-spacing between\n"
-                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
-          painCave.isFatal = 1;
-          simError();
+          if (!allowTimeFuzz_) {                        
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "HBondJump::correlation Error: sampleTime (%f)\n"
+                     "\tin %s does not match actual time-spacing between\n"
+                     "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                     deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+            painCave.isFatal = 1;
+            simError();
+          }
         }
 
         int timeBin = int((time2 - time1) / deltaTime_ + 0.5);

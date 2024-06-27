@@ -198,7 +198,7 @@ namespace OpenMD::RNEMD {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                  "RNEMD: Incorrect number of parameters specified for "
                  "coordinateOrigin.\n"
-                 "\tthere should be 3 parameters, but %lu were specified.\n",
+                 "\tthere should be 3 parameters, but %zu were specified.\n",
                  co.size());
         painCave.isFatal = 1;
         simError();
@@ -1054,7 +1054,7 @@ namespace OpenMD::RNEMD {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "RNEMD: Incorrect number of parameters specified for "
                "momentumFluxVector.\n"
-               "\tthere should be 3 parameters, but %lu were specified.\n",
+               "\tthere should be 3 parameters, but %zu were specified.\n",
                momentumFluxVector.size());
       painCave.isFatal = 1;
       simError();
@@ -1071,7 +1071,7 @@ namespace OpenMD::RNEMD {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "RNEMD: Incorrect number of parameters specified for "
                "angularMomentumFluxVector.\n"
-               "\tthere should be 3 parameters, but %lu were specified.\n",
+               "\tthere should be 3 parameters, but %zu were specified.\n",
                angularMomentumFluxVector.size());
       painCave.isFatal = 1;
       simError();

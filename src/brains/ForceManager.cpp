@@ -149,8 +149,8 @@ namespace OpenMD {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                  "ForceManager::setupCutoffs: No value was set for the "
                  "cutoffRadius.\n"
-                 "\tOpenMD will use a default value of 12.0 angstroms"
-                 "\tfor the cutoffRadius.\n");
+                 "\tOpenMD will use a default value of 12.0 angstroms "
+                 "for the cutoffRadius.\n");
         painCave.isFatal  = 0;
         painCave.severity = OPENMD_INFO;
         simError();

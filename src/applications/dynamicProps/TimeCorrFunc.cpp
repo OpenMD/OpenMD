@@ -62,7 +62,7 @@ namespace OpenMD {
       selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info_),
       evaluator2_(info_), autoCorrFunc_(false), doSystemProperties_(false),
       doMolecularProperties_(false), doObjectProperties_(false),
-      doBondProperties_(false) {
+      doBondProperties_(false), allowTimeFuzz_(false) {
     reader_ = new DumpReader(info_, dumpFilename_);
 
     uniqueSelections_ = (sele1.compare(sele2) != 0) ? true : false;
@@ -125,6 +125,23 @@ namespace OpenMD {
 
       computeFrame(istep);
     }
+
+    RealType dtAvg = 0.0;
+    for (int istep = 1; istep < nFrames_; istep++)
+      dtAvg += times_[istep] - times_[istep-1];
+    dtAvg /= (nFrames_-1);
+
+    if ( fabs(dtAvg - deltaTime_) > 1.0e-4 ) {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "TimeCorrFunc::preCorrelate: sampleTime (%f) does not match\n"
+               "\tthe mean spacing between configurations (%f).\n"
+               "\tProceeding with the mean value.\n",
+               deltaTime_, dtAvg);
+      painCave.isFatal = 0;
+      simError();
+      allowTimeFuzz_ = true;
+      deltaTime_ = dtAvg;
+    }         
   }
 
   template<typename T>
@@ -301,15 +318,17 @@ namespace OpenMD {
         RealType time2 = times_[j];
 
         if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "TimeCorrFunc::correlateBlocks Error: sampleTime (%f)\n"
-                   "\tin %s does not match actual time-spacing between\n"
-                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
-          painCave.isFatal = 1;
-          simError();
+          if (!allowTimeFuzz_) {
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "TimeCorrFunc::correlateBlocks Error: sampleTime (%f)\n"
+                     "\tin %s does not match actual time-spacing between\n"
+                     "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                     deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+            painCave.isFatal = 1;
+            simError();
+          }
         }
-
+        
         int timeBin = int((time2 - time1) / deltaTime_ + 0.5);
         correlateFrames(i, j, timeBin);
       }
