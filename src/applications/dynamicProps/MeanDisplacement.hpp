@@ -49,10 +49,10 @@
 
 namespace OpenMD {
 
-  class MeanDisplacement: public ObjectACF<Vector3d> {
+  class MeanDisplacement : public ObjectACF<Vector3d> {
   public:
     MeanDisplacement(SimInfo* info, const std::string& filename,
-		     const std::string& sele1, const std::string& sele2);
+                     const std::string& sele1, const std::string& sele2);
 
   private:
     virtual int computeProperty1(int frame, StuntDouble* sd);
@@ -60,7 +60,7 @@ namespace OpenMD {
     virtual Vector3d calcCorrVal(int frame1, int frame2, int id1, int id2);
     std::vector<std::vector<Vector3d>> positions_;
   };
-   
+
 }  // namespace OpenMD
 
 #endif

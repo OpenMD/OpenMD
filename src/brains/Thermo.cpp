@@ -915,9 +915,9 @@ namespace OpenMD {
 
       Vector3d r(0.0);
       Vector3d v(0.0);
-      Mat3x3d Itmp{};
+      Mat3x3d Itmp {};
 
-      RealType m = 0.0;      
+      RealType m = 0.0;
 
       for (mol = info_->beginMolecule(i); mol != NULL;
            mol = info_->nextMolecule(i)) {
@@ -944,7 +944,7 @@ namespace OpenMD {
             RotMat3x3d A = sd->getA();
             Itmp += A.transpose() * sd->getI() * A;
             angularMomentum += sd->getJ();
-          }          
+          }
         }
       }
 

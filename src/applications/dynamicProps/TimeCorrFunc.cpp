@@ -128,15 +128,15 @@ namespace OpenMD {
 
     RealType dt2Avg(0.0);
     for (int istep = 1; istep < nFrames_; istep++) {
-      RealType dt = times_[istep] - times_[istep-1];
+      RealType dt = times_[istep] - times_[istep - 1];
       dtMean_ += dt;
-      dt2Avg += dt*dt;
+      dt2Avg += dt * dt;
     }
     dtMean_ /= RealType(nFrames_ - 1);
-    dt2Avg  /= RealType(nFrames_ - 1);
-    dtSigma_ = std::sqrt(dt2Avg - dtMean_*dtMean_);
-    
-    if ( std::fabs(dtMean_ - deltaTime_) > 1.0e-9 ) {
+    dt2Avg /= RealType(nFrames_ - 1);
+    dtSigma_ = std::sqrt(dt2Avg - dtMean_ * dtMean_);
+
+    if (std::fabs(dtMean_ - deltaTime_) > 1.0e-9) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "TimeCorrFunc::preCorrelate: sampleTime (%f) does not match\n"
                "\tthe mean spacing between configurations (%f).\n"
@@ -144,7 +144,7 @@ namespace OpenMD {
                deltaTime_, dtMean_);
       painCave.isFatal = 0;
       simError();
-    }         
+    }
   }
 
   template<typename T>
@@ -320,7 +320,8 @@ namespace OpenMD {
 
         RealType time2 = times_[j];
 
-        if (std::fabs((time2 - time1) - (j - i) * dtMean_) > 6 * dtSigma_*(j-i) ) {
+        if (std::fabs((time2 - time1) - (j - i) * dtMean_) >
+            6 * dtSigma_ * (j - i)) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                    "TimeCorrFunc::correlateBlocks Error: mean sampleTime (%f)\n"
                    "\tin %s does not match actual time-spacing between\n"
@@ -329,7 +330,7 @@ namespace OpenMD {
           painCave.isFatal = 1;
           simError();
         }
-        
+
         int timeBin = int((time2 - time1) / dtMean_ + 0.5);
         correlateFrames(i, j, timeBin);
       }
