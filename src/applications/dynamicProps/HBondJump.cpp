@@ -141,17 +141,18 @@ namespace OpenMD {
 
         RealType time2 = times_[j];
 
-        if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
+        if (std::fabs((time2 - time1) - (j - i) * dtMean_) >
+            6 * dtSigma_ * (j - i)) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "HBondJump::correlation Error: sampleTime (%f)\n"
+                   "HBondJump::correlation Error: mean sampleTime (%f)\n"
                    "\tin %s does not match actual time-spacing between\n"
                    "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+                   dtMean_, dumpFilename_.c_str(), i, time1, j, time2);
           painCave.isFatal = 1;
           simError();
         }
 
-        int timeBin = int((time2 - time1) / deltaTime_ + 0.5);
+        int timeBin = int((time2 - time1) / dtMean_ + 0.5);
 
         corrVal = 0.0;
         count   = 0;
@@ -633,17 +634,18 @@ namespace OpenMD {
 
         RealType time2 = times_[j];
 
-        if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
+        if (std::fabs((time2 - time1) - (j - i) * dtMean_) >
+            6 * dtSigma_ * (j - i)) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "HBondJump::correlation Error: sampleTime (%f)\n"
+                   "HBondJump::correlation Error: mean sampleTime (%f)\n"
                    "\tin %s does not match actual time-spacing between\n"
                    "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+                   dtMean_, dumpFilename_.c_str(), i, time1, j, time2);
           painCave.isFatal = 1;
           simError();
         }
 
-        int timeBin = int((time2 - time1) / deltaTime_ + 0.5);
+        int timeBin = int((time2 - time1) / dtMean_ + 0.5);
 
         // loop over the Hydrogens found in frame i:
 
@@ -936,17 +938,18 @@ namespace OpenMD {
 
         RealType time2 = times_[j];
 
-        if (fabs((time2 - time1) - (j - i) * deltaTime_) > 1.0e-4) {
+        if (std::fabs((time2 - time1) - (j - i) * dtMean_) >
+            6 * dtSigma_ * (j - i)) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "HBondJump::correlation Error: sampleTime (%f)\n"
+                   "HBondJump::correlation Error: mean sampleTime (%f)\n"
                    "\tin %s does not match actual time-spacing between\n"
                    "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                   deltaTime_, dumpFilename_.c_str(), i, time1, j, time2);
+                   dtMean_, dumpFilename_.c_str(), i, time1, j, time2);
           painCave.isFatal = 1;
           simError();
         }
 
-        int timeBin = int((time2 - time1) / deltaTime_ + 0.5);
+        int timeBin = int((time2 - time1) / dtMean_ + 0.5);
 
         // loop over the Hydrogens found in frame i:
 

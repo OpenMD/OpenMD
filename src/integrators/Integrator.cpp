@@ -164,7 +164,7 @@ namespace OpenMD {
 
           // check to make sure exchange time is a multiple of dt;
           RealType newET = ceil(RNEMD_exchangeTime / dt) * dt;
-          if (fabs(newET - RNEMD_exchangeTime) > 1e-6) {
+          if (std::fabs(newET - RNEMD_exchangeTime) > 1e-6) {
             RNEMD_exchangeTime = newET;
           }
         }
@@ -302,7 +302,7 @@ namespace OpenMD {
   void Integrator::preStep() {
     RealType difference = snap->getTime() + dt - currStatus;
 
-    if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
+    if (difference > 0 || std::fabs(difference) <= dtEps) {
       needPotential = true;
       needVirial    = true;
     }
@@ -321,7 +321,7 @@ namespace OpenMD {
     if (needVelocityScaling) {
       difference = snap->getTime() - currThermal;
 
-      if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
+      if (difference > 0 || std::fabs(difference) <= dtEps) {
         velocitizer_->randomize(targetScalingTemp);
         currThermal += thermalTime;
       }
@@ -330,7 +330,7 @@ namespace OpenMD {
     if (useRNEMD) {
       difference = snap->getTime() - currRNEMD;
 
-      if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
+      if (difference > 0 || std::fabs(difference) <= dtEps) {
         rnemd_->doRNEMD();
         currRNEMD += RNEMD_exchangeTime;
       }
@@ -339,14 +339,14 @@ namespace OpenMD {
 
     difference = snap->getTime() - currSample;
 
-    if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
+    if (difference > 0 || std::fabs(difference) <= dtEps) {
       dumpWriter->writeDumpAndEor();
       currSample += sampleTime;
     }
 
     difference = snap->getTime() - currStatus;
 
-    if (difference > 0 || fabs(difference) <= OpenMD::epsilon) {
+    if (difference > 0 || std::fabs(difference) <= dtEps) {
       stats->collectStats();
 
       if (useRNEMD) { rnemd_->writeOutputFile(); }
@@ -363,7 +363,7 @@ namespace OpenMD {
 
     difference = snap->getTime() - currReset;
 
-    if (needReset && (difference > 0 || fabs(difference) <= OpenMD::epsilon)) {
+    if (needReset && (difference > 0 || std::fabs(difference) <= dtEps)) {
       resetIntegrator();
       currReset += resetTime;
     }

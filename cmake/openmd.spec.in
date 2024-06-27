@@ -56,8 +56,8 @@ mv %{buildroot}/usr/lib %{buildroot}/usr/lib64
 mkdir -p %{buildroot}/usr/share/doc/%{name}
 mkdir -p %{buildroot}/usr/share/%{name}
 mv %{buildroot}/usr/doc/OpenMDmanual.pdf %{buildroot}/usr/share/doc/%{name}/
-mv %{buildroot}/usr/AUTHORS %{buildroot}/usr/share/doc/%{name}/
-mv %{buildroot}/usr/INSTALL %{buildroot}/usr/share/doc/%{name}/
+mv %{buildroot}/usr/doc/AUTHORS %{buildroot}/usr/share/doc/%{name}/
+mv %{buildroot}/usr/doc/INSTALL %{buildroot}/usr/share/doc/%{name}/
 mv %{buildroot}/usr/LICENSE %{buildroot}/usr/share/doc/%{name}/
 mv %{buildroot}/usr/README %{buildroot}/usr/share/doc/%{name}/
 mv %{buildroot}/usr/samples %{buildroot}/usr/share/%{name}/samples

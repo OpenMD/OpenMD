@@ -140,6 +140,8 @@ namespace OpenMD {
     Snapshot* snap {nullptr};
     ProgressBarPtr progressBar {nullptr};
 
+    const RealType dtEps = 1.0e-4;
+
   private:
     virtual RealType calcConservedQuantity() = 0;
     virtual DumpWriter* createDumpWriter();
