@@ -96,7 +96,7 @@ where the damped shifted force potential,
   0, & r_{ij} > R_c
   \end{cases}
 \end{equation}
-cuts off smoothly as $r_{ij} \rightarrow R_c$, and the Coulombic kernel is damped using a complementary error function, $f(r) = \frac{\textrm{erfc}(\alpha r)}{r}$.  The shifted potential term can be thought of as the interactions of a pair of charges with negative images of each other on the surface of the cutoff sphere. The damping parameter $(\alpha)$ can be specified directly in `OpenMD`, or is set by default from the cutoff radius, $\alpha = 0.425 - 0.02 R_c$, where the code switches to an undamped kernel for $R_c > 21.25$ &#8491;  The self potential represents the interaction of each charge with its own image at the cutoff sphere, and this term resembles the self-interaction in the Ewald sum,
+cuts off smoothly as $r_{ij} \rightarrow R_c$, and the Coulombic kernel is damped using a complementary error function, $f(r) = \frac{\textrm{erfc}(\alpha r)}{r}$.  The shifted potential term can be thought of as the interactions of charges with neutralizing charges on the surface of the cutoff sphere. The damping parameter $(\alpha)$ can be specified directly in `OpenMD`, or is set by default from the cutoff radius, $\alpha = 0.425 - 0.02 R_c$, where the code switches to an undamped kernel for $R_c > 21.25$ &#8491;. The self potential represents the interaction of each charge with its own neutralizing charge on the cutoff sphere, and this term resembles the self-interaction in the Ewald sum,
 \begin{equation}
   U_i^\mathrm{self}(q_i) =  - \left(\frac{\textrm{erfc}(\alpha R_c)}{R_c} + \frac{\alpha}{\pi^{1/2}}\right) q_i^2.
 \end{equation}
