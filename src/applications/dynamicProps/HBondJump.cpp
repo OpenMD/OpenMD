@@ -148,7 +148,13 @@ namespace OpenMD {
                    "\tin %s does not match actual time-spacing between\n"
                    "\tconfigurations %d (t = %f) and %d (t = %f).\n",
                    dtMean_, dumpFilename_.c_str(), i, time1, j, time2);
-          painCave.isFatal = 1;
+	  if (allowTimeFuzz_) {
+	    painCave.isFatal = 0;
+	    painCave.severity = OPENMD_INFO;
+	  } else {
+	    painCave.isFatal = 1;
+	    painCave.severity = OPENMD_ERROR;
+	  }
           simError();
         }
 
@@ -641,7 +647,13 @@ namespace OpenMD {
                    "\tin %s does not match actual time-spacing between\n"
                    "\tconfigurations %d (t = %f) and %d (t = %f).\n",
                    dtMean_, dumpFilename_.c_str(), i, time1, j, time2);
-          painCave.isFatal = 1;
+	  if (allowTimeFuzz_) {
+	    painCave.isFatal = 0;
+	    painCave.severity = OPENMD_INFO;
+	  } else {
+	    painCave.isFatal = 1;
+	    painCave.severity = OPENMD_ERROR;
+	  }
           simError();
         }
 
@@ -945,7 +957,13 @@ namespace OpenMD {
                    "\tin %s does not match actual time-spacing between\n"
                    "\tconfigurations %d (t = %f) and %d (t = %f).\n",
                    dtMean_, dumpFilename_.c_str(), i, time1, j, time2);
-          painCave.isFatal = 1;
+	  if (allowTimeFuzz_) {
+	    painCave.isFatal = 0;
+	    painCave.severity = OPENMD_INFO;
+	  } else {
+	    painCave.isFatal = 1;
+	    painCave.severity = OPENMD_ERROR;
+	  }
           simError();
         }
 

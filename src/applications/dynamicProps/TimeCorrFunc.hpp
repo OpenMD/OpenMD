@@ -137,6 +137,7 @@ namespace OpenMD {
     bool doObjectProperties_;
     bool doAtomicProperties_;
     bool doBondProperties_;
+    bool allowTimeFuzz_;
 
     std::string corrFuncType_;
     std::string paramString_;

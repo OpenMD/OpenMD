@@ -62,7 +62,8 @@ namespace OpenMD {
       selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info_),
       evaluator2_(info_), autoCorrFunc_(false), doSystemProperties_(false),
       doMolecularProperties_(false), doObjectProperties_(false),
-      doBondProperties_(false) {
+      doBondProperties_(false), allowTimeFuzz_(false) {
+    
     reader_ = new DumpReader(info_, dumpFilename_);
 
     uniqueSelections_ = (sele1.compare(sele2) != 0) ? true : false;
@@ -136,13 +137,15 @@ namespace OpenMD {
     dt2Avg /= RealType(nFrames_ - 1);
     dtSigma_ = std::sqrt(dt2Avg - dtMean_ * dtMean_);
 
-    if (std::fabs(dtMean_ - deltaTime_) > 1.0e-9) {
+    if (dtSigma_ > 1.0e-6) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "TimeCorrFunc::preCorrelate: sampleTime (%f) does not match\n"
-               "\tthe mean spacing between configurations (%f).\n"
-               "\tProceeding with the mean value.\n",
-               deltaTime_, dtMean_);
+               "\tthe mean spacing between configurations (%f), with\n"
+               "\tsigma (%f). Proceeding with the mean value.\n",
+               deltaTime_, dtMean_, dtSigma_);
+      allowTimeFuzz_ = true;
       painCave.isFatal = 0;
+      painCave.severity = OPENMD_INFO;
       simError();
     }
   }
@@ -321,13 +324,19 @@ namespace OpenMD {
         RealType time2 = times_[j];
 
         if (std::fabs((time2 - time1) - (j - i) * dtMean_) >
-            6 * dtSigma_ * (j - i)) {
+            6 * dtSigma_ * (j - i)) {	  
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "TimeCorrFunc::correlateBlocks Error: mean sampleTime (%f)\n"
+                   "TimeCorrFunc::correlateBlocks: mean sampleTime (%f)\n"
                    "\tin %s does not match actual time-spacing between\n"
                    "\tconfigurations %d (t = %f) and %d (t = %f).\n",
                    dtMean_, dumpFilename_.c_str(), i, time1, j, time2);
-          painCave.isFatal = 1;
+	  if (allowTimeFuzz_) {
+	    painCave.isFatal = 0;
+	    painCave.severity = OPENMD_INFO;
+	  } else {
+	    painCave.isFatal = 1;
+	    painCave.severity = OPENMD_ERROR;
+	  }
           simError();
         }
 
