@@ -126,7 +126,7 @@ The contribution to the local density at site $i$ depends on the instantaneous p
 \end{equation}
 with $N_j$ as the valency count for atom $j$. Modifications to the pair potential used in DR-EAM are also supported.
 
-DR-EAM was tested and validated against experimental results as well as DFT-based and EAM models for bulk metals which have little to no charge transfer between metal atoms. Common surfaces of the bulk metals like you may see on the surface of nanoparticles and ordered structures such as in alloys were also tested. Metal slabs in a uniform electric field or with a fixed external charge approaching the surface demonstrate the utility of a polarizable metal potential, as the image charge effect can be replicated in this model. The method was shown to perform well across all test systems, and most importantly, retain the strengths of unmodified EAM when it comes to bulk elastic constants and surface energies [@Bhattarai2019]. DR-EAM has similar performance to unmodified EAM modeling, as both approaches require a double pass through the force loop to first compute local densities, and a second pass to compute forces and energies.
+DR-EAM was shown to perform well for bulk metals, metal surfaces, and alloys; and most importantly, it retains the strengths of the unmodified EAM in modeling bulk elastic constants and surface energies [@Bhattarai2019]. DR-EAM has similar performance to the unmodified EAM in that both approaches require a double-pass through the force loop, once to compute local densities and again to compute forces and energies.
 
 We note that the infrastructure required to implement DR-EAM is a superset of what is required for common *fluc-q* potentials like the TIP4P-FQ model for water [@Rick1994].
 
