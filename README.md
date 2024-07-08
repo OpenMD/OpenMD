@@ -1,6 +1,7 @@
 # What is OpenMD?
 
-[![build](https://github.com/OpenMD/OpenMD/workflows/build/badge.svg)](https://github.com/OpenMD/OpenMD/actions?query=workflow%3Abuild)
+[![build](https://github.com/OpenMD/OpenMD/workflows/build/badge.svg)](https://github.com/OpenMD/OpenMD/actions?query=workflow%3Abuild) [![status](https://joss.theoj.org/papers/8841bf23a51ceaf3439f455219043855/status.svg)](https://joss.theoj.org/papers/8841bf23a51ceaf3439f455219043855)
+
 
 OpenMD is an open source molecular dynamics engine which is capable of
 efficiently simulating liquids, proteins, nanoparticles, interfaces,
