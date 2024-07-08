@@ -76,3 +76,14 @@ in the `docs` directory. Sample simulations are available in the
  6) umask 0022; sudo make install
 
 That's it.
+
+## Contributing
+
+Please read [CONTRIBUTING.md](.github/CONTRIBUTING.md) for details on how you can become a contributor and the process for submitting pull requests to us.
+
+## License
+
+Copyright (c) 2004-2024, OpenMD. All rights reserved.
+
+Licensed under the [BSD 3-Clause License](LICENSE).
+
