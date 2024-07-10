@@ -1,6 +1,7 @@
 # What is OpenMD?
 
-[![build](https://github.com/OpenMD/OpenMD/workflows/build/badge.svg)](https://github.com/OpenMD/OpenMD/actions?query=workflow%3Abuild)
+[![build](https://github.com/OpenMD/OpenMD/workflows/build/badge.svg)](https://github.com/OpenMD/OpenMD/actions?query=workflow%3Abuild) [![status](https://joss.theoj.org/papers/8841bf23a51ceaf3439f455219043855/status.svg)](https://joss.theoj.org/papers/8841bf23a51ceaf3439f455219043855)
+
 
 OpenMD is an open source molecular dynamics engine which is capable of
 efficiently simulating liquids, proteins, nanoparticles, interfaces,
@@ -76,3 +77,14 @@ in the `docs` directory. Sample simulations are available in the
  6) umask 0022; sudo make install
 
 That's it.
+
+## Contributing
+
+Please read [CONTRIBUTING.md](.github/CONTRIBUTING.md) for details on how you can become a contributor and the process for submitting pull requests to us.
+
+## License
+
+Copyright (c) 2004-2024, OpenMD. All rights reserved.
+
+Licensed under the [BSD 3-Clause License](LICENSE).
+
