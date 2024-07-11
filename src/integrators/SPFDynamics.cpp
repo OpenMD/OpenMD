@@ -77,9 +77,7 @@ namespace OpenMD {
         if (rnemd_->failedLastKick()) {
           snap->clearDerivedProperties();
 
-          spfForceManager->combineForcesAndTorques();
-          spfForceManager->updatePotentials();
-          spfForceManager->updateVirialTensor();
+          spfForceManager->updateSPFState();
 
           Snapshot tempSourceSnap =
               spfForceManager->getTemporarySourceSnapshot();

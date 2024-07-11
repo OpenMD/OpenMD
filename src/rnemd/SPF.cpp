@@ -128,10 +128,8 @@ namespace OpenMD::RNEMD {
           q_tot[i] /= molCount[i];
 
           if (q_tot[i] > 0.0) {
-            q_cation += q_tot[i];
             cationMan_ |= ionManager;
-          } else {
-            q_anion += q_tot[i];
+          } else if (q_tot[i] < 0.0) {
             anionMan_ |= ionManager;
           }
         } else {
@@ -200,7 +198,7 @@ namespace OpenMD::RNEMD {
     if (!doRNEMD_) return;
 
     // Remove selected molecule from the source selection manager
-    if (deltaLambda_ > 0.0 && !selectedMoleculeMan_.isEmpty()) {
+    if (spfTarget_ > 0.0 && !selectedMoleculeMan_.isEmpty()) {
       smanA -= selectedMoleculeMan_;
     } else {
       smanB -= selectedMoleculeMan_;
@@ -294,7 +292,7 @@ namespace OpenMD::RNEMD {
       Vector3d v_b = P_b / M_b;
 
       RealType deltaU = Constants::energyConvert *
-                        forceManager_->getScaledDeltaU(std::fabs(deltaLambda_));
+                        forceManager_->getScaledDeltaU(std::fabs(spfTarget_));
 
       RealType a {};
       RealType b {};
@@ -372,16 +370,16 @@ namespace OpenMD::RNEMD {
         currentSnap_->hasKineticEnergy              = false;
         currentSnap_->hasTotalEnergy                = false;
 
-        RealType currentDeltaLambda = deltaLambda_;
+        RealType currentSPFTarget = spfTarget_;
 
         // Synced across processors
         bool updateSelectedMolecule =
-            forceManager_->updateLambda(currentDeltaLambda, deltaLambda_);
+            forceManager_->updateLambda(currentSPFTarget, spfTarget_);
 
         if (updateSelectedMolecule) selectMolecule();
 
         successfulExchange = true;
-        particleExchange_ += currentDeltaLambda;
+        particleExchange_ += currentSPFTarget;
         kineticExchange_ += kineticTarget_;
       }
     }
@@ -439,13 +437,13 @@ namespace OpenMD::RNEMD {
   }
 
   bool SPFMethod::setSelectedMolecule() {
-    SelectionManager sourceSman {info_};
+    SelectionManager sourceSman {info_}, ionSman {info_};
     RealType targetSlabCenter {};
 
     Utils::RandNumGenPtr randNumGen = info_->getRandomNumberGenerator();
 
-    // Always reset deltaLambda_ before selecting a new particle
-    deltaLambda_ = particleTarget_;
+    // Always reset spfTarget_ before selecting a new particle
+    spfTarget_ = particleTarget_;
 
 #ifdef IS_MPI
     int worldRank {}, size {};
@@ -459,32 +457,30 @@ namespace OpenMD::RNEMD {
       if (useChargedSPF_) {
         std::uniform_int_distribution<> slabDistribution {0, 1};
 
-        if (slabDistribution(*randNumGen) == 0) {
-          deltaLambda_ = std::copysign(deltaLambda_, q_cation);
-        } else {
-          deltaLambda_ = std::copysign(deltaLambda_, q_anion);
-        }
+        if (slabDistribution(*randNumGen) != 0) {
+          spfTarget_ *= -1;
+          ionSman = anionMan_;
+        } else
+          ionSman = cationMan_;
       }
 #ifdef IS_MPI
     }
 
     if (useChargedSPF_) {
-      MPI_Bcast(&deltaLambda_, 1, MPI_REALTYPE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&spfTarget_, 1, MPI_REALTYPE, 0, MPI_COMM_WORLD);
     }
 #endif
     // The sign of our flux determines which slab is the source and which is
     // the sink
-    if (deltaLambda_ > 0.0) {
+    if (spfTarget_ > 0.0) {
       sourceSman       = commonA_;
       targetSlabCenter = slabBCenter_;
-
-      if (useChargedSPF_) { sourceSman -= anionMan_; }
     } else {
       sourceSman       = commonB_;
       targetSlabCenter = slabACenter_;
-
-      if (useChargedSPF_) { sourceSman -= cationMan_; }
     }
+
+    if (useChargedSPF_) { sourceSman -= ionSman; }
 
     if (sourceSman.getMoleculeSelectionCount() == 0) {
       forceManager_->setSelectedMolecule(nullptr);
@@ -519,21 +515,24 @@ namespace OpenMD::RNEMD {
 
       // Scale the particle flux by the charge yielding a current denstiy
       if (useChargedSPF_) {
-        deltaLambda_ /= std::fabs(selectedMolecule->getFixedCharge());
+        assert(std::fabs(selectedMolecule->getFixedCharge()) >=
+               OpenMD::epsilon);
+
+        spfTarget_ /= std::fabs(selectedMolecule->getFixedCharge());
       }
 
 #ifdef IS_MPI
       for (int i {}; i < size; ++i) {
         if (i != worldRank) {
           MPI_Send(&globalSelectedID, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-          MPI_Send(&deltaLambda_, 1, MPI_REALTYPE, i, 0, MPI_COMM_WORLD);
+          MPI_Send(&spfTarget_, 1, MPI_REALTYPE, i, 0, MPI_COMM_WORLD);
         }
       }
     } else {
       MPI_Recv(&globalSelectedID, 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD,
                &ierr);
-      MPI_Recv(&deltaLambda_, 1, MPI_REALTYPE, MPI_ANY_SOURCE, 0,
-               MPI_COMM_WORLD, &ierr);
+      MPI_Recv(&spfTarget_, 1, MPI_REALTYPE, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD,
+               &ierr);
 #endif
     }
 

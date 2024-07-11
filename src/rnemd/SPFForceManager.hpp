@@ -100,21 +100,26 @@ namespace OpenMD::RNEMD {
     Snapshot getTemporarySourceSnapshot() { return *temporarySourceSnapshot_; }
     Snapshot getTemporarySinkSnapshot() { return *temporarySinkSnapshot_; }
 
-    void combineForcesAndTorques();
-    void updatePotentials();
-    void updateVirialTensor();
+    void updateSPFState() {
+      combineForcesAndTorques();
+      updatePotentials();
+      updateVirialTensor();
+    }
 
     RealType f_lambda(RealType lambda) const { return std::pow(lambda, k_); }
 
   private:
     void calcForces() override;
 
+    void combineForcesAndTorques();
+    void updatePotentials();
     void updateLongRangePotentials();
     void updateShortRangePotentials();
     void updateSelfPotentials();
     void updateExcludedPotentials();
     void updateRestraintPotentials();
     void updateSelectionPotentials();
+    void updateVirialTensor();
 
     template<typename T>
     T linearCombination(T quantityA, T quantityB) {

@@ -63,7 +63,6 @@ namespace OpenMD {
       evaluator2_(info_), autoCorrFunc_(false), doSystemProperties_(false),
       doMolecularProperties_(false), doObjectProperties_(false),
       doBondProperties_(false), allowTimeFuzz_(false) {
-    
     reader_ = new DumpReader(info_, dumpFilename_);
 
     uniqueSelections_ = (sele1.compare(sele2) != 0) ? true : false;
@@ -143,8 +142,8 @@ namespace OpenMD {
                "\tthe mean spacing between configurations (%f), with\n"
                "\tsigma (%f). Proceeding with the mean value.\n",
                deltaTime_, dtMean_, dtSigma_);
-      allowTimeFuzz_ = true;
-      painCave.isFatal = 0;
+      allowTimeFuzz_    = true;
+      painCave.isFatal  = 0;
       painCave.severity = OPENMD_INFO;
       simError();
     }
@@ -324,19 +323,19 @@ namespace OpenMD {
         RealType time2 = times_[j];
 
         if (std::fabs((time2 - time1) - (j - i) * dtMean_) >
-            6 * dtSigma_ * (j - i)) {	  
+            6 * dtSigma_ * (j - i)) {
           snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                    "TimeCorrFunc::correlateBlocks: mean sampleTime (%f)\n"
                    "\tin %s does not match actual time-spacing between\n"
                    "\tconfigurations %d (t = %f) and %d (t = %f).\n",
                    dtMean_, dumpFilename_.c_str(), i, time1, j, time2);
-	  if (allowTimeFuzz_) {
-	    painCave.isFatal = 0;
-	    painCave.severity = OPENMD_INFO;
-	  } else {
-	    painCave.isFatal = 1;
-	    painCave.severity = OPENMD_ERROR;
-	  }
+          if (allowTimeFuzz_) {
+            painCave.isFatal  = 0;
+            painCave.severity = OPENMD_INFO;
+          } else {
+            painCave.isFatal  = 1;
+            painCave.severity = OPENMD_ERROR;
+          }
           simError();
         }
 

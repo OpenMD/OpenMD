@@ -113,8 +113,8 @@ namespace OpenMD {
     std::vector<T> histogram_;
     std::vector<int> count_;
     std::vector<RealType> times_;
-    RealType dtMean_{};
-    RealType dtSigma_{};
+    RealType dtMean_ {};
+    RealType dtSigma_ {};
 
     SimInfo* info_ {nullptr};
     DumpReader* reader_;

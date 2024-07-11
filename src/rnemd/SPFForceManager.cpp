@@ -179,9 +179,7 @@ namespace OpenMD::RNEMD {
         simError();
       }
 
-      combineForcesAndTorques();
-      updatePotentials();
-      updateVirialTensor();
+      updateSPFState();
 
       // Only the processor with the selected molecule should do this step:
       if (selectedMolecule_) { selectedMolecule_->setCom(currentSourceCom); }
@@ -201,51 +199,38 @@ namespace OpenMD::RNEMD {
     }
   }
 
-  bool SPFForceManager::updateLambda(RealType& particleTarget,
-                                     RealType& deltaLambda) {
+  bool SPFForceManager::updateLambda(RealType& currentSPFTarget,
+                                     RealType& nextSPFTarget) {
     bool updateSelectedMolecule {false};
 
     if (hasSelectedMolecule_) {
-      currentSnapshot_->getSPFData()->lambda += std::fabs(particleTarget);
+      RealType deltaLambda = std::fabs(currentSPFTarget);
 
-      if (f_lambda(currentSnapshot_->getSPFData()->lambda +
-                   std::fabs(particleTarget)) > 1.0 &&
-          f_lambda(currentSnapshot_->getSPFData()->lambda) < 1.0) {
+      std::shared_ptr<SPFData> currentSPFData = currentSnapshot_->getSPFData();
+
+      currentSPFData->lambda += deltaLambda;
+
+      if (f_lambda(currentSPFData->lambda + deltaLambda) > 1.0 &&
+          f_lambda(currentSPFData->lambda) < 1.0) {
         /*
-         * New deltaLambda should be determined such that:
-         *  f_lambda(lambda + deltaLambda) = 1
+         * New spfTarget should be determined such that:
+         *  f_lambda(lambda + spfTarget) = 1
          */
-        deltaLambda = 1.0 - currentSnapshot_->getSPFData()->lambda;
-        deltaLambda = std::copysign(deltaLambda, particleTarget);
+        nextSPFTarget = 1.0 - currentSPFData->lambda;
+        nextSPFTarget = std::copysign(nextSPFTarget, currentSPFTarget);
       }
-
-      if (selectedMolecule_ && useChargedSPF_) {
-        particleTarget *= selectedMolecule_->getFixedCharge();
-      }
-
-#ifdef IS_MPI
-      int globalSelectedID = currentSnapshot_->getSPFData()->globalID;
-
-      // if globalSelectedID is -1 (default), this will be an issue
-      MPI_Bcast(&particleTarget, 1, MPI_REALTYPE,
-                info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
-#endif
 
       currentSnapshot_->clearDerivedProperties();
+      updateSPFState();
 
-      combineForcesAndTorques();
-      updatePotentials();
-      updateVirialTensor();
-
-      if (f_lambda(currentSnapshot_->getSPFData()->lambda) > 1.0 ||
-          std::fabs(f_lambda(currentSnapshot_->getSPFData()->lambda) - 1.0) <
-              1e-6) {
-        currentSnapshot_->getSPFData()->lambda   = 0.0;
-        currentSnapshot_->getSPFData()->globalID = -1;
+      if (f_lambda(currentSPFData->lambda) > 1.0 ||
+          std::fabs(f_lambda(currentSPFData->lambda) - 1.0) < 1e-6) {
+        currentSPFData->lambda   = 0.0;
+        currentSPFData->globalID = -1;
 
         // Only the processor with the selected molecule should do this step:
         if (selectedMolecule_) {
-          selectedMolecule_->setCom(currentSnapshot_->getSPFData()->pos);
+          selectedMolecule_->setCom(currentSPFData->pos);
           selectedMolecule_ = nullptr;
         }
 

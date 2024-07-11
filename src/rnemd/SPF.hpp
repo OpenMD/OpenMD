@@ -68,9 +68,8 @@ namespace OpenMD::RNEMD {
     bool getSelectedMolecule();
     bool setSelectedMolecule();
 
-    RealType deltaLambda_ {};
+    RealType spfTarget_ {};
 
-    RealType q_anion {}, q_cation {};
     SelectionManager anionMan_, cationMan_;
 
     SPFForceManager* forceManager_ {nullptr};
