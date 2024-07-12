@@ -529,6 +529,7 @@ src/math/LegendrePolynomial.cpp
 src/math/RealSphericalHarmonic.cpp
 src/math/RMSD.cpp
 src/math/SphericalHarmonic.cpp
+src/math/Triangle.cpp
 src/math/Wigner3jm.cpp
 src/mdParser/FilenameObserver.cpp
 src/optimization/OptimizationFactory.cpp
@@ -653,7 +654,6 @@ src/flucq/FluctuatingChargeConstraints.cpp
 src/flucq/FluctuatingChargeObjectiveFunction.cpp
 src/flucq/FluctuatingChargeForces.cpp
 src/flucq/FluctuatingChargePropagator.cpp
-src/integrators/LangevinHullForceModifier.cpp
 src/integrators/LangevinPiston.cpp
 src/rnemd/NIVS.cpp
 src/rnemd/RNEMD.cpp
@@ -696,10 +696,6 @@ src/io/gzstream.cpp
 ENDIF(ZLIB_FOUND)
 
 IF(QHULL_FOUND)
-set(QHULL_SOURCE
-src/integrators/LangevinHullDynamics.cpp
-src/math/Triangle.cpp
-)
 set(QHULL_PARALLEL_SOURCE
 src/integrators/LangevinHullForceModifier.cpp
 src/math/ConvexHull.cpp
@@ -713,7 +709,7 @@ src/utils/wingetopt.cpp
 )
 ENDIF(WIN32)
 
-add_library(openmd_core STATIC ${SOURCE} ${QHULL_SOURCE} ${ZLIB_SOURCE} )
+add_library(openmd_core STATIC ${SOURCE} ${ZLIB_SOURCE} )
 add_library(openmd_single STATIC ${PARALLEL_SOURCE} ${QHULL_PARALLEL_SOURCE} )
 
 IF(MPI_FOUND)
