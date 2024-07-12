@@ -461,8 +461,8 @@ def writeOutputForceMethod(outputFileName, rnemdJzP, jzType, popt):
 
     outFile.write("#\n#\n")
     outFile.write("#  The Force matching method is reported here. We assume the system has come to steady state at which point the Fappl = sum(Ffric) \n")
-    outFile.write("# \t Fsl = jz(p) + \eta * (dV/dz) \n")
-    outFile.write("# \t Cf = 0.5*[1 + \eta * (dV/dz) / jz(p)] \n")
+    outFile.write("# \t Fsl = jz(p) + \\eta * (dV/dz) \n")
+    outFile.write("# \t Cf = 0.5*[1 + \\eta * (dV/dz) / jz(p)] \n")
 
     viscosity = 0.88 # Jz(px) / (dVx/dz) from bulk SPC/E @ 225K
 
@@ -470,14 +470,14 @@ def writeOutputForceMethod(outputFileName, rnemdJzP, jzType, popt):
         Fsl = rnemdJzP[0] + viscosity*popt[3]
         Cf = 0.5 + (0.5*viscosity*popt[3]/rnemdJzP[0])
         outFile.write("# jz(px) = " + str(float(rnemdJzP[0])) + "\n")
-        outFile.write("# \eta = " + str(viscosity) + "\n")
+        outFile.write("# \\eta = " + str(viscosity) + "\n")
         outFile.write("# (dVx/dz) = " + str(popt[3]) + "\n")
 
     elif (jzType == 1):
         Fsl = rnemdJzP[1] + viscosity*popt[3]
         Cf = 0.5 + (0.5*viscosity*popt[3]/rnemdJzP[1])
         outFile.write("# jz(py) = " + str(float(rnemdJzP[1])) + "\n")
-        outFile.write("# \eta = " + str(viscosity) + "\n")
+        outFile.write("# \\eta = " + str(viscosity) + "\n")
         outFile.write("# (dVy/dz) = " + str(popt[3]) + "\n#\n")
 
 
@@ -491,14 +491,14 @@ def writeOutputForceMethod(outputFileName, rnemdJzP, jzType, popt):
 def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound, upperBound, boxlZ, poptParab):
     derivFileName = outputFileName + "DERIV"
     derivFile = open(derivFileName, "w")
-    derivFile.write("# xPos \t U \t dU/dz \t d^2U/dz^2 \t (d^2U/dz^2)\(dU/dz) \n")
+    derivFile.write("# xPos \t U \t dU/dz \t d^2U/dz^2 \t (d^2U/dz^2)/(dU/dz) \n")
 
     outFile = open(outputFileName, "a")
 
     outFile.write("#\n#\n")
     outFile.write("# The integral method makes no assumptions about the system having reached \n")
     outFile.write("# a steady-state. \n")
-    outFile.write("# \t Cf = F_{fric} \ F_{appl} \n")
+    outFile.write("# \t Cf = F_{fric} / F_{appl} \n")
     outFile.write("# \t    = 2* Integral[ (d^2u/dz^2) / (du/dz) dz]|^{solid}_{liquid} \n")
     outFile.write("# Integral bounds: \n")
     outFile.write("# \t lowerBound = " + str(lowerBound) + "\n")
@@ -513,8 +513,7 @@ def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound
         derivFile.write(str(xPos) + "\t" + str(func(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t" + str(secondDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/firstDeriv(xPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
         xPos = xPos + deltaX
 
-
-        '''
+    '''
     # Write out smooth porabola fit
     x = np.array([])
     xPos = 0.0
@@ -532,16 +531,15 @@ def writeOutputIntegralMethod(outputFileName, rnemdJzP, jzType, popt, lowerBound
     #def funcParab(x, Vs, Z1, Z2, ml, w, Vl):
     #k = 2.0 * (Vs - Vl - ml * (Z1-w)) / (w*w)
     outFile.write("# Parabola Fitting Method \n")
-    outFile.write("#   Cf = 4kw\mu \n#\n")
+    outFile.write("#   Cf = 4kw\\mu \n#\n")
     outFile.write("# Parameters: \n")
     k = 2.0 * (poptParab[0] - poptParab[5] - poptParab[3] * (poptParab[1] - poptParab[4])) / ( poptParab[4] * poptParab[4])
     outFile.write("#   k = " + str(k) + "\n")
     outFile.write("#   w = " + str(poptParab[4]) + "\n")
-    outFile.write("#   \mu = " + str(1) + "\n")
+    outFile.write("#   \\mu = " + str(1) + "\n")
     CfParab = 4.0 * k * 1.0 * poptParab[4]
     outFile.write("# Cf_{Parab} = " + str(CfParab) + "\n")
     '''
-
 
     # calculate integral Cf
     deltaX = (upperBound - lowerBound)/1000
@@ -580,11 +578,11 @@ def writeOutputSimpleCfCalc(outputFileName, rnemdJzP, jzType, popt, givenWidth, 
     outFile = open(outputFileName, "a")
     outFile.write("#\n#\n#\n")
     outFile.write("# Simple Cf Calculation with fit width \n")
-    outFile.write("# \t Cf = -2.0*w (d^2u\dz^2)|z=Z1 / (du\dz)|z=Z1 \n")
+    outFile.write("# \t Cf = -2.0*w (d^2u/dz^2)|z=Z1 / (du/dz)|z=Z1 \n")
     outFile.write("#\n# Parameters in calculation \n")
     outFile.write("#  w = " + str(popt[4]) + "\n")
-    outFile.write("#  (d^2u\dz^2)|z=Z1 = " + str(secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
-    outFile.write("#  (du\dz)|z=Z1 = " + str(firstDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
+    outFile.write("#  (d^2u/dz^2)|z=Z1 = " + str(secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
+    outFile.write("#  (du/dz)|z=Z1 = " + str(firstDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
 
     Cf = -2.0*popt[4]*secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
     
@@ -607,12 +605,12 @@ def writeOutputSimpleCfCalc(outputFileName, rnemdJzP, jzType, popt, givenWidth, 
     # let's also calculate Cf_{SimpleMethod} with the width given by the user
     outFile.write("#\n#\n#\n")
     outFile.write("# Simple Cf Calculation with given width \n")
-    outFile.write("# \t Cf = -2.0*w (d^2u\dz^2)|z_{min(U'')} / (du\dz)|z_{min(U'')} \n")
+    outFile.write("# \t Cf = -2.0*w (d^2u/dz^2)|z_{min(U'')} / (du/dz)|z_{min(U'')} \n")
     outFile.write("#\n# Parameters in calculation \n")
     outFile.write("#  w = " + str(givenWidth) + "\n")
     outFile.write("#  minUppxPos = " + str(minUppXPos) + "\n")
-    outFile.write("#  (d^2u\dz^2)|z_{min(U'')} = " + str(secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
-    outFile.write("#  (du\dz)|z_{min(U'')} = " + str(firstDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) +"\n")
+    outFile.write("#  (d^2u/dz^2)|z_{min(U'')} = " + str(secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
+    outFile.write("#  (du/dz)|z_{min(U'')} = " + str(firstDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) +"\n")
     outFile.write("#  (d^2u/dz^2)/(du/dz) = " + str(secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/firstDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\n")
 
     Cf = -2.0*givenWidth*secondDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])/ firstDeriv(minUppXPos, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])
