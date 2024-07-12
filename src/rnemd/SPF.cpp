@@ -138,8 +138,9 @@ namespace OpenMD::RNEMD {
       }
     }
 
-    bool hasParticleFlux = rnemdParams->haveParticleFlux();
-    bool hasKineticFlux  = rnemdParams->haveKineticFlux();
+    bool hasParticleFlux   = rnemdParams->haveParticleFlux();
+    bool hasCurrentDensity = rnemdParams->haveCurrentDensity();
+    bool hasKineticFlux    = rnemdParams->haveKineticFlux();
 
     bool methodFluxMismatch = false;
     bool hasCorrectFlux     = false;
@@ -150,6 +151,9 @@ namespace OpenMD::RNEMD {
       break;
     case rnemdParticleKE:
       hasCorrectFlux = hasParticleFlux && hasKineticFlux;
+      break;
+    case rnemdCurrentDensity:
+      hasCorrectFlux = hasParticleFlux || hasCurrentDensity;
       break;
     default:
       methodFluxMismatch = true;
@@ -170,7 +174,8 @@ namespace OpenMD::RNEMD {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "RNEMD: The current method, SPF, and flux type, %s,\n"
                "\tdid not have the correct flux type specified. Options\n"
-               "\tinclude: particleFlux and particleFlux + kineticFlux.\n",
+               "\tinclude: particleFlux, particleFlux + kineticFlux,\n"
+               "\tand currentDensity.\n",
                rnemdFluxTypeLabel_.c_str());
       painCave.isFatal  = 1;
       painCave.severity = OPENMD_ERROR;
@@ -179,6 +184,12 @@ namespace OpenMD::RNEMD {
 
     if (hasParticleFlux) {
       setParticleFlux(rnemdParams->getParticleFlux());
+    } else {
+      setParticleFlux(0.0);
+    }
+
+    if (hasCurrentDensity) {
+      setParticleFlux(rnemdParams->getCurrentDensity());
     } else {
       setParticleFlux(0.0);
     }
