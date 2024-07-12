@@ -59,9 +59,6 @@
 #include "integrators/NVE.hpp"
 #include "integrators/NVT.hpp"
 #include "integrators/NgammaT.hpp"
-#if defined(HAVE_QHULL)
-#include "integrators/LangevinHullDynamics.hpp"
-#endif
 #include "integrators/SPFDynamics.hpp"
 #include "lattice/BCCLattice.hpp"
 #include "lattice/FCCLattice.hpp"
@@ -105,14 +102,12 @@ namespace OpenMD {
         new IntegratorBuilder<LangevinDynamics>("LANGEVINDYNAMICS"));
     IntegratorFactory::getInstance().registerIntegrator(
         new IntegratorBuilder<LangevinDynamics>("LD"));
-#if defined(HAVE_QHULL)
     IntegratorFactory::getInstance().registerIntegrator(
-        new IntegratorBuilder<LangevinHullDynamics>("LHULL"));
+        new IntegratorBuilder<LangevinDynamics>("LHULL"));
     IntegratorFactory::getInstance().registerIntegrator(
-        new IntegratorBuilder<LangevinHullDynamics>("LANGEVINHULL"));
+        new IntegratorBuilder<LangevinDynamics>("LANGEVINHULL"));
     IntegratorFactory::getInstance().registerIntegrator(
-        new IntegratorBuilder<LangevinHullDynamics>("SMIPD"));
-#endif
+        new IntegratorBuilder<LangevinDynamics>("SMIPD"));
     IntegratorFactory::getInstance().registerIntegrator(
         new IntegratorBuilder<LangevinPiston>("LANGEVINPISTON"));
     IntegratorFactory::getInstance().registerIntegrator(

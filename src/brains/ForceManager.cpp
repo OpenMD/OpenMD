@@ -492,9 +492,19 @@ namespace OpenMD {
 
     if (ensembleParam == "LHULL" || ensembleParam == "LANGEVINHULL" ||
         ensembleParam == "SMIPD") {
+#if defined(HAVE_QHULL)
       LangevinHullForceModifier* langevinHullFM =
           new LangevinHullForceModifier(info_);
       forceModifiers_.push_back(langevinHullFM);
+#else
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "ForceManager: Cannot use the LangevinHull ensembles without qhull.\n"
+          "\tPlease rebuild OpenMD with qhull enabled.");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+#endif
     } else if (ensembleParam == "LANGEVINDYNAMICS" || ensembleParam == "LD") {
       LDForceModifier* langevinDynamicsFM = new LDForceModifier(info_);
       forceModifiers_.push_back(langevinDynamicsFM);
