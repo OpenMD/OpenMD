@@ -525,13 +525,10 @@ namespace OpenMD::RNEMD {
       for (int i {}; i < size; ++i) {
         if (i != worldRank) {
           MPI_Send(&globalSelectedID, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-          MPI_Send(&spfTarget_, 1, MPI_REALTYPE, i, 0, MPI_COMM_WORLD);
         }
       }
     } else {
       MPI_Recv(&globalSelectedID, 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD,
-               &ierr);
-      MPI_Recv(&spfTarget_, 1, MPI_REALTYPE, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD,
                &ierr);
 #endif
     }
@@ -559,6 +556,9 @@ namespace OpenMD::RNEMD {
 #ifdef IS_MPI
     }
     MPI_Bcast(&spfData->pos[0], 3, MPI_REALTYPE,
+              info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
+
+    MPI_Bcast(&spfTarget_, 1, MPI_REALTYPE,
               info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
 #endif
 

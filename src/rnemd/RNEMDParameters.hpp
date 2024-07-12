@@ -62,6 +62,7 @@ namespace OpenMD::RNEMD {
     DeclareParameter(ExchangeTime, RealType);
     DeclareParameter(KineticFlux, RealType);
     DeclareParameter(ParticleFlux, RealType);
+    DeclareParameter(CurrentDensity, RealType);
     DeclareParameter(MomentumFlux, RealType);
     DeclareParameter(MomentumFluxVector, std::vector<RealType>);
     DeclareParameter(AngularMomentumFlux, RealType);
@@ -81,7 +82,6 @@ namespace OpenMD::RNEMD {
     DeclareParameter(OutputFields, std::string);
     DeclareParameter(PrivilegedAxis, std::string);
     DeclareParameter(SPFScalingPower, int);
-    DeclareParameter(UseChargedSPF, bool);
     DeclareParameter(SPFUniformKineticScaling, bool);
 
   public:

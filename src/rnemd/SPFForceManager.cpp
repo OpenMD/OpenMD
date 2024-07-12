@@ -63,6 +63,7 @@
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "rnemd/RNEMDParameters.hpp"
+#include "utils/CI_String.hpp"
 
 namespace OpenMD::RNEMD {
 
@@ -73,8 +74,11 @@ namespace OpenMD::RNEMD {
 
     RNEMDParameters* rnemdParams = info_->getSimParams()->getRNEMDParameters();
 
-    k_             = rnemdParams->getSPFScalingPower();
-    useChargedSPF_ = rnemdParams->getUseChargedSPF();
+    k_ = rnemdParams->getSPFScalingPower();
+
+    if (Utils::traits_cast<Utils::ci_char_traits>(rnemdParams->getFluxType()) ==
+        "CurrentDensity")
+      useChargedSPF_ = true;
 
     int nAtoms        = info_->getNAtoms();
     int nRigidBodies  = info_->getNRigidBodies();
@@ -218,6 +222,21 @@ namespace OpenMD::RNEMD {
          */
         nextSPFTarget = 1.0 - currentSPFData->lambda;
         nextSPFTarget = std::copysign(nextSPFTarget, currentSPFTarget);
+      }
+
+      // Convert particle target into electron target for rnemd reporting
+      if (useChargedSPF_) {
+        if (selectedMolecule_) {
+          currentSPFTarget *= selectedMolecule_->getFixedCharge();
+        }
+
+#ifdef IS_MPI
+        int globalSelectedID = currentSPFData->globalID;
+
+        // if globalSelectedID is -1 (default), this will be an issue
+        MPI_Bcast(&currentSPFTarget, 1, MPI_REALTYPE,
+                  info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
+#endif
       }
 
       currentSnapshot_->clearDerivedProperties();

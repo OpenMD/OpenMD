@@ -100,24 +100,25 @@ namespace OpenMD::RNEMD {
     // Determine Flux Type
     std::map<std::string, RNEMDFluxType> stringToFluxType;
 
-    stringToFluxType["KE"]          = rnemdKE;
-    stringToFluxType["Px"]          = rnemdPx;
-    stringToFluxType["Py"]          = rnemdPy;
-    stringToFluxType["Pz"]          = rnemdPz;
-    stringToFluxType["Pvector"]     = rnemdPvector;
-    stringToFluxType["Lx"]          = rnemdLx;
-    stringToFluxType["Ly"]          = rnemdLy;
-    stringToFluxType["Lz"]          = rnemdLz;
-    stringToFluxType["Lvector"]     = rnemdLvector;
-    stringToFluxType["Particle"]    = rnemdParticle;
-    stringToFluxType["Particle+KE"] = rnemdParticleKE;
-    stringToFluxType["KE+Px"]       = rnemdKePx;
-    stringToFluxType["KE+Py"]       = rnemdKePy;
-    stringToFluxType["KE+Pvector"]  = rnemdKePvector;
-    stringToFluxType["KE+Lx"]       = rnemdKeLx;
-    stringToFluxType["KE+Ly"]       = rnemdKeLy;
-    stringToFluxType["KE+Lz"]       = rnemdKeLz;
-    stringToFluxType["KE+Lvector"]  = rnemdKeLvector;
+    stringToFluxType["KE"]             = rnemdKE;
+    stringToFluxType["Px"]             = rnemdPx;
+    stringToFluxType["Py"]             = rnemdPy;
+    stringToFluxType["Pz"]             = rnemdPz;
+    stringToFluxType["Pvector"]        = rnemdPvector;
+    stringToFluxType["Lx"]             = rnemdLx;
+    stringToFluxType["Ly"]             = rnemdLy;
+    stringToFluxType["Lz"]             = rnemdLz;
+    stringToFluxType["Lvector"]        = rnemdLvector;
+    stringToFluxType["Particle"]       = rnemdParticle;
+    stringToFluxType["Particle+KE"]    = rnemdParticleKE;
+    stringToFluxType["CurrentDensity"] = rnemdCurrentDensity;
+    stringToFluxType["KE+Px"]          = rnemdKePx;
+    stringToFluxType["KE+Py"]          = rnemdKePy;
+    stringToFluxType["KE+Pvector"]     = rnemdKePvector;
+    stringToFluxType["KE+Lx"]          = rnemdKeLx;
+    stringToFluxType["KE+Ly"]          = rnemdKeLy;
+    stringToFluxType["KE+Lz"]          = rnemdKeLz;
+    stringToFluxType["KE+Lvector"]     = rnemdKeLvector;
 
     if (rnemdParams->haveFluxType()) {
       rnemdFluxTypeLabel_ = rnemdParams->getFluxType();
@@ -455,7 +456,7 @@ namespace OpenMD::RNEMD {
       seleManB_.setSelectionSet(evaluatorB_.evaluate());
 
     // Charged-SPF
-    useChargedSPF_ = rnemdParams->getUseChargedSPF();
+    if (rnemdFluxType_ == rnemdCurrentDensity) useChargedSPF_ = true;
 
     MoleculeStampSet obTypes = seleMan_.getSelectedMoleculeStamps();
     std::copy(obTypes.begin(), obTypes.end(), std::back_inserter(objectTypes_));
