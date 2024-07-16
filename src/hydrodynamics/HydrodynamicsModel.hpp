@@ -72,7 +72,7 @@ namespace OpenMD {
     void writeHydroProps(HydroProp* hp, RealType temperature, std::ostream& os);
 
   protected:
-    Shape* shape_;
+    Shape* shape_ {};
   };
 }  // namespace OpenMD
 

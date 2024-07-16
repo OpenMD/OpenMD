@@ -91,7 +91,7 @@ namespace OpenMD {
 
     SimInfo* info_ {nullptr};
     std::string filename_;
-    std::ostream* dumpFile_;
+    std::ostream* dumpFile_ {};
     std::string eorFilename_;
     bool needCompression_;
     bool needForceVector_;

@@ -64,7 +64,7 @@ namespace OpenMD {
     virtual void validate();
 
   private:
-    bool isTerminal_;
+    bool isTerminal_ {};
     std::vector<int> members_;
   };
 }  // namespace OpenMD

@@ -73,7 +73,7 @@ namespace OpenMD {
       if (d1.size() != 3) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                  "uniformGradientDirection1: Incorrect number of parameters\n"
-                 "\tspecified. There should be 3 parameters, but %lu were\n"
+                 "\tspecified. There should be 3 parameters, but %zu were\n"
                  "\tspecified.\n",
                  d1.size());
         painCave.isFatal = 1;
@@ -92,7 +92,7 @@ namespace OpenMD {
       if (d2.size() != 3) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                  "uniformGradientDirection2: Incorrect number of parameters\n"
-                 "\tspecified. There should be 3 parameters, but %lu were\n"
+                 "\tspecified. There should be 3 parameters, but %zu were\n"
                  "\tspecified.\n",
                  d2.size());
         painCave.isFatal = 1;

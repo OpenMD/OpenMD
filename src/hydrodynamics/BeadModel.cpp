@@ -100,7 +100,7 @@ namespace OpenMD {
       snprintf(
           painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
           "BeadModel::checkElement: There is a bead with a negative radius.\n"
-          "\tStarting from index 0, check bead (%lu).\n",
+          "\tStarting from index 0, check bead (%zu).\n",
           i);
       painCave.isFatal = 1;
       simError();

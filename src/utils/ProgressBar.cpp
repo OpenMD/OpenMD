@@ -46,6 +46,7 @@
 #include <iostream>
 
 #ifdef _MSC_VER
+#define NOMINMAX
 #include <Windows.h>
 #include <io.h>
 #include <stdio.h>

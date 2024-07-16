@@ -70,8 +70,8 @@ namespace OpenMD {
     virtual void processStuntDouble(StuntDouble* sd, int bin) = 0;
 
   protected:
-    Snapshot* currentSnapshot_;
-    int nProcessed_;
+    Snapshot* currentSnapshot_ {};
+    int nProcessed_ {};
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
@@ -87,7 +87,7 @@ namespace OpenMD {
 
   protected:
     Mat3x3d hmat_;
-    RealType volume_;
+    RealType volume_ {};
     int axis_;
     std::string axisLabel_;
   };
