@@ -306,8 +306,7 @@ namespace OpenMD {
     if (std::isinf(spfData->pos[0]) || std::isnan(spfData->pos[0]) ||
         std::isinf(spfData->pos[1]) || std::isnan(spfData->pos[1]) ||
         std::isinf(spfData->pos[2]) || std::isnan(spfData->pos[2]) ||
-        std::isinf(spfData->lambda) || std::isnan(spfData->lambda) ||
-        std::isinf(spfData->globalID) || std::isnan(spfData->globalID)) {
+        std::isinf(spfData->lambda) || std::isnan(spfData->lambda) ) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "DumpWriter detected a numerical error writing the spf data "
                "structure");

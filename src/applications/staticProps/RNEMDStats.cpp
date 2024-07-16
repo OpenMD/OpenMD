@@ -666,9 +666,9 @@ namespace OpenMD {
 
       if (amf.size() != 3) {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                 "RNEMDRTheta: Incorrect number of parameters specified for "
+                  "RNEMDRTheta: Incorrect number of parameters specified for "
                  "angularMomentumFluxVector.\n"
-                 "\tthere should be 3 parameters, but %lu were specified.\n",
+                 "\tthere should be 3 parameters, but %zu were specified.\n",
                  amf.size());
         painCave.isFatal = 1;
         simError();

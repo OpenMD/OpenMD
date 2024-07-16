@@ -431,7 +431,7 @@ namespace OpenMD {
     } else {
       snprintf(
           painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-          "%d is an invalid index. The current rigid body contans %lu atoms.\n",
+          "%d is an invalid index. The current rigid body contans %zu atoms.\n",
           index, atoms_.size());
       painCave.isFatal = 0;
       simError();
@@ -487,7 +487,7 @@ namespace OpenMD {
     } else {
       snprintf(
           painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-          "Index %d is an invalid index, the current rigid body contains %lu "
+          "Index %d is an invalid index, the current rigid body contains %zu "
           "atoms.\n",
           index, atoms_.size());
       painCave.isFatal = 0;
@@ -518,7 +518,7 @@ namespace OpenMD {
     } else {
       snprintf(
           painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-          "Index %d is an invalid index, the current rigid body contains %lu "
+          "Index %d is an invalid index, the current rigid body contains %zu "
           "atoms.\n",
           index, atoms_.size());
       painCave.isFatal = 0;

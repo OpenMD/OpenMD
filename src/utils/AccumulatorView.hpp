@@ -81,7 +81,7 @@ namespace OpenMD::Utils {
 
     void writeData(std::ostream& stream, const std::string& errorMessage,
                    DataHandling dataHandling) const override {
-      RealType dat;
+      RealType dat {};
       std::size_t count = RealAccumulator::getCount();
 
       switch (dataHandling) {
@@ -119,7 +119,7 @@ namespace OpenMD::Utils {
 
     void writeErrorBars(std::ostream& stream, const std::string& errorMessage,
                         ErrorHandling errorHandling) const override {
-      RealType err;
+      RealType err {};
       std::size_t count = RealAccumulator::getCount();
 
       switch (errorHandling) {

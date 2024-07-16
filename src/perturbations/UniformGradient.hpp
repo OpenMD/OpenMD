@@ -134,7 +134,7 @@ namespace OpenMD {
     Globals* simParams;
     Mat3x3d Grad_;
     Vector3d a_, b_;
-    RealType g_, cpsi_;
+    RealType g_ {}, cpsi_ {};
   };
 }  // namespace OpenMD
 

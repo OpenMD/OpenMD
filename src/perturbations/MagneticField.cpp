@@ -68,7 +68,7 @@ namespace OpenMD {
     if (mf.size() != 3) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "MagneticField: Incorrect number of parameters specified.\n"
-               "\tthere should be 3 parameters, but %lu were specified.\n",
+               "\tthere should be 3 parameters, but %zu were specified.\n",
                mf.size());
       painCave.isFatal = 1;
       simError();

@@ -69,20 +69,20 @@ namespace OpenMD {
     void writeProbs();
 
     SimInfo* info_ {nullptr};
-    Snapshot* currentSnapshot_;
+    Snapshot* currentSnapshot_ {};
 
     string selectionScript1_;
     SelectionManager seleMan1_;
     SelectionEvaluator evaluator1_;
 
-    int nProcessed_;
+    int nProcessed_ {};
     vector<int> count_;
     vector<RealType> histogram_;
     vector<RealType> freqs_;
     map<string, RealType> frequencyMap_;
     RealType minFreq_;
     RealType maxFreq_;
-    int nBins_;
+    int nBins_ {};
     vector<vector<int>> excludesForAtom;
     Electrostatic* electrostatic_;
     Vector3d EF_;

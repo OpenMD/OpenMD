@@ -78,7 +78,7 @@ namespace OpenMD {
     if (ef.size() != 3) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "UniformField: Incorrect number of parameters specified.\n"
-               "\tthere should be 3 parameters, but %lu were specified.\n",
+               "\tthere should be 3 parameters, but %zu were specified.\n",
                ef.size());
       painCave.isFatal = 1;
       simError();
