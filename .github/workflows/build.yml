@@ -6,39 +6,34 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  # windows-builds:
-  #   runs-on: windows-latest
-  #   if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
+  windows-builds:
+    runs-on: windows-latest
 
-  #   steps:
-  #   - uses: actions/checkout@v2
+    steps:
+    - uses: actions/checkout@v4
 
-  #   - name: Configure
-  #     run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+    - name: Configure
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
-  #   - name: Build
-  #     run: cmake --build .
+    - name: Build
+      run: cmake --build .
 
-  #   - name: Install
-  #     run: cmake --build . --target install
+    - name: Install
+      run: cmake --build . --target install
 
   ubuntu-builds:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Dependencies
         run: |
           sudo apt-get install libfftw3-3 libfftw3-dev
           sudo apt-get install openmpi-bin libopenmpi-dev
-          sudo apt-get install nlohmann-json3-dev
           sudo apt-get install python3-numpy python3-scipy
           sudo apt-get install qhull-bin libqhull-dev
           sudo apt-get install minizip zlib1g-dev
-
-        # sudo apt-get install openbabel libopenbabel-dev
 
       - name: Configure
         run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
@@ -51,17 +46,15 @@ jobs:
 
   macos-builds:
     runs-on: macos-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Dependencies
         run: |
           brew install fftw
           brew install open-babel
           brew install open-mpi
-          brew install nlohmann-json
           brew install numpy scipy
           brew install qhull
           brew install zlib

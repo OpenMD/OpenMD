@@ -65,8 +65,12 @@ namespace OpenMD::RNEMD {
   private:
     void selectMolecule();
 
-    bool getSelectedMolecule();
-    bool setSelectedMolecule();
+    bool getSelectedMolecule(std::shared_ptr<SPFData> spfData);
+    bool setSelectedMolecule(std::shared_ptr<SPFData> spfData);
+
+    void convertParticlesToElectrons(Molecule* selectedMolecule) {
+      spfTarget_ /= std::fabs(selectedMolecule->getFixedCharge());
+    }
 
     RealType spfTarget_ {};
 

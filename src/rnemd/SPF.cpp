@@ -153,7 +153,7 @@ namespace OpenMD::RNEMD {
       hasCorrectFlux = hasParticleFlux && hasKineticFlux;
       break;
     case rnemdCurrentDensity:
-      hasCorrectFlux = hasParticleFlux || hasCurrentDensity;
+      hasCorrectFlux = hasCurrentDensity;
       break;
     default:
       methodFluxMismatch = true;
@@ -184,11 +184,7 @@ namespace OpenMD::RNEMD {
 
     if (hasParticleFlux) {
       setParticleFlux(rnemdParams->getParticleFlux());
-    } else {
-      setParticleFlux(0.0);
-    }
-
-    if (hasCurrentDensity) {
+    } else if (hasCurrentDensity) {
       setParticleFlux(rnemdParams->getCurrentDensity());
     } else {
       setParticleFlux(0.0);
@@ -403,58 +399,68 @@ namespace OpenMD::RNEMD {
     }
 
     if (!successfulExchange) {
-      //   snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-      //           "SPF exchange NOT performed - roots that solve\n"
-      //           "\tthe constraint equations may not exist or there may
-      //           be\n"
-      //           "\tno selected objects in one or both slabs.\n");
-      //   painCave.isFatal  = 0;
-      //   painCave.severity = OPENMD_INFO;
-      //   simError();
+      // snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+      //          "SPF exchange NOT performed - roots that solve the\n"
+      //          "\tconstraint equations may not exist or there may\n"
+      //          "\tbe no selected objects in one or both slabs.\n");
+      // painCave.isFatal  = 0;
+      // painCave.severity = OPENMD_INFO;
+      // simError();
       failTrialCount_++;
       failedLastTrial_ = true;
     }
   }
 
   void SPFMethod::selectMolecule() {
-    bool hasSelectedMolecule = (currentSnap_->getSPFData()->globalID == -1) ?
-                                   setSelectedMolecule() :
-                                   getSelectedMolecule();
+    std::shared_ptr<SPFData> spfData = currentSnap_->getSPFData();
+
+    // Always reset spfTarget_ before selecting a new particle
+    spfTarget_ = particleTarget_;
+
+    bool hasSelectedMolecule = (spfData->globalID == -1) ?
+                                   setSelectedMolecule(spfData) :
+                                   getSelectedMolecule(spfData);
 
     if (hasSelectedMolecule) {
-      selectedMoleculeStr_ =
-          "select " + std::to_string(currentSnap_->getSPFData()->globalID);
+      selectedMoleculeStr_ = "select " + std::to_string(spfData->globalID);
 
       selectedMoleculeEvaluator_.loadScriptString(selectedMoleculeStr_);
       selectedMoleculeMan_.setSelectionSet(
           selectedMoleculeEvaluator_.evaluate());
     }
 
+#ifdef IS_MPI
+    MPI_Bcast(&spfTarget_, 1, MPI_REALTYPE,
+              info_->getMolToProc(spfData->globalID), MPI_COMM_WORLD);
+#endif
+
     forceManager_->setHasSelectedMolecule(hasSelectedMolecule);
   }
 
-  bool SPFMethod::getSelectedMolecule() {
-    std::shared_ptr<SPFData> spfData = currentSnap_->getSPFData();
-
+  bool SPFMethod::getSelectedMolecule(std::shared_ptr<SPFData> spfData) {
     Molecule* selectedMolecule;
 
     selectedMolecule = info_->getMoleculeByGlobalIndex(spfData->globalID);
 
     if (selectedMolecule) {
+      // Scale the particle flux by the charge yielding a current denstiy
+      if (useChargedSPF_) {
+        if (selectedMolecule->getFixedCharge() < 0.0) { spfTarget_ *= -1; }
+
+        convertParticlesToElectrons(selectedMolecule);
+      }
+
       forceManager_->setSelectedMolecule(selectedMolecule);
     }
 
     return true;
   }
 
-  bool SPFMethod::setSelectedMolecule() {
+  bool SPFMethod::setSelectedMolecule(std::shared_ptr<SPFData> spfData) {
     SelectionManager sourceSman {info_}, ionSman {info_};
     RealType targetSlabCenter {};
 
     Utils::RandNumGenPtr randNumGen = info_->getRandomNumberGenerator();
-
-    // Always reset spfTarget_ before selecting a new particle
-    spfTarget_ = particleTarget_;
 
 #ifdef IS_MPI
     int worldRank {}, size {};
@@ -502,8 +508,6 @@ namespace OpenMD::RNEMD {
     int whichSelectedID {-1};
     Molecule* selectedMolecule;
 
-    std::shared_ptr<SPFData> spfData = currentSnap_->getSPFData();
-
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
@@ -525,12 +529,7 @@ namespace OpenMD::RNEMD {
       globalSelectedID = selectedMolecule->getGlobalIndex();
 
       // Scale the particle flux by the charge yielding a current denstiy
-      if (useChargedSPF_) {
-        assert(std::fabs(selectedMolecule->getFixedCharge()) >=
-               OpenMD::epsilon);
-
-        spfTarget_ /= std::fabs(selectedMolecule->getFixedCharge());
-      }
+      if (useChargedSPF_) { convertParticlesToElectrons(selectedMolecule); }
 
 #ifdef IS_MPI
       for (int i {}; i < size; ++i) {
@@ -567,9 +566,6 @@ namespace OpenMD::RNEMD {
 #ifdef IS_MPI
     }
     MPI_Bcast(&spfData->pos[0], 3, MPI_REALTYPE,
-              info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
-
-    MPI_Bcast(&spfTarget_, 1, MPI_REALTYPE,
               info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
 #endif
 

@@ -547,7 +547,8 @@ namespace OpenMD::RNEMD {
       simError();
     }
 
-    if (rnemdFluxType_ == rnemdParticle || rnemdFluxType_ == rnemdParticleKE) {
+    if (rnemdFluxType_ == rnemdParticle || rnemdFluxType_ == rnemdParticleKE ||
+        rnemdFluxType_ == rnemdCurrentDensity) {
       SelectionManager tempCommonA = seleManA_ & outputSeleMan_;
       SelectionManager tempCommonB = seleManB_ & outputSeleMan_;
 
@@ -1077,7 +1078,10 @@ namespace OpenMD::RNEMD {
   }
 
   void RNEMD::setParticleFlux(RealType particleFlux) {
-    particleFlux_ = particleFlux;
+    RealType area = getDefaultDividingArea();
+
+    particleFlux_   = particleFlux;
+    particleTarget_ = particleFlux_ * exchangeTime_ * area;
   }
 
   void RNEMD::setMomentumFluxVector(
