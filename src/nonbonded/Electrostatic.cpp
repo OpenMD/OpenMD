@@ -68,6 +68,7 @@
 #include "utils/simError.h"
 
 namespace OpenMD {
+  static constexpr RealType TINY_DISTANCE = 1e-7;
 
   Electrostatic::Electrostatic() :
       name_("Electrostatic"), initialized_(false), haveCutoffRadius_(false),
@@ -354,7 +355,7 @@ namespace OpenMD {
 
     // Approximate using splines using a maximum of 0.1 Angstroms
     // between points.
-    int nptest = int((cutoffRadius_ + 2.0) / 0.1);
+    int nptest = int((cutoffRadius_ + 2.0) / 0.1) + 1;
     np_        = (np_ > nptest) ? np_ : nptest;
 
     // Add a 2 angstrom safety window to deal with cutoffGroups that
@@ -373,8 +374,8 @@ namespace OpenMD {
     vector<RealType> v31v, v32v;
     vector<RealType> v41v, v42v, v43v;
 
-    for (int i = 1; i < np_ + 1; i++) {
-      r = RealType(i) * dx;
+    for (int i = 0; i < np_; i++) {
+      r = TINY_DISTANCE + RealType(i) * dx;
       rv.push_back(r);
 
       ri  = 1.0 / r;
@@ -783,8 +784,8 @@ namespace OpenMD {
           // RealType j0, j0c, j1c;
           // don't start at i = 0, as rval = 0 is undefined for the
           // slater overlap integrals.
-          for (int i = 1; i < np_ + 1; i++) {
-            rval = RealType(i) * dr;
+          for (int i = 0; i < np_; i++) {
+            rval = TINY_DISTANCE + RealType(i) * dr;
             rvals.push_back(rval);
 
             Jvals.push_back(
