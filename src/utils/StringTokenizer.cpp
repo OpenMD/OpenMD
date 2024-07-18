@@ -232,7 +232,7 @@ namespace OpenMD {
     }
   }
 
-  std::string StringTokenizer::getRemainingString() {
+  std::string StringTokenizer::getRemainingString() const {
     std::string result;
     std::string::const_iterator tmpIter = currentPos_;
     if (tmpIter != end_) {
