@@ -427,12 +427,12 @@ namespace OpenMD::RNEMD {
       selectedMoleculeEvaluator_.loadScriptString(selectedMoleculeStr_);
       selectedMoleculeMan_.setSelectionSet(
           selectedMoleculeEvaluator_.evaluate());
-    }
 
 #ifdef IS_MPI
-    MPI_Bcast(&spfTarget_, 1, MPI_REALTYPE,
-              info_->getMolToProc(spfData->globalID), MPI_COMM_WORLD);
+      MPI_Bcast(&spfTarget_, 1, MPI_REALTYPE,
+                info_->getMolToProc(spfData->globalID), MPI_COMM_WORLD);
 #endif
+    }
 
     forceManager_->setHasSelectedMolecule(hasSelectedMolecule);
   }
@@ -444,11 +444,7 @@ namespace OpenMD::RNEMD {
 
     if (selectedMolecule) {
       // Scale the particle flux by the charge yielding a current denstiy
-      if (useChargedSPF_) {
-        if (selectedMolecule->getFixedCharge() < 0.0) { spfTarget_ *= -1; }
-
-        convertParticlesToElectrons(selectedMolecule);
-      }
+      if (useChargedSPF_) { convertParticlesToElectrons(selectedMolecule); }
 
       forceManager_->setSelectedMolecule(selectedMolecule);
     }
