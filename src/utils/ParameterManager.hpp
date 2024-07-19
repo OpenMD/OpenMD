@@ -97,7 +97,7 @@ struct ParameterTraits<bool> {
 
   template<typename T>
   static RepType convert(T v) {
-    RepType tmp;
+    RepType tmp {};
     convert(v, tmp);
     return tmp;
   }
@@ -131,7 +131,7 @@ struct ParameterTraits<int> {
 
   template<typename T>
   static RepType convert(T v) {
-    RepType tmp;
+    RepType tmp {};
     convert(v, tmp);
     return tmp;
   }
@@ -156,7 +156,7 @@ struct ParameterTraits<unsigned long int> {
 
   template<typename T>
   static RepType convert(T v) {
-    RepType tmp;
+    RepType tmp {};
     convert(v, tmp);
     return tmp;
   }
@@ -186,7 +186,7 @@ struct ParameterTraits<RealType> {
 
   template<typename T>
   static RepType convert(T v) {
-    RepType tmp;
+    RepType tmp {};
     convert(v, tmp);
     return tmp;
   }
@@ -293,13 +293,13 @@ public:
   ParameterBase() :
       keyword_(), optional_(false), defaultValue_(false), empty_(true) {}
   virtual ~ParameterBase() {}
-  bool isOptional() { return optional_; }
+  bool isOptional() const { return optional_; }
   void setOptional(bool optional) { optional_ = optional; }
-  bool hasDefaultValue() { return defaultValue_; }
+  bool hasDefaultValue() const { return defaultValue_; }
   virtual bool isValid() { return true; }
   const std::string& getKeyword() { return keyword_; }
   void setKeyword(const std::string& keyword) { keyword_ = keyword; }
-  bool empty() { return empty_; }
+  bool empty() const { return empty_; }
   virtual bool setData(std::string)           = 0;
   virtual bool setData(int)                   = 0;
   virtual bool setData(unsigned long int)     = 0;
@@ -351,7 +351,7 @@ public:
 private:
   template<class T>
   bool internalSetData(T data) {
-    ParamType tmp;
+    ParamType tmp {};
     bool result = ValueType::convert(data, tmp);
     if (result) {
       empty_ = false;

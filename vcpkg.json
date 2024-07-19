@@ -1,0 +1,7 @@
+{
+  "dependencies": [
+    "fftw3",
+    "qhull",
+    "zlib"
+  ]
+}
