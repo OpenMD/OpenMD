@@ -131,6 +131,8 @@ namespace OpenMD {
     DefineOptionalParameter(PotentialSelection, "potentialSelection");
 
     DefineOptionalParameterWithDefaultValue(
+        UsePeriodicBoundaryConditions, "skipPairLoop", false);
+    DefineOptionalParameterWithDefaultValue(
         UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);
     DefineOptionalParameterWithDefaultValue(ConserveLinearMomentum,
                                             "conserveLinearMomentum", true);

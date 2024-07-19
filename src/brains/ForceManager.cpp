@@ -539,7 +539,8 @@ namespace OpenMD {
 
     preCalculation();
     shortRangeInteractions();
-    longRangeInteractions();
+    if (info_->getSimParams()->getSkipPairLoop() == false) 
+      longRangeInteractions();
     postCalculation();
   }
 
