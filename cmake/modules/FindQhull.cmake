@@ -97,7 +97,7 @@ endif(NOT QHULL_LIBRARY_DEBUG)
 
 if(QHULL_LIBRARY)
     get_filename_component(qhull_library ${QHULL_LIBRARY} NAME_WE)
-    if("${qhull_library}" MATCHES "libqhull[a-zA-Z0-9]*_[a-zA-Z0-9]*r[a-zA-Z0-9]*")
+    if("${qhull_library}" MATCHES "(lib)?qhull[a-zA-Z0-9]*_[a-zA-Z0-9]*r[a-zA-Z0-9]*")
         set(HAVE_QHULL_REENTRANT_LIB ON)
         set(HAVE_QHULL_POINTER_LIB OFF)
     elseif("${qhull_library}" MATCHES "libqhull[a-zA-Z0-9]*_[a-zA-Z0-9]*p[a-zA-Z0-9]*")
