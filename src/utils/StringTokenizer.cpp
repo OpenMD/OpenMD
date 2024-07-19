@@ -147,7 +147,7 @@ namespace OpenMD {
     if (currentPos_ != end_) {
       while (currentPos_ != end_ && isDelimiter(*currentPos_)) {
         if (returnTokens_) {
-          *currentPos_++;
+          currentPos_++;
           return;
         }
 
@@ -155,7 +155,7 @@ namespace OpenMD {
       }
 
       while (currentPos_ != end_ && !isDelimiter(*currentPos_)) {
-        *currentPos_++;
+        currentPos_++;
       }
     }
   }
@@ -232,7 +232,7 @@ namespace OpenMD {
     }
   }
 
-  std::string StringTokenizer::getRemainingString() {
+  std::string StringTokenizer::getRemainingString() const {
     std::string result;
     std::string::const_iterator tmpIter = currentPos_;
     if (tmpIter != end_) {

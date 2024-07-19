@@ -199,7 +199,7 @@ namespace OpenMD {
      * Returns the remaining unparsed string
      * @return the remaining unparsed string
      */
-    std::string getRemainingString();
+    std::string getRemainingString() const;
 
   private:
     /**
