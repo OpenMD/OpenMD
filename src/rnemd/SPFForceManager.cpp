@@ -242,16 +242,16 @@ namespace OpenMD::RNEMD {
       currentSnapshot_->clearDerivedProperties();
       updateSPFState();
 
+      // Full reset on completed particle exchange
       if (f_lambda(currentSPFData->lambda) > 1.0 ||
           std::fabs(f_lambda(currentSPFData->lambda) - 1.0) < 1e-6) {
-        currentSPFData->lambda   = 0.0;
-        currentSPFData->globalID = -1;
-
         // Only the processor with the selected molecule should do this step:
         if (selectedMolecule_) {
           selectedMolecule_->setCom(currentSPFData->pos);
           selectedMolecule_ = nullptr;
         }
+
+        currentSPFData->clear();
 
         neighborList_   = sinkNeighborList_;
         point_          = sinkPoint_;
@@ -263,6 +263,31 @@ namespace OpenMD::RNEMD {
     }
 
     return updateSelectedMolecule;
+  }
+
+  RealType SPFForceManager::getScaledDeltaU(RealType d_lambda) {
+    std::shared_ptr<SPFData> currentSPFData = currentSnapshot_->getSPFData();
+
+    RealType lambda = currentSPFData->lambda;
+
+    // Some checking against unreasonable potentials
+    if (std::isinf(potentialSink_) || std::isnan(potentialSink_) ||
+        std::isinf(potentialSource_) || std::isnan(potentialSource_)) {
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "SPFForceManager detected a numerical error in the potential\n"
+          "\tenergy with a lambda value of %f. Selecting a new molecule.\n",
+          lambda);
+      painCave.isFatal  = 0;
+      painCave.severity = OPENMD_WARNING;
+      simError();
+
+      hasSelectedMolecule_ = false;
+      currentSPFData->clear();
+    }
+
+    return -(f_lambda(lambda + d_lambda) - f_lambda(lambda)) *
+           (potentialSink_ - potentialSource_);
   }
 
   void SPFForceManager::combineForcesAndTorques() {

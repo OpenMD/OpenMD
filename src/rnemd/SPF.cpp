@@ -197,15 +197,15 @@ namespace OpenMD::RNEMD {
     }
 
     uniformKineticScaling_ = rnemdParams->getSPFUniformKineticScaling();
-    selectMolecule();
   }
 
   void SPFMethod::doRNEMDImpl(SelectionManager& smanA,
                               SelectionManager& smanB) {
     if (!doRNEMD_) return;
+    if (selectedMoleculeMan_.isEmpty()) { selectMolecule(); }
 
     // Remove selected molecule from the source selection manager
-    if (spfTarget_ > 0.0 && !selectedMoleculeMan_.isEmpty()) {
+    if (spfTarget_ > 0.0) {
       smanA -= selectedMoleculeMan_;
     } else {
       smanB -= selectedMoleculeMan_;
@@ -293,13 +293,14 @@ namespace OpenMD::RNEMD {
     bool successfulExchange = false;
     bool doExchange         = false;
 
+    // Scaling shouldn't be performed on massive potential energies
+    RealType deltaU = Constants::energyConvert *
+                      forceManager_->getScaledDeltaU(std::fabs(spfTarget_));
+
     if ((M_a > 0.0) && (M_b > 0.0) &&
         forceManager_->getHasSelectedMolecule()) {  // both slabs are not empty
       Vector3d v_a = P_a / M_a;
       Vector3d v_b = P_b / M_b;
-
-      RealType deltaU = Constants::energyConvert *
-                        forceManager_->getScaledDeltaU(std::fabs(spfTarget_));
 
       RealType a {};
       RealType b {};
@@ -443,8 +444,12 @@ namespace OpenMD::RNEMD {
     selectedMolecule = info_->getMoleculeByGlobalIndex(spfData->globalID);
 
     if (selectedMolecule) {
-      // Scale the particle flux by the charge yielding a current denstiy
-      if (useChargedSPF_) { convertParticlesToElectrons(selectedMolecule); }
+      // Scale the particle flux by the charge yielding a current density
+      if (useChargedSPF_) {
+        if (selectedMolecule->getFixedCharge() < 0.0f) { spfTarget_ *= -1; }
+
+        convertParticlesToElectrons(selectedMolecule);
+      }
 
       forceManager_->setSelectedMolecule(selectedMolecule);
     }
@@ -453,7 +458,7 @@ namespace OpenMD::RNEMD {
   }
 
   bool SPFMethod::setSelectedMolecule(std::shared_ptr<SPFData> spfData) {
-    SelectionManager sourceSman {info_}, ionSman {info_};
+    SelectionManager sourceSman {info_}, oppositeIonSman {info_};
     RealType targetSlabCenter {};
 
     Utils::RandNumGenPtr randNumGen = info_->getRandomNumberGenerator();
@@ -472,9 +477,9 @@ namespace OpenMD::RNEMD {
 
         if (slabDistribution(*randNumGen) != 0) {
           spfTarget_ *= -1;
-          ionSman = anionMan_;
+          oppositeIonSman = cationMan_;
         } else
-          ionSman = cationMan_;
+          oppositeIonSman = anionMan_;
       }
 #ifdef IS_MPI
     }
@@ -493,7 +498,7 @@ namespace OpenMD::RNEMD {
       targetSlabCenter = slabACenter_;
     }
 
-    if (useChargedSPF_) { sourceSman -= ionSman; }
+    if (useChargedSPF_) { sourceSman -= oppositeIonSman; }
 
     if (sourceSman.getMoleculeSelectionCount() == 0) {
       forceManager_->setSelectedMolecule(nullptr);
@@ -524,7 +529,7 @@ namespace OpenMD::RNEMD {
     if (selectedMolecule) {
       globalSelectedID = selectedMolecule->getGlobalIndex();
 
-      // Scale the particle flux by the charge yielding a current denstiy
+      // Scale the particle flux by the charge yielding a current density
       if (useChargedSPF_) { convertParticlesToElectrons(selectedMolecule); }
 
 #ifdef IS_MPI
