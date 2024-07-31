@@ -1010,6 +1010,7 @@ set(PYNONUMPY_FILES
     src/applications/utilities/stat2visco
     src/applications/utilities/stat2pcorr
     src/applications/hydrodynamics/hydroExplainer
+    src/applications/utilities/waterBoxer
     src/applications/utilities/waterRotator
     src/applications/utilities/stat2dipolecorr)
 
@@ -1063,7 +1064,7 @@ if(Python3_Interpreter_FOUND)
 endif(Python3_Interpreter_FOUND)
 
 set(PERL_FILES
-    src/applications/utilities/solvator src/applications/utilities/waterBoxer
+    src/applications/utilities/solvator 
     src/applications/utilities/waterSphere scripts/git2cl)
 
 if(PERL_FOUND)
