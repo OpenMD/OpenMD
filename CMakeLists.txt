@@ -243,44 +243,46 @@ if(FORMAT_OPENMD AND NOT WIN32)
   if(NOT formatter_NOTFOUND)
     message(STATUS "Formatting OpenMD")
 
-    # Run clang-format on all code except the files passed as arguments with the
-    # '-i' flag ##
+    ## Run clang-format on all code except the files passed as arguments with the '-i' flag ##
     execute_process(
-      COMMAND
-        bash ../cmake/scripts/format-codebase.sh -f ${formatter} -i antlr/* -i
-        applications/thermalizer/thermalizerCmd.hpp -i
-        applications/thermalizer/thermalizerCmd.cpp -i
-        applications/simpleBuilder/simpleBuilderCmd.hpp -i
-        applications/simpleBuilder/simpleBuilderCmd.cpp -i
-        applications/dump2Xyz/Dump2XYZCmd.hpp -i
-        applications/dump2Xyz/Dump2XYZCmd.cpp -i
-        applications/sequentialProps/SequentialPropsCmd.cpp -i
-        applications/sequentialProps/SequentialPropsCmd.hpp -i
-        applications/randomBuilder/randomBuilderCmd.hpp -i
-        applications/randomBuilder/randomBuilderCmd.cpp -i
-        applications/hydrodynamics/HydroCmd.hpp -i
-        applications/hydrodynamics/HydroCmd.cpp -i
-        applications/staticProps/StaticPropsCmd.hpp -i
-        applications/staticProps/StaticPropsCmd.cpp -i
-        applications/omd2omd/omd2omdCmd.cpp -i
-        applications/omd2omd/omd2omdCmd.hpp -i
-        applications/nanoparticleBuilder/nanorodBuilderCmd.hpp -i
-        applications/nanoparticleBuilder/nanorod_pentBuilderCmd.cpp -i
-        applications/nanoparticleBuilder/icosahedralBuilderCmd.hpp -i
-        applications/nanoparticleBuilder/nanoparticleBuilderCmd.hpp -i
-        applications/nanoparticleBuilder/nanorodBuilderCmd.cpp -i
-        applications/nanoparticleBuilder/nanorod_pentBuilderCmd.hpp -i
-        applications/nanoparticleBuilder/nanoparticleBuilderCmd.cpp -i
-        applications/nanoparticleBuilder/icosahedralBuilderCmd.cpp -i
-        applications/recenter/recenterCmd.cpp -i
-        applications/recenter/recenterCmd.hpp -i
-        applications/dynamicProps/DynamicPropsCmd.hpp -i
-        applications/dynamicProps/DynamicPropsCmd.cpp -i
-        applications/eos/equationofstateCmd.cpp -i
-        applications/eos/equationofstateCmd.hpp -i
-        applications/elasticConstants/elasticConstantsCmd.hpp -i
-        applications/elasticConstants/elasticConstantsCmd.cpp -i mdParser/* -i
-        utils/MemoryUtils.hpp
+      COMMAND bash ../cmake/scripts/format-codebase.sh
+                -f ${formatter}
+                -i antlr/*
+                -i applications/thermalizer/thermalizerCmd.hpp
+                -i applications/thermalizer/thermalizerCmd.cpp
+                -i applications/simpleBuilder/simpleBuilderCmd.hpp
+                -i applications/simpleBuilder/simpleBuilderCmd.cpp
+                -i applications/dump2Xyz/Dump2XYZCmd.hpp
+                -i applications/dump2Xyz/Dump2XYZCmd.cpp
+                -i applications/sequentialProps/SequentialPropsCmd.cpp
+                -i applications/sequentialProps/SequentialPropsCmd.hpp
+                -i applications/randomBuilder/randomBuilderCmd.hpp
+                -i applications/randomBuilder/randomBuilderCmd.cpp
+                -i applications/hydrodynamics/HydroCmd.hpp
+                -i applications/hydrodynamics/HydroCmd.cpp
+                -i applications/staticProps/StaticPropsCmd.hpp
+                -i applications/staticProps/StaticPropsCmd.cpp
+                -i applications/omd2omd/omd2omdCmd.cpp
+                -i applications/omd2omd/omd2omdCmd.hpp
+                -i applications/openmd/openmd.cpp
+                -i applications/nanoparticleBuilder/nanorodBuilderCmd.hpp
+                -i applications/nanoparticleBuilder/nanorod_pentBuilderCmd.cpp
+                -i applications/nanoparticleBuilder/icosahedralBuilderCmd.hpp
+                -i applications/nanoparticleBuilder/nanoparticleBuilderCmd.hpp
+                -i applications/nanoparticleBuilder/nanorodBuilderCmd.cpp
+                -i applications/nanoparticleBuilder/nanorod_pentBuilderCmd.hpp
+                -i applications/nanoparticleBuilder/nanoparticleBuilderCmd.cpp
+                -i applications/nanoparticleBuilder/icosahedralBuilderCmd.cpp
+                -i applications/recenter/recenterCmd.cpp
+                -i applications/recenter/recenterCmd.hpp
+                -i applications/dynamicProps/DynamicPropsCmd.hpp
+                -i applications/dynamicProps/DynamicPropsCmd.cpp
+                -i applications/eos/equationofstateCmd.cpp
+                -i applications/eos/equationofstateCmd.hpp
+                -i applications/elasticConstants/elasticConstantsCmd.hpp
+                -i applications/elasticConstants/elasticConstantsCmd.cpp 
+                -i mdParser/*
+                -i utils/MemoryUtils.hpp
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src
       OUTPUT_QUIET)
   endif()
@@ -1184,7 +1186,7 @@ install(
 install(
   FILES "${CMAKE_CURRENT_SOURCE_DIR}/docs/OpenMDmanual.pdf"
         "${CMAKE_CURRENT_SOURCE_DIR}/docs/AUTHORS"
-        "${CMAKE_CURRENT_SOURCE_DIR}/docs/INSTALL"
+        "${CMAKE_CURRENT_SOURCE_DIR}/docs/INSTALL.md"
   DESTINATION docs
   PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 

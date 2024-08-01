@@ -76,7 +76,7 @@ in the `docs` directory. Sample simulations are available in the
  5) make
  6) umask 0022; sudo make install
 
-That's it.
+That's it. For more information on building and configuring OpenMD, check out our [INSTALL.md](docs/INSTALL.md) instructions.
 
 ## Contributing
 
