@@ -63,8 +63,8 @@ in the `docs` directory. Sample simulations are available in the
       + FFTW:        [www.fftw.org](http://www.fftw.org)
       + Doxygen:     [www.doxygen.org](http://www.doxygen.org)
 
- 5) Some of the utility scripts depend on Python, NumPy, SciPy, and Perl.  
-    These interpreters are common installations on most flavors of Unix and
+ 5) Some of the utility scripts depend on Python, NumPy, and SciPy.  
+    These are common installations on most flavors of Unix and
     Mac OS X.
 
 ## Instructions

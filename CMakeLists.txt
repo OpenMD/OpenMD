@@ -374,18 +374,6 @@ if(DOXYGEN_FOUND)
     VERBATIM)
 endif(DOXYGEN_FOUND)
 
-find_package(Perl)
-if(PERL_FOUND)
-  set(PERL ${PERL_EXECUTABLE})
-else(PERL_FOUND)
-  message(STATUS "Failed to find perl - some scripts will not be made")
-endif(PERL_FOUND)
-
-set(PERL_INSTALLDIRS
-    "site"
-    CACHE STRING "Perl installation
-locations")
-
 set(Python3_FIND_STRATEGY LOCATION)
 find_package(Python3 COMPONENTS Interpreter NumPy)
 if(Python3_Interpreter_FOUND)
@@ -1067,36 +1055,6 @@ if(Python3_Interpreter_FOUND)
   endforeach(PY_FILE)
 endif(Python3_Interpreter_FOUND)
 
-set(PERL_FILES
-    scripts/git2cl)
-
-if(PERL_FOUND)
-  if(WIN32)
-    set(PLEXT ".PL")
-  else(WIN32)
-    set(PLEXT "")
-  endif(WIN32)
-
-  foreach(PERL_FILE ${PERL_FILES})
-    get_filename_component(filename "${PERL_FILE}" NAME)
-    configure_file(
-      ${PERL_FILE} "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}${PLEXT}"
-      @ONLY)
-    install(
-      FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}${PLEXT}"
-      DESTINATION bin
-      PERMISSIONS
-        OWNER_READ
-        OWNER_WRITE
-        OWNER_EXECUTE
-        GROUP_READ
-        GROUP_EXECUTE
-        WORLD_READ
-        WORLD_EXECUTE)
-
-  endforeach(PERL_FILE)
-endif(PERL_FOUND)
-
 install(
   FILES LICENSE README.md
   DESTINATION .
@@ -1218,7 +1176,6 @@ message(STATUS "ZLIB_LIBRARIES ............. = ${ZLIB_LIBRARIES}")
 message(STATUS "FFTW3_ROOT ................. = ${FFTW3_ROOT}")
 message(STATUS "FFTW3_INCLUDE_DIR .......... = ${FFTW3_INCLUDE_DIR}")
 message(STATUS "FFTW3_LIBRARIES ............ = ${FFTW3_LIBRARIES}")
-message(STATUS "PERL_EXECUTABLE ............ = ${PERL_EXECUTABLE}")
 message(STATUS "Python3_EXECUTABLE ......... = ${Python3_EXECUTABLE}")
 message(STATUS "DOXYGEN_EXECUTABLE ......... = ${DOXYGEN_EXECUTABLE}")
 message(STATUS)

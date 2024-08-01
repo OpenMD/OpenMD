@@ -26,9 +26,9 @@ available some features will be missing:
 for parallel computing.  A version of the MPI library is required
 if you want to run the multi-processor version of OpenMD
 
-* perl and python - interpreted scripting languages that some of
-the OpenMD utilities use to parse and process data files. The python
-scripts now depend on NumPy and SciPy.
+* python - An interpreted scripting language that some of the OpenMD 
+utilities use to parse and process data files. Some python
+scripts also depend on NumPy and SciPy.
 
 * qhull – A computational geometry toolbox for computing convex
 hulls and Delaunay triangulations.  qhull is required for the
