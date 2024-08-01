@@ -1006,6 +1006,7 @@ set(PYNONUMPY_FILES
     src/applications/utilities/omdSplit
     src/applications/utilities/omdShrink
     src/applications/utilities/omdLast
+    src/applications/utilities/solvator
     src/applications/utilities/stat2dielectric
     src/applications/utilities/stat2tension
     src/applications/utilities/stat2thcond
@@ -1067,7 +1068,6 @@ if(Python3_Interpreter_FOUND)
 endif(Python3_Interpreter_FOUND)
 
 set(PERL_FILES
-    src/applications/utilities/solvator 
     scripts/git2cl)
 
 if(PERL_FOUND)
