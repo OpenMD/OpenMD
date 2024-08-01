@@ -619,8 +619,12 @@ namespace OpenMD::RNEMD {
     ConstraintPair* consPair;
     Molecule::ConstraintPairIterator cpi;
 
+    std::shared_ptr<SPFData> spfData = currentSnap_->getSPFData();
+
     for (mol = info_->beginMolecule(miter); mol != NULL;
          mol = info_->nextMolecule(miter)) {
+      if (mol->getGlobalIndex() == spfData->globalID) { continue; }
+
       for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
            sd = mol->nextIntegrableObject(iiter)) {
         if (outputSeleMan_.isSelected(sd)) {
@@ -718,15 +722,19 @@ namespace OpenMD::RNEMD {
               atomBinNo = getBin(atom->getPos());
               eField    = atom->getElectricField();
 
-              binEFieldCount[atomBinNo]++;
-              binEField[atomBinNo] += eField;
+              if (atomBinNo >= 0 && atomBinNo < int(nBins_)) {
+                binEFieldCount[atomBinNo]++;
+                binEField[atomBinNo] += eField;
+              }
             }
           } else {
             eField    = sd->getElectricField();
             atomBinNo = getBin(sd->getPos());
 
-            binEFieldCount[atomBinNo]++;
-            binEField[atomBinNo] += eField;
+            if (atomBinNo >= 0 && atomBinNo < int(nBins_)) {
+              binEFieldCount[atomBinNo]++;
+              binEField[atomBinNo] += eField;
+            }
           }
         }
       }
@@ -767,10 +775,10 @@ namespace OpenMD::RNEMD {
                     MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, &binDOF[i], 1, MPI_INT, MPI_SUM,
                     MPI_COMM_WORLD);
-      MPI_Allreduce(MPI_IN_PLACE, &binEFieldCount[i], 1, MPI_INT, MPI_SUM,
-                    MPI_COMM_WORLD);
 
       if (outputMask_[ELECTRICFIELD]) {
+        MPI_Allreduce(MPI_IN_PLACE, &binEFieldCount[i], 1, MPI_INT, MPI_SUM,
+                      MPI_COMM_WORLD);
         MPI_Allreduce(MPI_IN_PLACE, binEField[i].getArrayPointer(), 3,
                       MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       }

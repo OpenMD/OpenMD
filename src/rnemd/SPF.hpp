@@ -63,6 +63,8 @@ namespace OpenMD::RNEMD {
     void doRNEMDImpl(SelectionManager& smanA, SelectionManager& smanB) override;
 
   private:
+    enum SelectedIon { NONE = -1, ANION, CATION };
+
     void selectMolecule();
 
     bool getSelectedMolecule(std::shared_ptr<SPFData> spfData);
@@ -75,6 +77,7 @@ namespace OpenMD::RNEMD {
     RealType spfTarget_ {};
 
     SelectionManager anionMan_, cationMan_;
+    SelectedIon selectedIon_ {NONE};
 
     SPFForceManager* forceManager_ {nullptr};
 

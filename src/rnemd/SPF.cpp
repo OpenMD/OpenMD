@@ -444,10 +444,10 @@ namespace OpenMD::RNEMD {
     selectedMolecule = info_->getMoleculeByGlobalIndex(spfData->globalID);
 
     if (selectedMolecule) {
-      // Scale the particle flux by the charge yielding a current density
       if (useChargedSPF_) {
-        if (selectedMolecule->getFixedCharge() < 0.0f) { spfTarget_ *= -1; }
+        if (selectedIon_ == ANION) { spfTarget_ *= -1; }
 
+      // Scale the particle flux by the charge yielding a current density
         convertParticlesToElectrons(selectedMolecule);
       }
 
@@ -463,6 +463,8 @@ namespace OpenMD::RNEMD {
 
     Utils::RandNumGenPtr randNumGen = info_->getRandomNumberGenerator();
 
+    int ion {-1};
+
 #ifdef IS_MPI
     int worldRank {}, size {};
 
@@ -474,20 +476,23 @@ namespace OpenMD::RNEMD {
 #endif
       if (useChargedSPF_) {
         std::uniform_int_distribution<> slabDistribution {0, 1};
-
-        if (slabDistribution(*randNumGen) != 0) {
-          spfTarget_ *= -1;
-          oppositeIonSman = cationMan_;
-        } else
-          oppositeIonSman = anionMan_;
+        ion = slabDistribution(*randNumGen);
       }
 #ifdef IS_MPI
     }
 
-    if (useChargedSPF_) {
-      MPI_Bcast(&spfTarget_, 1, MPI_REALTYPE, 0, MPI_COMM_WORLD);
-    }
+    if (useChargedSPF_) { MPI_Bcast(&ion, 1, MPI_INT, 0, MPI_COMM_WORLD); }
 #endif
+
+    selectedIon_ = static_cast<SelectedIon>(ion);
+
+    if (selectedIon_ == ANION) {
+      spfTarget_ *= -1;
+      oppositeIonSman = cationMan_;
+    } else if (selectedIon_ == CATION) {
+      oppositeIonSman = anionMan_;
+    }
+
     // The sign of our flux determines which slab is the source and which is
     // the sink
     if (spfTarget_ > 0.0) {
@@ -531,18 +536,12 @@ namespace OpenMD::RNEMD {
 
       // Scale the particle flux by the charge yielding a current density
       if (useChargedSPF_) { convertParticlesToElectrons(selectedMolecule); }
+    }
 
 #ifdef IS_MPI
-      for (int i {}; i < size; ++i) {
-        if (i != worldRank) {
-          MPI_Send(&globalSelectedID, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-        }
-      }
-    } else {
-      MPI_Recv(&globalSelectedID, 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD,
-               &ierr);
+    MPI_Allreduce(MPI_IN_PLACE, &globalSelectedID, 1, MPI_INT, MPI_MAX,
+                  MPI_COMM_WORLD);
 #endif
-    }
 
     int axis0 = (rnemdPrivilegedAxis_ + 1) % 3;
     int axis1 = (rnemdPrivilegedAxis_ + 2) % 3;
