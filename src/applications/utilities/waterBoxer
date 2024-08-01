@@ -571,12 +571,11 @@ def print_meta_data(outfile, doWaterInc, waterName, waterCase, invalidWater,
     outfile.write("  type = \"{}\";\n".format(waterName))
     outfile.write("  nMol = {};\n".format(nMol))
     outfile.write("}\n")
-    outfile.write("ensemble = NVT;\n")
+    outfile.write("ensemble = \"NVT\";\n")
     outfile.write("forceField = \"Water\";\n")
     outfile.write("electrostaticSummationMethod = \"shifted_force\";\n")
     outfile.write("electrostaticScreeningMethod = \"damped\";\n")
     outfile.write("cutoffRadius = {};\n".format(cutoff))
-    outfile.write("switchingRadius = {};\n".format(cutoff))
     outfile.write("dampingAlpha = {};\n".format(alpha))
     outfile.write("\n")
     outfile.write("targetTemp = 300;\n")
@@ -647,11 +646,12 @@ def main(argv):
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=
 '''
-    Note: you can only use values of x, y, or z that are smaller
-          than the derived box length for a given density and
-          number of molecules.
-    Example:
-       waterBoxer -d 0.997 -w SSD_RF -o ssdrfWater.omd
+Note: you can only use values of x, y, or z that are smaller
+      than the derived box length for a given density and
+      number of molecules.
+
+Example:
+       waterBoxer -d 0.997 -x 20 -y 20 -z 20 -w TIP4P-Ice -o tip4pWater.omd
 ''')
     parser.add_argument("-d", "--density=", action="store", dest='density',
                         type=float, help="density in g/cm^3",
@@ -794,31 +794,31 @@ def main(argv):
     zCorr = []
 
     if lattice == 0:
-        xCorr_initial = [0.0, 0.0, cell2X, cell2X]
-        yCorr_initial = [0.0, cell2Y, cell2Y, 0.0]
-        zCorr_initial = [0.0, cell2Z, 0.0, cell2Z]
+        xref = [0.0, 0.0, cell2X, cell2X]
+        yref = [0.0, cell2Y, cell2Y, 0.0]
+        zref = [0.0, cell2Z, 0.0, cell2Z]
     
         counter = 0
         for z in range(nz):
             for y in range(ny):
                 for x in range(nx):
                     for uc in range(4):
-                        xCorr.append(xCorr_initial[uc] + cellLengthX * x)
-                        yCorr.append(yCorr_initial[uc] + cellLengthY * y)
-                        zCorr.append(zCorr_initial[uc] + cellLengthZ * z)
+                        xCorr.append(xref[uc] + cellLengthX * x)
+                        yCorr.append(yref[uc] + cellLengthY * y)
+                        zCorr.append(zref[uc] + cellLengthZ * z)
                     counter += 4
     elif lattice == 1:
-        xCorr_initial = [cell2X]
-        yCorr_initial = [cell2Y]
-        zCorr_initial = [cell2Z]
+        xref = [cell2X]
+        yref = [cell2Y]
+        zref = [cell2Z]
 
         counter = 0
         for z in range(nz):
             for y in range(ny):
                 for x in range(nx):
-                    xCorr.append(xCorr_initial[uc] + cellLengthX * x)
-                    yCorr.append(yCorr_initial[uc] + cellLengthY * y)
-                    zCorr.append(zCorr_initial[uc] + cellLengthZ * z)
+                    xCorr.append(xref[uc] + cellLengthX * x)
+                    yCorr.append(yref[uc] + cellLengthY * y)
+                    zCorr.append(zref[uc] + cellLengthZ * z)
                     counter += 1
 
     (waterCase, invalidWater) = validate_water(waterName)
