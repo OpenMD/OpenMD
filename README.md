@@ -27,7 +27,8 @@ sections:
 
 Detailed descriptions of the structures of these files are available
 in the `docs` directory. Sample simulations are available in the
-`samples` directory.
+`samples` directory and [QUICK_START.md](QUICK_START.md) walks you through a
+procedure for running and analyzing your first OpenMD simulation.
 
 ## Requirements
 

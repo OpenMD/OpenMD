@@ -89,6 +89,7 @@ EOF
 %doc %{_defaultdocdir}/%{name}/OpenMDmanual.pdf
 %doc %{_defaultdocdir}/%{name}/AUTHORS
 %doc %{_defaultdocdir}/%{name}/INSTALL.md
+%doc %{_defaultdocdir}/%{name}/QUICK_START.md
 %doc %{_defaultdocdir}/%{name}/LICENSE
 %doc %{_defaultdocdir}/%{name}/README.md
 
