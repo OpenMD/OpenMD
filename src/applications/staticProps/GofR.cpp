@@ -150,12 +150,10 @@ namespace OpenMD {
       if (!paramString_.empty())
         ofs << "# parameters: " << paramString_ << "\n";
 
-      ofs << "#r\tcorrValue\tcumulativeSum1\tcumulativeSum2\n";
+      ofs << "#r\tcorrValue\n";
       for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
         RealType r = deltaR_ * (i + 0.5);
-        ofs << r << "\t" << avgGofr_[i] / nProcessed_ << "\t"
-            << sumGofr1_[i] / nProcessed_ << "\t" << sumGofr2_[i] / nProcessed_
-            << "\n";
+        ofs << r << "\t" << avgGofr_[i] / nProcessed_  << "\n";
       }
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
