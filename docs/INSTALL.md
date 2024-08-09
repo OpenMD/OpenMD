@@ -22,7 +22,7 @@ can also compile it yourself from the source code.
 The following are optional when compiling OpenMD, but if they are not
 available some features will be missing:
 
-* OpenMPI – A very good implementation of the MPI-2 specification
+* OpenMPI or MPICH – Very good implementations of the MPI-2 specification
 for parallel computing.  A version of the MPI library is required
 if you want to run the multi-processor version of OpenMD
 
@@ -68,11 +68,11 @@ the following tools:
 ## Basic build procedure
 
 The recommended way to build OpenMD is to use a separate source and
-build directory; for example, openmd-3.0 and build. The first step
+build directory; for example, openmd-3.1 and build. The first step
 is to create these directories:
 
 ```bash
-$ tar zxf openmd-3.0.tar.gz   # (this creates openmd-3.0)
+$ tar zxf openmd-3.1.tar.gz   # (this creates openmd-3.1)
 $ mkdir build
 ```
 
@@ -81,7 +81,7 @@ configure the build to use all of the default options:
 
 ```bash
 $ cd build
-$ cmake ../openmd-3.0
+$ cmake ../openmd-3.1
 ```
 
 If you need to specify a particular compiler, you can do that with
@@ -89,7 +89,7 @@ environment variables before the cmake line
 
 ```bash
 $ export CXX=/opt/local/lib/openmpi/bin/mpic++
-$ cmake ../openmd-3.0
+$ cmake ../openmd-3.1
 ```
 
 If you need to specify an option, use the -D switch to cmake. For
@@ -97,7 +97,7 @@ example, the following line sets the value of `CMAKE_INSTALL_PREFIX`
 and `CMAKE_BUILD_TYPE`:
 
 ```bash
-$ cmake ../openmd-3.0 -DCMAKE_INSTALL_PREFIX=~/Tools -DCMAKE_BUILD_TYPE=DEBUG
+$ cmake ../openmd-3.1 -DCMAKE_INSTALL_PREFIX=~/Tools -DCMAKE_BUILD_TYPE=DEBUG
 ```
 
 We will discuss various possible options later.
@@ -128,6 +128,17 @@ $ umask 0022
 $ sudo make install
 ```
 
+By default, OpenMD installs directories into `/usr/local/openmd`,
+so in order for the command line options to be in your path, you'll 
+need:
+```bash
+export PATH=${PATH}:/usr/local/openmd/bin
+```
+or if you use csh or tcsh as your shell:
+```
+setenv PATH ${PATH}:/usr/local/openmd/bin
+```
+
 ### Local build
 
 With the right sort of environment variable magic (see below), you
@@ -151,13 +162,25 @@ To configure cmake to install into `~/Tools/openmd-install`, for
 example, you would do the following:
 
 ```bash
-$ cmake ../openmd-3.0 -DCMAKE_INSTALL_PREFIX=~/Tools/openmd-install
+$ cmake ../openmd-3.1 -DCMAKE_INSTALL_PREFIX=~/Tools/openmd-install
 ```
 
 Then you can run make and make install without needing root access:
 
 ```bash
 $ make && make install
+```
+
+Once you have installed OpenMD in a specified location, a 
+`bin` subdirectory will contain all of the command line tools.
+In order for these command line tools to be accessible commands, 
+you'll need:
+```bash
+export PATH=${PATH}:~/Tools/openmd-install/bin
+```
+or if you use csh or tcsh as your shell:
+```
+setenv PATH ${PATH}:~/Tools/openmd-install/bin
 ```
 
 ### Troubleshooting build problems

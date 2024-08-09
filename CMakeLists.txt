@@ -1127,20 +1127,6 @@ install(
   PATTERN "*.fz" EXCLUDE PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ
                                      WORLD_READ)
 
-configure_file(samples/builders/runMe.in
-               "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runMe" @ONLY)
-install(
-  FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runMe"
-  DESTINATION samples/builders
-  PERMISSIONS
-    OWNER_READ
-    OWNER_WRITE
-    OWNER_EXECUTE
-    GROUP_READ
-    GROUP_EXECUTE
-    WORLD_READ
-    WORLD_EXECUTE)
-
 install(
   FILES "${CMAKE_CURRENT_SOURCE_DIR}/docs/OpenMDmanual.pdf"
         "${CMAKE_CURRENT_SOURCE_DIR}/docs/AUTHORS"

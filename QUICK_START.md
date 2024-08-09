@@ -64,7 +64,7 @@ The `Dump2XYZ` program is quite flexible. Note that some simulations will use at
 
 ## Statistical Analysis
 
-At this point we have a completed simulation (256 SPC/E water molecules), simulated in NVE conditions for 10 ps) and we've tracked its progress, what's next?
+At this point we have a completed simulation (256 SPC/E water molecules, simulated in NVE conditions for 10 ps) and we've tracked its progress, what's next?
 
 Suppose you want to dive a bit deeper into your data analysis and want to compute either static properties or time correlation functions.  Once the trajectory has been generated, you can use two other utilities to study many derived properties.  
 
@@ -98,7 +98,7 @@ DynamicProps -h
 - aqueousIons - some salt water boxes showing how to run with Li-Song-Merz 12-6 and 12-6-4 models for ions
 - argon - simple liquid argon boxes using Lennard-Jones potentials
 - bond-order - demonstration files for testing bond orientational order parameters in different structures
-- builders - demonstrations of how to create initial structures using the builder codes.  See the [README.md](samples/builders/README.md) and [runMe.in](samples/builders/runMe.in) files in this directory
+- builders - demonstrations of how to create initial structures using the builder codes.  See the [README.md](samples/builders/README.md) file in this directory
 - fluctuating - samples for various fluctuating charge models (tip4p-fq, DR-EAM)
 - gbljtest - test cases showing how to include Gay-Berne (ellipsoids) and Lennard-Jones models in the same simulation
 - graphene - models for graphene sheets and nanoporous graphene membranes

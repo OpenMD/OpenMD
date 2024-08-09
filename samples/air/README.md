@@ -1,4 +1,6 @@
-# Air models in OpenMD
+# Air
+
+## Background Information
 
 The files here can help set up some simple gas-phase simulations of
 the common components of air. Three site rigid body models for
@@ -24,16 +26,9 @@ Air has a density at sea level and at 15C of roughly 1.225 kg / m<sup>3</sup>
 | He             | 0.000005            |
 | Kr             | 0.000001            |
 
+In addition to the monatomic models for Ar, Ne, He, and Kr, this sample also requires a few models for diatomic and triatomic molecules.  In this sample, these molecules are represented as rigid linear (N<sub>2</sub>, O<sub>2</sub>, CO<sub>2</sub>) or three site models (SPC/E water).
 
-### Rigid Linear Models
-+ N2
-+ O2
-+ CO2
-
-### Rigid three site models
-+ SPC/E
-
-### Building a box of air
+## Instructions
 
 The `air.inc` and `Air.frc` files contain parameters for most of the
 simple components of air.  To build a small box, one might start with
@@ -48,20 +43,43 @@ randomBuilder mix.omd -o test.omd --density=0.001225 --nx=5 --ny=5 --nz=5 --molF
 This creates a `test.omd` structure containing 500 molecules in
 roughly the correct proportions (and density).
 
-To warm this mixture up to 15C (and assign initial velocities):
+To warm this mixture up to 25C (and assign initial velocities):
 ```
-thermalizer -t 288 -i test.omd -o warm.omd
+thermalizer -t 298 -i test.omd -o warm.omd
 ```
 The simulation is relatively short:
 ```
 openmd warm.omd
 ```
-Then `Dump2XYZ` can output the base atom types and map back to the simulation box:
+
+## Expected Output
+
+Some missing interaction warnings are expected here (notably between Ar atoms and the non-atomic 'X' sites on the N<sub>2</sub> and O<sub>2</sub> models).  OpenMD is just warning the user that there are atom pairs present in the simulation with no corresponding interaction in the `frc` file.
+
+This is a relatively short simulation, but the expected report would be:
+
+```
+###############################################################################
+# Status Report:                                                              #
+#              Total Time:       10000 fs                                     #
+#       Number of Samples:         101                                        #
+#            Total Energy:     735.802  ±  0.586997     kcal/mol              #
+#        Potential Energy:   -0.279875  ±  0.0654789    kcal/mol              #
+#          Kinetic Energy:     736.082  ±  0.617257     kcal/mol              #
+#             Temperature:     298.116  ±  0.249991     K                     #
+#                Pressure:     1.03131  ±  0.00126752   atm                   #
+#                  Volume: 1.96509e+07  ±  0            A^3                   #
+#      Conserved Quantity:     740.366  ±  0.0023359    kcal/mol              #
+###############################################################################
+```
+This approximates a box of air at standard temperature and Pressure (298 K and 1 atm).
+Then `Dump2XYZ` can output the base atom types and map back to the simulation box for visualization with `Jmol`:
 ```
 Dump2XYZ -i warm.dump -b -m
+jmol warm.xyz
 ```
 
-# References
+## References
 
 | Molecular Model| Number of Sites | DOI  |
 | ----------:|:---------------:|-----:|
