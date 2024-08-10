@@ -9,12 +9,12 @@ To build OpenMD, you need the following:
 
 * The source code for the latest release of OpenMD
 * A C++ compiler
-* CMake 3.15 or newer
+* CMake 3.20 or newer
 
 OpenMD uses CMake as its build system. CMake is an open source
 cross-platform build system from KitWare.
 
-You need to install CMake 3.15 or newer. This is available as a
+You need to install CMake 3.20 or newer. This is available as a
 binary package from the KitWare website; alternatively, it may be
 available through your package manager (on Linux). If necessary, you
 can also compile it yourself from the source code.
@@ -24,46 +24,51 @@ available some features will be missing:
 
 * OpenMPI or MPICH – Very good implementations of the MPI-2 specification
 for parallel computing.  A version of the MPI library is required
-if you want to run the multi-processor version of OpenMD
+if you want to run the multi-processor version of OpenMD. 
 
 * python - An interpreted scripting language that some of the OpenMD 
 utilities use to parse and process data files. Some python
-scripts also depend on NumPy and SciPy.
+scripts also depend on NumPy and SciPy. You'll want version 3 or higher,
+and we test on 3.12
 
 * qhull – A computational geometry toolbox for computing convex
 hulls and Delaunay triangulations.  qhull is required for the
 LangevinHull integrator and for any of the tools that compute the
-Hull atoms or hull volumes of nanoparticles and clusters.
+Hull atoms or hull volumes of nanoparticles and clusters.  You'll
+want version qhull 2020.2 or newer.
 
 * openbabel – a chemical toolbox for converting between different
 data formats.  This is required for building the atom2md program
 which helps prepare initial "metadata" or md files for
-simulations.
+simulations.  You'll want openbabel version 3.1.1 or newer, but note
+that when openbabel is found, there are some compiler warnings that
+will appear.
 
 * fftw - a library for computing discrete Fourier transforms.  This
 is required for surface undulation spectra (Hxy in
-staticProps). Get version 3.
+staticProps). Get version 3.3.10 or newer.
 
-* zlib - required to support reading gzipped trajectory files
+* zlib - required to support reading gzipped trajectory files (this 
+is usually included on most unix / macOS machines)
 
 You’ll also likely want to download and compile the following useful
 tools for interacting with the data:
 
-  * Jmol
-  * xmgr
-  * grace
-  * NumPy
-  * SciPy
-  * vmd
+  * [Jmol](https://jmol.sourceforge.net/)
+  * [xmgrace/ grace](https://plasma-gate.weizmann.ac.il/Grace/)
+  * [NumPy](https://numpy.org/)
+  * [SciPy](https://scipy.org/)
+  * [vmd](https://www.ks.uiuc.edu/Research/vmd/)
 
 If you are going to be extending or developing OpenMD, you’ll need
 the following tools:
 
-* antlr – our tool for parsing meta-data files.  You’ll want
-  version 2, not 3.  
+* [antlr](https://www.antlr2.org/ – our tool for parsing meta-data files.
+You’ll want version 2, not 3.  
 
-* gengetopt - a tool to generate C code to parse the command line
-  arguments argc and argv that are part of every C or C++ program
+* [gengetopt](https://www.gnu.org/software/gengetopt/gengetopt.html) - a
+tool to generate C code to parse the command line arguments argc and argv
+that are part of every C or C++ program.
 
 ## Basic build procedure
 
