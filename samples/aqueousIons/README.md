@@ -1,4 +1,6 @@
-**12-6-4 Aqueous Ion Solutions**
+# Aqueous Ions
+
+## Background Information
 
 The interactions present in aqueous ion solutions need a bit of care. Charge-charge and charge-dipole terms are generally covered by the direct Coulomb interactions between point charges on the ions and the water molecules. The 12-6-4 model includes contributions from ion-induced dipole interactions in addition to the standard 12-6 van der Waals interaction. The modified non-bonded interaction looks like:
 
@@ -7,6 +9,7 @@ $$V_{12-6-4} = \frac{C_{12}}{r^{12}} + \frac{C_6}{r^6}  + \frac{C_4}{r^4}$$
 which is handled as an inverse power series in OpenMD. The $C_{12}$, $C_6$, and $C_4$ parameters between an ions and the relevant water model are part of the force field for 12-6-4 models.  However for ionic solutions, we need to generate **_all_** pairs of $C_4$ terms for the inter-ionic contributions. We use the following model:
 
 $$C_{4}(i-j) = \left( C_{4}(i-H2O)  \left(\frac{\alpha_j}{\alpha_{H2O}}\right) + C_{4}(j-H2O) \left(\frac{\alpha_i}{\alpha_{H2O}}\right) \right)$$ 
+
 which was suggested in the original 12-6-4 paper:
 
 - "Systematic Parameterization of Monovalent Ions Employing the Nonbonded Model," Pengfei Li, Lin Frank Song, and Kenneth M. Merz Jr., *Journal of Chemical Theory and Computation*, **11** (4), 1645-1657, (2015) DOI: 10.1021/ct500918t 
@@ -44,3 +47,7 @@ where $\sigma$ and $\epsilon$ values for each atom are given in the frc file. On
 atype1 atype2 InversePowerSeries  12  C12   6  C6   4  C4
 ```
 where the `C12`, `C6`, and `C4` are replaced with the values calculated above.
+
+## Instructions
+
+## Expected Output

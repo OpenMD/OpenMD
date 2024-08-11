@@ -1,4 +1,6 @@
-# Water models in OpenMD
+# Water
+
+## Background Information
 
 OpenMD supports a large number of water models, only some of which
 have examples shown here.
@@ -23,14 +25,12 @@ have examples shown here.
 ### Six site models
 + NE6
 
-
-
 One of the powerful functionalities of OpenMD is the separation
 between declaration of *components* and *stuntDoubles*. In every
 (.omd) file, a component block is used to specifiy what types of atoms
 or molecules the stuntDoubles correspond to.
 
-```
+```C++
 	component{
 		type = "SPCE";
 		nMol = 256;
@@ -50,7 +50,7 @@ easily transformed into a simulation with a different water model
 (regardless of the number of potential sites) by simply changing the
 component block.
 
-```
+```C++
 	component{
 		type = "TIP4P";
 		nMol = 256;
@@ -65,19 +65,22 @@ made.
 
 In addition to the ease of transferring between potentials, OpenMD
 also has a water system builder which generates OpenMD (.omd) files
-for you, **waterBoxer**.
+for you, `waterBoxer`.
 
-## waterBoxer
+### waterBoxer
 
-**waterBoxer** is a perl script which generates FCC lattices of water
+`waterBoxer` is a python script which generates FCC lattices of water
 molecules at user-defined densities and system sizes. The user can
 specifiy which water model to generate a system of, or as described
 above, change the component block definition from the default once
-generated.  **waterBoxer** prints a helpful discription of how its use
+generated.  `waterBoxer` prints a helpful discription of how its use
 and functionalities when passed *-h*.
 
+## Instructions
 
-# References
+## Expected Output
+
+## References
 
 | Water Model| Number of Sites | DOI  |
 | ----------:|:---------------:|-----:|

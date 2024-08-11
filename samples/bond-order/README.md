@@ -1,3 +1,7 @@
+# Bond Order
+
+## Background Information
+
 These are sample files used to test the bond order parameter
 code in StaticProps.  Perfect SC, BCC, FCC, HCP, and Icosahedral
 clusters have known analytic values for the bond order parameter
@@ -19,3 +23,7 @@ legend:
   tet.omd                 = Tetrahedral cluster
 
 (Cu atoms are located at (0,0,0), and Au atoms surround Cu in the clusters.)
+
+## Instructions
+
+## Expected Output

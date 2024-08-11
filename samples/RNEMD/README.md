@@ -1,12 +1,16 @@
-# Sample (.omd) files using Reverse Non-Equilibrium Molecular Dynamics (RNEMD)
+# Reverse Non-Equilibrium Molecular Dynamics (RNEMD)
 
-## Momentum transport in bulk fluids
+## Background Information
 
-The file **shearWater.omd** is a box of 1500 SPC/E water molecules
+## Instructions
+
+### Example 1
+
+The file `shearWater.omd` is a box of 1500 SPC/E water molecules
 which has the momentum flux functionality of RNEMD turned on. Notice
 in the RNEMD block of the (.omd) file that
 
-```
+```C++
 	fluxType = "Px";
 	momentumFlux = 6.0e-7;
 ```
@@ -17,7 +21,7 @@ functionality, one is able to measure the *shear viscosity* of the
 liquid at the simulated temperature by relating the imposed momentum
 flux to the system's gradient response of the velocity.
 
-## Thermal transport in bulk materials
+### Example 2
 
 It is also possible to measure the *thermal conductivity* of a
 material using the RNEMD functionality in OpenMD. As an example,
@@ -26,7 +30,7 @@ thermal flux applied accross the long axis of the sheet. In the (.omd)
 file the fluxType has been set to a kinetic energy flux, and also that
 the kineticFlux is defined.
 
-```
+```C++
 	fluxType = "KE";
 	kineticFlux = -6.55e-11;
 ```
@@ -36,7 +40,7 @@ gradient across the z-axis of the system. The thermal conductivity can
 be computed by relating the resulting thermal gradient to the imposed
 kinetic energy flux.
 
-## Thermal transport across an interface
+### Example 3
 
 While computing the thermal conductivity of a bulk material is
 certainly of interest, one may also want to investigate interfacial
@@ -51,7 +55,7 @@ the thermal conductivity across an interface, here, a gold / water
 interface. Notice in the RNEMD declaration block in the (.omd) file
 that the objectSelection is now,
 
-```
+```C++
 	objectSelection = "select SPCE_RB_0 or Au";
 ```
 
@@ -62,20 +66,19 @@ simulation cell and at the far edges (wrapping about the periodic
 box), the gold and water need to be properly distributed throughout
 the box or else your computation will not give you what you want.
 
-
-## Simultaneous shearing and thermal transport of bulk materials
+### Example 4
 
 The file **2744_shear.omd** is a box of 2744 Argon atoms which has a
 simultaneous momentum and kinetic energy flux through the box. Notice
 in the RNEMD block of the (.omd) file that
 
-```
+```C++
 	fluxType = "KE+Pvector";
 ```
 
 and both *kineticFlux* and *momentumFluxVector* are defined.
 
-```
+```C++
 	kineticFlux = -5.0e-6;
 	momentumFluxVector = (-2e-7, 0, 0);
 ```
@@ -85,8 +88,7 @@ in both a velocity and thermal gradient response of the system,
 allowing for measurement of the shear viscosity of the fluid at a
 large number of temperature domains with one simulation.
 
-
-## Thermal transport in non-periodic systems
+### Example 5
 
 OpenMD can perform non-periodic simulations using the Langevin Hull
 along with the RNEMD functionality, allowing for computation of
@@ -101,7 +103,7 @@ cuboctahedra), which can be found in *samples/builders/*.
   (.omd) file is only slightly different than above. The syntax is
   described in detail in the OpenMD manual.
 
-```
+```C++
 	useRNEMD = "true";
 	objectSelection = "select Au or Hexane";
 	sphereAradius = 10;
@@ -111,8 +113,11 @@ cuboctahedra), which can be found in *samples/builders/*.
 	kineticFlux = 1E-5;
 	exchangeTime = 10;
 	outputBins = 60;
-
 ```
+
 The only notable change to the RNEMD declaration block is the addition
 of *sphereAradius* and *sphereBradius*, which define the two exchange
 regions for the RNEMD moves.
+
+
+## Expected Output
