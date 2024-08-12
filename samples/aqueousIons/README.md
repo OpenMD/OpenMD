@@ -2,7 +2,7 @@
 
 ## Background Information
 
-The interactions present in aqueous ion solutions need a bit of care. Charge-charge and charge-dipole terms are generally covered by the direct Coulomb interactions between point charges on the ions and the water molecules. The 12-6-4 model includes contributions from ion-induced dipole interactions in addition to the standard 12-6 van der Waals interaction. The modified non-bonded interaction looks like:
+The interactions in aqueous ion solutions need a bit of care. Charge-charge and charge-dipole terms are generally covered by the direct Coulomb interactions between point charges on the ions and the water molecules. The 12-6-4 model includes contributions from ion-induced dipole interactions in addition to the standard 12-6 van der Waals interaction. The modified non-bonded interaction looks like:
 
 $$V_{12-6-4} = \frac{C_{12}}{r^{12}} + \frac{C_6}{r^6}  + \frac{C_4}{r^4}$$
 

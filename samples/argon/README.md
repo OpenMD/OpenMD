@@ -52,7 +52,7 @@ For the final simulation, we expect a report that looks like:
 #      Conserved Quantity:    -1176.28  ±  1.67662      kcal/mol              #
 ###############################################################################
 ```
-You can see the resampling events if you plot the total energy of this last sample using the generated stat file.
+You can see the velocity resampling events if you plot the total energy of this last sample using the generated stat file.
 ```
 xmgrace ar864.stat
 ```
