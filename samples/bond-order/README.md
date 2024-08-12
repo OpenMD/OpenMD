@@ -17,7 +17,7 @@ and formulae for individual atoms appeared in:
 
 `StaticProps` can compute bond orientational order parameters, using a
 single cutoff radius to decide membership in the list of neighbors,
-and does not have use a distance-dependent weighting as used in the
+and does not use a distance-dependent weighting as used in the
 second reference above.
 
 ## Instructions
@@ -111,11 +111,11 @@ analytically-derived output values for $n=4$ and $n=6$ are:
 | fcc.omd         | Face Centered Cubic    | 0.191 | 0.575 | -0.159 | -0.013 |
 | sc.omd          | Simple Cubic           | 0.764 | 0.354 |  0.159 |  0.013 |
 | icosahedron.omd | Icosahedral cluster    | 0     | 0.663 |  0     | -0.170 |
-| surface_icosahedron.omd | Half of a Icosahedral Cluster approximating a nanoparticle surface atom | 0 | 0.663 | ~0 | -0.17 |
+| surface_icosahedron.omd | Half of an Icosahedral Cluster approximating a nanoparticle surface atom | 0 | 0.663 | ~0 | -0.17 |
 | tet.omd         | Tetrahedral cluster    | 0.509 | 0.629 | -0.159 |  0.013 |
 
 Note that for tetrahedral clusters, $Q_3 \sim 0.745$, and the $l =
-4,6$ order parameters are somewhat less useful disricminators of
+4,6$ order parameters are less useful disricminators of
 structure.
 
 

@@ -58,8 +58,6 @@ uses 4 unit cells in each direction, a density of 1.0 g / cm^3, and
 molFractions of 0.4, 0.4, and 0.2 for the three components.  Places
 the output (which can be used to start an OpenMD job) in `random_FCC.omd`
 
- Note that builders will rewrite the number of molecules in each component
- to match the number of lattice sites.
 
 ```bash
 randomBuilder -o random_FCC.omd --nx=4 --ny=4 --nz=4 --density=1.0 --molFraction=0.4 --molFraction=0.4 three_component.omd
@@ -74,8 +72,6 @@ Dump2XYZ -i random_FCC-100K.omd
  angstroms. Places the output (which can be used to start an OpenMD job) in 
  `gold_sphere.omd` 
 
- Note that builders will rewrite the number of molecules in each component
- to match the number of lattice sites.
  
 ```bash
 nanoparticleBuilder -o gold_sphere.omd --radius=30.0 --latticeConstant=4.09 gold.omd
@@ -91,8 +87,6 @@ Dump2XYZ -i gold_sphere-500K.omd
  Places the output (which can be used to start an OpenMD job) in 
  `Au_Ag_alloy.omd` 
 
- Note that builders will rewrite the number of molecules in each component
- to match the number of lattice sites.
 
 ```bash
 nanoparticleBuilder -o Au_Ag_alloy.omd --radius=30.0 --latticeConstant=4.09 --molFraction=0.4 bimetallic.omd
@@ -108,8 +102,6 @@ Dump2XYZ -i Au_Ag_alloy-600K.omd
  of 12.5 angstroms. Places the output (which can be used to start an 
  OpenMD job) in `Au-core-Ag-shell.omd `
 
- Note that builders will rewrite the number of molecules in each component
- to match the number of lattice sites.
 
 ```bash
 nanoparticleBuilder -o Au-core-Ag-shell.omd --radius=30.0 --latticeConstant=4.09 --shellRadius=12.5 bimetallic.omd
@@ -173,8 +165,6 @@ Dump2XYZ -i vacancy_alloy-900K.omd
  angstroms. Places the output (which can be used to start an OpenMD job) in 
  `gold_fccrod.omd `
 
- Note that builders will rewrite the number of molecules in each component
- to match the number of lattice sites.
 
 ```bash
 nanorodBuilder -o gold_fccrod.omd --radius=20.0 --length=50.0 --latticeConstant=4.08 gold.omd
@@ -188,8 +178,6 @@ Dump2XYZ -i gold_fccrod.omd
  angstroms. Places the output (which can be used to start an OpenMD job) in 
  `gold_pentrod.omd` 
 
- Note that builders will rewrite the number of molecules in each component
- to match the number of lattice sites.
 
 ```bash
 nanorod_pentBuilder -o gold_pentrod.omd --radius=15.0 --length=64.0 --latticeConstant=4.08 gold.omd
@@ -203,8 +191,6 @@ Dump2XYZ -i gold_pentrod.omd
  Places the output (which can be used to start an OpenMD job) in 
  `gold_ico.omd` 
 
- Note that builders will rewrite the number of molecules in each component
- to match the number of lattice sites.
 
 ```bash
 icosahedralBuilder --ico -o gold_ico.omd --shells=8 --latticeConstant=4.08 gold.omd
@@ -219,8 +205,6 @@ Dump2XYZ -i gold_ico_300K.omd
  Places the output (which can be used to start an OpenMD job) in 
  `gold_deca.omd `
 
- Note that builders will rewrite the number of molecules in each component
- to match the number of lattice sites.
 
 ```bash
 icosahedralBuilder --deca -o gold_deca.omd --shells=10 --latticeConstant=4.08 gold.omd
@@ -236,8 +220,6 @@ Dump2XYZ -i gold_deca_300.omd
  Places the output (which can be used to start an OpenMD job) in 
  `penta_rod.omd` 
 
- Note that builders will rewrite the number of molecules in each component
- to match the number of lattice sites.
 
 ```bash
 icosahedralBuilder --ino --columnAtoms=100 --twinAtoms=5 --shells=10 -d 4.08 -o penta_rod.omd gold.omd
@@ -251,8 +233,6 @@ Dump2XYZ -i gold_penta_rod_300.omd
  Places the output (which can be used to start an OpenMD job) in 
  `cuboctahedron.omd` 
 
- Note that builders will rewrite the number of molecules in each component
- to match the number of lattice sites.
 
 ```bash
 icosahedralBuilder --cuboctahedron --lattice="FCC" --unitCells=10 -d 4.08 -o cuboctahedron.omd gold.omd
@@ -268,8 +248,6 @@ Dump2XYZ -i cuboctahedron_300.omd
  Places the output (which can be used to start an OpenMD job) in 
  `truncatedCube.omd` 
 
- Note that builders will rewrite the number of molecules in each component
- to match the number of lattice sites.
 
 ```
 icosahedralBuilder --truncatedCube --lattice="FCC" --unitCells=10 -d 4.08 -o truncatedCube.omd gold.omd
