@@ -1,7 +1,7 @@
 <OpenMD version=2>
   <MetaData>
 
-#include "../water.inc"
+#include "water.inc"
 
 component{
   type = "SPCE";
@@ -31,7 +31,7 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 1e5;
+runTime = 1e3;
 
 sampleTime = 1000;
 statusTime = 2;

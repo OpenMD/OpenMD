@@ -57,4 +57,4 @@ You can see the velocity resampling events if you plot the total energy of this 
 xmgrace ar864.stat
 ```
 
-<img src="../figures/ar864.png" alt="image" width="500" height="auto">
+<img src="../figures/argon.png" alt="image" width="500" height="auto">
