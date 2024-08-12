@@ -46,8 +46,33 @@ where $\sigma$ and $\epsilon$ values for each atom are given in the frc file. On
 ```
 atype1 atype2 InversePowerSeries  12  C12   6  C6   4  C4
 ```
+
 where the `C12`, `C6`, and `C4` are replaced with the values calculated above.
 
 ## Instructions
 
+The following examples highlight the differences between the normal 12-6 Lennard-Jones potential and the 12-6-4 potential discussed above. Both `NaCl_12_6.omd` and `NaCl_12_6_4.omd` contain equivalent aqueous ion solutions but differ in the force field (potential) used.
+
+### Example 1
+
+```
+mpirun -np 4 openmd_MPI NaCl_12_6.omd
+```
+
+### Example 2
+
+```
+mpirun -np 4 openmd_MPI NaCl_12_6_4.omd
+```
+
 ## Expected Output
+
+The following command:
+
+```
+xmgrace NaCl_12_6_4.stat NaCl_12_6.stat
+```
+
+plots the differences between the total energy of the two example simulations. As we can see, the effect of moving to a 12-6-4 potential has a noticable impact on this quantity.
+
+<img src="../figures/aqueousIons.png" alt="image" width="500" height="auto">
