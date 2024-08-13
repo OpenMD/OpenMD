@@ -4,17 +4,22 @@
 The sample in this directory provides a way of checking the value of
 the Madelung Energy for a perfect crystal of NaCl using different methods of computing electrostatic interactions.  The relevant quantities are:
 
-$$\begin{aligned}
+$$
+\begin{aligned}
 M \text{ (Madelung constant)} &= 1.74756 \\
-a \text{ (lattice constant)} &= 5.65 \text{Angstroms} \\
+a \text{ (lattice constant)} &= 5.65 \AA \\
+
 \frac{q^2}{4 \pi \epsilon_0 a} &= 58.77233 \text{ kcal mol}^{-1} \\
 M \frac{q^2}{4 \pi \epsilon_0 a} & = 102.708173 \text{ kcal mol}^{-1}\\
-\end{aligned}$$ 
+\end{aligned}
+$$ 
 
 The file `NaCl.omd` contains 8000 ions, so the total electrostatic energy
 of the perfect crystal in this file should be:
 
-$$V_\text{electrostatic} = -821665.38 \text{ kcal mol}^{-1}$$
+$$
+V_\text{electrostatic} = -821665.38 \text{ kcal mol}^{-1}
+$$
 
 ## Instructions
 Using different electrostatic calculation methods, we can get quite
@@ -53,17 +58,17 @@ The report generated from this simulation should look like:
 #       Number of Samples:           2                                        #
 #            Total Energy:     -709366  ±  0            kcal/mol              #
 #        Potential Energy:     -709366  ±  0            kcal/mol              #
-#          Kinetic Energy: 2.34108e-25  ±  3.24457e-25  kcal/mol              #
-#             Temperature: 9.81846e-27  ±  1.36077e-26  K                     #
-#                Pressure:      116088  ±  0.00118777   atm                   #
+#          Kinetic Energy: 2.33099e-25  ±  3.23058e-25  kcal/mol              #
+#             Temperature: 9.77614e-27  ±  1.3549e-26   K                     #
+#                Pressure:      116086  ±  0            atm                   #
 #                  Volume:      180362  ±  0            A^3                   #
 #      Conserved Quantity:     -709366  ±  0            kcal/mol              #
-# Electrostatic Potential:     -821668  ±  0.00589253   kcal/mol              #
+# Electrostatic Potential:     -821668  ±  0            kcal/mol              #
 ###############################################################################
 ```
 
 Looking into the `NaCl.stat` file shows that the resultant electrostatic potential is:
-
-$$V_\text{electrostatic} = -821667.61 \text{ kcal mol}^{-1}$$
-
-which is only a 0.0002714 % error from the true Madelung energy.
+$$
+V_\text{electrostatic} = -821667.68 \text{ kcal mol}^{-1}
+$$
+which is only a 0.00028 % error from the true Madelung energy.
