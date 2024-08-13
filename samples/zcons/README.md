@@ -56,6 +56,6 @@ Of note with this example is a new file type you may notice: `.fz`. This is a ra
 
 ## References
 
-[^1]: Roux, B.; Karplus, M. Ion Transport in a Gramicidin-Like Channel: Dynamics and Mobility. *J. Phys. Chem.* **1991**, 95, 4856–4868.
+[^1]: Merdaw, A. A.; Sharif, A. O.; Derwish, G. A. W. Water permeability in polymeric membranes, Part I. *Desalination* **2010**, 260, 180–192.
 
-[^2]: Merdaw, A. A.; Sharif, A. O.; Derwish, G. A. W. Water permeability in polymeric membranes, Part I. *Desalination* **2010**, 260, 180–192.
+[^2]: Roux, B.; Karplus, M. Ion Transport in a Gramicidin-Like Channel: Dynamics and Mobility. *J. Phys. Chem.* **1991**, 95, 4856–4868.
