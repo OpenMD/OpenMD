@@ -1,0 +1,124 @@
+// SPC/E water model available in: J. Phys. Chem. 91, 24, (1987) 6269
+//    H.J.C.Berendsen, J.R.Grigera, T.P.Straatsma
+//
+// Graphene parameters are from: "OPLS/2020 Force Field for Unsaturated
+// Hydrocarbons, Alcohols, and Ethers," William L. Jorgensen, Mohammad
+// M. Ghahremanpour, Anastasia Saar, and Julian Tirado-Rives
+//
+// Methanol parameters are based on GAFF-DC:
+//
+// "A Fixed-Charge Model for Alcohol Polarization in the Condensed Phase,
+// and Its Role in Small Molecule Hydration," Christopher J. Fennell,
+// Karisa L. Wymer, and David L. Mobley, J. Phys. Chem. B 2014, 118, 24,
+// 6438–6446
+
+begin Options
+      Name	"MethanolWater"
+      vdW-14-scale		0.5
+      electrostatic-14-scale	0.83333333333333
+end Options
+
+begin BaseAtomTypes    
+//Name		mass	 (amu)
+O		15.9994
+H		1.0079
+C               12.0107
+end BaseAtomTypes
+
+begin AtomTypes
+//name          baseatomtype
+OW              O
+HW              H
+O_SPCE          OW
+H_SPCE          HW
+C3              C
+OH              O
+HO              H
+HC              H
+CA              C
+CB              C
+HA              H
+end AtomTypes
+
+begin ChargeAtomTypes
+//name			charge
+O_SPCE		       -0.8476
+H_SPCE			0.4238
+C3                      0.14521
+OH                     -0.72579
+HO                      0.48011
+HC                      0.03349
+CA                     -0.115
+HA                      0.115
+end ChargeAtomTypes
+
+begin LennardJonesAtomTypes
+//name		epsilon(kcal/mol)  sigma(Angstroms)
+O_SPCE          0.15532         3.16549
+HC		0.0208		2.4220
+C3		0.1078		3.3977
+OH		0.0930		3.2429
+HO		0.0047		0.5379
+CA              0.068           3.55
+CB              0.068           3.55
+HA              0.030           2.42
+end LennardJonesAtomTypes
+
+begin BondTypes
+//Atom1	Atom2	Harmonic	b0		kb (kcal/mol)
+HC	C3	Harmonic	1.097		751.8	// GAFF
+C3	OH	Harmonic	1.423		586.8	// GAFF
+OH	HO	Harmonic	0.973	        1127.0  // GAFF
+CA      HA      Harmonic        1.080           734     // OPLS 2020
+CB      CB      Harmonic        1.370           1040    // OPLS 2020
+CA      CB      Harmonic        1.404           938     // OPLS 2020
+CA      CA      Harmonic        1.40            938     // OPLS 2020
+end BondTypes
+
+begin BendTypes
+//Atom1	Atom2	Atom3	Harmonic	Theta	Ktheta
+C3	OH	HO	Harmonic	107.26	98.0    // GAFF
+OH	C3	HC	Harmonic	110.26 125.0    // GAFF
+HC	C3	HC	Harmonic	108.46	77.6    // GAFF
+CB      CB      CB      Harmonic        120.0  126.0
+CB      CB      CA      Harmonic        120.0  126.0
+CA      CB      CA      Harmonic        120.0  126.0
+CB      CA      CB      Harmonic        120.0  126.0
+CA      CA      CA      Harmonic        120.0  126.0
+CA      CA      CB      Harmonic        120.0  126.0
+CA      CA      HA      Harmonic        120.0   70.0
+CB      CA      HA      Harmonic        120.0   70.0
+end BendTypes
+
+begin TorsionTypes
+//Atom1 Atom2	Atom3	Atom4	Charmm	Kchi	n	delta	[Kchi	n	delta]
+HC	C	OH	HO	Charmm	0.167	3	0.0000
+// V_Opls = v1 / 2 * [1 + cos(phi)] + v2 / 2 * [1 - cos(2*phi)] + v3 / 2 * [1 + cos(3*phi)]
+// units for v_n: kcal / mol
+// X is wildcard atom type:
+CA      CB      CB      CA      Opls            0.0             7.250           0.0
+CB      CB      CB      CB      Opls            0.0             7.250           0.0
+CB      CB      CB      CA      Opls            0.0             7.250           0.0
+CA      CA      CB      CB      Opls            0.0             7.250           0.0
+CB      CA      CB      CB      Opls            0.0             7.250           0.0
+CA      CA      CB      CA      Opls            0.0             7.250           0.0
+CA      CB      CA      CB      Opls            0.0             7.250           0.0
+X       CB      CB      X       Opls            0.0             7.250           0.0
+X       CA      CA      X       Opls            0.0             7.250           0.0
+CA      CA      CA      CB      Opls            0.0             7.250           0.0
+HA      CA      CA      CB      Opls            0.0             7.250           0.0
+HA      CA      CB      CB      Opls            0.0             7.250           0.0
+HA      CA      CB      CA      Opls            0.0             7.250           0.0
+HA      CA      CA      HA      Opls            0.0             7.250           0.0
+end TorsionTypes
+
+begin InversionTypes
+CB      CB      CB      CB      AmberImproper   1.100
+CB      CB      CB      CA      AmberImproper   1.100
+CB      CB      CA      CA      AmberImproper   1.100
+CB      CA      CA      CA      AmberImproper   1.100
+CA      HA      CA      CB      AmberImproper   1.100
+CA      HA      CA      CA      AmberImproper   1.100
+CA      HA      CB      CB      AmberImproper   1.100
+end InversionTypes
+
