@@ -153,7 +153,7 @@ namespace OpenMD {
       ofs << "#r\tcorrValue\n";
       for (unsigned int i = 0; i < avgGofr_.size(); ++i) {
         RealType r = deltaR_ * (i + 0.5);
-        ofs << r << "\t" << avgGofr_[i] / nProcessed_  << "\n";
+        ofs << r << "\t" << avgGofr_[i] / nProcessed_ << "\n";
       }
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,

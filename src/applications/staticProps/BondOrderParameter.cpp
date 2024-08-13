@@ -64,7 +64,7 @@ namespace OpenMD {
       selectionScript_(sele), seleMan_(info), evaluator_(info) {
     setAnalysisType("Bond Order Parameters");
     setOutputName(getPrefix(filename) + ".bo");
-    
+
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -72,7 +72,7 @@ namespace OpenMD {
 
     // Set up cutoff radius and order of the Legendre Polynomial:
 
-    rCut_ = rCut;
+    rCut_  = rCut;
     nBins_ = nbins;
 
     std::stringstream params;
