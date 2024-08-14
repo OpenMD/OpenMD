@@ -32,10 +32,10 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 1e3;
+runTime = 5000;
 
-sampleTime = 1000;
-statusTime = 2;
+sampleTime = 50;
+statusTime = 5;
 
 ## Last run using OpenMD version: 3.0, revision: 9ef978bbd9b3b4b548d940d68c8f493c7fb46a18
   </MetaData>

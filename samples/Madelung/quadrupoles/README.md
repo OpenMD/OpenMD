@@ -44,7 +44,7 @@ mol, the electrostatic energies are:
 $E$ here is an energy density, so it must be multiplied by the total
 volume of the box.
 
-For example, the `fcc.omd` sample has a 8000 quadrupoles (1
+For example, the `sc.omd` sample has a 8000 quadrupoles (1
 Debye-angstrom each) in a (40 angstrom)^3 box with a lattice spacing
 of 2 angstroms, so the resulting energy is:
 
