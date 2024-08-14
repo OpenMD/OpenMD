@@ -12,21 +12,27 @@ $$C_{4}(i-j) = \left( C_{4}(i-H2O)  \left(\frac{\alpha_j}{\alpha_{H2O}}\right) +
 
 which was suggested in the original 12-6-4 paper:
 
-- "Systematic Parameterization of Monovalent Ions Employing the Nonbonded Model," Pengfei Li, Lin Frank Song, and Kenneth M. Merz Jr., *Journal of Chemical Theory and Computation*, **11** (4), 1645-1657, (2015) DOI: 10.1021/ct500918t 
+> "Systematic Parameterization of Monovalent Ions Employing the Nonbonded Model," Pengfei 
+> Li, Lin Frank Song, and Kenneth M. Merz Jr., *Journal of Chemical Theory and 
+> Computation*, **11** (4), 1645-1657, (2015) DOI: 10.1021/ct500918t 
 
 A few pieces of information are required:
 
 1. Atomic polarizability values $(\alpha_j)$. These can be taken either from Sangster & Atwood:
 
-    - M J L Sangster and R M Atwood, *J. Phys. C: Solid State Phys*, **11**, 1541 (1978) DOI 10.1088/0022-3719/11/8/015
+    > M J L Sangster and R M Atwood, *J. Phys. C: Solid State Phys*,
+    > **11**, 1541 (1978) DOI 10.1088/0022-3719/11/8/015
 
     or from Miller:
 
-    - "Additivity methods in molecular polarizability," Kenneth J. Miller, *Journal of the American Chemical Society*, **112** (23), 8533-8542 (1990). DOI: 10.1021/ja00179a044
+    > "Additivity methods in molecular polarizability," Kenneth J. Miller,
+    > *Journal of the American Chemical Society*, **112** (23), 
+    > 8533-8542 (1990). DOI: 10.1021/ja00179a044
 
 2. Water polarizability values $(\alpha_{H2O})$.  We are using $1.444 Å^3$, which was taken from Eisenberg and Kauzmann:
 
-    - Eisenberg, D. S.; Kauzmann, W. *The Structure and Properties of Water* (Oxford University Press: Oxford, U.K., 1969)
+    > Eisenberg, D. S.; Kauzmann, W. *The Structure and Properties of Water* (Oxford
+    > University Press: Oxford, U.K., 1969)
 
 3. $C_4$ values for ion $i$ with the water model. These are taken from the relevant force field for a specific water model, and are model-dependent. In the example in this directory, we have taken the $C_4$ values for Na+ and Cl- ions from the `LiMerzIons12-6-4.SPCE.frc` file in the `forceFields` directory.
 
@@ -56,23 +62,30 @@ The following examples highlight the differences between the normal 12-6 Lennard
 ### Example 1
 
 ```
-mpirun -np 4 openmd_MPI NaCl_12_6.omd
+$ mpirun -np 4 openmd_MPI NaCl_12_6.omd
 ```
 
 ### Example 2
 
 ```
-mpirun -np 4 openmd_MPI NaCl_12_6_4.omd
+$ mpirun -np 4 openmd_MPI NaCl_12_6_4.omd
 ```
 
 ## Expected Output
 
-The following command:
+To visualize the impact changing to a 12-6-4 potential might have, we can calculate the g(r) for `Na+` to `O_SPCE` (`Cl-` to `H_SPCE` would work equally well) with the following:
 
 ```
-xmgrace NaCl_12_6_4.stat NaCl_12_6.stat
+$ StaticProps -i NaCl_12_6.dump --gofr --sele1="select Na+" --sele2="select O_SPCE"
+$ StaticProps -i NaCl_12_6_4.dump --gofr --sele1="select Na+" --sele2="select O_SPCE"
 ```
 
-plots the differences between the total energy of the two example simulations. As we can see, the effect of moving to a 12-6-4 potential has a noticable impact on this quantity.
+Then we can plot them in xmgrace,
+
+```
+$ xmgrace NaCl_12_6_4.gofr NaCl_12_6.gofr
+```
+
+And as we can see, though subtle, the effect of moving to a 12-6-4 potential has a noticable shift in the first solvation shell of Na+ to the O on water.
 
 <img src="../figures/aqueousIons.png" alt="image" width="500" height="auto">
