@@ -32,9 +32,6 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Rev$"
-__date__ = "$LastChangedDate$"
-
 __copyright__ = "Copyright (c) 2004-present The University of Notre Dame. All Rights Reserved."
 __license__ = "OpenMD"
 
@@ -47,8 +44,6 @@ import numpy
 def usage():
     print(__doc__)
 
-    
-    
 def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, arrayType, outputFileName):
     # The following section creates 24 basic arrays from Luttinger and
     # Tisza:

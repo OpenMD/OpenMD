@@ -1,33 +1,41 @@
 #!@Python3_EXECUTABLE@
 
+# This is a quick and dirty script which modifies the cutoff radius on
+# a particular structure and pulls out the electrostatic energy from
+# the stat files. These are then assembled into energyVsCutoff. The
+# Reciprocal Energy is printed out via the statFileFormat, and this
+# energy is added to the Electrostatic Energy for cases where we want
+# to test multipolar Ewald sums.
+
 import fileinput
 import sys
 import subprocess
 import os
 from numpy import *
 
+# change this to sample cutoff radii for a different crystal:
 myCrystal = "B_bcc_001.omd"
 
 statfile = open("statfile", "w")
 for i in range(6, 20):
-	o = open("cutoffTest.omd",'w')
-	f = open(myCrystal, 'r')
-	for line in f:
-		if "cutoffRadius" in line:
-			o.write('     cutoffRadius = {:1f};\n'.format(float(i)))
-		elif "statFileFormat" in line:
-			o.write('     statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL|RECIPROCAL_POTENTIAL";\n')
-		else:
-			o.write(line)
-	o.close()
-	f.close()
-	subprocess.call(['../../../build/bin/openmd_MPI', 'cutoffTest.omd'])
-	f = open("cutoffTest.stat")
-	f.readline()
-	f.readline()
-	line = f.readline()
-	statfile.write(line)
-	f.close()
+    o = open("cutoffTest.omd",'w')
+    f = open(myCrystal, 'r')
+    for line in f:
+        if "cutoffRadius" in line:
+            o.write('     cutoffRadius = {:1f};\n'.format(float(i)))
+        elif "statFileFormat" in line:
+            o.write('     statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL|RECIPROCAL_POTENTIAL";\n')
+        else:
+            o.write(line)
+    o.close()
+    f.close()
+    subprocess.call(['openmd', 'cutoffTest.omd'])
+    f = open("cutoffTest.stat")
+    f.readline()
+    f.readline()
+    line = f.readline()
+    statfile.write(line)
+    f.close()
 statfile.close()
 
 data = loadtxt("statfile", double)
@@ -35,9 +43,9 @@ electrostaticPotential = data[:,8]
 reciporcalSpacePotential = data[:,9]
 total = electrostaticPotential + reciporcalSpacePotential
 
-f= open("cutoffVsEnergy", 'w')
+f= open("energyVsCutoff", 'w')
 for i in range(6, 20):
-	j = i-6
-	f.write('{}\t{}\n'.format(i, total[j]))
+    j = i-6
+    f.write('{}\t{}\n'.format(i, total[j]))
 f.close()  
 
