@@ -1,0 +1,43 @@
+#!@Python3_EXECUTABLE@
+
+import fileinput
+import sys
+import subprocess
+import os
+from numpy import *
+
+myCrystal = "B_bcc_001.omd"
+
+statfile = open("statfile", "w")
+for i in range(6, 20):
+	o = open("cutoffTest.omd",'w')
+	f = open(myCrystal, 'r')
+	for line in f:
+		if "cutoffRadius" in line:
+			o.write('     cutoffRadius = {:1f};\n'.format(float(i)))
+		elif "statFileFormat" in line:
+			o.write('     statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL|RECIPROCAL_POTENTIAL";\n')
+		else:
+			o.write(line)
+	o.close()
+	f.close()
+	subprocess.call(['../../../build/bin/openmd_MPI', 'cutoffTest.omd'])
+	f = open("cutoffTest.stat")
+	f.readline()
+	f.readline()
+	line = f.readline()
+	statfile.write(line)
+	f.close()
+statfile.close()
+
+data = loadtxt("statfile", double)
+electrostaticPotential = data[:,8]
+reciporcalSpacePotential = data[:,9]
+total = electrostaticPotential + reciporcalSpacePotential
+
+f= open("cutoffVsEnergy", 'w')
+for i in range(6, 20):
+	j = i-6
+	f.write('{}\t{}\n'.format(i, total[j]))
+f.close()  
+

@@ -1004,7 +1004,8 @@ set(PYNONUMPY_FILES
     src/applications/utilities/waterBoxer
     src/applications/utilities/waterRotator
     src/applications/utilities/waterSphere
-    src/applications/utilities/stat2dipolecorr)
+    src/applications/utilities/stat2dipolecorr
+    samples/Madelung/dipoles/fieldValues)
 
 set(PYNUMPY_FILES
     src/applications/utilities/hbtetAnalyzer
@@ -1014,7 +1015,10 @@ set(PYNUMPY_FILES
     src/applications/utilities/slabBuilder
     src/applications/utilities/vcorr2spectrum
     src/applications/utilities/waterReplacer
-    src/applications/utilities/wcorr2spectrum)
+    src/applications/utilities/wcorr2spectrum
+    samples/Madelung/dipoles/buildDipolarArray
+    samples/Madelung/dipoles/changeCutoff
+    samples/Madelung/quadrupoles/buildQuadrupolarArray)
 
 set(PYSCIPY_FILES
     src/applications/utilities/lcorrzFit src/applications/utilities/slipLength
