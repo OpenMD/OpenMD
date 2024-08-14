@@ -6,7 +6,7 @@ the Madelung Energy for a perfect crystal of NaCl using different methods of com
 
 $$\begin{aligned}
 M \text{ (Madelung constant)} &= 1.74756 \\
-a \text{ (lattice constant)} &= 5.65 \AA \\
+a \text{ (lattice constant)} &= 5.65 \text{ angstroms} \\
 \frac{q^2}{4 \pi \epsilon_0 a} &= 58.77233 \text{ kcal mol}^{-1} \\
 M \frac{q^2}{4 \pi \epsilon_0 a} & = 102.708173 \text{ kcal mol}^{-1}\\
 \end{aligned}$$ 
