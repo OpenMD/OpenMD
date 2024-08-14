@@ -3,6 +3,7 @@
 ## Background Information
 The sample in this directory provides a way of checking the value of
 the Madelung Energy for a perfect crystal of NaCl using different methods of computing electrostatic interactions.  The relevant quantities are:
+
 $$\begin{aligned}
 M \text{ (Madelung constant)} &= 1.74756 \\
 a \text{ (lattice constant)} &= 5.65 \AA \\
@@ -12,6 +13,7 @@ M \frac{q^2}{4 \pi \epsilon_0 a} & = 102.708173 \text{ kcal mol}^{-1}\\
 
 The file `NaCl.omd` contains 8000 ions, so the total electrostatic energy
 of the perfect crystal in this file should be:
+
 $$V_\text{electrostatic} = -821665.38 \text{ kcal mol}^{-1}$$
 
 ## Instructions
@@ -61,5 +63,7 @@ The report generated from this simulation should look like:
 ```
 
 Looking into the `NaCl.stat` file shows that the resultant electrostatic potential is:
+
 $$V_\text{electrostatic} = -821667.68 \text{ kcal mol}^{-1}$$
+
 which is only a 0.00028 % error from the true Madelung energy.
