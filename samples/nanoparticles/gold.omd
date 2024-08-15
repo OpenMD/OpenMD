@@ -1,0 +1,20 @@
+<OpenMD>
+  <MetaData>
+molecule{
+name = "Au";
+
+atom[0]{
+type = "Au";
+position(0.0, 0.0, 0.0);
+     }
+}
+
+component{
+type = "Au";
+nMol = 1;
+}
+
+forceField = "SC";
+forceFieldFileName = "SuttonChen.QSC.frc";
+  </MetaData>
+</OpenMD>
