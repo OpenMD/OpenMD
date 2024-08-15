@@ -59,7 +59,7 @@ namespace OpenMD {
   BondOrderParameter::BondOrderParameter(SimInfo* info,
                                          const std::string& filename,
                                          const std::string& sele, double rCut,
-                                         int nbins) :
+                                         unsigned int nbins) :
       StaticAnalyser(info, filename, nbins),
       selectionScript_(sele), seleMan_(info), evaluator_(info) {
     setAnalysisType("Bond Order Parameters");
@@ -72,7 +72,8 @@ namespace OpenMD {
 
     // Set up cutoff radius and order of the Legendre Polynomial:
 
-    rCut_ = rCut;
+    rCut_  = rCut;
+    nBins_ = nbins;
 
     std::stringstream params;
     params << " rcut = " << rCut_ << ", nbins = " << nBins_;
@@ -86,14 +87,14 @@ namespace OpenMD {
 
     MinQ_   = 0.0;
     MaxQ_   = 1.1;
-    deltaQ_ = (MaxQ_ - MinQ_) / nbins;
+    deltaQ_ = (MaxQ_ - MinQ_) / (nBins_);
 
     // W_6 for icosahedral clusters is 11 / sqrt(4199) = 0.169754, so we'll
     // use values for MinW_ and MaxW_ that are slightly larger than this:
 
     MinW_   = -1.1;
     MaxW_   = 1.1;
-    deltaW_ = (MaxW_ - MinW_) / nbins;
+    deltaW_ = (MaxW_ - MinW_) / (nBins_);
 
     // Make arrays for Wigner3jm
     RealType* THRCOF = new RealType[2 * lMax_ + 1];
@@ -390,12 +391,12 @@ namespace OpenMD {
     std::ofstream osw((getOutputFileName() + "w").c_str());
 
     if (osw.is_open()) {
-      osq << "# " << getAnalysisType() << "\n";
-      osq << "# OpenMD " << rev.getFullRevision() << "\n";
-      osq << "# " << rev.getBuildDate() << "\n";
-      osq << "# selection script: \"" << selectionScript_ << "\"\n";
+      osw << "# " << getAnalysisType() << "\n";
+      osw << "# OpenMD " << rev.getFullRevision() << "\n";
+      osw << "# " << rev.getBuildDate() << "\n";
+      osw << "# selection script: \"" << selectionScript_ << "\"\n";
       if (!paramString_.empty())
-        osq << "# parameters: " << paramString_ << "\n";
+        osw << "# parameters: " << paramString_ << "\n";
 
       for (int l = 0; l <= lMax_; l++) {
         osw << "# <W_" << l << ">: " << real(What[l]) << "\t" << imag(What[l])

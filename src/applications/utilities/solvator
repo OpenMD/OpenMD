@@ -1,286 +1,222 @@
-#!@PERL_EXECUTABLE@
+#!@Python3_EXECUTABLE@
 
-# program that reads in a water box and solute xyz (or pdb), merges the two systems, and
-# deletes overlapping molecules
+# program that reads in a water box and solute xyz (or pdb), merges
+# the two systems, and deletes overlapping molecules
 
-# author    = "Chris Fennell
-# copyright = "Copyright (c) 2004-present The University of Notre Dame. All Rights Reserved."
-# license   = "OpenMD"
+__author__ = "Chris Fennell and Dan Gezelter"
+__copyright__ = "Copyright (c) 2004-present The University of Notre Dame. All Rights Reserved."
+__license__ = "OpenMD"
 
+import argparse
+import sys
+import math
 
-use Getopt::Std;
+d2tolerance = 7.5625  # distance to start cutting
+fileName = 'solvatedSystem.omd'
+startSnap = 0
+startFrame = 0
+startStunts = 0
+startMeta = 0
+soluteName = 'SOLUTE'
+nSolvent = 0
 
-$d2tolerance = 7.5625; #distance to start cutting
-$fileName = 'solvatedSystem.omd';
-$startSnap = 0;
-$startFrame = 0;
-$startStunts = 0;
-$startMeta = 0;
-$soluteName = 'SOLUTE';
-$nSolvent = 0;
+# Argument parser setup
+parser = argparse.ArgumentParser(description='Carves a solute void in an OpenMD water box', 
+                                    formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     epilog=
+'''
+Example:
+       solvator -i myWater.omd -p mySolute.pdb -o mySystem.omd
+''')
+parser.add_argument('-f', '--flexible=', type=bool, dest='f',
+                        action=argparse.BooleanOptionalAction, default=False,
+                        help='include a flexible solute model description in the output file rather than the rigid body solute model description')
+parser.add_argument('-d', action='store', dest='d',
+                        type=float, default=2.75, required=False,
+                        help='Overlap removal distance (in angstroms)')
+parser.add_argument('-i', type=str, required=True, action='store', dest='i',
+                        help='Solvent input file (OpenMD .omd file)')
+parser.add_argument('-n', type=str, help='Name for the solute',
+                        required=False, dest='n', action='store',
+                        default='SOLUTE')
+parser.add_argument('-o', '--output=', action='store', dest='o',
+                        required=False, default='solvatedSystem.omd',
+                        help='Carved solvent output file (OpenMD .omd format)')
+parser.add_argument('-p', type=str, help='Solute input file (pdb)',
+                        action='store', dest='p')
+parser.add_argument('-x', type=str, help='Solute input file (xyz)',
+                        action='store', dest='x')
+args = parser.parse_args()
 
-# get our options
-getopts('fhd:i:n:o:p:x:');
+# Set variables from arguments
+if args.i:
+    solventName = args.i
+else:
+    sys.exit("Error: No solvent box specified\nPlease select a solvent box using the -i flag")
 
-# if we don't have a filename, drop to -h
-$opt_h = 'true' if $#ARGV != -1;
+soluteFileName = args.p if args.p else args.x
+fileName = args.o if args.o else fileName
+soluteName = args.n if args.n else soluteName
 
-# our option output 
-if ($opt_h){
-  print "solvator: carves a solute void in an OpenMD water box\n\n";
-  print "usage: solvator [-fh] [-d distance tolerance] [-i file name (solvent)]";
-  print " [-n solute name] [-px file name (solute)] [-o file name (output)]\n\n";
-  print "  -f : include a flexible solute model description in the output file rather\n";
-  print "       than the rigid body solute model description\n";
-  print "  -h : show this message\n\n";
-  print "  -d real : overlap removal distance\n";
-  print "                 (default: 2.75 ang)\n";
-  print "  -i char : solvent input file (OpenMD .omd file)\n";
-  print "  -n char : name for the solute\n";
-  print "                 (default: SOLUTE)\n";
-  print "  -o char : carved solvent output file (OpenMD .omd format)\n";
-  print "                 (default: 'solvatedSystem.omd')\n";
-  print "  -p char : solute input file (pdb)\n";
-  print "  -x char : solute input file (xyz)\n\n";
-  print "Example:\n";
-  die   "   solvator -i myWater.omd -p mySolute.pdb -o mySystem.omd\n";
-}
+if not (args.p or args.x):
+    sys.exit("Error: No solute file specified\nPlease select a solute file with the -p or -x flags (pdb or xyz respectively)")
 
-# set some variables to be used in the code
-if (defined($opt_i)){
-  $solventName = $opt_i;
-} else {
-  die "Error: No solvent box specified\n       Please select a solvent box using the -i flag\n";
-}
+if args.d:
+    dval = args.d
+    d2tolerance = dval * dval
+else:
+    d2tolerance = 7.5625
 
-$soluteFileName = $opt_p if defined($opt_p);
-$soluteFileName = $opt_x if defined($opt_x);
-$fileName = $opt_o if defined($opt_o);
-$soluteName = $opt_n if defined($opt_n);
+# Open files
+try:
+    with open(soluteFileName, 'r') as solute_file:
+        solute_data = solute_file.readlines()
+except FileNotFoundError:
+    sys.exit(f"Error: Can't open file {soluteFileName}")
 
-if (defined($opt_p) || defined($opt_x)){
-} else {
-  die "Error: No solute file specifed\n       Please select a solute file with the -p or -x flags (pdb or xyz respectively)\n";
-}
+solute_names, solute_x, solute_y, solute_z = [], [], [], []
 
-if (defined($opt_d)){
-  if ($opt_d =~ /^[0-9]/) {
-    $dval = $opt_d;
-    $d2tolerance = $dval*$dval;
-  } else {
-    die "Error: The '-d' value ($opt_d) is not a valid number\n       Please choose a positive real # value\n";
-  }
-}
+if args.x:
+    headerLines = 2
+    for line in solute_data:
+        if headerLines > 0:
+            headerLines -= 1
+        else:
+            parts = line.split()
+            solute_names.append(parts[0])
+            solute_x.append(float(parts[1]))
+            solute_y.append(float(parts[2]))
+            solute_z.append(float(parts[3]))
 
-# open the file writer
-open(OUTFILE, ">./$fileName") || die "Error: can't open file $fileName\n";
+if args.p:
+    for line in solute_data:
+        parts = line.split()
+        if parts[0] == 'ATOM' or parts[0] == 'HETATM':
+            solute_names.append(parts[2])
+            solute_x.append(float(parts[5]))
+            solute_y.append(float(parts[6]))
+            solute_z.append(float(parts[7]))
 
-# open and read the pdb or xyz file and get solute coordinates
-open(SOLUTEFILE, "$soluteFileName") || die "Error: Can't open file $soluteFileName\n";
+# Remap solute to the center of the box
+xSol = sum(solute_x) / len(solute_x)
+ySol = sum(solute_y) / len(solute_y)
+zSol = sum(solute_z) / len(solute_z)
 
-if (defined($opt_x)){
-  $headerLines = 2;
-  while (<SOLUTEFILE>){
-    if ($headerLines > 0){
-      $headerLines--;
-    } else {
-      chomp;
-      @line = split;
-      push(@solute_names, $line[0]);
-      push(@solute_x, $line[1]);
-      push(@solute_y, $line[2]);
-      push(@solute_z, $line[3]);
-    }
-  }
-}
-if (defined($opt_p)){
-  while (<SOLUTEFILE>){
-    chomp;
-    @line = split;
-    if ($line[0] eq 'ATOM'){
-      push(@solute_names, $line[2]);
-      push(@solute_x, $line[5]);
-      push(@solute_y, $line[6]);
-      push(@solute_z, $line[7]);
-    }
-  }
-}
+solute_x = [x - xSol for x in solute_x]
+solute_y = [y - ySol for y in solute_y]
+solute_z = [z - zSol for z in solute_z]
 
-# remap solute to the center of the box
-$xSol = 0;
-$ySol = 0;
-$zSol = 0;
-for ($i=0; $i<=$#solute_x; $i++){
-  $xSol += $solute_x[$i];
-  $ySol += $solute_y[$i];
-  $zSol += $solute_z[$i];
-}
-$xSol /= $#solute_x + 1;
-$ySol /= $#solute_y + 1;
-$zSol /= $#solute_z + 1;
-for ($i=0; $i<=$#solute_x; $i++){
-  $solute_x[$i] -= $xSol;
-  $solute_y[$i] -= $ySol;
-  $solute_z[$i] -= $zSol;
-}
+soluteCount = len(solute_x) if args.f else 1
+solventCount = soluteCount
 
-if ($opt_f){
-  $soluteCount = $#solute_x + 1;
-} else {
-  $soluteCount = 1;
-}
+# Process solvent file and write output
+try:
+    with open(solventName, 'r') as solvent_file, open(fileName, 'w') as out_file:
+        startSnap = startFrame = startStunts = startMeta = 0
+        frameData, metaLines, goodSolventMolecules = [], [], []
 
-$solventCount = $soluteCount;
-# okay, let's open the solvent box and write a carved file
-open(SOLVENT, "$solventName") || die "Error: Can't open file $solventName\n";
+        for line in solvent_file:
+            if "</Snapshot" in line:
+                startSnap = 0
+            if "</FrameData" in line:
+                startFrame = 0
+            if "</StuntDoubles" in line:
+                startStunts = 0
+            if "</MetaData" in line:
+                startMeta = 0
+            if "</OpenMD" in line:
+                break
 
+            if startMeta == 1:
+                metaLines.append(line)
 
-while (<SOLVENT>){
-  $startSnap = 0 if /\/Snapshot/;
-  $startFrame = 0 if /\/FrameData/;
-  $startStunts = 0 if /\/StuntDoubles/;
-  $startMeta = 0 if /\/MetaData/;
+            if startSnap == 1:
+                if startFrame == 1:
+                    frameData.append(line)
+                if "Hmat" in line:
+                    parts = line.split()
+                    hxx, hyy, hzz = float(parts[2][:-1]), float(parts[8][:-1]), float(parts[14])
+                if startStunts == 1:
+                    parts = line.split()
+                    x_val = float(parts[2]) - (hxx * round(float(parts[2]) / hxx))
+                    y_val = float(parts[3]) - (hyy * round(float(parts[3]) / hyy))
+                    z_val = float(parts[4]) - (hzz * round(float(parts[4]) / hzz))
 
-  # save the MetaData lines
-  push(@metaLines, $_) if $startMeta == 1;
+                    saveFlag = True
+                    for i in range(len(solute_x)):
+                        diff_x = x_val - solute_x[i]
+                        diff_y = y_val - solute_y[i]
+                        diff_z = z_val - solute_z[i]
+                        dist2 = diff_x * diff_x + diff_y * diff_y + diff_z * diff_z
+                        if dist2 < d2tolerance:
+                            saveFlag = False
+                            break
 
-  if ($startSnap == 1){
-    # save the frame data
-    push(@frameData, $_) if $startFrame == 1;
-    if (/Hmat/){
-      @line = split;
-      $hxx = $line[2];
-      chop($hxx);
-      $hyy = $line[8];
-      chop($hyy);
-      $hzz = $line[14];
-    }
-    if ($startStunts == 1){
-      @line = split;
+                    if saveFlag:
+                        saveLine = f"{solventCount}\t{parts[1]}\t{parts[2]}"
+                        saveLine += ''.join([f" {p}" for p in parts[3:]])
+                        goodSolventMolecules.append(saveLine)
+                        solventCount += 1
 
-      # wrap positions back into the box
-      $x_val = $line[2] - ($hxx*round($line[2]/$hxx));
-      $y_val = $line[3] - ($hyy*round($line[3]/$hyy));
-      $z_val = $line[4] - ($hzz*round($line[4]/$hzz));
+            if "<Snapshot" in line:
+                startSnap = 1
+            if "<FrameData" in line:
+                startFrame = 1
+            if "<StuntDoubles" in line:
+                startStunts = 1
+            if "<MetaData" in line:
+                startMeta = 1
 
-      $saveFlag = 1;
-      for($i=0; $i<=$#solute_x; $i++){
-	$diff_x = $x_val - $solute_x[$i];
-	$diff_y = $y_val - $solute_y[$i];
-	$diff_z = $z_val - $solute_z[$i];
-	$dist2 = $diff_x*$diff_x + $diff_y*$diff_y + $diff_z*$diff_z;
-	if ($dist2 < $d2tolerance) {
-	  $saveFlag = 0;
-	  last;
-	}
-      }
-      if ($saveFlag == 1){
-	$saveLine = "$solventCount\t$line[1]\t$line[2]";
-	for ($i = 3; $i <= $#line; $i++){
-	  $saveLine = join(' ', $saveLine, $line[$i]);
-	}
-	push(@goodSolventMolecules, $saveLine);
-	$solventCount++;
-      }
-    }
-  }
-  $startSnap = 1 if /Snapshot/;
-  $startFrame = 1 if /FrameData/;
-  $startStunts = 1 if /StuntDoubles/;
-  $startMeta = 1 if /MetaData/;
-  # check again since "/value" contains "value"
-  $startSnap = 0 if /\/Snapshot/;
-  $startFrame = 0 if /\/FrameData/;
-  $startStunts = 0 if /\/StuntDoubles/;
-  $startMeta = 0 if /\/MetaData/;
-}
+        nSolvent = len(goodSolventMolecules)
 
-$nSolvent = $#goodSolventMolecules + 1;
+        # Write output file
+        out_file.write("<OpenMD version=2>\n")
+        out_file.write("  <MetaData>\n")
+        out_file.write("\nmolecule{{\n  name = \"{}\";\n\n".format(soluteName))
 
-# write out the final file
-writeOutFile();
-print "The solvated system \"$fileName\" was generated.\n";
+        if args.f:
+            for i in range(len(solute_x)):
+                out_file.write(f"  atom[{i}]{{\n    type = \"{solute_names[i]}\";\n  }}\n")
+            out_file.write("}\n")
+        else:
+            for i in range(len(solute_x)):
+                out_file.write(f"  atom[{i}]{{\n    type = \"{solute_names[i]}\";\n")
+                out_file.write(f"    position({solute_x[i]}, {solute_y[i]}, {solute_z[i]});\n  }}\n")
+            out_file.write("\n  rigidBody[0]{\n    members(")
+            out_file.write(", ".join(str(i) for i in range(len(solute_x))))
+            out_file.write(");\n  }\n}\n")
 
+        out_file.write(f"\ncomponent{{\n  type = \"{soluteName}\";\n  nMol = 1;\n}}\n")
+        for line in metaLines:
+            if "nMol" in line:
+                out_file.write(f"  nMol = {nSolvent};\n")
+            else:
+                out_file.write(line)
 
-sub writeOutFile {
-  # write out the header
-  print OUTFILE "<OpenMD version=1>\n";
-  printMetaData();
-  printFrameData();
-  print OUTFILE "    <StuntDoubles>\n";
-  # now print out the atoms
-  if (defined($opt_f)){
-    for ($i=0; $i<=$#solute_x; $i++){
-      print OUTFILE "$i\tp\t$solute_x[$i] $solute_y[$i] $solute_z[$i]\n";
-    }
-  } else {
-    print OUTFILE "0\tpq\t0.0 0.0 0.0 1.0 0.0 0.0 0.0\n";
-  }
-  for ($i=0; $i<=$#goodSolventMolecules; $i++) {
-    print OUTFILE "$goodSolventMolecules[$i]\n";
-  }
-  print OUTFILE "    </StuntDoubles>\n  </Snapshot>\n</OpenMD>\n";
-}
+        out_file.write("  </MetaData>\n")
+        out_file.write("  <Snapshot>\n")
+        out_file.write("    <FrameData>\n")
 
-sub printMetaData() {
-  print OUTFILE "  <MetaData>\n";
+        for line in frameData:
+            out_file.write(line)
 
-  writeSoluteDescription();
+        out_file.write("    </FrameData>\n")
+        out_file.write("    <StuntDoubles>\n")
 
-  for ($i = 0; $i<=$#metaLines; $i++) {
-    # reset the number of solvent molecules
-    if ($metaLines[$i] =~ /nMol/) {
-      $metaLines[$i] = "  nMol = $nSolvent;\n";
-    }
+        if args.f:
+            for i in range(len(solute_x)):
+                out_file.write(f"{i}\tp\t{solute_x[i]} {solute_y[i]} {solute_z[i]}\n")
+        else:
+            out_file.write("0\tpq\t0.0 0.0 0.0 1.0 0.0 0.0 0.0\n")
 
-    print OUTFILE "$metaLines[$i]";
-  }
+        for molecule in goodSolventMolecules:
+            out_file.write(f"{molecule}\n")
 
-  print OUTFILE "  </MetaData>\n";
-}
+        out_file.write("    </StuntDoubles>\n")
+        out_file.write("  </Snapshot>\n")
+        out_file.write("</OpenMD>\n")
 
-sub writeSoluteDescription {
-  # include a solute model description in the meta data region
+    print(f"The solvated system \"{fileName}\" was generated.")
 
-  print OUTFILE "\nmolecule{\n  name = \"$soluteName\";\n\n";
-
-  if (defined($opt_f)) {
-    # for flexible solutes
-    for ($i=0; $i<=$#solute_x; $i++){
-      print OUTFILE "  atom[$i]{\n    type = \"$solute_names[$i]\";\n  }\n";
-    }
-    print OUTFILE "}\n";
-  } else {
-    # the default is a rigid body solute
-    for ($i=0; $i<=$#solute_x; $i++){
-      print OUTFILE "  atom[$i]{\n    type = \"$solute_names[$i]\";\n    position($solute_x[$i], $solute_y[$i], $solute_z[$i]);\n  }\n";
-    }
-    print OUTFILE "\n  rigidBody[0]{\n    members(";
-    for ($i=0; $i<$#solute_x; $i++){
-      print OUTFILE "$i, ";
-    }
-    print OUTFILE "$#solute_x);\n  }\n}\n";
-  }
-
-  # now back to the metaData output
-  print OUTFILE "\ncomponent{
-  type = \"$soluteName\";
-  nMol = 1;
-}\n";
-
-  print "The solute model definition was included in '$fileName'.\n";
-}
-
-sub printFrameData {
-  print OUTFILE "  <Snapshot>\n    <FrameData>\n";
-
-  for($i = 0; $i<=$#frameData; $i++) {
-    print OUTFILE "$frameData[$i]";
-  }
-
-  print OUTFILE "    </FrameData>\n";
-}
-
-sub round {
-  return int( $_[0] + 0.5 * ($_[0] <=> 0) );
-}
+except FileNotFoundError:
+    sys.exit(f"Error: Can't open file {solventName}")

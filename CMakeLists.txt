@@ -248,44 +248,46 @@ if(FORMAT_OPENMD AND NOT WIN32)
   if(NOT formatter_NOTFOUND)
     message(STATUS "Formatting OpenMD")
 
-    # Run clang-format on all code except the files passed as arguments with the
-    # '-i' flag ##
+    ## Run clang-format on all code except the files passed as arguments with the '-i' flag ##
     execute_process(
-      COMMAND
-        bash ../cmake/scripts/format-codebase.sh -f ${formatter} -i antlr/* -i
-        applications/thermalizer/thermalizerCmd.hpp -i
-        applications/thermalizer/thermalizerCmd.cpp -i
-        applications/simpleBuilder/simpleBuilderCmd.hpp -i
-        applications/simpleBuilder/simpleBuilderCmd.cpp -i
-        applications/dump2Xyz/Dump2XYZCmd.hpp -i
-        applications/dump2Xyz/Dump2XYZCmd.cpp -i
-        applications/sequentialProps/SequentialPropsCmd.cpp -i
-        applications/sequentialProps/SequentialPropsCmd.hpp -i
-        applications/randomBuilder/randomBuilderCmd.hpp -i
-        applications/randomBuilder/randomBuilderCmd.cpp -i
-        applications/hydrodynamics/HydroCmd.hpp -i
-        applications/hydrodynamics/HydroCmd.cpp -i
-        applications/staticProps/StaticPropsCmd.hpp -i
-        applications/staticProps/StaticPropsCmd.cpp -i
-        applications/omd2omd/omd2omdCmd.cpp -i
-        applications/omd2omd/omd2omdCmd.hpp -i
-        applications/nanoparticleBuilder/nanorodBuilderCmd.hpp -i
-        applications/nanoparticleBuilder/nanorod_pentBuilderCmd.cpp -i
-        applications/nanoparticleBuilder/icosahedralBuilderCmd.hpp -i
-        applications/nanoparticleBuilder/nanoparticleBuilderCmd.hpp -i
-        applications/nanoparticleBuilder/nanorodBuilderCmd.cpp -i
-        applications/nanoparticleBuilder/nanorod_pentBuilderCmd.hpp -i
-        applications/nanoparticleBuilder/nanoparticleBuilderCmd.cpp -i
-        applications/nanoparticleBuilder/icosahedralBuilderCmd.cpp -i
-        applications/recenter/recenterCmd.cpp -i
-        applications/recenter/recenterCmd.hpp -i
-        applications/dynamicProps/DynamicPropsCmd.hpp -i
-        applications/dynamicProps/DynamicPropsCmd.cpp -i
-        applications/eos/equationofstateCmd.cpp -i
-        applications/eos/equationofstateCmd.hpp -i
-        applications/elasticConstants/elasticConstantsCmd.hpp -i
-        applications/elasticConstants/elasticConstantsCmd.cpp -i mdParser/* -i
-        utils/MemoryUtils.hpp
+      COMMAND bash ../cmake/scripts/format-codebase.sh
+                -f ${formatter}
+                -i antlr/*
+                -i applications/thermalizer/thermalizerCmd.hpp
+                -i applications/thermalizer/thermalizerCmd.cpp
+                -i applications/simpleBuilder/simpleBuilderCmd.hpp
+                -i applications/simpleBuilder/simpleBuilderCmd.cpp
+                -i applications/dump2Xyz/Dump2XYZCmd.hpp
+                -i applications/dump2Xyz/Dump2XYZCmd.cpp
+                -i applications/sequentialProps/SequentialPropsCmd.cpp
+                -i applications/sequentialProps/SequentialPropsCmd.hpp
+                -i applications/randomBuilder/randomBuilderCmd.hpp
+                -i applications/randomBuilder/randomBuilderCmd.cpp
+                -i applications/hydrodynamics/HydroCmd.hpp
+                -i applications/hydrodynamics/HydroCmd.cpp
+                -i applications/staticProps/StaticPropsCmd.hpp
+                -i applications/staticProps/StaticPropsCmd.cpp
+                -i applications/omd2omd/omd2omdCmd.cpp
+                -i applications/omd2omd/omd2omdCmd.hpp
+                -i applications/openmd/openmd.cpp
+                -i applications/nanoparticleBuilder/nanorodBuilderCmd.hpp
+                -i applications/nanoparticleBuilder/nanorod_pentBuilderCmd.cpp
+                -i applications/nanoparticleBuilder/icosahedralBuilderCmd.hpp
+                -i applications/nanoparticleBuilder/nanoparticleBuilderCmd.hpp
+                -i applications/nanoparticleBuilder/nanorodBuilderCmd.cpp
+                -i applications/nanoparticleBuilder/nanorod_pentBuilderCmd.hpp
+                -i applications/nanoparticleBuilder/nanoparticleBuilderCmd.cpp
+                -i applications/nanoparticleBuilder/icosahedralBuilderCmd.cpp
+                -i applications/recenter/recenterCmd.cpp
+                -i applications/recenter/recenterCmd.hpp
+                -i applications/dynamicProps/DynamicPropsCmd.hpp
+                -i applications/dynamicProps/DynamicPropsCmd.cpp
+                -i applications/eos/equationofstateCmd.cpp
+                -i applications/eos/equationofstateCmd.hpp
+                -i applications/elasticConstants/elasticConstantsCmd.hpp
+                -i applications/elasticConstants/elasticConstantsCmd.cpp 
+                -i mdParser/*
+                -i utils/MemoryUtils.hpp
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src
       OUTPUT_QUIET)
   endif()
@@ -376,18 +378,6 @@ if(DOXYGEN_FOUND)
     COMMENT "Generating API documentation with Doxygen"
     VERBATIM)
 endif(DOXYGEN_FOUND)
-
-find_package(Perl)
-if(PERL_FOUND)
-  set(PERL ${PERL_EXECUTABLE})
-else(PERL_FOUND)
-  message(STATUS "Failed to find perl - some scripts will not be made")
-endif(PERL_FOUND)
-
-set(PERL_INSTALLDIRS
-    "site"
-    CACHE STRING "Perl installation
-locations")
 
 set(Python3_FIND_STRATEGY LOCATION)
 find_package(Python3 COMPONENTS Interpreter NumPy)
@@ -1009,14 +999,18 @@ set(PYNONUMPY_FILES
     src/applications/utilities/omdSplit
     src/applications/utilities/omdShrink
     src/applications/utilities/omdLast
+    src/applications/utilities/solvator
     src/applications/utilities/stat2dielectric
     src/applications/utilities/stat2tension
     src/applications/utilities/stat2thcond
     src/applications/utilities/stat2visco
     src/applications/utilities/stat2pcorr
     src/applications/hydrodynamics/hydroExplainer
+    src/applications/utilities/waterBoxer
     src/applications/utilities/waterRotator
-    src/applications/utilities/stat2dipolecorr)
+    src/applications/utilities/waterSphere
+    src/applications/utilities/stat2dipolecorr
+    samples/Madelung/dipoles/fieldValues)
 
 set(PYNUMPY_FILES
     src/applications/utilities/hbtetAnalyzer
@@ -1026,7 +1020,10 @@ set(PYNUMPY_FILES
     src/applications/utilities/slabBuilder
     src/applications/utilities/vcorr2spectrum
     src/applications/utilities/waterReplacer
-    src/applications/utilities/wcorr2spectrum)
+    src/applications/utilities/wcorr2spectrum
+    samples/Madelung/dipoles/buildDipolarArray
+    samples/Madelung/dipoles/changeCutoff
+    samples/Madelung/quadrupoles/buildQuadrupolarArray)
 
 set(PYSCIPY_FILES
     src/applications/utilities/lcorrzFit src/applications/utilities/slipLength
@@ -1066,37 +1063,6 @@ if(Python3_Interpreter_FOUND)
         WORLD_EXECUTE)
   endforeach(PY_FILE)
 endif(Python3_Interpreter_FOUND)
-
-set(PERL_FILES
-    src/applications/utilities/solvator src/applications/utilities/waterBoxer
-    src/applications/utilities/waterSphere scripts/git2cl)
-
-if(PERL_FOUND)
-  if(WIN32)
-    set(PLEXT ".PL")
-  else(WIN32)
-    set(PLEXT "")
-  endif(WIN32)
-
-  foreach(PERL_FILE ${PERL_FILES})
-    get_filename_component(filename "${PERL_FILE}" NAME)
-    configure_file(
-      ${PERL_FILE} "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}${PLEXT}"
-      @ONLY)
-    install(
-      FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}${PLEXT}"
-      DESTINATION bin
-      PERMISSIONS
-        OWNER_READ
-        OWNER_WRITE
-        OWNER_EXECUTE
-        GROUP_READ
-        GROUP_EXECUTE
-        WORLD_READ
-        WORLD_EXECUTE)
-
-  endforeach(PERL_FILE)
-endif(PERL_FOUND)
 
 install(
   FILES LICENSE README.md
@@ -1170,24 +1136,12 @@ install(
   PATTERN "*.fz" EXCLUDE PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ
                                      WORLD_READ)
 
-configure_file(samples/builders/runMe.in
-               "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runMe" @ONLY)
-install(
-  FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runMe"
-  DESTINATION samples/builders
-  PERMISSIONS
-    OWNER_READ
-    OWNER_WRITE
-    OWNER_EXECUTE
-    GROUP_READ
-    GROUP_EXECUTE
-    WORLD_READ
-    WORLD_EXECUTE)
-
 install(
   FILES "${CMAKE_CURRENT_SOURCE_DIR}/docs/OpenMDmanual.pdf"
         "${CMAKE_CURRENT_SOURCE_DIR}/docs/AUTHORS"
-        "${CMAKE_CURRENT_SOURCE_DIR}/docs/INSTALL"
+        "${CMAKE_CURRENT_SOURCE_DIR}/docs/INSTALL.md"
+        "${CMAKE_CURRENT_SOURCE_DIR}/QUICK_START.md"
+        "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
   DESTINATION docs
   PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
@@ -1219,7 +1173,6 @@ message(STATUS "ZLIB_LIBRARIES ............. = ${ZLIB_LIBRARIES}")
 message(STATUS "FFTW3_ROOT ................. = ${FFTW3_ROOT}")
 message(STATUS "FFTW3_INCLUDE_DIR .......... = ${FFTW3_INCLUDE_DIR}")
 message(STATUS "FFTW3_LIBRARIES ............ = ${FFTW3_LIBRARIES}")
-message(STATUS "PERL_EXECUTABLE ............ = ${PERL_EXECUTABLE}")
 message(STATUS "Python3_EXECUTABLE ......... = ${Python3_EXECUTABLE}")
 message(STATUS "DOXYGEN_EXECUTABLE ......... = ${DOXYGEN_EXECUTABLE}")
 message(STATUS)

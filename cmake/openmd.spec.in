@@ -57,7 +57,7 @@ mkdir -p %{buildroot}/usr/share/doc/%{name}
 mkdir -p %{buildroot}/usr/share/%{name}
 mv %{buildroot}/usr/doc/OpenMDmanual.pdf %{buildroot}/usr/share/doc/%{name}/
 mv %{buildroot}/usr/doc/AUTHORS %{buildroot}/usr/share/doc/%{name}/
-mv %{buildroot}/usr/doc/INSTALL %{buildroot}/usr/share/doc/%{name}/
+mv %{buildroot}/usr/doc/INSTALL.md %{buildroot}/usr/share/doc/%{name}/
 mv %{buildroot}/usr/LICENSE %{buildroot}/usr/share/doc/%{name}/
 mv %{buildroot}/usr/README %{buildroot}/usr/share/doc/%{name}/
 mv %{buildroot}/usr/samples %{buildroot}/usr/share/%{name}/samples
@@ -88,9 +88,10 @@ EOF
 #%docdir %{_defaultdocdir}/%{name}-%{version}
 %doc %{_defaultdocdir}/%{name}/OpenMDmanual.pdf
 %doc %{_defaultdocdir}/%{name}/AUTHORS
-%doc %{_defaultdocdir}/%{name}/INSTALL
+%doc %{_defaultdocdir}/%{name}/INSTALL.md
+%doc %{_defaultdocdir}/%{name}/QUICK_START.md
 %doc %{_defaultdocdir}/%{name}/LICENSE
-%doc %{_defaultdocdir}/%{name}/README
+%doc %{_defaultdocdir}/%{name}/README.md
 
 %{_datadir}/%{name}/samples/*
 %{_datadir}/%{name}/forceFields/*

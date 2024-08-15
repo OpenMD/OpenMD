@@ -86,7 +86,8 @@ namespace OpenMD {
   class BondOrderParameter : public StaticAnalyser {
   public:
     BondOrderParameter(SimInfo* info, const std::string& filename,
-                       const std::string& sele, double rCut, int nbins);
+                       const std::string& sele, double rCut,
+                       unsigned int nbins);
 
     virtual void process();
 

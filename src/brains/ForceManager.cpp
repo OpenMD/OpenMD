@@ -1149,6 +1149,52 @@ namespace OpenMD {
         curSnapshot->setVirialTensor(virialTensor);
       }
     */
+
+    // Sanity check on PE - don't wait for StatWriter or DumpWriter.
+    RealType pe = curSnapshot->getPotentialEnergy();
+    if (std::isinf(pe) || std::isnan(pe)) {
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "ForceManager detected a numerical error in the potential energy.\n"
+          "\tStopping the simulation.");
+      painCave.isFatal = 1;
+      simError();
+    }
+    Vector3d f;
+    Vector3d t;
+
+    Molecule::IntegrableObjectIterator ii;
+    StuntDouble* sd;
+
+    for (mol = info_->beginMolecule(mi); mol != NULL;
+         mol = info_->nextMolecule(mi)) {
+      for (sd = mol->beginIntegrableObject(ii); sd != NULL;
+           sd = mol->nextIntegrableObject(ii)) {
+        f = sd->getFrc();
+        if (std::isinf(f[0]) || std::isnan(f[0]) || std::isinf(f[1]) ||
+            std::isnan(f[1]) || std::isinf(f[2]) || std::isnan(f[2])) {
+          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                   "ForceManager detected a numerical error in the force"
+                   " for object %d",
+                   sd->getGlobalIndex());
+          painCave.isFatal = 1;
+          simError();
+        }
+        if (sd->isDirectional()) {
+          t = sd->getTrq();
+          if (std::isinf(t[0]) || std::isnan(t[0]) || std::isinf(t[1]) ||
+              std::isnan(t[1]) || std::isinf(t[2]) || std::isnan(t[2])) {
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "ForceManager detected a numerical error in the torque"
+                     " for object %d",
+                     sd->getGlobalIndex());
+            painCave.isFatal = 1;
+            simError();
+          }
+        }
+      }
+    }
+    errorCheckPoint();
   }
 
   void ForceManager::calcSelectedForces(Molecule* mol1, Molecule* mol2) {
@@ -1815,7 +1861,8 @@ namespace OpenMD {
     for (auto& forceModifier : forceModifiers_)
       forceModifier->modifyForces();
 
-    // Modify the rigid bodies in response to the applied force modifications
+    // Modify the rigid bodies in response to the applied force
+    // modifications
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;

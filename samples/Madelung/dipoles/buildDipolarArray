@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!@Python3_EXECUTABLE@
 
 """Dipolar Lattice Builder
 
@@ -32,9 +32,6 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Rev$"
-__date__ = "$LastChangedDate$"
-
 __copyright__ = "Copyright (c) 2004-present The University of Notre Dame. All Rights Reserved."
 __license__ = "OpenMD"
 
@@ -45,10 +42,8 @@ import math
 import numpy
 
 def usage():
-    print __doc__
+    print(__doc__)
 
-    
-    
 def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, arrayType, outputFileName):
     # The following section creates 24 basic arrays from Luttinger and
     # Tisza:
@@ -228,8 +223,8 @@ def createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, 
                 known_case = True
 
     if (not known_case):
-        print "unhandled combination of lattice and dipole direction"
-        print __doc__
+        print("unhandled combination of lattice and dipole direction")
+        print(__doc__)
 
     bravais_lattice = numpy.zeros(0).reshape((0,6))
     for i in range(latticeNumber):
@@ -360,7 +355,7 @@ def main(argv):
             haveOutputFileName = True
     if (not haveOutputFileName):
         usage()
-        print "No output file was specified"
+        print("No output file was specified")
         sys.exit()
         
     createLattice(latticeType, latticeNumber, latticeConstant, dipoleDirection, arrayType, outputFileName);

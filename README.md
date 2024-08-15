@@ -27,7 +27,8 @@ sections:
 
 Detailed descriptions of the structures of these files are available
 in the `docs` directory. Sample simulations are available in the
-`samples` directory.
+`samples` directory and [QUICK_START.md](QUICK_START.md) walks you through a
+procedure for running and analyzing your first OpenMD simulation.
 
 ## Requirements
 
@@ -36,35 +37,36 @@ in the `docs` directory. Sample simulations are available in the
 
 | Architecture                   |  CXX | Notes                                 |
 |--------------------------------|:----:|---------------------------------------|
-| macOS Sonoma (intel & arm)     | c++  | (Apple clang 15.3, Open MPI 5.0.3)    |
+| macOS Sonoma (intel & arm)     | c++  | (Apple clang 15.4, Open MPI 5.0.3)    |
 | Linux (Ubuntu 24.04 - x86\_64) | g++  | (GNU version 13.2  Open MPI 4.1.6)    |
 | Linux (RHEL 9.4 - x86\_64)     | icpx | (Intel version 23.0, Intel MPI 2021.8)|
 
   OpenMD uses features in the C++ standard library and language features from
   C++17. Most (but not all) C++ compilers support these features.
 
- 2) CMake, a cross-platform build system which is available at
-    [cmake.org](http://www.cmake.org). Most Linux and some Unix distributions
-    provide CMake as a standard package. If not, please download it,
-    and make sure you get a recent version. Mac OS X users can either
-    download the CMake installer or install it from the command line
-    using macports.
+ 2) CMake (version 3.20 or higher), a cross-platform build system which
+    is available at [cmake.org](http://www.cmake.org). Most Linux and
+    some Unix distributions provide CMake as a standard package. If not,
+    please download it, and make sure you get a recent version. Mac OS X
+    users can either download the CMake installer or install it from the
+    command line using homebrew or macports.
 
- 3) An implementation of MPI-2 is optional for the single processor
+ 4) An implementation of MPI-2 is optional for the single processor
     version of OpenMD, but is required if you want OpenMD to run in
-    parallel. We like OpenMPI. Other implementations of MPI-2 might
-    work, but we haven't tried. You can get Open MPI here:
-    [open-mpi.org](http://www.open-mpi.org/)
+    parallel. We like OpenMPI and MPICH. Other implementations of
+    MPI-2 might work, but we haven't tried. You can get Open MPI here:
+    [open-mpi.org](http://www.open-mpi.org/) and MPICH here:
+    [mpich.org](https://www.mpich.org/)
 
- 4) Other required libraries that unlock some features of OpenMD:
+ 6) Other optional libraries that unlock some features of OpenMD:
 
-      + Open Babel:  [openbabel.org](http://openbabel.org)
-      + Qhull:       [www.qhull.org](http://www.qhull.org)
-      + FFTW:        [www.fftw.org](http://www.fftw.org)
-      + Doxygen:     [www.doxygen.org](http://www.doxygen.org)
+      + Open Babel (version 3.1.1 or newer):  [openbabel.org](http://openbabel.org)
+      + Qhull (version 2020.2 or newer):      [www.qhull.org](http://www.qhull.org)
+      + FFTW (version 3.3.10 or newer):       [www.fftw.org](http://www.fftw.org)
+      + Doxygen (version 1.12.0 or newer):    [www.doxygen.org](http://www.doxygen.org)
 
- 5) Some of the utility scripts depend on Python, NumPy, SciPy, and Perl.  
-    These interpreters are common installations on most flavors of Unix and
+ 7) Some of the utility scripts depend on Python (v3 required), NumPy,
+    and SciPy. These are common installations on most flavors of Unix and
     Mac OS X.
 
 ## Instructions
@@ -76,7 +78,7 @@ in the `docs` directory. Sample simulations are available in the
  5) make
  6) umask 0022; sudo make install
 
-That's it.
+That's it. For more information on building and configuring OpenMD, check out our [INSTALL.md](docs/INSTALL.md) instructions.
 
 ## Contributing
 
