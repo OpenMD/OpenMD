@@ -33,7 +33,7 @@ The electrostatic energy for one of these dipolar arrays is
   $$ E = C \left( \frac{3}{4} \right) N^2 Q^2 $$
 
 where $C$ is the energy constant above, N is the number of quadrupoles
-per unit volume, and $Q$ is the strength of the dipole.
+per unit volume, and $Q$ is the strength of the quadrupole.
 
 In the units used by OpenMD, with quadrupole moments of 1
 Debye-angstrom, lengths in angstroms, and energies reported in kcal /
@@ -70,7 +70,7 @@ carrying out electrostatic interactions with a large cutoff, and
 cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "undamped";
 cutoffRadius = 20.0;
-statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGYTEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITYELECTROSTATIC_POTENTIAL";
+statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGYTEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL";
 ```
 
 Other options for the `cutoffMethod` include `shifted_potential`,
