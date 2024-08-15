@@ -97,7 +97,7 @@ cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
 cutoffRadius = 20.0;
 dampingAlpha = 0.18;
-statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGYTEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITYELECTROSTATIC_POTENTIAL";
+statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGYTEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL";
 ```
 
 Other options for the `cutoffMethod` include `shifted_potential`,
