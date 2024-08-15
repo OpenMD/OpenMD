@@ -87,25 +87,28 @@ StaticProps -h
 DynamicProps -h
 ```
 
-## List of Samples included with OpenMD
+## Next Steps
 
-- DR-EAM - various samples using the Density-Readjusting Embedded Atom Model for metals
-- LangevinHull - samples using constant Pressure and Temperature for non-periodic systems
-- Madelung - computes Madelung constants using different approximate electrostatic methods
-- RNEMD - Reverse Non-Equilibrium Molecular Dynamics, in bulk and at interfaces
-- air - a simple mixture of diatomic nitrogen, diatomic oxygen, and argon atoms
-- alkane - demonstration of alkanes, with most parameters adapted from the [TraPPE-UA](http://chem-siepmann.oit.umn.edu/siepmann/trappe/index.html) force field
-- aqueousIons - some salt water boxes showing how to run with Li-Song-Merz 12-6 and 12-6-4 models for ions
-- argon - simple liquid argon boxes using Lennard-Jones potentials
-- bond-order - demonstration files for testing bond orientational order parameters in different structures
-- builders - demonstrations of how to create initial structures using the builder codes.  See the [README.md](samples/builders/README.md) file in this directory
-- fluctuating - samples for various fluctuating charge models (tip4p-fq, DR-EAM)
-- gbljtest - test cases showing how to include Gay-Berne (ellipsoids) and Lennard-Jones models in the same simulation
-- graphene - models for graphene sheets and nanoporous graphene membranes
-- lipid - small models of unified atom lipids
-- metals - metal structures (bulk, surface, nanoparticle, nanorod) using many interaction models.
-- minimizer - small, simple samples showing how to invoke the minimizer
-- thermoIntegration - demonstrations of how to do thermodynamic Integration to either ideal gas (liquid) or an Einstein crystal (solid)
-- water - multiple water models, and initial structures including ice, ice surfaces, and dimers
-- zcons - tests for Z-constraints to keep molecules fixed at specific values of one coordinate
-- zeolite - a ZSM5 structure simulated using the CLAYFF force field
+So what's next? By now you've familiarized yourself with a simple OpenMD simulation and analyzed the result both visually and statistically. OpenMD provides a number of other [samples](#list-of-samples-included-with-openmd) which can help guide you on what kind of projects are possible in our engine. From there you're likely ready to start creating your own simulations and run experiments on them. The [OpenMD manual](https://github.com/OpenMD/OpenMD/blob/main/docs/OpenMDmanual.pdf) is a good place to learn the in-depth theory, design decisions, and configuration options available to you. If you're also looking to contribute to the codebase, check out our [contributing guidelines](.github/CONTRIBUTING.md) and [API documentation](https://openmd.org/wp-content/docs/code/index.html).
+
+### List of Samples included with OpenMD
+
+- [DR-EAM](samples/DR-EAM/README.md) - various samples using the Density-Readjusting Embedded Atom Model for metals
+- [LangevinHull](samples/LangevinHull/README.md) - samples using constant Pressure and Temperature for non-periodic systems
+- [Madelung](samples/Madelung/README.md) - computes Madelung constants using different approximate electrostatic methods
+- [RNEMD](samples/RNEMD/README.md) - Reverse Non-Equilibrium Molecular Dynamics, in bulk and at interfaces
+- [air](samples/air/README.md) - a simple mixture of diatomic nitrogen, diatomic oxygen, and argon atoms
+- [alkane](samples/alkane/README.md) - demonstration of alkanes, with most parameters adapted from the [TraPPE-UA](http://chem-siepmann.oit.umn.edu/siepmann/trappe/index.html) force field
+- [aqueousIons](samples/aqueousIons/README.md) - some salt water boxes showing how to run with Li-Song-Merz 12-6 and 12-6-4 models for ions
+- [argon](samples/argon/README.md) - simple liquid argon boxes using Lennard-Jones potentials
+- [bond-order](samples/bond-order/README.md) - demonstration files for testing bond orientational order parameters in different structures
+- [builders](samples/builders/README.md) - demonstrations of how to create initial structures using the builder codes.
+- [fluctuating](samples/fluctuating/README.md) - samples for various fluctuating charge models (tip4p-fq, DR-EAM)
+- [gbljtest](samples/gbljtest/README.md) - test cases showing how to include Gay-Berne (ellipsoids) and Lennard-Jones models in the same simulation
+- [graphene](samples/graphene/README.md) - models for graphene sheets and nanoporous graphene membranes
+- [metals](samples/metals/README.md) - metal structures (bulk, surface, nanoparticle, nanorod) using many interaction models.
+- [minimizer](samples/minimizer/README.md) - small, simple samples showing how to invoke the minimizer
+- [thermoIntegration](samples/thermoIntegration/README.md) - demonstrations of how to do thermodynamic Integration to either ideal gas (liquid) or an Einstein crystal (solid)
+- [water](samples/water/README.md) - multiple water models, and initial structures including ice, ice surfaces, and dimers
+- [zcons](samples/zcons/README.md) - tests for Z-constraints to keep molecules fixed at specific values of one coordinate
+- [zeolite](samples/zeolite/README.md) - a ZSM5 structure simulated using the CLAYFF force field

@@ -37,6 +37,8 @@ Files included:
 
 ## Instructions
 
+### Example 1
+
 To create the initial configurations, we typically run:
 
 `packmol < system.pack`
@@ -53,15 +55,14 @@ the graphene sheets, the `system.omd` file must be edited to modify the Hmat
 line to read:
 
 ```
-        Hmat: {{ 22.23, 0, 0 }, { 0, 42.78, 0 }, { 0, 0, 50 }}
+Hmat: {{ 22.23, 0, 0 }, { 0, 42.78, 0 }, { 0, 0, 50 }}
 ```
 
 Then to combine the propylene monomers with the graphene sheets, eliminating
 molecules that overlap, we would run:
 
 ```
-omd-solvator -u graphene.omd -v system.omd -r 3.5 -o combined.omd -n
-360 -p 3
+omd-solvator -u graphene.omd -v system.omd -r 3.5 -o combined.omd -n 360 -p 3
 ```
 
 Following this, we typically edit the `combined.omd` file to include the
@@ -78,7 +79,7 @@ component{
 }
 component{
   type = propylene;
-nMol = 27;
+  nMol = 27;
 }
 
 forceField = "graphene";
@@ -102,9 +103,14 @@ thermalizer -t 300 -i combined.omd -o warm.omd
 mpirun -np 4 openmd_MPI combined.omd
 ```
 
+### Example 2
+
+Another way in which graphene sheets can be generated is with an external tool called [NPG-Builder](https://github.com/crdrisko/nd-grad/tree/main). This program outputs `.omd` and `.inc` files for a periodic graphene sheet with given box dimensions. Files created with this tool can be found in the `graphene/npg` directory, which contains a number of nanoporous graphene sheets with pore sizes from 0 (`graphene/npg/graphene.omd`) to 28 (`graphene/npg/p28/p28.omd`) rings disrupted.
+
 ## Expected Output
 
 The report from this simulation should look similar to:
+
 ```
 ###############################################################################
 # Status Report:                                                              #
@@ -145,6 +151,6 @@ during the simulation:
 <img src="../figures/graphene.png"  alt="image" width="500"
 height="auto">
  
- (Here we've zoomed in on some of the curves to show the collision
- event at 15.5 ps and the oscillations in many of the thermodynamic
- quantities.
+(Here we've zoomed in on some of the curves to show the collision event at 15.5 
+ps and the oscillations in many of the thermodynamic
+quantities.
