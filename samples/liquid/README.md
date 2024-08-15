@@ -5,7 +5,7 @@ In this example, we’ll build a simulation of a simple liquid (methanol) starti
 
 ## Instructions
 
-1. Start with a good structure for your molecule. We're going to be starting with the `ethanol.xyz` structure that is in this directory.
+1. Start with a good structure for your molecule. We're going to be starting with the `methanol.xyz` structure that is in this directory.
 
 2. Use the `atom2omd` program to convert the structure into a format that can be read by OpenMD:
 ```
