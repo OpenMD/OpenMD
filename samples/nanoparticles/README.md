@@ -1,4 +1,4 @@
-# Metallic nanoparticle Samples
+# Metallic nanoparticles
 
 
 ## Background Information
@@ -6,7 +6,7 @@
 In these examples, we’ll build gold nanoparticles and equilibrate them to a temperature of 300K. 
 
 ## Instructions
-### Spherical metal nanoparticle
+### Building a spherical metal nanoparticle
 
 1. We need to start with an input `.omd` file for the metal of your choice. This directory has a `gold.omd` for this example. It looks like:
 ```
@@ -31,7 +31,8 @@ forceFieldFileName = "SuttonChen.QSC.frc";
   </MetaData>
 </OpenMD>
 ```
-2. Now to build the nanoparticle. We’ll choose a radius of 15 Å and use the lattice constant of gold, 4.08 Å. We’ll call our initial structure NP15.omd. 
+
+2. Now to build the nanoparticle. We’ll choose a radius of 15 Å and use the lattice constant of gold, 4.08 Å. We’ll call our initial structure `NP15.omd`. 
 ```
 nanoparticleBuilder --latticeConstant=4.08 --radius=15 gold.omd -o NP15.omd
 ```
@@ -64,22 +65,27 @@ tauBarostat = 5E3;
 ```
 thermalizer -t 5 NP15.omd -o NP15_5K.omd
 ```
+
 6. For the first step in the equilibration we need to let the gold lattice structurally relax. `NP15_5K.omd` can now be run:
 ```
 openmd NP15_5K.omd
 ```
+
 7. Running the simulation will create several new files. `NP15_5K.dump` contains the trajectory of the simulation. Statistics such as temperature, pressure, and energy will be recorded in the `NP15_5K.stat` file and can be viewed using:
 ```
 xmgrace -nxy NP15_5K.stat
 ```
+
 8. The end-of-run file `NP15_5K.eor` stores the last configuration of the simulation. We’ll copy it to a new .omd file.
 ```
 cp NP15_5K.eor NP15_100K.omd
 ```
+
 9. To continue with the equilibration we need to change the `targetTemp` of `NP15_100K.omd`. We’ll increase it to 100 and run the `NP15_100K.omd` file.
+    
 10. We’ll continue the procedure of copying the .eor file to a new .omd file and increasing the temperature until we’ve reached 300K. Temperature increases of 50 – 100K and simulation times of 100 – 200 ps are reasonable.
 
-### Icosahedral metal nanoparticle
+### Building an icosahedral metal nanoparticle
 
 1. To start the process, a metal file (`gold.omd`) is needed to describe the material composition of the particle.  We'll use the same file from the spherical example above.
 
@@ -121,6 +127,7 @@ where -t is followed by the desired temperature in Kelvin, and -o is followed by
 ```
 openmd file-5K.omd
 ```
+
 7.  To ensure that the temperature of the system has reached 5K, we can use xmgrace to view the stat file:
 ```
 xmgrace -nxy file-5K.stat

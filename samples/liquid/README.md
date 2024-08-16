@@ -5,7 +5,7 @@ In this example, we’ll build a simulation of a simple liquid (methanol) starti
 
 ## Instructions
 
-1. Start with a good structure for your molecule. We're going to be starting with the `ethanol.xyz` structure that is in this directory.
+1. Start with a good structure for your molecule. We're going to be starting with the `methanol.xyz` structure that is in this directory.
 
 2. Use the `atom2omd` program to convert the structure into a format that can be read by OpenMD:
 ```
@@ -35,13 +35,13 @@ If there are any problems, correct any unknown atom types, and repeat until you 
 ```
 simpleBuilder -o liquid.omd --density=0.7918 --nx=3 --ny=3 --nz=3 methanol.omd
 ```
-This command creates a new system, liquid.omd which contains 108 copies of the methanol molecule arranged in a simple FCC lattice. FCC has 4 molecules in the unit cell, so the total number of molecules = 4 * 3 * 3 * 3 = 108. The molecules are packed at a distance commensurate with their liquid state density.
+This command creates a new system, `liquid.omd` which contains 108 copies of the methanol molecule arranged in a simple FCC lattice. FCC has 4 molecules in the unit cell, so the total number of molecules = 4 * 3 * 3 * 3 = 108. The molecules are packed at a distance commensurate with their liquid state density.
 
 7. To visualize what the system looks like at this stage, you can run:
 ```
 Dump2XYZ -i liquid.omd -b
 ```
-to create a file called `liquid.xyz`. This file can be viewed in VMD, Jmol, or any other chemical structure viewer.
+to create a file called `liquid.xyz`. The -b flag prints out 'Base' atom types (i.e. the element name). This file can be viewed in VMD, Jmol, or any other chemical structure viewer.
 
 8. Add the following lines below the forceField line of the liquid.omd file:
 ```
@@ -58,22 +58,25 @@ to create a file called `liquid.xyz`. This file can be viewed in VMD, Jmol, or a
     sampleTime = 100;
     statusTime = 10;
 ```
+
 9. Initial configurations that are created from bare structures typically have no velocity information. To give an initial kick to the atoms (i.e. to sample the velocities from a Maxwell-Boltzmann distribution), you can use the following command:
 ```
 thermalizer -o warm.omd -t 300 liquid.omd
 ```
-This creates a new OpenMD file called warm.omd which has initial velocity information.
+This creates a new OpenMD file called `warm.omd` which has initial velocity information.
+
 10. At this stage, a simple simulation can be run:
 ```
 openmd warm.omd
 ```
+
 11. This should complete relatively quickly, and should create a `warm.stat` file as well as a `warm.dump` file containing the actual trajectory.
 
 12. To view the contents of the trajectory file, you’ll need to convert the dump file into something another program can visualize:
 ```
 Dump2XYZ -i warm.dump -m -b
 ```
-will create a new file `warm.xyz` that can be viewed in VMD and many other chemical structure viewers.
+will create a new file `warm.xyz` that can be viewed in VMD and many other chemical structure viewers.  The -m flag maps molecules that leave the periodic box back into the box.
 
 13. The “End-of-Run” file warm.eor can be re-purposed as the starting point for a new simulation:
 ```
