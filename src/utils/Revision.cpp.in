@@ -5,7 +5,7 @@
 #include "utils/Revision.hpp"
 #include <cstring>
 
-extern "C" { 
+extern "C" {
   const char version[] = OPENMD_VERSION;
   const char revision[] = GIT_SHA1;
   const char build_date[] = BUILD_DATE;
@@ -20,7 +20,7 @@ namespace OpenMD {
     v.append(version);
     return v;
   }
-  
+
   std::string Revision::getRevision() {
     std::string r;
     std::string rev(revision, strnlen(revision, 40));
@@ -41,7 +41,17 @@ namespace OpenMD {
     d.append(build_date);
     return d;
   }
-  
+
+  std::string Revision::getHalfRevision() {
+    std::string fr;
+    fr.assign(getVersion());
+    fr.append("  ");
+    fr.append(getRevision().substr(0, 17));
+    fr.append("   ");
+    fr.append(getBuildDate());
+    return fr;
+  }
+
   std::string Revision::getFullRevision() {
     std::string fr;
     fr.assign(getVersion());

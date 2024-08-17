@@ -53,7 +53,7 @@ zconstraint {
 Since this simulation box is already equilibrated, we don't need to do anything but run it.
 
 ```bash
-$ mpirun -np 4 openmd_MPI waterWithP28.omd
+mpirun -np 4 openmd_MPI waterWithP28.omd
 ```
 
 ### Example 2
@@ -63,8 +63,8 @@ Another interesting aspect of z-constraints we wish to highlight is the differen
 In this example we'll be looking at the two files, `zconsFixed.omd` and `zconsMoving.omd`, so let's run them with openmd:
 
 ```bash
-$ openmd zconsFixed.omd
-$ openmd zconsMoving.omd
+openmd zconsFixed.omd
+openmd zconsMoving.omd
 ```
 
 ## Expected Output

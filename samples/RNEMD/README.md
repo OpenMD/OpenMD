@@ -33,10 +33,11 @@ shorter simulation times to obtain converged results for transport properties.
 
 ## Instructions
 
-Unless explicitly mentioned, you can run `openmd` on all these examples mentioned below with the following command:
+Unless explicitly mentioned, you can run `openmd` on all these examples
+mentioned below with the following command:
 
-```
-$ mpirun -np 4 openmd_MPI <sample_file>.omd
+```bash
+mpirun -np 4 openmd_MPI <sample_file>.omd
 ```
 
 ### Example 1
@@ -81,7 +82,8 @@ gradient across the z-axis of the system. The thermal conductivity can
 be computed by relating the resulting thermal gradient to the imposed
 kinetic energy flux.
 
-Since we have just two molecules in this example, openmd won't allow parallelization of more than 2 cores, so we can just run the following:
+Since we have just two molecules in this example, openmd won't allow
+parallelization of more than 2 cores, so we can just run the following:
 
 ```
 openmd graphene.omd
@@ -119,8 +121,10 @@ the box or else your computation will not give you what you want.
 ### Example 4
 
 The file `2744_shear.omd` is a box of 2744 Argon atoms which has a
-simultaneous momentum and kinetic energy flux through the box. Notice
-this in the RNEMD block of the (.omd) file:
+simultaneous momentum and kinetic energy flux through the box. In the
+middle of the simulation cell is a lattice structure which has interesting
+implications for the velocity profiles (see [below](#expected-output)).
+Notice this in the RNEMD block of the (.omd) file:
 
 ```C++
 RNEMD {
@@ -173,7 +177,12 @@ regions for the RNEMD moves.
 
 ### Example 6
 
-One of the newer techniques in our RNEMD module allows for the application of a particle flux by moving particles slowly from one region of the simulation box to another. Note here that all previous examples have been perturbing velocities, whereas this scaled particle flux (SPF) method perturbs molecular positions. The file `spf.omd` contains a similar structure to that of the `2744.omd` file with the following noticeable changes:
+One of the newer techniques in our RNEMD module allows for the application
+of a particle flux by moving particles slowly from one region of the
+simulation box to another. Note here that all previous examples have been
+perturbing velocities, whereas this scaled particle flux (SPF) method perturbs
+molecular positions. The file `spf.omd` contains a similar structure to that
+of the `2744.omd` file with the following noticeable changes:
 
 ```C++
 ensemble = "SPF";
@@ -187,11 +196,17 @@ RNEMD {
 }
 ```
 
-These simulations usually take quite a bit longer than the other methods discussed and result in some amount of failed exchanges. This is normal for the method due to the simulation's sensitivity to potential energy changes (something unique to SPF-RNEMD). 
+These simulations usually take quite a bit longer than the other methods
+discussed and result in some amount of failed exchanges. This is normal
+for the method due to the simulation's sensitivity to potential energy
+changes (something unique to SPF-RNEMD).
 
 ## Expected Output
 
-In [Example 4](#example-4) we apply both a thermal flux and a momentum flux in the x-direction. With RNEMD, a new output file type is introduced, the `.rnemd` file. These files are human readable, offering a large amount of information about the simulation details:
+In [Example 4](#example-4) we apply both a thermal flux and a momentum
+flux in the x-direction. With RNEMD, a new output file type is introduced,
+the `.rnemd` file. These files are human readable, offering a large amount
+of information about the simulation details:
 
 ```
 #######################################################
@@ -240,6 +255,10 @@ By plotting the output of the RNEMD simulation,
 xmgrace -nxy 2744_shear.rnemd
 ```
 
-we can visualize the effect these fluxes have on the temperature and velocity profiles, noticing smooth gradients that develop as a response to our applied fluxes. 
+we can visualize the effect these fluxes have on the temperature and velocity
+profiles, noticing smooth gradients that develop as a response to our applied
+fluxes. As we mentioned in the example, the simulation cell contains a lattice
+of argon atoms in the middle, hence the larger region with no velocity
+gradient.
 
 <img src="../figures/rnemd.png" alt="image" width="500" height="auto">

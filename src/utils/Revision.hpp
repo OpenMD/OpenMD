@@ -15,6 +15,7 @@ namespace OpenMD {
   public:
     std::string getVersion();
     std::string getRevision();
+    std::string getHalfRevision();
     std::string getFullRevision();
     std::string getBuildDate();
   };

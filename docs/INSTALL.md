@@ -79,24 +79,24 @@ build directory; for example, openmd-3.1 and build. The first step
 is to create these directories:
 
 ```bash
-$ tar zxf openmd-3.1.tar.gz   # (this creates openmd-3.1)
-$ mkdir build
+tar zxf openmd-3.1.tar.gz   # (this creates openmd-3.1)
+mkdir build
 ```
 
 Now you need to run cmake to configure the build. The following will
 configure the build to use all of the default options:
 
 ```bash
-$ cd build
-$ cmake ../openmd-3.1
+cd build
+cmake ../openmd-3.1
 ```
 
 If you need to specify a particular compiler, you can do that with
 environment variables before the cmake line
 
 ```bash
-$ export CXX=/opt/local/lib/openmpi/bin/mpic++
-$ cmake ../openmd-3.1
+export CXX=/opt/local/lib/openmpi/bin/mpic++
+cmake ../openmd-3.1
 ```
 
 If you need to specify an option, use the -D switch to cmake. For
@@ -104,7 +104,7 @@ example, the following line sets the value of `CMAKE_INSTALL_PREFIX`
 and `CMAKE_BUILD_TYPE`:
 
 ```bash
-$ cmake ../openmd-3.1 -DCMAKE_INSTALL_PREFIX=~/Tools -DCMAKE_BUILD_TYPE=DEBUG
+cmake ../openmd-3.1 -DCMAKE_INSTALL_PREFIX=~/Tools -DCMAKE_BUILD_TYPE=DEBUG
 ```
 
 We will discuss various possible options later.
@@ -112,36 +112,39 @@ We will discuss various possible options later.
 At this point, it would be a good idea to compile OpenMD:
 
 ```bash
-$ make
+make
 ```
 
 Have a coffee while the magic happens. If you have a multi-processor
 machine and would prefer an espresso, try a parallel build instead:
 
 ```bash
-$ make -j 4  
+make -j 4  
 ```
 
 And finally, as root (or using sudo) you should install it:
 
 ```bash
-$ umask 0022 && make install
+umask 0022 && make install
 ```
 
 Or:
   
 ```bash
-$ umask 0022
-$ sudo make install
+umask 0022
+sudo make install
 ```
 
 By default, OpenMD installs directories into `/usr/local/openmd`,
 so in order for the command line options to be in your path, you'll 
 need:
+
 ```bash
 export PATH=${PATH}:/usr/local/openmd/bin
 ```
+
 or if you use csh or tcsh as your shell:
+
 ```
 setenv PATH ${PATH}:/usr/local/openmd/bin
 ```
@@ -169,23 +172,26 @@ To configure cmake to install into `~/Tools/openmd-install`, for
 example, you would do the following:
 
 ```bash
-$ cmake ../openmd-3.1 -DCMAKE_INSTALL_PREFIX=~/Tools/openmd-install
+cmake ../openmd-3.1 -DCMAKE_INSTALL_PREFIX=~/Tools/openmd-install
 ```
 
 Then you can run make and make install without needing root access:
 
 ```bash
-$ make && make install
+make && make install
 ```
 
 Once you have installed OpenMD in a specified location, a 
 `bin` subdirectory will contain all of the command line tools.
 In order for these command line tools to be accessible commands, 
 you'll need:
+
 ```bash
 export PATH=${PATH}:~/Tools/openmd-install/bin
 ```
+
 or if you use csh or tcsh as your shell:
+
 ```
 setenv PATH ${PATH}:~/Tools/openmd-install/bin
 ```
@@ -227,7 +233,7 @@ setenv PATH ${PATH}:~/Tools/openmd-install/bin
   > Run Make as follows:
   > 
   > ```bash
-  > $ VERBOSE=1 make
+  > VERBOSE=1 make
   > ```
 
 * How do I build the Doxygen documentation?
@@ -238,5 +244,5 @@ setenv PATH ${PATH}:~/Tools/openmd-install/bin
   `-DDOXYGEN_EXECUTABLE=wherever`.  To build the documentation, type:
   > 
   > ```bash
-  > $ make docs
+  > make docs
   > ```
