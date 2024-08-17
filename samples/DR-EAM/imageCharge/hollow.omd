@@ -47,8 +47,8 @@ outputElectricField = true;
 outputDensity = true;
 ensemble = NVE;
 dt = 0.1;
-runTime = 1000;
-sampleTime =10;
+runTime = 1;
+sampleTime =1;
 statusTime = 1;
 
 cutoffMethod = "shifted_force";
@@ -1873,7 +1873,7 @@ useInitialExtendedSystemState = "false";
 	1797	pv	12.114870	12.081450	12.460374	0.0	0.0	0.0
 	1798	pv	9.177932	12.081450	14.537102	0.0	0.0	0.0
 	1799	pv	11.380636	10.809718	14.537102	0.0	0.0	0.0
-	1800 	pv	-0.367117	0.635866	25.000000	0	0	0
+	1800 	pv	-0.367117	0.635866	17.000000	0	0	0
     </StuntDoubles> 
   </Snapshot>
 </OpenMD>

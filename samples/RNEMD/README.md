@@ -33,7 +33,7 @@ shorter simulation times to obtain converged results for transport properties.
 
 ## Instructions
 
-With all examples mentioned below, you can run `openmd` with the following command:
+Unless explicitly mentioned, you can run `openmd` on all these examples mentioned below with the following command:
 
 ```
 $ mpirun -np 4 openmd_MPI <sample_file>.omd
@@ -64,7 +64,7 @@ flux to the system's gradient response of the velocity.
 It is also possible to measure the *thermal conductivity* of a
 material using the RNEMD functionality in OpenMD. As an example,
 `graphene.omd` is an (.omd) file where two sheets of graphene have a
-thermal flux applied accross the long axis of the sheet. In the (.omd)
+thermal flux applied across the long axis of the sheet. In the (.omd)
 file the fluxType has been set to a kinetic energy flux, and also that
 the kineticFlux is defined.
 
@@ -80,6 +80,12 @@ The system responds to the thermal flux by developing a temperature
 gradient across the z-axis of the system. The thermal conductivity can
 be computed by relating the resulting thermal gradient to the imposed
 kinetic energy flux.
+
+Since we have just two molecules in this example, openmd won't allow parallelization of more than 2 cores, so we can just run the following:
+
+```
+openmd graphene.omd
+```
 
 ### Example 3
 
@@ -165,4 +171,75 @@ The only notable change to the RNEMD declaration block is the addition
 of *sphereAradius* and *sphereBradius*, which define the two exchange
 regions for the RNEMD moves.
 
+### Example 6
+
+One of the newer techniques in our RNEMD module allows for the application of a particle flux by moving particles slowly from one region of the simulation box to another. Note here that all previous examples have been perturbing velocities, whereas this scaled particle flux (SPF) method perturbs molecular positions. The file `spf.omd` contains a similar structure to that of the `2744.omd` file with the following noticeable changes:
+
+```C++
+ensemble = "SPF";
+
+RNEMD {
+  fluxType = "Particle";
+  method = "spf";
+  particleFlux = 5e-7;
+  outputFields = "Z|TEMPERATURE|VELOCITY|DENSITY|ACTIVITY";
+  // ...
+}
+```
+
+These simulations usually take quite a bit longer than the other methods discussed and result in some amount of failed exchanges. This is normal for the method due to the simulation's sensitivity to potential energy changes (something unique to SPF-RNEMD). 
+
 ## Expected Output
+
+In [Example 4](#example-4) we apply both a thermal flux and a momentum flux in the x-direction. With RNEMD, a new output file type is introduced, the `.rnemd` file. These files are human readable, offering a large amount of information about the simulation details:
+
+```
+#######################################################
+# RNEMD {
+#    exchangeMethod  = "VSS";
+#    fluxType  = "KE+Pvector";
+#    privilegedAxis = z;
+#    exchangeTime = 50;
+#    objectSelection = "select Ar";
+#    selectionA = "select wrappedz >= -4.00005 && wrappedz < 4.00005";
+#    selectionB = "select wrappedz >= 36.0005 || wrappedz < -36.0005";
+#    outputSelection = "select Ar";
+# }
+#######################################################
+# RNEMD report:
+#      running time = 100001 fs
+# Target flux:
+#           kinetic = -5e-06 (kcal/mol/A^2/fs)
+#          momentum = [ -2e-07, 0, 0 ] (amu/A/fs^2)
+#  angular momentum = [ 0, 0, 0 ] (amu/A^2/fs^2)
+#          particle = 0 (particles/A^2/fs)
+# Target one-time exchanges:
+#          kinetic = -0.80002096 (kcal/mol)
+#          momentum = [ -0.032000838, 0, 0 ] (amu*A/fs)
+#  angular momentum = [ 0, 0, 0 ] (amu*A^2/fs)
+#          particle = 0 (particles)
+# Actual exchange totals:
+#          kinetic = -1600.0419 (kcal/mol)
+#          momentum = [ -64.001677, 0, 0 ] (amu*A/fs)
+#  angular momentum = [ 0, 0, 0 ] (amu*A^2/fs)
+#         particles = 0 (particles)
+# Actual flux:
+#          kinetic = -4.99995e-06 (kcal/mol/A^2/fs)
+#          momentum = [ -1.99998e-07, 0, 0 ] (amu/A/fs^2)
+#  angular momentum = [ 0, 0, 0 ] (amu/A^2/fs^2)
+#          particle = 0 (particles/A^2/fs)
+# Exchange statistics:
+#               attempted = 2000
+#                  failed = 0
+#######################################################
+```
+
+By plotting the output of the RNEMD simulation,
+
+```
+xmgrace -nxy 2744_shear.rnemd
+```
+
+we can visualize the effect these fluxes have on the temperature and velocity profiles, noticing smooth gradients that develop as a response to our applied fluxes. 
+
+<img src="../figures/rnemd.png" alt="image" width="500" height="auto">
