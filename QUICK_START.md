@@ -103,7 +103,6 @@ So what's next? By now you've familiarized yourself with a simple OpenMD simulat
 - [argon](samples/argon/README.md) - simple liquid argon boxes using Lennard-Jones potentials
 - [bond-order](samples/bond-order/README.md) - demonstration files for testing bond orientational order parameters in different structures
 - [builders](samples/builders/README.md) - demonstrations of how to create initial structures using the builder codes.
-- [fluctuating](samples/fluctuating/README.md) - samples for various fluctuating charge models (tip4p-fq, DR-EAM)
 - [gbljtest](samples/gbljtest/README.md) - test cases showing how to include Gay-Berne (ellipsoids) and Lennard-Jones models in the same simulation
 - [graphene](samples/graphene/README.md) - models for graphene sheets and nanoporous graphene membranes
 - [metals](samples/metals/README.md) - metal structures (bulk, surface, nanoparticle, nanorod) using many interaction models.

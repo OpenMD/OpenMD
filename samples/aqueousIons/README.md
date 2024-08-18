@@ -61,29 +61,29 @@ The following examples highlight the differences between the normal 12-6 Lennard
 
 ### Example 1
 
-```
-$ mpirun -np 4 openmd_MPI NaCl_12_6.omd
+```bash
+mpirun -np 4 openmd_MPI NaCl_12_6.omd
 ```
 
 ### Example 2
 
-```
-$ mpirun -np 4 openmd_MPI NaCl_12_6_4.omd
+```bash
+mpirun -np 4 openmd_MPI NaCl_12_6_4.omd
 ```
 
 ## Expected Output
 
 To visualize the impact changing to a 12-6-4 potential might have, we can calculate the g(r) for `Na+` to `O_SPCE` (`Cl-` to `H_SPCE` would work equally well) with the following:
 
-```
-$ StaticProps -i NaCl_12_6.dump --gofr --sele1="select Na+" --sele2="select O_SPCE"
-$ StaticProps -i NaCl_12_6_4.dump --gofr --sele1="select Na+" --sele2="select O_SPCE"
+```bash
+StaticProps -i NaCl_12_6.dump --gofr --sele1="select Na+" --sele2="select O_SPCE"
+StaticProps -i NaCl_12_6_4.dump --gofr --sele1="select Na+" --sele2="select O_SPCE"
 ```
 
 Then we can plot them in xmgrace,
 
-```
-$ xmgrace NaCl_12_6_4.gofr NaCl_12_6.gofr
+```bash
+xmgrace NaCl_12_6_4.gofr NaCl_12_6.gofr
 ```
 
 And as we can see, though subtle, the effect of moving to a 12-6-4 potential has a noticable shift in the first solvation shell of Na+ to the O on water.
