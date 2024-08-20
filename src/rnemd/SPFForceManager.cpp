@@ -208,43 +208,11 @@ namespace OpenMD::RNEMD {
     bool updateSelectedMolecule {false};
 
     if (hasSelectedMolecule_) {
-      RealType deltaLambda = std::fabs(currentSPFTarget);
-
       std::shared_ptr<SPFData> currentSPFData = currentSnapshot_->getSPFData();
 
-      currentSPFData->lambda += deltaLambda;
-
-      if (f_lambda(currentSPFData->lambda + deltaLambda) > 1.0 &&
-          f_lambda(currentSPFData->lambda) < 1.0) {
-        /*
-         * New spfTarget should be determined such that:
-         *  f_lambda(lambda + spfTarget) = 1
-         */
-        nextSPFTarget = 1.0 - currentSPFData->lambda;
-        nextSPFTarget = std::copysign(nextSPFTarget, currentSPFTarget);
-      }
-
-      // Convert particle target into electron target for rnemd reporting
-      if (useChargedSPF_) {
-        if (selectedMolecule_) {
-          currentSPFTarget *= selectedMolecule_->getFixedCharge();
-        }
-
-#ifdef IS_MPI
-        int globalSelectedID = currentSPFData->globalID;
-
-        // if globalSelectedID is -1 (default), this will be an issue
-        MPI_Bcast(&currentSPFTarget, 1, MPI_REALTYPE,
-                  info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
-#endif
-      }
-
-      currentSnapshot_->clearDerivedProperties();
-      updateSPFState();
-
-      // Full reset on completed particle exchange
-      if (f_lambda(currentSPFData->lambda) > 1.0 ||
-          std::fabs(f_lambda(currentSPFData->lambda) - 1.0) < 1e-6) {
+      // Check to see if we are already fully in sink region
+      if (currentSPFData->lambda >= 1.0 ||
+          std::fabs(currentSPFData->lambda - 1.0) < 1e-6) {
         // Only the processor with the selected molecule should do this step:
         if (selectedMolecule_) {
           selectedMolecule_->setCom(currentSPFData->pos);
@@ -259,6 +227,41 @@ namespace OpenMD::RNEMD {
 
         hasSelectedMolecule_   = false;
         updateSelectedMolecule = true;
+
+        return true;
+      }
+
+      // survived the return true, so lambda is not >= 1:
+      // currentSPFTarget is an ion flux target, so can have sign:
+      RealType deltaLambda = std::fabs(currentSPFTarget);
+
+      if (currentSPFData->lambda + deltaLambda > 1.0) {
+        /*
+         * New deltaLambda should be determined such that:
+         *  f_lambda(lambda + deltaLambda) = 1
+         */
+        deltaLambda = 1.0 - currentSPFData->lambda;
+      }
+
+      currentSPFData->lambda += deltaLambda;
+
+      // Mark currentSPFTarget as 'dirty' from here on for
+      // ion exchange. Now we are only using it for electron exchange.
+      nextSPFTarget = std::copysign(deltaLambda, currentSPFTarget);
+
+      if (useChargedSPF_) {
+        if (selectedMolecule_) {
+          // Convert ion target into electron target for rnemd reporting
+          currentSPFTarget *= selectedMolecule_->getFixedCharge();
+        }
+
+#ifdef IS_MPI
+        int globalSelectedID = currentSPFData->globalID;
+
+        // if globalSelectedID is -1 (default), this will be an issue
+        MPI_Bcast(&currentSPFTarget, 1, MPI_REALTYPE,
+                  info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
+#endif
       }
     }
 

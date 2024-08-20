@@ -77,8 +77,6 @@ namespace OpenMD::RNEMD {
     RealType spfTarget_ {};
 
     SelectionManager anionMan_, cationMan_;
-    SelectedIon selectedIon_ {NONE};
-
     SPFForceManager* forceManager_ {nullptr};
 
     std::string selectedMoleculeStr_;

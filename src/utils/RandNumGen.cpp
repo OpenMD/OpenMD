@@ -55,16 +55,19 @@
 namespace OpenMD::Utils {
 
   RandNumGen::RandNumGen(result_type seed) {
-    result_type result;
+    int worldRank {};
     int nProcessors {1};
 
 #ifdef IS_MPI
-    int worldRank {};
     MPI_Status status;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
     MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
+#endif
+    result_type result;
+    std::vector<result_type> seeds(nProcessors);
 
+#ifdef IS_MPI
     if (worldRank == 0) {
 #endif
       std::vector<result_type> initalSequence(nProcessors);
@@ -72,18 +75,14 @@ namespace OpenMD::Utils {
 
       // Generate the seed_seq to initialize the RNG on each processor
       std::seed_seq seq(initalSequence.begin(), initalSequence.end());
-      std::vector<result_type> seeds(nProcessors);
+
       seq.generate(seeds.begin(), seeds.end());
-
-      result = seeds[0];
-
 #ifdef IS_MPI
-      for (int index {1}; index < nProcessors; ++index)
-        MPI_Send(&seeds[index], 1, MPI_UINT32_T, index, 10, MPI_COMM_WORLD);
-    } else {
-      MPI_Recv(&result, 1, MPI_UINT32_T, 0, 10, MPI_COMM_WORLD, &status);
     }
+
+    MPI_Bcast(&seeds[0], nProcessors, MPI_UINT32_T, 0, MPI_COMM_WORLD);
 #endif
+    result = seeds[worldRank];
 
     engine = std::mt19937(result);
   }

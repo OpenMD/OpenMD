@@ -445,9 +445,9 @@ namespace OpenMD::RNEMD {
 
     if (selectedMolecule) {
       if (useChargedSPF_) {
-        if (selectedIon_ == ANION) { spfTarget_ *= -1; }
+        if (selectedMolecule->getFixedCharge() < 0.0) { spfTarget_ *= -1; }
 
-      // Scale the particle flux by the charge yielding a current density
+        // Scale the particle flux by the charge yielding a current density
         convertParticlesToElectrons(selectedMolecule);
       }
 
@@ -484,12 +484,12 @@ namespace OpenMD::RNEMD {
     if (useChargedSPF_) { MPI_Bcast(&ion, 1, MPI_INT, 0, MPI_COMM_WORLD); }
 #endif
 
-    selectedIon_ = static_cast<SelectedIon>(ion);
+    SelectedIon selectedIon = static_cast<SelectedIon>(ion);
 
-    if (selectedIon_ == ANION) {
+    if (selectedIon == ANION) {
       spfTarget_ *= -1;
       oppositeIonSman = cationMan_;
-    } else if (selectedIon_ == CATION) {
+    } else if (selectedIon == CATION) {
       oppositeIonSman = anionMan_;
     }
 
