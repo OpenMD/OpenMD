@@ -49,7 +49,7 @@ From the beginning, `OpenMD` has been an open source project, and has been maint
 
 # Statement of need
 
-`OpenMD` builds on the foundations of the Object-Oriented Parallel Simulation Engine (`OOPSE`) program [@Meineke2005]. Entirely rewritten in modern C++, it extends `OOPSE` in a number of key areas. One of the added capabilities is Reverse Non-Equilibrium Molecular Dynamics (RNEMD), a family of algorithms which impose a non-physical flux on a system and use linear response theory to compute transport properties as the system approaches steady state. The goal of RNEMD methods is to calculate the relevant transport property ($\lambda$) that connects the flux ($\textbf{J}$) and driving force ($\nabla X$) according to the generalized equation,
+`OpenMD` builds on the foundations of the Object-Oriented Parallel Simulation Engine (`OOPSE`) program [@Meineke2005], rewritten in modern C++. It differs from other contemporary molecular dynamics engines in its focus on complex interfaces. A number of features unique to `OpenMD` facilitate the study of this problem space, including efficient non-equilibrium algorithms, non-periodic simulations, metal polarizability models, and real space electrostatics. The first such feature is Reverse Non-Equilibrium Molecular Dynamics (RNEMD), a family of algorithms which impose a non-physical flux on a system and use linear response theory to compute transport properties as the system approaches steady state. The goal of RNEMD methods is to calculate the relevant transport property ($\lambda$) that connects the flux ($\textbf{J}$) and driving force ($\nabla X$) according to the generalized equation,
 \begin{equation}\label{eq:linearConstitutive}
   \textbf{J} = - \lambda \nabla X.
 \end{equation}
