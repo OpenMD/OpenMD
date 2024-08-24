@@ -210,14 +210,11 @@ namespace OpenMD {
 
     if (!generated) generate();
 
-    assert(t >= x_.front());
-    assert(t <= x_.back());
-
     //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
     //  to t.
 
     if (isUniform) {
-      j = std::max(0, std::min(n - 1, int((t - x_[0]) * dx)));
+      j = int((t - x_[0]) * dx);
 
     } else {
       j = n - 1;
@@ -229,6 +226,8 @@ namespace OpenMD {
         }
       }
     }
+
+    j = std::clamp(j, 0, n - 1);
 
     //  Evaluate the cubic polynomial.
 
@@ -246,14 +245,11 @@ namespace OpenMD {
 
     if (!generated) generate();
 
-    assert(t >= x_.front());
-    assert(t <= x_.back());
-
     //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
     //  to t.
 
     if (isUniform) {
-      j = std::max(0, std::min(n - 1, int((t - x_[0]) * dx)));
+      j = int((t - x_[0]) * dx);
 
     } else {
       j = n - 1;
@@ -265,6 +261,8 @@ namespace OpenMD {
         }
       }
     }
+
+    j = std::clamp(j, 0, n - 1);
 
     //  Evaluate the cubic polynomial.
 
@@ -295,14 +293,11 @@ namespace OpenMD {
 
     if (!generated) generate();
 
-    assert(t >= x_.front());
-    assert(t <= x_.back());
-
     //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
     //  to t.
 
     if (isUniform) {
-      j = std::max(0, std::min(n - 1, int((t - x_[0]) * dx)));
+      j = int((t - x_[0]) * dx);
 
     } else {
       j = n - 1;
@@ -314,6 +309,8 @@ namespace OpenMD {
         }
       }
     }
+
+    j = std::clamp(j, 0, n - 1);
 
     //  Evaluate the cubic polynomial.
 

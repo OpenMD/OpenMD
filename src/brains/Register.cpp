@@ -59,7 +59,6 @@
 #include "integrators/NVE.hpp"
 #include "integrators/NVT.hpp"
 #include "integrators/NgammaT.hpp"
-#include "integrators/SPFDynamics.hpp"
 #include "lattice/BCCLattice.hpp"
 #include "lattice/FCCLattice.hpp"
 #include "lattice/LatticeCreator.hpp"
@@ -110,8 +109,6 @@ namespace OpenMD {
         new IntegratorBuilder<LangevinDynamics>("SMIPD"));
     IntegratorFactory::getInstance().registerIntegrator(
         new IntegratorBuilder<LangevinPiston>("LANGEVINPISTON"));
-    IntegratorFactory::getInstance().registerIntegrator(
-        new IntegratorBuilder<SPFDynamics>("SPF"));
   }
 
   void registerOptimizers() {

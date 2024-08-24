@@ -84,8 +84,6 @@ namespace OpenMD::RNEMD {
       updateVirialTensor();
     }
 
-    RealType f_lambda(RealType lambda) const { return std::pow(lambda, k_); }
-
   private:
     void calcForces() override;
 
@@ -98,6 +96,12 @@ namespace OpenMD::RNEMD {
     void updateRestraintPotentials();
     void updateSelectionPotentials();
     void updateVirialTensor();
+
+    RealType f_lambda(RealType lambda) const {
+      RealType result = std::pow(lambda, k_);
+
+      return std::clamp(result, 0.0, 1.0);
+    }
 
     template<typename T>
     T linearCombination(T quantityA, T quantityB) {

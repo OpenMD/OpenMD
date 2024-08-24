@@ -75,8 +75,6 @@ namespace OpenMD::RNEMD {
     void collectData();
     void writeOutputFile();
 
-    bool failedLastKick() const { return failedLastTrial_; }
-
   protected:
     enum RNEMDPrivilegedAxis { rnemdX = 0, rnemdY = 1, rnemdZ = 2 };
 
@@ -145,8 +143,6 @@ namespace OpenMD::RNEMD {
     unsigned int trialCount_ {0};
     unsigned int failTrialCount_ {0};
     unsigned int failRootCount_ {0};
-
-    bool failedLastTrial_ {false};
 
     void setKineticFlux(RealType kineticFlux);
     void setParticleFlux(RealType particleFlux);

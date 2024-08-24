@@ -211,8 +211,6 @@ namespace OpenMD::RNEMD {
       smanB -= selectedMoleculeMan_;
     }
 
-    failedLastTrial_ = false;
-
     int selei {}, selej {};
 
     StuntDouble* sd;
@@ -373,11 +371,6 @@ namespace OpenMD::RNEMD {
           }
         }
 
-        currentSnap_->hasTranslationalKineticEnergy = false;
-        currentSnap_->hasRotationalKineticEnergy    = false;
-        currentSnap_->hasKineticEnergy              = false;
-        currentSnap_->hasTotalEnergy                = false;
-
         RealType currentSPFTarget = spfTarget_;
 
         // Synced across processors
@@ -395,7 +388,6 @@ namespace OpenMD::RNEMD {
     if (!forceManager_->getHasSelectedMolecule()) {
       selectMolecule();
       failTrialCount_++;
-      failedLastTrial_ = true;
       return;
     }
 
@@ -408,7 +400,6 @@ namespace OpenMD::RNEMD {
       // painCave.severity = OPENMD_INFO;
       // simError();
       failTrialCount_++;
-      failedLastTrial_ = true;
     }
   }
 

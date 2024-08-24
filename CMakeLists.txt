@@ -497,7 +497,6 @@ set(SOURCE
     src/integrators/NPTxyz.cpp
     src/integrators/NVE.cpp
     src/integrators/NVT.cpp
-    src/integrators/SPFDynamics.cpp
     src/integrators/VelocityVerletIntegrator.cpp
     src/io/AtomTypesSectionParser.cpp
     src/io/BaseAtomTypesSectionParser.cpp

@@ -220,6 +220,7 @@ namespace OpenMD::RNEMD {
         }
 
         currentSPFData->clear();
+        currentSnapshot_->clearDerivedProperties();
 
         neighborList_   = sinkNeighborList_;
         point_          = sinkPoint_;
@@ -289,7 +290,7 @@ namespace OpenMD::RNEMD {
       currentSPFData->clear();
     }
 
-    return -(f_lambda(lambda + d_lambda) - f_lambda(lambda)) *
+    return -(f_lambda(lambda) - f_lambda(lambda - d_lambda)) *
            (potentialSink_ - potentialSource_);
   }
 

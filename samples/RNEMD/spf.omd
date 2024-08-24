@@ -12,7 +12,7 @@ forceField = "LJ";
 targetTemp = 83.86;
 tauThermostat = 1e3;
 cutoffRadius = 9.0;
-ensemble = "SPF";
+ensemble = "NVE";
 seed = 8675309;
 
 RNEMD
