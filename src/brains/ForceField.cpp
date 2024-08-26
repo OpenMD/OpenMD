@@ -438,7 +438,45 @@ namespace OpenMD {
         return bestType;
       } else {
         // if no exact match found, try wild card match
-        return torsionTypeCont_.find(keys, wildCardAtomTypeName_);
+	
+	for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
+	  kk = 0;
+	  for (k = at3Chain.begin(); k != at3Chain.end(); ++k) {
+	    ii = 0;
+	    for (i = at1Chain.begin(); i != at1Chain.end(); ++i) {
+	      ll = 0;
+	      for (l = at4Chain.begin(); l != at4Chain.end(); ++l) {
+		ILscore = ii + ll;
+		JKscore = jj + kk;
+		
+		std::vector<std::string> myKeys;
+		myKeys.push_back((*i)->getName());
+		myKeys.push_back((*j)->getName());
+		myKeys.push_back((*k)->getName());
+		myKeys.push_back((*l)->getName());
+				
+		TorsionType* torsionType = torsionTypeCont_.find(myKeys, wildCardAtomTypeName_);
+		if (torsionType) {
+		  foundTorsions.push_back(
+					  std::make_tuple(JKscore, ILscore, myKeys));
+		}
+		ll++;
+	      }
+	      ii++;
+	    }
+	    kk++;
+	  }
+	  jj++;
+	}
+
+	if (!foundTorsions.empty()) {
+	  std::sort(foundTorsions.begin(), foundTorsions.end());
+	  std::vector<std::string> theKeys = std::get<2>(foundTorsions[0]);
+	  TorsionType* bestType = torsionTypeCont_.find(theKeys, wildCardAtomTypeName_);
+	  return bestType;
+	} else {
+	  return NULL;
+	}
       }
     }
   }

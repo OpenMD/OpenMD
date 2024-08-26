@@ -58,6 +58,41 @@
 #endif
 
 namespace OpenMD {
+  std::string stripComments(const std::string& S) {
+    unsigned int n = S.length();
+    std::string res;
+
+    // Flags to indicate that single line and multpile line comments
+    // have started or not.
+    bool s_cmt = false;
+    bool m_cmt = false;
+
+    // Traverse the line
+    for (unsigned int i = 0; i < n; i++) {
+      // If single line comment flag is on, then check for end of it
+      if (s_cmt == true && S[i] == '\n') s_cmt = false;
+
+      // If multiple line comment is on, then check for end of it
+      else if (m_cmt == true && S[i] == '*' && S[i + 1] == '/')
+        m_cmt = false, i++;
+
+      // If this character is in a comment, ignore it
+      else if (s_cmt || m_cmt)
+        continue;
+
+      // Check for beginning of comments and set the approproate flags
+      else if ((S[i] == '/' && S[i + 1] == '/') || (S[i] == '#'))
+        s_cmt = true, i++;
+      else if (S[i] == '/' && S[i + 1] == '*')
+        m_cmt = true, i++;
+
+      // If current character is a non-comment character, append it to res
+      else
+        res += S[i];
+    }
+    return res;
+  }
+  
   std::string UpperCase(const std::string& S) {
     std::string uc = S;
     unsigned int n = uc.size();

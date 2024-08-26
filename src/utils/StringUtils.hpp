@@ -61,6 +61,12 @@
 namespace OpenMD {
 
   /**
+   * Strip comments from a string
+   * @param S
+   */
+  std::string stripComments(const std::string& S);
+  
+  /**
    * Converts a string to UPPER CASE
    * @param S
    */
