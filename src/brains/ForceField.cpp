@@ -454,11 +454,13 @@ namespace OpenMD {
 		myKeys.push_back((*j)->getName());
 		myKeys.push_back((*k)->getName());
 		myKeys.push_back((*l)->getName());
-				
-		TorsionType* torsionType = torsionTypeCont_.find(myKeys, wildCardAtomTypeName_);
+		
+		TorsionType* torsionType = torsionTypeCont_.find(myKeys,
+							wildCardAtomTypeName_);
 		if (torsionType) {
 		  foundTorsions.push_back(
-					  std::make_tuple(JKscore, ILscore, myKeys));
+					  std::make_tuple(JKscore, ILscore,
+							  myKeys));
 		}
 		ll++;
 	      }
@@ -473,6 +475,7 @@ namespace OpenMD {
 	  std::sort(foundTorsions.begin(), foundTorsions.end());
 	  std::vector<std::string> theKeys = std::get<2>(foundTorsions[0]);
 	  TorsionType* bestType = torsionTypeCont_.find(theKeys, wildCardAtomTypeName_);
+
 	  return bestType;
 	} else {
 	  return NULL;
@@ -575,14 +578,53 @@ namespace OpenMD {
 
         InversionType* bestType =
             inversionTypeCont_.permutedFindSkippingFirstElement(theKeys);
+
         return bestType;
       } else {
         // if no exact match found, try wild card match
-        return inversionTypeCont_.find(keys, wildCardAtomTypeName_);
+	for (j = at2Chain.begin(); j != at2Chain.end(); ++j) {
+	  kk = 0;
+	  for (k = at3Chain.begin(); k != at3Chain.end(); ++k) {
+	    ii = 0;
+	    for (i = at1Chain.begin(); i != at1Chain.end(); ++i) {
+	      ll = 0;
+	      for (l = at4Chain.begin(); l != at4Chain.end(); ++l) {
+		Iscore   = ii;
+		JKLscore = jj + kk + ll;
+		
+		std::vector<std::string> myKeys;
+		myKeys.push_back((*i)->getName());
+		myKeys.push_back((*j)->getName());
+		myKeys.push_back((*k)->getName());
+		myKeys.push_back((*l)->getName());
+		InversionType* inversionType =
+                  inversionTypeCont_.permutedFindSkippingFirstElement(myKeys,
+							 wildCardAtomTypeName_);
+		if (inversionType) {
+		  foundInversions.push_back(
+                    std::make_tuple(Iscore, JKLscore, myKeys));
+		}
+		ll++;
+	      }
+	      ii++;
+	    }
+	    kk++;
+	  }
+	  jj++;
+	}
+	if (!foundInversions.empty()) {
+	  std::sort(foundInversions.begin(), foundInversions.end());
+	  std::vector<std::string> theKeys = std::get<2>(foundInversions[0]);
+	  InversionType* bestType =
+            inversionTypeCont_.permutedFindSkippingFirstElement(theKeys, wildCardAtomTypeName_);
+	  return bestType;
+	} else {
+	  return NULL;
+	}
       }
     }
   }
-
+  
   NonBondedInteractionType* ForceField::getNonBondedInteractionType(
       const std::string& at1, const std::string& at2) {
     std::vector<std::string> keys;
