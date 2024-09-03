@@ -442,7 +442,6 @@ def removeOverlaps(rcut, nSolventAtoms, nSoluteAtoms):
             for j in range (atomStartIndex, (atomStartIndex+nSolventAtoms)):
                 indices1.append(myIndex)
                 pvqj1.append(pvqj2[j])
-                print(pvqj2[j])
                 if ("p" in pvqj2[j]):
                     positions1.append(positions2[j])
                 else:
@@ -452,7 +451,6 @@ def removeOverlaps(rcut, nSolventAtoms, nSoluteAtoms):
                 else:
                     velocities1.append([0.0, 0.0, 0.0])
                 if ("q" in pvqj2[j]):
-                    print("here")
                     quaternions1.append(quaternions2[j])
                 else:
                     quaternions1.append([0.0, 0.0, 0.0, 0.0])                   
@@ -460,10 +458,6 @@ def removeOverlaps(rcut, nSolventAtoms, nSoluteAtoms):
                     angVels1.append(angVels2[j])
                 else:
                     angVels1.append([0.0, 0.0, 0.0])
-                print(positions1[-1])
-                print(velocities1[-1])
-                print(quaternions1[-1])
-                print(angVels1[-1])
 
                 myIndex = myIndex +1
     
