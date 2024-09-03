@@ -1,10 +1,77 @@
+# OpenMD-translated version of:
+#
+# AMBER General Force Field for organic molecules (Version 2.1, April 2016)
+# ----------------------------------------------------------------------------
+# This is the version gaff2.1 
+# van der Waals:  redeveloped to reproduce both high-level ab initio interaction 
+#                 energies and experimental pure liquid properties. 
+# Reference bond lengthes and angles:  updated based on the statistics of more 
+#                 than 30,000 geometries optimized at at least B3LYP/6-31G* level. 
+# Bond length and bond angle force constants: redeveloped to reproduce vibrational
+#                 frequencies of more than 600 molecules. The AUE and RMSE of more 
+# 		than 22000 frequencies is 51 and 67 cm-1, respectively.
+# Torsional angle parameters:  developed to reproduce ab initio rotation profiles
+#                 (MP2/aug-cc-pVTZ) for 400 most common model compounds including 
+#                 some PTM residues. The average RMS errors of reproducing ab 
+# 		initio rotation profiles is 0.94 kcal/mol 
+# !!!Suggestions/criticisms/comments are always welcome !!! 
+# ---------------------------------------------------------------------------
+# Equilibrium  Sources
+# SOURCE1
+# Authors: Frank H. Allen, Olga Kennard and David G. Watson
+# Title : Tables of Bond lengths determined by X-ray and neutron
+# diffraction. Part 1. Bond lengths in organic compounds
+# Journal: J. Chem. Soc. Perkin Trans. II 1987, S1-S19
+# 
+# SOURCE2
+# Authors: Harmony, M. D.; Laurie, V. W.; Kuczkowski, R. L.; Schwendeman,
+# R. H.; Ramsay, D. A.; Lovas, F. J.; Lafferty, W. J.; Maki, A. G.
+# Title : Molecular structures of gas-phase polyatomic molecules determined
+# by spectroscopic methods
+# Journal: J. Phys. Chem. Ref. Data, Vol 8, 1979, 619
+# 
+# SOURCE3
+# Optimized geometries at MP2/6-31G* level
+# 
+# SOURCE4
+# Optimized geometries at B3LYP/6-31G* level (15,000 molecules)
+# 
+# SOURCE5
+# Optimized geometries at B3LYP/6-31G* level (30,000 molecules)
+# ---------------------------------------------------------------------------
+# Bond stretching parameter format
+# atom_type  force_constant   equ. length  source_ID occurrence rmsd
+# xx-yy          581.1           1.288      SOURCE1     103    0.0100
+# ---------------------------------------------------------------------------
+# atom_type  force_constant   equ. angle   source_ID   occurrence   rmsd
+# xx-yy-zz      35.450          103.620     SOURCE3         3      0.7078
+# ---------------------------------------------------------------------------
+# aa-bb-cc-dd 4    2.000         0.000 2	set2_17	SS AUE=0.8458 RMSE=1.0943 TorType=3
+# |           |    |             |     |     |    |           |   |         |
+# atom_type   |    force_constant|     Vterm |    Opt_methods |   |    Torsional_Type
+#             multiplicity       phase    model_cmpd          Prediction_Error 
+# 
+# TorType=1: parameter comes from gaff
+# TorType=2: parameter introduced in gaff, but updated 
+# TorType=3: parameter newly introduced
+# Opt_method=SS: systematic search
+# Opt_method=GA: genetic algorithm
+# ---------------------------------------------------------------------------
+#
+# OpenMD notes:
+# 1) van der Waals interactions have been changed from equilibrium length (Re) to sigma epsilon LJ format
+# 2) Atom Types are all given default charges of 0, so they must have overrides in molecule definitions
+# 3) Inversions in OpenMD have central atom listed first, not as the third atom in improper torsion
+# 4) Amber-style multi-line torsion potentials have been combined into single Torsion lines
+# 5) Special atom types are given fallbacks to basic atom types. List of special and basic atom types can be found on https://github.com/rsdefever/GAFF-foyer or the GAFF oroginal paper (https://doi.org/10.1002/jcc.20035)  
+
 begin Options
 	Name				Gaff2
 	vdW-14-scale			0.5
 	electrostatic-14-scale		0.833333333
 	BondForceConstantScaling	2.0
 	BendForceConstantScaling	2.0
-End Options
+end Options
 
 
 begin BaseAtomTypes
@@ -24,55 +91,55 @@ end BaseAtomTypes
 
 begin AtomTypes
 //name	baseatomtype
-c	C			# Sp2 C carbonyl group 
 cs	C			# Sp2 C in c=S
 c1	C			# Sp C
 c2	C			# Sp2 C  
 c3	C			# Sp3 C
-ca	C			# Sp2 C in pure aromatic systems
-cp	C			# Head Sp2 C that connect two rings in biphenyl sys. 
-cq	C			# Head Sp2 C that connect two rings in biphenyl sys. identical to cp 
-cc	C			# Sp2 carbons in non-pure aromatic systems
-cd	C			# Sp2 carbons in non-pure aromatic systems, identical to cc
-ce	C			# Inner Sp2 carbons in conjugated systems
-cf	C			# Inner Sp2 carbons in conjugated systems, identical to ce
-cg	C			# Inner Sp carbons in conjugated systems
 ch	C			# Inner Sp carbons in conjugated systems, identical to cg
-cx	C			# Sp3 carbons in triangle systems
-cy	C			# Sp3 carbons in square systems
-cu	C			# Sp2 carbons in triangle systems
-cv	C			# Sp2 carbons in square systems
-cz	C			# Sp2 carbon in guanidine group
-h1	H			# H bonded to aliphatic carbon with 1 electrwd. group  
-h2	H			# H bonded to aliphatic carbon with 2 electrwd. group 
-h3	H			# H bonded to aliphatic carbon with 3 electrwd. group 
-h4	H			# H bonded to non-sp3 carbon with 1 electrwd. group 
-h5	H			# H bonded to non-sp3 carbon with 2 electrwd. group 
-ha	H			# H bonded to aromatic carbon  
+c	c2			# Sp2 C carbonyl group 
+ca	c2			# Sp2 C in pure aromatic systems
+cp	ca			# Head Sp2 C that connect two rings in biphenyl sys. 
+cq	ca			# Head Sp2 C that connect two rings in biphenyl sys. identical to cp 
+cc	c2			# Sp2 carbons in non-pure aromatic systems
+cd	c2			# Sp2 carbons in non-pure aromatic systems, identical to cc
+ce	c2			# Inner Sp2 carbons in conjugated systems
+cf	c2			# Inner Sp2 carbons in conjugated systems, identical to ce
+cg	c1			# Inner Sp carbons in conjugated systems
+cx	c3			# Sp3 carbons in triangle systems
+cy	c3			# Sp3 carbons in square systems
+cu	c2			# Sp2 carbons in triangle systems
+cv	c2			# Sp2 carbons in square systems
+cz	c2			# Sp2 carbon in guanidine group
 hc	H			# H bonded to aliphatic carbon without electrwd. group 
+ha	H			# H bonded to aromatic carbon  
+h1	hc			# H bonded to aliphatic carbon with 1 electrwd. group  
+h2	h1			# H bonded to aliphatic carbon with 2 electrwd. group 
+h3	h2			# H bonded to aliphatic carbon with 3 electrwd. group 
+h4	ha			# H bonded to non-sp3 carbon with 1 electrwd. group 
+h5	h4			# H bonded to non-sp3 carbon with 2 electrwd. group 
 hn	H			# H bonded to nitrogen atoms
 ho	H			# Hydroxyl group
 hp	H			# H bonded to phosphate 
 hs	H			# Hydrogen bonded to sulphur 
 hw	H			# Hydrogen in water 
-hx	H			# H bonded to C next to positively charged group  
+hx	h1			# H bonded to C next to positively charged group  
 f	F			# Fluorine
 cl	Cl			# Chlorine 
 br	Br			# Bromine 
 i	I			# Iodine 
-n	N			# Sp2 nitrogen in amide groups
 n1	N			# Sp N  
 n2	N			# aliphatic Sp2 N with two connected atoms 
 n3	N			# Sp3 N with three connected atoms
 n4	N			# Sp3 N with four connected atoms 
-na	N			# Sp2 N with three connected atoms 
-nb	N			# Sp2 N in pure aromatic systems 
-nc	N			# Sp2 N in non-pure aromatic systems
-nd	N			# Sp2 N in non-pure aromatic systems, identical to nc
-ne	N			# Inner Sp2 N in conjugated systems
+n	n3			# Sp2 nitrogen in amide groups
+na	n3			# Sp2 N with three connected atoms 
+ne	n2			# Inner Sp2 N in conjugated systems
 nf	N			# Inner Sp2 N in conjugated systems, identical to ne
-nh	N			# Amine N connected one or more aromatic rings 
-no	N			# Nitro N  
+nc	ne			# Sp2 N in non-pure aromatic systems
+nb	nc			# Sp2 N in pure aromatic systems 
+nd	na			# Sp2 N in non-pure aromatic systems, identical to nc
+nh	n3			# Amine N connected one or more aromatic rings 
+no	na			# Nitro N  
 ns	N			# amind N, with 1 attached hydrogen atom
 nt	N			# amide N, with 2 attached hydrogen atoms
 nx	N			# like n4, but only has one hydrogen atom
@@ -90,23 +157,23 @@ os	O			# Ether and ester oxygen
 ow	O			# Oxygen in water 
 p2	P			# Phosphate with two connected atoms 
 p3	P			# Phosphate with three connected atoms, such as PH3
-p4	P			# Phosphate with three connected atoms, such as O=P(CH3)2
+p4	p3			# Phosphate with three connected atoms, such as O=P(CH3)2
 p5	P			# Phosphate with four connected atoms, such as O=P(OH)3
-pb	P			# Sp2 P in pure aromatic systems 
-pc	P			# Sp2 P in non-pure aromatic systems
-pd	P			# Sp2 P in non-pure aromatic systems, identical to pc
-pe	P			# Inner Sp2 P in conjugated systems
-pf	P			# Inner Sp2 P in conjugated systems, identical to pe
-px	P			# Special p4 in conjugated systems
-py	P			# Special p5 in conjugated systems
+pe	p2			# Inner Sp2 P in conjugated systems
+pb	pe			# Sp2 P in pure aromatic systems 
+pc	pe			# Sp2 P in non-pure aromatic systems
+pd	p2			# Sp2 P in non-pure aromatic systems, identical to pc
+pf	p2			# Inner Sp2 P in conjugated systems, identical to pe
+px	p4			# Special p4 in conjugated systems
+py	p5			# Special p5 in conjugated systems
 s	S			# S with one connected atom 
 s2	S			# S with two connected atom, involved at least one double bond  
 s4	S			# S with three connected atoms 
 s6	S			# S with four connected atoms 
-sh	S			# Sp3 S connected with hydrogen 
-ss	S			# Sp3 S in thio-ester and thio-ether
-sx	S			# Special s4 in conjugated systems
-sy	S			# Special s6 in conjugated systems
+sh	s2			# Sp3 S connected with hydrogen 
+ss	s2			# Sp3 S in thio-ester and thio-ether
+sx	s4			# Special s4 in conjugated systems
+sy	s6			# Special s6 in conjugated systems
 end AtomTypes
 
 
@@ -6390,7 +6457,7 @@ hc	c3	c3	f	Charmm	0.220		3	0.000		1.970		1	180.000		 # m3 GA AUE=0.0868 RMSE=0.1
 hc	c3	c3	hc	Charmm	0.120		3	0.000							 # m1 SS AUE=0.2420 RMSE=0.2944 TorType=2
 hc	c3	c3	oh	Charmm	0.180		3	0.000		0.510		1	0.000		 # m11 GA AUE=0.1021 RMSE=0.1307 TorType=2	m11 GA AUE=0.1021 RMSE=0.1307 TorType=2
 n 	c 	c3	n	Charmm	0.100		1	180.000		2.120		2	180.000		 # p17 GA AUE=0.9129 RMSE=1.0401 TorType=2	p17 GA AUE=0.9129 RMSE=1.0401 TorType=2
-oh	c3	c3	os	Charmm	1.010		3	0.000		0.000		2	0.000		0.020		1	180.000		 # suger5ring,suger6ring GA AUE=0.6597 RMSE=0.8978 TorType=2	suger5ring,suger6ring GA AUE=0.6597 RMSE=0.8978 TorType=2	suger5ring,suger6ring GA AUE=0.6597 RMSE=0.8978 TorType=2
+oh	c3	c3	os	Charmm	1.010		3	0.000		0.000		2	0.000		0.020		1	180.000		 # suger5ring,suger6ring GA AUE=0.6597 RMSE=0.8978 TorType=2	 suger5ring,suger6ring GA AUE=0.6597 RMSE=0.8978 TorType=2	suger5ring,suger6ring GA AUE=0.6597 RMSE=0.8978 TorType=2
 os	p5	os	c3	Charmm	0.000		3	0.000		2.610		2	0.000		 # c191 GA AUE=0.2324 RMSE=0.3542 TorType=2	c191 GA AUE=0.2324 RMSE=0.3542 TorType=2
 c3	n 	c 	c3	Charmm	0.260		2	180.000		0.500		1	0.000		 # c5 GA AUE=0.9706 RMSE=1.2796 TorType=2	c5 GA AUE=0.9706 RMSE=1.2796 TorType=2
 c3	os	c 	c3	Charmm	1.580		1	180.000		3.180		2	180.000		0.730		3	0.000		 # c13 GA AUE=0.2469 RMSE=0.2990 TorType=2	c13 GA AUE=0.2469 RMSE=0.2990 TorType=2	c13 GA AUE=0.2469 RMSE=0.2990 TorType=2
