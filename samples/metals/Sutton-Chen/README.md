@@ -9,8 +9,7 @@ Although it has the same basic form as the EAM potential,
 the Sutton-Chen model requires a simpler set of parameters,
 
 $$
-U_{tot}=\sum _{i}\left[ \frac{1}{2}\sum _{j\neq
-i}\epsilon_{ij}V^{pair}_{ij}(r_{ij})-c_{i}\epsilon_{ii}\sqrt{\rho_{i}}\right] ,
+U_{tot}=\sum_{i}\left[\frac{1}{2}\sum_{j\neq i}\epsilon_{ij}V^{pair}_{ij}(r_{ij})-c_{i}\epsilon_{ii}\sqrt{\rho_{i}} \right] ,
 $$
 
 where $V^{pair}_{ij}$ and $\rho_{i}$ are given by 
