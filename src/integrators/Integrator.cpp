@@ -309,8 +309,6 @@ namespace OpenMD {
   void Integrator::postStep() {
     RealType difference;
 
-    saveConservedQuantity();
-
     if (needVelocityScaling) {
       difference = snap->getTime() - currThermal;
 
@@ -331,6 +329,8 @@ namespace OpenMD {
       rnemd_->collectData();
       rnemd_->writeOutputFile();
     }
+
+    saveConservedQuantity();
 
     difference = snap->getTime() - currSample;
 

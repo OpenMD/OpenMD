@@ -59,14 +59,16 @@
 
 namespace OpenMD::RNEMD {
 
+  class SPFMethod;
+
   class SPFForceManager : public ForceManager {
   public:
     SPFForceManager(SimInfo* info);
     ~SPFForceManager();
 
     void setSelectedMolecule(Molecule* selectedMolecule);
-    bool updateLambda(RealType& particleTarget, RealType& deltaLambda);
-    RealType getScaledDeltaU(RealType d_lambda);
+    void setDeltaLambda(RealType spfTarget);
+    RealType getScaledDeltaU();
 
     bool getHasSelectedMolecule() const { return hasSelectedMolecule_; }
 
@@ -83,6 +85,8 @@ namespace OpenMD::RNEMD {
       updatePotentials();
       updateVirialTensor();
     }
+
+    SPFMethod* spfRNEMD_;
 
   private:
     void calcForces() override;
@@ -126,10 +130,11 @@ namespace OpenMD::RNEMD {
     std::vector<Vector3d> sinkSavedPositions_;
 
     bool hasSelectedMolecule_ {};
-    bool useChargedSPF_ {};
 
     Molecule* selectedMolecule_ {nullptr};
     int k_ {};
+
+    RealType deltaLambda_ {};
 
     RealType potentialSource_ {};
     RealType potentialSink_ {};

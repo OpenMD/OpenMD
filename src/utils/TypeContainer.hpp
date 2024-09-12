@@ -137,8 +137,7 @@ namespace OpenMD {
 
       do {
         i = data_.find(permutedKeys);
-        if (i != data_.end()) {
-	  return (i->second).second; }
+        if (i != data_.end()) { return (i->second).second; }
       } while (std::next_permutation(start, permutedKeys.end()));
 
       return NULL;
@@ -188,8 +187,7 @@ namespace OpenMD {
     }
 
     ElemPtr permutedFindSkippingFirstElement(KeyType& keys,
-					     const std::string& wildCard) {
-      
+                                             const std::string& wildCard) {
       assert(keys.size() == SIZE);
       MapTypeIterator i;
       MapTypeIterator i2;
@@ -197,23 +195,23 @@ namespace OpenMD {
       std::vector<std::string> replacedKeys;
       std::vector<ValueType> foundTypes;
 
-      
-      while (replaceWithWildCardSkippingFirstElement(iterCont, keys, replacedKeys, wildCard)) {		
-	KeyType permutedKeys = replacedKeys;
-	// skip the first element:
-	KeyTypeIterator start;
-	start = permutedKeys.begin();
-	++start;
-	std::sort(start, permutedKeys.end());	
-       	do {
-       	  i2 = data_.find(permutedKeys);
-       	  if (i2 != data_.end()) { foundTypes.push_back(i2->second); }
-       	} while (std::next_permutation(start, permutedKeys.end()));
+      while (replaceWithWildCardSkippingFirstElement(iterCont, keys,
+                                                     replacedKeys, wildCard)) {
+        KeyType permutedKeys = replacedKeys;
+        // skip the first element:
+        KeyTypeIterator start;
+        start = permutedKeys.begin();
+        ++start;
+        std::sort(start, permutedKeys.end());
+        do {
+          i2 = data_.find(permutedKeys);
+          if (i2 != data_.end()) { foundTypes.push_back(i2->second); }
+        } while (std::next_permutation(start, permutedKeys.end()));
       }
-            
+
       // replaceWithWildCard can not generate this particular sequence, we
       // have to do it manually
-      
+
       KeyType allWildCards(SIZE, wildCard);
       // but retain first element:
       allWildCards[0] = keys[0];
@@ -222,16 +220,15 @@ namespace OpenMD {
       ++start;
       std::sort(start, allWildCards.end());
       do {
-	i2 = data_.find(allWildCards);
-	if (i2 != data_.end()) { foundTypes.push_back(i2->second); }
+        i2 = data_.find(allWildCards);
+        if (i2 != data_.end()) { foundTypes.push_back(i2->second); }
       } while (std::next_permutation(start, allWildCards.end()));
-      
-      
+
       typename std::vector<ValueType>::iterator j;
       j = std::min_element(foundTypes.begin(), foundTypes.end());
       return j == foundTypes.end() ? NULL : j->second;
     }
-    
+
     size_t size() { return data_.size(); }
 
     ElemPtr beginType(MapTypeIterator& i) {

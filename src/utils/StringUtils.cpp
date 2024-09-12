@@ -92,7 +92,7 @@ namespace OpenMD {
     }
     return res;
   }
-  
+
   std::string UpperCase(const std::string& S) {
     std::string uc = S;
     unsigned int n = uc.size();

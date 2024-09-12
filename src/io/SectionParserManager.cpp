@@ -47,8 +47,8 @@
 #include <cstdio>
 #include <stack>
 
-#include "utils/Trim.hpp"
 #include "utils/StringUtils.hpp"
+#include "utils/Trim.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -137,7 +137,7 @@ namespace OpenMD {
     if (!sectionNameStack.empty()) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "SectionParserManager Error: Stack is not empty.\n"
-	       "\tCheck for matching begin / end lines.\n");
+               "\tCheck for matching begin / end lines.\n");
       painCave.isFatal = 1;
       simError();
     }

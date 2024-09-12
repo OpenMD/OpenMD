@@ -63,6 +63,7 @@
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "rnemd/RNEMDParameters.hpp"
+#include "rnemd/SPF.hpp"
 #include "utils/CI_String.hpp"
 
 namespace OpenMD::RNEMD {
@@ -72,13 +73,7 @@ namespace OpenMD::RNEMD {
     thermo_          = std::make_unique<Thermo>(info);
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-    RNEMDParameters* rnemdParams = info_->getSimParams()->getRNEMDParameters();
-
-    k_ = rnemdParams->getSPFScalingPower();
-
-    if (Utils::traits_cast<Utils::ci_char_traits>(rnemdParams->getFluxType()) ==
-        "CurrentDensity")
-      useChargedSPF_ = true;
+    k_ = info_->getSimParams()->getRNEMDParameters()->getSPFScalingPower();
 
     int nAtoms        = info_->getNAtoms();
     int nRigidBodies  = info_->getNRigidBodies();
@@ -107,6 +102,20 @@ namespace OpenMD::RNEMD {
   }
 
   void SPFForceManager::calcForces() {
+    std::shared_ptr<SPFData> currentSPFData = currentSnapshot_->getSPFData();
+
+    // Synced across processors
+    setDeltaLambda(spfRNEMD_->spfTarget_);
+
+    currentSPFData->lambda += deltaLambda_;
+
+    Vector3d v_a {};
+    Vector3d v_b {};
+    RealType a {};
+    RealType b {};
+
+    spfRNEMD_->isValidExchange(v_a, v_b, a, b);
+
     // Current snapshot with selected molecule in source slab
     ForceManager::calcForces();
     potentialSource_ = currentSnapshot_->getPotentialEnergy();
@@ -146,14 +155,14 @@ namespace OpenMD::RNEMD {
 
       // Only the processor with the selected molecule should do this step:
       if (selectedMolecule_) {
-        currentSnapshot_->getSPFData()->pos += delta;
-        selectedMolecule_->setCom(currentSnapshot_->getSPFData()->pos);
+        currentSPFData->pos += delta;
+        selectedMolecule_->setCom(currentSPFData->pos);
       }
 
 #ifdef IS_MPI
-      int globalSelectedID = currentSnapshot_->getSPFData()->globalID;
+      int globalSelectedID = currentSPFData->globalID;
 
-      MPI_Bcast(&currentSnapshot_->getSPFData()->pos[0], 3, MPI_REALTYPE,
+      MPI_Bcast(&currentSPFData->pos[0], 3, MPI_REALTYPE,
                 info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
 #endif
 
@@ -183,15 +192,27 @@ namespace OpenMD::RNEMD {
         simError();
       }
 
-      updateSPFState();
-
       // Only the processor with the selected molecule should do this step:
       if (selectedMolecule_) { selectedMolecule_->setCom(currentSourceCom); }
 
+      bool doExchange {};
+
+      // restrict scaling coefficients
+      if ((a > 0.999) && (a < 1.001) && (b > 0.999) && (b < 1.001)) {
+        doExchange = true;
+      } else {
+        // roll back lambda
+        currentSPFData->lambda -= deltaLambda_;
+        deltaLambda_ = 0.0;
+      }
+
+      spfRNEMD_->failedLastTrial_ = !doExchange;
+
+      updateSPFState();
     } else {
       *temporarySourceSnapshot_ = *currentSnapshot_;
       *temporarySinkSnapshot_   = *currentSnapshot_;
-      potentialSink_            = currentSnapshot_->getPotentialEnergy();
+      potentialSink_            = std::numeric_limits<RealType>::max();
     }
   }
 
@@ -203,10 +224,7 @@ namespace OpenMD::RNEMD {
     }
   }
 
-  bool SPFForceManager::updateLambda(RealType& currentSPFTarget,
-                                     RealType& nextSPFTarget) {
-    bool updateSelectedMolecule {false};
-
+  void SPFForceManager::setDeltaLambda(RealType spfTarget) {
     if (hasSelectedMolecule_) {
       std::shared_ptr<SPFData> currentSPFData = currentSnapshot_->getSPFData();
 
@@ -220,56 +238,34 @@ namespace OpenMD::RNEMD {
         }
 
         currentSPFData->clear();
-        currentSnapshot_->clearDerivedProperties();
+        deltaLambda_ = 0.0;
 
         neighborList_   = sinkNeighborList_;
         point_          = sinkPoint_;
         savedPositions_ = sinkSavedPositions_;
 
-        hasSelectedMolecule_   = false;
-        updateSelectedMolecule = true;
+        hasSelectedMolecule_ = false;
 
-        return true;
+        spfRNEMD_->selectMolecule();
+
+        return;
       }
 
       // survived the return true, so lambda is not >= 1:
       // currentSPFTarget is an ion flux target, so can have sign:
-      RealType deltaLambda = std::fabs(currentSPFTarget);
+      deltaLambda_ = std::fabs(spfTarget);
 
-      if (currentSPFData->lambda + deltaLambda > 1.0) {
+      if (currentSPFData->lambda + deltaLambda_ >= 1.0) {
         /*
          * New deltaLambda should be determined such that:
          *  f_lambda(lambda + deltaLambda) = 1
          */
-        deltaLambda = 1.0 - currentSPFData->lambda;
-      }
-
-      currentSPFData->lambda += deltaLambda;
-
-      // Mark currentSPFTarget as 'dirty' from here on for
-      // ion exchange. Now we are only using it for electron exchange.
-      nextSPFTarget = std::copysign(deltaLambda, currentSPFTarget);
-
-      if (useChargedSPF_) {
-        if (selectedMolecule_) {
-          // Convert ion target into electron target for rnemd reporting
-          currentSPFTarget *= selectedMolecule_->getFixedCharge();
-        }
-
-#ifdef IS_MPI
-        int globalSelectedID = currentSPFData->globalID;
-
-        // if globalSelectedID is -1 (default), this will be an issue
-        MPI_Bcast(&currentSPFTarget, 1, MPI_REALTYPE,
-                  info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
-#endif
+        deltaLambda_ = 1.0 - currentSPFData->lambda;
       }
     }
-
-    return updateSelectedMolecule;
   }
 
-  RealType SPFForceManager::getScaledDeltaU(RealType d_lambda) {
+  RealType SPFForceManager::getScaledDeltaU() {
     std::shared_ptr<SPFData> currentSPFData = currentSnapshot_->getSPFData();
 
     RealType lambda = currentSPFData->lambda;
@@ -290,7 +286,9 @@ namespace OpenMD::RNEMD {
       currentSPFData->clear();
     }
 
-    return -(f_lambda(lambda) - f_lambda(lambda - d_lambda)) *
+    if (lambda < 1e-6) { return 0.0; }
+
+    return -(f_lambda(lambda) - f_lambda(lambda - deltaLambda_)) *
            (potentialSink_ - potentialSource_);
   }
 

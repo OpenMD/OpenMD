@@ -71,8 +71,9 @@
 namespace OpenMD::RNEMD {
 
   SPFMethod::SPFMethod(SimInfo* info, ForceManager* forceMan) :
-      RNEMD {info, forceMan}, anionMan_ {info}, cationMan_ {info},
-      selectedMoleculeMan_ {info}, selectedMoleculeEvaluator_ {info} {
+      RNEMD {info, forceMan}, smanA_ {info}, smanB_ {info}, anionMan_ {info},
+      cationMan_ {info}, selectedMoleculeMan_ {info},
+      selectedMoleculeEvaluator_ {info} {
     rnemdMethodLabel_ = "SPF";
 
     selectedMoleculeStr_ = "select none";
@@ -81,7 +82,8 @@ namespace OpenMD::RNEMD {
 
     if (SPFForceManager* spfForceManager =
             dynamic_cast<SPFForceManager*>(forceMan)) {
-      forceManager_ = spfForceManager;
+      forceManager_            = spfForceManager;
+      forceManager_->spfRNEMD_ = this;
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "SPF-RNEMD cannot be used with the default ForceManager.\n");
@@ -199,37 +201,22 @@ namespace OpenMD::RNEMD {
     uniformKineticScaling_ = rnemdParams->getSPFUniformKineticScaling();
   }
 
-  void SPFMethod::doRNEMDImpl(SelectionManager& smanA,
-                              SelectionManager& smanB) {
-    if (!doRNEMD_) return;
-    if (selectedMoleculeMan_.isEmpty()) { selectMolecule(); }
-
-    // Remove selected molecule from the source selection manager
-    if (spfTarget_ > 0.0) {
-      smanA -= selectedMoleculeMan_;
-    } else {
-      smanB -= selectedMoleculeMan_;
-    }
+  SPFMethod::SlabThermodynamics SPFMethod::calculateSlabTherodynamicQuantities(
+      SelectionManager& sman) {
+    SlabThermodynamics slab {};
 
     int selei {}, selej {};
 
     StuntDouble* sd;
 
-    Vector3d P_a {V3Zero};
-    Vector3d P_b {V3Zero};
-    RealType M_a {};
-    RealType M_b {};
-    RealType K_a {};
-    RealType K_b {};
-
-    for (sd = smanA.beginSelected(selei); sd != NULL;
-         sd = smanA.nextSelected(selei)) {
+    for (sd = sman.beginSelected(selei); sd != NULL;
+         sd = sman.nextSelected(selei)) {
       RealType mass = sd->getMass();
       Vector3d vel  = sd->getVel();
 
-      P_a += mass * vel;
-      M_a += mass;
-      K_a += mass * vel.lengthSquare();
+      slab.P += mass * vel;
+      slab.M += mass;
+      slab.K += mass * vel.lengthSquare();
 
       if (sd->isDirectional()) {
         Vector3d angMom = sd->getJ();
@@ -238,70 +225,41 @@ namespace OpenMD::RNEMD {
           int i = sd->linearAxis();
           int j = (i + 1) % 3;
           int k = (i + 2) % 3;
-          K_a +=
+          slab.K +=
               angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
         } else {
-          K_a += angMom[0] * angMom[0] / I(0, 0) +
-                 angMom[1] * angMom[1] / I(1, 1) +
-                 angMom[2] * angMom[2] / I(2, 2);
+          slab.K += angMom[0] * angMom[0] / I(0, 0) +
+                    angMom[1] * angMom[1] / I(1, 1) +
+                    angMom[2] * angMom[2] / I(2, 2);
         }
       }
     }
 
-    for (sd = smanB.beginSelected(selej); sd != NULL;
-         sd = smanB.nextSelected(selej)) {
-      RealType mass = sd->getMass();
-      Vector3d vel  = sd->getVel();
-
-      P_b += mass * vel;
-      M_b += mass;
-      K_b += mass * vel.lengthSquare();
-
-      if (sd->isDirectional()) {
-        Vector3d angMom = sd->getJ();
-        Mat3x3d I       = sd->getI();
-        if (sd->isLinear()) {
-          int i = sd->linearAxis();
-          int j = (i + 1) % 3;
-          int k = (i + 2) % 3;
-          K_b +=
-              angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
-        } else {
-          K_b += angMom[0] * angMom[0] / I(0, 0) +
-                 angMom[1] * angMom[1] / I(1, 1) +
-                 angMom[2] * angMom[2] / I(2, 2);
-        }
-      }
-    }
-
-    K_a *= 0.5;
-    K_b *= 0.5;
+    slab.K *= 0.5;
 
 #ifdef IS_MPI
-    MPI_Allreduce(MPI_IN_PLACE, &P_a[0], 3, MPI_REALTYPE, MPI_SUM,
+    MPI_Allreduce(MPI_IN_PLACE, &(slab.P[0]), 3, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &P_b[0], 3, MPI_REALTYPE, MPI_SUM,
+    MPI_Allreduce(MPI_IN_PLACE, &(slab.M), 1, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &M_a, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &M_b, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &K_a, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &K_b, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &(slab.K), 1, MPI_REALTYPE, MPI_SUM,
+                  MPI_COMM_WORLD);
 #endif
 
-    bool successfulExchange = false;
-    bool doExchange         = false;
+    return slab;
+  }
 
-    // Scaling shouldn't be performed on massive potential energies
-    RealType deltaU = Constants::energyConvert *
-                      forceManager_->getScaledDeltaU(std::fabs(spfTarget_));
+  void SPFMethod::isValidExchange(Vector3d& v_a, Vector3d& v_b, RealType& a,
+                                  RealType& b) {
+    const auto& [P_a, M_a, K_a] = calculateSlabTherodynamicQuantities(smanA_);
+    const auto& [P_b, M_b, K_b] = calculateSlabTherodynamicQuantities(smanB_);
 
-    if ((M_a > 0.0) && (M_b > 0.0) &&
-        forceManager_->getHasSelectedMolecule()) {  // both slabs are not empty
-      Vector3d v_a = P_a / M_a;
-      Vector3d v_b = P_b / M_b;
+    RealType deltaU =
+        Constants::energyConvert * forceManager_->getScaledDeltaU();
 
-      RealType a {};
-      RealType b {};
+    if ((M_a > 0.0) && (M_b > 0.0)) {  // both slabs are not empty
+      v_a = P_a / M_a;
+      v_b = P_b / M_b;
 
       if (uniformKineticScaling_) {
         RealType numerator   = deltaU;
@@ -314,9 +272,6 @@ namespace OpenMD::RNEMD {
         if (a2 > 0.0) {
           a = std::sqrt(a2);
           b = a;
-
-          // restrict scaling coefficients
-          if ((a > 0.999) && (a < 1.001)) { doExchange = true; }
         }
       } else {
         RealType aNumerator   = deltaU - kineticTarget_;
@@ -333,74 +288,89 @@ namespace OpenMD::RNEMD {
         if (a2 > 0.0 && b2 > 0.0) {
           a = std::sqrt(a2);
           b = std::sqrt(b2);
+        }
+      }
+    }
+  }
 
-          // restrict scaling coefficients
-          if ((a > 0.999) && (a < 1.001) && (b > 0.999) && (b < 1.001)) {
-            doExchange = true;
-          }
+  void SPFMethod::doRNEMDImpl(SelectionManager& smanA,
+                              SelectionManager& smanB) {
+    if (!doRNEMD_) return;
+
+    if (!forceManager_->getHasSelectedMolecule()) { selectMolecule(); }
+
+    // Remove selected molecule from the source selection manager
+    if (spfTarget_ > 0.0) {
+      smanA -= selectedMoleculeMan_;
+    } else {
+      smanB -= selectedMoleculeMan_;
+    }
+
+    smanA_ = smanA;
+    smanB_ = smanB;
+
+    if (!failedLastTrial_) {
+      Vector3d v_a {};
+      Vector3d v_b {};
+      RealType a {0.0};
+      RealType b {0.0};
+
+      isValidExchange(v_a, v_b, a, b);
+
+      Vector3d vel;
+
+      int selei {}, selej {};
+      StuntDouble* sd;
+
+      for (sd = smanA.beginSelected(selei); sd != NULL;
+           sd = smanA.nextSelected(selei)) {
+        vel = (sd->getVel() - v_a) * a + v_a;
+        sd->setVel(vel);
+
+        if (sd->isDirectional()) {
+          Vector3d angMom = sd->getJ() * a;
+          sd->setJ(angMom);
         }
       }
 
-      if (doExchange) {
-        Vector3d vel;
+      for (sd = smanB.beginSelected(selej); sd != NULL;
+           sd = smanB.nextSelected(selej)) {
+        vel = (sd->getVel() - v_b) * b + v_b;
+        sd->setVel(vel);
 
-        int selei2 {}, selej2 {};
-        StuntDouble* sd2;
-
-        for (sd2 = smanA.beginSelected(selei2); sd2 != NULL;
-             sd2 = smanA.nextSelected(selei2)) {
-          vel = (sd2->getVel() - v_a) * a + v_a;
-
-          sd2->setVel(vel);
-
-          if (sd2->isDirectional()) {
-            Vector3d angMom = sd2->getJ() * a;
-            sd2->setJ(angMom);
-          }
+        if (sd->isDirectional()) {
+          Vector3d angMom = sd->getJ() * b;
+          sd->setJ(angMom);
         }
-
-        for (sd2 = smanB.beginSelected(selei2); sd2 != NULL;
-             sd2 = smanB.nextSelected(selei2)) {
-          vel = (sd2->getVel() - v_b) * b + v_b;
-
-          sd2->setVel(vel);
-
-          if (sd2->isDirectional()) {
-            Vector3d angMom = sd2->getJ() * b;
-            sd2->setJ(angMom);
-          }
-        }
-
-        RealType currentSPFTarget = spfTarget_;
-
-        // Synced across processors
-        bool updateSelectedMolecule =
-            forceManager_->updateLambda(currentSPFTarget, spfTarget_);
-
-        if (updateSelectedMolecule) selectMolecule();
-
-        successfulExchange = true;
-        particleExchange_ += currentSPFTarget;
-        kineticExchange_ += kineticTarget_;
       }
+
+      if (useChargedSPF_) {
+        RealType fixedChargeOnIon {};
+
+        if (Molecule* selectedMolecule = forceManager_->getSelectedMolecule();
+            selectedMolecule) {
+          fixedChargeOnIon = selectedMolecule->getFixedCharge();
+        }
+
+#ifdef IS_MPI
+        MPI_Bcast(&fixedChargeOnIon, 1, MPI_REALTYPE,
+                  info_->getMolToProc(currentSnap_->getSPFData()->globalID),
+                  MPI_COMM_WORLD);
+#endif
+
+        particleExchange_ += spfTarget_ * fixedChargeOnIon;
+      } else {
+        particleExchange_ += spfTarget_;
+      }
+
+      kineticExchange_ += kineticTarget_;
+    } else {
+      failTrialCount_++;
     }
 
-    if (!forceManager_->getHasSelectedMolecule()) {
-      selectMolecule();
-      failTrialCount_++;
-      return;
-    }
-
-    if (!successfulExchange) {
-      // snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-      //          "SPF exchange NOT performed - roots that solve the\n"
-      //          "\tconstraint equations may not exist or there may\n"
-      //          "\tbe no selected objects in one or both slabs.\n");
-      // painCave.isFatal  = 0;
-      // painCave.severity = OPENMD_INFO;
-      // simError();
-      failTrialCount_++;
-    }
+    currentSnap_->hasTranslationalKineticEnergy = false;
+    currentSnap_->hasRotationalKineticEnergy    = false;
+    currentSnap_->hasKineticEnergy              = false;
   }
 
   void SPFMethod::selectMolecule() {

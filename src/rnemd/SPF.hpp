@@ -57,13 +57,26 @@
 namespace OpenMD::RNEMD {
 
   class SPFMethod : public RNEMD {
+    friend class SPFForceManager;
+
   public:
     explicit SPFMethod(SimInfo* info, ForceManager* forceMan);
 
+    void isValidExchange(Vector3d& v_a, Vector3d& v_b, RealType& a,
+                         RealType& b);
     void doRNEMDImpl(SelectionManager& smanA, SelectionManager& smanB) override;
 
   private:
     enum SelectedIon { NONE = -1, ANION, CATION };
+
+    struct SlabThermodynamics {
+      Vector3d P {V3Zero};
+      RealType M {};
+      RealType K {};
+    };
+
+    SlabThermodynamics calculateSlabTherodynamicQuantities(
+        SelectionManager& sman);
 
     void selectMolecule();
 
@@ -76,6 +89,8 @@ namespace OpenMD::RNEMD {
 
     RealType spfTarget_ {};
 
+    SelectionManager smanA_, smanB_;
+
     SelectionManager anionMan_, cationMan_;
     SPFForceManager* forceManager_ {nullptr};
 
@@ -83,6 +98,7 @@ namespace OpenMD::RNEMD {
     SelectionEvaluator selectedMoleculeEvaluator_;
     SelectionManager selectedMoleculeMan_;
     bool uniformKineticScaling_;
+    bool failedLastTrial_ {false};
   };
 }  // namespace OpenMD::RNEMD
 
