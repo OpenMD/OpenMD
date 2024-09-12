@@ -74,4 +74,34 @@ namespace OpenMD {
 
     return hasMoreCombination;
   }
+
+
+  bool replaceWithWildCardSkippingFirstElement(
+      std::vector<std::vector<std::string>::iterator>& cont,
+      std::vector<std::string>& sequence, std::vector<std::string>& result,
+      const std::string& wildCard) {
+    if (cont.size() > sequence.size()) {
+      std::cerr << "the size of iterator container is greater than the size of "
+                   "sequence";
+    }
+
+    std::vector<std::string>::iterator start = sequence.begin();
+    ++start;
+    
+    bool hasMoreCombination =
+        next_combination(cont, start, sequence.end());
+
+    if (hasMoreCombination) {
+      result.clear();
+      result.insert(result.begin(), sequence.size(), wildCard);
+      result[0] = *(sequence.begin());
+      std::vector<std::vector<std::string>::iterator>::iterator i;
+      for (i = cont.begin(); i != cont.end(); ++i) {
+	int index = std::distance(cont.begin(), i) + 1;
+        result[index] = **i;
+      }
+    }
+
+    return hasMoreCombination;
+  }  
 }  // namespace OpenMD

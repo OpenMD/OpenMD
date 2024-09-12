@@ -100,6 +100,11 @@ namespace OpenMD {
       std::vector<std::vector<std::string>::iterator>& cont,
       std::vector<std::string>& sequence, std::vector<std::string>& result,
       const std::string& wildCard = "X");
+  bool replaceWithWildCardSkippingFirstElement(
+      std::vector<std::vector<std::string>::iterator>& cont,
+      std::vector<std::string>& sequence, std::vector<std::string>& result,
+      const std::string& wildCard = "X");
+
 }  // namespace OpenMD
 
 #endif

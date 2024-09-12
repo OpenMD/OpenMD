@@ -24,8 +24,9 @@ def inSphere(x, y, z, radius):
 
 # Function to open the output file
 def open_output_file(fileName):
+    f = open(fileName, 'w')
     if os.path.exists(fileName):
-        return open(fileName, 'w')
+        return f
     else:
         sys.exit("Error: can't open file {}\n".format(fileName))
 

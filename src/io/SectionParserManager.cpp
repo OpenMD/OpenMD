@@ -48,6 +48,7 @@
 #include <stack>
 
 #include "utils/Trim.hpp"
+#include "utils/StringUtils.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
@@ -75,7 +76,7 @@ namespace OpenMD {
     while (input.getline(buffer, bufferSize)) {
       ++lineNo;
 
-      std::string line = Utils::trimLeftCopy(buffer);
+      std::string line = stripComments(Utils::trimLeftCopy(buffer));
       // a line begins with "//" is a comment line
       if (line.empty() ||
           (line.size() >= 2 && line[0] == '/' && line[1] == '/')) {
@@ -135,7 +136,8 @@ namespace OpenMD {
 
     if (!sectionNameStack.empty()) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "SectionParserManager Error: Stack is not empty\n");
+               "SectionParserManager Error: Stack is not empty.\n"
+	       "\tCheck for matching begin / end lines.\n");
       painCave.isFatal = 1;
       simError();
     }

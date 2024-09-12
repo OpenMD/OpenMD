@@ -255,27 +255,40 @@ def readFile2(mdFileName):
                         myIndex = int(L[0])
                         indices2.append(myIndex)
                         pvqj2.append(L[1])
-                        x = float(L[2])
-                        y = float(L[3])
-                        z = float(L[4])
-                        positions2.append([x, y, z])
-                        vx = float(L[5])
-                        vy = float(L[6])
-                        vz = float(L[7])
-                        velocities2.append([vx, vy, vz])
-                        if 'pvqj' in L[1]:
-                            qw = float(L[8])
-                            qx = float(L[9])
-                            qy = float(L[10])
-                            qz = float(L[11])
+                        loc = 2
+                        if 'p' in L[1]:
+                            x = float(L[loc])
+                            y = float(L[loc+1])
+                            z = float(L[loc+2])
+                            positions2.append([x, y, z])
+                            loc += 3
+                        else:
+                            positions2.append([0.0, 0.0, 0.0])
+                        if 'v' in L[1]:                            
+                            vx = float(L[loc])
+                            vy = float(L[loc+1])
+                            vz = float(L[loc+2])
+                            velocities2.append([vx, vy, vz])
+                            loc += 3
+                        else:
+                            velocities2.append([0.0, 0.0, 0.0])
+                        if 'q' in L[1]:
+                            qw = float(L[loc])
+                            qx = float(L[loc+1])
+                            qy = float(L[loc+2])
+                            qz = float(L[loc+3])
                             quaternions2.append([qw, qx, qy, qz])
-                            jx = float(L[12])
-                            jy = float(L[13])
-                            jz = float(L[14])
-                            angVels2.append([jx, jy, jz])
+                            loc += 4
                         else:
                             quaternions2.append([0.0, 0.0, 0.0, 0.0])
-                            angVels1.append([0.0, 0.0, 0.0])
+                        if 'j' in L[1]:
+                            jx = float(L[loc])
+                            jy = float(L[loc+1])
+                            jz = float(L[loc+2])
+                            angVels2.append([jx, jy, jz])
+                            loc += 3
+                        else:
+                            angVels2.append([0.0, 0.0, 0.0])
 
                         line = mdFile.readline()
                         if '</StuntDoubles>' in line:
@@ -313,14 +326,18 @@ def writeFile(outputFileName):
         
     outputFile.write("    <StuntDoubles>\n")
 
-
     newIndex = 0
     for i in range(len(indices1)):
-        if (pvqj1[i] == 'pv'):
-            outputFile.write("%10d %7s %18.10g %18.10g %18.10g %14e %13e %13e\n" % (newIndex, pvqj1[i], positions1[i][0], positions1[i][1], positions1[i][2], velocities1[i][0], velocities1[i][1], velocities1[i][2]))
-        elif(pvqj1[i] == 'pvqj'):
-            outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (newIndex, pvqj1[i], positions1[i][0], positions1[i][1], positions1[i][2], velocities1[i][0], velocities1[i][1], velocities1[i][2], quaternions1[i][0], quaternions1[i][1], quaternions1[i][2], quaternions1[i][3], angVels1[i][0], angVels1[i][1], angVels1[i][2]))
-
+        if ('p' in pvqj1[i]):
+            outputFile.write("%10d %7s %18.10g %18.10g %18.10g " % (newIndex, pvqj1[i], positions1[i][0], positions1[i][1], positions1[i][2]))
+        if ('v' in pvqj1[i]):
+            outputFile.write("%13e %13e %13e " % (velocities1[i][0], velocities1[i][1], velocities1[i][2]))
+        if('q' in pvqj1[i]):
+            outputFile.write("%13e %13e %13e %13e " % (quaternions1[i][0], quaternions1[i][1], quaternions1[i][2], quaternions1[i][3]))
+        if('j' in pvqj1[i]):
+            outputFile.write("%13e %13e %13e " % (angVels1[i][0], angVels1[i][1], angVels1[i][2]))
+        outputFile.write("\n")
+            
         newIndex = newIndex + 1
 
     outputFile.write("    </StuntDoubles>\n")
@@ -425,17 +442,23 @@ def removeOverlaps(rcut, nSolventAtoms, nSoluteAtoms):
             for j in range (atomStartIndex, (atomStartIndex+nSolventAtoms)):
                 indices1.append(myIndex)
                 pvqj1.append(pvqj2[j])
-                if (pvqj2[j] == 'pv'):
+                if ("p" in pvqj2[j]):
                     positions1.append(positions2[j])
-                    velocities1.append(velocities2[j])
-                    quaternions1.append([0.0, 0.0, 0.0, 0.0])
-                    angVels1.append([0.0, 0.0, 0.0])
                 else:
-                    positions1.append(positions2[j])
+                    positions1.append([0.0, 0.0, 0.0])
+                if ("v" in pvqj2[j]):
                     velocities1.append(velocities2[j])
+                else:
+                    velocities1.append([0.0, 0.0, 0.0])
+                if ("q" in pvqj2[j]):
                     quaternions1.append(quaternions2[j])
+                else:
+                    quaternions1.append([0.0, 0.0, 0.0, 0.0])                   
+                if ("j" in pvqj2[j]):
                     angVels1.append(angVels2[j])
- #                   indices1.append(indices2[j])
+                else:
+                    angVels1.append([0.0, 0.0, 0.0])
+
                 myIndex = myIndex +1
     
 def main(argv):                         
