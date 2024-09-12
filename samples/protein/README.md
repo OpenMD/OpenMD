@@ -107,7 +107,7 @@ The report file contains something like this:
 ###############################################################################
 ```
 
-Don't worry if your numbers aren't an exact match with ours, random number generation plays a roll in how we got here (`thermalizer`). These are averages and confidence intervals for the thermodynamic quantities we've been tracking throughout the simulation. For the raw data, plot the `warm.stat` file in something like `xmgrace` to see how these thermodynamic quantities change with time:
+Don't worry if your numbers aren't an exact match with ours, random number generation plays a role in how we got here (`thermalizer`). These are averages and confidence intervals for the thermodynamic quantities we've been tracking throughout the simulation. For the raw data, plot the `warm.stat` file in something like `xmgrace` to see how these thermodynamic quantities change with time:
 ```
 xmgrace -nxy warm.stat
 ```
