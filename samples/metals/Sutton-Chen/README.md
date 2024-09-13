@@ -9,18 +9,19 @@ Although it has the same basic form as the EAM potential,
 the Sutton-Chen model requires a simpler set of parameters,
 
 $$
-U_\text{tot}=\sum_{i}\left[ \frac{1}{2} \sum_{j\neq i} \epsilon_{ij} V^\text{pair}_{ij}(r_{ij}) - c_{i} \epsilon_{ii} \sqrt{\rho_{i}} \right]
+U_\textrm{tot}=\sum_{i}\left[\frac{1}{2} \sum_{j \neq i} \epsilon_{ij} V_{ij}^\textrm{pair}(r_{ij}) - c_{i} \epsilon_{ii} \sqrt{\rho_{i}} \right]
 $$
 
-where $V^\text{pair}_{ij}$ and $\rho_{i}$ are given by 
+where $V_{ij}^\text{pair}$ and $\rho_{i}$ are given by 
+
 $$
-V^\text{pair}_{ij}(r)=\left(
+V_{ij}^\text{pair}(r)=\left(
 \frac{\alpha_{ij}}{r_{ij}}\right)^{n_{ij}} ~~~~~~~~~~~~~ \rho_{i}=\sum_{j\neq i}\left(
 \frac{\alpha_{ij}}{r_{ij}}\right) ^{m_{ij}}
 $$
 
-$V^{pair}_{ij}$ is a repulsive pairwise potential that accounts for
-interactions of the pseudo-atom cores.  The $\sqrt{\rho_i}$ term in
+$V_{ij}^{pair}$ is a repulsive pairwise potential that accounts for
+interactions of the pseudo-atom cores.  The $\sqrt{\rho_{i}}$ term in
 the first equation is an attractive many-body potential that models
 the interactions between the valence electrons and the cores of the
 pseudo-atoms.  $\epsilon_{ij}$, $\epsilon_{ii}$, $c_i$ and
