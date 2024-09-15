@@ -55,7 +55,6 @@ component block.
 		type = "TIP4P";
 		nMol = 256;
 	}
-
 ```
 
 Now, the same stuntDoubles will be treated as *TIP4P* water instead of

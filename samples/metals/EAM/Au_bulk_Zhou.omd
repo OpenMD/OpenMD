@@ -15,12 +15,12 @@ forceField = "EAM";
 forceFieldVariant="Zhou2004";
 
 ensemble = "NVE";
-dt = 4.0;
-runTime = 2e3;
+dt = 4;
+runTime = 4e3;
 cutoffRadius = 5.5;
 
 statusTime = 4;
-sampleTime = 100.0;
+sampleTime = 100;
 seed = 985456376;
 
 useInitialExtendedSystemState="false";
