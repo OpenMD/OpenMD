@@ -75,7 +75,6 @@ namespace OpenMD {
     return hasMoreCombination;
   }
 
-
   bool replaceWithWildCardSkippingFirstElement(
       std::vector<std::vector<std::string>::iterator>& cont,
       std::vector<std::string>& sequence, std::vector<std::string>& result,
@@ -87,9 +86,8 @@ namespace OpenMD {
 
     std::vector<std::string>::iterator start = sequence.begin();
     ++start;
-    
-    bool hasMoreCombination =
-        next_combination(cont, start, sequence.end());
+
+    bool hasMoreCombination = next_combination(cont, start, sequence.end());
 
     if (hasMoreCombination) {
       result.clear();
@@ -97,11 +95,11 @@ namespace OpenMD {
       result[0] = *(sequence.begin());
       std::vector<std::vector<std::string>::iterator>::iterator i;
       for (i = cont.begin(); i != cont.end(); ++i) {
-	int index = std::distance(cont.begin(), i) + 1;
+        int index     = std::distance(cont.begin(), i) + 1;
         result[index] = **i;
       }
     }
 
     return hasMoreCombination;
-  }  
+  }
 }  // namespace OpenMD
