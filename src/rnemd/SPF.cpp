@@ -394,6 +394,8 @@ namespace OpenMD::RNEMD {
       MPI_Bcast(&spfTarget_, 1, MPI_REALTYPE,
                 info_->getMolToProc(spfData->globalID), MPI_COMM_WORLD);
 #endif
+    } else {
+      failedLastTrial_ = true;
     }
 
     forceManager_->setHasSelectedMolecule(hasSelectedMolecule);
