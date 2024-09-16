@@ -140,17 +140,17 @@ nb	nc			# Sp2 N in pure aromatic systems
 nd	na			# Sp2 N in non-pure aromatic systems, identical to nc
 nh	n3			# Amine N connected one or more aromatic rings 
 no	na			# Nitro N  
-ns	N			# amind N, with 1 attached hydrogen atom
-nt	N			# amide N, with 2 attached hydrogen atoms
-nx	N			# like n4, but only has one hydrogen atom
-ny	N			# like n4, but only has two hydrogen atoms
-nz	N			# like n4, but only has three three hydrogen atoms
+ns	n2			# amind N, with 1 attached hydrogen atom
+nt	n2			# amide N, with 2 attached hydrogen atoms
+nx	n4			# like n4, but only has one hydrogen atom
+ny	n4			# like n4, but only has two hydrogen atoms
+nz	n4			# like n4, but only has three three hydrogen atoms
 n+	N			# NH4+
-nu	N			# like nh, but only has one attached hydrogen atom
-nv	N			# like nh, but only has two attached hydrogen atoms
-n7	N			# like n3, but only has one attached hydrogen atom 
-n8	N			# like n3, but only has two attached hydrogen atoms
-n9	N			# NH3
+nu	nh			# like nh, but only has one attached hydrogen atom
+nv	nh			# like nh, but only has two attached hydrogen atoms
+n7	n3			# like n3, but only has one attached hydrogen atom 
+n8	n3			# like n3, but only has two attached hydrogen atoms
+n9	n3			# NH3
 o	O			# Oxygen with one connected atom
 oh	O			# Oxygen in hydroxyl group
 os	O			# Ether and ester oxygen
@@ -6845,4 +6845,5 @@ c 	o 	hc	os	AmberImproper		1.1
 ca	c2	n2	n2	AmberImproper		1.1		# dac guess, 9/94
 ca	ca	n2	n2	AmberImproper		1.1		# dac guess, 9/94
 ca	n2	na	n2	AmberImproper		1.1		# dac, 10/94
+ca	ca	ca	X	AmberImproper		1.1		#Manually added
 end InversionTypes
