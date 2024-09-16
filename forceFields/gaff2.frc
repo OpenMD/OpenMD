@@ -134,7 +134,7 @@ n4	N			# Sp3 N with four connected atoms
 n	n3			# Sp2 nitrogen in amide groups
 na	n3			# Sp2 N with three connected atoms 
 ne	n2			# Inner Sp2 N in conjugated systems
-nf	N			# Inner Sp2 N in conjugated systems, identical to ne
+nf	n2			# Inner Sp2 N in conjugated systems, identical to ne
 nc	ne			# Sp2 N in non-pure aromatic systems
 nb	nc			# Sp2 N in pure aromatic systems 
 nd	na			# Sp2 N in non-pure aromatic systems, identical to nc
@@ -145,7 +145,7 @@ nt	n2			# amide N, with 2 attached hydrogen atoms
 nx	n4			# like n4, but only has one hydrogen atom
 ny	n4			# like n4, but only has two hydrogen atoms
 nz	n4			# like n4, but only has three three hydrogen atoms
-n+	N			# NH4+
+n+	n4			# NH4+
 nu	nh			# like nh, but only has one attached hydrogen atom
 nv	nh			# like nh, but only has two attached hydrogen atoms
 n7	n3			# like n3, but only has one attached hydrogen atom 
@@ -6845,5 +6845,7 @@ c 	o 	hc	os	AmberImproper		1.1
 ca	c2	n2	n2	AmberImproper		1.1		# dac guess, 9/94
 ca	ca	n2	n2	AmberImproper		1.1		# dac guess, 9/94
 ca	n2	na	n2	AmberImproper		1.1		# dac, 10/94
-ca	ca	ca	X	AmberImproper		1.1		#Manually added
+ca	ca	ca	X	AmberImproper		1.1		#Manually added by Nhat P. for Casodex
+ca	ca	nb	c2	AmberImproper		1.1		#Manually added by Nhat P. for Pulmicort
+c2	c2	ca	ha	AmberImproper		1.1		#Manually added by Nhat P. for Pulmicort
 end InversionTypes
