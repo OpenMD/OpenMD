@@ -15,7 +15,7 @@ targetTemp = 1000.0;
 
 ensemble = "NVE";
 dt = 1.0;
-runTime = 1000.0;
+runTime = 10000.0;
 
 usePeriodicBoundaryConditions = "false";
 
