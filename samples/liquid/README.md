@@ -12,7 +12,7 @@ In this example, we’ll build a simulation of a simple liquid (methanol) starti
     atom2omd -ixyz methanol.xyz
     ```
     This command will create an incomplete OpenMD file called `methanol.omd` that *must be edited* before it can be used.
-    
+
 3. OpenMD can use a number of force fields, but in this example, we’ll use the Amber force field. If you are using this force field and are starting from an XYZ file or non-standard PDB file, you *must edit the atom types*. In the `methanol.omd` file:
     - change the atom typing for the methyl carbon from `C3` to `CT`
     - change the `O3` to `OH`
@@ -30,7 +30,7 @@ In this example, we’ll build a simulation of a simple liquid (methanol) starti
     openmd methanol.omd
     ```
     If there are any problems, correct any unknown atom types, and repeat until you get an error about the “Integrator Factory”.
-    
+
 6. Next, we’ll build a lattice of methanol molecules using this initial structure as a starting point. The density of liquid methanol is roughly 0.7918 g cm<sup>-3</sup>, so we’ll build a simple box of methanol molecules using the command:
     ```
     simpleBuilder -o liquid.omd --density=0.7918 --nx=3 --ny=3 --nz=3 methanol.omd
@@ -80,48 +80,72 @@ In this example, we’ll build a simulation of a simple liquid (methanol) starti
 
 13. The “End-of-Run” file warm.eor can be re-purposed as the starting point for a new simulation:
     ```
-    cp warm.eor equilibration.omd
+    cp warm.eor stable.omd
     ```
-    Edit the `equilibration.omd` file, and change parameters you’d like to change before running openmd on the new file.
 
+14. Edit the `stable.omd` file, and change the following parameters before running openmd on the new file:
+    ```
+    tauThermostat = 100;
+    runTime = 1.5e4;
+    sampleTime = 1000;
+    ```
+    then run,
+    ```
+    openmd stable.omd
+    ```
+
+15. Copy the endpoint of the stabilization run into the starting point for an equilibration run:
+    ```
+    cp stable.eor equil.omd
+    ```
+
+16. Edit equil.omd, and change the following lines:
+    ```
+    ensemble = NVE;
+    runTime = 2.5e4;
+    ```
+    and run the command
+    ```
+    openmd equil.omd
+    ```
+
+17. Copy the endpoint of the equilibration run into the starting point for a collection run:
+    ```
+    cp equil.eor collection.omd
+    ```
+
+18. Edit collection.omd, and change the following lines:
+    ```
+    runTime = 2.5e5;
+    sampleTime = 500;
+    ```
+    and run the command
+    ```
+    openmd collection.omd
+    ```
 
 ## Expected Output
 
-Looking back at the report output of step 10, one thing that may immediately jump out at you is a massive pressure. One thing we can do to try and remedy this is perform a pressure relaxation using the NPT ensemble. `OpenMD` has many NPT ensembles to choose from, NPTi is probably a good choice here so the x, y, and z box dimensions can fluctuate together.
+We'll analyze the results of the simulation with two `OpenMD` tools, `StaticProps` for structural features and `DynamicProps` for dynamic properties.
 
-From step 13, let's change the `ensemble` from NVT to NPTi, `dt` to 2.0, and `runTime` from 1e3 to 2e5. We'll also need to add the following lines somewhere in the `<MetaData>` block:
+First we can analyze the trajectory (dump) file to make a carbon-carbon pair correlation function, gCC(r) with the following command:
 ```
-targetPressure = 1.0;
-tauBarostat = 1e4;
-resetTime = 100.0;
+StaticProps -i collection.dump -g --sele1="select CT" --sele2="select CT"
 ```
-
-This will take a bit of time, so if you can spare the resources, run the simulation in parallel with:
+and view the result with
 ```
-mpirun -np 4 openmd_MPI equilibration.omd
+xmgrace collection.gofr
 ```
 
-When this finishes, take a look at the pressure in the report printout, it's much more managable:
+<img src="../figures/liquid_gofr.png" alt="image" width="500" height="auto"/>
+
+The g(r) analysis we performed gives us structural information about the system; to work with dynamics, such as computing the mean squared displacement as a function of time, we can use the following:
 ```
-###############################################################################
-# Status Report:                                                              #
-#              Total Time:      200000 fs                                     #
-#       Number of Samples:       20001                                        #
-#            Total Energy:    -86.0616  ±  1.50033      kcal/mol              #
-#        Potential Energy:    -651.654  ±  1.51787      kcal/mol              #
-#          Kinetic Energy:     565.592  ±  0.235502     kcal/mol              #
-#             Temperature:     293.267  ±  0.122111     K                     #
-#                Pressure:     7793.48  ±  56.9277      atm                   #
-#                  Volume:     13367.6  ±  51.2877      A^3                   #
-#      Conserved Quantity:    -85.6438  ±  1.50132      kcal/mol              #
-###############################################################################
+DynamicProps -i collection.dump -r --sele1="select methanol"
+```
+View the R<sup>2</sup>(t) function with
+```
+xmgrace collection.rcorr
 ```
 
-For a deeper look, plot the stat file with
-```
-xmgrace -nxy equilibration.stat
-```
-
-<img src="../figures/liquid.png" alt="image" width="500" height="auto"/>
-
-The pressure (yellow) is certainly coming down but at the expense of our volume (brown). By allowing the volume to change like this, our density is also changing. As an exercise to the reader, see if by changing some of the parameters I did, you can get a lower pressure while staying close to the target density of 0.7918 g cm<sup>-3</sup>.
+<img src="../figures/liquid_rcorr.png" alt="image" width="500" height="auto"/>
