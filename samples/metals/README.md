@@ -34,7 +34,7 @@ The included subdirectories illustrate a few examples of metals simulated
 using potentials in this family.
 
 ### Sample Directories
+
 + [EAM](EAM/README.md) - using the Embedded Atom Method
 + [Sutton-Chen](Sutton-Chen/README.md) - using the Sutton-Chen potential
-+ [minimizer](minimizer/README.md) - optimizing a structure
 + [surfaces](surfaces/README.md) - creating and simulating metal surfaces
