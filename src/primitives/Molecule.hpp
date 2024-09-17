@@ -96,8 +96,7 @@ namespace OpenMD {
     using HBondDonorIterator        = std::vector<HBondDonor*>::iterator;
     using HBondAcceptorIterator     = std::vector<Atom*>::iterator;
 
-    Molecule(int stampId, int globalIndex, const std::string& molName,
-             int region);
+    Molecule(int globalIndex, MoleculeStamp* molStamp);
     virtual ~Molecule();
 
     /**
@@ -113,11 +112,13 @@ namespace OpenMD {
      * will become invalid, if the molecule migrate to other
      * processor.
      */
-    int getStampId() { return stampId_; }
-    int getRegion() { return region_; }
+    int getStampId() { return molStamp_->getIdent(); }
+    int getRegion() { return molStamp_->getRegion(); }
+
+    MoleculeStamp* getMolStamp() const { return molStamp_; }
 
     /** Returns the name of the molecule */
-    std::string getType() { return moleculeName_; }
+    std::string getType() { return molStamp_->getName(); }
 
     /**
      * Sets the global index of this molecule.
@@ -345,6 +346,9 @@ namespace OpenMD {
     /** get total mass of this molecule */
     RealType getMass();
 
+    /** get total fixed charge of this molecule */
+    RealType getFixedCharge();
+
     /**
      * Returns the center of mass position of this molecule in
      * the previous snapshot
@@ -377,8 +381,6 @@ namespace OpenMD {
 
     /** Returns the velocity of center of mass of this molecule */
     Vector3d getComVel();
-
-    std::string getMoleculeName() { return moleculeName_; }
 
     friend std::ostream& operator<<(std::ostream& o, Molecule& mol);
 
@@ -432,11 +434,9 @@ namespace OpenMD {
     std::vector<HBondDonor*> hBondDonors_;
     std::vector<Atom*> hBondAcceptors_;
 
-    int stampId_;
-    int region_;
-    std::string moleculeName_;
     PropertyMap properties_;
     bool constrainTotalCharge_;
+    MoleculeStamp* molStamp_;
   };
 }  // namespace OpenMD
 

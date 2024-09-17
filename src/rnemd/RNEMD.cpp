@@ -100,24 +100,25 @@ namespace OpenMD::RNEMD {
     // Determine Flux Type
     std::map<std::string, RNEMDFluxType> stringToFluxType;
 
-    stringToFluxType["KE"]          = rnemdKE;
-    stringToFluxType["Px"]          = rnemdPx;
-    stringToFluxType["Py"]          = rnemdPy;
-    stringToFluxType["Pz"]          = rnemdPz;
-    stringToFluxType["Pvector"]     = rnemdPvector;
-    stringToFluxType["Lx"]          = rnemdLx;
-    stringToFluxType["Ly"]          = rnemdLy;
-    stringToFluxType["Lz"]          = rnemdLz;
-    stringToFluxType["Lvector"]     = rnemdLvector;
-    stringToFluxType["Particle"]    = rnemdParticle;
-    stringToFluxType["Particle+KE"] = rnemdParticleKE;
-    stringToFluxType["KE+Px"]       = rnemdKePx;
-    stringToFluxType["KE+Py"]       = rnemdKePy;
-    stringToFluxType["KE+Pvector"]  = rnemdKePvector;
-    stringToFluxType["KE+Lx"]       = rnemdKeLx;
-    stringToFluxType["KE+Ly"]       = rnemdKeLy;
-    stringToFluxType["KE+Lz"]       = rnemdKeLz;
-    stringToFluxType["KE+Lvector"]  = rnemdKeLvector;
+    stringToFluxType["KE"]             = rnemdKE;
+    stringToFluxType["Px"]             = rnemdPx;
+    stringToFluxType["Py"]             = rnemdPy;
+    stringToFluxType["Pz"]             = rnemdPz;
+    stringToFluxType["Pvector"]        = rnemdPvector;
+    stringToFluxType["Lx"]             = rnemdLx;
+    stringToFluxType["Ly"]             = rnemdLy;
+    stringToFluxType["Lz"]             = rnemdLz;
+    stringToFluxType["Lvector"]        = rnemdLvector;
+    stringToFluxType["Particle"]       = rnemdParticle;
+    stringToFluxType["Particle+KE"]    = rnemdParticleKE;
+    stringToFluxType["CurrentDensity"] = rnemdCurrentDensity;
+    stringToFluxType["KE+Px"]          = rnemdKePx;
+    stringToFluxType["KE+Py"]          = rnemdKePy;
+    stringToFluxType["KE+Pvector"]     = rnemdKePvector;
+    stringToFluxType["KE+Lx"]          = rnemdKeLx;
+    stringToFluxType["KE+Ly"]          = rnemdKeLy;
+    stringToFluxType["KE+Lz"]          = rnemdKeLz;
+    stringToFluxType["KE+Lvector"]     = rnemdKeLvector;
 
     if (rnemdParams->haveFluxType()) {
       rnemdFluxTypeLabel_ = rnemdParams->getFluxType();
@@ -454,6 +455,12 @@ namespace OpenMD::RNEMD {
     if (!evaluatorB_.isDynamic())
       seleManB_.setSelectionSet(evaluatorB_.evaluate());
 
+    // Charged-SPF
+    if (rnemdFluxType_ == rnemdCurrentDensity) useChargedSPF_ = true;
+
+    MoleculeStampSet obTypes = seleMan_.getSelectedMoleculeStamps();
+    std::copy(obTypes.begin(), obTypes.end(), std::back_inserter(objectTypes_));
+
     // Do some sanity checking
     int selectionCount =
         seleMan_.removeAtomsInRigidBodies().getSelectionCount();
@@ -540,7 +547,8 @@ namespace OpenMD::RNEMD {
       simError();
     }
 
-    if (rnemdFluxType_ == rnemdParticle || rnemdFluxType_ == rnemdParticleKE) {
+    if (rnemdFluxType_ == rnemdParticle || rnemdFluxType_ == rnemdParticleKE ||
+        rnemdFluxType_ == rnemdCurrentDensity) {
       SelectionManager tempCommonA = seleManA_ & outputSeleMan_;
       SelectionManager tempCommonB = seleManB_ & outputSeleMan_;
 
@@ -611,8 +619,12 @@ namespace OpenMD::RNEMD {
     ConstraintPair* consPair;
     Molecule::ConstraintPairIterator cpi;
 
+    std::shared_ptr<SPFData> spfData = currentSnap_->getSPFData();
+
     for (mol = info_->beginMolecule(miter); mol != NULL;
          mol = info_->nextMolecule(miter)) {
+      if (mol->getGlobalIndex() == spfData->globalID) { continue; }
+
       for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
            sd = mol->nextIntegrableObject(iiter)) {
         if (outputSeleMan_.isSelected(sd)) {
@@ -651,7 +663,6 @@ namespace OpenMD::RNEMD {
           I(2, 2) += mass * r2;
 
           if (outputMask_[ACTIVITY]) {
-            typeIndex = -1;
             if (sd->isRigidBody()) {
               int atomBinNo;
               RigidBody* rb = static_cast<RigidBody*>(sd);
@@ -659,6 +670,7 @@ namespace OpenMD::RNEMD {
               Atom* atom;
               for (atom = rb->beginAtom(ai); atom != NULL;
                    atom = rb->nextAtom(ai)) {
+                typeIndex = -1;
                 atomBinNo = getBin(atom->getPos());
 
                 atype = static_cast<Atom*>(atom)->getAtomType();
@@ -672,10 +684,16 @@ namespace OpenMD::RNEMD {
                 }
               }
             } else if (sd->isAtom()) {
-              atype = static_cast<Atom*>(sd)->getAtomType();
+              typeIndex = -1;
+              atype     = static_cast<Atom*>(sd)->getAtomType();
               at = std::find(outputTypes_.begin(), outputTypes_.end(), atype);
               if (at != outputTypes_.end()) {
                 typeIndex = std::distance(outputTypes_.begin(), at);
+              }
+
+              if (binNo >= 0 && binNo < int(nBins_)) {
+                if (outputMask_[ACTIVITY] && typeIndex != -1)
+                  binTypeCounts[binNo][typeIndex]++;
               }
             }
           }
@@ -688,14 +706,11 @@ namespace OpenMD::RNEMD {
             binI[binNo] += I;
             binL[binNo] += L;
             binDOF[binNo] += DOF;
-
-            if (outputMask_[ACTIVITY] && typeIndex != -1)
-              binTypeCounts[binNo][typeIndex]++;
           }
         }
 
-        // Calculate the electric field (kcal/mol/e/Angstrom) for all atoms in
-        // the box
+        // Calculate the electric field (kcal/mol/e/Angstrom) for all atoms
+        // in the box
         if (outputMask_[ELECTRICFIELD]) {
           int atomBinNo;
           if (sd->isRigidBody()) {
@@ -707,15 +722,19 @@ namespace OpenMD::RNEMD {
               atomBinNo = getBin(atom->getPos());
               eField    = atom->getElectricField();
 
-              binEFieldCount[atomBinNo]++;
-              binEField[atomBinNo] += eField;
+              if (atomBinNo >= 0 && atomBinNo < int(nBins_)) {
+                binEFieldCount[atomBinNo]++;
+                binEField[atomBinNo] += eField;
+              }
             }
           } else {
             eField    = sd->getElectricField();
             atomBinNo = getBin(sd->getPos());
 
-            binEFieldCount[atomBinNo]++;
-            binEField[atomBinNo] += eField;
+            if (atomBinNo >= 0 && atomBinNo < int(nBins_)) {
+              binEFieldCount[atomBinNo]++;
+              binEField[atomBinNo] += eField;
+            }
           }
         }
       }
@@ -756,10 +775,10 @@ namespace OpenMD::RNEMD {
                     MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, &binDOF[i], 1, MPI_INT, MPI_SUM,
                     MPI_COMM_WORLD);
-      MPI_Allreduce(MPI_IN_PLACE, &binEFieldCount[i], 1, MPI_INT, MPI_SUM,
-                    MPI_COMM_WORLD);
 
       if (outputMask_[ELECTRICFIELD]) {
+        MPI_Allreduce(MPI_IN_PLACE, &binEFieldCount[i], 1, MPI_INT, MPI_SUM,
+                      MPI_COMM_WORLD);
         MPI_Allreduce(MPI_IN_PLACE, binEField[i].getArrayPointer(), 3,
                       MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
       }
@@ -914,8 +933,13 @@ namespace OpenMD::RNEMD {
                  << " (amu/A/fs^2)\n";
       rnemdFile_ << "#  angular momentum = " << angularMomentumFluxVector_
                  << " (amu/A^2/fs^2)\n";
-      rnemdFile_ << "#          particle = " << particleFlux_
-                 << " (particles/A^2/fs)\n";
+      if (useChargedSPF_) {
+        rnemdFile_ << "#   current density = " << particleFlux_
+                   << " (electrons/A^2/fs)\n";
+      } else {
+        rnemdFile_ << "#          particle = " << particleFlux_
+                   << " (particles/A^2/fs)\n";
+      }
 
       rnemdFile_ << "# Target one-time exchanges:\n";
       rnemdFile_ << "#          kinetic = "
@@ -925,8 +949,14 @@ namespace OpenMD::RNEMD {
                  << " (amu*A/fs)\n";
       rnemdFile_ << "#  angular momentum = " << angularMomentumTarget_
                  << " (amu*A^2/fs)\n";
-      rnemdFile_ << "#          particle = " << particleTarget_
-                 << " (particles)\n";
+      if (useChargedSPF_) {
+        rnemdFile_ << "#   current density = " << particleTarget_
+                   << " (electrons)\n";
+      } else {
+        rnemdFile_ << "#          particle = " << particleTarget_
+                   << " (particles)\n";
+      }
+
       rnemdFile_ << "# Actual exchange totals:\n";
       rnemdFile_ << "#          kinetic = "
                  << kineticExchange_ / Constants::energyConvert
@@ -935,15 +965,26 @@ namespace OpenMD::RNEMD {
                  << " (amu*A/fs)\n";
       rnemdFile_ << "#  angular momentum = " << angularMomentumExchange_
                  << " (amu*A^2/fs)\n";
-      rnemdFile_ << "#         particles = " << particleExchange_
-                 << " (particles)\n";
+      if (useChargedSPF_) {
+        rnemdFile_ << "#   current density = " << particleExchange_
+                   << " (electrons)\n";
+      } else {
+        rnemdFile_ << "#          particle = " << particleExchange_
+                   << " (particles)\n";
+      }
 
       rnemdFile_ << "# Actual flux:\n";
       rnemdFile_ << "#          kinetic = " << Jz << " (kcal/mol/A^2/fs)\n";
       rnemdFile_ << "#          momentum = " << JzP << " (amu/A/fs^2)\n";
       rnemdFile_ << "#  angular momentum = " << JzL << " (amu/A^2/fs^2)\n";
-      rnemdFile_ << "#          particle = " << Jpart
-                 << " (particles/A^2/fs)\n";
+      if (useChargedSPF_) {
+        rnemdFile_ << "#   current density = " << Jpart
+                   << " (electrons/A^2/fs)\n";
+      } else {
+        rnemdFile_ << "#          particle = " << Jpart
+                   << " (particles/A^2/fs)\n";
+      }
+
       rnemdFile_ << "# Exchange statistics:\n";
       rnemdFile_ << "#               attempted = " << trialCount_ << "\n";
       rnemdFile_ << "#                  failed = " << failTrialCount_ << "\n";
@@ -975,7 +1016,7 @@ namespace OpenMD::RNEMD {
         }
       }
 
-      rnemdFile_ << std::endl;
+      rnemdFile_ << '\n';
 
       std::vector<int> nonEmptyAccumulators(nBins_);
       int numberOfAccumulators {};
@@ -1005,7 +1046,7 @@ namespace OpenMD::RNEMD {
             }
           }
 
-          rnemdFile_ << std::endl;
+          rnemdFile_ << '\n';
         }
       }
 
@@ -1027,7 +1068,7 @@ namespace OpenMD::RNEMD {
             }
           }
 
-          rnemdFile_ << std::endl;
+          rnemdFile_ << '\n';
         }
       }
 
@@ -1045,7 +1086,10 @@ namespace OpenMD::RNEMD {
   }
 
   void RNEMD::setParticleFlux(RealType particleFlux) {
-    particleFlux_ = particleFlux;
+    RealType area = getDefaultDividingArea();
+
+    particleFlux_   = particleFlux;
+    particleTarget_ = particleFlux_ * exchangeTime_ * area;
   }
 
   void RNEMD::setMomentumFluxVector(
@@ -1183,10 +1227,10 @@ namespace OpenMD::RNEMD {
         volumeA_ = surfaceMeshA->getVolume();
         delete surfaceMeshA;
 #else
-        snprintf(
-            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-            "RNEMD::getDividingArea : Hull calculation is not possible\n"
-            "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RNEMD::getDividingArea : Hull calculation is not possible\n"
+                 "\twithout libqhull. Please rebuild OpenMD with qhull "
+                 "enabled.");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
@@ -1239,10 +1283,10 @@ namespace OpenMD::RNEMD {
         volumeB_ = surfaceMeshB->getVolume();
         delete surfaceMeshB;
 #else
-        snprintf(
-            painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-            "RNEMD::getDividingArea : Hull calculation is not possible\n"
-            "\twithout libqhull. Please rebuild OpenMD with qhull enabled.");
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "RNEMD::getDividingArea : Hull calculation is not possible\n"
+                 "\twithout libqhull. Please rebuild OpenMD with qhull "
+                 "enabled.");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();

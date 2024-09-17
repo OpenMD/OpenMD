@@ -62,6 +62,7 @@ namespace OpenMD::RNEMD {
     DeclareParameter(ExchangeTime, RealType);
     DeclareParameter(KineticFlux, RealType);
     DeclareParameter(ParticleFlux, RealType);
+    DeclareParameter(CurrentDensity, RealType);
     DeclareParameter(MomentumFlux, RealType);
     DeclareParameter(MomentumFluxVector, std::vector<RealType>);
     DeclareParameter(AngularMomentumFlux, RealType);

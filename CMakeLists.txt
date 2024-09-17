@@ -82,44 +82,49 @@ if(NOT NO_PARALLEL)
     set(MSMPI_INC $ENV{MSMPI_INC})
     set(MSMPI_LIB32 $ENV{MSMPI_LIB32})
     set(MSMPI_LIB64 $ENV{MSMPI_LIB64})
+    
     message(STATUS "MSMPI_BIN=${MSMPI_BIN}")
     message(STATUS "MSMPI_INC=${MSMPI_INC}")
     message(STATUS "MSMPI_LIB32=${MSMPI_LIB32}")
     message(STATUS "MSMPI_LIB64=${MSMPI_LIB64}")
+    
     if("${MSMPI_BIN}" STREQUAL ""
        OR "${MSMPI_INC}" STREQUAL ""
        OR "${MSMPI_LIB32}" STREQUAL ""
        OR "${MSMPI_LIB64}" STREQUAL "")
       message(
-        FATAL_ERROR
+        STATUS
           "Can not find MSMPI install. Please install MSMPI or check the ENV variable:
             MSMPI_INC, MSMPI_LIB32, MSMPI_LIB64, MSMPI_BIN")
+    else ()
+      set(MPIEXEC "${MSMPI_BIN}/mpiexec.exe")
+      # For building MPI programs the selected Visual Studio compiler is used,
+      # namely cl.exe. So there is no need to set a specific MPI compiler.
+      # set(MPI_CXX_COMPILER "${CMAKE_CXX_COMPILER}")
+      set(MPI_CXX_INCLUDE_PATH "${MSMPI_INC}")
+      # Make sure the correct libraries (64-bit or 32-bit) are selected. Decide
+      # between 32-bit and 64-bit libraries for Microsoft's MPI
+      if("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+        set(MS_MPI_ARCH_LIB ${MSMPI_LIB64})
+      else()
+        set(MS_MPI_ARCH_LIB ${MSMPI_LIB32})
+      endif()
+
+      set(MPI_CXX_LIBRARIES "${MS_MPI_ARCH_LIB}/msmpi.lib")
+      set(MPI_C_INCLUDE_PATH "${MPI_CXX_INCLUDE_PATH}")
+      set(MPI_C_LIBRARIES "{${MPI_CXX_LIBRARIES}")
+      set(MPIEXEC_NUMPROC_FLAG
+          "-np"
+          CACHE STRING
+                "Flag used by MPI to specify the number of processes for MPIEXEC;
+          the next option will be the number of processes.")
+      set(MPI_CXX_FOUND ON)
+      set(MPI_FOUND ON)
     endif()
-    set(MPIEXEC "${MSMPI_BIN}/mpiexec.exe")
-    # For building MPI programs the selected Visual Studio compiler is used,
-    # namely cl.exe. So there is no need to set a specific MPI compiler.
-    # set(MPI_CXX_COMPILER "${CMAKE_CXX_COMPILER}")
-    set(MPI_CXX_INCLUDE_PATH "${MSMPI_INC}")
-    # Make sure the correct libraries (64-bit or 32-bit) are selected. Decide
-    # between 32-bit and 64-bit libraries for Microsoft's MPI
-    if("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-      set(MS_MPI_ARCH_LIB ${MSMPI_LIB64})
-    else()
-      set(MS_MPI_ARCH_LIB ${MSMPI_LIB32})
-    endif()
-    set(MPI_CXX_LIBRARIES "${MS_MPI_ARCH_LIB}/msmpi.lib")
-    set(MPI_C_INCLUDE_PATH "${MPI_CXX_INCLUDE_PATH}")
-    set(MPI_C_LIBRARIES "{${MPI_CXX_LIBRARIES}")
-    set(MPIEXEC_NUMPROC_FLAG
-        "-np"
-        CACHE STRING
-              "Flag used by MPI to specify the number of processes for MPIEXEC;
-        the next option will be the number of processes.")
-    set(MPI_CXX_FOUND ON)
-    set(MPI_FOUND ON)
   else()
     find_package(MPI)
   endif()
+  
   if(NOT MPI_CXX_FOUND)
     message(STATUS "========== OpenMD Parallel Information ==========")
     message(STATUS)
@@ -492,7 +497,6 @@ set(SOURCE
     src/integrators/NPTxyz.cpp
     src/integrators/NVE.cpp
     src/integrators/NVT.cpp
-    src/integrators/SPFDynamics.cpp
     src/integrators/VelocityVerletIntegrator.cpp
     src/io/AtomTypesSectionParser.cpp
     src/io/BaseAtomTypesSectionParser.cpp

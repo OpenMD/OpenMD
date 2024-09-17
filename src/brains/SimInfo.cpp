@@ -684,6 +684,7 @@ namespace OpenMD {
     curStampId = moleculeStamps_.size();
 
     moleculeStamps_.push_back(molStamp);
+    moleculeStamps_[moleculeStamps_.size() - 1]->setIdent(curStampId);
     molStampIds_.insert(molStampIds_.end(), nmol, curStampId);
   }
 

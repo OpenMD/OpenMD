@@ -63,7 +63,7 @@ namespace OpenMD {
     return tmp.size() != cont.size();
   }
 
-  MoleculeStamp::MoleculeStamp() : nintegrable_(0) {
+  MoleculeStamp::MoleculeStamp() : nintegrable_(0), ident_ {-1} {
     DefineParameter(Name, "name");
     DefineOptionalParameter(ConstrainTotalCharge, "constrainTotalCharge");
 

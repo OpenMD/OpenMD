@@ -71,7 +71,7 @@ namespace OpenMD {
   class MoleculeCreator {
   public:
     virtual Molecule* createMolecule(ForceField* ff, MoleculeStamp* molStamp,
-                                     int stampId, int globalIndex,
+                                     int globalIndex,
                                      LocalIndexManager* localIndexMan);
 
   protected:

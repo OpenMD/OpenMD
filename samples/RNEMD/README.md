@@ -185,8 +185,6 @@ molecular positions. The file `spf.omd` contains a similar structure to that
 of the `2744.omd` file with the following noticeable changes:
 
 ```C++
-ensemble = "SPF";
-
 RNEMD {
   fluxType = "Particle";
   method = "spf";

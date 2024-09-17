@@ -481,6 +481,7 @@ namespace OpenMD {
 
   RealType Snapshot::getSelfPotential() {
     if (!hasSelfPotential) {
+      frameData.selfPotential = 0.0;
       for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
         frameData.selfPotential += frameData.selfPotentials[i];
       }
@@ -500,6 +501,7 @@ namespace OpenMD {
 
   RealType Snapshot::getLongRangePotential() {
     if (!hasLongRangePotential) {
+      frameData.longRangePotential = 0.0;
       for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
         frameData.longRangePotential += frameData.lrPotentials[i];
       }
@@ -545,6 +547,7 @@ namespace OpenMD {
 
   RealType Snapshot::getExcludedPotential() {
     if (!hasExcludedPotential) {
+      frameData.excludedPotential = 0.0;
       for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
         frameData.excludedPotential += frameData.excludedPotentials[i];
       }

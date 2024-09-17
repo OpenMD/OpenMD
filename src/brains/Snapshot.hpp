@@ -54,10 +54,26 @@
 using namespace std;
 namespace OpenMD {
 
+  /**
+   * Storage specific to the SPF-RNEMD method that allows for a new simulation
+   *  to pick up where an old one left off.
+   *
+   * \note used primarily in a \c std::shared_ptr
+   */
   struct SPFData {
-    Vector3d pos {V3Zero};
-    RealType lambda {0.0};
-    int globalID {-1};
+    Vector3d pos {V3Zero}; /**< location to place a selected molecule */
+    RealType lambda {0.0}; /**< how much of the molecule has been transferred */
+    int globalID {-1};     /**< which molecule have we selected */
+
+    /**
+     * Reset member variables to their defaults. Prefer this to resetting a
+     *  \c std::shared_ptr<SPFData> or allocating/deallocating more memory.
+     */
+    void clear() {
+      pos      = V3Zero;
+      lambda   = 0.0;
+      globalID = -1;
+    }
   };
 
   /**

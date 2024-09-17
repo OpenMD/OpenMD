@@ -210,14 +210,11 @@ namespace OpenMD {
 
     if (!generated) generate();
 
-    assert(t >= x_.front());
-    assert(t <= x_.back());
-
     //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
     //  to t.
 
     if (isUniform) {
-      j = std::max(0, std::min(n - 1, int((t - x_[0]) * dx)));
+      j = int((t - x_[0]) * dx);
 
     } else {
       j = n - 1;
@@ -229,6 +226,8 @@ namespace OpenMD {
         }
       }
     }
+
+    j = std::clamp(j, 0, n - 1);
 
     //  Evaluate the cubic polynomial.
 
@@ -246,14 +245,11 @@ namespace OpenMD {
 
     if (!generated) generate();
 
-    assert(t >= x_.front());
-    assert(t <= x_.back());
-
     //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
     //  to t.
 
     if (isUniform) {
-      j = std::max(0, std::min(n - 1, int((t - x_[0]) * dx)));
+      j = int((t - x_[0]) * dx);
 
     } else {
       j = n - 1;
@@ -266,13 +262,15 @@ namespace OpenMD {
       }
     }
 
+    j = std::clamp(j, 0, n - 1);
+
     //  Evaluate the cubic polynomial.
 
     dt = t - x_[j];
     v  = y_[j] + dt * (b[j] + dt * (c[j] + dt * d[j]));
   }
 
-  pair<RealType, RealType> CubicSpline::getLimits() {
+  std::pair<RealType, RealType> CubicSpline::getLimits() {
     if (!generated) generate();
     return make_pair(x_.front(), x_.back());
   }
@@ -295,14 +293,11 @@ namespace OpenMD {
 
     if (!generated) generate();
 
-    assert(t >= x_.front());
-    assert(t <= x_.back());
-
     //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
     //  to t.
 
     if (isUniform) {
-      j = std::max(0, std::min(n - 1, int((t - x_[0]) * dx)));
+      j = int((t - x_[0]) * dx);
 
     } else {
       j = n - 1;
@@ -315,6 +310,8 @@ namespace OpenMD {
       }
     }
 
+    j = std::clamp(j, 0, n - 1);
+
     //  Evaluate the cubic polynomial.
 
     dt = t - x_[j];
@@ -323,28 +320,25 @@ namespace OpenMD {
     dv = b[j] + dt * (2.0 * c[j] + 3.0 * dt * d[j]);
   }
 
-  std::vector<int> CubicSpline::sort_permutation(std::vector<RealType>& v) {
+  std::vector<int> CubicSpline::sort_permutation(
+      const std::vector<double>& v) const {
     std::vector<int> p(v.size());
 
-    // 6 lines to replace std::iota(p.begin(), p.end(), 0);
-    int value = 0;
-    std::vector<int>::iterator i;
-    for (i = p.begin(); i != p.end(); ++i) {
-      (*i) = value;
-      ++value;
-    }
+    std::iota(p.begin(), p.end(), 0);
+    std::sort(p.begin(), p.end(), [&v](int a, int b) { return (v[a] < v[b]); });
 
-    std::sort(p.begin(), p.end(), OpenMD::Comparator(v));
     return p;
   }
 
   std::vector<RealType> CubicSpline::apply_permutation(
-      std::vector<RealType> const& v, std::vector<int> const& p) {
+      const std::vector<RealType>& v, const std::vector<int>& p) const {
     std::size_t n = p.size();
     std::vector<RealType> sorted_vec(n);
+
     for (std::size_t i = 0; i < n; ++i) {
       sorted_vec[i] = v[p[i]];
     }
+
     return sorted_vec;
   }
 }  // namespace OpenMD

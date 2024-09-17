@@ -75,32 +75,31 @@ namespace OpenMD::RNEMD {
     void collectData();
     void writeOutputFile();
 
-    bool failedLastKick() const { return failedLastTrial_; }
-
   protected:
     enum RNEMDPrivilegedAxis { rnemdX = 0, rnemdY = 1, rnemdZ = 2 };
 
     enum RNEMDFluxType {
-      rnemdKE,          // translational kinetic energy flux
-      rnemdRotKE,       // rotational kinetic energy flux
-      rnemdFullKE,      // full kinetic energy flux
-      rnemdPx,          // flux of momentum along x axis
-      rnemdPy,          // flux of momentum along y axis
-      rnemdPz,          // flux of momentum along z axis
-      rnemdPvector,     // flux of momentum vector
-      rnemdLx,          // flux of angular momentum along x axis
-      rnemdLy,          // flux of angular momentum along y axis
-      rnemdLz,          // flux of angular momentum along z axis
-      rnemdLvector,     // flux of angular momentum vector
-      rnemdParticle,    // flux of particles
-      rnemdParticleKE,  // flux of particles and total kinetic energy
-      rnemdKePx,        // flux of translational KE and x-momentum
-      rnemdKePy,        // flux of translational KE and y-momentum
-      rnemdKePvector,   // full combo flying platter
-      rnemdKeLx,        // flux of translational KE and x-angular momentum
-      rnemdKeLy,        // flux of translational KE and y-angular momentum
-      rnemdKeLz,        // flux of translational KE and z-angular momentum
-      rnemdKeLvector,   // full combo spinning platter
+      rnemdKE,              // translational kinetic energy flux
+      rnemdRotKE,           // rotational kinetic energy flux
+      rnemdFullKE,          // full kinetic energy flux
+      rnemdPx,              // flux of momentum along x axis
+      rnemdPy,              // flux of momentum along y axis
+      rnemdPz,              // flux of momentum along z axis
+      rnemdPvector,         // flux of momentum vector
+      rnemdLx,              // flux of angular momentum along x axis
+      rnemdLy,              // flux of angular momentum along y axis
+      rnemdLz,              // flux of angular momentum along z axis
+      rnemdLvector,         // flux of angular momentum vector
+      rnemdParticle,        // flux of particles
+      rnemdParticleKE,      // flux of particles and total kinetic energy
+      rnemdCurrentDensity,  // flux of electrons/charge
+      rnemdKePx,            // flux of translational KE and x-momentum
+      rnemdKePy,            // flux of translational KE and y-momentum
+      rnemdKePvector,       // full combo flying platter
+      rnemdKeLx,            // flux of translational KE and x-angular momentum
+      rnemdKeLy,            // flux of translational KE and y-angular momentum
+      rnemdKeLz,            // flux of translational KE and z-angular momentum
+      rnemdKeLvector,       // full combo spinning platter
       rnemdUnknownFluxType
     };
 
@@ -110,6 +109,7 @@ namespace OpenMD::RNEMD {
     RealType slabWidth_;
 
     std::string rnemdObjectSelection_;
+    std::vector<MoleculeStamp*> objectTypes_;
 
     SelectionManager commonA_;
     SelectionManager commonB_;
@@ -124,6 +124,7 @@ namespace OpenMD::RNEMD {
 
     bool doRNEMD_ {false};
     bool usePeriodicBoundaryConditions_ {false};
+    bool useChargedSPF_ {false};
 
     Vector3d coordinateOrigin_;
 
@@ -142,8 +143,6 @@ namespace OpenMD::RNEMD {
     unsigned int trialCount_ {0};
     unsigned int failTrialCount_ {0};
     unsigned int failRootCount_ {0};
-
-    bool failedLastTrial_ {false};
 
     void setKineticFlux(RealType kineticFlux);
     void setParticleFlux(RealType particleFlux);

@@ -618,6 +618,64 @@ namespace OpenMD {
     return atomTypes;
   }
 
+  MoleculeStampSet SelectionManager::getSelectedMoleculeStamps() {
+    MoleculeStampSet moleculeStamps;
+
+    for (size_t i = 0; i < ss_.bitsets_[MOLECULE].size(); ++i) {
+      if (ss_.bitsets_[MOLECULE][i]) {
+        // check that this processor owns this molecule
+        if (molecules_[i] != NULL) {
+          Molecule* mol = static_cast<Molecule*>(molecules_[i]);
+          moleculeStamps.insert(mol->getMolStamp());
+        }
+      }
+    }
+
+#ifdef IS_MPI
+    std::vector<int> foundStamps;
+    MoleculeStampSet::iterator i;
+    for (i = moleculeStamps.begin(); i != moleculeStamps.end(); ++i)
+      foundStamps.push_back((*i)->getIdent());
+
+    // count_local holds the number of found stamps on this processor
+    int count_local = foundStamps.size();
+
+    int nproc;
+    MPI_Comm_size(MPI_COMM_WORLD, &nproc);
+
+    // we need arrays to hold the counts and displacement vectors for
+    // all processors
+    std::vector<int> counts(nproc, 0);
+    std::vector<int> disps(nproc, 0);
+
+    // fill the counts array
+    MPI_Allgather(&count_local, 1, MPI_INT, &counts[0], 1, MPI_INT,
+                  MPI_COMM_WORLD);
+
+    // use the processor counts to compute the displacement array
+    disps[0]       = 0;
+    int totalCount = counts[0];
+    for (int iproc = 1; iproc < nproc; iproc++) {
+      disps[iproc] = disps[iproc - 1] + counts[iproc - 1];
+      totalCount += counts[iproc];
+    }
+
+    // we need a (possibly redundant) set of all found stamps:
+    std::vector<int> fsGlobal(totalCount);
+
+    // now spray out the foundStamps to all the other processors:
+    MPI_Allgatherv(&foundStamps[0], count_local, MPI_INT, &fsGlobal[0],
+                   &counts[0], &disps[0], MPI_INT, MPI_COMM_WORLD);
+
+    std::vector<int>::iterator j;
+
+    for (j = fsGlobal.begin(); j != fsGlobal.end(); ++j)
+      moleculeStamps.insert(info_->getMoleculeStamp(*j));
+#endif
+
+    return moleculeStamps;
+  }
+
   SelectionManager SelectionManager::replaceRigidBodiesWithAtoms() const {
     SelectionSet ssAtoms(nObjects_);
     ssAtoms.clearAll();

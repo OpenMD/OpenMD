@@ -490,6 +490,7 @@ namespace OpenMD {
     Molecule* nthSelectedMolecule(int& n);
 
     AtomTypeSet getSelectedAtomTypes();
+    MoleculeStampSet getSelectedMoleculeStamps();
 
     SelectionManager& operator&=(const SelectionManager& sman) {
       for (int i = 0; i < N_SELECTIONTYPES; i++)

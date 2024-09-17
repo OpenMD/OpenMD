@@ -144,13 +144,6 @@ namespace OpenMD {
         // ForceManager will only be changed if SPF-RNEMD is enabled
         if (Utils::traits_cast<Utils::ci_char_traits>(
                 simParams->getRNEMDParameters()->getMethod()) == "SPF") {
-          if (toUpperCopy(simParams->getEnsemble()) != "SPF") {
-            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                     "The SPF RNEMD method requires the SPF Ensemble.\n");
-            painCave.isFatal = 1;
-            simError();
-          }
-
           forceMan_ = new RNEMD::SPFForceManager(info);
         }
 
@@ -316,8 +309,6 @@ namespace OpenMD {
   void Integrator::postStep() {
     RealType difference;
 
-    saveConservedQuantity();
-
     if (needVelocityScaling) {
       difference = snap->getTime() - currThermal;
 
@@ -334,8 +325,12 @@ namespace OpenMD {
         rnemd_->doRNEMD();
         currRNEMD += RNEMD_exchangeTime;
       }
+
       rnemd_->collectData();
+      rnemd_->writeOutputFile();
     }
+
+    saveConservedQuantity();
 
     difference = snap->getTime() - currSample;
 
@@ -348,8 +343,6 @@ namespace OpenMD {
 
     if (difference > 0 || std::fabs(difference) <= dtEps) {
       stats->collectStats();
-
-      if (useRNEMD) { rnemd_->writeOutputFile(); }
 
       statWriter->writeStat();
 

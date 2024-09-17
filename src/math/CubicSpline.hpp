@@ -69,9 +69,9 @@ namespace OpenMD {
 
   private:
     void generate();
-    std::vector<int> sort_permutation(std::vector<RealType>& v);
-    std::vector<RealType> apply_permutation(std::vector<RealType> const& v,
-                                            std::vector<int> const& p);
+    std::vector<int> sort_permutation(const std::vector<RealType>& v) const;
+    std::vector<RealType> apply_permutation(const std::vector<RealType>& v,
+                                            const std::vector<int>& p) const;
 
     bool isUniform;
     bool generated;
@@ -82,14 +82,6 @@ namespace OpenMD {
     std::vector<RealType> b;
     std::vector<RealType> c;
     std::vector<RealType> d;
-  };
-
-  class Comparator {
-    std::vector<RealType>& _v;
-
-  public:
-    Comparator(std::vector<RealType>& v) : _v(v) {}
-    bool operator()(size_t i, size_t j) { return _v[i] < _v[j]; }
   };
 
   using CubicSplinePtr = std::shared_ptr<CubicSpline>;

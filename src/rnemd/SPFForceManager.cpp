@@ -46,6 +46,7 @@
 
 #include <config.h>
 
+#include <cmath>
 #include <vector>
 
 #ifdef IS_MPI
@@ -61,6 +62,9 @@
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
+#include "rnemd/RNEMDParameters.hpp"
+#include "rnemd/SPF.hpp"
+#include "utils/CI_String.hpp"
 
 namespace OpenMD::RNEMD {
 
@@ -98,6 +102,20 @@ namespace OpenMD::RNEMD {
   }
 
   void SPFForceManager::calcForces() {
+    std::shared_ptr<SPFData> currentSPFData = currentSnapshot_->getSPFData();
+
+    // Synced across processors
+    setDeltaLambda(spfRNEMD_->spfTarget_);
+
+    currentSPFData->lambda += deltaLambda_;
+
+    Vector3d v_a {};
+    Vector3d v_b {};
+    RealType a {};
+    RealType b {};
+
+    spfRNEMD_->isValidExchange(v_a, v_b, a, b);
+
     // Current snapshot with selected molecule in source slab
     ForceManager::calcForces();
     potentialSource_ = currentSnapshot_->getPotentialEnergy();
@@ -137,14 +155,14 @@ namespace OpenMD::RNEMD {
 
       // Only the processor with the selected molecule should do this step:
       if (selectedMolecule_) {
-        currentSnapshot_->getSPFData()->pos += delta;
-        selectedMolecule_->setCom(currentSnapshot_->getSPFData()->pos);
+        currentSPFData->pos += delta;
+        selectedMolecule_->setCom(currentSPFData->pos);
       }
 
 #ifdef IS_MPI
-      int globalSelectedID = currentSnapshot_->getSPFData()->globalID;
+      int globalSelectedID = currentSPFData->globalID;
 
-      MPI_Bcast(&currentSnapshot_->getSPFData()->pos[0], 3, MPI_REALTYPE,
+      MPI_Bcast(&currentSPFData->pos[0], 3, MPI_REALTYPE,
                 info_->getMolToProc(globalSelectedID), MPI_COMM_WORLD);
 #endif
 
@@ -155,7 +173,7 @@ namespace OpenMD::RNEMD {
       if (temporarySinkSnapshot_ && currentSnapshot_) {
         *temporarySinkSnapshot_ = *currentSnapshot_;
 
-        // Save source Verlet neighbor list information:
+        // Save sink Verlet neighbor list information:
         sinkNeighborList_   = neighborList_;
         sinkPoint_          = point_;
         sinkSavedPositions_ = savedPositions_;
@@ -174,17 +192,27 @@ namespace OpenMD::RNEMD {
         simError();
       }
 
-      combineForcesAndTorques();
-      updatePotentials();
-      updateVirialTensor();
-
       // Only the processor with the selected molecule should do this step:
       if (selectedMolecule_) { selectedMolecule_->setCom(currentSourceCom); }
 
+      bool doExchange {};
+
+      // restrict scaling coefficients
+      if ((a > 0.999) && (a < 1.001) && (b > 0.999) && (b < 1.001)) {
+        doExchange = true;
+      } else {
+        // roll back lambda
+        currentSPFData->lambda -= deltaLambda_;
+        deltaLambda_ = 0.0;
+      }
+
+      spfRNEMD_->failedLastTrial_ = !doExchange;
+
+      updateSPFState();
     } else {
       *temporarySourceSnapshot_ = *currentSnapshot_;
       *temporarySinkSnapshot_   = *currentSnapshot_;
-      potentialSink_            = currentSnapshot_->getPotentialEnergy();
+      potentialSink_            = std::numeric_limits<RealType>::max();
     }
   }
 
@@ -196,52 +224,72 @@ namespace OpenMD::RNEMD {
     }
   }
 
-  bool SPFForceManager::updateLambda(RealType& particleTarget,
-                                     RealType& deltaLambda) {
-    bool updateSelectedMolecule {false};
-
+  void SPFForceManager::setDeltaLambda(RealType spfTarget) {
     if (hasSelectedMolecule_) {
-      currentSnapshot_->getSPFData()->lambda += std::fabs(particleTarget);
+      std::shared_ptr<SPFData> currentSPFData = currentSnapshot_->getSPFData();
 
-      if (f_lambda(currentSnapshot_->getSPFData()->lambda +
-                   std::fabs(particleTarget)) > 1.0 &&
-          f_lambda(currentSnapshot_->getSPFData()->lambda) < 1.0) {
-        deltaLambda =
-            particleTarget - (f_lambda(currentSnapshot_->getSPFData()->lambda +
-                                       std::fabs(particleTarget)) -
-                              1.0);
-      } else {
-        deltaLambda = particleTarget;
-      }
-
-      currentSnapshot_->clearDerivedProperties();
-
-      combineForcesAndTorques();
-      updatePotentials();
-      updateVirialTensor();
-
-      if (f_lambda(currentSnapshot_->getSPFData()->lambda) > 1.0 ||
-          std::fabs(f_lambda(currentSnapshot_->getSPFData()->lambda) - 1.0) <
-              1e-6) {
-        currentSnapshot_->getSPFData()->lambda   = 0.0;
-        currentSnapshot_->getSPFData()->globalID = -1;
-
+      // Check to see if we are already fully in sink region
+      if (currentSPFData->lambda >= 1.0 ||
+          std::fabs(currentSPFData->lambda - 1.0) < 1e-6) {
         // Only the processor with the selected molecule should do this step:
         if (selectedMolecule_) {
-          selectedMolecule_->setCom(currentSnapshot_->getSPFData()->pos);
+          selectedMolecule_->setCom(currentSPFData->pos);
           selectedMolecule_ = nullptr;
         }
+
+        currentSPFData->clear();
+        deltaLambda_ = 0.0;
 
         neighborList_   = sinkNeighborList_;
         point_          = sinkPoint_;
         savedPositions_ = sinkSavedPositions_;
 
-        hasSelectedMolecule_   = false;
-        updateSelectedMolecule = true;
+        hasSelectedMolecule_ = false;
+
+        spfRNEMD_->selectMolecule();
+
+        return;
+      }
+
+      // survived the return true, so lambda is not >= 1:
+      // currentSPFTarget is an ion flux target, so can have sign:
+      deltaLambda_ = std::fabs(spfTarget);
+
+      if (currentSPFData->lambda + deltaLambda_ >= 1.0) {
+        /*
+         * New deltaLambda should be determined such that:
+         *  f_lambda(lambda + deltaLambda) = 1
+         */
+        deltaLambda_ = 1.0 - currentSPFData->lambda;
       }
     }
+  }
 
-    return updateSelectedMolecule;
+  RealType SPFForceManager::getScaledDeltaU() {
+    std::shared_ptr<SPFData> currentSPFData = currentSnapshot_->getSPFData();
+
+    RealType lambda = currentSPFData->lambda;
+
+    // Some checking against unreasonable potentials
+    if (std::isinf(potentialSink_) || std::isnan(potentialSink_) ||
+        std::isinf(potentialSource_) || std::isnan(potentialSource_)) {
+      snprintf(
+          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+          "SPFForceManager detected a numerical error in the potential\n"
+          "\tenergy with a lambda value of %f. Selecting a new molecule.\n",
+          lambda);
+      painCave.isFatal  = 0;
+      painCave.severity = OPENMD_WARNING;
+      simError();
+
+      hasSelectedMolecule_ = false;
+      currentSPFData->clear();
+    }
+
+    if (lambda < 1e-6) { return 0.0; }
+
+    return -(f_lambda(lambda) - f_lambda(lambda - deltaLambda_)) *
+           (potentialSink_ - potentialSource_);
   }
 
   void SPFForceManager::combineForcesAndTorques() {

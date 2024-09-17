@@ -62,6 +62,7 @@ namespace OpenMD::RNEMD {
                                             100.0);
     DefineOptionalParameter(KineticFlux, "kineticFlux");
     DefineOptionalParameter(ParticleFlux, "particleFlux");
+    DefineOptionalParameter(CurrentDensity, "currentDensity");
     DefineOptionalParameter(MomentumFlux, "momentumFlux");
     DefineOptionalParameter(MomentumFluxVector, "momentumFluxVector");
     DefineOptionalParameter(AngularMomentumFlux, "angularMomentumFlux");
@@ -108,7 +109,8 @@ namespace OpenMD::RNEMD {
             isEqualIgnoreCase("KE+Ly") || isEqualIgnoreCase("KE+Lz") ||
             isEqualIgnoreCase("KE+Pvector") ||
             isEqualIgnoreCase("KE+Lvector") || isEqualIgnoreCase("Particle") ||
-            isEqualIgnoreCase("Particle+KE"));
+            isEqualIgnoreCase("Particle+KE") ||
+            isEqualIgnoreCase("CurrentDensity"));
     CheckParameter(PrivilegedAxis, isEqualIgnoreCase("x") ||
                                        isEqualIgnoreCase("y") ||
                                        isEqualIgnoreCase("z"));

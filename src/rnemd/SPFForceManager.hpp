@@ -59,13 +59,16 @@
 
 namespace OpenMD::RNEMD {
 
+  class SPFMethod;
+
   class SPFForceManager : public ForceManager {
   public:
     SPFForceManager(SimInfo* info);
     ~SPFForceManager();
 
     void setSelectedMolecule(Molecule* selectedMolecule);
-    bool updateLambda(RealType& particleTarget, RealType& deltaLambda);
+    void setDeltaLambda(RealType spfTarget);
+    RealType getScaledDeltaU();
 
     bool getHasSelectedMolecule() const { return hasSelectedMolecule_; }
 
@@ -73,32 +76,36 @@ namespace OpenMD::RNEMD {
       hasSelectedMolecule_ = hasSelectedMolecule;
     }
 
-    RealType getScaledDeltaU(RealType d_lambda) const {
-      RealType lambda = currentSnapshot_->getSPFData()->lambda;
-
-      return -(f_lambda(lambda + d_lambda) - f_lambda(lambda)) *
-             (potentialSink_ - potentialSource_);
-    }
-
     Molecule* getSelectedMolecule() { return selectedMolecule_; }
     Snapshot getTemporarySourceSnapshot() { return *temporarySourceSnapshot_; }
     Snapshot getTemporarySinkSnapshot() { return *temporarySinkSnapshot_; }
 
-    void combineForcesAndTorques();
-    void updatePotentials();
-    void updateVirialTensor();
+    void updateSPFState() {
+      combineForcesAndTorques();
+      updatePotentials();
+      updateVirialTensor();
+    }
 
-    RealType f_lambda(RealType lambda) const { return std::pow(lambda, k_); }
+    SPFMethod* spfRNEMD_;
 
   private:
     void calcForces() override;
 
+    void combineForcesAndTorques();
+    void updatePotentials();
     void updateLongRangePotentials();
     void updateShortRangePotentials();
     void updateSelfPotentials();
     void updateExcludedPotentials();
     void updateRestraintPotentials();
     void updateSelectionPotentials();
+    void updateVirialTensor();
+
+    RealType f_lambda(RealType lambda) const {
+      RealType result = std::pow(lambda, k_);
+
+      return std::clamp(result, 0.0, 1.0);
+    }
 
     template<typename T>
     T linearCombination(T quantityA, T quantityB) {
@@ -126,6 +133,8 @@ namespace OpenMD::RNEMD {
 
     Molecule* selectedMolecule_ {nullptr};
     int k_ {};
+
+    RealType deltaLambda_ {};
 
     RealType potentialSource_ {};
     RealType potentialSink_ {};
