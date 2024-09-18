@@ -352,20 +352,6 @@ else(FFTW3_FOUND)
   message(STATUS "No fftw3 found - will be missing some analysis modules")
 endif(FFTW3_FOUND)
 
-# find_package(TensorFlow) IF(TensorFlow_FOUND) SET(HAVE_TensorFLow 1)
-# include_directories(${TensorFlow_INCLUDE_DIR})
-# LINK_LIBRARIES(${TensorFlow_LIBRARY}) ELSE(TensorFlow_FOUND) MESSAGE(STATUS
-# "No TensorFlow found - will be missing some features") ENDIF(TensorFlow_FOUND)
-
-find_package(DeePMD)
-if(DeePMD_FOUND)
-  set(HAVE_DeePMD 1)
-  include_directories(${DeePMD_INCLUDE_DIR})
-  link_libraries(${DeePMD_LIBRARY})
-else(DeePMD_FOUND)
-  message(STATUS "No DeePMD found - will be missing some features")
-endif(DeePMD_FOUND)
-
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
@@ -1047,19 +1033,34 @@ if(Python3_Interpreter_FOUND)
 
   foreach(PY_FILE ${PY_FILES})
     get_filename_component(filename "${PY_FILE}" NAME)
+    get_filename_component(directory "${PY_FILE}" DIRECTORY)
     configure_file(
       ${PY_FILE} "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}${PYEXT}" @ONLY)
-    install(
-      FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}${PYEXT}"
-      DESTINATION bin
-      PERMISSIONS
-        OWNER_READ
-        OWNER_WRITE
-        OWNER_EXECUTE
-        GROUP_READ
-        GROUP_EXECUTE
-        WORLD_READ
-        WORLD_EXECUTE)
+      if(${PY_FILE} MATCHES "samples")
+        install(
+          FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}${PYEXT}"
+          DESTINATION ${directory}
+          PERMISSIONS
+          OWNER_READ
+          OWNER_WRITE
+          OWNER_EXECUTE
+          GROUP_READ
+          GROUP_EXECUTE
+          WORLD_READ
+          WORLD_EXECUTE)
+      else()
+        install(
+          FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${filename}${PYEXT}"
+          DESTINATION bin
+          PERMISSIONS
+          OWNER_READ
+          OWNER_WRITE
+          OWNER_EXECUTE
+          GROUP_READ
+          GROUP_EXECUTE
+          WORLD_READ
+          WORLD_EXECUTE)
+      endif()
   endforeach(PY_FILE)
 endif(Python3_Interpreter_FOUND)
 
@@ -1132,6 +1133,10 @@ install(
   PATTERN "*.stat" EXCLUDE
   PATTERN "*.eor" EXCLUDE
   PATTERN "*.rnemd" EXCLUDE
+  PATTERN "buildDipolarArray" EXCLUDE
+  PATTERN "buildQuadrupolarArray" EXCLUDE
+  PATTERN "changeCutoff" EXCLUDE
+  PATTERN "fieldValues" EXCLUDE
   PATTERN "*.fz" EXCLUDE PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ
                                      WORLD_READ)
 
