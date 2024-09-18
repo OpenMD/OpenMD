@@ -1,0 +1,85 @@
+//  SPC/E water model available in: J. Phys. Chem. 91, 24, (1987) 6269
+//    H.J.C.Berendsen, J.R.Grigera, T.P.Straatsma
+
+begin Options
+      Name                    "sample"
+      DistanceMixingRule     GEOMETRIC
+      EAMMixingMethod        DREAM1
+      vdW-14-scale           0.5
+      electrostatic-14-scale 0.5
+      MetallicEnergyUnitScaling     23.0605423
+      FluctuatingChargeEnergyUnitScaling     23.0605423
+end Options
+
+begin BaseAtomTypes
+//Name 	mass (amu)
+C       12.0107
+O       15.9994
+H       1.0079
+Au     	196.97
+Pt      195.09
+M_CO    0.0
+end BaseAtomTypes
+
+begin AtomTypes
+//Name   Base	mass (amu)
+OW       O
+HW       H
+Au_FQ    Au
+Pt_FQ    Pt
+O_SPCE   OW
+H_SPCE   HW
+CO       C
+OC       O
+end AtomTypes
+
+begin LennardJonesAtomTypes
+//Name  epsilon    sigma
+O_SPCE  0.15532    3.16549
+//Karplus and Straub model for CO
+CO      0.0262     3.83
+OC      0.1591     3.12
+end LennardJonesAtomTypes
+
+begin ChargeAtomTypes
+//Name   charge
+O_SPCE   -0.8476
+H_SPCE    0.4238
+//Karplus and Straub model for CO
+CO       -0.75
+OC       -0.85
+M_CO      1.6
+end ChargeAtomTypes
+
+begin EAMAtomTypes
+// Equlibrium distances (re) are in angstroms, density parameters (fe,rhoe) are
+// in eV/angstrom. Most others (alpha, beta, kappa, lambda, eta) are
+// dimensionless. Spline parameters for the energy functional (Fn0, Fn1, Fn2,
+// Fn3, F0, F1, F2, F3, Fe) are in eV.
+//
+// Type     lat re       fe       rhoe      rhos      alpha    beta     A        B        kappa    lambda    Fn0       Fn1      Fn1       Fn3      F0    F1 F2       F3        eta
+Au Zhou2004 FCC 2.885034 1.529021 19.991632 19.991509 9.516052 5.075228 0.229762 0.356666 0.35657  0.748798 -2.937772 -0.500288 1.601954 -0.83553  -2.98 0  1.706587 -1.134778 1.021095 -2.978815 0.85 1.15
+Pt Zhou2004 FCC 2.771916 2.336509 33.367564 35.205357 7.105782 3.78975  0.556398 0.696037 0.385255 0.77051  -1.455568 -2.149952 0.528491  1.222875 -4.17 0  3.010561 -2.420128 1.45     -4.145597 0.25 1.15
+end EAMAtomTypes
+
+begin FluctuatingChargeAtomTypes
+// Fictitious ChargeMass has units of (fs / e)^2 kcal / mol  (note the ps->fs difference between
+// this code and the Rick, Stuart, and Berne paper
+//Name  chargeMass (fs^2 kcal/e^2 mol) EAM  nValence coupling  q0 u0 k0 q1 u1 k1 q2 u2 k2
+//all the parameters are converted in to eV
+
+Au_FQ 	1000.0 EAMPoly   0.590000 1 13.890000 2 7.920000 3 13.192055 4 68.173897 5 -88.029873 6 28.855093
+Pt_FQ   1000.0 EAMPoly   1.640000 1 12.610000 2 6.150000 3 14.073578 4 67.323210 5 -86.754482 6 28.280729
+end FluctuatingChargeAtomTypes
+
+begin NonBondedInteractions
+// Fitting potenital energy surface from
+// "Spohr" potential for gold with SPC/E water.
+// From Dou et al., J Phys. Chem. A, 2001, 105 (12), pp 2748–2755
+// SPCE values reduced by factor of 2.5 to promote metal-ligand binding
+Au	O_SPCE	Mie	       3.18284    0.6285748 9 6
+Au	H_SPCE	RepulsivePower 1 0.0008492 4
+// CO-metal interaction model
+Pt      CO      LennardJones   1.41 45 
+Pt      OC      RepulsiveMorse 4.4 0.05 1.8
+end NonBondedInteractions
