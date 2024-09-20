@@ -75,21 +75,36 @@ functionality of omd2omd.
 omd2omd -i bigCrystal.omd -o prismFace.omd -p 90 -q 90 -r 0
 ```
 
+## Expected Output
+
+If you want to visualize what was just made, you can use the `Dump2XYZ` utility:
+
+```
+Dump2XYZ -i prismFace.omd -b -m
+jmol prismFace.xyz
+```
+
+You should see this structure.  Here, a side view of this structure shows the prism face at the top and bottom: 
+
+<img src="../../figures/prismFace.png" alt="image" width="500" height="auto">
+
 ## Sample equilibration scheme
 
 NOTE: These structures are ideal ice crystals, and should be *gently*
 equilibrated with whichever water model you choose. Depending on the
-model, these starting structures may be more or less favorable. A
+model, these starting structures may be more or less stable. A
 sample equilibration scheme might be:
 
-1. Short NPTxyz run at a low temperature, approximately 10 to 50 K,
-   with resetTime set to a small time, approximately 10 to 50 fs.
+1. Short `ensemble = NPTxyz;` run at a low temperature, approximately 
+   10 to 50 K, with `resetTime` set to a small time, approximately 
+   10 to 50 fs.
 2. Once the pressure tensor elements are nearly zero and the volume is
-   oscillating around some average, use affineScale so scale the
-   simulation cell to the average volume. Turn resetTime off.
-3. Perform an NVT simulation with the targetTemperature set to your
-   desired temperature.
+   oscillating around some average, use `affineScale` to scale the
+   simulation cell to the average volume. Comment out `resetTime` to 
+   turn resets off.
+3. Perform an `ensemble = NVT;` simulation with the `targetTemp` set 
+   to your desired temperature.
 4. When the temperature has reached the target, and the total energy
-   is oscillating around some average, use thermalizer to scale the
-   simulation energy to this average energy.
-5. You can now perform NVE simulations.
+   is oscillating around some average, use `thermalizer -e` to scale 
+   the simulation energy to this average energy.
+5. You can now perform `ensemble = NVE;` data collection simulations.

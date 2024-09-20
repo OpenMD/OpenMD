@@ -77,12 +77,16 @@ namespace OpenMD {
       // query the force field for the AtomType associated with this
       // atomTypeName:
       AtomType* at = ff_->getAtomType(atomInfo->atomTypeName);
-      // get the chain of base types for this atom type:
-      std::vector<AtomType*> ayb = at->allYourBase();
-      // use the last type in the chain of base types for the name:
-      std::string bn = ayb[ayb.size() - 1]->getName();
+      // Sometimes the atomInfo is set to a fictitious type, so we'll
+      // only do base replacement if this AtomType is known in the forceField:
+      if (at != NULL) {
+	// get the chain of base types for this atom type:
+	std::vector<AtomType*> ayb = at->allYourBase();
+	// use the last type in the chain of base types for the name:
+	std::string bn = ayb[ayb.size() - 1]->getName();
 
-      atomInfo->atomTypeName = bn;
+	atomInfo->atomTypeName = bn;
+      }
     }
   }
 

@@ -77,7 +77,8 @@ and functionalities when passed *-h*.
 
 ## Instructions
 
-## Expected Output
+Each of the sub directories has a separate README.md file to explain that 
+sample.
 
 ## References
 
