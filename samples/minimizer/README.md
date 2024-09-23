@@ -46,7 +46,7 @@ forceField = "graphene";
 // ensemble = NVT;
 ```
 
-For our example here, the file `p10-small.omd` contains an output file from NPG-Builder for a $25 \textrm{\AA} \times 25 \textrm{\AA}$ graphene sheet with a small pore in the center. All that's left for us is to run the code:
+For our example here, the file `p10-small.omd` contains an output file from NPG-Builder for a 25 &#8491; x 25 &#8491; graphene sheet with a small pore in the center. All that's left for us is to run the code:
 ```bash
 openmd p10-small.omd
 ```
@@ -61,9 +61,9 @@ jmol p10-small.xyz    ### To run the animation: Tools -> Animate... -> Once
 
 Animate the frames with the comment above and watch some of the crazy configurations it tries before finally settling into the minimized structure. Below are some screenshots from the beginning, middle, and end of the minimization procedure:
 <p float="left">
-  <img src="../figures/p10-small_f1.png" alt="image" width="250" height="auto"/>
-  <img src="../figures/p10-small_f8.png" alt="image" width="250" height="auto"/>
-  <img src="../figures/p10-small_f149.png" alt="image" width="250" height="auto"/>
+  <img src="../figures/p10-small_f1.png" alt="image" width="300" height="auto"/>
+  <img src="../figures/p10-small_f8.png" alt="image" width="300" height="auto"/>
+  <img src="../figures/p10-small_f149.png" alt="image" width="300" height="auto"/>
 </p>
 
 We can do the same with the two water molecule simulation, 
