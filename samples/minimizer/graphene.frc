@@ -1,0 +1,89 @@
+// OPLS/2020 Force Field for Unsaturated Hydrocarbons, Alcohols, and Ethers
+// William L. Jorgensen,* Mohammad M. Ghahremanpour, Anastasia Saar, and Julian Tirado-Rives
+
+begin Options
+      Name                   = "graphene"
+end Options
+
+begin BaseAtomTypes
+//Name  mass(amu)
+C       12.0107
+H       1.0079
+end BaseAtomTypes
+
+begin AtomTypes
+//Name  BaseAtomType    [mass-override(amu)]
+CA	    C
+CB	    C
+HA      H
+end AtomTypes
+
+begin LennardJonesAtomTypes
+//Name          epsilon(kcal/mol)  sigma(angstroms)
+CA		          0.068		        3.55
+CB              0.068           3.55
+HA              0.030           2.42
+end LennardJonesAtomTypes
+
+begin ChargeAtomTypes
+CA	-0.115
+HA	0.115
+end ChargeAtomTypes
+
+begin BondTypes
+// Bond stretching force constants from
+// OPLS-AA (k multiplied by 2 because of how we write harmonic potentials):
+// Atom1        Atom2   Harmonic        b0              k (kcal/mol)
+// V_Harmonic = 0.5 * k * (b - bo)^2
+CA	HA	Harmonic	1.080	734	// OPLS 2020
+CB	CB	Harmonic	1.370	1040 	// OPLS 2020
+CA	CB	Harmonic	1.404	938	// OPLS 2020
+CA	CA	Harmonic	1.40	938	// OPLS 2020
+end BondTypes
+
+begin BendTypes
+// Harmonic
+// Atom1        Atom2   Atom3   Harmonic        Theta0  Ktheta
+// V_Harmonic = 0.5 * k * (Theta - Theta0)^2
+// Ktheta: kcal/mole/rad**2
+// Theta0: degrees
+CB	    CB	    CB	    Harmonic	      120.0	  126.0
+CB	    CB	    CA	    Harmonic	      120.0 	126.0 // just added
+CA 	    CB	    CA	    Harmonic      	120.0 	126.0 // just added
+CB      CA      CB      Harmonic        120.0   126.0
+CA      CA      CA      Harmonic        120.0   126.0
+CA      CA      CB      Harmonic        120.0   126.0
+CA	    CA	    HA	    Harmonic	      120.0	  70.0
+CB      CA      HA      Harmonic        120.0   70.0
+end BendTypes
+
+begin TorsionTypes
+// All-atom parameters from OPLS-AA:
+// V_Opls = v1 / 2 * [1 + cos(phi)] + v2 / 2 * [1 - cos(2*phi)] + v3 / 2 * [1 + cos(3*phi)]
+// units for v_n: kcal / mol
+// X is wildcard atom type:
+CA      CB      CB      CA      Opls            0.0             7.250           0.0
+CB      CB      CB      CB      Opls            0.0             7.250           0.0
+CB      CB      CB      CA      Opls            0.0             7.250           0.0
+CA      CA      CB      CB      Opls            0.0             7.250           0.0
+CB      CA      CB      CB      Opls            0.0             7.250           0.0
+CA      CA      CB      CA      Opls            0.0             7.250           0.0
+CA      CB      CA      CB      Opls            0.0             7.250           0.0
+X       CB      CB      X       Opls            0.0             7.250           0.0
+X       CA      CA      X       Opls            0.0             7.250           0.0
+CA      CA      CA      CB      Opls            0.0             7.250           0.0
+HA      CA      CA      CB      Opls            0.0             7.250           0.0
+HA      CA      CB      CB      Opls            0.0             7.250           0.0
+HA      CA      CB      CA      Opls            0.0             7.250           0.0
+HA      CA      CA      HA      Opls            0.0             7.250           0.0
+end TorsionTypes
+
+begin InversionTypes
+CB      CB      CB      CB      AmberImproper   1.100
+CB	    CB	    CB	    CA	    AmberImproper   1.100
+CB      CB      CA      CA      AmberImproper   1.100
+CB      CA      CA      CA      AmberImproper   1.100
+CA	    HA	    CA	    CB	    AmberImproper   1.100
+CA      HA      CA      CA	    AmberImproper   1.100
+CA      HA      CB	    CB	    AmberImproper   1.100
+end InversionTypes
