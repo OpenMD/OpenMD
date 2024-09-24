@@ -87,8 +87,10 @@ namespace OpenMD {
 
     // fixed number of bins
     sliceQ_.resize(nBins_);
+    sliceQ2_.resize(nBins_);
     sliceCount_.resize(nBins_);
     std::fill(sliceQ_.begin(), sliceQ_.end(), 0.0);
+    std::fill(sliceQ2_.begin(), sliceQ_.end(), 0.0);
     std::fill(sliceCount_.begin(), sliceCount_.end(), 0);
 
     setOutputName(getPrefix(filename) + ".Qz");
@@ -195,6 +197,7 @@ namespace OpenMD {
           int binNo =
               int(nBins_ * (halfBoxZ_ + rk[axis_]) / hmat(axis_, axis_));
           sliceQ_[binNo] += Qk;
+	  sliceQ2_[binNo] += Qk*Qk;
           sliceCount_[binNo] += 1;
         }
       }
@@ -223,7 +226,10 @@ namespace OpenMD {
       for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
         RealType z = zAve * (i + 0.5) / sliceQ_.size();
         if (sliceCount_[i] != 0) {
-          qZstream << z << "\t" << sliceQ_[i] / sliceCount_[i] << "\n";
+	  RealType mean = sliceQ_[i] / sliceCount_[i];
+	  RealType stdDev = sqrt( sliceQ2_[i] / sliceCount_[i] - mean*mean );
+	  RealType e95 = 1.96 * stdDev / sqrt( sliceCount_[i] - 1 );
+          qZstream << z << "\t" << mean << "\t" << e95 << "\n";
         }
       }
 

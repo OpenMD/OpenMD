@@ -103,6 +103,7 @@ namespace OpenMD {
     int nZBins_;
     std::vector<RealType> zBox_;
     std::vector<RealType> sliceQ_;
+    std::vector<RealType> sliceQ2_;
     std::vector<int> sliceCount_;
     int axis_;
     std::string axisLabel_;
