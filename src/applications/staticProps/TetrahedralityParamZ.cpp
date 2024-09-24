@@ -90,7 +90,7 @@ namespace OpenMD {
     sliceQ2_.resize(nBins_);
     sliceCount_.resize(nBins_);
     std::fill(sliceQ_.begin(), sliceQ_.end(), 0.0);
-    std::fill(sliceQ2_.begin(), sliceQ_.end(), 0.0);
+    std::fill(sliceQ2_.begin(), sliceQ2_.end(), 0.0);
     std::fill(sliceCount_.begin(), sliceCount_.end(), 0);
 
     setOutputName(getPrefix(filename) + ".Qz");
@@ -228,8 +228,12 @@ namespace OpenMD {
         if (sliceCount_[i] != 0) {
 	  RealType mean = sliceQ_[i] / sliceCount_[i];
 	  RealType stdDev = sqrt( sliceQ2_[i] / sliceCount_[i] - mean*mean );
-	  RealType e95 = 1.96 * stdDev / sqrt( sliceCount_[i] - 1 );
-          qZstream << z << "\t" << mean << "\t" << e95 << "\n";
+          if (sliceCount_[i] == 1) {
+            qZstream << z << "\t" << mean << "\n";
+          } else {
+	    RealType e95 = 1.96 * stdDev / sqrt( sliceCount_[i] - 1 );
+            qZstream << z << "\t" << mean << "\t" << e95 << "\n";
+          }
         }
       }
 
