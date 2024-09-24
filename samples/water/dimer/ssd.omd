@@ -1,6 +1,6 @@
 <OpenMD version=1>
   <MetaData>
-#include "water.inc"
+#include "../water.inc"
 
 component{
   type = "SSD_E";
@@ -8,7 +8,7 @@ component{
 }
 
 ensemble = NVT;
-forceField = "DUFF";
+forceField = "Water";
 cutoffMethod = "switched";
 cutoffRadius = 9.0;
 switchingRadius = 7.8;

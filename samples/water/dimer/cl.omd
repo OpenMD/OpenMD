@@ -1,6 +1,6 @@
 <OpenMD version=2>
   <MetaData>
-#include "water.inc"
+#include "../water.inc"
 
 component{
   type = "Cl-";

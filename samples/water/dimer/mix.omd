@@ -1,6 +1,6 @@
 <OpenMD version=2>
   <MetaData>
-#include "water.inc"
+#include "../water.inc"
 
 component{
   type = "TIP4P";
@@ -12,7 +12,7 @@ component{
 }
 
 ensemble = NVT;
-forceField = "DUFF";
+forceField = "Water";
 cutoffMethod = "shifted_force";
 dampingAlpha = 0.2;
 cutoffRadius = 9.0;
