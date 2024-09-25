@@ -149,7 +149,7 @@ CTS              0.06
 end ChargeAtomTypes
 
 begin MultipoleAtomTypes
-SSD_E   dq      0.0     0.0     0.0     2.42    -1.682  1.762   -0.08
+SSD_E   d      0.0     0.0     0.0     2.42
 end MultipoleAtomTypes
 
 begin StickyAtomTypes

@@ -1,6 +1,7 @@
 <OpenMD version=1>
   <MetaData>
-#include "water.inc"
+
+#include "../water.inc"
 
 
 component{
@@ -10,7 +11,7 @@ component{
 
 
 ensemble = NVE;
-forceField = "Amber";
+forceField = "Water";
 cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
 dampingAlpha = 0.18;
@@ -23,14 +24,10 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 10000;
-useInitialTime = "false";
-useInitialExtendedSystemState = "false";
+runTime = 1e5;
+sampleTime = 100;
+statusTime = 10;
 
-//tempSet = "true";
-//thermalTime = 10;
-sampleTime = 1000;
-statusTime = 2;
   </MetaData>
   <Snapshot>
     <FrameData>

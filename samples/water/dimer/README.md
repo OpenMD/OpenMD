@@ -61,19 +61,20 @@ bond:
 
 <img src="../../figures/ssd.png" alt="image" width="500" height="auto">
 
-which should be 2.26 angstroms and 149.9 degrees, respectively.  For the 
+which should be 2.67 angstroms and 156.1 degrees, respectively.  For the 
 two TIP4P molecules in `two.xyz` we get 2.76 angstroms and 177.1 degrees:
 
 <img src="../../figures/two.png" alt="image" width="500" height="auto">
 
 For the mixed case (one SSD/E and one TIP4P) where TIP4P is the H-bond 
-acceptor, we get an intermediate structure with 2.72 angstroms and 160.6 
+donor, we get an intermediate structure with 2.47 angstroms and 178.9 
 degrees:
 
 <img src="../../figures/mix.png" alt="image" width="500" height="auto">
 
 And for the Cl<sup>-</sup> ion with the SSD/E molecule, we get a Cl-O 
-distance of 3.16 angstroms and an O-H-Cl angle of 178.9 degrees:
+distance of 3.24 angstroms and an O-H-Cl angle of 111.8 degrees, with the 
+Chloride ion sitting along the H-O-H bisector:
 
 <img src="../../figures/cl.png" alt="image" width="500" height="auto">
 

@@ -1,6 +1,6 @@
 <OpenMD version=1>
   <MetaData>
-#include "water.inc"
+#include "../water.inc"
 
 
 component{
@@ -10,10 +10,10 @@ component{
 
 
 ensemble = NVE;
-forceField = "DUFF";
+forceField = "Water";
 cutoffMethod = "shifted_force";
 cutoffRadius = 9.0;
-dampingAlpha = 0.2;
+dampingAlpha = 0.18;
 
 targetTemp = 300;
 targetPressure = 1.0;
@@ -22,14 +22,10 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 1e4;
-useInitialTime = "false";
-useInitialExtendedSystemState = "false";
-
-//tempSet = "true";
-//thermalTime = 10;
+runTime = 1e5;
 sampleTime = 100;
 statusTime = 10;
+
   </MetaData>
   <Snapshot>
     <FrameData>
