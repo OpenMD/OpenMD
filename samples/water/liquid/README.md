@@ -1,4 +1,4 @@
-# Liquid water simulations with two water models
+# Liquid water simulations with five water models
 
 This directory contains equilibrated configurations for simulating
 liquid water with five different water models, SPC/E and TIP4P, which 
