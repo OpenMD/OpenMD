@@ -58,9 +58,9 @@ O_SPCE  0.15532         3.16549
 end LennardJonesAtomTypes
 
 begin NonBondedInteractions
-Na+	O_SPCE	InversePowerSeries	12	95714.67667	6	-162.87491	4	-6
-Cl-	O_SPCE	InversePowerSeries	12	3867588.80217	6	-2100.87068	4	55
-Na+	Na+	InversePowerSeries	12	13102.85758	6	-40.25030562	4	-1.036703601
-Na+	Cl-	InversePowerSeries	12	655295.1761	6	-577.5889834	4	-13.44182825
-Cl-	Cl-	InversePowerSeries	12	21294018.81	6	-6681.030834	4	9.503116343
+Na+   O_SPCE  InversePowerSeries       12     95714.67654     6       -162.87491      4       -6.00000
+Cl-   O_SPCE  InversePowerSeries       12     3867588.79805   6       -2100.87068     4       55.00000
+Na+   Na+     InversePowerSeries       12     13102.85758     6       -40.25031       4       -4.15512
+Na+   Cl-     InversePowerSeries       12     655295.17613    6       -577.58898      4       24.64681
+Cl-   Cl-     InversePowerSeries       12     21294018.81053  6       -6681.03083     4       123.21676
 end NonBondedInteractions

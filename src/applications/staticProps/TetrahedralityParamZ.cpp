@@ -197,7 +197,7 @@ namespace OpenMD {
           int binNo =
               int(nBins_ * (halfBoxZ_ + rk[axis_]) / hmat(axis_, axis_));
           sliceQ_[binNo] += Qk;
-	  sliceQ2_[binNo] += Qk*Qk;
+          sliceQ2_[binNo] += Qk * Qk;
           sliceCount_[binNo] += 1;
         }
       }
@@ -226,12 +226,12 @@ namespace OpenMD {
       for (unsigned int i = 0; i < sliceQ_.size(); ++i) {
         RealType z = zAve * (i + 0.5) / sliceQ_.size();
         if (sliceCount_[i] != 0) {
-	  RealType mean = sliceQ_[i] / sliceCount_[i];
-	  RealType stdDev = sqrt( sliceQ2_[i] / sliceCount_[i] - mean*mean );
+          RealType mean   = sliceQ_[i] / sliceCount_[i];
+          RealType stdDev = sqrt(sliceQ2_[i] / sliceCount_[i] - mean * mean);
           if (sliceCount_[i] == 1) {
             qZstream << z << "\t" << mean << "\n";
           } else {
-	    RealType e95 = 1.96 * stdDev / sqrt( sliceCount_[i] - 1 );
+            RealType e95 = 1.96 * stdDev / sqrt(sliceCount_[i] - 1);
             qZstream << z << "\t" << mean << "\t" << e95 << "\n";
           }
         }
