@@ -2,7 +2,7 @@
 
 This directory contains four prepared systems with different ice facets 
 exposed to liquid water. They were prepared using a block of Ice-Ih that
-has been cleaved along one particular facet. These blocks were then  
+has been cleaved along one particular facet. These blocks were then 
 rotated so that the prepared facet was oriented to the + and - *z* 
 direction of the periodic box, with a vaccuum layer separating periodic 
 replicas.  For instructions on preparing these blocks, see the 
