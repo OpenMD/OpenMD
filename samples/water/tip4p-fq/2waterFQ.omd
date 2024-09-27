@@ -24,7 +24,6 @@ molecule {
   rigidBody[0]{
     members(0,1,2,3);
   }
-  constrainTotalCharge = true;
 }
 component{
   type = "TIP4P_FQ";
@@ -34,7 +33,7 @@ component{
 statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTRONIC_TEMPERATURE";
 ensemble = NVE;
 forceField = "FlucQ";
-forceFieldFileName = "FQ.frc";
+forceFieldFileName = "tip4p-fq.frc";
 cutoffMethod = "shifted_force";
 cutoffRadius = 9.0;
 outputFluctuatingCharges = true;

@@ -25,7 +25,7 @@ molecule{
   rigidBody[0]{
     members(0, 1, 2, 3);
   }
-
+  constrainTotalCharge = true;
 }
 
 component{
@@ -40,7 +40,7 @@ flucQ {
 
 ensemble = NVE;
 forceField = "FlucQ";
-forceFieldFileName = "FQ.frc";
+forceFieldFileName = "tip4p-fq.frc";
 cutoffMethod = "SHIFTED_FORCE";
 electrostaticScreeningMethod = "DAMPED";
 cutoffRadius = 10.0;

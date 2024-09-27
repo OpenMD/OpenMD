@@ -42,7 +42,7 @@ statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|
 
 ensemble = NVE;
 forceField = "FlucQ";
-forceFieldFileName = "FQ.frc";
+forceFieldFileName = "tip4p-fq.frc";
 cutoffMethod = "shifted_force";
 cutoffRadius = 9.0;
 outputFluctuatingCharges = true;
