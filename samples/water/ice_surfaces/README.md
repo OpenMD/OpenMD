@@ -143,6 +143,9 @@ You should get a plot that looks like this:
 
 <img src="../../figures/solvatedBasal.Qz.png" alt="image" width="500" height="auto">
 
+Note that the error bars are larger where there are very few water molecules.
+This happens in the space between the water bilayers that make up the crystal
+structure.
 
 The orientational correlation function data has multiple sets, each representing one of the 10 slabs:
 ```
