@@ -56,7 +56,7 @@ Here's a side view of the solvate basal facet generated with:
 Dump2XYZ -i solvatedBasal.omd -b -m
 jmol solvatedBasal.xyz
 ```
-<img src="../../figures/solvateBasal.png" alt="image" width="500" height="auto">
+<img src="../../figures/solvatedBasal.png" alt="image" width="500" height="auto">
 
 
 ## Instructions 
@@ -141,7 +141,7 @@ xmgrace -settype xydy solvatedBasal.Qz
 ```
 You should get a plot that looks like this:
 
-<img src="../../figures/solvateBasal.Qz.png" alt="image" width="500" height="auto">
+<img src="../../figures/solvatedBasal.Qz.png" alt="image" width="500" height="auto">
 
 
 The orientational correlation function data has multiple sets, each representing one of the 10 slabs:
@@ -150,4 +150,5 @@ xmgrace -nxy solvatedBasal.lcorrZ
 ```
 <img src="../../figures/solvatedBasal.lcorrZ.png" alt="image" width="500" height="auto">
 
-Note that the correlation functions from the slabs in the ice don't decay very much, while in the liquid regions, the orientational decay is nearly complete after 100 ps.
+Note that the correlation functions from the slabs in the ice don't decay very much, while 
+in the liquid regions, the orientational decay is nearly complete after 100 ps.

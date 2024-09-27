@@ -1,38 +1,47 @@
+# Parameters for the TIP4P-FQ water model defined in the original fluc-q 
+# paper:
+#
+# Steven W. Rick, Steven J. Stuart, B. J. Berne; Dynamical fluctuating 
+# charge force fields: Application to liquid water. J. Chem. Phys. 1994; 
+# 101 (7): pp. 6141–6156. https://doi.org/10.1063/1.468398
+
 begin Options
+  Name      "FlucQ"
   EnergyUnitScaling 1.0
   DistanceUnitScaling 1.0
 end Options
 
 begin BaseAtomTypes
-//Name 		mass (amu)
+#Name 	mass (amu)
 O	15.9994
 H	1.0079
 M	0.0
 end BaseAtomTypes
 
 begin AtomTypes    
-//Name		mass	 (amu)
+#Name		baseType
 O_TIP4P_FQ	O
 H_TIP4P_FQ	H
 M_TIP4P_FQ	M
 end AtomTypes
 
 begin LennardJonesAtomTypes
-//Name		epsilon		    sigma	
-O_TIP4P_FQ	0.2862		3.159
+#Name		epsilon	sigma	
+O_TIP4P_FQ	0.2862	3.159
 end LennardJonesAtomTypes
 
 begin FluctuatingChargeAtomTypes
-//Values obtained from Rick, Stuart, and Berne J Chem Phys, 1994, 101
-//Since they gave chi as an electronegativity difference, we will assign Oxygen's (the M site 
-//actually for TIP4P) electronegativity from Rappe and Goddard III, and setting H to equal 
-//the difference 
-// Rappe and Goddard, O or M chi: 8.741 eV = 201.5705 kcal/mol
-// Rick, Stuart, and Berne, delta Chi between O and H = 68.49
-// SlaterZeta has units of Bohr radius
-// Fictitious ChargeMass has units of (fs / e)^2 kcal / mol  (note the ps->fs difference between
-// this code and the Rick, Stuart, and Berne paper
-//Name	   ChargeMass (fs^2 kcal/e^2 mol) chi (kcal/mol e)   hardness (kcal/(mol*e^2))  slaterN   slaterZeta
+# Values obtained from Rick, Stuart, and Berne J Chem Phys, 1994, 101
+# Since they gave chi as an electronegativity difference, we will assign 
+# Oxygen's (the M site actually for TIP4P) electronegativity from Rappe 
+# and Goddard III, and setting H to equal the difference.
+# Rappe and Goddard, O or M chi: 8.741 eV = 201.5705 kcal/mol
+# Rick, Stuart, and Berne, delta Chi between O and H = 68.49
+# SlaterZeta has units of Bohr radius
+# Fictitious ChargeMass has units of (fs / e)^2 kcal / mol  (note the 
+#    ps->fs difference between this code and the Rick, Stuart, and Berne paper
+#
+#Name ChargeMass chi (kcal/mol e) hardness (kcal/(mol*e^2)) slaterN slaterZeta
 H_TIP4P_FQ  60.0 Hardness 133.0805   353.0   1	  0.90
 M_TIP4P_FQ  60.0 Hardness 201.5705   371.6   2	  1.63
 end FluctuatingChargeAtomTypes
