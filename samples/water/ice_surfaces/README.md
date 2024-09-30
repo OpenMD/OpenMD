@@ -2,7 +2,7 @@
 
 This directory contains four prepared systems with different ice facets 
 exposed to liquid water. They were prepared using a block of Ice-Ih that
-has been cleaved along one particular facet. These blocks were then  
+has been cleaved along one particular facet. These blocks were then 
 rotated so that the prepared facet was oriented to the + and - *z* 
 direction of the periodic box, with a vaccuum layer separating periodic 
 replicas.  For instructions on preparing these blocks, see the 
@@ -143,6 +143,9 @@ You should get a plot that looks like this:
 
 <img src="../../figures/solvatedBasal.Qz.png" alt="image" width="500" height="auto">
 
+Note that the error bars are larger where there are very few water molecules.
+This happens in the space between the water bilayers that make up the crystal
+structure.
 
 The orientational correlation function data has multiple sets, each representing one of the 10 slabs:
 ```
