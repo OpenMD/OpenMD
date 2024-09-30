@@ -81,11 +81,23 @@ outputDensity = true;              # helps us look at the electron density
 useSurfaceTerm = "true";           # Adds an important term in electrostatic interactions
 uniformField = (0,0,1e-2);         # an exeternal electric field along the z-axis
 ```
-Running and analyzing this simulation, we would run (note that this is quite a long simulation):
+Running and analyzing this simulation, we would run (note that this is a very long simulation):
 ```
 mpirun -np 4 openmd_MPI PtSlab.omd
-StaticProps
 ```
+To analyze the data, we're going to look primarily at the local electric field and we can get to this value using the `--rnemdz` option in `StaticProps`:
+```
+StaticProps -i PtSlab.dump --rnemdz --nbins=100
+awk 'NF>3 || $1=="#"' < PtSlab.rnemdZ > PtSlab.data
+xmgrace -block PtSlab.data -bxy 1:10
+```
+The `awk` command above strips out data lines from `PtSlab.rnemd` which 
+don't have the right number of fields. This can happen when there are no 
+atoms present in some parts of the simulation cell.
+
+The Electric Field is in columns 8,9, and 10 of the rnemdZ
+data file, so we'll pull out only the *z*-component with the 
+`xmgrace` command.
 
 ### Image charges
 
@@ -114,15 +126,19 @@ A very useful command in jmol is
 
 In the console window, type `color partialCharge` and hit return.  The blue colors indicate copper atoms that have taken on a positive partial charge, and the red/pink colors are copper atoms with negative positive charges.
 
-
-
 ## Expected Output
 
 For the Alloys, we expect distributions of partial charges that look like:
 <img src="../figures/alloys.png" alt="image" width="500" height="auto">
 
-For the Field screening simulation, we expect charge distributions to look like:
+For the Field screening simulation, we expect the *z*-component of 
+electric field to look like:
 
+<img src="../figures/slabField.png" alt="image" width="500" height="auto">
+
+Note that the DR-EAM atoms feel almost none of the external electric 
+field in the middle of the slab.  The polarization of the surface atoms
+has effectively shielded the interior atoms.
 
 For the image charge simulations, sample charge images are shown below:
 
