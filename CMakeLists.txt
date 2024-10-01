@@ -1114,8 +1114,9 @@ install(
     GROUP_EXECUTE
     WORLD_READ
     WORLD_EXECUTE
-  PATTERN ".svn" EXCLUDE PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ
-                                     WORLD_READ)
+  PATTERN ".svn" EXCLUDE PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+
+# maybe should be exluding *.xyz files also:
 install(
   DIRECTORY samples/
   DESTINATION samples
@@ -1127,18 +1128,29 @@ install(
     GROUP_EXECUTE
     WORLD_READ
     WORLD_EXECUTE
+  PATTERN ".DS_STORE" EXCLUDE
   PATTERN ".svn" EXCLUDE
+  PATTERN "*.avol" EXCLUDE
+  PATTERN "*.boq" EXCLUDE
+  PATTERN "*.bow" EXCLUDE
+  PATTERN "*.Chargehist" EXCLUDE
+  PATTERN "*.ChargeZ" EXCLUDE
   PATTERN "*.dump" EXCLUDE
-  PATTERN "*.report" EXCLUDE
-  PATTERN "*.stat" EXCLUDE
   PATTERN "*.eor" EXCLUDE
+  PATTERN "*.fz" EXCLUDE
+  PATTERN "*.gofr" EXCLUDE
+  PATTERN "*.lcorrZ" EXCLUDE
+  PATTERN "*.Qz" EXCLUDE
+  PATTERN "*.rcorr" EXCLUDE
+  PATTERN "*.rcorrZ" EXCLUDE
+  PATTERN "*.report" EXCLUDE
   PATTERN "*.rnemd" EXCLUDE
+  PATTERN "*.stat" EXCLUDE
   PATTERN "buildDipolarArray" EXCLUDE
   PATTERN "buildQuadrupolarArray" EXCLUDE
   PATTERN "changeCutoff" EXCLUDE
-  PATTERN "fieldValues" EXCLUDE
-  PATTERN "*.fz" EXCLUDE PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ
-                                     WORLD_READ)
+  PATTERN "fieldValues" EXCLUDE 
+  PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
 install(
   FILES "${CMAKE_CURRENT_SOURCE_DIR}/docs/OpenMDmanual.pdf"
