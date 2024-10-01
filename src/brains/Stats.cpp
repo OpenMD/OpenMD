@@ -938,22 +938,22 @@ namespace OpenMD {
           Vector3d s = getVectorAverage(i);
           Vector3d e = getVectorError(i);
 
-          report << "#                       ";
+          report << "#                         ";
           report << luc << right << setw(12) << s(0) << ruc << "     ";
           report << luc << right << setw(12) << e(0);
-          report << ruc << "                    #" << std::endl;
+          report << ruc << "                   #" << std::endl;
 
           report << "# " << right << setw(23) << getTitle(i) << ":";
 
           report << lex << right << setw(12) << s(1) << rex << pm;
           report << lex << right << setw(12) << e(1) << rex << " ";
-          report << left << setw(17) << getUnits(i) << "  #";
+          report << left << setw(17) << getUnits(i) << " #";
           report << std::endl;
 
-          report << "#                       ";
+          report << "#                         ";
           report << llc << right << setw(12) << s(2) << rlc << "     ";
           report << llc << right << setw(12) << e(2);
-          report << rlc << "                     #" << std::endl;
+          report << rlc << "                   #" << std::endl;
 
         } else if (getDataType(i) == "potVec") {
           potVec s = getPotVecAverage(i);
