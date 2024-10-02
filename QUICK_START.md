@@ -23,10 +23,10 @@ In the `samples` subdirectory, there are a wide range of example simulations tha
 cd ~/OpenMD-3.1/samples
 ```
 
-Now, let's go to the water/spce sample directory and run a simulation: 
+Now, let's go to the `water/liquid` sample directory and run a simulation: 
 
 ```bash
-cd water/spce
+cd water/liquid
 openmd spce.omd                     # run the sample
 ```
 
@@ -98,16 +98,16 @@ So what's next? By now you've familiarized yourself with a simple OpenMD simulat
 - [Madelung](samples/Madelung/README.md) - computes Madelung constants using different approximate electrostatic methods
 - [RNEMD](samples/RNEMD/README.md) - Reverse Non-Equilibrium Molecular Dynamics, in bulk and at interfaces
 - [air](samples/air/README.md) - a simple mixture of diatomic nitrogen, diatomic oxygen, and argon atoms
-- [alkane](samples/alkane/README.md) - demonstration of alkanes, with most parameters adapted from the [TraPPE-UA](http://chem-siepmann.oit.umn.edu/siepmann/trappe/index.html) force field
 - [aqueousIons](samples/aqueousIons/README.md) - some salt water boxes showing how to run with Li-Song-Merz 12-6 and 12-6-4 models for ions
 - [argon](samples/argon/README.md) - simple liquid argon boxes using Lennard-Jones potentials
 - [bond-order](samples/bond-order/README.md) - demonstration files for testing bond orientational order parameters in different structures
 - [builders](samples/builders/README.md) - demonstrations of how to create initial structures using the builder codes.
-- [gbljtest](samples/gbljtest/README.md) - test cases showing how to include Gay-Berne (ellipsoids) and Lennard-Jones models in the same simulation
 - [graphene](samples/graphene/README.md) - models for graphene sheets and nanoporous graphene membranes
-- [metals](samples/metals/README.md) - metal structures (bulk, surface, nanoparticle, nanorod) using many interaction models.
+- [metals](samples/metals/README.md) - metal structures (bulk and surface) using different interaction models.
+- [liquid](samples/liquid/README.md) - build and equilibrate a liquid sample using methanol as a demonstration molecule
 - [minimizer](samples/minimizer/README.md) - small, simple samples showing how to invoke the minimizer
-- [thermoIntegration](samples/thermoIntegration/README.md) - demonstrations of how to do thermodynamic Integration to either ideal gas (liquid) or an Einstein crystal (solid)
-- [water](samples/water/README.md) - multiple water models, and initial structures including ice, ice surfaces, and dimers
+- [nanoparticles](samples/nanoparticles/README.md) - build and equilibrate spherical and icosahedral nanoparticles
+- [protein](samples/protein/README.md) - build and equilibrate a small pentapeptide starting from a PDB file
+- [water](samples/water/README.md) - multiple water models, and initial structures including ice, ice surfaces, liquids, and dimers
 - [zcons](samples/zcons/README.md) - tests for Z-constraints to keep molecules fixed at specific values of one coordinate
-- [zeolite](samples/zeolite/README.md) - a ZSM5 structure simulated using the CLAYFF force field
+- [zeolite](samples/zeolite/README.md) - diffusion in a ZSM5 structure simulated using the CLAYFF force field
