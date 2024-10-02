@@ -37,7 +37,7 @@ procedure for running and analyzing your first OpenMD simulation.
 
 | Architecture                   |  CXX | Notes                                  |
 |--------------------------------|:----:|----------------------------------------|
-| macOS Sonoma (intel & arm)     | c++  | (Apple clang 15.4, Open MPI 5.0.3)     |
+| macOS Sequoia (intel & arm)    | c++  | (Apple Xcode 16.0, Open MPI 5.0.3)     |
 | Linux (Ubuntu 24.04 - x86\_64) | g++  | (GNU version 13.2  Open MPI 4.1.6)     |
 | Linux (RHEL 9.4 - x86\_64)     | icpx | (Intel version 23.0, Intel MPI 2021.13)|
 
