@@ -20,7 +20,7 @@ variant of EAM.
 
 To specify the Voter-Chen variant
 of the EAM force field, the user would add the 
-```
+```C++
 forceFieldVariant = "VC";
 ```
 line to the `<MetaData>` block in the `omd` file.
@@ -117,13 +117,13 @@ And for the Zhou2004 variant we expect these thermodynamic means:
 ```
 
 To visualize the movies of these files, one would use `Dump2XYZ`:
-```
+```bash
 Dump2XYZ -i Au_bulk_FBD.dump -b -m
 Dump2XYZ -i Au_bulk_voter.dump -b -m
 Dump2XYZ -i Au_bulk_Zhou.dump -b -m
 ```
 and then visualize the resulting `xyz` file using `jmol`:
-```
+```bash
 jmol Au_bulk_FBD.xyz
 jmol Au_bulk_voter.xyz
 jmol Au_bulk_Zhou.xyz

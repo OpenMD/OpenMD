@@ -22,7 +22,7 @@ close to this value.
 
 For example, to test the Damped Shifted Force (DSF) model with a very large cutoff, we set these lines in `NaCl.omd` :
 
-```
+```C++
 cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
 cutoffRadius = 28;
@@ -34,13 +34,13 @@ Other options for the `cutoffMethod` include `shifted_potential`, `reaction_fiel
 To extract values for the electrostatic potential in OpenMD, we add the
 `ELECTROSTATIC_POTENTIAL` keyword to the end of the `statFileFormat`:
 
-```
+```C++
 statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY|ELECTROSTATIC_POTENTIAL";
 ```
 
 Once those lines have been set we run a single step simulation:
 
-```
+```bash
 mpirun -np 4 openmd_MPI NaCl.omd
 ```
 

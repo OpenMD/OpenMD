@@ -1,5 +1,7 @@
 # TIP4P-fq,  a Fluctuating charge (*fluc-q*) model for water
 
+## Background Information
+
 This directory contains a [force field file](tip4p-fq.frc) and structures which 
 allow exploration of fluctuating charge models for water.  These 
 models have extra charge degrees of freedom attached to charged 
@@ -11,7 +13,7 @@ coordinates.  We're using the parameters given in:
 The main thing to note in these files is the addition of a fluctuating
 charge `<MetaData>` section,
 
-```
+```C++
 flucQ {
  propagator = "NVT";
  targetTemp = 10.0;
@@ -70,14 +72,14 @@ Note the lower charges on the isolated water molecule.
 ## Instructions
 
 These samples all run quite quickly:
-```
+```bash
 openmd 1Water_FQ.omd
 openmd 2waterFQ.omd
 mpirun -np 4 openmd_MPI water-fq.omd
 ```
 We're going to want to generate `xyz` files of the trajectories, adding 
 charges to track how these change over time:
-```
+```bash
 Dump2XYZ -i 1Water_FQ.dump -m -b -c
 Dump2XYZ -i 2waterFQ.dump -m -b -c
 Dump2XYZ -i water-fq.dump -m -b -c
@@ -86,7 +88,7 @@ Dump2XYZ -i water-fq.dump -m -b -c
 ## Expected Output
 
 To look at these simulation trajectories individually, we'd use Jmol:
-```
+```bash
 jmol 2waterFQ.xyz
 ```
 
@@ -105,11 +107,10 @@ are taking place throughout the trajectory..
 
 We can also calculate the distributions of partial charge values that the water molecules
 take on during the simulation:
-```
+```bash
 StaticProps -i water-fq.dump -q --sele1="select H_TIP4P_FQ" -o water-fq.ChargeHistH
 StaticProps -i water-fq.dump -q --sele1="select M_TIP4P_FQ" -o water-fq.ChargeHistM
 xmgrace water-fq.ChargeHistH water-fq.ChargeHistM
 ```
+
 <img src="../../figures/chargeHist.png" alt="image" width="500" height="auto">
-
-

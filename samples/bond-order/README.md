@@ -31,7 +31,7 @@ can be used to make sure the correct values are being computed.  The
 central atom in each cluster is a copper atom, so the proper way to
 run the tests would be a command like:
 
-```
+```bash
 StaticProps --bo -i bcc.omd --rcut=9 --sele1="select Cu"
 ```
 
@@ -117,6 +117,3 @@ analytically-derived output values for $n=4$ and $n=6$ are:
 Note that for tetrahedral clusters, $Q_3 \sim 0.745$, and the $l =
 4,6$ order parameters are less useful disricminators of
 structure.
-
-
-

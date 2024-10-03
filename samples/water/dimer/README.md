@@ -1,16 +1,19 @@
 # Annealing of dimer structures
 
+## Background Information
+
 This directory contains very simple starting structures to explore the 
 energy minimum for dimers of water with ions or with other water
 molecules. Instead of using the minimizer to find the local energy
 minimum, we'll instead be using an annealing approach where the target 
 temperature of a NVT run is set very low. The only novelty here is in these keywords in the `<MetaData>` section:
-```
+```C++
 ensemble = NVT;
 targetTemp = 0.001;
 tauThermostat = 1e4;
 ```
-## Dimer structures
+
+### Dimer structures
 
 The following dimer structures are provided,
 
@@ -33,14 +36,14 @@ For more information on the two water models, we suggest:
 ## Instructions
 
 These samples all run quite quickly:
-```
+```bash
 openmd ssd.omd
 openmd two.omd
 openmd mix.omd
 openmd cl.omd
 ```
 We're going to want to generate `xyz` files of the trajectories, 
-```
+```bash
 Dump2XYZ -i ssd.dump
 Dump2XYZ -i two.dump
 Dump2XYZ -i mix.dump
@@ -51,7 +54,7 @@ to see what the dimer geometries at the endpoints look like.
 ## Expected Output
 
 To look at these simulation trajectories individually, we'd use Jmol:
-```
+```bash
 jmol ssd.xyz
 ```
 And then use the *Tools -> Animate -> Go to last frame* menu item. We can 

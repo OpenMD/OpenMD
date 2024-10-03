@@ -85,7 +85,7 @@ kinetic energy flux.
 Since we have just two molecules in this example, openmd won't allow
 parallelization of more than 2 cores, so we can just run the following:
 
-```
+```bash
 openmd graphene.omd
 ```
 
@@ -249,7 +249,7 @@ of information about the simulation details:
 
 By plotting the output of the RNEMD simulation,
 
-```
+```bash
 xmgrace -nxy 2744_shear.rnemd
 ```
 

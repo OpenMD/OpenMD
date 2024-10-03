@@ -92,7 +92,7 @@ To test the damped shifted force (DSF) method of carrying out
 electrostatic interactions with a large cutoff, we would add these
 lines to a sample file:
 
-```
+```C++
 cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
 cutoffRadius = 20.0;
@@ -107,7 +107,7 @@ cost.
 
 Once those lines have been set we run a single step simulation:
 
-```
+```bash
 mpirun -np 4 openmd_MPI A_sc_001.omd
 ```
 

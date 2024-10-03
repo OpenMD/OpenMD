@@ -82,7 +82,7 @@ xmgrace spce.rcorr                 # visualize the MSD calculated by DynamicProp
 
 Both `StaticProps` and `DynamicProps` can compute many properties. You can get a list of them using the `-h` flag:
 
-```
+```bash
 StaticProps -h
 DynamicProps -h
 ```

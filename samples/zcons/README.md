@@ -33,7 +33,7 @@ Note that $\Delta P$ is the hydraulic pressure difference that develops as a res
 
 To test the z-constraint method, we have an equilibrated solution of SPC/E water with two nanoporous graphene (NPG) sheets sitting at 25% and 75% of the box length in z. Z-constraints are applied to fix these graphene sheets according to the following additions to the `.omd` file:
 
-```
+```C++
 zconsTime = 1;
 zconsTol = 0.01;
 

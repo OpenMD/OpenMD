@@ -40,11 +40,11 @@ calculations to match structural features of the FCC crystal.  This variant is c
 
 The two sample files in this directory describe identical short (3 ps) simulations of bulk gold in a FCC crystal.  The only differences are in the force field variants, but in this example, we are using the file name of the force field to select the variant:
 
-```
+```C++
 forceFieldFileName = "SuttonChen.QSC.frc";
 ```
 for the QSC sample and 
-```
+```C++
 forceFieldFileName = "SuttonChen.frc";
 ```
 for the original Sutton-Chen parameters. These samples also illustrate another feature, periodic thermalization of the atomic velocitites. The initial atomic velocities in these samples are all 0, so to provide kinetic energy, we add these lines to the `<MetaData>` section:
@@ -67,7 +67,7 @@ openmd Au_bulk_QSC.omd  # simulate using the Quantum Sutton-Chen parameters
 
 Another utility built in to `OpenMD` can be used to look at the elastic constants of gold:
 
-```
+```bash
 elasticConstants -i Au_bulk_QSC.omd -b --method="energy"
 ```
 
@@ -75,7 +75,7 @@ elasticConstants -i Au_bulk_QSC.omd -b --method="energy"
 
 Here, we're going to look at the stat file which shows the effect of the periodic thermalization that were turned on during these simulations:
 
-```
+```bash
 xmgrace -nxy Au_bulk_QSC.stat
 ```
 Zooming in on the temperature (blue) line, we can see that every 400 fs, the simulation has resampled velocities to match the target temperature:

@@ -145,7 +145,7 @@ export PATH=${PATH}:/usr/local/openmd/bin
 
 or if you use csh or tcsh as your shell:
 
-```
+```bash
 setenv PATH ${PATH}:/usr/local/openmd/bin
 ```
 
@@ -192,7 +192,7 @@ export PATH=${PATH}:~/Tools/openmd-install/bin
 
 or if you use csh or tcsh as your shell:
 
-```
+```bash
 setenv PATH ${PATH}:~/Tools/openmd-install/bin
 ```
 

@@ -15,7 +15,7 @@ Here we show a couple of quick sample trajectories that explore a few state poin
 ### Example 1
 
 This example runs a very small (108 atom) simulation in the canonical ensemble (constant-NVT).  The initial thermalizer command sets the initial velocities to sample a reduced temperature of 1 (T = 119.8):
-```
+```bash
 thermalizer -t 119.8 argonNVT.omd -o warmNVT.omd
 openmd warmNVT.omd
 ```
@@ -23,7 +23,7 @@ openmd warmNVT.omd
 ### Example 2
 
 This is a somewhat larger box (500 atoms) run in the microcanonical ensemble (constant-NVE), and is a good test to make sure that energy is being conserved.  The second column of the generated `warm500.stat` file should be reasonably well conserved over the course of this simulation.
-```
+```bash
 thermalizer -t 178.5 500.omd -o warm500.omd
 openmd warm500.omd
 ```
@@ -31,7 +31,7 @@ openmd warm500.omd
 ### Example 3
 
 This example is a larger box (864 atoms), and is set to resample velocities at T=135.1344K every 1 ps by setting three parameters: `targetTemp = 135.1344;`, `thermalTime = 1000.0;` and `tempSet = "true";`   This procedure helps rapidly equilibrate an initial structure to a fixed temperature when the initial structure is not particularly liquid-like.  In this example, we're running the simulation with four processors:
-```
+```bash
 mpirun -np 4 openmd_MPI ar864.omd
 ```
 
@@ -53,7 +53,7 @@ For the final simulation, we expect a report that looks like:
 ###############################################################################
 ```
 You can see the velocity resampling events if you plot the total energy of this last sample using the generated stat file.
-```
+```bash
 xmgrace ar864.stat
 ```
 

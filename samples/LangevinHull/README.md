@@ -14,7 +14,7 @@ simulations for non-periodic systems using the Langevin Hull.  Further details o
 In general, to use the `LangevinHull` integrator, you'll want include
 these lines in your `.omd` file:
 
-```  		   	
+```C++  		   	
 ensemble = "LangevinHull";
 targetTemp = 300;
 targetPressure = 100;
@@ -44,7 +44,7 @@ exposed surface area and bath viscosity.
 
 To run one of these simulations (in parallel), you would enter this command:
 
-```
+```bash
 mpirun -np 4 openmd_MPI Au_300K.omd
 ```
 
@@ -69,7 +69,7 @@ The report that is generated indicates the thermodynamic averages.  Note that th
 ```
 
 The time-sequence of the thermodynamic variables can be plotted using
-``` 
+```bash
 xmgrace -nxy Au_300K.stat
 ```
 The plot of these same thermodynamic variables sampled during the simulation should resemble:

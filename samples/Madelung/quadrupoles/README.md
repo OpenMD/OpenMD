@@ -66,7 +66,7 @@ To test the shifted force (DSF) (or shfited gradient) method of
 carrying out electrostatic interactions with a large cutoff, and
 *without damping*, we would add these lines to a sample file:
 
-```
+```C++
 cutoffMethod = "shifted_force";
 electrostaticScreeningMethod = "undamped";
 cutoffRadius = 20.0;
@@ -80,7 +80,7 @@ cost.
 
 Once those lines have been set we run a single step simulation:
 
-```
+```bash
 mpirun -np 4 openmd_MPI sc.omd
 ```
 
@@ -104,7 +104,7 @@ The report generated from this simulation should look like:
 ```
 
 One interesting test is to modify the parameters to include:
-```
+```C++
 electrostaticScreeningMethod = "damped";
 dampingAlpha = 0.18;
 ```

@@ -249,7 +249,7 @@ Dump2XYZ -i cuboctahedron_300.omd
  `truncatedCube.omd` 
 
 
-```
+```bash
 icosahedralBuilder --truncatedCube --lattice="FCC" --unitCells=10 -d 4.08 -o truncatedCube.omd gold.omd
 thermalizer -o truncatedCube_300.omd -t 300 truncatedCube.omd
 Dump2XYZ -i truncatedCube_300.omd

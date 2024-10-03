@@ -28,15 +28,15 @@ surfaces, and alloys.
 In the `orderedStructures`  directory, are two alloy samples: Ag<sub>3</sub>Au in
 the $L1_{2}$ structure and PtNi in the $L1_{0}$ structure.  Both of the `omd` files in this directory describe structure optimizations, and not molecular dynamics. The `omd` files have a block to use Conjugate Gradient `CG` as the method for finding the optimal structure:
 
-```
+```C++
 minimizer {
-  useMinimizer = True;
+  useMinimizer = true;
   method = CG;
   maxIterations = 5000;
 }
 ```
 These files also turn on the fluctuating charge module to use DR-EAM.  Here, the target temperature for the electronic degrees of freedom is set very low (1K):
-```
+```C++
 flucQ {
   propagator = "Langevin";
   targetTemp = 1;
@@ -46,14 +46,14 @@ flucQ {
 
 To carry out these optimization runs, we would use these commands:
 
-```
+```bash
 openmd AgAuL12.omd
 openmd PtNiL10.omd
 ```
 
 OpenMD will simultaneously optimize the structure and the partial charges on the atoms.  Once the structures have been optimized, we can look at the charges (`q`) that have been assigned to the types of atoms at the end of the run (in the `eor` file):
 
-```
+```bash
 StaticProps -i AgAuL12.eor -q --sele1="select Ag_FQ" -o Ag.chargeHist
 StaticProps -i AgAuL12.eor -q --sele1="select Au_FQ" -o Au.chargeHist
 StaticProps -i PtNiL10.eor -q --sele1="select Pt_FQ" -o Pt.chargeHist
@@ -61,7 +61,7 @@ StaticProps -i PtNiL10.eor -q --sele1="select Ni_FQ" -o Ni.chargeHist
 ```
 These calculate the distribution of partial charges assigned to particular types of atoms.  Plotting these:
 
-```
+```bash
 xmgrace Ag.chargeHist Au.chargeHist Pt.chargeHist Ni.chargeHist
 ```
 we should expect to see Ag and Au with opposing charges (but in a 3:1 ratio), and Pt and Ni with opposing charges.
@@ -69,7 +69,7 @@ we should expect to see Ag and Au with opposing charges (but in a 3:1 ratio), an
 ### Field Screening
 
 One of the properties of a metal is the ability to screen atoms internal to the slab from external electric fields. The sample in the `fieldScreening` subdirectory  is a Platinum slab simulated in the presence of an external electric field.  The relevant portions of that sample file add a few new items to the simulation definition:
-```
+```C++
 flucQ {
   propagator = "Langevin";
   targetTemp = 1;
@@ -82,11 +82,11 @@ useSurfaceTerm = "true";           # Adds an important term in electrostatic int
 uniformField = (0,0,1e-2);         # an exeternal electric field along the z-axis
 ```
 Running and analyzing this simulation, we would run (note that this is a very long simulation):
-```
+```bash
 mpirun -np 4 openmd_MPI PtSlab.omd
 ```
 To analyze the data, we're going to look primarily at the local electric field and we can get to this value using the `--rnemdz` option in `StaticProps`:
-```
+```bash
 StaticProps -i PtSlab.dump --rnemdz --nbins=100
 awk 'NF>3 || $1=="#"' < PtSlab.rnemdZ > PtSlab.data
 xmgrace -block PtSlab.data -bxy 1:10
@@ -103,20 +103,20 @@ data file, so we'll pull out only the *z*-component with the
 
 Metal surfaces should respond to nearby ions by creating an *image charge*. This happens when the electron density in the metal towards (or away) from the positively-charged (or negatively charged) ion. The `imageCharge` directory has three samples which explore this property from three sites above the surface:
 
-```
+```bash
 openmd atop.omd
 openmd bridge.omd
 openmd hollow.omd
-````
-To look at the charges on the metal surface we'd do the following:
 ```
+To look at the charges on the metal surface we'd do the following:
+```bash
 Dump2XYZ -i atop.eor -c -b 
 Dump2XYZ -i bridge.eor -c -b
 Dump2XYZ -i hollow.eor -c -b
 ```
 This creates xyz files from the end-of-run (eor) file which have partial charges added to each atom.  We can visualize these in jmol
 
-```
+```bash
 jmol atop.xyz
 jmol bridge.xyz
 jmol hollow.xyz
@@ -142,6 +142,8 @@ has effectively shielded the interior atoms.
 
 For the image charge simulations, sample charge images are shown below:
 
-<img src="../figures/atop.png" alt="image" width="500" height="auto">
-<img src="../figures/bridge.png" alt="image" width="500" height="auto">
-<img src="../figures/hollow.png" alt="image" width="500" height="auto">
+<p float="left">
+  <img src="../figures/atop.png" alt="image" width="300" height="auto"/>
+  <img src="../figures/bridge.png" alt="image" width="300" height="auto"/>
+  <img src="../figures/hollow.png" alt="image" width="300" height="auto"/>
+</p>

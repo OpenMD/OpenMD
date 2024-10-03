@@ -1,5 +1,7 @@
 # Structures for simulating Ice-Ih interfaces with liquid water
 
+## Background Information
+
 This directory contains four prepared systems with different ice facets 
 exposed to liquid water. They were prepared using a block of Ice-Ih that
 has been cleaved along one particular facet. These blocks were then 
@@ -26,8 +28,8 @@ ice at a slightly lower temperature than the liquid. For the
 simulations in these samples, that flux has been turned off, but 
 you can see what was used in previous steps in the `omd` files:
 
-```
-RNEMD{
+```C++
+RNEMD {
   useRNEMD = false;
   objectSelection = "select TIP4P-Ice_RB_0";
   exchangeTime = 2;
@@ -42,7 +44,7 @@ If you want to experiment with reverse non-equilibrium molecular
 dynamics (RNEMD), you can change the block above to include
 `useRNEMD = true;` which will re-enable the kinetic energy flux.
 
-## Facets of ice
+### Facets of ice
 
 The following solvated ice-Ih facets were prepared:
 
@@ -52,12 +54,12 @@ The following solvated ice-Ih facets were prepared:
 + Pyramidal {202̅1} facet - `solvatedPyramidal.omd`
 
 Here's a side view of the solvate basal facet generated with:
-```
+```bash
 Dump2XYZ -i solvatedBasal.omd -b -m
 jmol solvatedBasal.xyz
 ```
-<img src="../../figures/solvatedBasal.png" alt="image" width="500" height="auto">
 
+<img src="../../figures/solvatedBasal.png" alt="image" width="500" height="auto">
 
 ## Instructions 
 
@@ -69,7 +71,7 @@ time.**
 1. First let's run that simulation. If you have more than 4 processors available, now
 would be a good time to use them:
 
-```
+```bash
 mpirun -np 4 openmd_MPI solvatedBasal.omd
 ```
 
@@ -103,7 +105,7 @@ width of a ice/water interface.  Note that this is the tetrahedrality for the Ox
 using other Oxygens to define the neighbors, and a cutoff of 3.5 angstroms for defining
 the group of nearest neighbors:
 
-```
+```bash
 StaticProps -i solvatedBasal.dump --tet_param_z --sele1="select O_TIP4P-Ice" --sele2="select O_TIP4P-Ice" --rcut=3.5
 ```
 
@@ -130,13 +132,14 @@ $$
 Note that the box is approximately 100 angstroms in 
 *z*, so this computes the orientational correlations in 10 angstrom slabs:
 
-```
+```bash
 DynamicProps -i solvatedBasal.dump --lcorrZ --order=2 --sele1="select TIP4P-Ice_RB_0" --nzbins=10
 ```
 
-### Expected Results
+## Expected Results
+
 The tetrahedral order parameter can be plotted (with error bars) like this:
-```
+```bash
 xmgrace -settype xydy solvatedBasal.Qz
 ```
 You should get a plot that looks like this:
@@ -148,9 +151,10 @@ This happens in the space between the water bilayers that make up the crystal
 structure.
 
 The orientational correlation function data has multiple sets, each representing one of the 10 slabs:
-```
+```bash
 xmgrace -nxy solvatedBasal.lcorrZ
 ```
+
 <img src="../../figures/solvatedBasal.lcorrZ.png" alt="image" width="500" height="auto">
 
 Note that the correlation functions from the slabs in the ice don't decay very much, while 

@@ -37,18 +37,18 @@ the `mix.omd` which declares the three most prevalent components
 
 With all 3 of these files in this sample directory, you can make an air
 mixture using randomBuilder:
-```
+```bash
 randomBuilder mix.omd -o test.omd --density=0.001225 --nx=5 --ny=5 --nz=5 --molFraction=0.78084 --molFraction=0.20946
 ```
 This creates a `test.omd` structure containing 500 molecules in
 roughly the correct proportions (and density).
 
 To warm this mixture up to 25C (and assign initial velocities):
-```
+```bash
 thermalizer -t 298 -i test.omd -o warm.omd
 ```
 The simulation is relatively short:
-```
+```bash
 openmd warm.omd
 ```
 
@@ -74,7 +74,7 @@ This is a relatively short simulation, but the expected report would be:
 ```
 This approximates a box of air at standard temperature and Pressure (298 K and 1 atm).
 Then `Dump2XYZ` can output the base atom types and map back to the simulation box for visualization with `Jmol`:
-```
+```bash
 Dump2XYZ -i warm.dump -b -m
 jmol warm.xyz
 ```

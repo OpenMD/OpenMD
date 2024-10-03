@@ -1,10 +1,12 @@
 # Structures for simulating Ice-Ih
 
+## Background Information
+
 This directory contains unit cell and larger structures for
 simulations of ice crystals. Unless otherwise stated, these crystals
 are oriented such that the basal face is normal to the z-axis.
 
-## Proton-disordered ice crystals
+### Proton-disordered ice crystals
 
 The following proton-disordered ice-Ih crystals,
 
@@ -24,7 +26,7 @@ hexagonal ice" by J. A. Hayward and J. R. Reimers, *J. Chem. Phys.*
 **106**, 1518 (1997).
 DOI: [10.1063/1.473300](https://doi.org/10.1063/1.473300)
 
-## Proton-ordered ice unit cells
+### Proton-ordered ice unit cells
 
 The following structures are unit cells for proton-ordered ice-Ih
 crystals.
@@ -56,13 +58,15 @@ NOTE: HO-struct1.omd	is actually ice XI.
 When replicated, HO-struct6.omd and HO-struct7.omd create proton
 stripes on the basal surfaces.
 
-## Creating large ice crystals from these structures 
+## Instructions
+
+### Creating large ice crystals from these structures 
 
 In order to generate larger crystals from these structures, use
 omd2omd with the -x -y -z flags to replicate these unit cells in the
 x, y, and z dimensions.
 
-```
+```bash
 omd2omd -i HO-struct1.omd -o bigCrystal.omd -x 5 -y 3 -z 5
 ```
 
@@ -71,7 +75,7 @@ OpenMD software, you are able to rotate these crystals exposing the
 prismatic and secondary prismatic facets using the -p -q -r
 functionality of omd2omd.
 
-```
+```bash
 omd2omd -i bigCrystal.omd -o prismFace.omd -p 90 -q 90 -r 0
 ```
 
@@ -79,7 +83,7 @@ omd2omd -i bigCrystal.omd -o prismFace.omd -p 90 -q 90 -r 0
 
 If you want to visualize what was just made, you can use the `Dump2XYZ` utility:
 
-```
+```bash
 Dump2XYZ -i prismFace.omd -b -m
 jmol prismFace.xyz
 ```
@@ -88,7 +92,7 @@ You should see this structure.  Here, a side view of this structure shows the pr
 
 <img src="../../figures/prismFace.png" alt="image" width="500" height="auto">
 
-## Sample equilibration scheme
+### Sample equilibration scheme
 
 NOTE: These structures are ideal ice crystals, and should be *gently*
 equilibrated with whichever water model you choose. Depending on the

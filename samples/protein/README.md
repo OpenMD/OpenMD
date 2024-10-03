@@ -11,7 +11,7 @@ One of the major tasks facing a new user of OpenMD is getting their molecule of 
 2. Alternatively (and this is the route we’ll take here), you can download a protein structure directly from the Protein Data Bank. We’ve picked a short pentapeptide (the neurotransmitter met-enkephalin) to use as an example. The PDB-ID for this protein is 1PLW. The text version of the PDB file is located in this sample directory.
 
 3. Use the atom2md program to convert the structure into a format that can be read by OpenMD:
-    ```
+    ```bash
     atom2md -ipdb 1PLW.pdb
     ```
     This command will create an incomplete OpenMD file called `1PLW.omd` that must be edited before it can be used.
@@ -25,17 +25,17 @@ One of the major tasks facing a new user of OpenMD is getting their molecule of 
 6. At this point it is also a good idea to change the name of the molecule to something descriptive (perhaps “metenk”). This should be done in two places; once in the molecule description and another time in the component block.
 
 7. Before the simulation can run, add a forceField line after the component block:
-    ```
+    ```C++
     forceField = "Amber";
     ```
     At this stage, you should be able to run OpenMD on the file to check to make sure your hand-crafted atom typing can be matched up with types known by the force field:
-    ```
+    ```bash
     openmd 1PLW.md
     ```
     Correct any unknown atom types, and repeat until you get an error about the “Integrator Factory”.
 
 8. Add the following lines below the forceField line:
-    ```
+    ```C++
     ensemble = NVT;
     cutoffMethod = "shifted_force";
     electrostaticScreeningMethod = "damped";
@@ -56,26 +56,26 @@ One of the major tasks facing a new user of OpenMD is getting their molecule of 
     ```
 
 10. Initial configurations that are created from crystal structures usually have no velocity information. To give an initial kick to the atoms (i.e. to sample the velocities from a Maxwell-Boltzmann distribution), you can use the following command:
-    ```
+    ```bash
     thermalizer -i 1PLW.omd -o warm.omd -t 300
     ```
     This creates a new OpenMD file called `warm.omd` which has initial velocity information.
 
 11. At this stage, a simple simulation can be run:
-    ```
+    ```bash
     openmd warm.omd
     ```
 
 12. This should complete relatively quickly, and should create a `warm.stat` file as well as a `warm.dump` file containing the actual trajectory.
 
 13. To view the contents of the trajectory file, you’ll need to convert the dump file into something another program can visualize:
-    ```
+    ```bash
     Dump2XYZ -i warm.dump -b
     ```
     will create a new file `warm.xyz` that can be viewed in VMD and many other chemical structure viewers. The -b flag prints out the 'base' atom types (i.e. the element name) for each atom.
 
 14. The “End-of-Run” file `warm.eor` can be re-purposed as the starting point for a new simulation:
-    ```
+    ```bash
     cp warm.eor  equilibration.omd
     ```
     Edit the `equilibration.omd` file, and change parameters you’d like to change before running openmd on the new file.
@@ -108,7 +108,7 @@ The report file contains something like this:
 ```
 
 Don't worry if your numbers aren't an exact match with ours, random number generation plays a role in how we got here (`thermalizer`). These are averages and confidence intervals for the thermodynamic quantities we've been tracking throughout the simulation. For the raw data, plot the `warm.stat` file in something like `xmgrace` to see how these thermodynamic quantities change with time:
-```
+```bash
 xmgrace -nxy warm.stat
 ```
 

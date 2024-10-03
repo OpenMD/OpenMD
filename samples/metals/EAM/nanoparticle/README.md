@@ -6,7 +6,7 @@ The two sample files in this directory describe metallic simulations of
 nanoparticles, carried out without periodic boundary conditions. The key parameter
 to enable this,
 
-```
+```C++
 usePeriodicBoundaryConditions = "false";
 ```
 
@@ -45,7 +45,7 @@ StaticProps -i Au_nanoparticle.dump --hullvol
 
 The `--hullvol` calculator prints out the volume and surface area of the nanoparticles for each configuration in the `dump` file.  This data is placed in an `avol` file, and we can plot these quantities for both samples:
 
-```
+```bash
 xmgrace -nxy Au_nanoparticle.avol -nxy Au-Core-Ag-Shell_Nanoparticle.avol
 ```
 
@@ -53,58 +53,3 @@ Zooming in on the volumes of the two particles, we can see that they start at ne
 
 
 <img src="../../../figures/HullVolume.png" alt="image" width="500" height="auto">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

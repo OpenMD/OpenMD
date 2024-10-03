@@ -16,7 +16,7 @@ is simulated using the CLAYFF force field in the microcanonical
 ## Instructions
 
 To run this simulation (which is a bit long), we would do:
-```
+```bash
 mpirun -np 4 openmd_MPI zsm5_loaded.omd
 ```
 
@@ -24,7 +24,7 @@ This command will run a 300ps (150,000 step) simulation and sample the configura
 every 0.5 ps to a `dump` file.  We can watch a movie of what happens during the
 simulation by creating an `xyz` file from the `dump` file:
 
-```
+```bash
 Dump2XYZ -i zsm5_loaded.dump -b -m
 jmol zsm5_loaded.xyz
 ```
@@ -37,7 +37,7 @@ molecules through the larger zeolite pores. Once the simulation has
 completed, we can also go back and measure the mean squared
 displacement of the water molecules in this environment:
 
-```
+```bash
 DynamicProps -i zsm5_loaded.dump --rcorr --sele1="select SPC"
 xmgrace zsm5_loaded.rcorr
 ```

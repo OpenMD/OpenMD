@@ -41,12 +41,16 @@ Files included:
 
 To create the initial configurations, we typically run:
 
-`packmol < system.pack`
+```bash
+packmol < system.pack
+```
 
 which will create a `system.xyz` file containing all of the propylene moleucles.
 To get this into a reasonable OpenMD starting configuration, we would run:
 
-`atom2omd -ixyz system.xyz`
+```bash
+atom2omd -ixyz system.xyz
+```
 
 This creates `system.omd`, which has periodic box guessed from the bounding box
 of the solvent molecules, and this box is generally **not** the same size as the
@@ -61,7 +65,7 @@ Hmat: {{ 22.23, 0, 0 }, { 0, 42.78, 0 }, { 0, 0, 50 }}
 Then to combine the propylene monomers with the graphene sheets, eliminating
 molecules that overlap, we would run:
 
-```
+```bash
 omd-solvator -u graphene.omd -v system.omd -r 3.5 -o combined.omd -n 360 -p 3
 ```
 
@@ -69,7 +73,7 @@ Following this, we typically edit the `combined.omd` file to include the
 molecule definitions, set the force field, and set various simulation
 parameters:
 
-```
+```C++
 #include "graphene.inc"
 #include "propylene.omd"
 
@@ -98,7 +102,7 @@ statusTime = 10;
 
 Once these modifications are in place, we can sample some initial velocities and run the simulation:
 
-```
+```bash
 thermalizer -t 300 -i combined.omd -o warm.omd
 mpirun -np 4 openmd_MPI combined.omd
 ```
@@ -128,7 +132,7 @@ The report from this simulation should look similar to:
 
 Visualizing the trajectory can be done by first converting to an `xyz`
 file:
-```
+```bash
 Dump2XYZ -i warm.dump -b -m
 jmol warm.xyz
 ```
@@ -139,7 +143,7 @@ Note that the gaseous propylene between the graphene sheets exerts
 enough pressure to drive them together at around 15500 fs (15.5 ps).
 This is also evident if you plot the various thermodynamic quantities:
 
-```
+```bash
 xmgrace -nxy warm.stat
 ```
 

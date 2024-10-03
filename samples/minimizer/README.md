@@ -19,7 +19,7 @@ minimizer {
 ```
 
 For our Tip4P example, we'll be using the `tip4p_two.omd` file. Since the mimimizer block has already been added all we need to do is run `OpenMD`:
-```
+```bash
 openmd tip4p_two.omd
 ```
 

@@ -23,7 +23,9 @@ of water boxes.  In what follows we're going to create a metal interface
 and a matching box of water, and then we'll combine them together using
 `omd-solvator`
 
-## Instructions for Au(111) - Water Interface
+## Instructions 
+
+### Example 1: Au(111) - Water Interface
 
 Let's first build a gold slab with the 111 facet facing the 
 *z*-direction, and with some vaccuum space above and below the slab.
@@ -32,12 +34,12 @@ angstroms. We'll specify the facet with the `--hkl` flag, and how many
 unit cell repeats we want with the `-r` flag.  This command creates an 
 output `omd` file and also puts the coordinates in a matching `xyz` file:
 
-```
+```bash
 slabBuilder -l fcc -c 4.08 -o gold111.omd --hkl 1 1 1 -r 3 4 3 -e Au -v true -x gold111.xyz
 ```
 The `slabBuilder` command prints out the dimensions of the slab it created, but the size of the periodic box is also given on the `Hmat` line in the generated `gold111.omd` file:
 ```
-     Hmat: {{ 29.981754, 0.000000, 0.000000 }, { 0.000000, 23.079965, 0.000000 }, { 0.000000, 0.000000, 63.600906 }}
+Hmat: {{ 29.981754, 0.000000, 0.000000 }, { 0.000000, 23.079965, 0.000000 }, { 0.000000, 0.000000, 63.600906 }}
 ```
 
 Next, we want to generate a box of water that is exactly the same size as the gold slab:
@@ -88,25 +90,16 @@ The component blocks should be unchanged from what came out of `omd-solvator`, b
 
 Running this simulation takes a bit of time (15-30 minutes on four reasonably fast cores) so we'll use the parallel version of OpenMD:
 
-```
+```bash
 mpirun -np 4 openmd_MPI combined.omd
 ```
 
 At the end of this, we'll generally want to look at a movie of the simulation:
-```
+```bash
 Dump2XYZ -i combined.dump -m -b
 ```
 
-
-## Expected Output
-
-The final configuration from the combined metal / water simulation should 
-look like this when viewed from the side:
-
-<img src="../../figures/combined.png" alt="image" width="500" height="auto">
-
-
-## Instructions for Pt(557) - with adsorbed Carbon Monoxide
+### Example 2: Pt(557) - with adsorbed Carbon Monoxide
 
 Let's first build a Platinum slab with the 557 facet facing the 
 *z*-direction, and with some vaccuum space above and below the slab.
@@ -115,108 +108,125 @@ angstroms. We'll specify the facet with the `--hkl` flag, and how many
 unit cell repeats we want with the `-r` flag.  This command creates an 
 output `omd` file and also puts the coordinates in a matching `xyz` file:
 
-```
+```bash
 slabBuilder -l fcc -c 3.9242 -o pt557.omd --hkl 5 5 7 -r 1 4 1 -e Pt -v true -x pt557.xyz
 ```
 This creates a box that is quite large:
 ```
-     Hmat: {{ 55.218389, 0.000000, 0.000000 }, { 0.000000, 22.198627, 0.000000 }, { 0.000000, 0.000000, 117.135891 }}
+Hmat: {{ 55.218389, 0.000000, 0.000000 }, { 0.000000, 22.198627, 0.000000 }, { 0.000000, 0.000000, 117.135891 }}
 ```
 
 We'll need to modify the `pt557.omd` file to add a few CO molecules. This 
 time, we'll do a bit of this by hand.  We'll be using a rigid 3-site model 
 that was developed by Straub and Karplus, and the molecule definition is 
 provided in the `CO.inc` file:
-```
-  molecule{
-    name = "CarbonMonoxide";
-    atom[0]{
-      type = "CO";
-      position(0.0, 0.0, 0.0);
-    }
-    atom[1]{
-      type = "OC";
-      position(0.0, 0.0, 1.13);
-    }
-    atom[2]{
-      type = "M_CO";
-      position(0.0, 0.0, 0.6457);
-    }
-    rigidBody[0]{
-      members(0,1,2);
-    }
-  }
-```
- The atom types `CO`, `OC`, and `M_CO` are all specified in the `MnM.frc` 
- file in this directory. Note that this molecule definition is a rigid body, 
- which means that each molecule needs only one set of coordinates (and 
- quaternions) to define its position and orientation.  We're going to place 
- two CO molecules near the middle of the box in *x* and *y*, but just above 
- one of the 557 facets.  Here's how we do it:
-
- 1. Edit the `pt557.omd` file and make sure we have included the `CO.inc` file. 
- The top few lines of `pt557.omd` should look like this:
- ```
- <OpenMD version=2>
-  <MetaData> 
-
-#include "CO.inc"
-
+```C++
 molecule{
-  name = "Pt";
-
+  name = "CarbonMonoxide";
   atom[0]{
-    type="Pt";
-    position( 0.0, 0.0, 0.0 );
+    type = "CO";
+    position(0.0, 0.0, 0.0);
+  }
+  atom[1]{
+    type = "OC";
+    position(0.0, 0.0, 1.13);
+  }
+  atom[2]{
+    type = "M_CO";
+    position(0.0, 0.0, 0.6457);
+  }
+  rigidBody[0]{
+    members(0,1,2);
   }
 }
 ```
+The atom types `CO`, `OC`, and `M_CO` are all specified in the `MnM.frc` 
+file in this directory. Note that this molecule definition is a rigid body, 
+which means that each molecule needs only one set of coordinates (and 
+quaternions) to define its position and orientation.  We're going to place 
+two CO molecules near the middle of the box in *x* and *y*, but just above 
+one of the 557 facets.  Here's how we do it:
+
+1. Edit the `pt557.omd` file and make sure we have included the `CO.inc` file. 
+The top few lines of `pt557.omd` should look like this:
+    ```C++
+    <OpenMD version=2>
+      <MetaData> 
+
+    #include "CO.inc"
+
+    molecule{
+      name = "Pt";
+
+      atom[0]{
+        type="Pt";
+        position( 0.0, 0.0, 0.0 );
+      }
+    }
+    ```
+
 2. Next, add a component block for two CO molecules. The component blocks
 should then look like:
-```
-component{
-  type = "Pt";
-  nMol = 3168;
-}
+    ```C++
+    component{
+      type = "Pt";
+      nMol = 3168;
+    }
 
-component{
-  type = "CarbonMonoxide";
-  nMol = 2;
-}
-```
+    component{
+      type = "CarbonMonoxide";
+      nMol = 2;
+    }
+    ```
+
 3. Then at the very bottom of the file, we'll need to add lines to specify 
 the positions and orientations of the CO molecules.  We'll put them near 
 the center of the box, at about 22 angstroms in *z*.  When we're done the 
 bottom of the `pt557.omd` file should look like:
-```
-        3167    pv      -22.937942      9.018192        18.536656       0.0     0.0     0.0
-        3168    pq   0 0 22 0 0 0 1
-        3169    pq   5 5 22 0 0 0 1
-    </StuntDoubles> 
-  </Snapshot>
-</OpenMD>
-```
-The `pq` field tells OpenMD that the data that follows is a position (x, y, z) 
-and quaternions (qw, qx, qy, qz).  
+    ```
+            3167    pv      -22.937942      9.018192        18.536656       0.0     0.0     0.0
+            3168    pq   0 0 22 0 0 0 1
+            3169    pq   5 5 22 0 0 0 1
+        </StuntDoubles> 
+      </Snapshot>
+    </OpenMD>
+    ```
+    The `pq` field tells OpenMD that the data that follows is a position (x, y, z) 
+    and quaternions (qw, qx, qy, qz).
 
 4. We can visualize what this structure looks like prior to simulation:
-```
-Dump2XYZ -i pt557.omd -b -m
-jmol pt557.xyz
-```
+    ```bash
+    Dump2XYZ -i pt557.omd -b -m
+    jmol pt557.xyz
+    ```
+
 5. Next, we'll provide some initial velocities to all of the atoms
-```
-thermalizer -t 300 -i pt557.omd -o pt557_warm.omd
-```
+    ```bash
+    thermalizer -t 300 -i pt557.omd -o pt557_warm.omd
+    ```
+
 6. And finally, let's run the simulation and visualize the results:
-``` 
-mpirun -np 4 openmd_MPI pt557_warm.omd
-Dump2XYZ -i pt557_warm.eor -b -m
-```
+    ``` bash
+    mpirun -np 4 openmd_MPI pt557_warm.omd
+    Dump2XYZ -i pt557_warm.eor -b -m
+    ```
 
 ## Expected Output
+
+### Example 1
+
+The final configuration from the combined metal / water simulation should 
+look like this when viewed from the side:
+
+<img src="../../figures/combined.png" alt="image" width="500" height="auto">
+
+### Example 2
+
 Here we show the side views of the initial Pt (557) interface with two CO 
 molecules positioned near the surface, and then after the relatively 
 short (10 ps) simulation with them bound on one of the steps:
 
-<img src="../../figures/pt557_initial.png" alt="image" width="500" height="auto"> <img src="../../figures/pt557_final.png" alt="image" width="500" height="auto">
+<p float="left">
+  <img src="../../figures/pt557_initial.png" alt="image" width="450" height="auto"/>
+  <img src="../../figures/pt557_final.png" alt="image" width="450" height="auto"/>
+</p>
