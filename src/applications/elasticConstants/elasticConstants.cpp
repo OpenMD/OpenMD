@@ -563,7 +563,6 @@ int main(int argc, char* argv[]) {
   std::unique_ptr<Velocitizer> veloSet {std::make_unique<Velocitizer>(info)};
 
   forceMan->initialize();
-  info->update();
 
   Shake* shake                       = new Shake(info);
   bool hasFlucQ                      = false;

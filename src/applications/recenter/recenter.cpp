@@ -87,12 +87,9 @@ int main(int argc, char* argv[]) {
   }
 
   // parse md file and set up the system
-
   SimCreator creator;
   SimInfo* info = creator.createSim(inputFileName, false);
   DumpReader reader(info, inputFileName);
-  // very important step:
-  info->update();
 
   outputFileName = args_info.output_arg;
 

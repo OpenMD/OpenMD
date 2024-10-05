@@ -107,7 +107,6 @@ namespace OpenMD {
       shake_->constraintF();
       getGrad(grad);
       return thermo.getPotential();
-      ;
     } else {
       // The deformation was too large, so return infinite
       // potential and gradient

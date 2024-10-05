@@ -105,8 +105,6 @@ int main(int argc, char* argv[]) {
   // Parse the input file, set up the system, and read the last frame:
   SimCreator creator;
   SimInfo* info = creator.createSim(inputFileName, true);
-  // communicate velocity information onto the atoms:
-  info->update();
 
   // Important utility classes for computing system properties:
   Thermo thermo(info);

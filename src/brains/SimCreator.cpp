@@ -481,6 +481,8 @@ namespace OpenMD {
     }
 
     if (loadInitCoords) loadCoordinates(info, mdFileName);
+
+    info->update();
     return info;
   }
 
