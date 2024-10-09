@@ -47,9 +47,6 @@ RNEMD {
    method = "VSS";
    outputBins = 20;
 }
-
-
-
   </MetaData>
   <Snapshot>
     <FrameData>

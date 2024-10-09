@@ -2,12 +2,10 @@
   <MetaData>
 #include "lj.inc"
 
-
 component{
   type = "Ar";
   nMol =       2744;
 }
-
 
 forceField = "LJ";
 targetTemp = 83.86;
@@ -17,14 +15,14 @@ switchingRadius = 7.65;
 
 ensemble = "NVE";
 RNEMD {
-   useRNEMD = true;
-   exchangeTime = 50;
-   objectSelection = "select Ar";
-   fluxType = "KE";
-   method = "VSS";
-   outputBins = 30;
-   kineticFlux = -2e-9;
-   outputFields = "Z|TEMPERATURE|VELOCITY|DENSITY";
+  useRNEMD = true;
+  exchangeTime = 1.0;
+  outputBins = 40;
+  objectSelection = "select Ar";
+  fluxType = "KE";
+  method = "VSS";
+  kineticFlux = -2e-9;
+  outputFields = "Z|TEMPERATURE|VELOCITY|DENSITY";
 }
 dt = 1.0;
 runTime = 1e5;
