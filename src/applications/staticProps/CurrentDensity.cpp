@@ -115,7 +115,8 @@ namespace OpenMD {
         sliceSDLists_[i].clear();
       }
 
-      RealType sliceVolume = currentSnapshot_->getVolume() / nBins_;
+      RealType boxVolume   = currentSnapshot_->getVolume();
+      RealType sliceVolume = boxVolume / nBins_;
       Mat3x3d hmat         = currentSnapshot_->getHmat();
       zBox_.push_back(hmat(axis_, axis_));
 
@@ -161,7 +162,7 @@ namespace OpenMD {
 
         // Units of (e / Ang^2 / fs)
         currentDensity_[i] += binJc / sliceVolume;
-        overallCurrentDensity_ += currentDensity_[i];
+        overallCurrentDensity_ += binJc / boxVolume;
       }
     }
 
@@ -180,7 +181,7 @@ namespace OpenMD {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
       rdfStream << "#Current Density = "
-                << overallCurrentDensity_ / (nBins_ * nProcessed_)
+                << overallCurrentDensity_ / nProcessed_
                 << " e / Ang^2 / fs.\n";
       rdfStream << "#J_c(" << axisLabel_ << ")\n";
       rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
