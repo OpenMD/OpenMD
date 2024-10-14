@@ -13,7 +13,7 @@
     + [dipoles](Madelung/dipoles/README.md) - electrostatic energies for dipolar crysals
     + [quadrupoles](Madelung/quadrupoles/README.md) - electrostatic energies for quadrupolar crystals
 
-- [RNEMD](RNEMD/README.md) - Reverse Non-Equilibrium Molecular Dynamics, in bulk and at [interfaces](RNEMD/interfaces)
+- [RNEMD](RNEMD/README.md) - Reverse Non-Equilibrium Molecular Dynamics, in bulk and at intefaces
 - [air](air/README.md) - a simple mixture of diatomic nitrogen, diatomic oxygen, and argon atoms
 - [aqueousIons](aqueousIons/README.md) - some salt water boxes showing how to run with Li-Song-Merz 12-6 and 12-6-4 models for ions
 - [argon](argon/README.md) - simple liquid argon boxes using Lennard-Jones potentials
