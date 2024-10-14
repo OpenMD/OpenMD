@@ -69,6 +69,61 @@
 
 namespace OpenMD {
 
+  void MoleculeCreator::createOverrideAtomTypes(ForceField* ff,
+						MoleculeStamp* molStamp) {
+
+    // Some stamps have overrides of default types in the force field.
+    // This runs through atomStamps which can have overrides and makes sure
+    // that the types are created, even if this processor doesn't end up
+    // owning that molecule:
+
+    AtomStamp* stamp;
+    size_t nAtom = molStamp->getNAtoms();
+    
+    for (size_t i = 0; i < nAtom; ++i) {
+      stamp = molStamp->getAtomStamp(i);
+      AtomType* atomType = ff->getAtomType(stamp->getType());
+    
+      if (atomType == NULL) {
+	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		 "Can not find Matching Atom Type for[%s]",
+		 stamp->getType().c_str());
+	
+	painCave.isFatal = 1;
+	simError();
+      }
+
+      if (stamp->hasOverride()) {
+	std::string baseType = atomType->getName();
+	RealType oc          = stamp->getOverrideCharge();
+	
+	// Create a new atom type name that builds in the override charge:
+	std::ostringstream ss;
+	ss << oc;
+	std::string atomTypeOverrideName = baseType + "_q=" + ss.str();
+	
+	// Maybe we've seen this before?
+	
+	AtomType* atB = ff->getAtomType(atomTypeOverrideName);
+	
+	if (atB == NULL) {
+	  // Nope, we've never seen it before, so make a new one:
+	  AtomType* atomTypeOverride = new AtomType();
+	  // Base points to the atomType we already found
+	  atomTypeOverride->useBase(atomType);
+	  int ident = ff->getNAtomType();
+	  atomTypeOverride->setIdent(ident);
+	  atomTypeOverride->setName(atomTypeOverrideName);
+	  ff->addAtomType(atomTypeOverrideName, atomTypeOverride);
+	  FixedChargeAdapter fca = FixedChargeAdapter(atomTypeOverride);
+	  RealType charge =
+            ff->getForceFieldOptions().getChargeUnitScaling() * oc;
+	  fca.makeFixedCharge(charge);
+	} 
+      }
+    }    
+  }
+  
   Molecule* MoleculeCreator::createMolecule(ForceField* ff,
                                             MoleculeStamp* molStamp,
                                             int globalIndex,
@@ -81,7 +136,7 @@ namespace OpenMD {
     size_t nAtom = molStamp->getNAtoms();
     for (size_t i = 0; i < nAtom; ++i) {
       currentAtomStamp = molStamp->getAtomStamp(i);
-      atom             = createAtom(ff, mol, currentAtomStamp, localIndexMan);
+      atom             = createAtom(ff, currentAtomStamp, localIndexMan);
       mol->addAtom(atom);
     }
 
@@ -230,7 +285,7 @@ namespace OpenMD {
     return mol;
   }
 
-  Atom* MoleculeCreator::createAtom(ForceField* ff, Molecule*, AtomStamp* stamp,
+  Atom* MoleculeCreator::createAtom(ForceField* ff, AtomStamp* stamp,
                                     LocalIndexManager* localIndexMan) {
     AtomType* atomType;
     Atom* atom;
@@ -272,7 +327,7 @@ namespace OpenMD {
             ff->getForceFieldOptions().getChargeUnitScaling() * oc;
         fca.makeFixedCharge(charge);
         // officially use override type for this atom
-        atomType = atomTypeOverride;
+	atomType = atomTypeOverride;
       } else {
         // we've previously created the override type for this atom, so use that
         // one:
@@ -330,6 +385,7 @@ namespace OpenMD {
     rb->setType(mol->getType() + "_RB_" + s.c_str());
     return rb;
   }
+
 
   Bond* MoleculeCreator::createBond(ForceField* ff, Molecule* mol,
                                     BondStamp* stamp,

@@ -659,11 +659,14 @@ namespace OpenMD {
     int stampId;
 
     for (int i = 0; i < info->getNGlobalMolecules(); i++) {
+      stampId       = info->getMoleculeStampId(i);
+      molCreator.createOverrideAtomTypes(info->getForceField(),
+					 info->getMoleculeStamp(stampId));
+
 #ifdef IS_MPI
       if (info->getMolToProc(i) == worldRank) {
 #endif
 
-        stampId       = info->getMoleculeStampId(i);
         Molecule* mol = molCreator.createMolecule(
             info->getForceField(), info->getMoleculeStamp(stampId), i,
             info->getLocalIndexManager());

@@ -70,13 +70,15 @@ namespace OpenMD {
    */
   class MoleculeCreator {
   public:
+    virtual void createOverrideAtomTypes(ForceField* ff, MoleculeStamp* molStamp);
+    
     virtual Molecule* createMolecule(ForceField* ff, MoleculeStamp* molStamp,
                                      int globalIndex,
                                      LocalIndexManager* localIndexMan);
 
   protected:
     /** Create an atom by its stamp */
-    virtual Atom* createAtom(ForceField* ff, Molecule*, AtomStamp* stamp,
+    virtual Atom* createAtom(ForceField* ff, AtomStamp* stamp,
                              LocalIndexManager* localIndexMan);
     virtual RigidBody* createRigidBody(MoleculeStamp* molStamp, Molecule* mol,
                                        RigidBodyStamp* rbStamp,
