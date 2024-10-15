@@ -22,7 +22,7 @@ jobs:
       run: cmake --build . --target install
 
   ubuntu-builds:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22
 
     steps:
       - uses: actions/checkout@v4
