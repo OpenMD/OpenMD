@@ -29,17 +29,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
- * research, please cite the appropriate papers when you publish your
- * work.  Good starting points are:
+ * research, please cite the following paper when you publish your work:
  *
- * [1] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
- * [2] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
- * [3] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
- * [4] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
- * [5] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
- * [6] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
- * [7] Lamichhane, Newman & Gezelter, J. Chem. Phys. 141, 134110 (2014).
+ * [1] Drisko et al., J. Open Source Softw. 9, 7004 (2024).
+ *
+ * Good starting points for code and simulation methodology are:
+ *
+ * [2] Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).
+ * [3] Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).
+ * [4] Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).
+ * [5] Vardeman, Stocker & Gezelter, J. Chem. Theory Comput. 7, 834 (2011).
+ * [6] Kuang & Gezelter, Mol. Phys., 110, 691-701 (2012).
+ * [7] Lamichhane, Gezelter & Newman, J. Chem. Phys. 141, 134109 (2014).
  * [8] Bhattarai, Newman & Gezelter, Phys. Rev. B 99, 094106 (2019).
+ * [9] Drisko & Gezelter, J. Chem. Theory Comput. 20, 4986-4997 (2024).
  */
 
 #include "applications/staticProps/BondAngleDistribution.hpp"
