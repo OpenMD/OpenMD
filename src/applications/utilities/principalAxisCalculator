@@ -45,16 +45,16 @@ mass_table = {
     'Cl': 35.453,
     'O': 15.999,
     'N': 14.007,
-    'S': 32.0655,
+    'F': 18.9984032,
     'Au': 196.466569,
-    'CH4': 16.05,           
-    'CH3': 15.04,           
-    'CH2': 14.03,           
+    'CH4': 16.05,
+    'CH3': 15.04,
+    'CH2': 14.03,
     'CH':  13.02,
     'CHar': 13.02,
     'CHa': 13.02,
     'RCHar': 12.0107,
-    'RCH': 12.0107,    
+    'RCH': 12.0107,
     'CH3S': 15.04,
     'CH2S': 14.03,
     'CHS': 13.02,
@@ -64,19 +64,19 @@ mass_table = {
     'HS': 1.0079,
     'S': 32.0655,
     'SZ': 32.0655,
-    'SS': 32.0655, 
+    'SS': 32.0655,
     'SP': 32.0655,
     'CS': 12.0107,
     'SAu': 228.9807,
-    'SSD': 18.0153,         
+    'SSD': 18.0153,
     'SSD1': 18.0153,
     'SSD_E': 18.0153,
-    'SSD_RF': 18.0153,                 
-    'O_TIP3P': 15.9994,                 
+    'SSD_RF': 18.0153,
+    'O_TIP3P': 15.9994,
     'O_TIP4P': 15.9994,
     'O_TIP4P-Ew': 15.9994,
     'O_TIP5P': 15.9994,
-    'O_TIP5P-E': 15.9994, 
+    'O_TIP5P-E': 15.9994,
     'O_SPCE': 15.9994,
     'O_SPC': 15.9994,
     'H_TIP3P':    1.0079,
@@ -110,7 +110,7 @@ def sum(seq):
 def readFile(XYZFileName):
     print("reading XYZ file")
 
-    XYZFile = open(XYZFileName, 'r')        
+    XYZFile = open(XYZFileName, 'r')
     # Find number of atoms first
     line = XYZFile.readline()
     L = line.split()
@@ -157,11 +157,11 @@ def findCOM():
 def findMoments():
 
     COM = findCOM()
-    
+
     #find inertia tensor matrix elements
 
-    I = numpy.zeros((3, 3), numpy.float)
-    
+    I = numpy.zeros((3, 3), dtype=float)
+
     for i in range(0, len(indices)):
         myMass = mass_table[atypes[i]]
 
@@ -189,9 +189,12 @@ def findMoments():
     (evals, evects) = numpy.linalg.eig(I)
     print("evals:")
     print(evals)
-    print() 
+    print()
     print("evects:")
     print(evects)
+    print()
+    print("Center of mass:")
+    print(COM)
     print()
 
     return (COM, evals, evects)
@@ -203,20 +206,33 @@ def writeFile(OutFileName):
     # we need to re-order the axes so that the smallest moment of inertia
     # (which corresponds to the long axis of the molecule) is along the z-axis
     # we'll just reverse the order of the three axes:
-    
-    axOrder = numpy.argsort(evals)    
-    RotMat = numpy.zeros((3, 3), numpy.float)
-    RotMat[0] = evects[axOrder[2]]
-    RotMat[1] = evects[axOrder[1]]
-    RotMat[2] = evects[axOrder[0]]
+
+    axOrder = numpy.argsort(evals)
+    RotMat = numpy.zeros((3, 3), dtype=float)
+
+    achk1 = (axOrder == numpy.array([0, 1, 2])).all()
+    achk2 = (axOrder == numpy.array([1, 2, 0])).all()
+    achk3 = (axOrder == numpy.array([2, 0, 1])).all()
+    if achk1 == True or achk2 == True or achk3 == True:
+        RotMat[0] = evects[axOrder[2]]
+        RotMat[1] = evects[axOrder[1]]
+        RotMat[2] = evects[axOrder[0]]
+    else:
+        RotMat[0] = evects[axOrder[1]]
+        RotMat[1] = evects[axOrder[2]]
+        RotMat[2] = evects[axOrder[0]]
+
+    #RotMat[0] = evects[axOrder[2]]
+    #RotMat[1] = evects[axOrder[1]]
+    #RotMat[2] = evects[axOrder[0]]
 
     q = [0.0, 0.0, 0.0, 0.0]
     myEuler = [0.0, 0.0, 0.0]
 
     # RotMat to Quat code is out of OpenMD's SquareMatrix3.hpp code:
-    
+
     t = RotMat[0][0] + RotMat[1][1] + RotMat[2][2] + 1.0
-        
+
     if( t > 1e-6 ):
         s = 0.5 / math.sqrt( t )
         q[0] = 0.25 / s
@@ -227,7 +243,7 @@ def writeFile(OutFileName):
         ad1 = RotMat[0][0]
         ad2 = RotMat[1][1]
         ad3 = RotMat[2][2]
-        
+
         if( ad1 >= ad2 and ad1 >= ad3 ):
             s = 0.5 / math.sqrt( 1.0 + RotMat[0][0] - RotMat[1][1] - RotMat[2][2] )
             q[0] = (RotMat[1][2] - RotMat[2][1]) * s
@@ -244,10 +260,11 @@ def writeFile(OutFileName):
             s = 0.5 / math.sqrt( 1.0 + RotMat[2][2] - RotMat[0][0] - RotMat[1][1] )
             q[0] = (RotMat[0][1] - RotMat[1][0]) * s
             q[1] = (RotMat[0][2] + RotMat[2][0]) * s
-            q[2] = (RotMat[1][2] + RotMat[2][1]) * s        
+            q[2] = (RotMat[1][2] + RotMat[2][1]) * s
 
     print("Quaternions:")
     print(q)
+    print()
 
     theta = math.acos(RotMat[2][2])
     ctheta = RotMat[2][2]
@@ -255,17 +272,17 @@ def writeFile(OutFileName):
 
     if (math.fabs(stheta) < 1e-6):
         psi = 0.0
-        phi = math.atan2(-RotMat[1][0], RotMat[0][0]) 
+        phi = math.atan2(-RotMat[1][0], RotMat[0][0])
     else:
         phi = math.atan2(RotMat[2][0], -RotMat[2][1])
         psi = math.atan2(RotMat[0][2], RotMat[1][2])
-        
+
     if (phi < 0):
         phi = phi + 2.0 * math.pi;
-        
+
     if (psi < 0):
         psi = psi + 2.0 * math.pi;
-        
+
     myEuler[0] = phi * 180.0 / math.pi;
     myEuler[1] = theta * 180.0 / math.pi;
     myEuler[2] = psi * 180.0 / math.pi;
@@ -274,10 +291,10 @@ def writeFile(OutFileName):
     print(myEuler)
 
     nAtoms = len(indices)
-    
+
     print("writing output XYZ file")
 
-    OutFile = open(OutFileName, 'w')        
+    OutFile = open(OutFileName, 'w')
 
     OutFile.write('%10d\n' % (nAtoms))
     OutFile.write('\n')
@@ -290,32 +307,32 @@ def writeFile(OutFileName):
 
         r = numpy.array([dx, dy, dz])
         rnew = numpy.dot(RotMat, r)
-           
-        OutFile.write('%s\t%f\t%f\t%f\t%d\n' % (atypes[i], rnew[0], rnew[1], rnew[2], i))
-    OutFile.close()        
 
-def main(argv):                         
-    try:                                
-        opts, args = getopt.getopt(argv, "hx:o:", ["help", "xyz=", "out="]) 
-    except getopt.GetoptError:           
-        usage()                          
-        sys.exit(2)                     
-    for opt, arg in opts:                
-        if opt in ("-h", "--help"):      
-            usage()                     
-            sys.exit()                  
-        elif opt in ("-x", "--xyz"): 
+        OutFile.write('%s\t%f\t%f\t%f\n' % (atypes[i], rnew[0], rnew[1], rnew[2]))
+    OutFile.close()
+
+def main(argv):
+    try:
+        opts, args = getopt.getopt(argv, "hx:o:", ["help", "xyz=", "out="])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit()
+        elif opt in ("-x", "--xyz"):
             XYZFileName = arg
             global _haveXYZFileName
             _haveXYZFileName = 1
-        elif opt in ("-o", "--out"): 
+        elif opt in ("-o", "--out"):
             OutFileName = arg
             global _haveOutFileName
             _haveOutFileName = 1
 
 
     if (_haveXYZFileName != 1):
-        usage() 
+        usage()
         print("No xyz file was specified")
         sys.exit()
 
@@ -325,7 +342,7 @@ def main(argv):
         writeFile(OutFileName)
     else:
         findMoments()
-        
+
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         usage()
