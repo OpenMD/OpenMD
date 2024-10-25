@@ -126,14 +126,10 @@ The contribution to the local density at site $i$ depends on the instantaneous p
 \end{equation}
 with $N_j$ as the valency count for atom $j$. Modifications to the pair potential used in DR-EAM are also supported.
 
-DR-EAM was shown to perform well for bulk metals, metal surfaces, and alloys; and most importantly, it retains the strengths of the unmodified EAM in modeling bulk elastic constants and surface energies [@Bhattarai2019]. DR-EAM has similar performance to the unmodified EAM in that both approaches require a double-pass through the force loop, once to compute local densities and again to compute forces and energies.
-
-We note that the infrastructure required to implement DR-EAM is a superset of what is required for common *fluc-q* potentials like the TIP4P-FQ model for water [@Rick1994].
+DR-EAM was shown to perform well for bulk metals, metal surfaces, and alloys; and most importantly, it retains the strengths of the unmodified EAM in modeling bulk elastic constants and surface energies [@Bhattarai2019]. DR-EAM has similar performance to the unmodified EAM in that both approaches require a double-pass through the force loop, once to compute local densities and again to compute forces and energies. We note that the infrastructure required to implement DR-EAM is a superset of what is required for common *fluc-q* potentials like the TIP4P-FQ model for water [@Rick1994].
 
 # Acknowledgements
 
-We would like to acknowledge the contributions of Matthew A. Meineke and Teng Lin to the original `OOPSE` code. Contributions to the `OpenMD` codebase have also come from: Patrick B. Louden, Joseph R. Michalka, James M. Marr, Anderson D.S. Duraes, Suzanne M. Neidhart, Shenyu Kuang, Madan Lamichhane, Xiuquan Sun, Sydney A. Shavalier, Benjamin M. Harless, Veronica Freund, Minh Nhat Pham, Chunlei Li, Kyle Daily, Alexander Mazanek, and Yang Zheng.
-
-Development of `OpenMD` was carried out with support from the National Science Foundation under grants CHE-0848243, CHE-1362211, CHE-1663773, and CHE-191954648.
+We would like to acknowledge the contributions of Matthew A. Meineke and Teng Lin to the original `OOPSE` code. Contributions to the `OpenMD` codebase have also come from: Patrick B. Louden, Joseph R. Michalka, James M. Marr, Anderson D.S. Duraes, Suzanne M. Neidhart, Shenyu Kuang, Madan Lamichhane, Xiuquan Sun, Sydney A. Shavalier, Benjamin M. Harless, Veronica Freund, Minh Nhat Pham, Chunlei Li, Kyle Daily, Alexander Mazanek, and Yang Zheng. Development of `OpenMD` was carried out with support from the National Science Foundation under grants CHE-0848243, CHE-1362211, CHE-1663773, and CHE-191954648.
 
 # References
