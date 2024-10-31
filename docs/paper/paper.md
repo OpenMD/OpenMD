@@ -25,15 +25,15 @@ authors:
     corresponding: true
     affiliation: 1
 affiliations:
- - name: Department of Chemistry and Biochemistry, University of Notre Dame, Notre Dame, IN 46556 United States of America
+ - name: Department of Chemistry and Biochemistry, University of Notre Dame, Notre Dame, IN, United States of America
    index: 1
- - name: Department of Physics, Goshen College, Goshen, IN 46526 United States of America
+ - name: Department of Physics, Goshen College, Goshen, IN, United States of America
    index: 2      
- - name: Department of Chemistry, Oklahoma State University, Stillwater, OK, 74078 United States of America
+ - name: Department of Chemistry, Oklahoma State University, Stillwater, OK, United States of America
    index: 3
- - name: Department of Biochemistry, Chemistry, Environment, and Physics, Suffolk University, Boston, MA 02108 United States of America
+ - name: Department of Biochemistry, Chemistry, Environment, and Physics, Suffolk University, Boston, MA, United States of America
    index: 4
- - name: Center for Research Computing, University of Notre Dame, Notre Dame, IN 46556 United States of America
+ - name: Center for Research Computing, University of Notre Dame, Notre Dame, IN, United States of America
    index: 5   
 date: 25 June 2024
 bibliography: paper.bib
@@ -43,9 +43,7 @@ bibliography: paper.bib
 
 Molecular dynamics (MD) simulations help bridge the gap between quantum mechanical calculations, which trade computational resources and system size for chemical accuracy, and continuum simulations, which utilize bulk and surface material properties to make predictions. MD provides the ability to study emergent properties and dynamics for relatively large systems ($\sim 10^6$ atoms) over a span of nano- to micro-seconds. MD has been used for simulations of complex systems such as liquids, proteins, membranes, nanoparticles, interfaces, and porous materials, and the approximations used in MD simulations allow us to reach experimentally-relevant time and length scales [@Allen2017]. A molecular dynamics engine leverages classical equations of motion to evolve atomic or molecular coordinates according to a well-defined potential energy function, known as a force field, which is a function of those atomic coordinates. There are a number of high quality molecular dynamics engines that specialize in materials [@LAMMPS] or biomolecular [@CHARMM; @AmberTools] simulations or are models of computational efficiency [@GROMACS; @OpenMM]. In this paper, we provide background on an open source molecular dynamics engine, `OpenMD`, which specializes in complex systems and interfaces and was just released into version 3.1.
 
-`OpenMD` is capable of efficiently simulating a variety of complex systems using standard point-particle atoms, as well as atoms with orientational degrees of freedom (e.g. point multipoles and coarse-grained assemblies), and atoms with additional degrees of freedom (e.g. fluctuating charges). It provides a test-bed for new molecular simulation methodology, while being efficient and easy to use. Liquids, proteins, zeolites, lipids, inorganic nanomaterials, transition metals (bulk, flat interfaces, and nanoparticles), alloys, solid-liquid interfaces, and a wide array of other systems have all been simulated using this code. `OpenMD` works on parallel computers using the Message Passing Interface (MPI), and is packaged with trajectory analysis and utility programs that are easy to use, extend, and modify.
-
-From the beginning, `OpenMD` has been an open source project and has been maintained in accordance with the FAIR (findable, accessible, interoperable, and reusable) principles for research software [@Barker2022]. It uses a meta-data language that is tightly integrated with input (`.omd`) and trajectory (`.dump`) files, providing a standardized, human-readable way to completely describe molecular systems and simulation parameters. All data files are stamped with the code revision that generated that data. This allows `OpenMD` simulations to be easily reproduced, modified, and reused by others. The `<MetaData>` section of these files also serve as a form of machine-actionable meta-data, clearly specifying the composition of the molecular system in a manner that promotes interoperability with other software tools.
+`OpenMD` is capable of efficiently simulating a variety of complex systems using standard point-particle atoms, as well as atoms with orientational degrees of freedom (e.g. point multipoles and coarse-grained assemblies), and atoms with additional degrees of freedom (e.g. fluctuating charges). It provides a test-bed for new molecular simulation methodology, while being efficient and easy to use. Liquids, proteins, zeolites, lipids, inorganic nanomaterials, transition metals (bulk, flat interfaces, and nanoparticles), alloys, solid-liquid interfaces, and a wide array of other systems have all been simulated using this code. `OpenMD` works on parallel computers using the Message Passing Interface (MPI), and is packaged with trajectory analysis and utility programs that are easy to use, extend, and modify. From the beginning, `OpenMD` has been an open source project and has been maintained in accordance with the FAIR (findable, accessible, interoperable, and reusable) principles for research software [@Barker2022]. It uses a meta-data language that is tightly integrated with input (`.omd`) and trajectory (`.dump`) files, providing a standardized, human-readable way to completely describe molecular systems and simulation parameters. All data files are stamped with the code revision that generated that data. This allows `OpenMD` simulations to be easily reproduced, modified, and reused by others. The `<MetaData>` section of these files also serve as a form of machine-actionable meta-data, clearly specifying the composition of the molecular system in a manner that promotes interoperability with other software tools.
 
 # Statement of need
 
