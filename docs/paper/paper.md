@@ -25,15 +25,15 @@ authors:
     corresponding: true
     affiliation: 1
 affiliations:
- - name: Department of Chemistry and Biochemistry, University of Notre Dame, Notre Dame, IN 46556
+ - name: Department of Chemistry and Biochemistry, University of Notre Dame, Notre Dame, IN 46556 United States of America
    index: 1
- - name: Department of Physics, Goshen College, Goshen, IN 46526
+ - name: Department of Physics, Goshen College, Goshen, IN 46526 United States of America
    index: 2      
- - name: Department of Chemistry, Oklahoma State University, Stillwater, OK, 74078
+ - name: Department of Chemistry, Oklahoma State University, Stillwater, OK, 74078 United States of America
    index: 3
- - name: Department of Biochemistry, Chemistry, Environment, and Physics, Suffolk University, Boston, MA 02108
+ - name: Department of Biochemistry, Chemistry, Environment, and Physics, Suffolk University, Boston, MA 02108 United States of America
    index: 4
- - name: Center for Research Computing, University of Notre Dame, Notre Dame, IN 46556
+ - name: Center for Research Computing, University of Notre Dame, Notre Dame, IN 46556 United States of America
    index: 5   
 date: 25 June 2024
 bibliography: paper.bib
