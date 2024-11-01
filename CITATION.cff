@@ -1,0 +1,62 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Drisko
+  given-names: Cody R.
+  orcid: "https://orcid.org/0009-0006-3968-5088"
+- family-names: Bhattarai
+  given-names: Hemanta
+  orcid: "https://orcid.org/0000-0002-3573-9716"
+- family-names: Fennell
+  given-names: Christopher J.
+  orcid: "https://orcid.org/0000-0001-8963-4103"
+- family-names: Stocker
+  given-names: Kelsey M.
+  orcid: "https://orcid.org/0000-0002-1799-393X"
+- family-names: II
+  given-names: Charles F. Vardeman
+  orcid: "https://orcid.org/0000-0003-4091-6059"
+- family-names: Gezelter
+  given-names: J. Daniel
+  orcid: "https://orcid.org/0000-0002-2935-3163"
+contact:
+- family-names: Gezelter
+  given-names: J. Daniel
+  orcid: "https://orcid.org/0000-0002-2935-3163"
+doi: 10.5281/zenodo.13953130
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Drisko
+    given-names: Cody R.
+    orcid: "https://orcid.org/0009-0006-3968-5088"
+  - family-names: Bhattarai
+    given-names: Hemanta
+    orcid: "https://orcid.org/0000-0002-3573-9716"
+  - family-names: Fennell
+    given-names: Christopher J.
+    orcid: "https://orcid.org/0000-0001-8963-4103"
+  - family-names: Stocker
+    given-names: Kelsey M.
+    orcid: "https://orcid.org/0000-0002-1799-393X"
+  - family-names: II
+    given-names: Charles F. Vardeman
+    orcid: "https://orcid.org/0000-0003-4091-6059"
+  - family-names: Gezelter
+    given-names: J. Daniel
+    orcid: "https://orcid.org/0000-0002-2935-3163"
+  date-published: 2024-11-01
+  doi: 10.21105/joss.07004
+  issn: 2475-9066
+  issue: 103
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 7004
+  title: "OpenMD: A parallel molecular dynamics engine for complex
+    systems and interfaces"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.07004"
+  volume: 9
+title: "OpenMD: A parallel molecular dynamics engine for complex systems
+  and interfaces"
