@@ -122,7 +122,7 @@ namespace OpenMD {
     MPI_Allreduce(&tmpNFixedZmols[0], &nFixedZmolsInProc[0], nproc, MPI_INT,
                   MPI_SUM, MPI_COMM_WORLD);
 
-    MPI_Status* ierr = NULL;
+    MPI_Status ierr;
     int zmolIndex;
     RealType data[3];
 
@@ -142,8 +142,8 @@ namespace OpenMD {
 
         } else {
           for (int k = 0; k < nFixedZmolsInProc[i]; ++k) {
-            MPI_Recv(&zmolIndex, 1, MPI_INT, i, 0, MPI_COMM_WORLD, ierr);
-            MPI_Recv(data, 3, MPI_REALTYPE, i, 0, MPI_COMM_WORLD, ierr);
+            MPI_Recv(&zmolIndex, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &ierr);
+            MPI_Recv(data, 3, MPI_REALTYPE, i, 0, MPI_COMM_WORLD, &ierr);
             tmpData.zmolIndex = zmolIndex;
             tmpData.zforce    = data[0];
             tmpData.zpos      = data[1];

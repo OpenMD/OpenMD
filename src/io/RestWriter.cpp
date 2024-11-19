@@ -67,7 +67,7 @@ namespace OpenMD {
     createRestFile_ = false;
 
 #ifdef IS_MPI
-    MPI_Status* istatus = NULL;
+    MPI_Status istatus;
 #endif
 
     int printAny = 0;
@@ -176,12 +176,12 @@ namespace OpenMD {
         // prepared by processor i
 
         int recvLength;
-        MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, istatus);
+        MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &istatus);
         char* recvBuffer = new char[recvLength];
         if (recvBuffer == NULL) {
         } else {
           MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD,
-                   istatus);
+                   &istatus);
           if (createRestFile_) (*output_) << recvBuffer;
           delete[] recvBuffer;
         }
@@ -200,7 +200,7 @@ namespace OpenMD {
   void RestWriter::writeRest(
       std::vector<std::map<int, Restraint::RealPair>> restInfo) {
 #ifdef IS_MPI
-    MPI_Status* istatus = NULL;
+    MPI_Status istatus;
 #endif
 
 #ifndef IS_MPI
@@ -258,12 +258,12 @@ namespace OpenMD {
           // prepared by processor i
 
           int recvLength;
-          MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, istatus);
+          MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &istatus);
           char* recvBuffer = new char[recvLength];
           if (recvBuffer == NULL) {
           } else {
             MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD,
-                     istatus);
+                     &istatus);
             if (createRestFile_) (*output_) << recvBuffer;
 
             delete[] recvBuffer;
