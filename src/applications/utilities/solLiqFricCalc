@@ -325,15 +325,19 @@ def writeOutputKappa(outputFileName, rnemdJzP, jzType, zLiq1, zSol1, deltaV1, zL
     outFile.write("# vSol = " + str(funcParabOnePoint(zSol1, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5])) + "\t\t" + str(funcParabOnePoint(zSol2, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]))+ "\n")
 
     outFile.write("# deltaV = " + str(deltaV1) + "\t\t" + str(deltaV2) + "\n")
+    ml = popt[3]
     if (jzType == 0):
         JzPx = rnemdJzP[0]
+        viscosity = 16.60539 * JzPx / ml
         outFile.write("# Jz(px) = " + str(JzPx) + "\n#\n")
     elif (jzType == 1):
         JzPy = rnemdJzP[1]
+        viscosity = 16.60539 * JzPy / ml
         outFile.write("# Jz(py) = " + str(JzPy) + "\n#\n")
     outFile.write("# \t shear rate = " + str(shearRate) + "\n")
     outFile.write("# \t kappa1 = " + str(kappa1) + "\n")
     outFile.write("# \t kappa2 = " + str(kappa2) + "\n")
+    outFile.write("# \t viscosity = " + str(viscosity) + " mPa . s\n")
     # outFile.write("# shear rate \t\t kappa1 \t\t kappa2 \n")
     # outFile.write(str(shearRate) + "\t" + str(float(kappa1)) + "\t\t" + str(float(kappa2)) + "\n")
     if (kappa1 < 0.0 or kappa2 < 0.0):
