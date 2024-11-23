@@ -12,6 +12,7 @@ Options:
   -x,                     use the specified input (.xyz) file
   -o, --output-file=...   use specified output (.omd) file
   -s, --starting-index=.  start the water objects with an index
+  -t, --tolerance=......  tolerance to add to ideal O-H bond length
 
 
 Example:
@@ -73,14 +74,13 @@ def readFile(XYZFileName):
         positions.append([x, y, z])
     XYZFile.close()
 
-def findWaters():
+def findWaters(covTol):
     print("finding water molecules")
     # simpler since we only have to find H atoms within a few
     # angstroms of each water:
     H = []
     hCovRad = 0.32
     oCovRad = 0.73
-    covTol = 0.45
     OHbond = hCovRad + oCovRad + covTol
     Hmass = 1.0079
     Omass = 15.9994
@@ -175,7 +175,6 @@ def findWaters():
                 Eliminate.append(H[0])
                 Eliminate.append(H[1])
 
-
 def writeFile(outputFileName, startingIndex):
     outputFile = open(outputFileName, 'w')
 
@@ -234,11 +233,12 @@ def cross(L1, L2):
 
 def main(argv):                         
     try:                                
-        opts, args = getopt.getopt(argv, "hx:o:s:", ["help", "xyz-file=", "output-file=", "starting-index="]) 
+        opts, args = getopt.getopt(argv, "hx:o:s:t:", ["help", "xyz-file=", "output-file=", "starting-index=", "tolerance="]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)
     startingIndex = 0
+    tolerance = 0.45
     for opt, arg in opts:                
         if opt in ("-h", "--help"):      
             usage()                     
@@ -253,6 +253,8 @@ def main(argv):
             _haveOutputFileName = 1
         elif opt in ("-s", "--starting-index"): 
             startingIndex = int(arg)
+        elif opt in ("-t", "--tolerance"): 
+            tolerance = float(arg)
     if (_haveXYZFileName != 1):
         usage() 
         print("No XYZ file was specified")
@@ -262,7 +264,7 @@ def main(argv):
         print("No output file was specified")
         sys.exit()
     readFile(xyzFileName)
-    findWaters()
+    findWaters(tolerance)
     writeFile(outputFileName, startingIndex)
 
 if __name__ == "__main__":
