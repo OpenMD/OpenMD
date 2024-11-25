@@ -94,7 +94,14 @@ namespace OpenMD {
 
     times_.resize(nFrames_);
     sele1ToIndex_.resize(nFrames_);
-    if (uniqueSelections_) { sele2ToIndex_.resize(nFrames_); }
+    GIDtoSele1_.resize(nFrames_);
+    selection1StartFrame_.resize(nFrames_);
+
+    if (uniqueSelections_) { 
+      sele2ToIndex_.resize(nFrames_); 
+      GIDtoSele2_.resize(nFrames_);
+      selection2StartFrame_.resize(nFrames_);
+    }
 
     progressBar_ = std::make_unique<ProgressBar>();
   }
@@ -176,6 +183,10 @@ namespace OpenMD {
     }
 
     if (doMolecularProperties_) {
+      // Map of molecular global IDs to selections
+      if (selectionModeRestart_) 
+	GIDtoSele1_[istep].resize(info_->getNGlobalMolecules(), -1);
+
       for (mol = seleMan1_.beginSelectedMolecule(imol1); mol != NULL;
            mol = seleMan1_.nextSelectedMolecule(imol1)) {
         index = computeProperty1(istep, mol);
@@ -186,11 +197,28 @@ namespace OpenMD {
           sele1ToIndex_[istep].resize(index + 1);
           sele1ToIndex_[istep][index] = mol->getGlobalIndex();
         }
+	if (selectionModeRestart_) {
+	  GIDtoSele1_[istep][mol->getGlobalIndex()] = index;
+	  
+	  if (istep == 0) {
+	    selection1StartFrame_[istep].push_back(istep);
+	  } else {
+	    int prevIndex = GIDtoSele1_[istep-1][mol->getGlobalIndex()];
+	    if (prevIndex == -1)
+	      selection1StartFrame_[istep].push_back(istep);
+	    else
+	      selection1StartFrame_[istep].push_back(selection1StartFrame_[istep-1][prevIndex]);
+	  }
+	}
 
         if (!uniqueSelections_) { index = computeProperty2(istep, mol); }
       }
 
       if (uniqueSelections_) {
+	// Map of molecular global IDs to selections
+	if (selectionModeRestart_) 	  
+	  GIDtoSele2_[istep].resize(info_->getNGlobalMolecules(), -1);
+
         for (mol = seleMan2_.beginSelectedMolecule(imol2); mol != NULL;
              mol = seleMan2_.nextSelectedMolecule(imol2)) {
           if (autoCorrFunc_) {
@@ -204,11 +232,28 @@ namespace OpenMD {
             sele2ToIndex_[istep].resize(index + 1);
             sele2ToIndex_[istep][index] = mol->getGlobalIndex();
           }
+	  if (selectionModeRestart_) {
+	    
+	    GIDtoSele2_[istep][mol->getGlobalIndex()] = index;
+	    if (istep == 0) {
+	      selection2StartFrame_[istep].push_back(istep);
+	    } else {
+	      int prevIndex = GIDtoSele2_[istep-1][mol->getGlobalIndex()];
+	      if (prevIndex == -1)
+		selection2StartFrame_[istep].push_back(istep);
+	      else 	      
+		selection2StartFrame_[istep].push_back(selection2StartFrame_[istep-1][prevIndex]);
+	    }
+	  }	  
         }
       }
     }
 
     if (doObjectProperties_) {
+      // Map of StuntDouble global IDs to selections
+      if (selectionModeRestart_)	
+	GIDtoSele1_[istep].resize(info_->getNGlobalIntegrableObjects(), -1);
+      
       for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
            sd = seleMan1_.nextSelected(isd1)) {
         index = computeProperty1(istep, sd);
@@ -220,10 +265,28 @@ namespace OpenMD {
           sele1ToIndex_[istep][index] = sd->getGlobalIndex();
         }
 
+	if (selectionModeRestart_) {
+
+	  GIDtoSele1_[istep][sd->getGlobalIndex()] = index;
+	  if (istep == 0) {
+	    selection1StartFrame_[istep].push_back(istep);
+	  } else {
+	    int prevIndex = GIDtoSele1_[istep-1][sd->getGlobalIndex()];
+	    if (prevIndex == -1)
+	      selection1StartFrame_[istep].push_back(istep);
+	    else
+	      selection1StartFrame_[istep].push_back(selection1StartFrame_[istep-1][prevIndex]);
+	  }
+	}
+
         if (!uniqueSelections_) { index = computeProperty2(istep, sd); }
       }
 
       if (uniqueSelections_) {
+	// Map of StuntDouble global IDs to selections
+	if (selectionModeRestart_)
+	  GIDtoSele2_[istep].resize(info_->getNGlobalIntegrableObjects(), -1);
+	
         for (sd = seleMan2_.beginSelected(isd2); sd != NULL;
              sd = seleMan2_.nextSelected(isd2)) {
           if (autoCorrFunc_) {
@@ -237,11 +300,28 @@ namespace OpenMD {
             sele2ToIndex_[istep].resize(index + 1);
             sele2ToIndex_[istep][index] = sd->getGlobalIndex();
           }
+	  if (selectionModeRestart_) {
+
+	    GIDtoSele2_[istep][sd->getGlobalIndex()] = index;
+	    if (istep == 0) {
+	      selection2StartFrame_[istep].push_back(istep);
+	    } else {
+	      int prevIndex = GIDtoSele2_[istep-1][sd->getGlobalIndex()];
+	      if (prevIndex == -1)
+		selection2StartFrame_[istep].push_back(istep);
+	      else
+		selection2StartFrame_[istep].push_back(selection2StartFrame_[istep-1][prevIndex]);
+	    }
+	  }
         }
       }
     }
 
     if (doBondProperties_) {
+      // Map of bond global IDs to selections
+      if (selectionModeRestart_) 
+	GIDtoSele1_[istep].resize(info_->getNGlobalBonds(), -1);
+
       for (bond = seleMan1_.beginSelectedBond(ibond1); bond != NULL;
            bond = seleMan1_.nextSelectedBond(ibond1)) {
         index = computeProperty1(istep, bond);
@@ -253,10 +333,28 @@ namespace OpenMD {
           sele1ToIndex_[istep][index] = bond->getGlobalIndex();
         }
 
+	if (selectionModeRestart_) {
+	  
+	  GIDtoSele1_[istep][bond->getGlobalIndex()] = index;
+	  if (istep == 0) {
+	    selection1StartFrame_[istep].push_back(istep);
+	  } else {
+	    int prevIndex = GIDtoSele1_[istep-1][bond->getGlobalIndex()];
+	    if (prevIndex == -1)
+	      selection1StartFrame_[istep].push_back(istep);
+	    else
+	      selection1StartFrame_[istep].push_back(selection1StartFrame_[istep-1][prevIndex]);
+	  }
+	}
+	
         if (!uniqueSelections_) { index = computeProperty2(istep, bond); }
       }
 
       if (uniqueSelections_) {
+	// Map of bond global IDs to selections
+	if (selectionModeRestart_) 	 
+	  GIDtoSele2_[istep].resize(info_->getNGlobalBonds(), -1);
+
         for (bond = seleMan2_.beginSelectedBond(ibond2); bond != NULL;
              bond = seleMan2_.nextSelectedBond(ibond2)) {
           if (autoCorrFunc_) {
@@ -270,6 +368,19 @@ namespace OpenMD {
             sele2ToIndex_[istep].resize(index + 1);
             sele2ToIndex_[istep][index] = bond->getGlobalIndex();
           }
+	  if (selectionModeRestart_) {
+
+	    GIDtoSele2_[istep][bond->getGlobalIndex()] = index;
+	    if (istep == 0) {
+	      selection2StartFrame_[istep].push_back(istep);
+	    } else {
+	      int prevIndex = GIDtoSele2_[istep-1][bond->getGlobalIndex()];
+	      if (prevIndex == -1)
+		selection2StartFrame_[istep].push_back(istep);
+	      else	      
+		selection2StartFrame_[istep].push_back(selection2StartFrame_[istep-1][prevIndex]);
+	    }
+	  }
         }
       }
     }
@@ -363,6 +474,7 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
     std::vector<int>::iterator i2;
 
     T corrVal(0.0);
+    T zeroType(0.0);
 
     if (doSystemProperties_) {
       corrVal = calcCorrVal(frame1, frame2);
@@ -394,7 +506,22 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
 
         if (i1 == s1.end() || i2 == s2.end()) break;
 
-        corrVal = calcCorrVal(frame1, frame2, i1 - s1.begin(), i2 - s2.begin());
+	if (selectionModeRestart_) {
+	  
+	  int ssf1 = selection1StartFrame_[frame1][i1 - s1.begin()];
+	  int ssf2 = uniqueSelections_ ?
+	    selection2StartFrame_[frame2][i2 - s2.begin()] :
+	    selection1StartFrame_[frame2][i2 - s2.begin()];
+
+
+	  if (ssf1 != ssf2) break;
+	  corrVal = calcCorrVal(frame1, frame2,
+				i1 - s1.begin(), i2 - s2.begin());	  
+	} else {
+	  
+	  corrVal = calcCorrVal(frame1, frame2,
+				i1 - s1.begin(), i2 - s2.begin());        
+	}
         histogram_[timeBin] += corrVal;
         count_[timeBin]++;
       }
@@ -434,11 +561,12 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
         ofs << "#time\t" << labelString_ << "\n";
       else
         ofs << "#time\tcorrVal\n";
-
+      
       for (unsigned int i = 0; i < nTimeBins_; ++i) {
-        ofs << times_[i] - times_[0] << "\t" << histogram_[i] << "\n";
+	if (count_[i] > 0) 
+	  ofs << times_[i] - times_[0] << "\t" << histogram_[i] << "\n";
       }
-
+      
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",
@@ -471,11 +599,15 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
         ofs << "#time\tcorrVal\n";
 
       for (unsigned int i = 0; i < nTimeBins_; ++i) {
-        ofs << times_[i] - times_[0] << "\t";
-        for (int j = 0; j < 3; j++) {
-          ofs << histogram_[i](j) << '\t';
-        }
-        ofs << '\n';
+	if (count_[i] > 0) {
+	
+	  ofs << times_[i] - times_[0] << "\t";
+	  for (int j = 0; j < 3; j++) {
+	    ofs << histogram_[i](j) << '\t';
+	  }
+	  ofs << '\n';
+	  
+	}
       }
 
     } else {
@@ -510,13 +642,17 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
         ofs << "#time\tcorrVal\n";
 
       for (unsigned int i = 0; i < nTimeBins_; ++i) {
-        ofs << times_[i] - times_[0] << "\t";
-        for (int j = 0; j < 3; j++) {
-          for (int k = 0; k < 3; k++) {
-            ofs << histogram_[i](j, k) << '\t';
-          }
-        }
-        ofs << '\n';
+
+	if (count_[i] > 0) {
+	  
+	  ofs << times_[i] - times_[0] << "\t";
+	  for (int j = 0; j < 3; j++) {
+	    for (int k = 0; k < 3; k++) {
+	      ofs << histogram_[i](j, k) << '\t';
+	    }
+	  }
+	  ofs << '\n';
+	}
       }
 
     } else {

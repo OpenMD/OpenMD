@@ -52,6 +52,7 @@ const char *gengetopt_args_info_help[] = {
   "      --dipoleX=DOUBLE          X-component of the dipole with respect to body\n                                  frame  (default=`0.0')",
   "      --dipoleY=DOUBLE          Y-component of the dipole with respect to body\n                                  frame  (default=`0.0')",
   "      --dipoleZ=DOUBLE          Z-component of the dipole with respect to body\n                                  frame  (default=`-1.0')",
+  "      --selectionMode=ENUM      How to treat objects which leave a dynamic\n                                  selection and then return later (default =\n                                  survival)  (possible values=\"survival\",\n                                  \"restart\" default=`survival')",
   "\n Group: correlation function\n   an option of this group is required",
   "  -s, --selecorr                selection correlation function",
   "  -r, --rcorr                   mean squared displacement",
@@ -116,6 +117,7 @@ static int
 cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *prog_name, const char *additional_error);
 
 const char *cmdline_parser_privilegedAxis_values[] = {"x", "y", "z", 0}; /*< Possible values for privilegedAxis. */
+const char *cmdline_parser_selectionMode_values[] = {"survival", "restart", 0}; /*< Possible values for selectionMode. */
 
 static char *
 gengetopt_strdup (const char *s);
@@ -142,6 +144,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->dipoleX_given = 0 ;
   args_info->dipoleY_given = 0 ;
   args_info->dipoleZ_given = 0 ;
+  args_info->selectionMode_given = 0 ;
   args_info->selecorr_given = 0 ;
   args_info->rcorr_given = 0 ;
   args_info->rcorrZ_given = 0 ;
@@ -221,6 +224,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->dipoleY_orig = NULL;
   args_info->dipoleZ_arg = -1.0;
   args_info->dipoleZ_orig = NULL;
+  args_info->selectionMode_arg = selectionMode_arg_survival;
+  args_info->selectionMode_orig = NULL;
   
 }
 
@@ -248,46 +253,47 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->dipoleX_help = gengetopt_args_info_help[16] ;
   args_info->dipoleY_help = gengetopt_args_info_help[17] ;
   args_info->dipoleZ_help = gengetopt_args_info_help[18] ;
-  args_info->selecorr_help = gengetopt_args_info_help[20] ;
-  args_info->rcorr_help = gengetopt_args_info_help[21] ;
-  args_info->rcorrZ_help = gengetopt_args_info_help[22] ;
-  args_info->vcorr_help = gengetopt_args_info_help[23] ;
-  args_info->vcorrZ_help = gengetopt_args_info_help[24] ;
-  args_info->vcorrR_help = gengetopt_args_info_help[25] ;
-  args_info->vaOutProdcorr_help = gengetopt_args_info_help[26] ;
-  args_info->waOutProdcorr_help = gengetopt_args_info_help[27] ;
-  args_info->vwOutProdcorr_help = gengetopt_args_info_help[28] ;
-  args_info->wvOutProdcorr_help = gengetopt_args_info_help[29] ;
-  args_info->wcorr_help = gengetopt_args_info_help[30] ;
-  args_info->dcorr_help = gengetopt_args_info_help[31] ;
-  args_info->lcorr_help = gengetopt_args_info_help[32] ;
-  args_info->lcorrZ_help = gengetopt_args_info_help[33] ;
-  args_info->cohZ_help = gengetopt_args_info_help[34] ;
-  args_info->sdcorr_help = gengetopt_args_info_help[35] ;
-  args_info->r_rcorr_help = gengetopt_args_info_help[36] ;
-  args_info->thetacorr_help = gengetopt_args_info_help[37] ;
-  args_info->drcorr_help = gengetopt_args_info_help[38] ;
-  args_info->stresscorr_help = gengetopt_args_info_help[39] ;
-  args_info->bondcorr_help = gengetopt_args_info_help[40] ;
-  args_info->freqfluccorr_help = gengetopt_args_info_help[41] ;
-  args_info->jumptime_help = gengetopt_args_info_help[42] ;
-  args_info->jumptimeZ_help = gengetopt_args_info_help[43] ;
-  args_info->jumptimeR_help = gengetopt_args_info_help[44] ;
-  args_info->persistence_help = gengetopt_args_info_help[45] ;
-  args_info->pjcorr_help = gengetopt_args_info_help[46] ;
-  args_info->ftcorr_help = gengetopt_args_info_help[47] ;
-  args_info->ckcorr_help = gengetopt_args_info_help[48] ;
-  args_info->cscorr_help = gengetopt_args_info_help[49] ;
-  args_info->facorr_help = gengetopt_args_info_help[50] ;
-  args_info->tfcorr_help = gengetopt_args_info_help[51] ;
-  args_info->tacorr_help = gengetopt_args_info_help[52] ;
-  args_info->disp_help = gengetopt_args_info_help[53] ;
-  args_info->dispZ_help = gengetopt_args_info_help[54] ;
-  args_info->current_help = gengetopt_args_info_help[55] ;
-  args_info->onsager_help = gengetopt_args_info_help[56] ;
-  args_info->ddisp_help = gengetopt_args_info_help[57] ;
-  args_info->rotAngleDisp_help = gengetopt_args_info_help[58] ;
-  args_info->meandisp_help = gengetopt_args_info_help[59] ;
+  args_info->selectionMode_help = gengetopt_args_info_help[19] ;
+  args_info->selecorr_help = gengetopt_args_info_help[21] ;
+  args_info->rcorr_help = gengetopt_args_info_help[22] ;
+  args_info->rcorrZ_help = gengetopt_args_info_help[23] ;
+  args_info->vcorr_help = gengetopt_args_info_help[24] ;
+  args_info->vcorrZ_help = gengetopt_args_info_help[25] ;
+  args_info->vcorrR_help = gengetopt_args_info_help[26] ;
+  args_info->vaOutProdcorr_help = gengetopt_args_info_help[27] ;
+  args_info->waOutProdcorr_help = gengetopt_args_info_help[28] ;
+  args_info->vwOutProdcorr_help = gengetopt_args_info_help[29] ;
+  args_info->wvOutProdcorr_help = gengetopt_args_info_help[30] ;
+  args_info->wcorr_help = gengetopt_args_info_help[31] ;
+  args_info->dcorr_help = gengetopt_args_info_help[32] ;
+  args_info->lcorr_help = gengetopt_args_info_help[33] ;
+  args_info->lcorrZ_help = gengetopt_args_info_help[34] ;
+  args_info->cohZ_help = gengetopt_args_info_help[35] ;
+  args_info->sdcorr_help = gengetopt_args_info_help[36] ;
+  args_info->r_rcorr_help = gengetopt_args_info_help[37] ;
+  args_info->thetacorr_help = gengetopt_args_info_help[38] ;
+  args_info->drcorr_help = gengetopt_args_info_help[39] ;
+  args_info->stresscorr_help = gengetopt_args_info_help[40] ;
+  args_info->bondcorr_help = gengetopt_args_info_help[41] ;
+  args_info->freqfluccorr_help = gengetopt_args_info_help[42] ;
+  args_info->jumptime_help = gengetopt_args_info_help[43] ;
+  args_info->jumptimeZ_help = gengetopt_args_info_help[44] ;
+  args_info->jumptimeR_help = gengetopt_args_info_help[45] ;
+  args_info->persistence_help = gengetopt_args_info_help[46] ;
+  args_info->pjcorr_help = gengetopt_args_info_help[47] ;
+  args_info->ftcorr_help = gengetopt_args_info_help[48] ;
+  args_info->ckcorr_help = gengetopt_args_info_help[49] ;
+  args_info->cscorr_help = gengetopt_args_info_help[50] ;
+  args_info->facorr_help = gengetopt_args_info_help[51] ;
+  args_info->tfcorr_help = gengetopt_args_info_help[52] ;
+  args_info->tacorr_help = gengetopt_args_info_help[53] ;
+  args_info->disp_help = gengetopt_args_info_help[54] ;
+  args_info->dispZ_help = gengetopt_args_info_help[55] ;
+  args_info->current_help = gengetopt_args_info_help[56] ;
+  args_info->onsager_help = gengetopt_args_info_help[57] ;
+  args_info->ddisp_help = gengetopt_args_info_help[58] ;
+  args_info->rotAngleDisp_help = gengetopt_args_info_help[59] ;
+  args_info->meandisp_help = gengetopt_args_info_help[60] ;
   
 }
 
@@ -402,6 +408,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->dipoleX_orig));
   free_string_field (&(args_info->dipoleY_orig));
   free_string_field (&(args_info->dipoleZ_orig));
+  free_string_field (&(args_info->selectionMode_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -516,6 +523,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "dipoleY", args_info->dipoleY_orig, 0);
   if (args_info->dipoleZ_given)
     write_into_file(outfile, "dipoleZ", args_info->dipoleZ_orig, 0);
+  if (args_info->selectionMode_given)
+    write_into_file(outfile, "selectionMode", args_info->selectionMode_orig, cmdline_parser_selectionMode_values);
   if (args_info->selecorr_given)
     write_into_file(outfile, "selecorr", 0, 0 );
   if (args_info->rcorr_given)
@@ -1552,6 +1561,7 @@ cmdline_parser_internal (
         { "dipoleX",	1, NULL, 0 },
         { "dipoleY",	1, NULL, 0 },
         { "dipoleZ",	1, NULL, 0 },
+        { "selectionMode",	1, NULL, 0 },
         { "selecorr",	0, NULL, 's' },
         { "rcorr",	0, NULL, 'r' },
         { "rcorrZ",	0, NULL, 0 },
@@ -1997,6 +2007,20 @@ cmdline_parser_internal (
                 &(local_args_info.dipoleZ_given), optarg, 0, "-1.0", ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "dipoleZ", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* How to treat objects which leave a dynamic selection and then return later (default = survival).  */
+          else if (strcmp (long_options[option_index].name, "selectionMode") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->selectionMode_arg), 
+                 &(args_info->selectionMode_orig), &(args_info->selectionMode_given),
+                &(local_args_info.selectionMode_given), optarg, cmdline_parser_selectionMode_values, "survival", ARG_ENUM,
+                check_ambiguity, override, 0, 0,
+                "selectionMode", '-',
                 additional_error))
               goto failure;
           

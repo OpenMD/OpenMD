@@ -357,6 +357,9 @@ int main(int argc, char* argv[]) {
         std::make_unique<MeanDisplacement>(info, dumpFileName, sele1, sele2);
   }
 
+  if (args_info.selectionMode_arg == selectionMode_arg_restart) {
+    corrFunc->setSelectionModeRestart();
+  }
   if (args_info.output_given) { corrFunc->setOutputName(args_info.output_arg); }
 
   corrFunc->doCorrelate();

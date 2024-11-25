@@ -62,7 +62,7 @@ namespace OpenMD {
 
   class DynamicProperty {
   public:
-    DynamicProperty() {}
+    DynamicProperty() : selectionModeRestart_(false) {}
     virtual ~DynamicProperty() = default;
     virtual void doCorrelate() = 0;
 
@@ -71,8 +71,10 @@ namespace OpenMD {
     }
     const std::string& getOutputFileName() const { return outputFilename_; }
 
+    void setSelectionModeRestart() { selectionModeRestart_ = true; }
   protected:
     std::string outputFilename_;
+    bool selectionModeRestart_;
   };
 }  // namespace OpenMD
 

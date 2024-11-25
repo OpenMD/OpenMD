@@ -148,6 +148,10 @@ namespace OpenMD {
 
     std::vector<std::vector<int>> sele1ToIndex_;
     std::vector<std::vector<int>> sele2ToIndex_;
+    std::vector<std::vector<int>> GIDtoSele1_;
+    std::vector<std::vector<int>> GIDtoSele2_;
+    std::vector<std::vector<int>> selection1StartFrame_;
+    std::vector<std::vector<int>> selection2StartFrame_;
 
     ProgressBarPtr progressBar_;
   };

@@ -47,6 +47,7 @@ option	"length"	-	"maximum length"	                   double	default="100" optio
 option "dipoleX"       -       "X-component of the dipole with respect to body frame" default="0.0" double optional
 option "dipoleY"       -       "Y-component of the dipole with respect to body frame" default="0.0" double optional
 option "dipoleZ"       -       "Z-component of the dipole with respect to body frame" default="-1.0" double optional
+option "selectionMode" -       "How to treat objects which leave a dynamic selection and then return later (default = survival)" values="survival","restart" enum default="survival" optional
 defgroup "correlation function" groupdesc=" an option of this group is required" yes
 groupoption "selecorr"     s  "selection correlation function" group="correlation function"
 groupoption "rcorr"        r  "mean squared displacement" group="correlation function"

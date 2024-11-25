@@ -35,6 +35,7 @@ extern "C" {
 #endif
 
 enum enum_privilegedAxis { privilegedAxis__NULL = -1, privilegedAxis_arg_x = 0, privilegedAxis_arg_y, privilegedAxis_arg_z };
+enum enum_selectionMode { selectionMode__NULL = -1, selectionMode_arg_survival = 0, selectionMode_arg_restart };
 
 /** @brief Where the command line options are stored */
 struct gengetopt_args_info
@@ -92,6 +93,9 @@ struct gengetopt_args_info
   double dipoleZ_arg;	/**< @brief Z-component of the dipole with respect to body frame (default='-1.0').  */
   char * dipoleZ_orig;	/**< @brief Z-component of the dipole with respect to body frame original value given at command line.  */
   const char *dipoleZ_help; /**< @brief Z-component of the dipole with respect to body frame help description.  */
+  enum enum_selectionMode selectionMode_arg;	/**< @brief How to treat objects which leave a dynamic selection and then return later (default = survival) (default='survival').  */
+  char * selectionMode_orig;	/**< @brief How to treat objects which leave a dynamic selection and then return later (default = survival) original value given at command line.  */
+  const char *selectionMode_help; /**< @brief How to treat objects which leave a dynamic selection and then return later (default = survival) help description.  */
   const char *selecorr_help; /**< @brief selection correlation function help description.  */
   const char *rcorr_help; /**< @brief mean squared displacement help description.  */
   const char *rcorrZ_help; /**< @brief mean squared displacement binned by Z help description.  */
@@ -152,6 +156,7 @@ struct gengetopt_args_info
   unsigned int dipoleX_given ;	/**< @brief Whether dipoleX was given.  */
   unsigned int dipoleY_given ;	/**< @brief Whether dipoleY was given.  */
   unsigned int dipoleZ_given ;	/**< @brief Whether dipoleZ was given.  */
+  unsigned int selectionMode_given ;	/**< @brief Whether selectionMode was given.  */
   unsigned int selecorr_given ;	/**< @brief Whether selecorr was given.  */
   unsigned int rcorr_given ;	/**< @brief Whether rcorr was given.  */
   unsigned int rcorrZ_given ;	/**< @brief Whether rcorrZ was given.  */
@@ -320,6 +325,7 @@ int cmdline_parser_required (struct gengetopt_args_info *args_info,
   const char *prog_name);
 
 extern const char *cmdline_parser_privilegedAxis_values[];  /**< @brief Possible values for privilegedAxis. */
+extern const char *cmdline_parser_selectionMode_values[];  /**< @brief Possible values for selectionMode. */
 
 
 #ifdef __cplusplus
