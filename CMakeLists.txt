@@ -320,30 +320,11 @@ endif(OPENBABEL3_FOUND)
 find_package(Qhull)
 if(QHULL_FOUND)
   set(HAVE_QHULL 1)
+  include_directories(${QHULL_INCLUDE_DIR})
   link_libraries(${QHULL_LIBRARIES})
 else(QHULL_FOUND)
-#  FetchContent_Declare(
-#    qhull
-#    GIT_REPOSITORY https://github.com/qhull/qhull.git
-#    GIT_TAG b6f24606dc202f15791ef8c2d940e9a5d43c19cf
-#    GIT_SHALLOW FALSE
-#    UPDATE_DISCONNECTED TRUE
-#    )
-#  set(QHULL_ENABLE_TESTING OFF)
-#  set(BUILD_APPLICATIONS OFF)
-#  set(BUILD_SHARED_LIBS ON)
-#  set(BUILD_STATIC_LIBS ON)
-#  FetchContent_MakeAvailable(qhull)
-#  set(QHULL_INCLUDE_DIR ${qhull_SOURCE_DIR}/src)
-#  message(STATUS "Adding include for Qhull to ${qhull_SOURCE_DIR}/src")
-#  set(HAVE_QHULL 1)
-#  set(HAVE_QHULL_REENTRANT 1)
-#  set(QHULL_FOUND TRUE)
+  message(STATUS "No Qhull found - will be missing some features")
 endif(QHULL_FOUND)
-include_directories(${QHULL_INCLUDE_DIR})
-
-
-
 
 # zlib stuff
 find_package(ZLIB)
@@ -924,7 +905,7 @@ set(ELASTICCONSTANTSSOURCE
 
 add_executable(Dump2XYZ ${DUMP2XYZSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(Dump2XYZ openmd_single openmd_core openmd_single
-                      openmd_core) 
+                      openmd_core)
 add_executable(DynamicProps ${DYNAMICPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(DynamicProps openmd_single openmd_core openmd_single
                       openmd_core)
@@ -942,14 +923,14 @@ target_link_libraries(StaticProps openmd_single openmd_core openmd_single
                       openmd_core)
 add_executable(SequentialProps ${SEQUENTIALPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(SequentialProps openmd_single openmd_core openmd_single
-                      openmd_core) 
+                      openmd_core)
 add_executable(nanoparticleBuilder ${NANOPARTICLEBUILDERSOURCE}
                                    ${GETOPT_SOURCE})
 target_link_libraries(nanoparticleBuilder openmd_single openmd_core
                       openmd_single openmd_core openmd_single)
 add_executable(nanorodBuilder ${NANORODBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(nanorodBuilder openmd_single openmd_core openmd_single
-                      openmd_core openmd_single) 
+                      openmd_core openmd_single)
 add_executable(nanorod_pentBuilder ${NANOROD_PENTBUILDERSOURCE}
                                    ${GETOPT_SOURCE})
 target_link_libraries(nanorod_pentBuilder openmd_single openmd_core
