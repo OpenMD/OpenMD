@@ -8,8 +8,8 @@ project(
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-set(CMAKE_MACOSX_RPATH TRUE)
+#set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+#set(CMAKE_MACOSX_RPATH TRUE)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
   set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffp-model=precise")
@@ -322,23 +322,23 @@ if(QHULL_FOUND)
   set(HAVE_QHULL 1)
   link_libraries(${QHULL_LIBRARIES})
 else(QHULL_FOUND)
-  FetchContent_Declare(
-    qhull
-    GIT_REPOSITORY https://github.com/qhull/qhull.git
-    GIT_TAG b6f24606dc202f15791ef8c2d940e9a5d43c19cf
-    GIT_SHALLOW FALSE
-    UPDATE_DISCONNECTED TRUE
-    )
-  set(QHULL_ENABLE_TESTING OFF)
-  set(BUILD_APPLICATIONS OFF)
-  set(BUILD_SHARED_LIBS ON)
-  set(BUILD_STATIC_LIBS ON)
-  FetchContent_MakeAvailable(qhull)
-  set(QHULL_INCLUDE_DIR ${qhull_SOURCE_DIR}/src)
-  message(STATUS "Adding include for Qhull to ${qhull_SOURCE_DIR}/src")
-  set(HAVE_QHULL 1)
-  set(HAVE_QHULL_REENTRANT 1)
-  set(QHULL_FOUND TRUE)
+#  FetchContent_Declare(
+#    qhull
+#    GIT_REPOSITORY https://github.com/qhull/qhull.git
+#    GIT_TAG b6f24606dc202f15791ef8c2d940e9a5d43c19cf
+#    GIT_SHALLOW FALSE
+#    UPDATE_DISCONNECTED TRUE
+#    )
+#  set(QHULL_ENABLE_TESTING OFF)
+#  set(BUILD_APPLICATIONS OFF)
+#  set(BUILD_SHARED_LIBS ON)
+#  set(BUILD_STATIC_LIBS ON)
+#  FetchContent_MakeAvailable(qhull)
+#  set(QHULL_INCLUDE_DIR ${qhull_SOURCE_DIR}/src)
+#  message(STATUS "Adding include for Qhull to ${qhull_SOURCE_DIR}/src")
+#  set(HAVE_QHULL 1)
+#  set(HAVE_QHULL_REENTRANT 1)
+#  set(QHULL_FOUND TRUE)
 endif(QHULL_FOUND)
 include_directories(${QHULL_INCLUDE_DIR})
 
