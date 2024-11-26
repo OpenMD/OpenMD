@@ -51,9 +51,11 @@
 
 #include "SequentialPropsCmd.hpp"
 #include "applications/sequentialProps/COMVel.hpp"
+#include "applications/sequentialProps/CountDifference.hpp"
 #include "applications/sequentialProps/CenterOfMass.hpp"
 #include "applications/sequentialProps/ContactAngle1.hpp"
 #include "applications/sequentialProps/ContactAngle2.hpp"
+#include "applications/sequentialProps/FluxOut.hpp"
 #include "applications/sequentialProps/GCNSeq.hpp"
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 #include "applications/sequentialProps/equipartitionTest.hpp"
@@ -110,17 +112,45 @@ int main(int argc, char* argv[]) {
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
 
-  SequentialAnalyzer* analyzer = NULL;
+  // convert privilegedAxis to corresponding integer
+  // x axis -> 0
+  // y axis -> 1
+  // z axis -> 2 (default)
+
+  int privilegedAxis;
+  switch (args_info.privilegedAxis_arg) {
+  case privilegedAxis_arg_x:
+    privilegedAxis = 0;
+    break;
+  case privilegedAxis_arg_y:
+    privilegedAxis = 1;
+    break;
+  case privilegedAxis_arg_z:
+  default:
+    privilegedAxis = 2;
+    break;
+  }
+
+  std::unique_ptr<SequentialAnalyzer> analyzer {nullptr};
+
   if (args_info.com_given) {
-    analyzer = new CenterOfMass(info, dumpFileName, sele1, sele2);
+    analyzer = std::make_unique<CenterOfMass>(info, dumpFileName, sele1, sele2);
   } else if (args_info.comvel_given) {
-    analyzer = new COMVel(info, dumpFileName, sele1, sele2);
+    analyzer = std::make_unique<COMVel>(info, dumpFileName, sele1, sele2);
+  } else if (args_info.fluxOut_given) {
+    analyzer = std::make_unique<FluxOut>(info, dumpFileName, sele1,
+					 privilegedAxis);
+  } else if (args_info.deltaCount_given) {
+    analyzer = std::make_unique<CountDifference>(info, dumpFileName, sele1,
+						 sele2);
   } else if (args_info.testequi_given) {
-    analyzer = new Equipartition(info, dumpFileName, sele1, sele2);
+    analyzer = std::make_unique<Equipartition>(info, dumpFileName, sele1,
+					       sele2);
   } else if (args_info.gcn_given) {
     if (args_info.rcut_given) {
-      analyzer = new GCNSeq(info, dumpFileName, sele1, sele2,
-                            args_info.rcut_arg, args_info.nbins_arg);
+      analyzer = std::make_unique<GCNSeq>(info, dumpFileName, sele1, sele2,
+					  args_info.rcut_arg,
+					  args_info.nbins_arg);
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "A cutoff radius (rcut) must be specified when calculating\n"
@@ -152,7 +182,8 @@ int main(int argc, char* argv[]) {
     }
 
     analyzer =
-        new ContactAngle1(info, dumpFileName, sele1, sele2, solidZ, dropletR);
+      std::make_unique<ContactAngle1>(info, dumpFileName, sele1, sele2,
+				      solidZ, dropletR);
   } else if (args_info.ca2_given) {
     RealType solidZ(0.0);
     if (args_info.referenceZ_given)
@@ -205,16 +236,29 @@ int main(int argc, char* argv[]) {
       simError();
     }
 
-    analyzer = new ContactAngle2(info, dumpFileName, sele1, sele2, solidZ,
-                                 centroidX, centroidY, threshDens, bufferLength,
-                                 args_info.nbins_arg, args_info.nbins_z_arg);
+    analyzer = std::make_unique<ContactAngle2>(info, dumpFileName, sele1,
+					       sele2, solidZ, centroidX,
+					       centroidY, threshDens,
+					       bufferLength,
+					       args_info.nbins_arg,
+					       args_info.nbins_z_arg);
   }
 
-  if (args_info.output_given) { analyzer->setOutputName(args_info.output_arg); }
+  if (analyzer != NULL) {
+    
+    if (args_info.output_given) {
+      analyzer->setOutputName(args_info.output_arg);
+    }
 
-  analyzer->doSequence();
+    analyzer->doSequence();
+  } else {
+    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+             "SequentialProps: No Analyzer was created, nothing to do!");
+    painCave.severity = OPENMD_ERROR;
+    painCave.isFatal  = 1;
+    simError();
+  }
 
-  delete analyzer;
   delete info;
 
   return 0;

@@ -22,6 +22,7 @@ option	"sele1"		-	"select first stuntdouble set"	string	typestr="selection scrip
 option  "sele2"         -       "select second stuntdouble set (if sele2 is not set, use script from sele1)" string  typestr="selection script"      no
 option  "nbins"         b       "number of bins (general purpose)"                              int     default="100"           no
 option  "nbins_z"       -       "number of bins in z axis"                              int     default="100"           no
+option  "privilegedAxis" -      "which axis is special for spatial analysis (default = z axis)" values="x","y","z" enum default="z" optional
 option  "centroidX"     x       "Location of droplet centroid in x" double no
 option  "centroidY"     y       "Location of droplet centroid in y" double no
 option  "referenceZ"    z       "Reference z-height of solid surface" double no
@@ -32,6 +33,8 @@ option  "rcut"          -       "cutoff radius (rcut)"         double no
 defgroup "sequentialProps" groupdesc=" an option of this group is required" yes
 groupoption "com"       c       "selection center of mass" group="sequentialProps"
 groupoption "comvel"    v       "selection center of mass velocity" group="sequentialProps"
+groupoption "deltaCount" -      "difference in counts between two selections" group="sequentialProps"
+groupoption "fluxOut"   -       "number flux out of a selection" group="sequentialProps"
 groupoption "ca1"       -       "contact angle of selection (using center of mass)" group="sequentialProps"
 groupoption "ca2"       -       "contact angle of selection (using density profile)" group="sequentialProps"
 groupoption "gcn"       -       "Generalized Coordinate Number" group="sequentialProps"

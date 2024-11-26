@@ -8,6 +8,8 @@ project(
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_MACOSX_RPATH TRUE)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
   set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffp-model=precise")
@@ -67,7 +69,7 @@ if(NOT stl_reader_FOUND)
   FetchContent_Declare(
     stl_reader
     GIT_REPOSITORY https://github.com/sreiter/stl_reader.git
-    GIT_TAG a878405a7b2f52b0f24e7b02b9f8ea2390b0ab04)
+    GIT_TAG 6c7615759269a2e6958d04d4d6a4982b6b0da902)
   FetchContent_MakeAvailable(stl_reader)
   set(stl_reader_INCLUDE_DIR ${stl_reader_SOURCE_DIR})
 endif()
@@ -318,11 +320,30 @@ endif(OPENBABEL3_FOUND)
 find_package(Qhull)
 if(QHULL_FOUND)
   set(HAVE_QHULL 1)
-  include_directories(${QHULL_INCLUDE_DIR})
   link_libraries(${QHULL_LIBRARIES})
 else(QHULL_FOUND)
-  message(STATUS "No Qhull found - will be missing some features")
+  FetchContent_Declare(
+    qhull
+    GIT_REPOSITORY https://github.com/qhull/qhull.git
+    GIT_TAG b6f24606dc202f15791ef8c2d940e9a5d43c19cf
+    GIT_SHALLOW FALSE
+    UPDATE_DISCONNECTED TRUE
+    )
+  set(QHULL_ENABLE_TESTING OFF)
+  set(BUILD_APPLICATIONS OFF)
+  set(BUILD_SHARED_LIBS ON)
+  set(BUILD_STATIC_LIBS ON)
+  FetchContent_MakeAvailable(qhull)
+  set(QHULL_INCLUDE_DIR ${qhull_SOURCE_DIR}/src)
+  message(STATUS "Adding include for Qhull to ${qhull_SOURCE_DIR}/src")
+  set(HAVE_QHULL 1)
+  set(HAVE_QHULL_REENTRANT 1)
+  set(QHULL_FOUND TRUE)
 endif(QHULL_FOUND)
+include_directories(${QHULL_INCLUDE_DIR})
+
+
+
 
 # zlib stuff
 find_package(ZLIB)
@@ -786,9 +807,11 @@ set(HYDROSOURCE src/applications/hydrodynamics/Hydro.cpp
 set(SEQUENTIALPROPSSOURCE
     src/applications/sequentialProps/CenterOfMass.cpp
     src/applications/sequentialProps/equipartitionTest.cpp
+    src/applications/sequentialProps/CountDifference.cpp
     src/applications/sequentialProps/COMVel.cpp
     src/applications/sequentialProps/ContactAngle1.cpp
     src/applications/sequentialProps/ContactAngle2.cpp
+    src/applications/sequentialProps/FluxOut.cpp
     src/applications/sequentialProps/GCNSeq.cpp
     src/applications/sequentialProps/SequentialAnalyzer.cpp
     src/applications/sequentialProps/SequentialProps.cpp
@@ -901,7 +924,7 @@ set(ELASTICCONSTANTSSOURCE
 
 add_executable(Dump2XYZ ${DUMP2XYZSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(Dump2XYZ openmd_single openmd_core openmd_single
-                      openmd_core)
+                      openmd_core) 
 add_executable(DynamicProps ${DYNAMICPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(DynamicProps openmd_single openmd_core openmd_single
                       openmd_core)
@@ -919,14 +942,14 @@ target_link_libraries(StaticProps openmd_single openmd_core openmd_single
                       openmd_core)
 add_executable(SequentialProps ${SEQUENTIALPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(SequentialProps openmd_single openmd_core openmd_single
-                      openmd_core)
+                      openmd_core) 
 add_executable(nanoparticleBuilder ${NANOPARTICLEBUILDERSOURCE}
                                    ${GETOPT_SOURCE})
 target_link_libraries(nanoparticleBuilder openmd_single openmd_core
                       openmd_single openmd_core openmd_single)
 add_executable(nanorodBuilder ${NANORODBUILDERSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(nanorodBuilder openmd_single openmd_core openmd_single
-                      openmd_core openmd_single)
+                      openmd_core openmd_single) 
 add_executable(nanorod_pentBuilder ${NANOROD_PENTBUILDERSOURCE}
                                    ${GETOPT_SOURCE})
 target_link_libraries(nanorod_pentBuilder openmd_single openmd_core
