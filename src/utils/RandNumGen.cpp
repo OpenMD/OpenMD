@@ -62,8 +62,6 @@ namespace OpenMD::Utils {
     int nProcessors {1};
 
 #ifdef IS_MPI
-    MPI_Status status;
-
     MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
     MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
 #endif

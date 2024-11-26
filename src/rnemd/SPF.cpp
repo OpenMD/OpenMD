@@ -436,7 +436,6 @@ namespace OpenMD::RNEMD {
 
     MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Status ierr;
 
     if (worldRank == 0) {
 #endif

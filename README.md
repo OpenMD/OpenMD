@@ -37,11 +37,11 @@ procedure for running and analyzing your first OpenMD simulation.
  1) A good C++17-compliant compiler. We've built and tested OpenMD on the
     following architecture & compiler combinations:
 
-| Architecture                   |  CXX | Notes                                  |
-|--------------------------------|:----:|----------------------------------------|
-| macOS Sequoia (intel & arm)    | c++  | (Apple Xcode 16.0, Open MPI 5.0.3)     |
-| Linux (Ubuntu 24.04 - x86\_64) | g++  | (GNU version 13.2  Open MPI 4.1.6)     |
-| Linux (RHEL 9.4 - x86\_64)     | icpx | (Intel version 23.0, Intel MPI 2021.13)|
+| Architecture                  | CXX  | Notes                                |
+|-------------------------------|:----:|--------------------------------------|
+| macOS Sequoia (intel & arm)   | c++  | (Apple Xcode 16.1, Open MPI 5.0.6)   |
+| Linux (Ubuntu 24.10 - x86-64) | g++  | (GNU version 14.2  Open MPI 4.1.6)   |
+| Linux (RHEL 9.5 - x86-64)     | icpx | (Intel version 2023, Intel MPI 2021) |
 
   OpenMD uses features in the C++ standard library and language features from
   C++17. Most (but not all) C++ compilers support these features.
