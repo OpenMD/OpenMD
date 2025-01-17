@@ -2,9 +2,6 @@
 
 [![build](https://github.com/OpenMD/OpenMD/workflows/build/badge.svg)](https://github.com/OpenMD/OpenMD/actions?query=workflow%3Abuild) [![status](https://joss.theoj.org/papers/8841bf23a51ceaf3439f455219043855/status.svg)](https://joss.theoj.org/papers/8841bf23a51ceaf3439f455219043855) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13953130.svg)](https://doi.org/10.5281/zenodo.13953130)
 
-
-
-
 OpenMD is an open source molecular dynamics engine which is capable of
 efficiently simulating liquids, proteins, nanoparticles, interfaces,
 and other complex systems using atom types with orientational degrees
@@ -88,7 +85,7 @@ Please read [CONTRIBUTING.md](.github/CONTRIBUTING.md) for details on how you ca
 
 ## License
 
-Copyright (c) 2004-2024, OpenMD. All rights reserved.
+Copyright (c) 2004-2025, OpenMD. All rights reserved.
 
 Licensed under the [BSD 3-Clause License](LICENSE).
 

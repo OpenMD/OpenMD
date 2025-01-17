@@ -594,28 +594,30 @@ namespace OpenMD {
       totalCount += counts[iproc];
     }
 
-    // we need a (possibly redundant) set of all found types:
-    std::vector<int> ftGlobal(totalCount);
+    if (totalCount > 0) {
+      // we need a (possibly redundant) set of all found types:
+      std::vector<int> ftGlobal(totalCount);
 
-    // now spray out the foundTypes to all the other processors:
-    MPI_Allgatherv(&foundTypes[0], count_local, MPI_INT, &ftGlobal[0],
-                   &counts[0], &disps[0], MPI_INT, MPI_COMM_WORLD);
+      // now spray out the foundTypes to all the other processors:
+      MPI_Allgatherv(&foundTypes[0], count_local, MPI_INT, &ftGlobal[0],
+                     &counts[0], &disps[0], MPI_INT, MPI_COMM_WORLD);
 
-    std::vector<int>::iterator j;
+      std::vector<int>::iterator j;
 
-    // foundIdents is a stl set, so inserting an already found ident
-    // will have no effect.
-    std::set<int> foundIdents;
+      // foundIdents is a stl set, so inserting an already found ident
+      // will have no effect.
+      std::set<int> foundIdents;
 
-    for (j = ftGlobal.begin(); j != ftGlobal.end(); ++j)
-      foundIdents.insert((*j));
+      for (j = ftGlobal.begin(); j != ftGlobal.end(); ++j)
+        foundIdents.insert((*j));
 
-    // now iterate over the foundIdents and get the actual atom types
-    // that correspond to these:
-    ForceField* forceField_ = info_->getForceField();
-    std::set<int>::iterator it;
-    for (it = foundIdents.begin(); it != foundIdents.end(); ++it)
-      atomTypes.insert(forceField_->getAtomType((*it)));
+      // now iterate over the foundIdents and get the actual atom types
+      // that correspond to these:
+      ForceField* forceField_ = info_->getForceField();
+      std::set<int>::iterator it;
+      for (it = foundIdents.begin(); it != foundIdents.end(); ++it)
+        atomTypes.insert(forceField_->getAtomType((*it)));
+    }
 #endif
 
     return atomTypes;
@@ -663,17 +665,19 @@ namespace OpenMD {
       totalCount += counts[iproc];
     }
 
-    // we need a (possibly redundant) set of all found stamps:
-    std::vector<int> fsGlobal(totalCount);
+    if (totalCount > 0) {
+      // we need a (possibly redundant) set of all found stamps:
+      std::vector<int> fsGlobal(totalCount);
 
-    // now spray out the foundStamps to all the other processors:
-    MPI_Allgatherv(&foundStamps[0], count_local, MPI_INT, &fsGlobal[0],
-                   &counts[0], &disps[0], MPI_INT, MPI_COMM_WORLD);
+      // now spray out the foundStamps to all the other processors:
+      MPI_Allgatherv(&foundStamps[0], count_local, MPI_INT, &fsGlobal[0],
+                     &counts[0], &disps[0], MPI_INT, MPI_COMM_WORLD);
 
-    std::vector<int>::iterator j;
+      std::vector<int>::iterator j;
 
-    for (j = fsGlobal.begin(); j != fsGlobal.end(); ++j)
-      moleculeStamps.insert(info_->getMoleculeStamp(*j));
+      for (j = fsGlobal.begin(); j != fsGlobal.end(); ++j)
+        moleculeStamps.insert(info_->getMoleculeStamp(*j));
+    }
 #endif
 
     return moleculeStamps;
