@@ -17,7 +17,7 @@ component{
 }
 
 ensemble = NVE;
-forceField = "LiMerzIons12-6-4.SPCE";
+forceField = "tunedLiMerz.SPCE";
 forceFieldFileName = "tunedLiMerz.SPCE.frc";
 electrostaticSummationMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
