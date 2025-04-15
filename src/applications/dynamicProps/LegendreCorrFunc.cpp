@@ -58,7 +58,7 @@ namespace OpenMD {
                                      const std::string& sele1,
                                      const std::string& sele2, int order) :
       ObjectACF<Vector3d>(info, filename, sele1, sele2),
-      order_(order) {
+    order_(order), doOffset_(false) {
     setCorrFuncType("Legendre Correlation Function");
     setOutputName(getPrefix(dumpFilename_) + ".lcorr");
 
@@ -75,48 +75,92 @@ namespace OpenMD {
     rotMats_.resize(nFrames_);
   }
 
+  LegendreCorrFunc::LegendreCorrFunc(SimInfo* info, const std::string& filename,
+                                     const std::string& sele1,
+                                     const std::string& sele2,
+				     int seleOffset,
+				     int order) :
+    ObjectACF<Vector3d>(info, filename, sele1, sele2), doOffset_(true),
+    seleOffset_(seleOffset), order_(order) {
+    setCorrFuncType("Legendre Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".lcorr");
+
+    std::stringstream params;
+    params << " order = " << order_;
+    params << " seleoffset = " << seleOffset_;
+    const std::string paramString = params.str();
+    setParameterString(paramString);
+
+    setLabelString("Pn(costheta_x)\tPn(costheta_y)\tPn(costheta_z)");
+
+    LegendrePolynomial polynomial(order);
+    legendre_ = polynomial.getLegendrePolynomial(order);
+
+    vectors_.resize(nFrames_);
+  }
+  
   int LegendreCorrFunc::computeProperty1(int frame, StuntDouble* sd) {
-    rotMats_[frame].push_back(sd->getA());
-    return rotMats_[frame].size() - 1;
+    if (doOffset_) {
+      int sd2Index = sd->getGlobalIndex() + seleOffset_;
+      StuntDouble* sd2= info_->getIOIndexToIntegrableObject(sd2Index);
+      vectors_[frame].push_back(sd->getPos() - sd2->getPos());
+      return vectors_[frame].size() - 1;
+    } else {
+      rotMats_[frame].push_back(sd->getA());
+      return rotMats_[frame].size() - 1;
+    }
   }
 
   Vector3d LegendreCorrFunc::calcCorrVal(int frame1, int frame2, int id1,
                                          int id2) {
-    // The lab frame vector corresponding to the body-fixed
-    // z-axis is simply the second column of A.transpose()
-    // or, identically, the second row of A itself.
-    // Similar identites give the 0th and 1st rows of A for
-    // the lab vectors associated with body-fixed x- and y- axes.
 
-    Vector3d v1x = rotMats_[frame1][id1].getRow(0);
-    Vector3d v1y = rotMats_[frame1][id1].getRow(1);
-    Vector3d v1z = rotMats_[frame1][id1].getRow(2);
-
-    Vector3d v2x = rotMats_[frame2][id2].getRow(0);
-    Vector3d v2y = rotMats_[frame2][id2].getRow(1);
-    Vector3d v2z = rotMats_[frame2][id2].getRow(2);
-
-    RealType ux =
-        legendre_.evaluate(dot(v1x, v2x) / (v1x.length() * v2x.length()));
-    RealType uy =
-        legendre_.evaluate(dot(v1y, v2y) / (v1y.length() * v2y.length()));
-    RealType uz =
+    if (doOffset_) {
+      Vector3d v1z = vectors_[frame1][id1];
+      Vector3d v2z = vectors_[frame2][id2];
+      RealType uz =
         legendre_.evaluate(dot(v1z, v2z) / (v1z.length() * v2z.length()));
+      return Vector3d(0, 0, uz);
+      
+    } else {
 
-    return Vector3d(ux, uy, uz);
+      // The lab frame vector corresponding to the body-fixed
+      // z-axis is simply the second column of A.transpose()
+      // or, identically, the second row of A itself.
+      // Similar identites give the 0th and 1st rows of A for
+      // the lab vectors associated with body-fixed x- and y- axes.
+      
+      Vector3d v1x = rotMats_[frame1][id1].getRow(0);
+      Vector3d v1y = rotMats_[frame1][id1].getRow(1);
+      Vector3d v1z = rotMats_[frame1][id1].getRow(2);
+      
+      Vector3d v2x = rotMats_[frame2][id2].getRow(0);
+      Vector3d v2y = rotMats_[frame2][id2].getRow(1);
+      Vector3d v2z = rotMats_[frame2][id2].getRow(2);
+      
+      RealType ux =
+        legendre_.evaluate(dot(v1x, v2x) / (v1x.length() * v2x.length()));
+      RealType uy =
+        legendre_.evaluate(dot(v1y, v2y) / (v1y.length() * v2y.length()));
+      RealType uz =
+        legendre_.evaluate(dot(v1z, v2z) / (v1z.length() * v2z.length()));
+      
+      return Vector3d(ux, uy, uz);
+    }
   }
 
   void LegendreCorrFunc::validateSelection(SelectionManager&) {
     StuntDouble* sd;
     int i;
-    for (sd = seleMan1_.beginSelected(i); sd != NULL;
-         sd = seleMan1_.nextSelected(i)) {
-      if (!sd->isDirectional()) {
-        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                 "LegendreCorrFunc::validateSelection Error: "
-                 "at least one of the selected objects is not Directional\n");
-        painCave.isFatal = 1;
-        simError();
+    if (!doOffset_) {
+      for (sd = seleMan1_.beginSelected(i); sd != NULL;
+	   sd = seleMan1_.nextSelected(i)) {
+	if (!sd->isDirectional()) {
+	  snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		   "LegendreCorrFunc::validateSelection Error: "
+		   "at least one of the selected objects is not Directional\n");
+	  painCave.isFatal = 1;
+	  simError();
+	}
       }
     }
   }

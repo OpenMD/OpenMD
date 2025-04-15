@@ -1,0 +1,3 @@
+[submodule "src/NEP_CPU"]
+	path = src/NEP_CPU
+	url = https://github.com/brucefan1983/NEP_CPU.git

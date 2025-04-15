@@ -256,8 +256,16 @@ int main(int argc, char* argv[]) {
       simError();
     }
 
-    corrFunc = std::make_unique<LegendreCorrFunc>(info, dumpFileName, sele1,
-                                                  sele2, order);
+    if (args_info.seleoffset_given) {
+      corrFunc = std::make_unique<LegendreCorrFunc>(info, dumpFileName, sele1,
+						    sele2,
+						    args_info.seleoffset_arg,
+						    order);
+    } else {
+    
+      corrFunc = std::make_unique<LegendreCorrFunc>(info, dumpFileName, sele1,
+						    sele2, order);
+    }
   } else if (args_info.lcorrZ_given) {
     int order(0);
     if (args_info.order_given)

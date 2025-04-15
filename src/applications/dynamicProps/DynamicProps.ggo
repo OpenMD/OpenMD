@@ -34,6 +34,7 @@ option	"output"	o	"output file name"                          string typestr="fi
 option	"sele1"		-	"select first stuntdouble set"	            string typestr="selection script" optional
 option  "sele2"         -       "select second stuntdouble set (if sele2 is not set, use script from sele1)" string typestr="selection script"      optional
 option  "sele3"         -       "select third stuntdouble set" string typestr="selection script"      optional
+option  "seleoffset"    -       "global index offset for a second object (used to define a vector between sites in molecule)" int optional
 option  "order"         -       "Lengendre Polynomial Order"                int                               optional
 option  "nbins"         n       "Number of bins"                          int     default="100"             optional
 option  "nzbins"        z       "Number of Z bins"                          int     default="100"             optional

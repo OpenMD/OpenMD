@@ -59,6 +59,9 @@ namespace OpenMD {
     LegendreCorrFunc(SimInfo* info, const std::string& filename,
                      const std::string& sele1, const std::string& sele2,
                      int order);
+    LegendreCorrFunc(SimInfo* info, const std::string& filename,
+		     const std::string& sele1, const std::string& sele2,
+		     int seleOffset, int order);
 
   protected:
     virtual int computeProperty1(int frame, StuntDouble* sd);
@@ -68,6 +71,10 @@ namespace OpenMD {
     int order_;
     DoublePolynomial legendre_;
     std::vector<std::vector<RotMat3x3d>> rotMats_;
+    std::vector<std::vector<Vector3d>> vectors_;
+    bool doOffset_{};
+    int seleOffset_{};
+
   };
 }  // namespace OpenMD
 

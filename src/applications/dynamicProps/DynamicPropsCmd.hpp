@@ -57,6 +57,9 @@ struct gengetopt_args_info
   char * sele3_arg;	/**< @brief select third stuntdouble set.  */
   char * sele3_orig;	/**< @brief select third stuntdouble set original value given at command line.  */
   const char *sele3_help; /**< @brief select third stuntdouble set help description.  */
+  int seleoffset_arg;	/**< @brief global index offset for a second object (used to define a vector between sites in molecule).  */
+  char * seleoffset_orig;	/**< @brief global index offset for a second object (used to define a vector between sites in molecule) original value given at command line.  */
+  const char *seleoffset_help; /**< @brief global index offset for a second object (used to define a vector between sites in molecule) help description.  */
   int order_arg;	/**< @brief Lengendre Polynomial Order.  */
   char * order_orig;	/**< @brief Lengendre Polynomial Order original value given at command line.  */
   const char *order_help; /**< @brief Lengendre Polynomial Order help description.  */
@@ -144,6 +147,7 @@ struct gengetopt_args_info
   unsigned int sele1_given ;	/**< @brief Whether sele1 was given.  */
   unsigned int sele2_given ;	/**< @brief Whether sele2 was given.  */
   unsigned int sele3_given ;	/**< @brief Whether sele3 was given.  */
+  unsigned int seleoffset_given ;	/**< @brief Whether seleoffset was given.  */
   unsigned int order_given ;	/**< @brief Whether order was given.  */
   unsigned int nbins_given ;	/**< @brief Whether nbins was given.  */
   unsigned int nzbins_given ;	/**< @brief Whether nzbins was given.  */
