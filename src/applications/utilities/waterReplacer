@@ -118,7 +118,7 @@ def findWaters(covTol):
                 ux = [0.0, 0.0, 0.0]
                 uy = [0.0, 0.0, 0.0]
                 uz = [0.0, 0.0, 0.0]
-                RotMat = numpy.zeros((3, 3), numpy.float_)
+                RotMat = numpy.zeros((3, 3), numpy.float64)
 
                 for j in range(3):
                     bisector[j] = 0.5*(positions[H[0]][j] + positions[H[1]][j])
