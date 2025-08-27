@@ -644,9 +644,9 @@ set(SOURCE
     src/rnemd/RNEMDParameters.cpp
     src/clusters/Icosahedron.cpp
     src/clusters/Cuboctahedron.cpp
-    src/clusters/Decahedron.cpp
-    src/nonbonded/nep.cpp
-    src/NEP_CPU/src/nep.cpp)
+    src/clusters/Decahedron.cpp)
+#    src/nonbonded/nep.cpp
+#    src/NEP_CPU/src/nep.cpp)
 
 set(PARALLEL_SOURCE
     src/antlr/CharBuffer.cpp
