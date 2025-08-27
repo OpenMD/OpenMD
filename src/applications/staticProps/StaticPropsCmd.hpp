@@ -119,6 +119,9 @@ struct gengetopt_args_info
   int seleoffset2_arg;	/**< @brief global index offset for a third object (used to define a vector between sites in molecule).  */
   char * seleoffset2_orig;	/**< @brief global index offset for a third object (used to define a vector between sites in molecule) original value given at command line.  */
   const char *seleoffset2_help; /**< @brief global index offset for a third object (used to define a vector between sites in molecule) help description.  */
+  int seleoffset3_arg;	/**< @brief global index offset for a fourth object (used to define a vector between sites in molecule).  */
+  char * seleoffset3_orig;	/**< @brief global index offset for a fourth object (used to define a vector between sites in molecule) original value given at command line.  */
+  const char *seleoffset3_help; /**< @brief global index offset for a fourth object (used to define a vector between sites in molecule) help description.  */
   char * molname_arg;	/**< @brief molecule name.  */
   char * molname_orig;	/**< @brief molecule name original value given at command line.  */
   const char *molname_help; /**< @brief molecule name help description.  */
@@ -199,6 +202,7 @@ struct gengetopt_args_info
   const char *tet_param_help; /**< @brief tetrahedrality order parameter (Qk) help description.  */
   const char *tet_param_z_help; /**< @brief spatially-resolved tetrahedrality order parameter Qk(z) help description.  */
   const char *tet_param_r_help; /**< @brief spatially-resolved tetrahedrality order parameter Qk(r) around a third selection help description.  */
+  const char *tet_param_rangle_help; /**< @brief spatially-resolved tetrahedrality order parameter Qk(r,cos(theta)) around a third selection help description.  */
   const char *tet_param_dens_help; /**< @brief computes density of the tetrahedrality order parameter Qk help description.  */
   const char *tet_param_xyz_help; /**< @brief volume-resolved tetrahedrality order parameter Qk(x,y,z).  (voxelSize, rcut, and gaussWidth must be specified) help description.  */
   const char *trans_param_z_help; /**< @brief spatially-resolved translational order parameter t(z) help description.  */
@@ -265,6 +269,7 @@ struct gengetopt_args_info
   unsigned int comsele_given ;	/**< @brief Whether comsele was given.  */
   unsigned int seleoffset_given ;	/**< @brief Whether seleoffset was given.  */
   unsigned int seleoffset2_given ;	/**< @brief Whether seleoffset2 was given.  */
+  unsigned int seleoffset3_given ;	/**< @brief Whether seleoffset3 was given.  */
   unsigned int molname_given ;	/**< @brief Whether molname was given.  */
   unsigned int begin_given ;	/**< @brief Whether begin was given.  */
   unsigned int end_given ;	/**< @brief Whether end was given.  */
@@ -314,6 +319,7 @@ struct gengetopt_args_info
   unsigned int tet_param_given ;	/**< @brief Whether tet_param was given.  */
   unsigned int tet_param_z_given ;	/**< @brief Whether tet_param_z was given.  */
   unsigned int tet_param_r_given ;	/**< @brief Whether tet_param_r was given.  */
+  unsigned int tet_param_rangle_given ;	/**< @brief Whether tet_param_rangle was given.  */
   unsigned int tet_param_dens_given ;	/**< @brief Whether tet_param_dens was given.  */
   unsigned int tet_param_xyz_given ;	/**< @brief Whether tet_param_xyz was given.  */
   unsigned int trans_param_z_given ;	/**< @brief Whether trans_param_z was given.  */

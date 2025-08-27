@@ -51,6 +51,7 @@ option  "refsele"       -       "select reference (use and only use with --gxyz)
 option  "comsele"       -       "select stunt doubles for center-of-mass reference point" string typestr="selection script"  optional
 option  "seleoffset"    -       "global index offset for a second object (used to define a vector between sites in molecule)" int optional
 option  "seleoffset2"    -      "global index offset for a third object (used to define a vector between sites in molecule)" int optional
+option  "seleoffset3"    -      "global index offset for a fourth object (used to define a vector between sites in molecule)" int optional
 option  "molname"       -       "molecule name" string       optional
 option  "begin"         -       "begin internal index"                                 int                  optional
 option  "end"           -       "end internal index"                                 int                  optional
@@ -102,6 +103,7 @@ groupoption "rodlength" -       "length of nanorod" group="staticProps"
 groupoption "tet_param" Q       "tetrahedrality order parameter (Qk)" group="staticProps"
 groupoption "tet_param_z" -     "spatially-resolved tetrahedrality order parameter Qk(z)" group="staticProps"
 groupoption "tet_param_r" -     "spatially-resolved tetrahedrality order parameter Qk(r) around a third selection" group="staticProps"
+groupoption "tet_param_rangle" - "spatially-resolved tetrahedrality order parameter Qk(r,cos(theta)) around a third selection" group="staticProps"
 groupoption "tet_param_dens" -  "computes density of the tetrahedrality order parameter Qk" group="staticProps"
 groupoption "tet_param_xyz" -   "volume-resolved tetrahedrality order parameter Qk(x,y,z).  (voxelSize, rcut, and gaussWidth must be specified)" group="staticProps"
 groupoption "trans_param_z" -   "spatially-resolved translational order parameter t(z)" group="staticProps"
