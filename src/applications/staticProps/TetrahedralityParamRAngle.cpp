@@ -273,6 +273,7 @@ namespace OpenMD {
 	    qRstream << sliceQ_[i][j] / (RealType)sliceCount_[i][j] << "\t";
 	  } else {
 	    qRstream << 0.0 << "\t";
+	  }
 	}
 	qRstream << "\n";
       }
