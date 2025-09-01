@@ -271,7 +271,8 @@ namespace OpenMD {
         for (unsigned int j = 0; j < sliceQ_[i].size(); ++j) {	
 	  if (sliceCount_[i][j] != 0) {
 	    qRstream << sliceQ_[i][j] / (RealType)sliceCount_[i][j] << "\t";
-	  }
+	  } else {
+	    qRstream << 0.0 << "\t";
 	}
 	qRstream << "\n";
       }
