@@ -121,97 +121,98 @@ end ChargeAtomTypes
 
 begin LennardJonesAtomTypes
 //name  epsilon(kcal/mol) sigma(Angstroms)
-Na+     	0.35190147	2.21736680
-Mg2+     	0.87282505	1.16290000
-Ca2+     	0.12122371	2.66560000
-K+      	0.47460325	2.30140000
-Li+     	0.10398897	1.43970000
-Rb+     	0.44510373	2.99498000
-Cs+     	0.08985650	3.52101300
-F-      	0.00740050	3.78982000
-Cl-     	0.01838506	4.69905630
-Br-     	0.02695865	4.82525000
-I-      	0.04278442	5.04975000
-OSO4    	0.20014340	3.65000000
-SSO4    	0.25016730	3.55000000
-O_TIP4P-2005   	0.18520737	3.15890000
-OH3     	0.2		3.10
-OHI		0.05996409416826	3.4
-HI		0.0439551314531549	1.443
-N1     		0.16993308	3.15000000
-ON     		0.20984704	2.86000000
-NNH4   		0.16993308	3.25000000
-Ba2+		0.09679732	3.26560000
-Sr2+		0.10874761	3.05000000
+Na+	0.35190147	2.21736680
+Mg2+	0.87282505	1.16290000
+Ca2+	0.12122371	2.66560000
+K+	0.47460325	2.30140000
+Li+	0.10398897	1.43970000
+Rb+	0.44510373	2.99498000
+Cs+	0.08985650	3.52101300
+F-	0.00740050	3.78982000
+Cl-	0.01838506	4.69905630
+Br-	0.02695865	4.82525000
+I-	0.04278442	5.04975000
+OSO4	0.20014340	3.65000000
+SSO4	0.25016730	3.55000000
+O_TIP4P-2005	0.18520737	3.15890000
+OH3	0.2		3.10
+OHI	0.05996409416826	3.4
+HI	0.0439551314531549	1.443
+N1	0.16993308	3.15000000
+ON	0.20984704	2.86000000
+HNH4	0.00000000	0.00000000
+NNH4	0.16993308	3.25000000
+Ba2+	0.09679732	3.26560000
+Sr2+	0.10874761	3.05000000
 end LennardJonesAtomTypes
 
 begin NonBondedInteractions
-//i             j               LennardJones  sigma (angstrom) eps (kcal/mol)
- Cl-       	O_TIP4P-2005   	LennardJones	4.23866980	0.01481440
- Na+       	O_TIP4P-2005   	LennardJones	2.60837540	0.18962435
- Na+       	Cl-        	LennardJones	3.00512310	0.34390397
- Mg2+       	O_TIP4P-2005   	LennardJones	1.81000000	2.8680688
- Mg2+       	Cl-        	LennardJones	3.00000000	0.71701721
- Ca2+       	O_TIP4P-2005   	LennardJones	2.40000000	1.73279159
- Ca2+       	Cl-        	LennardJones	3.15000000	0.23900574
- K+        	O_TIP4P-2005   	LennardJones	2.89040000	0.33471080
- K+        	Cl-        	LennardJones	3.39700000	0.33460803
- Li+       	O_TIP4P-2005   	LennardJones	2.12000000	0.16745938
- Li+       	Cl-        	LennardJones	2.70000000	0.30663094
- Rb+       	O_TIP4P-2005   	LennardJones	3.54350000	0.02390057
- Rb+       	Cl-        	LennardJones	3.99642000	0.08141515
- Cs+       	O_TIP4P-2005   	LennardJones	3.66290000	0.02390057
- Cs+       	Cl-        	LennardJones	4.31854000	0.03861276
- Br-       	O_TIP4P-2005   	LennardJones	4.19850000	0.02390057
- Li+       	Br-        	LennardJones	2.61450000	0.04765249
- Na+       	Br-        	LennardJones	3.38500000	0.08527008
- K+        	Br-        	LennardJones	3.79879000	0.10180210
- Rb+       	Br-        	LennardJones	3.91725000	0.10954183
- Cs+       	Br-        	LennardJones	4.33408000	0.04675717
- Mg2+       	Br-        	LennardJones	2.65519000	0.15339555
- Ca2+       	Br-        	LennardJones	3.67052000	0.05716659
- I-        	O_TIP4P-2005   	LennardJones	4.34950000	0.02390057
- Li+       	I-         	LennardJones	3.20470000	0.06536759
- Na+       	I-         	LennardJones	3.64658000	0.12270244
- K+        	I-         	LennardJones	4.00550000	0.12824809
- Rb+       	I-         	LennardJones	4.10288000	0.12419837
- Cs+       	I-         	LennardJones	4.43790000	0.05890344
- Mg2+       	I-         	LennardJones	2.82707000	0.19324426
- Ca2+       	I-         	LennardJones	3.94181000	0.07201721
- F-        	O_TIP4P-2005   	LennardJones	3.77450000	0.02390057
- Li+       	F-         	LennardJones	2.84540000	0.02635409
- K+        	F-         	LennardJones	3.46250000	0.05333819
- Rb+       	F-         	LennardJones	3.57250000	0.05165397
- Cs+       	F-         	LennardJones	3.94550000	0.02320865
- OSO4      	O_TIP4P-2005   	LennardJones	3.40445000	0.15033461
- Mg2+       	OSO4      	LennardJones	2.40645000	0.65696527
- K+        	OSO4      	LennardJones	3.20000000	0.30820239
- Li+       	OSO4      	LennardJones	2.84485000	0.19206724
- Rb+       	OSO4      	LennardJones	3.40000000	0.29894840
- OH3      	O_TIP4P-2005   	LennardJones	2.80	0.18818
- OH3      	Cl-        	LennardJones	3.50	0.059
- OHI		O_TIP4P-2005   	LennardJones	3.45000000	0.10538313
- OHI 		Li+		LennardJones	2.64485000	0.07896575
- OHI 		Na+		LennardJones	3.0336834	0.145263391491396
- OHI 		K+		LennardJones	3.20000000	0.16869343
- ON       	O_TIP4P-2005   	LennardJones	3.23000000	0.19714166
- ON       	Li+            	LennardJones	3.30000000	0.14772196
- ON       	Na+     	LennardJones	3.00000000	0.27174525
- ON       	K+       	LennardJones	3.30000000	0.31558509
- ON       	Rb+    		LennardJones	3.20000000	0.30562022
- ON       	Cs+		LennardJones	3.40000000	0.13731759
- ON       	Mg2+		LennardJones	3.40000000	0.42797156
- ON       	Ca2+		LennardJones	2.76280000	0.15949426
- NNH4     	O_TIP4P-2005   	LennardJones	3.05445000	0.17740592
- NNH4     	F-		LennardJones	3.54000000	0.03546252
- NNH4     	N1            	LennardJones	3.90000000	0.16993308
- NNH4     	OSO4          	LennardJones	3.30000000	0.18442067
- Sr2+       	O_TIP4P-2005   	LennardJones	2.68000000	1.07552581
- Sr2+       	Cl-        	LennardJones	3.30000000	0.19120459
- Sr2+       	Br-		LennardJones	3.58000000	0.14340344
- Sr2+       	I-		LennardJones	3.60000000	0.09560229
- Ba2+		Cl-        	LennardJones	3.80000000	0.11950287
- Ba2+       	I-		LennardJones	4.20000000	0.07170172
- Ba2+       	Br-		LennardJones	3.90000000	0.09560229
- Ba2+       	O_TIP4P-2005   	LennardJones	2.96800000	0.81261950
+//i     j               LennardJones   sigma (angstrom) eps (kcal/mol)
+Cl-	O_TIP4P-2005	LennardJones	4.23866980	0.01481440
+Na+	O_TIP4P-2005	LennardJones	2.60837540	0.18962435
+Na+	Cl-		LennardJones	3.00512310	0.34390397
+Mg2+	O_TIP4P-2005	LennardJones	1.81000000	2.8680688
+Mg2+	Cl-		LennardJones	3.00000000	0.71701721
+Ca2+	O_TIP4P-2005	LennardJones	2.40000000	1.73279159
+Ca2+	Cl-		LennardJones	3.15000000	0.23900574
+K+	O_TIP4P-2005	LennardJones	2.89040000	0.33471080
+K+	Cl-		LennardJones	3.39700000	0.33460803
+Li+	O_TIP4P-2005	LennardJones	2.12000000	0.16745938
+Li+	Cl-		LennardJones	2.70000000	0.30663094
+Rb+	O_TIP4P-2005	LennardJones	3.54350000	0.02390057
+Rb+	Cl-		LennardJones	3.99642000	0.08141515
+Cs+	O_TIP4P-2005	LennardJones	3.66290000	0.02390057
+Cs+	Cl-		LennardJones	4.31854000	0.03861276
+Br-	O_TIP4P-2005	LennardJones	4.19850000	0.02390057
+Li+	Br-		LennardJones	2.61450000	0.04765249
+Na+	Br-		LennardJones	3.38500000	0.08527008
+K+	Br-		LennardJones	3.79879000	0.10180210
+Rb+	Br-		LennardJones	3.91725000	0.10954183
+Cs+	Br-		LennardJones	4.33408000	0.04675717
+Mg2+	Br-		LennardJones	2.65519000	0.15339555
+Ca2+	Br-		LennardJones	3.67052000	0.05716659
+I-	O_TIP4P-2005	LennardJones	4.34950000	0.02390057
+Li+	I-		LennardJones	3.20470000	0.06536759
+Na+	I-		LennardJones	3.64658000	0.12270244
+K+	I-		LennardJones	4.00550000	0.12824809
+Rb+	I-		LennardJones	4.10288000	0.12419837
+Cs+	I-		LennardJones	4.43790000	0.05890344
+Mg2+	I-		LennardJones	2.82707000	0.19324426
+Ca2+	I-		LennardJones	3.94181000	0.07201721
+F-	O_TIP4P-2005	LennardJones	3.77450000	0.02390057
+Li+	F-		LennardJones	2.84540000	0.02635409
+K+	F-		LennardJones	3.46250000	0.05333819
+Rb+	F-		LennardJones	3.57250000	0.05165397
+Cs+	F-		LennardJones	3.94550000	0.02320865
+OSO4	O_TIP4P-2005	LennardJones	3.40445000	0.15033461
+Mg2+	OSO4		LennardJones	2.40645000	0.65696527
+K+	OSO4		LennardJones	3.20000000	0.30820239
+Li+	OSO4		LennardJones	2.84485000	0.19206724
+Rb+	OSO4		LennardJones	3.40000000	0.29894840
+OH3	O_TIP4P-2005	LennardJones	2.80		0.18818
+OH3	Cl-		LennardJones	3.50		0.059
+OHI	O_TIP4P-2005	LennardJones	3.45000000	0.10538313
+OHI	Li+		LennardJones	2.64485000	0.07896575
+OHI	Na+		LennardJones	3.0336834	0.145263391491396
+OHI	K+		LennardJones	3.20000000	0.16869343
+ON	O_TIP4P-2005	LennardJones	3.23000000	0.19714166
+ON	Li+		LennardJones	3.30000000	0.14772196
+ON	Na+		LennardJones	3.00000000	0.27174525
+ON	K+		LennardJones	3.30000000	0.31558509
+ON	Rb+		LennardJones	3.20000000	0.30562022
+ON	Cs+		LennardJones	3.40000000	0.13731759
+ON	Mg2+		LennardJones	3.40000000	0.42797156
+ON	Ca2+		LennardJones	2.76280000	0.15949426
+NNH4	O_TIP4P-2005	LennardJones	3.05445000	0.17740592
+NNH4	F-		LennardJones	3.54000000	0.03546252
+NNH4	N1		LennardJones	3.90000000	0.16993308
+NNH4	OSO4		LennardJones	3.30000000	0.18442067
+Sr2+	O_TIP4P-2005	LennardJones	2.68000000	1.07552581
+Sr2+	Cl-		LennardJones	3.30000000	0.19120459
+Sr2+	Br-		LennardJones	3.58000000	0.14340344
+Sr2+	I-		LennardJones	3.60000000	0.09560229
+Ba2+	Cl-		LennardJones	3.80000000	0.11950287
+Ba2+	I-		LennardJones	4.20000000	0.07170172
+Ba2+	Br-		LennardJones	3.90000000	0.09560229
+Ba2+	O_TIP4P-2005	LennardJones	2.96800000	0.81261950
 end NonBondedInteractions
