@@ -77,6 +77,20 @@ endif()
 message(STATUS "Adding include for stl_reader to ${stl_reader_INCLUDE_DIR}")
 include_directories(${stl_reader_INCLUDE_DIR})
 
+#find_package(nep_cpu REQUIRED)
+#if(NOT nep_cpu_FOUND)
+#  FetchContent_Declare(
+#    nep_cpu
+#    GIT_REPOSITORY https://github.com/brucefan1983/NEP_CPU.git
+#    GIT_TAG 42634af93770d7c4efed1242f9caeb190fa89b02)
+#  FetchContent_MakeAvailable(nep_cpu)
+#  set(nep_cpu_INCLUDE_DIR ${nep_cpu_SOURCE_DIR}/src)
+#endif()
+
+#message(STATUS "Adding include for nep_cpu to ${nep_cpu_INCLUDE_DIR}")
+#include_directories(${nep_cpu_INCLUDE_DIR})
+
+
 if(NOT NO_PARALLEL)
   if(WIN32)
     # This is for finding MS-MPI.
@@ -631,6 +645,8 @@ set(SOURCE
     src/clusters/Icosahedron.cpp
     src/clusters/Cuboctahedron.cpp
     src/clusters/Decahedron.cpp)
+#    src/nonbonded/nep.cpp
+#    src/NEP_CPU/src/nep.cpp)
 
 set(PARALLEL_SOURCE
     src/antlr/CharBuffer.cpp
@@ -850,6 +866,7 @@ set(STATICPROPSSOURCE
     src/applications/staticProps/TetrahedralityParam.cpp
     src/applications/staticProps/TetrahedralityParamDens.cpp
     src/applications/staticProps/TetrahedralityParamR.cpp
+    src/applications/staticProps/TetrahedralityParamRAngle.cpp
     src/applications/staticProps/TetrahedralityParamZ.cpp
     src/applications/staticProps/TetrahedralityParamXYZ.cpp
     src/applications/staticProps/TranslationalOrderParamZ.cpp

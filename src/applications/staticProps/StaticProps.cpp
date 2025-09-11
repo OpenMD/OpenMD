@@ -115,6 +115,7 @@
 #include "applications/staticProps/TetrahedralityParam.hpp"
 #include "applications/staticProps/TetrahedralityParamDens.hpp"
 #include "applications/staticProps/TetrahedralityParamR.hpp"
+#include "applications/staticProps/TetrahedralityParamRAngle.hpp"
 #include "applications/staticProps/TetrahedralityParamXYZ.hpp"
 #include "applications/staticProps/TetrahedralityParamZ.hpp"
 #include "applications/staticProps/TranslationalOrderParamZ.hpp"
@@ -449,12 +450,37 @@ int main(int argc, char* argv[]) {
     if (args_info.rcut_given) {
       if (args_info.sele3_given) {
         analyser = std::make_unique<TetrahedralityParamR>(
-            info, dumpFileName, sele1, sele2, sele3, args_info.rcut_arg, maxLen,
+	    info, dumpFileName, sele1, sele2, sele3, args_info.rcut_arg, maxLen,
             nrbins);
       } else {
         snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                  "Selection3 (--sele3) must be given when calculating "
                  "Tetrahedrality Parameter Qk(r)");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal  = 1;
+        simError();
+      }
+    }
+  } else if (args_info.tet_param_rangle_given) {
+    if (args_info.rcut_given) {
+      if (args_info.sele3_given) {
+	if (args_info.seleoffset3_given) {
+	  analyser = std::make_unique<TetrahedralityParamRAngle>(
+	      info, dumpFileName, sele1, sele2, sele3,
+	      args_info.seleoffset3_arg, args_info.rcut_arg, maxLen,
+	      nrbins, nanglebins);
+	} else {
+	  snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		   "Selection3 offset (--seleoffset3) must be given when "
+		   "calculating Tetrahedrality Parameter Qk(r, cos(theta))");
+	  painCave.severity = OPENMD_ERROR;
+	  painCave.isFatal  = 1;
+	  simError();
+	}
+      } else {
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "Selection3 (--sele3) must be given when calculating "
+                 "Tetrahedrality Parameter Qk(r, cos(theta))");
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
         simError();
