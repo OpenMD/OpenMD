@@ -880,7 +880,7 @@ namespace OpenMD::RNEMD {
 
 #ifdef IS_MPI
     // If we're the primary node, should we print out the results
-    int worldRank;
+    int worldRank{};
     MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
 
     if (worldRank == 0) {
