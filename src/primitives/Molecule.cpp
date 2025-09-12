@@ -368,7 +368,7 @@ namespace OpenMD {
   Vector3d Molecule::getComVel() {
     StuntDouble* sd;
     std::vector<StuntDouble*>::iterator i;
-    Vector3d velCom;
+    Vector3d velCom(0.0);
     RealType totalMass = 0;
     RealType mass;
 

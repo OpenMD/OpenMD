@@ -88,11 +88,14 @@ namespace OpenMD {
       }
     }
 
+    // We've modified velocities, so clear any derived properties in
+    // the Snapshot:
+    info_->getSnapshotManager()->getCurrentSnapshot()->clearDerivedProperties();
+
     removeComDrift();
 
     // Remove angular drift if we are not using periodic boundary
     // conditions:
-
     if (!globals_->getUsePeriodicBoundaryConditions()) removeAngularDrift();
   }
 
@@ -158,12 +161,16 @@ namespace OpenMD {
       }
     }
 
+    // We've modified velocities, so clear any derived properties in
+    // the Snapshot:
+    info_->getSnapshotManager()->getCurrentSnapshot()->clearDerivedProperties();
+    
     removeComDrift();
 
     // Remove angular drift if we are not using periodic boundary
     // conditions:
-
     if (!globals_->getUsePeriodicBoundaryConditions()) removeAngularDrift();
+
   }
 
   void Velocitizer::randomizeChargeVelocity(RealType temperature) {
@@ -257,11 +264,14 @@ namespace OpenMD {
         sd->setVel(sd->getVel() - vdrift);
       }
     }
+
+    // We've modified velocities, so clear any derived properties in
+    // the Snapshot:
+    info_->getSnapshotManager()->getCurrentSnapshot()->clearDerivedProperties();
   }
 
   void Velocitizer::removeAngularDrift() {
     // Get the Center of Mass drift velocity.
-
     Vector3d vdrift;
     Vector3d com;
 
@@ -294,5 +304,9 @@ namespace OpenMD {
         sd->setVel((sd->getVel() - vdrift) - cross(omega, tempComPos));
       }
     }
+
+    // We've modified velocities, so clear any derived properties in
+    // the Snapshot:
+    info_->getSnapshotManager()->getCurrentSnapshot()->clearDerivedProperties();
   }
 }  // namespace OpenMD
