@@ -87,8 +87,13 @@ namespace OpenMD {
     Vector3d com(V3Zero);
     RealType mass;
 
-    for (sd = seleMan1_.beginSelected(i); sd != NULL;
-         sd = seleMan1_.nextSelected(i)) {
+    // Prevents double counting atoms that are part of rigid bodies
+    // and therefore miscalculating the total mass:
+    
+    auto reducedSeleMan = seleMan1_.removeAtomsInRigidBodies();
+    
+    for (sd = reducedSeleMan.beginSelected(i); sd != NULL;
+         sd = reducedSeleMan.nextSelected(i)) {
       mass = sd->getMass();
       mtot += mass;
       com += sd->getPos() * mass;

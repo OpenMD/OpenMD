@@ -71,12 +71,17 @@ namespace OpenMD {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
 
+    // Prevents double counting atoms that are part of rigid bodies
+    // and therefore miscalculating the total mass:
+    
+    auto reducedSeleMan = seleMan1_.removeAtomsInRigidBodies();
+
     RealType mtot = 0.0;
     Vector3d comVel(V3Zero);
     RealType mass;
 
-    for (sd = seleMan1_.beginSelected(i); sd != NULL;
-         sd = seleMan1_.nextSelected(i)) {
+    for (sd = reducedSeleMan.beginSelected(i); sd != NULL;
+         sd = reducedSeleMan.nextSelected(i)) {
       mass = sd->getMass();
       mtot += mass;
       comVel += sd->getVel() * mass;
