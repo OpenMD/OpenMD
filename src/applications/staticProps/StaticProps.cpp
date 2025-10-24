@@ -105,6 +105,7 @@
 #include "applications/staticProps/NitrileFrequencyMap.hpp"
 #include "applications/staticProps/NumberR.hpp"
 #include "applications/staticProps/NumberZ.hpp"
+#include "applications/staticProps/OHFrequencyMap.hpp"
 #include "applications/staticProps/OrderParameterProbZ.hpp"
 #include "applications/staticProps/PositionZ.hpp"
 #include "applications/staticProps/PotDiff.hpp"
@@ -676,6 +677,9 @@ int main(int argc, char* argv[]) {
   } else if (args_info.nitrile_given) {
     analyser = std::make_unique<NitrileFrequencyMap>(info, dumpFileName, sele1,
                                                      args_info.nbins_arg);
+  } else if (args_info.OHfreqmap_given) {
+    analyser = std::make_unique<OHFrequencyMap>(info, dumpFileName, sele1,
+						args_info.nbins_arg);
   } else if (args_info.p_angle_given) {
     if (args_info.sele1_given) {
       if (args_info.sele2_given)
