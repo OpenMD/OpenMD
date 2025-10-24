@@ -70,7 +70,6 @@ namespace OpenMD {
     void processHistogram();
     void writeProbs();
 
-    SimInfo* info_ {nullptr};
     Snapshot* currentSnapshot_ {};
 
     string selectionScript1_;
@@ -84,6 +83,7 @@ namespace OpenMD {
     RealType minFreq_;
     RealType maxFreq_;
     Vector3d EF_;
+    bool dumpHasElectricFields_;
   };
 }  // namespace OpenMD
 

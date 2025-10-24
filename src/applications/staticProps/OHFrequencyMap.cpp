@@ -50,27 +50,47 @@
 #include <algorithm>
 #include <fstream>
 
-#include "brains/Thermo.hpp"
+#include "brains/ForceManager.hpp"
+#include "brains/SimSnapshotManager.hpp"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
 
 namespace OpenMD {
 
-  OHFrequencyMap::OHFrequencyMap(SimInfo* info,
-				 const std::string& filename,
-				 const std::string& sele1,
-				 int nbins) :
-      StaticAnalyser(info, filename, nbins),
-      info_(info), selectionScript1_(sele1), seleMan1_(info_),
-      evaluator1_(info_) {
+  OHFrequencyMap::OHFrequencyMap(SimInfo* info, const std::string& filename,
+				 const std::string& sele1, int nbins) :
+    StaticAnalyser(info, filename, nbins),
+    selectionScript1_(sele1), seleMan1_(info_), evaluator1_(info_) {
+    
     setOutputName(getPrefix(filename) + ".OHfreqs");
+    
+    dumpHasElectricFields_ = info_->getSimParams()->getOutputElectricField();
+    
+    // If we don't have electric fields stored in the dump file, we
+    // need to expand storage to hold them during a force calculation.
+    
+    if(!dumpHasElectricFields_) {
+      int atomStorageLayout        = info_->getAtomStorageLayout();
+      int rigidBodyStorageLayout   = info->getRigidBodyStorageLayout();
+      int cutoffGroupStorageLayout = info->getCutoffGroupStorageLayout();
+      
+      atomStorageLayout |= DataStorage::dslElectricField;
+      rigidBodyStorageLayout |= DataStorage::dslElectricField;
+      info_->setAtomStorageLayout(atomStorageLayout);
+      info_->setRigidBodyStorageLayout(rigidBodyStorageLayout);
+      info_->setCutoffGroupStorageLayout(cutoffGroupStorageLayout);
+      
+      info_->setSnapshotManager(new SimSnapshotManager(info_, atomStorageLayout,
+						       rigidBodyStorageLayout,
+						       cutoffGroupStorageLayout));
+    }
 
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
-
+    
     count_.resize(nBins_);
     histogram_.resize(nBins_);
 
@@ -96,13 +116,6 @@ namespace OpenMD {
     AtomTypeSet atypes      = info_->getSimulatedAtomTypes();
     int nAtoms =
         info->getSnapshotManager()->getCurrentSnapshot()->getNumberOfAtoms();
-
-    RealType rcut;
-    if (info_->getSimParams()->haveCutoffRadius()) {
-      rcut = info_->getSimParams()->getCutoffRadius();
-    } else {
-      rcut = 12.0;
-    }
 
     EF_ = V3Zero;
 
@@ -135,27 +148,31 @@ namespace OpenMD {
   }
 
   void OHFrequencyMap::process() {
+    ForceManager* forceMan;
     Molecule* mol;
     Atom* atom;
     AtomType* atype;
     SimInfo::MoleculeIterator mi;
-    Molecule::AtomIterator ai2;
     Atom* atom2;
     StuntDouble* sd1;
-    int ii, sdID, molID, sdID2;
+    int ii, sdID, molID;
     RealType a0(0.0), a1(0.0);
     Vector3d sE(0.0);
     RealType freq;
     std::string name;
     map<string, std::pair<RealType, RealType>>::iterator fi;
-    bool excluded;
     const RealType chrgToKcal = 23.060548;
+    const RealType kcalToAU = 0.0008432975573; // fields in atomic units
 
     DumpReader reader(info_, dumpFilename_);
     int nFrames = reader.getNFrames();
-
     nProcessed_ = nFrames / step_;
 
+    if (!dumpHasElectricFields_) {
+      // We'll need the force manager to compute the fields
+      forceMan = new ForceManager(info_);
+    }
+    
     std::fill(histogram_.begin(), histogram_.end(), 0.0);
     std::fill(count_.begin(), count_.end(), 0);
 
@@ -163,6 +180,11 @@ namespace OpenMD {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
+      if (!dumpHasElectricFields_) {
+	forceMan->setDoElectricField(true);
+	forceMan->calcForces();
+      }
+      
       if (evaluator1_.isDynamic()) {
         seleMan1_.setSelectionSet(evaluator1_.evaluate());
       }
@@ -198,7 +220,7 @@ namespace OpenMD {
 	    
 	    // convert to atomic units (hartree electrons^-1 bohr^-1):
 	    
-	    sE *= 0.0008432975573;
+	    sE *= kcalToAU;
 	    
 	    freq = a0 + a1 * dot(rOH, sE);
 	  
@@ -207,7 +229,9 @@ namespace OpenMD {
 	    if (binNo >= 0 && binNo < nBins_) {
 	      count_[binNo]++;
 	    } else {
-	      std::cerr << "freq = " << freq << "is outside histogram range\n";
+	      std::cerr << "freq = " << freq
+			<< " is outside histogram range: (" << minFreq_ << ", "
+			<< maxFreq_ << ")\n";
 	    }
 	  }
 	}
