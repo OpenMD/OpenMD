@@ -86,6 +86,8 @@ namespace OpenMD {
 						       cutoffGroupStorageLayout));
     }
 
+    info_->getSimParams()->setOutputElectricField(true);
+
     evaluator1_.loadScriptString(sele1);
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
@@ -171,6 +173,8 @@ namespace OpenMD {
     if (!dumpHasElectricFields_) {
       // We'll need the force manager to compute the fields
       forceMan = new ForceManager(info_);
+      forceMan->setDoElectricField(true);
+      forceMan->initialize();
     }
     
     std::fill(histogram_.begin(), histogram_.end(), 0.0);
@@ -179,9 +183,9 @@ namespace OpenMD {
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
+      
       if (!dumpHasElectricFields_) {
-	forceMan->setDoElectricField(true);
+        forceMan->setDoElectricField(true);
 	forceMan->calcForces();
       }
       
@@ -191,7 +195,6 @@ namespace OpenMD {
 
       for (sd1 = seleMan1_.beginSelected(ii); sd1 != NULL;
            sd1 = seleMan1_.nextSelected(ii)) {
-	
         sdID  = sd1->getGlobalIndex();
         molID = info_->getGlobalMolMembership(sdID);
         mol   = info_->getMoleculeByGlobalIndex(molID);

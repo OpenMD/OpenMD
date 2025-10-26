@@ -127,7 +127,7 @@ namespace OpenMD {
     DeclareParameter(CompressDumpFile, bool);
     DeclareParameter(OutputForceVector, bool);
     DeclareParameter(OutputParticlePotential, bool);
-    DeclareParameter(OutputElectricField, bool);
+    DeclareAlterableParameter(OutputElectricField, bool);
     DeclareParameter(OutputFluctuatingCharges, bool);
     DeclareParameter(OutputSitePotential, bool);
     DeclareParameter(OutputDensity, bool);
