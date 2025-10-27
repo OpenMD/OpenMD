@@ -96,8 +96,8 @@ namespace OpenMD {
     count_.resize(nBins_);
     histogram_.resize(nBins_);
 
-    minFreq_ = 2900;
-    maxFreq_ = 3900;
+    minFreq_ = 2700;
+    maxFreq_ = 4000;
 
     // Values from "Combined electronic structure/molecular dynamics
     // approach for ultrafast infrared spectroscopy of dilute HOD in
@@ -108,11 +108,48 @@ namespace OpenMD {
     // These map site electric fields (in atomic units) onto
     // frequencies in wavenumbers.
 
-    frequencyMap_["H_TIP4P"]     = std::make_pair(3832.0, -12141.0);
-    frequencyMap_["H_SPCE"]      = std::make_pair(3806.0, -10792.0);
+    // w10_["H_TIP4P"]     = std::make_pair(3832.0, -12141.0);
+    // w10_["H_SPCE"]      = std::make_pair(3806.0, -10792.0);
+
+    // Updated maps from B. M. Auer, J. L. Skinner; IR and Raman
+    // spectra of liquid water: Theory and
+    // interpretation. J. Chem. Phys. 14 June 2008; 128 (22):
+    // 224511. https://doi.org/10.1063/1.2925258
+
+    w10_["H_SPCE"]     = std::make_tuple(3761.6, -5060.4, -86225.0);
+    w21_["H_SPCE"]     = std::make_tuple(3614.1, -5493.7, -115670.0); 
+    x10_["H_SPCE"]     = std::make_pair(0.1024, -0.927e-5);
+    x21_["H_SPCE"]     = std::make_pair(0.1428, -1.29e-5);
+    p10_["H_SPCE"]     = std::make_pair(1.611, 5.893e-4);
+    p21_["H_SPCE"]     = std::make_pair(1.611, 5.893e-4);
+    muprime_["H_SPCE"] = std::make_tuple(0.71116, 75.591, 0.0);
+    wintra_["H_SPCE"]  = std::make_tuple(-1789, 23852, -1.966);
+
+    // Updated maps from: "Robustness of frequency, transition dipole,
+    // and coupling maps for water vibrational spectroscopy,"
+    // S. M. Gruenbaum, C. J. Tainter, L. Shi, Y. Ni, and
+    // J. L. Skinner, Journal of Chemical Theory and Computation,
+    // 9(7):3109–3117, 07 2013 DOI: 10.1021/ct400292q
+
+    w10_["H_TIP4P"]     = std::make_tuple(3760.2, -3541.7, -152677.0);
+    w21_["H_TIP4P"]     = std::make_tuple(3606.0, -3498.6, -198715.0);
+    x10_["H_TIP4P"]     = std::make_pair(0.19285, -1.7261e-5);
+    x21_["H_TIP4P"]     = std::make_pair(0.26836, -2.3788e-5);
+    p10_["H_TIP4P"]     = std::make_pair(1.6466, 5.7692e-4);
+    p21_["H_TIP4P"]     = std::make_pair(2.0160, 8.7684e-4);
+    muprime_["H_TIP4P"] = std::make_tuple(0.1646, 11.39, 63.41);
+    wintra_["H_TIP4P"]  = std::make_tuple(-1361, 27165, -1.887);
+    
     // Assuming OH frequency map for TIP4P-Ice is the same as TIP4P.
     // This may not be a great assumption.
-    frequencyMap_["H_TIP4P-Ice"] = std::make_pair(3832.0, -12141.0);
+    w10_["H_TIP4P-Ice"] = w10_["H_TIP4P"];
+    w21_["H_TIP4P-Ice"] = w21_["H_TIP4P"];
+    x10_["H_TIP4P-Ice"] = x10_["H_TIP4P"];
+    x21_["H_TIP4P-Ice"] = x21_["H_TIP4P"];
+    p10_["H_TIP4P-Ice"] = p10_["H_TIP4P"];
+    p21_["H_TIP4P-Ice"] = p21_["H_TIP4P"];
+    muprime_["H_TIP4P-Ice"] = muprime_["H_TIP4P"];
+    wintra_["H_TIP4P-Ice"] = wintra_["H_TIP4P"];
 
     ForceField* forceField_ = info_->getForceField();
     AtomTypeSet atypes      = info_->getSimulatedAtomTypes();
@@ -158,11 +195,11 @@ namespace OpenMD {
     Atom* atom2;
     StuntDouble* sd1;
     int ii, sdID, molID;
-    RealType a0(0.0), a1(0.0);
+    RealType a0(0.0), a1(0.0), a2(0.0);
     Vector3d sE(0.0);
     RealType freq;
     std::string name;
-    map<string, std::pair<RealType, RealType>>::iterator fi;
+    map<string, std::tuple<RealType, RealType, RealType>>::iterator fi;
     const RealType chrgToKcal = 23.060548;
     const RealType kcalToAU = 0.0008432975573; // fields in atomic units
 
@@ -210,10 +247,11 @@ namespace OpenMD {
 	  atype = atom->getAtomType();
 	  name  = atype->getName();
 
-	  fi    = frequencyMap_.find(name);
-	  if (fi != frequencyMap_.end()) {
-	    a0 = (*fi).second.first;
-	    a1 = (*fi).second.second;
+	  fi    = w10_.find(name);
+	  if (fi != w10_.end()) {
+	    a0 = get<0>((*fi).second);
+	    a1 = get<1>((*fi).second);
+	    a2 = get<2>((*fi).second);
 	    
 	    sE = sd1->getElectricField(); // in kcal mol^-1 angstrom^-1 e^-1
 	    
@@ -224,8 +262,10 @@ namespace OpenMD {
 	    // convert to atomic units (hartree electrons^-1 bohr^-1):
 	    
 	    sE *= kcalToAU;
+
+	    RealType E = dot(rOH, sE);
 	    
-	    freq = a0 + a1 * dot(rOH, sE);
+	    freq = a0 + a1 * E + a2 * E*E;
 	  
 	    int binNo =
 	      int(nBins_ * (freq - minFreq_) / (maxFreq_ - minFreq_));
