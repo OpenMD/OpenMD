@@ -50,6 +50,7 @@
 
 #include <string>
 #include <vector>
+#include <tuple>
 
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "nonbonded/Electrostatic.hpp"
@@ -79,7 +80,15 @@ namespace OpenMD {
     int nProcessed_ {};
     vector<int> count_;
     vector<RealType> histogram_;
-    map<string, std::pair<RealType, RealType> > frequencyMap_;
+    map<string, std::tuple<RealType, RealType, RealType> > w10_;
+    map<string, std::tuple<RealType, RealType, RealType> > w21_;
+    map<string, std::pair<RealType, RealType> > x10_;
+    map<string, std::pair<RealType, RealType> > x21_;
+    map<string, std::pair<RealType, RealType> > p10_;
+    map<string, std::pair<RealType, RealType> > p21_;
+    map<string, std::tuple<RealType, RealType, RealType> > muprime_;
+    map<string, std::tuple<RealType, RealType, RealType> > wintra_;
+
     RealType minFreq_;
     RealType maxFreq_;
     Vector3d EF_;
