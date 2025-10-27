@@ -99,19 +99,19 @@ namespace OpenMD {
     minFreq_ = 2700;
     maxFreq_ = 4000;
 
-    // Values from "Combined electronic structure/molecular dynamics
-    // approach for ultrafast infrared spectroscopy of dilute HOD in
-    // liquid H2O and D2O," by S. A. Corcelli, C. P. Lawrence, and
-    // J. L. Skinner, J. Chem. Phys. 120, 8107–8117 (2004),
+    // Original values from "Combined electronic structure/molecular
+    // dynamics approach for ultrafast infrared spectroscopy of dilute
+    // HOD in liquid H2O and D2O," by S. A. Corcelli, C. P. Lawrence,
+    // and J. L. Skinner, J. Chem. Phys. 120, 8107–8117 (2004),
     // https://doi.org/10.1063/1.1683072
     //
-    // These map site electric fields (in atomic units) onto
+    // These map the site electric fields (in atomic units) onto
     // frequencies in wavenumbers.
 
     // w10_["H_TIP4P"]     = std::make_pair(3832.0, -12141.0);
     // w10_["H_SPCE"]      = std::make_pair(3806.0, -10792.0);
 
-    // Updated maps from B. M. Auer, J. L. Skinner; IR and Raman
+    // Updated SPC/E maps from B. M. Auer, J. L. Skinner; IR and Raman
     // spectra of liquid water: Theory and
     // interpretation. J. Chem. Phys. 14 June 2008; 128 (22):
     // 224511. https://doi.org/10.1063/1.2925258
@@ -125,8 +125,8 @@ namespace OpenMD {
     muprime_["H_SPCE"] = std::make_tuple(0.71116, 75.591, 0.0);
     wintra_["H_SPCE"]  = std::make_tuple(-1789, 23852, -1.966);
 
-    // Updated maps from: "Robustness of frequency, transition dipole,
-    // and coupling maps for water vibrational spectroscopy,"
+    // Updated TIP4P maps from: "Robustness of frequency, transition
+    // dipole, and coupling maps for water vibrational spectroscopy,"
     // S. M. Gruenbaum, C. J. Tainter, L. Shi, Y. Ni, and
     // J. L. Skinner, Journal of Chemical Theory and Computation,
     // 9(7):3109–3117, 07 2013 DOI: 10.1021/ct400292q
@@ -140,8 +140,13 @@ namespace OpenMD {
     muprime_["H_TIP4P"] = std::make_tuple(0.1646, 11.39, 63.41);
     wintra_["H_TIP4P"]  = std::make_tuple(-1361, 27165, -1.887);
     
-    // Assuming OH frequency map for TIP4P-Ice is the same as TIP4P.
-    // This may not be a great assumption.
+    // Assuming the OH frequency map for TIP4P-Ice is the same as
+    // TIP4P. Transferrability was tested by: Tetsuyuki Takayama,
+    // Takuhiro Otosu, Shoichi Yamaguchi; "Transferability of
+    // vibrational spectroscopic map from TIP4P to TIP4P-like water
+    // models," J. Chem. Phys. 7 April 2023; 158 (13): 136101.
+    // https://doi.org/10.1063/5.0146084
+    
     w10_["H_TIP4P-Ice"] = w10_["H_TIP4P"];
     w21_["H_TIP4P-Ice"] = w21_["H_TIP4P"];
     x10_["H_TIP4P-Ice"] = x10_["H_TIP4P"];
