@@ -63,24 +63,15 @@
 #include <mpi.h>
 #endif
 
-#include "antlr/ANTLRException.hpp"
-#include "antlr/CharStreamException.hpp"
-#include "antlr/MismatchedCharException.hpp"
-#include "antlr/MismatchedTokenException.hpp"
-#include "antlr/NoViableAltException.hpp"
-#include "antlr/NoViableAltForCharException.hpp"
-#include "antlr/RecognitionException.hpp"
-#include "antlr/TokenStreamException.hpp"
-#include "antlr/TokenStreamIOException.hpp"
-#include "antlr/TokenStreamRecognitionException.hpp"
+#include "antlr4-runtime.h"
 #include "brains/ForceField.hpp"
 #include "brains/MoleculeCreator.hpp"
 #include "brains/SimSnapshotManager.hpp"
 #include "io/DumpReader.hpp"
-#include "mdParser/MDLexer.hpp"
-#include "mdParser/MDParser.hpp"
-#include "mdParser/MDTreeParser.hpp"
-#include "mdParser/SimplePreprocessor.hpp"
+#include "omdParser/OMDLexer.h"
+#include "omdParser/OMDParser.h"
+#include "omdParser/OMDTreeVisitor.hpp"
+#include "omdParser/SimplePreprocessor.hpp"
 #include "types/DirectionalAdapter.hpp"
 #include "types/EAMAdapter.hpp"
 #include "types/FixedChargeAdapter.hpp"
@@ -94,6 +85,29 @@
 #include "utils/simError.h"
 
 namespace OpenMD {
+
+  // Custom error listener for better error reporting
+  class OMDErrorListener : public antlr4::BaseErrorListener {
+  public:
+    void syntaxError(
+		     antlr4::Recognizer *recognizer,
+		     antlr4::Token *offendingSymbol,
+		     size_t line,
+		     size_t charPositionInLine,
+		     const std::string &msg,
+		     std::exception_ptr e
+		     ) override {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Syntax error at line %zu:%zu  %s\n", line, charPositionInLine,
+	       msg.c_str());
+      painCave.isFatal = 1;
+      simError();
+
+      // Throw an exception here to halt parsing
+      std::runtime_error("Parse error");      
+    }
+  };
+
 
   Globals* SimCreator::parseFile(std::istream& rawMetaDataStream,
                                  const std::string& filename, int mdFileVersion,
@@ -134,109 +148,53 @@ namespace OpenMD {
         delete[] buf;
       }
 #endif
-      // Create a scanner that reads from the input stream
-      MDLexer lexer(ppStream);
-      lexer.setFilename(filename);
-      lexer.initDeferredLineCount();
 
-      // Create a parser that reads from the scanner
-      MDParser parser(lexer);
-      parser.setFilename(filename);
+      // Create ANTLR input stream from file
+      antlr4::ANTLRInputStream input(ppStream);
+        
+      // Create lexer
+      OMDLexer lexer(&input);
+      // Set up filename observer for preprocessor directives
+      FilenameObserver* observer = new FilenameObserver();
+      lexer.setObserver(observer);
 
-      // Create an observer that synchorizes file name change
-      FilenameObserver observer;
-      observer.setLexer(&lexer);
-      observer.setParser(&parser);
-      lexer.setObserver(&observer);
-      antlr::ASTFactory factory;
-      parser.initializeASTFactory(factory);
-      parser.setASTFactory(&factory);
-      parser.mdfile();
-      // Create a tree parser that reads information into Globals
-      MDTreeParser treeParser;
-      treeParser.initializeASTFactory(factory);
-      treeParser.setASTFactory(&factory);
-      simParams = treeParser.walkTree(parser.getAST());
+      // Create token stream
+      antlr4::CommonTokenStream tokens(&lexer);
+      
+      // Create parser
+      OMDParser parser(&tokens);
+
+      // Optional: Add custom error listener
+      OMDErrorListener errorListener;
+      parser.removeErrorListeners();  // Remove default console error listener
+      parser.addErrorListener(&errorListener);
+      
+      // Parse the file (top-level rule is 'omdfile')
+      OMDParser::OmdfileContext* tree = parser.omdfile();
+      
+      // Check for parse errors
+      if (parser.getNumberOfSyntaxErrors() > 0) {
+	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		 "Parsing failed with: %lu errors\n",
+		 parser.getNumberOfSyntaxErrors());
+	painCave.isFatal = 1;
+	simError();
+	return nullptr;
+      }
+      
+      // Create visitor and walk the parse tree
+      OMDTreeVisitor visitor;
+      Globals* simParams = visitor.walkTree(tree);
+      simParams->setMDfileVersion(mdFileVersion);
+      return simParams;      
+    } catch (const std::exception& e) {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "Exception during parsing: %s\n", e.what());
+      painCave.isFatal = 1;
+      simError();
+      return nullptr;
     }
-
-    catch (antlr::MismatchedCharException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "Mismatched Character: %s in file %s at line %d, column %d\n",
-               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
-               e.getColumn());
-      painCave.isFatal = 1;
-      simError();
-    } catch (antlr::MismatchedTokenException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "Mismatched Token: %s in file %s at line %d, column %d\n",
-               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
-               e.getColumn());
-      painCave.isFatal = 1;
-      simError();
-    } catch (antlr::NoViableAltForCharException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "No Viable Alternative for Character: %s in file %s at line %d, "
-               "column %d\n",
-               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
-               e.getColumn());
-      painCave.isFatal = 1;
-      simError();
-    } catch (antlr::NoViableAltException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "No Viable Alternative: %s in file %s at line %d, column %d\n",
-               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
-               e.getColumn());
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    catch (antlr::TokenStreamRecognitionException& e) {
-      snprintf(
-          painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-          "Token Stream Recognition: %s in file %s at line %d, column %d\n",
-          e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
-          e.getColumn());
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    catch (antlr::TokenStreamIOException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "Token Stream IO exception: %s\n", e.getMessage().c_str());
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    catch (antlr::TokenStreamException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "Token Stream exception: %s\n", e.getMessage().c_str());
-      painCave.isFatal = 1;
-      simError();
-    } catch (antlr::RecognitionException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "Recognition exception: %s in file %s at line %d, column %d\n",
-               e.getMessage().c_str(), e.getFilename().c_str(), e.getLine(),
-               e.getColumn());
-      painCave.isFatal = 1;
-      simError();
-    } catch (antlr::CharStreamException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "Character Stream exception: %s\n", e.getMessage().c_str());
-      painCave.isFatal = 1;
-      simError();
-    } catch (OpenMDException& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH, "%s\n", e.what());
-      painCave.isFatal = 1;
-      simError();
-    } catch (std::exception& e) {
-      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "parser exception: %s\n", e.what());
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    simParams->setMDfileVersion(mdFileVersion);
-    return simParams;
+    return nullptr;
   }
 
   SimInfo* SimCreator::createSim(const std::string& mdFileName,

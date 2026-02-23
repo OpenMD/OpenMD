@@ -36,9 +36,9 @@ procedure for running and analyzing your first OpenMD simulation.
 
 | Architecture                  | CXX  | Notes                                |
 |-------------------------------|:----:|--------------------------------------|
-| macOS Sequoia (intel & arm)   | c++  | (Apple Xcode 16.1, Open MPI 5.0.6)   |
-| Linux (Ubuntu 24.10 - x86-64) | g++  | (GNU version 14.2  Open MPI 4.1.6)   |
-| Linux (RHEL 9.5 - x86-64)     | icpx | (Intel version 2023, Intel MPI 2021) |
+| macOS Sequoia (intel & arm)   | c++  | (Apple Xcode 26.2, Open MPI 5.0.9)   |
+| Linux (Ubuntu 25.10 - x86-64) | g++  | (GNU version 15.2  Open MPI 5.0.8)   |
+| Linux (RHEL 9.7 - x86-64)     | icpx | (Intel version 2024, Intel MPI 2021) |
 
   OpenMD uses features in the C++ standard library and language features from
   C++17. Most (but not all) C++ compilers support these features.

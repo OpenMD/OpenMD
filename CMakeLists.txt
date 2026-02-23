@@ -28,6 +28,47 @@ endif(WIN32)
 
 include(FetchContent)
 
+set(USE_SYSTEM_ANTLR4 OFF)
+find_package(antlr4-runtime QUIET)
+
+if(antlr4-runtime_FOUND)
+    message(STATUS "Found system antlr4 runtime.  Checking
+    locations.")
+    find_library(ANTLR4_LIB
+      NAMES antlr4-runtime
+    )
+    if(ANTLR4_INCLUDE_DIR AND ANTLR4_LIB)
+        message(STATUS "Found antlr4: ${ANTLR4_LIB}")
+	set(USE_SYSTEM_ANTLR4 ON)
+	message(STATUS "Using system antlr4 runtime")
+    endif()
+endif()
+if (NOT USE_SYSTEM_ANTLR4)
+message(STATUS "antlr4-runtime not found, fetching...")
+    # --- Fetch Antlr4 C++ Runtime ---
+    set(ANTLR_BUILD_CPP_TESTS OFF CACHE BOOL "" FORCE)
+    set(ANTLR4_INSTALL OFF CACHE BOOL "" FORCE)
+    set(WITH_DEMO OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTING OFF CACHE BOOL "" FORCE) 
+
+   FetchContent_Declare(
+	antlr4_cpp_runtime
+	GIT_REPOSITORY https://github.com/antlr/antlr4
+	GIT_TAG 4.13.2
+    	SOURCE_SUBDIR runtime/Cpp
+     )
+
+     FetchContent_MakeAvailable(antlr4_cpp_runtime)
+     set(ANTLR4_INCLUDE_DIR
+         ${antlr4_cpp_runtime_SOURCE_DIR}/runtime/Cpp/runtime/src
+	)
+     set(ANTLR4_LIB
+	 ${antlr4_cpp_runtime_BINARY_DIR}/runtime/libantlr4-runtime.a
+	)
+     endif()
+include_directories(${ANTLR4_INCLUDE_DIR})
+link_libraries(${ANTLR4_LIB})
+
 find_package(RapidJSON)
 
 if(RAPIDJSON_FOUND)
@@ -268,7 +309,6 @@ if(FORMAT_OPENMD AND NOT WIN32)
     execute_process(
       COMMAND bash ../cmake/scripts/format-codebase.sh
                 -f ${formatter}
-                -i antlr/*
                 -i applications/thermalizer/thermalizerCmd.hpp
                 -i applications/thermalizer/thermalizerCmd.cpp
                 -i applications/simpleBuilder/simpleBuilderCmd.hpp
@@ -302,7 +342,7 @@ if(FORMAT_OPENMD AND NOT WIN32)
                 -i applications/eos/equationofstateCmd.hpp
                 -i applications/elasticConstants/elasticConstantsCmd.hpp
                 -i applications/elasticConstants/elasticConstantsCmd.cpp 
-                -i mdParser/*
+                -i omdParser/*
                 -i utils/MemoryUtils.hpp
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src
       OUTPUT_QUIET)
@@ -430,31 +470,6 @@ set(PROGRAMS
 
 set(SOURCE
     "${PROJECT_BINARY_DIR}/Revision.cpp"
-    src/antlr/ANTLRUtil.cpp
-    src/antlr/ASTFactory.cpp
-    src/antlr/ASTNULLType.cpp
-    src/antlr/ASTRefCount.cpp
-    src/antlr/BaseAST.cpp
-    src/antlr/BitSet.cpp
-    src/antlr/CommonAST.cpp
-    src/antlr/CommonASTWithHiddenTokens.cpp
-    src/antlr/CommonHiddenStreamToken.cpp
-    src/antlr/CommonToken.cpp
-    src/antlr/LLkParser.cpp
-    src/antlr/MismatchedCharException.cpp
-    src/antlr/MismatchedTokenException.cpp
-    src/antlr/NoViableAltException.cpp
-    src/antlr/NoViableAltForCharException.cpp
-    src/antlr/Parser.cpp
-    src/antlr/RecognitionException.cpp
-    src/antlr/String.cpp
-    src/antlr/Token.cpp
-    src/antlr/TokenRefCount.cpp
-    src/antlr/TokenStreamBasicFilter.cpp
-    src/antlr/TokenStreamHiddenTokenFilter.cpp
-    src/antlr/TokenStreamRewriteEngine.cpp
-    src/antlr/TokenStreamSelector.cpp
-    src/antlr/TreeParser.cpp
     src/brains/BlockSnapshotManager.cpp
     src/brains/DataStorage.cpp
     src/brains/ForceField.cpp
@@ -544,7 +559,13 @@ set(SOURCE
     src/math/SphericalHarmonic.cpp
     src/math/Triangle.cpp
     src/math/Wigner3jm.cpp
-    src/mdParser/FilenameObserver.cpp
+    src/omdParser/FilenameObserver.cpp
+    src/omdParser/OMDBaseListener.cpp
+    src/omdParser/OMDBaseVisitor.cpp
+    src/omdParser/OMDListener.cpp
+    src/omdParser/OMDVisitor.cpp
+    src/omdParser/OMDLexer.cpp
+    src/omdParser/OMDParser.cpp
     src/optimization/OptimizationFactory.cpp
     src/optimization/Armijo.cpp
     src/optimization/BFGS.cpp
@@ -649,13 +670,6 @@ set(SOURCE
 #    src/NEP_CPU/src/nep.cpp)
 
 set(PARALLEL_SOURCE
-    src/antlr/CharBuffer.cpp
-    src/antlr/CharScanner.cpp
-    src/antlr/InputBuffer.cpp
-    src/antlr/TokenBuffer.cpp
-    src/mdParser/MDLexer.cpp
-    src/mdParser/MDParser.cpp
-    src/mdParser/MDTreeParser.cpp
     src/brains/ForceManager.cpp
     src/brains/SimCreator.cpp
     src/brains/SimInfo.cpp
@@ -1202,6 +1216,8 @@ message(STATUS "OPENBABEL_LIBRARIES ........ = ${OPENBABEL_LIBRARIES}")
 message(STATUS "NLOHMANN_JSON .............. = ${NLOHMANN_JSON}")
 message(STATUS "RAPID_JSON ................. = ${RAPID_JSON}")
 message(STATUS "stl_reader_INCLUDE_DIR ..... = ${stl_reader_INCLUDE_DIR}")
+message(STATUS "ANTLR4_INCLUDE_DIR ......... = ${ANTLR4_INCLUDE_DIR}")
+message(STATUS "ANTLR4_LIB ................. = ${ANTLR4_LIB}")
 message(STATUS "QHULL_ROOT ................. = ${QHULL_ROOT}")
 message(STATUS "QHULL_INCLUDE_DIR .......... = ${QHULL_INCLUDE_DIR}")
 message(STATUS "QHULL_LIBRARIES ............ = ${QHULL_LIBRARIES}")
