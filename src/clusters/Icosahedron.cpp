@@ -150,29 +150,21 @@ namespace OpenMD {
   }
 
   int Icosahedron::getNpoints(int n) {
-    int count = 0;
-    for (int i = 0; i <= n; i++)
-      count += np(i);
-    return count;
+    // OEIS A005902
+    if (n <= 0)
+      return 0;
+    else
+      return ((2 * n + 1) * (5 * n * n + 5 * n + 3)) / 3;
   }
 
   int Icosahedron::np(int n) {
+    // OEIS A005901
     if (n < 0)
       return -1;
     else if (n == 0)
       return 1;
-    else if (n == 1)
-      return 12;
-    else if (n == 2)
-      return 42;
-    else {
-      int count = 0;
-      count += 12;            // edge particles
-      count += (n - 1) * 30;  // side particles
-      for (int i = 1; i <= n - 2; i++)
-        count += i * 20;  // body particles
-      return count;
-    }
+    else
+      return 10 * n * n + 2;
   }
 
   std::vector<Vector3d> Icosahedron::ih(int n) {
