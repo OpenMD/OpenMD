@@ -1,5 +1,6 @@
 {
   "dependencies": [
+    "antlr4",
     "fftw3",
     "qhull",
     "zlib"
