@@ -58,6 +58,7 @@ jobs:
           brew install numpy scipy
           brew install qhull
           brew install zlib
+          brew install antlr4-cpp-runtime
 
       - name: Configure
         run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
