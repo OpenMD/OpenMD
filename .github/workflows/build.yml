@@ -20,7 +20,7 @@ jobs:
       run: cmake -B build -S .
 
     - name: Install
-      run: cmake -B build -S . --target install
+      run: cmake -B build -S . install
 
   ubuntu-builds:
     runs-on: ubuntu-latest
