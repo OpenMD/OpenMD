@@ -10,16 +10,46 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
-    - name: Configure
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.14'
 
+    - name: Install Python dependencies
+      run: pip install numpy scipy
+
+    # Install MS-MPI
+    - name: Install MS-MPI
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri "https://download.microsoft.com/download/7/2/7/72731ebb-b63c-4170-ade7-836966263a8f/msmpisetup.exe" -OutFile "msmpisetup.exe"
+        Invoke-WebRequest -Uri "https://download.microsoft.com/download/7/2/7/72731ebb-b63c-4170-ade7-836966263a8f/msmpisdk.msi" -OutFile "msmpisdk.msi"
+        Start-Process -FilePath "msmpisetup.exe" -ArgumentList "-unattend" -Wait
+        Start-Process -FilePath "msiexec.exe" -ArgumentList "/i msmpisdk.msi /quiet /norestart" -Wait
+
+    # Refresh environment variables so MPI paths are available downstream
+    - name: Refresh environment after MPI install
+      shell: pwsh
+      run: |
+        $mpiDir = "C:\Program Files\Microsoft MPI"
+        echo "MSMPI_BIN=$mpiDir\Bin" >> $env:GITHUB_ENV
+        echo "MSMPI_INC=$mpiDir\SDK\Include" >> $env:GITHUB_ENV
+        echo "MSMPI_LIB64=$mpiDir\SDK\Lib\x64" >> $env:GITHUB_ENV
+        echo "$mpiDir\Bin" >> $env:GITHUB_PATH
+
+    - name: Configure CMake
+      run: cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake  -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      
     - name: Build
-      run: cmake --build .
+      run: cmake -B build -S .
 
     - name: Install
-      run: cmake --build . --target install
+      run: cmake -B build -S . install
 
   ubuntu-builds:
     runs-on: ubuntu-latest
@@ -58,6 +88,7 @@ jobs:
           brew install numpy scipy
           brew install qhull
           brew install zlib
+          brew install antlr4-cpp-runtime
 
       - name: Configure
         run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
