@@ -42,11 +42,6 @@ jobs:
         echo "MSMPI_LIB64=$mpiDir\SDK\Lib\x64" >> $env:GITHUB_ENV
         echo "$mpiDir\Bin" >> $env:GITHUB_PATH
 
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgJsonGlob: '**/vcpkg.json'
-
     - name: Configure CMake
       run: cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake  -DCMAKE_BUILD_TYPE=$BUILD_TYPE
       
