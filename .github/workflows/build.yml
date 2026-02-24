@@ -27,8 +27,8 @@ jobs:
     - name: Install MS-MPI
       shell: pwsh
       run: |
-        Invoke-WebRequest -Uri "https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe" -OutFile "msmpisetup.exe"
-        Invoke-WebRequest -Uri "https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisdk.msi" -OutFile "msmpisdk.msi"
+        Invoke-WebRequest -Uri "https://download.microsoft.com/download/7/2/7/72731ebb-b63c-4170-ade7-836966263a8f/msmpisetup.exe" -OutFile "msmpisetup.exe"
+        Invoke-WebRequest -Uri "https://download.microsoft.com/download/7/2/7/72731ebb-b63c-4170-ade7-836966263a8f/msmpisdk.msi" -OutFile "msmpisdk.msi"
         Start-Process -FilePath "msmpisetup.exe" -ArgumentList "-unattend" -Wait
         Start-Process -FilePath "msiexec.exe" -ArgumentList "/i msmpisdk.msi /quiet /norestart" -Wait
 
