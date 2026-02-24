@@ -10,20 +10,17 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Install vcpkg dependencies
-      run: vcpkg install antlr4
-        
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Configure CMake
-      run: cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake  -DCMAKE_BUILD_TYPE=Release
+      run: cmake -B build -S .  -DCMAKE_BUILD_TYPE=Release
 
     - name: Build
       run: cmake --build build --config Release
 
     - name: Install
-      run: cmake --build . --target install
+      run: cmake --build build --target install
 
   ubuntu-builds:
     runs-on: ubuntu-latest
