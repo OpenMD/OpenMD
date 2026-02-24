@@ -4,6 +4,7 @@
     "fftw3",
     "qhull",
     "zlib",
-    "mpi"
+    "mpi",
+    "python3"
   ]
 }
