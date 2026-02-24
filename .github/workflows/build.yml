@@ -13,6 +13,34 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.14'
+
+    - name: Install Python dependencies
+      run: pip install numpy scipy
+
+    # Install MS-MPI
+    - name: Install MS-MPI
+      shell: pwsh
+      run: choco install msmpi -y
+
+    # Refresh environment variables so MPI paths are available downstream
+    - name: Refresh environment after MPI install
+      shell: pwsh
+      run: |
+        $mpiDir = "C:\Program Files\Microsoft MPI"
+        echo "MSMPI_BIN=$mpiDir\Bin" >> $env:GITHUB_ENV
+        echo "MSMPI_INC=$mpiDir\SDK\Include" >> $env:GITHUB_ENV
+        echo "MSMPI_LIB64=$mpiDir\SDK\Lib\x64" >> $env:GITHUB_ENV
+        echo "$mpiDir\Bin" >> $env:GITHUB_PATH
+
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgJsonGlob: '**/vcpkg.json'
+
     - name: Configure CMake
       run: cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake  -DCMAKE_BUILD_TYPE=$BUILD_TYPE
       
