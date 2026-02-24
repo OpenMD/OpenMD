@@ -24,7 +24,11 @@ jobs:
     # Install MS-MPI
     - name: Install MS-MPI
       shell: pwsh
-      run: choco install msmpi -y
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe" -OutFile "msmpisetup.exe"
+        Invoke-WebRequest -Uri "https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisdk.msi" -OutFile "msmpisdk.msi"
+        Start-Process -FilePath "msmpisetup.exe" -ArgumentList "-unattend" -Wait
+        Start-Process -FilePath "msiexec.exe" -ArgumentList "/i msmpisdk.msi /quiet /norestart" -Wait
 
     # Refresh environment variables so MPI paths are available downstream
     - name: Refresh environment after MPI install
