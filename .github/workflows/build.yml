@@ -57,13 +57,13 @@ jobs:
         Write-Host "MSMPI_LIB64=$sdkDir\Lib\x64"
         
     - name: Configure CMake
-      run: cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake  -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake  -DCMAKE_BUILD_TYPE=Release
       
     - name: Build
-      run: cmake -B build -S .
+      run: cmake --build build --config Release --verbose
 
     - name: Install
-      run: cmake -B build -S . install
+      run: cmake --install build --config Release --prefix ${{ github.workspace }}/install
 
   ubuntu-builds:
     runs-on: ubuntu-latest
