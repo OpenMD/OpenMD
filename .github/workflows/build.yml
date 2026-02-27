@@ -29,8 +29,14 @@ jobs:
       run: |
         Invoke-WebRequest -Uri "https://download.microsoft.com/download/7/2/7/72731ebb-b63c-4170-ade7-836966263a8f/msmpisetup.exe" -OutFile "msmpisetup.exe"
         Invoke-WebRequest -Uri "https://download.microsoft.com/download/7/2/7/72731ebb-b63c-4170-ade7-836966263a8f/msmpisdk.msi" -OutFile "msmpisdk.msi"
-        Start-Process -FilePath "msmpisetup.exe" -ArgumentList "-unattend" -Wait
+        # Verify both files downloaded and have different sizes
+        Write-Host "msmpisetup.exe size: $((Get-Item msmpisetup.exe).Length) bytes"
+        Write-Host "msmpisdk.msi size: $((Get-Item msmpisdk.msi).Length) bytes"
+        Start-Process -FilePath ".\msmpisetup.exe" -ArgumentList "-unattend" -Wait
         Start-Process -FilePath "msiexec.exe" -ArgumentList "/i msmpisdk.msi /quiet /norestart" -Wait
+        # Verify SDK installed
+        Write-Host "SDK Include exists: $(Test-Path 'C:\Program Files (x86)\Microsoft SDKs\MPI\Include')"
+        Write-Host "SDK Lib exists: $(Test-Path 'C:\Program Files (x86)\Microsoft SDKs\MPI\Lib')"
 
     # Refresh environment variables so MPI paths are available downstream
     - name: Refresh environment after MPI install
