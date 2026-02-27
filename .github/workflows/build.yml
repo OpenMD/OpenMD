@@ -36,6 +36,13 @@ jobs:
     - name: Refresh environment after MPI install
       shell: pwsh
       run: |
+        # Dump registry keys to see what was actually set by the installer
+        Write-Host "=== MPI Registry Key ==="
+        Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MPI" | Format-List
+        Write-Host "=== MPI SDK Registry Key ==="
+        Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MPI\SDK" -ErrorAction SilentlyContinue | Format-List
+        Write-Host "=== WOW6432 MPI Registry Key ==="
+        Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Microsoft\MPI" -ErrorAction SilentlyContinue | Format-List
         # Read paths directly from registry where the installer recorded them
         $msmpiDir = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MPI").InstallRoot
         $msmpisdkDir = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MPI").SDKRoot
