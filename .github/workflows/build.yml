@@ -42,26 +42,20 @@ jobs:
     - name: Refresh environment after MPI install
       shell: pwsh
       run: |
-        # Dump registry keys to see what was actually set by the installer
-        Write-Host "=== MPI Registry Key ==="
-        Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MPI" | Format-List
-        Write-Host "=== MPI SDK Registry Key ==="
-        Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MPI\SDK" -ErrorAction SilentlyContinue | Format-List
-        Write-Host "=== WOW6432 MPI Registry Key ==="
-        Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Microsoft\MPI" -ErrorAction SilentlyContinue | Format-List
         # Read paths directly from registry where the installer recorded them
         $msmpiDir = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MPI").InstallRoot
-        $msmpisdkDir = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MPI").SDKRoot
+        $sdkDir = "C:\Program Files (x86)\Microsoft SDKs\MPI"
+
         echo "MSMPI_BIN=${msmpiDir}Bin" >> $env:GITHUB_ENV
-        echo "MSMPI_INC=${msmpisdkDir}Include" >> $env:GITHUB_ENV
-        echo "MSMPI_LIB64=${msmpisdkDir}Lib\x64" >> $env:GITHUB_ENV
-        echo "MSMPI_LIB32=${msmpisdkDir}Lib\x86" >> $env:GITHUB_ENV
+        echo "MSMPI_INC=$sdkDir\Include" >> $env:GITHUB_ENV
+        echo "MSMPI_LIB64=$sdkDir\Lib\x64" >> $env:GITHUB_ENV
+        echo "MSMPI_LIB32=$sdkDir\Lib\x86" >> $env:GITHUB_ENV
         echo "${msmpiDir}Bin" >> $env:GITHUB_PATH
         # Print for debugging
         Write-Host "MSMPI_BIN=${msmpiDir}Bin"
-        Write-Host "MSMPI_INC=${msmpisdkDir}Include"
-        Write-Host "MSMPI_LIB64=${msmpisdkDir}Lib\x64"
-
+        Write-Host "MSMPI_INC=$sdkDir\Include"
+        Write-Host "MSMPI_LIB64=$sdkDir\Lib\x64"
+        
     - name: Configure CMake
       run: cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake  -DCMAKE_BUILD_TYPE=$BUILD_TYPE
       
