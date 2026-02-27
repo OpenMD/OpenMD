@@ -36,11 +36,18 @@ jobs:
     - name: Refresh environment after MPI install
       shell: pwsh
       run: |
-        $mpiDir = "C:\Program Files\Microsoft MPI"
-        echo "MSMPI_BIN=$mpiDir\Bin" >> $env:GITHUB_ENV
-        echo "MSMPI_INC=$mpiDir\SDK\Include" >> $env:GITHUB_ENV
-        echo "MSMPI_LIB64=$mpiDir\SDK\Lib\x64" >> $env:GITHUB_ENV
-        echo "$mpiDir\Bin" >> $env:GITHUB_PATH
+        # Read paths directly from registry where the installer recorded them
+        $msmpiDir = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MPI").InstallRoot
+        $msmpisdkDir = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MPI").SDKRoot
+        echo "MSMPI_BIN=${msmpiDir}Bin" >> $env:GITHUB_ENV
+        echo "MSMPI_INC=${msmpisdkDir}Include" >> $env:GITHUB_ENV
+        echo "MSMPI_LIB64=${msmpisdkDir}Lib\x64" >> $env:GITHUB_ENV
+        echo "MSMPI_LIB32=${msmpisdkDir}Lib\x86" >> $env:GITHUB_ENV
+        echo "${msmpiDir}Bin" >> $env:GITHUB_PATH
+        # Print for debugging
+        Write-Host "MSMPI_BIN=${msmpiDir}Bin"
+        Write-Host "MSMPI_INC=${msmpisdkDir}Include"
+        Write-Host "MSMPI_LIB64=${msmpisdkDir}Lib\x64"
 
     - name: Configure CMake
       run: cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake  -DCMAKE_BUILD_TYPE=$BUILD_TYPE
