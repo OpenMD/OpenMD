@@ -99,6 +99,9 @@ struct gengetopt_args_info
   enum enum_selectionMode selectionMode_arg;	/**< @brief How to treat objects which leave a dynamic selection and then return later (default = survival) (default='survival').  */
   char * selectionMode_orig;	/**< @brief How to treat objects which leave a dynamic selection and then return later (default = survival) original value given at command line.  */
   const char *selectionMode_help; /**< @brief How to treat objects which leave a dynamic selection and then return later (default = survival) help description.  */
+  char * sfg_polarization_arg;	/**< @brief SFG polarization combination: ssp, ppp, sps (default='ssp').  */
+  char * sfg_polarization_orig;	/**< @brief SFG polarization combination: ssp, ppp, sps original value given at command line.  */
+  const char *sfg_polarization_help; /**< @brief SFG polarization combination: ssp, ppp, sps help description.  */
   const char *selecorr_help; /**< @brief selection correlation function help description.  */
   const char *rcorr_help; /**< @brief mean squared displacement help description.  */
   const char *rcorrZ_help; /**< @brief mean squared displacement binned by Z help description.  */
@@ -139,6 +142,7 @@ struct gengetopt_args_info
   const char *ddisp_help; /**< @brief Collective Dipole displacement function (Helfand moment of Current Density) help description.  */
   const char *rotAngleDisp_help; /**< @brief Displacement correlation function for rotation angles help description.  */
   const char *meandisp_help; /**< @brief mean displacement help description.  */
+  const char *sfg_help; /**< @brief SFG susceptibility spectrum (exciton model) help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -161,6 +165,7 @@ struct gengetopt_args_info
   unsigned int dipoleY_given ;	/**< @brief Whether dipoleY was given.  */
   unsigned int dipoleZ_given ;	/**< @brief Whether dipoleZ was given.  */
   unsigned int selectionMode_given ;	/**< @brief Whether selectionMode was given.  */
+  unsigned int sfg_polarization_given ;	/**< @brief Whether sfg-polarization was given.  */
   unsigned int selecorr_given ;	/**< @brief Whether selecorr was given.  */
   unsigned int rcorr_given ;	/**< @brief Whether rcorr was given.  */
   unsigned int rcorrZ_given ;	/**< @brief Whether rcorrZ was given.  */
@@ -201,6 +206,7 @@ struct gengetopt_args_info
   unsigned int ddisp_given ;	/**< @brief Whether ddisp was given.  */
   unsigned int rotAngleDisp_given ;	/**< @brief Whether rotAngleDisp was given.  */
   unsigned int meandisp_given ;	/**< @brief Whether meandisp was given.  */
+  unsigned int sfg_given ;	/**< @brief Whether sfg was given.  */
 
   char **inputs ; /**< @brief unnamed options (options without names) */
   unsigned inputs_num ; /**< @brief unnamed options number */

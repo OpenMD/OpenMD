@@ -801,6 +801,7 @@ set(DYNAMICPROPSSOURCE
     src/applications/dynamicProps/SelectionCorrFunc.cpp
     src/applications/dynamicProps/StressCorrFunc.cpp
     src/applications/dynamicProps/SystemDipoleCorrFunc.cpp
+    src/applications/dynamicProps/SFG.cpp
     src/applications/dynamicProps/ThetaCorrFunc.cpp
     src/applications/dynamicProps/TimeCorrFunc.cpp
     src/applications/dynamicProps/VCorrFunc.cpp
