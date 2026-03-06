@@ -68,6 +68,10 @@ namespace OpenMD {
       }
     }
   }
+  
+  BoxObjectiveFunction::~BoxObjectiveFunction() {
+    delete shake_;
+  }
 
   RealType BoxObjectiveFunction::value(const DynamicVector<RealType>& x) {
     info_->getSnapshotManager()->advance();

@@ -64,6 +64,7 @@ namespace OpenMD {
   public:
     DynamicProperty() : selectionModeRestart_(false) {}
     virtual ~DynamicProperty() = default;
+    virtual void setWindowingParameters(RealType tcorr_fs, int nStart, RealType tsep_fs) = 0;
     virtual void doCorrelate() = 0;
 
     void setOutputName(const std::string& filename) {

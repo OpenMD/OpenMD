@@ -835,5 +835,8 @@ int main(int argc, char* argv[]) {
 
   writeMaterialProperties(C, S);
 
+  delete flucQ;
+  delete shake;
+  delete forceMan;
   return 0;
 }

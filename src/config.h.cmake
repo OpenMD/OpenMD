@@ -46,6 +46,9 @@
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine HAVE_LIBZ 1
 
+#cmakedefine HAVE_LAPACK 1
+#cmakedefine HAVE_CBLAS  1
+
 #cmakedefine RAPID_JSON 1
 #cmakedefine NLOHMANN_JSON 1
 

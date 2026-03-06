@@ -330,6 +330,7 @@ namespace OpenMD {
                  filename_.c_str());
         painCave.severity = OPENMD_ERROR;
         painCave.isFatal  = 1;
+	delete efStream;
         simError();
       }
     }
@@ -340,6 +341,7 @@ namespace OpenMD {
     }
 
     if (efStream->is_open()) efStream->close();
+    delete efStream;
 
     if (GetSize() == 0) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,

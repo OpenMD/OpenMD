@@ -366,7 +366,8 @@ int main(int argc, char* argv[]) {
         std::make_unique<MeanDisplacement>(info, dumpFileName, sele1, sele2);
   } else if (args_info.sfg_given) {
     corrFunc = std::make_unique<SFG>(info, dumpFileName, sele1, sele2,
-				     args_info.sfg_polarization_arg);  // "ssp", "ppp", "sps"
+				     args_info.sfg_polarization_arg,
+                                     privilegedAxis);
   }
 
   if (args_info.selectionMode_arg == selectionMode_arg_restart) {
@@ -374,6 +375,9 @@ int main(int argc, char* argv[]) {
   }
   if (args_info.output_given) { corrFunc->setOutputName(args_info.output_arg); }
 
+  corrFunc->setWindowingParameters(args_info.tcorr_arg,   // fs, double
+				   args_info.nstart_arg,  // frames, int
+				   args_info.tsep_arg);   // fs, double
   corrFunc->doCorrelate();
 
   delete info;

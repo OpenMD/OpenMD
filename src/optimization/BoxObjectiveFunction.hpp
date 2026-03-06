@@ -59,7 +59,7 @@ namespace OpenMD {
   class BoxObjectiveFunction : public ObjectiveFunction {
   public:
     BoxObjectiveFunction(SimInfo* info, ForceManager* forceMan);
-
+    ~BoxObjectiveFunction();
     RealType value(const DynamicVector<RealType>& x);
     void gradient(DynamicVector<RealType>& grad,
                   const DynamicVector<RealType>& x);

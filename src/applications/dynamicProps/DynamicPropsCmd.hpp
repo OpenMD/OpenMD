@@ -69,6 +69,15 @@ struct gengetopt_args_info
   int nzbins_arg;	/**< @brief Number of Z bins (default='100').  */
   char * nzbins_orig;	/**< @brief Number of Z bins original value given at command line.  */
   const char *nzbins_help; /**< @brief Number of Z bins help description.  */
+  double tcorr_arg;	/**< @brief Correlation time (length of each window) in fs (default='100000.0').  */
+  char * tcorr_orig;	/**< @brief Correlation time (length of each window) in fs original value given at command line.  */
+  const char *tcorr_help; /**< @brief Correlation time (length of each window) in fs help description.  */
+  int nstart_arg;	/**< @brief Number of frames to skip at start of trajectory (default='0').  */
+  char * nstart_orig;	/**< @brief Number of frames to skip at start of trajectory original value given at command line.  */
+  const char *nstart_help; /**< @brief Number of frames to skip at start of trajectory help description.  */
+  double tsep_arg;	/**< @brief Separation time between correlation windows (0 = no gap) (default='0.0').  */
+  char * tsep_orig;	/**< @brief Separation time between correlation windows (0 = no gap) original value given at command line.  */
+  const char *tsep_help; /**< @brief Separation time between correlation windows (0 = no gap) help description.  */
   double rcut_arg;	/**< @brief cutoff radius (angstroms).  */
   char * rcut_orig;	/**< @brief cutoff radius (angstroms) original value given at command line.  */
   const char *rcut_help; /**< @brief cutoff radius (angstroms) help description.  */
@@ -155,6 +164,9 @@ struct gengetopt_args_info
   unsigned int order_given ;	/**< @brief Whether order was given.  */
   unsigned int nbins_given ;	/**< @brief Whether nbins was given.  */
   unsigned int nzbins_given ;	/**< @brief Whether nzbins was given.  */
+  unsigned int tcorr_given ;	/**< @brief Whether tcorr was given.  */
+  unsigned int nstart_given ;	/**< @brief Whether nstart was given.  */
+  unsigned int tsep_given ;	/**< @brief Whether tsep was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
   unsigned int OOcut_given ;	/**< @brief Whether OOcut was given.  */
   unsigned int thetacut_given ;	/**< @brief Whether thetacut was given.  */

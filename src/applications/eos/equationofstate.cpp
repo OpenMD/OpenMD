@@ -198,6 +198,9 @@ int main(int argc, char* argv[]) {
     std::cout << countStep << " data generated." << std::endl;
 
     current_affine += affine_step;
+
+    delete flucQ;
+    delete fman;
   }
   eos.close();
 }

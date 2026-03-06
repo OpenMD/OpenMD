@@ -63,6 +63,39 @@ namespace OpenMD {
 
   //! Computes a correlation function by scanning a trajectory once to
   //! precompute quantities to be correlated
+  
+  // There are two modes for carrying out time correleation
+  // functions. The default mode allows overlapping origins of the
+  // sampling windows. 
+  //
+  // origin 0:  frames 0,1,2,...,nFrames-1
+  // origin 1:  frames 1,2,3,...,nFrames-1
+  // origin 2:  frames 2,3,4,...,nFrames-1
+  // ...  
+  // This gives many samples for short lag times and fewer for long
+  // lag times, and we normalize using count_[timeBin]
+  //
+  // The second approach uses non-overlapping windows:
+  // |--ncor--|--nsep--|--ncor--|--nsep--|--ncor--|
+  //    avg1              avg2              avg3
+  // We accomplish this behavior by setting:
+  //
+  // nStart_ = frames to skip at beginning (for equilibration)
+  // ncor = frames per window (nTimeBins_)
+  // nStride_ = frames between window starts (ncor + nsep)
+  //
+  // This means that the sampling windows look like:
+  // origin 0:  frames [nStart_, nStart_ + ncor)
+  // origin 1:  frames [nStart_ + nStride_, nStart_ + nStride_ + ncor)
+  // origin 2:  frames [nStart_ + 2*nStride_, nStart_ + 2*nStride_ + ncor)
+  //
+  // nStride_ is the key here:
+  // nStride_ = 1             = all overlapping origins
+  // nStride_ = nTimeBins_    = tight non-overlapping windows (nsep=0)
+  // nStride_ > nTimeBins_    = sampling windows with a decorrelation gap
+  // 1 < nStride_ < nTimeBins_ = overlapping fixed-length windows
+  //                             (pass tsep_fs < 0 to setWindowingParameters;
+  //                              |tsep_fs| is the overlap duration in fs)
 
   template<typename T>
   class TimeCorrFunc : public DynamicProperty {
@@ -71,6 +104,10 @@ namespace OpenMD {
                  const std::string& sele1, const std::string& sele2);
 
     virtual ~TimeCorrFunc() { delete reader_; }
+    
+    // Setters — call before doCorrelate()
+    void setWindowingParameters(RealType tcorr_fs, int nStart, RealType tsep_fs);
+    
     virtual void doCorrelate();
 
     const std::string& getCorrFuncType() const { return corrFuncType_; }
@@ -154,6 +191,46 @@ namespace OpenMD {
     std::vector<std::vector<int>> selection2StartFrame_;
 
     ProgressBarPtr progressBar_;
+    // --- Windowing parameters -------------------------------------------
+    //
+    // nStart_  : number of frames to skip at the start of the trajectory
+    //            (equilibration period). Default 0.
+    //
+    // nStride_ : number of frames between the start of successive
+    //            correlation windows.
+    //
+    //   nStride_ = 1          → original overlapping-origin behavior
+    //                           (all possible time origins used)
+    //
+    //   nStride_ = nTimeBins_ → non-overlapping windows, no gap
+    //                           (MultiSpec ncor mode)
+    //
+    //   nStride_ = nTimeBins_ + nSep_
+    //                         → non-overlapping windows with a gap
+    //                           between them (MultiSpec ncor+nsep mode)
+    //
+    // nSep_    : gap in frames between end of one window and start of
+    //            the next. Only meaningful when nStride_ > nTimeBins_.
+    //            Default 0.
+    //
+    // nTimeBins_ already controls the correlation window length (ncor).
+    // It is set from simParams->getSampleTime() and nFrames_ in the
+    // existing constructor, but can be overridden by setSampleSize().
+    //
+    // navg_    : number of windows that fit in the trajectory given
+    //            nStart_, nStride_, nTimeBins_, nFrames_.
+    //            Computed in preCorrelate(), read-only after that.
+    //
+    // useWindowing_ : true if nStride_ > 1 or nStart_ > 0.
+    //                 Controls which correlation() path is taken.
+    // --------------------------------------------------------------------
+
+    int  nStart_  {0};      // frames to skip at trajectory start
+    int  nSep_    {0};      // signed offset: >0 gap, <0 overlap (frames)
+    int  nStride_ {1};      // frames between window origins
+    int  navg_    {0};      // number of windows (computed)
+    bool useWindowing_ {false};
+
   };
 
   template<typename T>
