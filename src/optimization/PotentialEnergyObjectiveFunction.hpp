@@ -59,7 +59,7 @@ namespace OpenMD {
   class PotentialEnergyObjectiveFunction : public ObjectiveFunction {
   public:
     PotentialEnergyObjectiveFunction(SimInfo* info, ForceManager* forceMan);
-
+    ~PotentialEnergyObjectiveFunction();
     RealType value(const DynamicVector<RealType>& x);
     void gradient(DynamicVector<RealType>& grad,
                   const DynamicVector<RealType>& x);

@@ -44,6 +44,11 @@ const char *gengetopt_args_info_help[] = {
   "      --order=INT               Lengendre Polynomial Order",
   "  -n, --nbins=INT               Number of bins  (default=`100')",
   "  -z, --nzbins=INT              Number of Z bins  (default=`100')",
+  "      --tcorr=DOUBLE            Correlation time (length of each window) in fs\n                                  (default=`100000.0')",
+  "      --nstart=INT              Number of frames to skip at start of trajectory\n                                  (default=`0')",
+  "      --tsep=DOUBLE             Separation time between correlation windows (0\n                                  = no gap)  (default=`0.0')",
+  "      --t_apod=DOUBLE           Apodization time (fs) [filters tcorr with\n                                  exp(-t/t_apod) in Fourier-transformed\n                                  spectroscopic functions]  (default=`0.0')",
+  "      --t_zerofill=DOUBLE       Zero-fill time (fs) [Pads time correlation\n                                  functions with zeros from tcorr -> t_zerofill\n                                  in Fourier-transformed spectroscopic\n                                  functions]  (default=`0.0')",
   "  -c, --rcut=DOUBLE             cutoff radius (angstroms)",
   "      --OOcut=DOUBLE            Oxygen-Oxygen cutoff radius (angstroms)\n                                  (default=`3.5')",
   "      --thetacut=DOUBLE         HOO cutoff angle (degrees)  (default=`30')",
@@ -54,6 +59,7 @@ const char *gengetopt_args_info_help[] = {
   "      --dipoleY=DOUBLE          Y-component of the dipole with respect to body\n                                  frame  (default=`0.0')",
   "      --dipoleZ=DOUBLE          Z-component of the dipole with respect to body\n                                  frame  (default=`-1.0')",
   "      --selectionMode=ENUM      How to treat objects which leave a dynamic\n                                  selection and then return later (default =\n                                  survival)  (possible values=\"survival\",\n                                  \"restart\" default=`survival')",
+  "      --sfg-polarization=STRING SFG polarization combination: ssp, ppp, sps\n                                  (default=`ssp')",
   "\n Group: correlation function\n   an option of this group is required",
   "  -s, --selecorr                selection correlation function",
   "  -r, --rcorr                   mean squared displacement",
@@ -95,6 +101,7 @@ const char *gengetopt_args_info_help[] = {
   "      --ddisp                   Collective Dipole displacement function\n                                  (Helfand moment of Current Density)",
   "      --rotAngleDisp            Displacement correlation function for rotation\n                                  angles",
   "      --meandisp                mean displacement",
+  "      --sfg                     SFG susceptibility spectrum (exciton model)",
     0
 };
 
@@ -137,6 +144,11 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->order_given = 0 ;
   args_info->nbins_given = 0 ;
   args_info->nzbins_given = 0 ;
+  args_info->tcorr_given = 0 ;
+  args_info->nstart_given = 0 ;
+  args_info->tsep_given = 0 ;
+  args_info->t_apod_given = 0 ;
+  args_info->t_zerofill_given = 0 ;
   args_info->rcut_given = 0 ;
   args_info->OOcut_given = 0 ;
   args_info->thetacut_given = 0 ;
@@ -147,6 +159,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->dipoleY_given = 0 ;
   args_info->dipoleZ_given = 0 ;
   args_info->selectionMode_given = 0 ;
+  args_info->sfg_polarization_given = 0 ;
   args_info->selecorr_given = 0 ;
   args_info->rcorr_given = 0 ;
   args_info->rcorrZ_given = 0 ;
@@ -187,6 +200,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->ddisp_given = 0 ;
   args_info->rotAngleDisp_given = 0 ;
   args_info->meandisp_given = 0 ;
+  args_info->sfg_given = 0 ;
   args_info->correlation_function_group_counter = 0 ;
 }
 
@@ -210,6 +224,16 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->nbins_orig = NULL;
   args_info->nzbins_arg = 100;
   args_info->nzbins_orig = NULL;
+  args_info->tcorr_arg = 100000.0;
+  args_info->tcorr_orig = NULL;
+  args_info->nstart_arg = 0;
+  args_info->nstart_orig = NULL;
+  args_info->tsep_arg = 0.0;
+  args_info->tsep_orig = NULL;
+  args_info->t_apod_arg = 0.0;
+  args_info->t_apod_orig = NULL;
+  args_info->t_zerofill_arg = 0.0;
+  args_info->t_zerofill_orig = NULL;
   args_info->rcut_orig = NULL;
   args_info->OOcut_arg = 3.5;
   args_info->OOcut_orig = NULL;
@@ -229,6 +253,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->dipoleZ_orig = NULL;
   args_info->selectionMode_arg = selectionMode_arg_survival;
   args_info->selectionMode_orig = NULL;
+  args_info->sfg_polarization_arg = gengetopt_strdup ("ssp");
+  args_info->sfg_polarization_orig = NULL;
   
 }
 
@@ -248,56 +274,63 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->order_help = gengetopt_args_info_help[8] ;
   args_info->nbins_help = gengetopt_args_info_help[9] ;
   args_info->nzbins_help = gengetopt_args_info_help[10] ;
-  args_info->rcut_help = gengetopt_args_info_help[11] ;
-  args_info->OOcut_help = gengetopt_args_info_help[12] ;
-  args_info->thetacut_help = gengetopt_args_info_help[13] ;
-  args_info->OHcut_help = gengetopt_args_info_help[14] ;
-  args_info->privilegedAxis_help = gengetopt_args_info_help[15] ;
-  args_info->length_help = gengetopt_args_info_help[16] ;
-  args_info->dipoleX_help = gengetopt_args_info_help[17] ;
-  args_info->dipoleY_help = gengetopt_args_info_help[18] ;
-  args_info->dipoleZ_help = gengetopt_args_info_help[19] ;
-  args_info->selectionMode_help = gengetopt_args_info_help[20] ;
-  args_info->selecorr_help = gengetopt_args_info_help[22] ;
-  args_info->rcorr_help = gengetopt_args_info_help[23] ;
-  args_info->rcorrZ_help = gengetopt_args_info_help[24] ;
-  args_info->vcorr_help = gengetopt_args_info_help[25] ;
-  args_info->vcorrZ_help = gengetopt_args_info_help[26] ;
-  args_info->vcorrR_help = gengetopt_args_info_help[27] ;
-  args_info->vaOutProdcorr_help = gengetopt_args_info_help[28] ;
-  args_info->waOutProdcorr_help = gengetopt_args_info_help[29] ;
-  args_info->vwOutProdcorr_help = gengetopt_args_info_help[30] ;
-  args_info->wvOutProdcorr_help = gengetopt_args_info_help[31] ;
-  args_info->wcorr_help = gengetopt_args_info_help[32] ;
-  args_info->dcorr_help = gengetopt_args_info_help[33] ;
-  args_info->lcorr_help = gengetopt_args_info_help[34] ;
-  args_info->lcorrZ_help = gengetopt_args_info_help[35] ;
-  args_info->cohZ_help = gengetopt_args_info_help[36] ;
-  args_info->sdcorr_help = gengetopt_args_info_help[37] ;
-  args_info->r_rcorr_help = gengetopt_args_info_help[38] ;
-  args_info->thetacorr_help = gengetopt_args_info_help[39] ;
-  args_info->drcorr_help = gengetopt_args_info_help[40] ;
-  args_info->stresscorr_help = gengetopt_args_info_help[41] ;
-  args_info->bondcorr_help = gengetopt_args_info_help[42] ;
-  args_info->freqfluccorr_help = gengetopt_args_info_help[43] ;
-  args_info->jumptime_help = gengetopt_args_info_help[44] ;
-  args_info->jumptimeZ_help = gengetopt_args_info_help[45] ;
-  args_info->jumptimeR_help = gengetopt_args_info_help[46] ;
-  args_info->persistence_help = gengetopt_args_info_help[47] ;
-  args_info->pjcorr_help = gengetopt_args_info_help[48] ;
-  args_info->ftcorr_help = gengetopt_args_info_help[49] ;
-  args_info->ckcorr_help = gengetopt_args_info_help[50] ;
-  args_info->cscorr_help = gengetopt_args_info_help[51] ;
-  args_info->facorr_help = gengetopt_args_info_help[52] ;
-  args_info->tfcorr_help = gengetopt_args_info_help[53] ;
-  args_info->tacorr_help = gengetopt_args_info_help[54] ;
-  args_info->disp_help = gengetopt_args_info_help[55] ;
-  args_info->dispZ_help = gengetopt_args_info_help[56] ;
-  args_info->current_help = gengetopt_args_info_help[57] ;
-  args_info->onsager_help = gengetopt_args_info_help[58] ;
-  args_info->ddisp_help = gengetopt_args_info_help[59] ;
-  args_info->rotAngleDisp_help = gengetopt_args_info_help[60] ;
-  args_info->meandisp_help = gengetopt_args_info_help[61] ;
+  args_info->tcorr_help = gengetopt_args_info_help[11] ;
+  args_info->nstart_help = gengetopt_args_info_help[12] ;
+  args_info->tsep_help = gengetopt_args_info_help[13] ;
+  args_info->t_apod_help = gengetopt_args_info_help[14] ;
+  args_info->t_zerofill_help = gengetopt_args_info_help[15] ;
+  args_info->rcut_help = gengetopt_args_info_help[16] ;
+  args_info->OOcut_help = gengetopt_args_info_help[17] ;
+  args_info->thetacut_help = gengetopt_args_info_help[18] ;
+  args_info->OHcut_help = gengetopt_args_info_help[19] ;
+  args_info->privilegedAxis_help = gengetopt_args_info_help[20] ;
+  args_info->length_help = gengetopt_args_info_help[21] ;
+  args_info->dipoleX_help = gengetopt_args_info_help[22] ;
+  args_info->dipoleY_help = gengetopt_args_info_help[23] ;
+  args_info->dipoleZ_help = gengetopt_args_info_help[24] ;
+  args_info->selectionMode_help = gengetopt_args_info_help[25] ;
+  args_info->sfg_polarization_help = gengetopt_args_info_help[26] ;
+  args_info->selecorr_help = gengetopt_args_info_help[28] ;
+  args_info->rcorr_help = gengetopt_args_info_help[29] ;
+  args_info->rcorrZ_help = gengetopt_args_info_help[30] ;
+  args_info->vcorr_help = gengetopt_args_info_help[31] ;
+  args_info->vcorrZ_help = gengetopt_args_info_help[32] ;
+  args_info->vcorrR_help = gengetopt_args_info_help[33] ;
+  args_info->vaOutProdcorr_help = gengetopt_args_info_help[34] ;
+  args_info->waOutProdcorr_help = gengetopt_args_info_help[35] ;
+  args_info->vwOutProdcorr_help = gengetopt_args_info_help[36] ;
+  args_info->wvOutProdcorr_help = gengetopt_args_info_help[37] ;
+  args_info->wcorr_help = gengetopt_args_info_help[38] ;
+  args_info->dcorr_help = gengetopt_args_info_help[39] ;
+  args_info->lcorr_help = gengetopt_args_info_help[40] ;
+  args_info->lcorrZ_help = gengetopt_args_info_help[41] ;
+  args_info->cohZ_help = gengetopt_args_info_help[42] ;
+  args_info->sdcorr_help = gengetopt_args_info_help[43] ;
+  args_info->r_rcorr_help = gengetopt_args_info_help[44] ;
+  args_info->thetacorr_help = gengetopt_args_info_help[45] ;
+  args_info->drcorr_help = gengetopt_args_info_help[46] ;
+  args_info->stresscorr_help = gengetopt_args_info_help[47] ;
+  args_info->bondcorr_help = gengetopt_args_info_help[48] ;
+  args_info->freqfluccorr_help = gengetopt_args_info_help[49] ;
+  args_info->jumptime_help = gengetopt_args_info_help[50] ;
+  args_info->jumptimeZ_help = gengetopt_args_info_help[51] ;
+  args_info->jumptimeR_help = gengetopt_args_info_help[52] ;
+  args_info->persistence_help = gengetopt_args_info_help[53] ;
+  args_info->pjcorr_help = gengetopt_args_info_help[54] ;
+  args_info->ftcorr_help = gengetopt_args_info_help[55] ;
+  args_info->ckcorr_help = gengetopt_args_info_help[56] ;
+  args_info->cscorr_help = gengetopt_args_info_help[57] ;
+  args_info->facorr_help = gengetopt_args_info_help[58] ;
+  args_info->tfcorr_help = gengetopt_args_info_help[59] ;
+  args_info->tacorr_help = gengetopt_args_info_help[60] ;
+  args_info->disp_help = gengetopt_args_info_help[61] ;
+  args_info->dispZ_help = gengetopt_args_info_help[62] ;
+  args_info->current_help = gengetopt_args_info_help[63] ;
+  args_info->onsager_help = gengetopt_args_info_help[64] ;
+  args_info->ddisp_help = gengetopt_args_info_help[65] ;
+  args_info->rotAngleDisp_help = gengetopt_args_info_help[66] ;
+  args_info->meandisp_help = gengetopt_args_info_help[67] ;
+  args_info->sfg_help = gengetopt_args_info_help[68] ;
   
 }
 
@@ -404,6 +437,11 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->order_orig));
   free_string_field (&(args_info->nbins_orig));
   free_string_field (&(args_info->nzbins_orig));
+  free_string_field (&(args_info->tcorr_orig));
+  free_string_field (&(args_info->nstart_orig));
+  free_string_field (&(args_info->tsep_orig));
+  free_string_field (&(args_info->t_apod_orig));
+  free_string_field (&(args_info->t_zerofill_orig));
   free_string_field (&(args_info->rcut_orig));
   free_string_field (&(args_info->OOcut_orig));
   free_string_field (&(args_info->thetacut_orig));
@@ -414,6 +452,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->dipoleY_orig));
   free_string_field (&(args_info->dipoleZ_orig));
   free_string_field (&(args_info->selectionMode_orig));
+  free_string_field (&(args_info->sfg_polarization_arg));
+  free_string_field (&(args_info->sfg_polarization_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -512,6 +552,16 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "nbins", args_info->nbins_orig, 0);
   if (args_info->nzbins_given)
     write_into_file(outfile, "nzbins", args_info->nzbins_orig, 0);
+  if (args_info->tcorr_given)
+    write_into_file(outfile, "tcorr", args_info->tcorr_orig, 0);
+  if (args_info->nstart_given)
+    write_into_file(outfile, "nstart", args_info->nstart_orig, 0);
+  if (args_info->tsep_given)
+    write_into_file(outfile, "tsep", args_info->tsep_orig, 0);
+  if (args_info->t_apod_given)
+    write_into_file(outfile, "t_apod", args_info->t_apod_orig, 0);
+  if (args_info->t_zerofill_given)
+    write_into_file(outfile, "t_zerofill", args_info->t_zerofill_orig, 0);
   if (args_info->rcut_given)
     write_into_file(outfile, "rcut", args_info->rcut_orig, 0);
   if (args_info->OOcut_given)
@@ -532,6 +582,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "dipoleZ", args_info->dipoleZ_orig, 0);
   if (args_info->selectionMode_given)
     write_into_file(outfile, "selectionMode", args_info->selectionMode_orig, cmdline_parser_selectionMode_values);
+  if (args_info->sfg_polarization_given)
+    write_into_file(outfile, "sfg-polarization", args_info->sfg_polarization_orig, 0);
   if (args_info->selecorr_given)
     write_into_file(outfile, "selecorr", 0, 0 );
   if (args_info->rcorr_given)
@@ -612,6 +664,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "rotAngleDisp", 0, 0 );
   if (args_info->meandisp_given)
     write_into_file(outfile, "meandisp", 0, 0 );
+  if (args_info->sfg_given)
+    write_into_file(outfile, "sfg", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -705,6 +759,7 @@ reset_group_correlation_function(struct gengetopt_args_info *args_info)
   args_info->ddisp_given = 0 ;
   args_info->rotAngleDisp_given = 0 ;
   args_info->meandisp_given = 0 ;
+  args_info->sfg_given = 0 ;
 
   args_info->correlation_function_group_counter = 0;
 }
@@ -1560,6 +1615,11 @@ cmdline_parser_internal (
         { "order",	1, NULL, 0 },
         { "nbins",	1, NULL, 'n' },
         { "nzbins",	1, NULL, 'z' },
+        { "tcorr",	1, NULL, 0 },
+        { "nstart",	1, NULL, 0 },
+        { "tsep",	1, NULL, 0 },
+        { "t_apod",	1, NULL, 0 },
+        { "t_zerofill",	1, NULL, 0 },
         { "rcut",	1, NULL, 'c' },
         { "OOcut",	1, NULL, 0 },
         { "thetacut",	1, NULL, 0 },
@@ -1570,6 +1630,7 @@ cmdline_parser_internal (
         { "dipoleY",	1, NULL, 0 },
         { "dipoleZ",	1, NULL, 0 },
         { "selectionMode",	1, NULL, 0 },
+        { "sfg-polarization",	1, NULL, 0 },
         { "selecorr",	0, NULL, 's' },
         { "rcorr",	0, NULL, 'r' },
         { "rcorrZ",	0, NULL, 0 },
@@ -1610,6 +1671,7 @@ cmdline_parser_internal (
         { "ddisp",	0, NULL, 0 },
         { "rotAngleDisp",	0, NULL, 0 },
         { "meandisp",	0, NULL, 0 },
+        { "sfg",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -1921,6 +1983,76 @@ cmdline_parser_internal (
               goto failure;
           
           }
+          /* Correlation time (length of each window) in fs.  */
+          else if (strcmp (long_options[option_index].name, "tcorr") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->tcorr_arg), 
+                 &(args_info->tcorr_orig), &(args_info->tcorr_given),
+                &(local_args_info.tcorr_given), optarg, 0, "100000.0", ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "tcorr", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Number of frames to skip at start of trajectory.  */
+          else if (strcmp (long_options[option_index].name, "nstart") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->nstart_arg), 
+                 &(args_info->nstart_orig), &(args_info->nstart_given),
+                &(local_args_info.nstart_given), optarg, 0, "0", ARG_INT,
+                check_ambiguity, override, 0, 0,
+                "nstart", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Separation time between correlation windows (0 = no gap).  */
+          else if (strcmp (long_options[option_index].name, "tsep") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->tsep_arg), 
+                 &(args_info->tsep_orig), &(args_info->tsep_given),
+                &(local_args_info.tsep_given), optarg, 0, "0.0", ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "tsep", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Apodization time (fs) [filters tcorr with exp(-t/t_apod) in Fourier-transformed spectroscopic functions].  */
+          else if (strcmp (long_options[option_index].name, "t_apod") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->t_apod_arg), 
+                 &(args_info->t_apod_orig), &(args_info->t_apod_given),
+                &(local_args_info.t_apod_given), optarg, 0, "0.0", ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "t_apod", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Zero-fill time (fs) [Pads time correlation functions with zeros from tcorr -> t_zerofill in Fourier-transformed spectroscopic functions].  */
+          else if (strcmp (long_options[option_index].name, "t_zerofill") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->t_zerofill_arg), 
+                 &(args_info->t_zerofill_orig), &(args_info->t_zerofill_given),
+                &(local_args_info.t_zerofill_given), optarg, 0, "0.0", ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "t_zerofill", '-',
+                additional_error))
+              goto failure;
+          
+          }
           /* Oxygen-Oxygen cutoff radius (angstroms).  */
           else if (strcmp (long_options[option_index].name, "OOcut") == 0)
           {
@@ -2043,6 +2175,20 @@ cmdline_parser_internal (
                 &(local_args_info.selectionMode_given), optarg, cmdline_parser_selectionMode_values, "survival", ARG_ENUM,
                 check_ambiguity, override, 0, 0,
                 "selectionMode", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* SFG polarization combination: ssp, ppp, sps.  */
+          else if (strcmp (long_options[option_index].name, "sfg-polarization") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->sfg_polarization_arg), 
+                 &(args_info->sfg_polarization_orig), &(args_info->sfg_polarization_given),
+                &(local_args_info.sfg_polarization_given), optarg, 0, "ssp", ARG_STRING,
+                check_ambiguity, override, 0, 0,
+                "sfg-polarization", '-',
                 additional_error))
               goto failure;
           
@@ -2553,6 +2699,23 @@ cmdline_parser_internal (
                 &(local_args_info.meandisp_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "meandisp", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* SFG susceptibility spectrum (exciton model).  */
+          else if (strcmp (long_options[option_index].name, "sfg") == 0)
+          {
+          
+            if (args_info->correlation_function_group_counter && override)
+              reset_group_correlation_function (args_info);
+            args_info->correlation_function_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->sfg_given),
+                &(local_args_info.sfg_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "sfg", '-',
                 additional_error))
               goto failure;
           

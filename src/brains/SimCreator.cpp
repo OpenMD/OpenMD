@@ -179,6 +179,7 @@ namespace OpenMD {
 		 parser.getNumberOfSyntaxErrors());
 	painCave.isFatal = 1;
 	simError();
+	delete observer;
 	return nullptr;
       }
       
@@ -186,6 +187,7 @@ namespace OpenMD {
       OMDTreeVisitor visitor;
       Globals* simParams = visitor.walkTree(tree);
       simParams->setMDfileVersion(mdFileVersion);
+      delete observer;
       return simParams;      
     } catch (const std::exception& e) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,

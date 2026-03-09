@@ -408,6 +408,65 @@ else(FFTW3_FOUND)
   message(STATUS "No fftw3 found - will be missing some analysis modules")
 endif(FFTW3_FOUND)
 
+# LAPACK + CBLAS
+# On macOS  : Accelerate supplies both; prefer it via BLA_VENDOR.
+# On Linux  : MKL (Intel) or OpenBLAS.  cmake's FindLAPACK/FindBLAS handle both.
+# The BLA_VENDOR hint is advisory — if unset cmake picks whatever it finds.
+# Developers can override with:  cmake -DBLA_VENDOR=Intel10_64lp  (MKL)
+#                                 cmake -DBLA_VENDOR=OpenBLAS
+#                                 cmake -DBLA_VENDOR=Apple         (Accelerate)
+if(APPLE AND NOT BLA_VENDOR)
+  set(BLA_VENDOR Apple)
+endif()
+
+find_package(LAPACK)
+find_package(BLAS)
+
+if(LAPACK_FOUND AND BLAS_FOUND)
+  set(HAVE_LAPACK 1)
+  message(STATUS "Found LAPACK: ${LAPACK_LIBRARIES}")
+  message(STATUS "Found BLAS:   ${BLAS_LIBRARIES}")
+
+  # Check for the CBLAS C header (needed for cblas_dgemm).
+  # Accelerate and MKL bundle it; OpenBLAS installs it separately.
+  find_path(CBLAS_INCLUDE_DIR cblas.h
+    HINTS
+      /usr/include/openblas          # Ubuntu: libopenblas-dev
+      /opt/homebrew/opt/openblas/include  # Homebrew OpenBLAS
+      /usr/local/opt/openblas/include
+      ${MKL_ROOT}/include            # Intel MKL (if MKL_ROOT is set)
+      /opt/intel/oneapi/mkl/latest/include
+  )
+
+  if(CBLAS_INCLUDE_DIR)
+    set(HAVE_CBLAS 1)
+    include_directories(${CBLAS_INCLUDE_DIR})
+    message(STATUS "Found CBLAS header: ${CBLAS_INCLUDE_DIR}/cblas.h")
+  else()
+    # Accelerate provides cblas.h via the framework umbrella header;
+    # no explicit include path needed on macOS.
+    if(APPLE AND BLA_VENDOR STREQUAL "Apple")
+      set(HAVE_CBLAS 1)
+      message(STATUS "CBLAS provided by Accelerate framework (no extra include needed)")
+    else()
+      message(STATUS "cblas.h not found — dgemm optimisation disabled (LAPACK diagonalisation still active)")
+    endif()
+  endif()
+
+  # Propagate defines the same way FFTW3 and zlib are handled
+  add_definitions(-DHAVE_LAPACK)
+  if(HAVE_CBLAS)
+    add_definitions(-DHAVE_CBLAS)
+  endif()
+
+  # Link DynamicProps against LAPACK+BLAS.  Other targets don't need it.
+  # We defer the actual target_link_libraries call until after DynamicProps
+  # is defined (see below).
+  set(LAPACK_BLAS_LIBRARIES ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+else()
+  message(STATUS "LAPACK/BLAS not found — SFG will use the JAMA eigensolver fallback")
+endif()
+
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
@@ -801,6 +860,7 @@ set(DYNAMICPROPSSOURCE
     src/applications/dynamicProps/SelectionCorrFunc.cpp
     src/applications/dynamicProps/StressCorrFunc.cpp
     src/applications/dynamicProps/SystemDipoleCorrFunc.cpp
+    src/applications/dynamicProps/SFG.cpp
     src/applications/dynamicProps/ThetaCorrFunc.cpp
     src/applications/dynamicProps/TimeCorrFunc.cpp
     src/applications/dynamicProps/VCorrFunc.cpp
@@ -941,6 +1001,14 @@ target_link_libraries(Dump2XYZ openmd_single openmd_core openmd_single
 add_executable(DynamicProps ${DYNAMICPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(DynamicProps openmd_single openmd_core openmd_single
                       openmd_core)
+if(LAPACK_FOUND AND BLAS_FOUND)
+  target_link_libraries(DynamicProps ${LAPACK_BLAS_LIBRARIES})
+  # Accelerate deprecated the legacy CBLAS interface in macOS 13.3.
+  # -DACCELERATE_NEW_LAPACK opts into the updated headers that replace it.
+  if(APPLE AND BLA_VENDOR STREQUAL "Apple")
+    target_compile_definitions(DynamicProps PRIVATE ACCELERATE_NEW_LAPACK)
+  endif()
+endif()
 add_executable(Hydro ${HYDROSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(Hydro PRIVATE openmd_single openmd_core openmd_single
                                     openmd_core)
@@ -1227,6 +1295,9 @@ message(STATUS "ZLIB_LIBRARIES ............. = ${ZLIB_LIBRARIES}")
 message(STATUS "FFTW3_ROOT ................. = ${FFTW3_ROOT}")
 message(STATUS "FFTW3_INCLUDE_DIR .......... = ${FFTW3_INCLUDE_DIR}")
 message(STATUS "FFTW3_LIBRARIES ............ = ${FFTW3_LIBRARIES}")
+message(STATUS "LAPACK_LIBRARIES ........... = ${LAPACK_LIBRARIES}")
+message(STATUS "BLAS_LIBRARIES ............. = ${BLAS_LIBRARIES}")
+message(STATUS "CBLAS_INCLUDE_DIR .......... = ${CBLAS_INCLUDE_DIR}")
 message(STATUS "Python3_EXECUTABLE ......... = ${Python3_EXECUTABLE}")
 message(STATUS "DOXYGEN_EXECUTABLE ......... = ${DOXYGEN_EXECUTABLE}")
 message(STATUS)

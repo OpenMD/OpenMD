@@ -125,11 +125,13 @@ namespace OpenMD {
   public:
     CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters);
     virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi);
+    std::vector<CharmmTorsionParameter> getParameters() { return pars_; }
 
   private:
     DoublePolynomial T_;
     DoublePolynomial U_;
     RealType C_;
+    std::vector<CharmmTorsionParameter> pars_;
   };
 }  // namespace OpenMD
 

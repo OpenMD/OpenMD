@@ -71,6 +71,10 @@ namespace OpenMD {
     }
   }
 
+  PotentialEnergyObjectiveFunction::~PotentialEnergyObjectiveFunction() {
+    delete shake_;
+  }
+  
   RealType PotentialEnergyObjectiveFunction::value(
       const DynamicVector<RealType>& x) {
     setCoor(x);

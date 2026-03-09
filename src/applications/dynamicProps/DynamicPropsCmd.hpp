@@ -69,6 +69,21 @@ struct gengetopt_args_info
   int nzbins_arg;	/**< @brief Number of Z bins (default='100').  */
   char * nzbins_orig;	/**< @brief Number of Z bins original value given at command line.  */
   const char *nzbins_help; /**< @brief Number of Z bins help description.  */
+  double tcorr_arg;	/**< @brief Correlation time (length of each window) in fs (default='100000.0').  */
+  char * tcorr_orig;	/**< @brief Correlation time (length of each window) in fs original value given at command line.  */
+  const char *tcorr_help; /**< @brief Correlation time (length of each window) in fs help description.  */
+  int nstart_arg;	/**< @brief Number of frames to skip at start of trajectory (default='0').  */
+  char * nstart_orig;	/**< @brief Number of frames to skip at start of trajectory original value given at command line.  */
+  const char *nstart_help; /**< @brief Number of frames to skip at start of trajectory help description.  */
+  double tsep_arg;	/**< @brief Separation time between correlation windows (0 = no gap) (default='0.0').  */
+  char * tsep_orig;	/**< @brief Separation time between correlation windows (0 = no gap) original value given at command line.  */
+  const char *tsep_help; /**< @brief Separation time between correlation windows (0 = no gap) help description.  */
+  double t_apod_arg;	/**< @brief Apodization time (fs) [filters tcorr with exp(-t/t_apod) in Fourier-transformed spectroscopic functions] (default='0.0').  */
+  char * t_apod_orig;	/**< @brief Apodization time (fs) [filters tcorr with exp(-t/t_apod) in Fourier-transformed spectroscopic functions] original value given at command line.  */
+  const char *t_apod_help; /**< @brief Apodization time (fs) [filters tcorr with exp(-t/t_apod) in Fourier-transformed spectroscopic functions] help description.  */
+  double t_zerofill_arg;	/**< @brief Zero-fill time (fs) [Pads time correlation functions with zeros from tcorr -> t_zerofill in Fourier-transformed spectroscopic functions] (default='0.0').  */
+  char * t_zerofill_orig;	/**< @brief Zero-fill time (fs) [Pads time correlation functions with zeros from tcorr -> t_zerofill in Fourier-transformed spectroscopic functions] original value given at command line.  */
+  const char *t_zerofill_help; /**< @brief Zero-fill time (fs) [Pads time correlation functions with zeros from tcorr -> t_zerofill in Fourier-transformed spectroscopic functions] help description.  */
   double rcut_arg;	/**< @brief cutoff radius (angstroms).  */
   char * rcut_orig;	/**< @brief cutoff radius (angstroms) original value given at command line.  */
   const char *rcut_help; /**< @brief cutoff radius (angstroms) help description.  */
@@ -99,6 +114,9 @@ struct gengetopt_args_info
   enum enum_selectionMode selectionMode_arg;	/**< @brief How to treat objects which leave a dynamic selection and then return later (default = survival) (default='survival').  */
   char * selectionMode_orig;	/**< @brief How to treat objects which leave a dynamic selection and then return later (default = survival) original value given at command line.  */
   const char *selectionMode_help; /**< @brief How to treat objects which leave a dynamic selection and then return later (default = survival) help description.  */
+  char * sfg_polarization_arg;	/**< @brief SFG polarization combination: ssp, ppp, sps (default='ssp').  */
+  char * sfg_polarization_orig;	/**< @brief SFG polarization combination: ssp, ppp, sps original value given at command line.  */
+  const char *sfg_polarization_help; /**< @brief SFG polarization combination: ssp, ppp, sps help description.  */
   const char *selecorr_help; /**< @brief selection correlation function help description.  */
   const char *rcorr_help; /**< @brief mean squared displacement help description.  */
   const char *rcorrZ_help; /**< @brief mean squared displacement binned by Z help description.  */
@@ -139,6 +157,7 @@ struct gengetopt_args_info
   const char *ddisp_help; /**< @brief Collective Dipole displacement function (Helfand moment of Current Density) help description.  */
   const char *rotAngleDisp_help; /**< @brief Displacement correlation function for rotation angles help description.  */
   const char *meandisp_help; /**< @brief mean displacement help description.  */
+  const char *sfg_help; /**< @brief SFG susceptibility spectrum (exciton model) help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -151,6 +170,11 @@ struct gengetopt_args_info
   unsigned int order_given ;	/**< @brief Whether order was given.  */
   unsigned int nbins_given ;	/**< @brief Whether nbins was given.  */
   unsigned int nzbins_given ;	/**< @brief Whether nzbins was given.  */
+  unsigned int tcorr_given ;	/**< @brief Whether tcorr was given.  */
+  unsigned int nstart_given ;	/**< @brief Whether nstart was given.  */
+  unsigned int tsep_given ;	/**< @brief Whether tsep was given.  */
+  unsigned int t_apod_given ;	/**< @brief Whether t_apod was given.  */
+  unsigned int t_zerofill_given ;	/**< @brief Whether t_zerofill was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
   unsigned int OOcut_given ;	/**< @brief Whether OOcut was given.  */
   unsigned int thetacut_given ;	/**< @brief Whether thetacut was given.  */
@@ -161,6 +185,7 @@ struct gengetopt_args_info
   unsigned int dipoleY_given ;	/**< @brief Whether dipoleY was given.  */
   unsigned int dipoleZ_given ;	/**< @brief Whether dipoleZ was given.  */
   unsigned int selectionMode_given ;	/**< @brief Whether selectionMode was given.  */
+  unsigned int sfg_polarization_given ;	/**< @brief Whether sfg-polarization was given.  */
   unsigned int selecorr_given ;	/**< @brief Whether selecorr was given.  */
   unsigned int rcorr_given ;	/**< @brief Whether rcorr was given.  */
   unsigned int rcorrZ_given ;	/**< @brief Whether rcorrZ was given.  */
@@ -201,6 +226,7 @@ struct gengetopt_args_info
   unsigned int ddisp_given ;	/**< @brief Whether ddisp was given.  */
   unsigned int rotAngleDisp_given ;	/**< @brief Whether rotAngleDisp was given.  */
   unsigned int meandisp_given ;	/**< @brief Whether meandisp was given.  */
+  unsigned int sfg_given ;	/**< @brief Whether sfg was given.  */
 
   char **inputs ; /**< @brief unnamed options (options without names) */
   unsigned inputs_num ; /**< @brief unnamed options number */

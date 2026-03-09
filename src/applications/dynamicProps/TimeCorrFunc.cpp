@@ -157,6 +157,38 @@ namespace OpenMD {
       painCave.severity = OPENMD_INFO;
       simError();
     }
+    
+    // Compute number of windows that fit in the trajectory
+    if (useWindowing_) {
+      // Need: nStart_ + navg_*nTimeBins_ + (navg_-1)*nSep_ <= nFrames_
+      // Solve: navg_ <= (nFrames_ - nStart_ - nSep_) / (nTimeBins_ + nSep_)
+      if (nStart_ >= nFrames_) {
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "TimeCorrFunc: nStart (%d) >= nFrames (%d).\n",
+                 nStart_, nFrames_);
+        painCave.isFatal = 1;
+        simError();
+      }
+      navg_ = (nFrames_ - nStart_ - nSep_) / nStride_;
+      if (navg_ < 1) {
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "TimeCorrFunc: trajectory too short for even one window.\n"
+                 "\tnFrames=%d, nStart=%d, nTimeBins=%d, nSep=%d\n",
+                 nFrames_, nStart_, nTimeBins_, nSep_);
+        painCave.isFatal = 1;
+        simError();
+      }
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "TimeCorrFunc: windowing enabled.\n"
+               "\tnStart=%d, nTimeBins=%d, nSep=%d, nStride=%d, navg=%d\n",
+               nStart_, nTimeBins_, nSep_, nStride_, navg_);
+      painCave.isFatal  = 0;
+      painCave.severity = OPENMD_INFO;
+      simError();
+    } else {
+      // Original behavior: all frames are origins, nTimeBins_ = nFrames_
+      navg_ = nFrames_;
+    }
   }
 
   template<typename T>
@@ -386,6 +418,34 @@ namespace OpenMD {
     }
   }
 
+  // Setters — call before doCorrelate()
+  template<typename T>
+  void TimeCorrFunc<T>::setWindowingParameters(RealType tcorr_fs, int nStart, RealType tsep_fs) {
+    // deltaTime_ and nFrames_ are already set by the constructor
+    // so we can compute frame counts here.
+    nStart_    = nStart;
+    nTimeBins_ = (tcorr_fs > 0)
+      ? static_cast<int>(tcorr_fs / deltaTime_)
+      : nFrames_;
+
+    // tsep_fs > 0: gap between end of one window and start of the next
+    //              (non-overlapping with decorrelation gap)
+    // tsep_fs = 0: tight non-overlapping windows (nStride = nTimeBins)
+    // tsep_fs < 0: overlapping windows.
+    //              |tsep_fs| is the overlap in femtoseconds, i.e. the
+    //              amount by which successive windows share frames.
+    //              nStride = nTimeBins + nSep, where nSep < 0.
+    //              nStride is clamped to a minimum of 1 so that window
+    //              origins always advance by at least one frame.
+    nSep_    = static_cast<int>(tsep_fs / deltaTime_);
+    nStride_ = std::max(1, static_cast<int>(nTimeBins_) + nSep_);
+    useWindowing_ = (nStride_ != static_cast<int>(nTimeBins_) || nStart_ > 0);
+
+    T zeroType(0.0);
+    histogram_.assign(nTimeBins_, zeroType);
+    count_.assign(nTimeBins_, 0);
+  }
+  
   template<typename T>
   void TimeCorrFunc<T>::doCorrelate() {
     painCave.isFatal  = 0;
@@ -419,45 +479,76 @@ namespace OpenMD {
     }
 
     progressBar_->clear();
-    RealType samples = 0.5 * (nFrames_ + 1) * nFrames_;
-    int visited      = 0;
 
-    for (int i = 0; i < nFrames_; ++i) {
-      RealType time1 = times_[i];
+    if (useWindowing_) {
+      // -------------------------------------------------------------------
+      // Windowed mode: non-overlapping (or strided) origins.
+      //
+      // For each window ii, the origin frame is:
+      //   frame0 = nStart_ + ii * nStride_
+      // The window covers frames [frame0, frame0 + nTimeBins_).
+      // -------------------------------------------------------------------
+      RealType samples = static_cast<RealType>(navg_ * nTimeBins_);
+      int visited = 0;
 
-      for (int j = i; j < nFrames_; ++j) {
-        visited++;
-        progressBar_->setStatus(visited, samples);
-        progressBar_->update();
+      for (int ii = 0; ii < navg_; ++ii) {
+        int frame0 = nStart_ + ii * nStride_;
 
-        // Perform a sanity check on the actual configuration times to
-        // make sure the configurations are spaced the same amount the
-        // sample time said they were spaced:
+        for (int tt = 0; tt < nTimeBins_; ++tt) {
+          int frame2 = frame0 + tt;
+          if (frame2 >= nFrames_) break;
 
-        RealType time2 = times_[j];
+          visited++;
+          progressBar_->setStatus(visited, samples);
+          progressBar_->update();
 
-        if (std::fabs((time2 - time1) - (j - i) * dtMean_) >
-            6 * dtSigma_ * (j - i)) {
-          snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-                   "TimeCorrFunc::correlateBlocks: mean sampleTime (%f)\n"
-                   "\tin %s does not match actual time-spacing between\n"
-                   "\tconfigurations %d (t = %f) and %d (t = %f).\n",
-                   dtMean_, dumpFilename_.c_str(), i, time1, j, time2);
-          if (allowTimeFuzz_) {
-            painCave.isFatal  = 0;
-            painCave.severity = OPENMD_INFO;
-          } else {
-            painCave.isFatal  = 1;
-            painCave.severity = OPENMD_ERROR;
-          }
-          simError();
+          // timeBin is just tt — lag from this window's origin
+          correlateFrames(frame0, frame2, tt);
         }
+      }
 
-        int timeBin = int((time2 - time1) / dtMean_ + 0.5);
-        correlateFrames(i, j, timeBin);
+    } else {
+      // -------------------------------------------------------------------
+      // Original overlapping-origin mode (nStride_ == 1).
+      // All frame pairs (i, j) with j >= i are correlated.
+      // -------------------------------------------------------------------
+      RealType samples = 0.5 * (nFrames_ + 1) * nFrames_;
+      int visited      = 0;
+
+      for (int i = 0; i < nFrames_; ++i) {
+        RealType time1 = times_[i];
+
+        for (int j = i; j < nFrames_; ++j) {
+          visited++;
+          progressBar_->setStatus(visited, samples);
+          progressBar_->update();
+
+          RealType time2 = times_[j];
+
+          if (std::fabs((time2 - time1) - (j - i) * dtMean_) >
+              6 * dtSigma_ * (j - i)) {
+            snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                     "TimeCorrFunc::correlation: mean sampleTime (%f)\n"
+                     "\tin %s does not match actual time-spacing between\n"
+                     "\tconfigurations %d (t = %f) and %d (t = %f).\n",
+                     dtMean_, dumpFilename_.c_str(), i, time1, j, time2);
+            if (allowTimeFuzz_) {
+              painCave.isFatal  = 0;
+              painCave.severity = OPENMD_INFO;
+            } else {
+              painCave.isFatal  = 1;
+              painCave.severity = OPENMD_ERROR;
+            }
+            simError();
+          }
+
+          int timeBin = int((time2 - time1) / dtMean_ + 0.5);
+          correlateFrames(i, j, timeBin);
+        }
       }
     }
   }
+  
 
   /*
 template<typename T>
@@ -561,12 +652,15 @@ void TimeCorrFunc<T>::validateSelection(SelectionManager& seleMan) {
         ofs << "#time\t" << labelString_ << "\n";
       else
         ofs << "#time\tcorrVal\n";
-      
+
       for (unsigned int i = 0; i < nTimeBins_; ++i) {
-	if (count_[i] > 0) 
-	  ofs << times_[i] - times_[0] << "\t" << histogram_[i] << "\n";
+        if (count_[i] > 0) {
+          RealType lagTime = useWindowing_ ?
+	    static_cast<RealType>(i) * dtMean_ :
+	    times_[i] - times_[0];
+          ofs << lagTime << "\t" << histogram_[i] << "\n";
+        }
       }
-      
     } else {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "TimeCorrFunc::writeCorrelate Error: fail to open %s\n",

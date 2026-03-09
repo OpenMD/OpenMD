@@ -164,15 +164,16 @@ namespace OpenMD {
     }
 
     /** Copy the internal data to an array*/
-    void getArray(Real* array) {
+    void getArray(Real* array) const {
       for (unsigned int i = 0; i < Dim; i++) {
         array[i] = this->data_[i];
       }
     }
 
     /** Returns the pointer of internal array */
+    const Real* getArrayPointer() const { return this->data_; }
     Real* getArrayPointer() { return this->data_; }
-
+    
     /**
      * Tests if this vetor is equal to other vector
      * @return true if equal, otherwise return false
@@ -298,7 +299,7 @@ namespace OpenMD {
     }
 
     /* returns the maximum value in this vector */
-    inline Real max() {
+    inline Real max() const {
       Real val = this->data_[0];
       for (unsigned int i = 0; i < Dim; i++) {
         if (this->data_[i] > val) val = this->data_[i];
@@ -369,7 +370,7 @@ namespace OpenMD {
      * Returns the sum of all elements of this vector.
      * @return the sum of all elements of this vector
      */
-    inline Real sum() {
+    inline Real sum() const {
       Real tmp;
       tmp = 0;
       for (unsigned int i = 0; i < Dim; i++)
@@ -381,7 +382,7 @@ namespace OpenMD {
      * Returns the product of all elements of this vector.
      * @return the product of all elements of this vector
      */
-    inline Real componentProduct() {
+    inline Real componentProduct() const {
       Real tmp;
       tmp = 1;
       for (unsigned int i = 0; i < Dim; i++)
@@ -393,22 +394,19 @@ namespace OpenMD {
      * Returns the length of this vector.
      * @return the length of this vector
      */
-    inline Real length() { return sqrt(lengthSquare()); }
+    inline Real length() const { return sqrt(lengthSquare()); }
 
     /**
      * Returns the squared length of this vector.
      * @return the squared length of this vector
      */
-    inline Real lengthSquare() { return dot(*this, *this); }
+    inline Real lengthSquare() const { return dot(*this, *this); }
 
     /** Normalizes this vector in place */
     inline void normalize() {
       Real len;
 
       len = length();
-
-      // if (len < OpenMD::Constants::epsilon)
-      //  throw();
 
       *this /= len;
     }
@@ -417,7 +415,7 @@ namespace OpenMD {
      * Tests if this vector is normalized
      * @return true if this vector is normalized, otherwise return false
      */
-    inline bool isNormalized() { return equal(lengthSquare(), (RealType)1); }
+    inline bool isNormalized() const { return equal(lengthSquare(), (RealType)1); }
 
     unsigned int size() const { return Dim; }
 
