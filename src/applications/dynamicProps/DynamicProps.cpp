@@ -367,7 +367,8 @@ int main(int argc, char* argv[]) {
   } else if (args_info.sfg_given) {
     corrFunc = std::make_unique<SFG>(info, dumpFileName, sele1, sele2,
 				     args_info.sfg_polarization_arg,
-                                     privilegedAxis);
+                                     privilegedAxis, args_info.t_apod_arg,
+				     args_info.t_zerofill_arg);
   }
 
   if (args_info.selectionMode_arg == selectionMode_arg_restart) {

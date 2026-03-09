@@ -78,12 +78,15 @@ namespace OpenMD {
   // =========================================================================
   SFG::SFG(SimInfo* info, const std::string& filename,
            const std::string& sele1, const std::string& sele2,
-           const std::string& polarization, int privilegedAxis) :
+           const std::string& polarization, int privilegedAxis,
+           RealType t_apod, RealType t_zerofill) :
     SystemACF<RealType>(info, filename, sele1, sele2),
     polarization_(polarization),
     privilegedAxis_(privilegedAxis),
     s1_((privilegedAxis + 1) % 3),
-    s2_((privilegedAxis + 2) % 3) {
+    s2_((privilegedAxis + 2) % 3),
+    t_apod_ps_(t_apod * 1e-3),
+    t_zerofill_ps_(t_zerofill * 1e-3) {
 
     setCorrFuncType("SFG");
     setOutputName(getPrefix(dumpFilename_) + ".sfg");
@@ -153,8 +156,8 @@ namespace OpenMD {
     dumpHasElectricFields_ = info_->getSimParams()->getOutputElectricField();
 
     if (!dumpHasElectricFields_) {
-      int asl  = info_->getAtomStorageLayout()        | DataStorage::dslElectricField;
-      int rbsl = info_->getRigidBodyStorageLayout()   | DataStorage::dslElectricField;
+      int asl  = info_->getAtomStorageLayout()      | DataStorage::dslElectricField;
+      int rbsl = info_->getRigidBodyStorageLayout() | DataStorage::dslElectricField;
       int cgsl = info_->getCutoffGroupStorageLayout();
       info_->setAtomStorageLayout(asl);
       info_->setRigidBodyStorageLayout(rbsl);
@@ -227,15 +230,15 @@ namespace OpenMD {
   void SFG::correlation() {
     const std::complex<double> czero(0.0, 0.0);
 
-    int    ncor   = static_cast<int>(nTimeBins_);
-    double dt_ps  = static_cast<double>(dtMean_) * 1.0e-3;  // fs → ps
-    dt_ps_        = dt_ps;
+    int    ncor     = static_cast<int>(nTimeBins_);
+    RealType dt_ps  = dtMean_ * 1.0e-3;  // fs → ps
+    dt_ps_          = dt_ps;
 
     // Finalize wAvg_ from all per-frame diagonal entries accumulated during
     // preCorrelate(). This is the true mean ω₁₀ across the trajectory and
     // the selected chromophores, regardless of water model.
     wAvg_ = (wAvgCount_ > 0)
-      ? wAvgSum_ / static_cast<double>(wAvgCount_)
+      ? wAvgSum_ / static_cast<RealType>(wAvgCount_)
       : 0.0;
 
     // Apply the shift to every stored Hamiltonian diagonal in one pass.
@@ -249,10 +252,15 @@ namespace OpenMD {
     tcf_ppp_.assign(ncor, czero);
     tcf_sps_.assign(ncor, czero);
 
+    progressBar_->clear();
+
     for (int iwin = 0; iwin < navg_; ++iwin) {
       int istart = nStart_ + iwin * nStride_;
       if (istart >= nFrames_) break;
 
+      progressBar_->setStatus(iwin + 1, navg_);
+      progressBar_->update();
+      
       const FrameData& fd0raw = allFrames_[istart];
       int N = fd0raw.N;
       if (N == 0) continue;
@@ -297,8 +305,8 @@ namespace OpenMD {
         if (tt > 0)
           propagateF(F, fdt.H, dt_ps, N);
 
-        double exptc = (T1_ps_ > 0.0)
-          ? std::exp(-static_cast<double>(tt) * dt_ps / (2.0 * T1_ps_))
+        RealType exptc = (T1_ps_ > 0.0)
+          ? std::exp(-static_cast<RealType>(tt) * dt_ps / (2.0 * T1_ps_))
           : 1.0;
 
         accumulateTCF(tt, F, fd0, fdt, N, exptc);
@@ -307,7 +315,7 @@ namespace OpenMD {
 
     // Normalize by number of windows
     if (navg_ > 0) {
-      double inv = 1.0 / static_cast<double>(navg_);
+      RealType inv = 1.0 / static_cast<RealType>(navg_);
       for (int tt = 0; tt < ncor; ++tt) {
         tcf_ssp_[tt] *= inv;
         tcf_ppp_[tt] *= inv;
@@ -322,8 +330,8 @@ namespace OpenMD {
   // extractFrame
   //
   // Reads the current snapshot and builds a FrameData in the local (site)
-  // basis.  The Hamiltonian matrix is NOT filled here; call buildHamiltonian
-  // afterward.  ohPos and molIndex are returned for Hamiltonian construction.
+  // basis. The Hamiltonian matrix is NOT filled here; call buildHamiltonian
+  // afterward. ohPos and molIndex are returned for Hamiltonian construction.
   // =========================================================================
   SFG::FrameData SFG::extractFrame(std::vector<Vector3d>& ohPos,
 				   std::vector<int>&      molIndex,
@@ -471,9 +479,9 @@ namespace OpenMD {
   //      Prefers dsyevd (LAPACK divide-and-conquer) when available;
   //      falls back to JAMA otherwise.
   //   2. Phase factors: u_k = exp(i w_k dt / hbar)
-  //   3. tmp  = V^T . F                  (real x complex, via cblas_dgemm if available)
-  //   4. tmp_k* *= u_k                   (row-wise phase scaling)
-  //   5. F    = V  . tmp                 (real x complex, via cblas_dgemm if available)
+  //   3. tmp  = V^T . F          (real x complex, via cblas_dgemm if available)
+  //   4. tmp_k* *= u_k           (row-wise phase scaling)
+  //   5. F    = V  . tmp         (real x complex, via cblas_dgemm if available)
   //
   // Work arrays are thread_local static and resized only when N grows,
   // so per-call heap allocation is zero in the steady state.
@@ -503,27 +511,40 @@ namespace OpenMD {
     }
 
     // -----------------------------------------------------------------------
-    // Step 1: Diagonalize H -> Wbuf (eigenvalues), Vbuf (eigenvectors col-major)
+    // Step 1: Diagonalize H -> Wbuf (eigenvalues),
+    //                          Vbuf (eigenvectors col-major)
     // -----------------------------------------------------------------------
 #if defined(HAVE_LAPACK)
-    // Copy H into Hbuf column-major (symmetric, so row == col order)
+    // Copy H into Hbuf column-major (symmetric, so row == col order).
+    // This must happen BEFORE the workspace query: dsyevd_ uses the A
+    // array as scratch even during the query call (lwork=-1), so querying
+    // with Hbuf and then refilling it would corrupt the input.
     for (int i = 0; i < N; ++i)
       for (int j = 0; j < N; ++j)
         Hbuf[i + j*N] = static_cast<double>(H(i, j));
 
-    // Workspace query
+    // Workspace query: use a throwaway A buffer so Hbuf is not touched.
+    // dsyevd_ with JOBZ='V' requires lwork >= 1+6N+2N^2 and
+    // liwork >= 3+5N; the query returns the optimal (larger) sizes.
+    // work_d and iwork_d are thread_local so we only pay for the query
+    // when N grows to a new maximum.
     {
-      int lwork_q = -1, liwork_q = -1, info = 0;
-      double  wq = 0.0; int wiq = 0;
-      dsyevd_("V", "U", &N, Hbuf.data(), &N, Wbuf.data(),
-              &wq, &lwork_q, &wiq, &liwork_q, &info);
-      int lw = static_cast<int>(wq), liw = wiq;
+      int lwork_q = -1, liwork_q = -1, info_q = 0;
+      double  wq  = 0.0;
+      int     wiq = 0;
+      // Temporary A copy for query — keeps Hbuf intact
+      std::vector<double> Htmp(Hbuf.begin(), Hbuf.begin() + N*N);
+      std::vector<double> Wtmp(N, 0.0);
+      dsyevd_("V", "U", &N, Htmp.data(), &N, Wtmp.data(),
+              &wq, &lwork_q, &wiq, &liwork_q, &info_q);
+      int lw  = static_cast<int>(wq);
+      int liw = wiq;
       if (static_cast<int>(work_d.size())  < lw)  work_d.resize(lw);
       if (static_cast<int>(iwork_d.size()) < liw) iwork_d.resize(liw);
     }
 
     {
-      int lw = static_cast<int>(work_d.size());
+      int lw  = static_cast<int>(work_d.size());
       int liw = static_cast<int>(iwork_d.size());
       int info = 0;
       dsyevd_("V", "U", &N, Hbuf.data(), &N, Wbuf.data(),
@@ -542,7 +563,7 @@ namespace OpenMD {
 
     // JAMA fallback
     {
-      JAMA::Eigenvalue<RealType> eig(H);
+      JAMA::Eigenvalue<RealType>  eig(H);
       DynamicVector<RealType>     evals_j(N);
       DynamicRectMatrix<RealType> evecs_j(N, N);
       eig.getRealEigenvalues(evals_j);
@@ -555,7 +576,7 @@ namespace OpenMD {
     }
 
 #if defined(HAVE_LAPACK)
-after_diag:
+  after_diag:
 #endif
 
     // -----------------------------------------------------------------------
@@ -577,7 +598,7 @@ after_diag:
     //   In column-major BLAS: T = V^T * F  =>  cblas_dgemm(Trans, NoTrans)
     // Step 4: row k of [Tr,Ti] *= phase[k]
     // Step 5: [Fr,Fi] = V * [Tr,Ti]
-    //   In column-major BLAS: F = V * T   =>  cblas_dgemm(NoTrans, NoTrans)
+    //   In column-major BLAS: F = V * T    =>  cblas_dgemm(NoTrans, NoTrans)
     // -----------------------------------------------------------------------
 
     for (int idx = 0; idx < N2; ++idx) {
@@ -586,10 +607,17 @@ after_diag:
     }
 
 #if defined(HAVE_CBLAS)
+#  if defined(__APPLE__)
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#  endif
     cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
                 N, N, N, 1.0, Vbuf.data(), N, Fr.data(), N, 0.0, Tr.data(), N);
     cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
                 N, N, N, 1.0, Vbuf.data(), N, Fi.data(), N, 0.0, Ti.data(), N);
+#  if defined(__APPLE__)
+#    pragma clang diagnostic pop
+#  endif
 #else
     std::fill(Tr.begin(), Tr.begin()+N2, 0.0);
     std::fill(Ti.begin(), Ti.begin()+N2, 0.0);
@@ -614,10 +642,17 @@ after_diag:
     }
 
 #if defined(HAVE_CBLAS)
+#  if defined(__APPLE__)
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#  endif
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
                 N, N, N, 1.0, Vbuf.data(), N, Tr.data(), N, 0.0, Fr.data(), N);
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
                 N, N, N, 1.0, Vbuf.data(), N, Ti.data(), N, 0.0, Fi.data(), N);
+#  if defined(__APPLE__)
+#    pragma clang diagnostic pop
+#  endif
 #else
     std::fill(Fr.begin(), Fr.begin()+N2, 0.0);
     std::fill(Fi.begin(), Fi.begin()+N2, 0.0);
@@ -692,16 +727,16 @@ after_diag:
 
     // SSP: average chi2_{s1,s1,n} and chi2_{s2,s2,n}
     tcf_ssp_[tt] += 0.5 * (dot_alpha(s1, s1, Fmu_n)
-                         + dot_alpha(s2, s2, Fmu_n)) * decay;
+			   + dot_alpha(s2, s2, Fmu_n)) * decay;
 
     // SPS: average s1 and s2 channels
     tcf_sps_[tt] += 0.5 * (dot_alpha(s1, n, Fmu_s1)
-                         + dot_alpha(s2, n, Fmu_s2)) * decay;
+			   + dot_alpha(s2, n, Fmu_s2)) * decay;
 
     // PPP: near-normal approximation (Buch et al. 2007)
     tcf_ppp_[tt] += (-dot_alpha(s1, s1, Fmu_n)
-                    - dot_alpha(s2, s2, Fmu_n)
-                    + dot_alpha(n,  n,  Fmu_n)) * decay;
+		     - dot_alpha(s2, s2, Fmu_n)
+		     + dot_alpha(n,  n,  Fmu_n)) * decay;
   }
 
   // =========================================================================
@@ -773,7 +808,7 @@ after_diag:
   // α_ab = α_perp·δ_ab + (α_par − α_perp)·ê_a·ê_b
   // =========================================================================
   Mat3x3d SFG::bondPolarizability(const Vector3d& ohUnit,
-                                   RealType alpha_par, RealType alpha_perp) {
+				  RealType alpha_par, RealType alpha_perp) {
     RealType da = alpha_par - alpha_perp;
     Mat3x3d a(0.0);
     for (int p = 0; p < 3; ++p) {
@@ -829,42 +864,64 @@ after_diag:
   
 #if defined(HAVE_FFTW3_H)
 
+    const double ps_to_invcm = 33.3564;
+
     // Select TCF based on polarization argument
     const std::vector<std::complex<double>>* pTCF = &tcf_ssp_;
     if (polarization_ == "ppp") pTCF = &tcf_ppp_;
     else if (polarization_ == "sps") pTCF = &tcf_sps_;
 
-    int N = static_cast<int>(nTimeBins_);
-    if (N < 2) {
+    // N_corr: number of real TCF points (determines intrinsic resolution).
+    // N_fft:  FFT size after zero-filling (determines grid spacing).
+    // Normalization uses N_corr throughout so amplitudes are independent
+    // of the zero-filling factor.
+    int N_corr = static_cast<int>(nTimeBins_);
+    if (N_corr < 2) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-	       "SFG::writeCorrelate: too few TCF points (%d) for FFT.\n", N);
+	       "SFG::writeCorrelate: too few TCF points (%d) for FFT.\n", N_corr);
       painCave.isFatal = 1; simError();
     }
 
-    // FFTW: real input (take Im part of the complex TCF, which is the
-    // odd/causal part; alternatively take the full complex TCF with c2c).
-    // MultiSpec writes Im of the complex FFT as the spectrum.
-    // Use c2c FFT on the full complex TCF.
-    fftw_complex* in  = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*N);
-    fftw_complex* out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*N);
+    // Zero-filling: extend to T_corr + t_zerofill_ps_, rounded up to next
+    // power of two for FFTW efficiency.  If t_zerofill_ps_ == 0, N_fft = N_corr.
+    int N_zf = (t_zerofill_ps_ > 0.0)
+      ? static_cast<int>(std::ceil((static_cast<double>(N_corr)
+				    + t_zerofill_ps_ / dt_ps_)))
+      : N_corr;
+    // Round up to next power of two
+    int N_fft = 1;
+    while (N_fft < N_zf) N_fft <<= 1;
+
+    fftw_complex* in  = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*N_fft);
+    fftw_complex* out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*N_fft);
     if (!in || !out) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
 	       "SFG: FFTW malloc failed.\n");
       painCave.isFatal = 1; simError();
     }
 
-    for (int i = 0; i < N; ++i) {
-      in[i][0] = (*pTCF)[i].real();
-      in[i][1] = (*pTCF)[i].imag();
+    // Apply apodization to the TCF data region; zero-fill the rest.
+    // exp(-t/t_apod_ps_) window; if t_apod_ps_ == 0, weight = 1 (no apodization).
+    for (int i = 0; i < N_fft; ++i) {
+      if (i < N_corr) {
+        double t = static_cast<double>(i) * dt_ps_;
+        double w = (t_apod_ps_ > 0.0) ? std::exp(-t / t_apod_ps_) : 1.0;
+        in[i][0] = (*pTCF)[i].real() * w;
+        in[i][1] = (*pTCF)[i].imag() * w;
+      } else {
+        in[i][0] = 0.0;   // zero-fill
+        in[i][1] = 0.0;
+      }
     }
 
-    fftw_plan plan = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+    fftw_plan plan = fftw_plan_dft_1d(N_fft, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
     fftw_execute(plan);
     fftw_destroy_plan(plan);
 
-    // Frequency axis using stored dt_ps_
-    const double ps_to_invcm = 33.3564;
-    const double dOmega = ps_to_invcm / (static_cast<double>(N) * dt_ps_);
+    // Frequency grid: spacing set by total FFT length, but intrinsic
+    // resolution is still 1/T_corr = ps_to_invcm/(N_corr*dt_ps_).
+    const double dOmega      = ps_to_invcm / (static_cast<double>(N_fft) * dt_ps_);
+    const double dOmega_res  = ps_to_invcm / (static_cast<double>(N_corr) * dt_ps_);
 
     // Temperature
     RealType T = 300.0;
@@ -885,31 +942,50 @@ after_diag:
     ofs << "# selection: \"" << selectionScript1_ << "\"\n";
     ofs << "# T = " << T << " K,  kT = " << kT_invcm << " cm-1\n";
     ofs << "# wAvg = " << wAvg_ << " cm-1\n";
-    ofs << "# navg = " << navg_ << "  nTimeBins = " << nTimeBins_
-	<< "  dOmega = " << dOmega << " cm-1\n";
+    ofs << "# navg = " << navg_ << "  nTimeBins = " << nTimeBins_ << "\n";
+    ofs << "# intrinsic resolution = " << dOmega_res << " cm-1";
+    if (t_apod_ps_ > 0.0)
+      ofs << "  t_apod = " << t_apod_ps_ << " ps"
+          << "  (added broadening ~"
+          << ps_to_invcm / (M_PI * t_apod_ps_) << " cm-1)";
+    ofs << "\n";
+    ofs << "# dOmega = " << dOmega << " cm-1";
+    if (t_zerofill_ps_ > 0.0)
+      ofs << "  (zero-filled: N_corr=" << N_corr
+          << " -> N_fft=" << N_fft << ")";
+    ofs << "\n";
     ofs << "#omega(cm-1)\tRe(chi2)\tIm(chi2)\t|chi2|^2\n";
+
+    // Normalize by N_corr (not N_fft) so that amplitudes are independent
+    // of the zero-filling factor.  The FFT of a zero-padded sequence
+    // returns values scaled by N_fft; dividing by N_corr instead recovers
+    // the same per-point normalization as the unpadded transform.
+    const double norm = 1.0 / static_cast<double>(N_corr);
 
     // The FFT of the shifted TCF C'(t) is centered at k=0 = wAvg_.
     // Bin k → absolute frequency: wAvg_ + k*dOmega
-    // Bins N/2+1..N-1 are the negative side (ω < wAvg_).
-    // Output in ascending frequency order: negative half first, then positive.
+    // Bins N_fft/2+1..N_fft-1 are the negative side (ω < wAvg_).
+    // Output only physically meaningful frequencies (ω > 0) in
+    // ascending order: negative half first, then positive.
     auto writeRow = [&](double omega, int k) {
       if (omega <= 0.0) return;
-      double re = out[k][0] / static_cast<double>(N);
-      double im = out[k][1] / static_cast<double>(N);
+      double re = out[k][0] * norm;
+      double im = out[k][1] * norm;
       double x  = omega / kT_invcm;
       double qCorr = (x > 1.0e-6) ?
-        ((x < 50.0) ? x / (1.0 - std::exp(-x)) : x) : 1.0;
+      ((x < 50.0) ? x / (1.0 - std::exp(-x)) : x) : 1.0;
       double im_corr = im * qCorr;
       ofs << omega << "\t" << re << "\t" << im_corr << "\t"
-	  << re*re + im_corr*im_corr << "\n";
+      << re*re + im_corr*im_corr << "\n";
     };
 
-    for (int k = N/2 + 1; k < N; ++k)   // negative half → ω below wAvg_
-      writeRow(wAvg_ + (k - N) * dOmega, k);
-    for (int k = 0; k <= N/2; ++k)       // positive half → ω at/above wAvg_
+    // negative half → ω below wAvg_
+    for (int k = N_fft - N_corr/2; k < N_fft; ++k) 
+      writeRow(wAvg_ + (k - N_fft) * dOmega, k);
+    // positive half → ω at/above wAvg_
+    for (int k = 0; k <= N_corr/2; ++k)              
       writeRow(wAvg_ + k * dOmega, k);
-
+    
     ofs.close();
     fftw_free(in);
     fftw_free(out);

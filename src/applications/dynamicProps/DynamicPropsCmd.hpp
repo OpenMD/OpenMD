@@ -78,6 +78,12 @@ struct gengetopt_args_info
   double tsep_arg;	/**< @brief Separation time between correlation windows (0 = no gap) (default='0.0').  */
   char * tsep_orig;	/**< @brief Separation time between correlation windows (0 = no gap) original value given at command line.  */
   const char *tsep_help; /**< @brief Separation time between correlation windows (0 = no gap) help description.  */
+  double t_apod_arg;	/**< @brief Apodization time (fs) [filters tcorr with exp(-t/t_apod) in Fourier-transformed spectroscopic functions] (default='0.0').  */
+  char * t_apod_orig;	/**< @brief Apodization time (fs) [filters tcorr with exp(-t/t_apod) in Fourier-transformed spectroscopic functions] original value given at command line.  */
+  const char *t_apod_help; /**< @brief Apodization time (fs) [filters tcorr with exp(-t/t_apod) in Fourier-transformed spectroscopic functions] help description.  */
+  double t_zerofill_arg;	/**< @brief Zero-fill time (fs) [Pads time correlation functions with zeros from tcorr -> t_zerofill in Fourier-transformed spectroscopic functions] (default='0.0').  */
+  char * t_zerofill_orig;	/**< @brief Zero-fill time (fs) [Pads time correlation functions with zeros from tcorr -> t_zerofill in Fourier-transformed spectroscopic functions] original value given at command line.  */
+  const char *t_zerofill_help; /**< @brief Zero-fill time (fs) [Pads time correlation functions with zeros from tcorr -> t_zerofill in Fourier-transformed spectroscopic functions] help description.  */
   double rcut_arg;	/**< @brief cutoff radius (angstroms).  */
   char * rcut_orig;	/**< @brief cutoff radius (angstroms) original value given at command line.  */
   const char *rcut_help; /**< @brief cutoff radius (angstroms) help description.  */
@@ -167,6 +173,8 @@ struct gengetopt_args_info
   unsigned int tcorr_given ;	/**< @brief Whether tcorr was given.  */
   unsigned int nstart_given ;	/**< @brief Whether nstart was given.  */
   unsigned int tsep_given ;	/**< @brief Whether tsep was given.  */
+  unsigned int t_apod_given ;	/**< @brief Whether t_apod was given.  */
+  unsigned int t_zerofill_given ;	/**< @brief Whether t_zerofill was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
   unsigned int OOcut_given ;	/**< @brief Whether OOcut was given.  */
   unsigned int thetacut_given ;	/**< @brief Whether thetacut was given.  */

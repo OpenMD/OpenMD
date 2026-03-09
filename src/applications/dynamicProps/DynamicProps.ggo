@@ -41,6 +41,8 @@ option  "nzbins"        z       "Number of Z bins"                          int 
 option  "tcorr"         -       "Correlation time (length of each window) in fs"           double  default="100000.0"   no
 option  "nstart"        -       "Number of frames to skip at start of trajectory"          int     default="0"          no
 option  "tsep"          -       "Separation time between correlation windows (0 = no gap)" double  default="0.0"        no
+option  "t_apod"        -       "Apodization time (fs) [filters tcorr with exp(-t/t_apod) in Fourier-transformed spectroscopic functions]" double default="0.0" no
+option  "t_zerofill"    -       "Zero-fill time (fs) [Pads time correlation functions with zeros from tcorr -> t_zerofill in Fourier-transformed spectroscopic functions]" double default="0.0" no
 # option  "memory"        m       "Available memory (defaults to 2G)"         string  typestr="memory specification" default="2G" optional
 option  "rcut"          c       "cutoff radius (angstroms)"                 double                            optional
 option  "OOcut"         -       "Oxygen-Oxygen cutoff radius (angstroms)"   double  default="3.5"             optional

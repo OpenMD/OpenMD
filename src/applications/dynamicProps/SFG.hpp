@@ -89,7 +89,8 @@ namespace OpenMD {
   public:
     SFG(SimInfo* info, const std::string& filename, const std::string& sele1,
         const std::string& sele2, const std::string& polarization = "ssp",
-        int privilegedAxis = 2);
+        int privilegedAxis = 2,
+        RealType t_apod = 0.0, RealType t_zerofill = 0.0);
 
     virtual ~SFG();
 
@@ -147,7 +148,7 @@ namespace OpenMD {
     // -----------------------------------------------------------------------
     struct FrameData {
       int N {0};
-      DynamicRectMatrix<RealType> H;   // NxN exciton Hamiltonian [cm-1]
+      DynamicRectMatrix<RealType> H;    // NxN exciton Hamiltonian [cm-1]
       std::vector<Vector3d>  mu;        // transition dipole vectors [D]
       std::vector<Mat3x3d>   alpha;     // Raman polarizability tensors
       std::vector<int>       globalIDs; // global H-atom index per chromophore
@@ -164,18 +165,32 @@ namespace OpenMD {
     std::vector<std::complex<double>> tcf_sps_;
 
     // T1 vibrational relaxation time [ps]; 0 = no relaxation
-    double T1_ps_ {0.0};
+    RealType T1_ps_ {0.0};
+
+    // Apodization time constant [ps].
+    // TCF is multiplied by exp(-t/t_apod_ps) before FFT.
+    // 0 = no apodization.  Adds ~33.36/(pi*t_apod_ps) cm-1 of Lorentzian
+    // broadening; a value of ~T_corr/3 is a good starting point.
+    RealType t_apod_ps_ {0.0};
+
+    // Zero-filling duration [ps].
+    // The apodized TCF is padded with zeros out to
+    // (T_corr + t_zerofill_ps) before FFT, interpolating the spectrum
+    // onto a finer frequency grid without adding new information.
+    // 0 = no zero-filling.  A value of 2-4x T_corr is typical.
+    RealType t_zerofill_ps_ {0.0};
 
     // Average OH frequency computed from actual per-frame diagonal entries
     // across all frames during preCorrelate(). Finalized at the start of
     // correlation() and subtracted from every stored H diagonal before
     // propagation. Restored on the frequency axis in writeCorrelate().
-    double wAvg_      {0.0};
-    double wAvgSum_   {0.0};  // running sum of all ω₁₀ values seen
-    long   wAvgCount_ {0};    // total number of ω₁₀ values accumulated
+    RealType wAvg_      {0.0};
+    RealType wAvgSum_   {0.0};  // running sum of all ω₁₀ values seen
+    long     wAvgCount_ {0};    // total number of ω₁₀ values accumulated
 
-    // Frame interval [ps], set at start of correlation() and reused in writeCorrelate()
-    double dt_ps_ {0.001};
+    // Frame interval [ps], set at start of correlation() and reused
+    // in writeCorrelate()
+    RealType dt_ps_ {0.001};
 
     // -----------------------------------------------------------------------
     // Private helpers
@@ -209,7 +224,7 @@ namespace OpenMD {
      */
     void propagateF(std::vector<std::complex<double>>& F,
                     const DynamicRectMatrix<RealType>&  H,
-                    double dt_ps, int N);
+                    RealType dt_ps, int N);
 
     /**
      * Accumulate one lag point into tcf_ssp_, tcf_ppp_, tcf_sps_.
@@ -228,7 +243,7 @@ namespace OpenMD {
                        const std::vector<std::complex<double>>& F,
                        const FrameData& fd0,
                        const FrameData& fdt,
-                       int N, double exptc);
+                       int N, RealType exptc);
 
     /**
      * TDC coupling between sites i and j.
