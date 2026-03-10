@@ -16,25 +16,22 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "ewald_nep.h"
 
-// #define USE_TABLE_FOR_RADIAL_FUNCTIONS
-
-class NEP3
+class NEP
 {
 public:
   struct ParaMB {
-    bool use_typewise_cutoff = false;
     bool use_typewise_cutoff_zbl = false;
-    double typewise_cutoff_radial_factor = 2.5;
-    double typewise_cutoff_angular_factor = 2.0;
     double typewise_cutoff_zbl_factor = 0.65;
 
+    int charge_mode = 0;
     int model_type = 0; // 0=potential, 1=dipole, 2=polarizability
     int version = 4;
-    double rc_radial = 0.0;
-    double rc_angular = 0.0;
-    double rcinv_radial = 0.0;
-    double rcinv_angular = 0.0;
+    double rc_radial_max = 0.0;
+    double rc_angular_max = 0.0;
+    double rc_radial[94];
+    double rc_angular[94];
     int n_max_radial = 0;
     int n_max_angular = 0;
     int L_max = 0;
@@ -42,9 +39,9 @@ public:
     int num_L;
     int basis_size_radial = 8;
     int basis_size_angular = 8;
-    int num_types_sq = 0;
-    int num_c_radial = 0;
-    int num_types = 0;
+    std::size_t num_types_sq = 0;
+    std::size_t num_c_radial = 0;
+    std::size_t num_types = 0;
     double q_scaler[140];
     int atomic_numbers[94];
   };
@@ -59,6 +56,7 @@ public:
     const double* w1[94];
     const double* b1;
     const double* c;
+    const double* sqrt_epsilon_inf;
     // for the scalar part of polarizability
     const double* w0_pol[94];
     const double* b0_pol[94];
@@ -75,6 +73,14 @@ public:
     double para[550];
   };
 
+  struct Charge_Para {
+    int num_kpoints_max = 1;
+    double alpha = 0.5; // 1 / (2 Angstrom)
+    double two_alpha_over_sqrt_pi = 0.564189583547756;
+    double A;
+    double B;
+  };
+
   struct DFTD3 {
     double s6 = 0.0;
     double s8 = 0.0;
@@ -88,8 +94,8 @@ public:
     std::vector<double> dc8_sum;
   };
 
-  NEP3();
-  NEP3(const std::string& potential_filename);
+  NEP();
+  NEP(const std::string& potential_filename);
 
   void init_from_file(const std::string& potential_filename, const bool is_rank_0);
 
@@ -112,6 +118,16 @@ public:
     std::vector<double>& potential,
     std::vector<double>& force,
     std::vector<double>& virial);
+
+  void compute(
+    const std::vector<int>& type,
+    const std::vector<double>& box,
+    const std::vector<double>& position,
+    std::vector<double>& potential,
+    std::vector<double>& force,
+    std::vector<double>& virial,
+    std::vector<double>& charge,
+    std::vector<double>& bec);
 
   void compute_with_dftd3(
     const std::string& xc,
@@ -183,27 +199,51 @@ public:
     double** virial          // cvatom or nullptr
   );
 
-  // Constants exposed for external callers
-  static constexpr int NUM_OF_ABC  = 80;
-  static constexpr int MAX_NUM_N   = 20;
-  static constexpr int MAX_DIM     = MAX_NUM_N * 7;
-  static constexpr int MAX_NEURON  = 200;
-
   int num_atoms = 0;
   int num_cells[3];
   double ebox[18];
   ParaMB paramb;
   ANN annmb;
   ZBL zbl;
+  Charge_Para charge_para;
+  EwaldNep ewald;
   DFTD3 dftd3;
   std::vector<int> NN_radial, NL_radial, NN_angular, NL_angular;
   std::vector<double> r12;
   std::vector<double> Fp;
   std::vector<double> sum_fxyz;
+  std::vector<double> D_real;
+  std::vector<double> charge_derivative;
   std::vector<double> parameters;
   std::vector<std::string> element_list;
   void update_potential(double* parameters, ANN& ann);
   void allocate_memory(const int N);
+
+#ifdef USE_TABLE_FOR_RADIAL_FUNCTIONS
+  std::vector<double> gn_radial;   // tabulated gn_radial functions
+  std::vector<double> gnp_radial;  // tabulated gnp_radial functions
+  std::vector<double> gn_angular;  // tabulated gn_angular functions
+  std::vector<double> gnp_angular; // tabulated gnp_angular functions
+  void construct_table(double* parameters);
+#endif
+
+  bool set_dftd3_para_one(
+    const std::string& functional_input,
+    const std::string& functional_library,
+    const double s6,
+    const double a1,
+    const double s8,
+    const double a2);
+  void set_dftd3_para_all(
+    const std::string& functional_input,
+    const double rc_potential,
+    const double rc_coordination_number);
+
+  // Constants exposed for external callers (match values in nep_utilities.h anonymous namespace)
+  static constexpr int NUM_OF_ABC = 80;
+  static constexpr int MAX_NUM_N  = 17;
+  static constexpr int MAX_DIM    = 103;
+  static constexpr int MAX_NEURON = 120;
 
   // Staged computation interface for OpenMD two-pass pair loop
   // (analogous to EAM calcDensity / calcFunctional / calcForce)
@@ -239,24 +279,4 @@ public:
                           const double* Fp1_ang, const double* sum_fxyz1,
                           const double* Fp2_ang, const double* sum_fxyz2,
                           double* f12_out);
-
-#ifdef USE_TABLE_FOR_RADIAL_FUNCTIONS
-  std::vector<double> gn_radial;   // tabulated gn_radial functions
-  std::vector<double> gnp_radial;  // tabulated gnp_radial functions
-  std::vector<double> gn_angular;  // tabulated gn_angular functions
-  std::vector<double> gnp_angular; // tabulated gnp_angular functions
-  void construct_table(double* parameters);
-#endif
-
-  bool set_dftd3_para_one(
-    const std::string& functional_input,
-    const std::string& functional_library,
-    const double s6,
-    const double a1,
-    const double s8,
-    const double a2);
-  void set_dftd3_para_all(
-    const std::string& functional_input,
-    const double rc_potential,
-    const double rc_coordination_number);
 };

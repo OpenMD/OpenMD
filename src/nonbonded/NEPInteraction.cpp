@@ -49,7 +49,7 @@ namespace OpenMD {
     nMaxAngular_   = nep3_.paramb.n_max_angular;
     dim_           = nep3_.annmb.dim;
     dimAngular_    = nep3_.paramb.dim_angular;
-    sumFxyzStride_ = (nMaxAngular_ + 1) * NEP3::NUM_OF_ABC;
+    sumFxyzStride_ = (nMaxAngular_ + 1) * NEP::NUM_OF_ABC;
   }
 
   void NEPInteraction::allocate(int nAtoms)
@@ -141,7 +141,7 @@ namespace OpenMD {
 
   double NEPInteraction::getMaxCutoff() const
   {
-    return std::max(nep3_.paramb.rc_radial, nep3_.paramb.rc_angular);
+    return std::max(nep3_.paramb.rc_radial_max, nep3_.paramb.rc_angular_max);
   }
 
 }  // namespace OpenMD

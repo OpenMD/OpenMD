@@ -728,6 +728,8 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/src/nep_cpu/nep.h")
   set(HAVE_NEP 1)
   list(APPEND SOURCE
     src/nep_cpu/nep.cpp
+    src/nep_cpu/ewald_nep.cpp
+    src/nep_cpu/neighbor_nep.cpp
     src/nonbonded/NEPInteraction.cpp)
   message(STATUS "Vendored NEP_CPU sources found — building with NEP support")
 else()

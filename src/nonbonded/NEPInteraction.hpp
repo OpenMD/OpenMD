@@ -107,7 +107,7 @@ namespace OpenMD {
     /** Return max(rc_radial, rc_angular) so ForceManager can set rCut_. */
     double getMaxCutoff() const;
 
-    NEP3 nep3_;
+    NEP nep3_;
 
   private:
     int nAtoms_         {0};
