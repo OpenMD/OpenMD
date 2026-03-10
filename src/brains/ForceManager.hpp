@@ -66,8 +66,14 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 
+#ifdef HAVE_NEP
+#include "nonbonded/NEPInteraction.hpp"
+#endif
+
 #define PREPAIR_LOOP 0
 #define PAIR_LOOP 1
+
+#include <map>
 
 using namespace std;
 namespace OpenMD {
@@ -150,6 +156,15 @@ namespace OpenMD {
     // And all of the variables and structures for long range interactions:
     InteractionData idat;
     SelfData sdat;
+
+#ifdef HAVE_NEP
+    bool useNEP_ {false};
+    NEPInteraction* nepInteraction_ {nullptr};
+    // Maps OpenMD atom-type ident → NEP type index (0-based); -1 if unknown
+    std::map<int, int> nepTypeMap_;
+    // Per-local-atom NEP type indices (built in initialize())
+    std::vector<int> nepAtomTypes_;
+#endif
   };
 }  // namespace OpenMD
 

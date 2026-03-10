@@ -118,18 +118,10 @@ endif()
 message(STATUS "Adding include for stl_reader to ${stl_reader_INCLUDE_DIR}")
 include_directories(${stl_reader_INCLUDE_DIR})
 
-#find_package(nep_cpu REQUIRED)
-#if(NOT nep_cpu_FOUND)
-#  FetchContent_Declare(
-#    nep_cpu
-#    GIT_REPOSITORY https://github.com/brucefan1983/NEP_CPU.git
-#    GIT_TAG 42634af93770d7c4efed1242f9caeb190fa89b02)
-#  FetchContent_MakeAvailable(nep_cpu)
-#  set(nep_cpu_INCLUDE_DIR ${nep_cpu_SOURCE_DIR}/src)
-#endif()
-
-#message(STATUS "Adding include for nep_cpu to ${nep_cpu_INCLUDE_DIR}")
-#include_directories(${nep_cpu_INCLUDE_DIR})
+if(EXISTS "${CMAKE_SOURCE_DIR}/src/nep_cpu/nep.h")
+  include_directories(${CMAKE_SOURCE_DIR}/src)
+  message(STATUS "Vendored NEP_CPU sources found — building with NEP support")
+endif()
 
 
 if(NOT NO_PARALLEL)
@@ -497,6 +489,11 @@ if(NOT SCIPY_FOUND)
   message(STATUS "Failed to find SciPy - some scripts will not be made")
 endif(NOT SCIPY_FOUND)
 
+# Detect vendored NEP_CPU sources for config.h generation
+if(EXISTS "${CMAKE_SOURCE_DIR}/src/nep_cpu/nep.h")
+  set(HAVE_NEP 1)
+endif()
+
 configure_file("${PROJECT_SOURCE_DIR}/src/config.h.cmake"
                "${PROJECT_BINARY_DIR}/config.h")
 configure_file("${PROJECT_SOURCE_DIR}/src/utils/Revision.cpp.in"
@@ -725,8 +722,19 @@ set(SOURCE
     src/clusters/Icosahedron.cpp
     src/clusters/Cuboctahedron.cpp
     src/clusters/Decahedron.cpp)
-#    src/nonbonded/nep.cpp
-#    src/NEP_CPU/src/nep.cpp)
+
+# NEP (Neuroevolution Potential) support via vendored NEP_CPU sources
+if(EXISTS "${CMAKE_SOURCE_DIR}/src/nep_cpu/nep.h")
+  set(HAVE_NEP 1)
+  list(APPEND SOURCE
+    src/nep_cpu/nep.cpp
+    src/nep_cpu/ewald_nep.cpp
+    src/nep_cpu/neighbor_nep.cpp
+    src/nonbonded/NEPInteraction.cpp)
+  message(STATUS "Vendored NEP_CPU sources found — building with NEP support")
+else()
+  message(STATUS "Vendored NEP_CPU sources not found — building without NEP support")
+endif()
 
 set(PARALLEL_SOURCE
     src/brains/ForceManager.cpp

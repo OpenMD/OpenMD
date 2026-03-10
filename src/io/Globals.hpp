@@ -164,6 +164,7 @@ namespace OpenMD {
     DeclareParameter(ConstraintTime, RealType);
     DeclareParameter(PotentialSelection, std::string);
     DeclareParameter(PrivilegedAxis, std::string);
+    DeclareParameter(NEPModelFileName, std::string);
 
   public:
     bool addComponent(Component* comp);
