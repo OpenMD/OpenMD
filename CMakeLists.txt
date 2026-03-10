@@ -497,6 +497,11 @@ if(NOT SCIPY_FOUND)
   message(STATUS "Failed to find SciPy - some scripts will not be made")
 endif(NOT SCIPY_FOUND)
 
+# Detect NEP_CPU submodule for config.h generation
+if(EXISTS "${CMAKE_SOURCE_DIR}/src/NEP_CPU/src/nep.h")
+  set(HAVE_NEP 1)
+endif()
+
 configure_file("${PROJECT_SOURCE_DIR}/src/config.h.cmake"
                "${PROJECT_BINARY_DIR}/config.h")
 configure_file("${PROJECT_SOURCE_DIR}/src/utils/Revision.cpp.in"
@@ -725,8 +730,17 @@ set(SOURCE
     src/clusters/Icosahedron.cpp
     src/clusters/Cuboctahedron.cpp
     src/clusters/Decahedron.cpp)
-#    src/nonbonded/nep.cpp
-#    src/NEP_CPU/src/nep.cpp)
+
+# NEP (Neuroevolution Potential) support via bundled NEP_CPU submodule
+if(EXISTS "${CMAKE_SOURCE_DIR}/src/NEP_CPU/src/nep.h")
+  set(HAVE_NEP 1)
+  list(APPEND SOURCE
+    src/NEP_CPU/src/nep.cpp
+    src/nonbonded/NEPInteraction.cpp)
+  message(STATUS "NEP_CPU submodule found — building with NEP support")
+else()
+  message(STATUS "NEP_CPU submodule not found — building without NEP support")
+endif()
 
 set(PARALLEL_SOURCE
     src/brains/ForceManager.cpp

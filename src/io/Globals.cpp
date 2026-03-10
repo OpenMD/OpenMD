@@ -203,6 +203,8 @@ namespace OpenMD {
     DefineOptionalParameterWithDefaultValue(PrivilegedAxis, "privilegedAxis",
                                             "z");
 
+    DefineOptionalParameter(NEPModelFileName, "nepModelFileName");
+
     deprecatedKeywords_.insert("nComponents");
     deprecatedKeywords_.insert("nZconstraints");
     deprecatedKeywords_.insert("initialConfig");
