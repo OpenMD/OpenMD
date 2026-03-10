@@ -22,36 +22,41 @@ can also compile it yourself from the source code.
 The following are optional when compiling OpenMD, but if they are not
 available some features will be missing:
 
-* [OpenMPI](https://www.open-mpi.org/) or [MPICH](https://www.mpich.org/) –
-Very good implementations of the MPI-2 specification
-for parallel computing.  A version of the MPI library is required
-if you want to run the multi-processor version of OpenMD. 
-
-* [python](https://www.python.org/) - An interpreted scripting language
-that some of the OpenMD utilities use to parse and process data files.
-Some python scripts also depend on [NumPy](https://numpy.org/) and
-[SciPy](https://scipy.org/). You'll want Python version 3 or higher,
-and we test on 3.12
+* [OpenMPI](https://www.open-mpi.org/) or
+[MPICH](https://www.mpich.org/) – Very good implementations of the MPI-2 specification for parallel computing.  A version of the MPI library is required if you want to run the multi-processor version of OpenMD. 
+* [python](https://www.python.org/) - An interpreted scripting
+language that some of the OpenMD utilities use to parse and process
+data files. Some python scripts also depend on
+[NumPy](https://numpy.org/) and [SciPy](https://scipy.org/). You'll
+want Python version 3 or higher, and we test on 3.12
 
 * [qhull](http://qhull.org/) – A computational geometry toolbox for
-computing convex hulls and Delaunay triangulations. qhull is *required*
-for the `LangevinHull` integrator and for any of the tools that compute the
-Hull atoms or hull volumes of nanoparticles and clusters.  You'll
-want version qhull 2020.2 or newer.
+computing convex hulls and Delaunay triangulations. qhull is
+*required* for the `LangevinHull` integrator and for any of the tools
+that compute the Hull atoms or hull volumes of nanoparticles and
+clusters.  You'll want version qhull 2020.2 or newer.
 
 * [openbabel](https://openbabel.org/) – a chemical toolbox for
 converting between different data formats.  This is *required* for
-building the `atom2md` program which helps prepare initial `omd` files for
-simulations.  You'll want openbabel version 3.1.1 or newer, but note
-that when openbabel is found, there are some compiler warnings that
-will appear.
+building the `atom2md` program which helps prepare initial `omd` files
+for simulations.  You'll want openbabel version 3.1.1 or newer, but
+note that when openbabel is found, there are some compiler warnings
+that will appear.
 
 * [fftw](https://fftw.org/) - a library for computing discrete Fourier
 transforms.  This is *required* for surface undulation spectra (Hxy in
-staticProps). Get version 3.3.10 or newer.
+staticProps) and the SFG spectrum module in DynamicProps. Get version
+3.3.10 or newer.
 
-* [zlib](https://zlib.net) - required to support reading gzipped trajectory
-files (this is usually included on most unix / macOS machines)
+* [zlib](https://zlib.net) - required to support reading gzipped
+  trajectory files (this is usually included on most unix / macOS
+  machines) 
+
+* BLAS/LAPACK - numerical routines for linear algebra. These can come
+  from from [OpenBLAS](http://www.openmathlib.org/OpenBLAS/), Intel's
+  [MKL](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html),
+  or the macOS Accelerator framework, which is built-in to macOS) 
+
 
 You’ll also likely want to download and install the following useful
 tools for interacting with the data:
@@ -65,12 +70,12 @@ tools for interacting with the data:
 If you are going to be extending or developing OpenMD, you’ll need
 the following tools:
 
-* [antlr](https://www.antlr2.org/) – our tool for converting grammars
-into parsers for `omd` files.  You’ll want version 2.77, not 3 or 4.
+* [antlr](https://www.antlr.org/) – our tool for converting grammars
+into parsers for `omd` files.  You’ll want version 4. 
 
-* [gengetopt](https://www.gnu.org/software/gengetopt/gengetopt.html) - a
-tool to generate C code to parse the command line arguments argc and argv
-that are part of every C or C++ program.
+* [gengetopt](https://www.gnu.org/software/gengetopt/gengetopt.html) -
+a tool to generate C code to parse the command line arguments argc and
+argv that are part of every C or C++ program.
 
 ## Basic build procedure
 

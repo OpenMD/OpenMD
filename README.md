@@ -57,14 +57,15 @@ procedure for running and analyzing your first OpenMD simulation.
     [open-mpi.org](http://www.open-mpi.org/) and MPICH here:
     [mpich.org](https://www.mpich.org/)
 
- 6) Other optional libraries that unlock some features of OpenMD:
+ 5) Other optional libraries that unlock some features of OpenMD:
 
       + Open Babel (version 3.1.1 or newer):  [openbabel.org](http://openbabel.org)
       + Qhull (version 2020.2 or newer):      [www.qhull.org](http://www.qhull.org)
       + FFTW (version 3.3.10 or newer):       [www.fftw.org](http://www.fftw.org)
+      + BLAS/Lapack (can come from OpenBLAS, Intel's MKL, or the macOS Accelerator framework) 
       + Doxygen (version 1.12.0 or newer):    [www.doxygen.org](http://www.doxygen.org)
 
- 7) Some of the utility scripts depend on Python (v3 required), NumPy,
+ 6) Some of the utility scripts depend on Python (v3 required), NumPy,
     and SciPy. These are common installations on most flavors of Unix and
     Mac OS X.
 

@@ -441,10 +441,10 @@ namespace OpenMD {
     //! 2 = connected via a bend
     //! 3 = connected via a torsion
 
-    vdwScale_.reserve(4);
+    vdwScale_.resize(4);
     fill(vdwScale_.begin(), vdwScale_.end(), 0.0);
 
-    electrostaticScale_.reserve(4);
+    electrostaticScale_.resize(4);
     fill(electrostaticScale_.begin(), electrostaticScale_.end(), 0.0);
 
     vdwScale_[0] = 1.0;
@@ -659,7 +659,7 @@ namespace OpenMD {
         bend->calcForce(angle, doParticlePot_);
         RealType currBendPot = bend->getPotential();
 
-        bendPotential += bend->getPotential();
+        bendPotential += currBendPot;
         map<Bend*, BendDataSet>::iterator i = bendDataSets.find(bend);
         if (i == bendDataSets.end()) {
           BendDataSet dataSet;
@@ -680,7 +680,7 @@ namespace OpenMD {
           if (seleMan_.isSelected(bend->getAtomA()) ||
               seleMan_.isSelected(bend->getAtomB()) ||
               seleMan_.isSelected(bend->getAtomC())) {
-            selectionPotential[BONDED_FAMILY] += bend->getPotential();
+            selectionPotential[BONDED_FAMILY] += currBendPot;
           }
         }
       }
@@ -690,7 +690,7 @@ namespace OpenMD {
         RealType angle;
         torsion->calcForce(angle, doParticlePot_);
         RealType currTorsionPot = torsion->getPotential();
-        torsionPotential += torsion->getPotential();
+        torsionPotential += currTorsionPot;
         map<Torsion*, TorsionDataSet>::iterator i =
             torsionDataSets.find(torsion);
         if (i == torsionDataSets.end()) {
@@ -713,7 +713,7 @@ namespace OpenMD {
               seleMan_.isSelected(torsion->getAtomB()) ||
               seleMan_.isSelected(torsion->getAtomC()) ||
               seleMan_.isSelected(torsion->getAtomD())) {
-            selectionPotential[BONDED_FAMILY] += torsion->getPotential();
+            selectionPotential[BONDED_FAMILY] += currTorsionPot;
           }
         }
       }
@@ -723,7 +723,7 @@ namespace OpenMD {
         RealType angle;
         inversion->calcForce(angle, doParticlePot_);
         RealType currInversionPot = inversion->getPotential();
-        inversionPotential += inversion->getPotential();
+        inversionPotential += currInversionPot;
         map<Inversion*, InversionDataSet>::iterator i =
             inversionDataSets.find(inversion);
         if (i == inversionDataSets.end()) {
@@ -747,7 +747,7 @@ namespace OpenMD {
               seleMan_.isSelected(inversion->getAtomB()) ||
               seleMan_.isSelected(inversion->getAtomC()) ||
               seleMan_.isSelected(inversion->getAtomD())) {
-            selectionPotential[BONDED_FAMILY] += inversion->getPotential();
+            selectionPotential[BONDED_FAMILY] += currInversionPot;
           }
         }
       }
