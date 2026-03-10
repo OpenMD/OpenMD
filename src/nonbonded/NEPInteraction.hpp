@@ -40,7 +40,7 @@
 #include <string>
 #include <vector>
 
-#include "NEP_CPU/src/nep.h"
+#include "nep_cpu/nep.h"
 
 namespace OpenMD {
 
