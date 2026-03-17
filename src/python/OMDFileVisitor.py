@@ -39,16 +39,15 @@ class OMDFileVisitor(OMDVisitor):
 
     The top-level visit(tree) call returns a dict of the form:
     {
-        'assignments': { 'key': value, ... },
-        'components':  [ { 'assignments': {...} }, ... ],
-        'molecules':   [ { 'assignments': {...}, 'atoms': [...], ... }, ... ],
-        'fragments':   [ ... ],
+        'components':   [ ... ],
+        'molecules':    [ { 'atoms': [...], ... }, ... ],
+        'fragments':    [ ... ],
         'zconstraints': [ ... ],
-        'restraints':  [ ... ],
-        'flucq':       [ ... ],
-        'rnemd':       [ ... ],
-        'light':       [ ... ],
-        'minimizer':   [ ... ],
+        'restraints':   [ ... ],
+        'flucq':        { ... },
+        'rnemd':        { ... },
+        'light':        { ... },
+        'minimizer':    { ... },
     }
     """
 
@@ -57,44 +56,45 @@ class OMDFileVisitor(OMDVisitor):
     # -------------------------------------------------------------------------
 
     def visitOmdfile(self, ctx):
-        result = {
-            'assignments':  {},
-            'components':   [],
+        result = {}
+        structural = {
+            'fragments':    [],            
             'molecules':    [],
-            'fragments':    [],
+            'components':   [],
             'zconstraints': [],
             'restraints':   [],
-            'flucq':        [],
-            'rnemd':        [],
-            'light':        [],
-            'minimizer':    [],
+            'flucq':        {},
+            'rnemd':        {},
+            'light':        {},
+            'minimizer':    {},
         }
+        assignments = {}
         for stmt in ctx.statement():
-            self._dispatch_statement(stmt, result)
-        return result
+            self._dispatch_statement(stmt, structural, assignments)
+        return {**structural, **assignments}
 
-    def _dispatch_statement(self, ctx, result):
+    def _dispatch_statement(self, ctx, structural, assignments):
         if ctx.assignment():
             key, value = self.visitAssignment(ctx.assignment())
-            result['assignments'][key] = value
+            assignments[key] = value
         elif ctx.componentblock():
-            result['components'].append(self.visitComponentblock(ctx.componentblock()))
+            structural['components'].append(self.visitComponentblock(ctx.componentblock()))
         elif ctx.moleculeblock():
-            result['molecules'].append(self.visitMoleculeblock(ctx.moleculeblock()))
+            structural['molecules'].append(self.visitMoleculeblock(ctx.moleculeblock()))
         elif ctx.fragmentblock():
-            result['fragments'].append(self.visitFragmentblock(ctx.fragmentblock()))
+            structural['fragments'].append(self.visitFragmentblock(ctx.fragmentblock()))
         elif ctx.zconstraintblock():
-            result['zconstraints'].append(self.visitZconstraintblock(ctx.zconstraintblock()))
+            structural['zconstraints'].append(self.visitZconstraintblock(ctx.zconstraintblock()))
         elif ctx.restraintblock():
-            result['restraints'].append(self.visitRestraintblock(ctx.restraintblock()))
+            structural['restraints'].append(self.visitRestraintblock(ctx.restraintblock()))
         elif ctx.flucqblock():
-            result['flucq'].append(self.visitFlucqblock(ctx.flucqblock()))
+            structural['flucq'] = self.visitFlucqblock(ctx.flucqblock())
         elif ctx.rnemdblock():
-            result['rnemd'].append(self.visitRnemdblock(ctx.rnemdblock()))
+            structural['rnemd'] = self.visitRnemdblock(ctx.rnemdblock())
         elif ctx.lightblock():
-            result['light'].append(self.visitLightblock(ctx.lightblock()))
+            structural['light'] = self.visitLightblock(ctx.lightblock())
         elif ctx.minimizerblock():
-            result['minimizer'].append(self.visitMinimizerblock(ctx.minimizerblock()))
+            structural['minimizer'] = self.visitMinimizerblock(ctx.minimizerblock())
 
     # -------------------------------------------------------------------------
     # Assignment
@@ -131,10 +131,10 @@ class OMDFileVisitor(OMDVisitor):
 
     def _visit_simple_block(self, ctx):
         """Handle blocks that contain only assignments."""
-        result = {'assignments': {}}
+        result = {}
         for a in ctx.assignment():
             key, value = self.visitAssignment(a)
-            result['assignments'][key] = value
+            result[key] = value
         return result
 
     def visitComponentblock(self, ctx):
@@ -163,71 +163,71 @@ class OMDFileVisitor(OMDVisitor):
     # -------------------------------------------------------------------------
 
     def visitMoleculeblock(self, ctx):
-        result = {
-            'assignments':  {},
+        assignments = {}
+        structural = {
             'atoms':        [],
             'bonds':        [],
             'bends':        [],
             'torsions':     [],
             'inversions':   [],
-            'rigidbodies':  [],
-            'cutoffgroups': [],
+            'rigidBodies':  [],
+            'cutoffGroups': [],
             'constraints':  [],
             'sequences':    [],
         }
         for stmt in ctx.moleculestatement():
-            self._dispatch_moleculestatement(stmt, result)
-        return result
+            self._dispatch_moleculestatement(stmt, assignments, structural)
+        return {**assignments, **structural}
 
-    def _dispatch_moleculestatement(self, ctx, result):
+    def _dispatch_moleculestatement(self, ctx, assignments, structural):
         if ctx.assignment():
             key, value = self.visitAssignment(ctx.assignment())
-            result['assignments'][key] = value
+            assignments[key] = value
         elif ctx.atomblock():
-            result['atoms'].append(self.visitAtomblock(ctx.atomblock()))
+            structural['atoms'].append(self.visitAtomblock(ctx.atomblock()))
         elif ctx.bondblock():
-            result['bonds'].append(self.visitBondblock(ctx.bondblock()))
+            structural['bonds'].append(self.visitBondblock(ctx.bondblock()))
         elif ctx.bendblock():
-            result['bends'].append(self.visitBendblock(ctx.bendblock()))
+            structural['bends'].append(self.visitBendblock(ctx.bendblock()))
         elif ctx.torsionblock():
-            result['torsions'].append(self.visitTorsionblock(ctx.torsionblock()))
+            structural['torsions'].append(self.visitTorsionblock(ctx.torsionblock()))
         elif ctx.inversionblock():
-            result['inversions'].append(self.visitInversionblock(ctx.inversionblock()))
+            structural['inversions'].append(self.visitInversionblock(ctx.inversionblock()))
         elif ctx.rigidbodyblock():
-            result['rigidbodies'].append(self.visitRigidbodyblock(ctx.rigidbodyblock()))
+            structural['rigidBodies'].append(self.visitRigidbodyblock(ctx.rigidbodyblock()))
         elif ctx.cutoffgroupblock():
-            result['cutoffgroups'].append(self.visitCutoffgroupblock(ctx.cutoffgroupblock()))
+            structural['cutoffGroups'].append(self.visitCutoffgroupblock(ctx.cutoffgroupblock()))
         elif ctx.constraintblock():
-            result['constraints'].append(self.visitConstraintblock(ctx.constraintblock()))
+            structural['constraints'].append(self.visitConstraintblock(ctx.constraintblock()))
         elif ctx.sequencestring():
-            result['sequences'].append(self.visitSequencestring(ctx.sequencestring()))
+            structural['sequences'].append(self.visitSequencestring(ctx.sequencestring()))
 
     # -------------------------------------------------------------------------
     # Atom block
     # -------------------------------------------------------------------------
 
     def visitAtomblock(self, ctx):
-        result = {
+        assignments = {}
+        structural = {
             'index':        self.visitIntConst(ctx.intConst()),
-            'assignments':  {},
-            'positions':    [],
-            'orientations': [],
-            'charges':      [],
+            'position':     None,
+            'orientation':  None,
+            'charge':       None,
         }
         for stmt in ctx.atomstatement():
-            self._dispatch_atomstatement(stmt, result)
-        return result
+            self._dispatch_atomstatement(stmt, assignments, structural)
+        return {**assignments, **structural}
 
-    def _dispatch_atomstatement(self, ctx, result):
+    def _dispatch_atomstatement(self, ctx, assignments, structural):
         if ctx.assignment():
             key, value = self.visitAssignment(ctx.assignment())
-            result['assignments'][key] = value
+            assignments[key] = value
         elif ctx.POSITION():
-            result['positions'].append(self.visitDoubleNumberTuple(ctx.doubleNumberTuple()))
+            structural['position'] = self.visitDoubleNumberTuple(ctx.doubleNumberTuple())
         elif ctx.ORIENTATION():
-            result['orientations'].append(self.visitDoubleNumberTuple(ctx.doubleNumberTuple()))
+            structural['orientation'] = self.visitDoubleNumberTuple(ctx.doubleNumberTuple())
         elif ctx.CHARGE():
-            result['charges'].append(self.visitFloatConst(ctx.floatConst()))
+            structural['charge'] = self.visitFloatConst(ctx.floatConst())
 
     # -------------------------------------------------------------------------
     # Bond block
@@ -236,9 +236,8 @@ class OMDFileVisitor(OMDVisitor):
     def visitBondblock(self, ctx):
         result = {
             'index':       self.visitIntConst(ctx.intConst()) if ctx.intConst() else None,
-            'assignments': {},
-            'members':     [],
-            'potentials':  [],
+            'members':     None,
+            'potential':   None,
         }
         for stmt in ctx.bondstatement():
             self._dispatch_bondstatement(stmt, result)
@@ -247,19 +246,19 @@ class OMDFileVisitor(OMDVisitor):
     def _dispatch_bondstatement(self, ctx, result):
         if ctx.assignment():
             key, value = self.visitAssignment(ctx.assignment())
-            result['assignments'][key] = value
+            result[key] = value
         elif ctx.MEMBERS():
-            result['members'].append(self.visitInttuple(ctx.inttuple()))
+            result['members'] = self.visitInttuple(ctx.inttuple())
         else:
             # Potential type — find which keyword token is present
             pot_type = self._bond_potential_type(ctx)
             if pot_type:
-                result['potentials'].append({
+                result['potential'] = {
                     'type':   pot_type,
                     'params': self.visitDoubleNumberTuple(ctx.doubleNumberTuple())
                               if ctx.doubleNumberTuple() else
                               [self.visitFloatConst(ctx.floatConst())]
-                })
+                }
 
     def _bond_potential_type(self, ctx):
         for name in ('FIXED', 'HARMONIC', 'CUBIC', 'QUARTIC', 'POLYNOMIAL', 'MORSE'):
@@ -274,9 +273,8 @@ class OMDFileVisitor(OMDVisitor):
     def visitBendblock(self, ctx):
         result = {
             'index':       self.visitIntConst(ctx.intConst()) if ctx.intConst() else None,
-            'assignments': {},
-            'members':     [],
-            'potentials':  [],
+            'members':     None,
+            'potential':  None,
         }
         for stmt in ctx.bendstatement():
             self._dispatch_bendstatement(stmt, result)
@@ -285,16 +283,16 @@ class OMDFileVisitor(OMDVisitor):
     def _dispatch_bendstatement(self, ctx, result):
         if ctx.assignment():
             key, value = self.visitAssignment(ctx.assignment())
-            result['assignments'][key] = value
+            result[key] = value
         elif ctx.MEMBERS():
-            result['members'].append(self.visitInttuple(ctx.inttuple()))
+            result['members'] = self.visitInttuple(ctx.inttuple())
         else:
             pot_type = self._bend_potential_type(ctx)
             if pot_type:
-                result['potentials'].append({
+                result['potential'] = {
                     'type':   pot_type,
                     'params': self.visitDoubleNumberTuple(ctx.doubleNumberTuple())
-                })
+                }
 
     def _bend_potential_type(self, ctx):
         for name in ('HARMONIC', 'GHOSTBEND', 'UREYBRADLEY', 'CUBIC',
@@ -310,9 +308,8 @@ class OMDFileVisitor(OMDVisitor):
     def visitTorsionblock(self, ctx):
         result = {
             'index':       self.visitIntConst(ctx.intConst()) if ctx.intConst() else None,
-            'assignments': {},
-            'members':     [],
-            'potentials':  [],
+            'members':     None,
+            'potential':   None,
         }
         for stmt in ctx.torsionstatement():
             self._dispatch_torsionstatement(stmt, result)
@@ -321,16 +318,16 @@ class OMDFileVisitor(OMDVisitor):
     def _dispatch_torsionstatement(self, ctx, result):
         if ctx.assignment():
             key, value = self.visitAssignment(ctx.assignment())
-            result['assignments'][key] = value
+            result[key] = value
         elif ctx.MEMBERS():
-            result['members'].append(self.visitInttuple(ctx.inttuple()))
+            result['members']  = self.visitInttuple(ctx.inttuple())
         else:
             pot_type = self._torsion_potential_type(ctx)
             if pot_type:
-                result['potentials'].append({
+                result['potentials'] = {
                     'type':   pot_type,
                     'params': self.visitDoubleNumberTuple(ctx.doubleNumberTuple())
-                })
+                }
 
     def _torsion_potential_type(self, ctx):
         for name in ('GHOSTTORSION', 'CUBIC', 'QUARTIC', 'POLYNOMIAL',
@@ -346,10 +343,9 @@ class OMDFileVisitor(OMDVisitor):
     def visitInversionblock(self, ctx):
         result = {
             'index':       self.visitIntConst(ctx.intConst()) if ctx.intConst() else None,
-            'assignments': {},
             'center':      None,
-            'satellites':  [],
-            'potentials':  [],
+            'satellites':  None,
+            'potential':   None,
         }
         for stmt in ctx.inversionstatement():
             self._dispatch_inversionstatement(stmt, result)
@@ -358,7 +354,7 @@ class OMDFileVisitor(OMDVisitor):
     def _dispatch_inversionstatement(self, ctx, result):
         if ctx.assignment():
             key, value = self.visitAssignment(ctx.assignment())
-            result['assignments'][key] = value
+            result[key] = value
         elif ctx.CENTER():
             result['center'] = self.visitIntConst(ctx.intConst())
         elif ctx.SATELLITES():
@@ -366,10 +362,10 @@ class OMDFileVisitor(OMDVisitor):
         else:
             pot_type = self._inversion_potential_type(ctx)
             if pot_type:
-                result['potentials'].append({
+                result['potential'] = {
                     'type':   pot_type,
                     'params': self.visitDoubleNumberTuple(ctx.doubleNumberTuple())
-                })
+                }
 
     def _inversion_potential_type(self, ctx):
         for name in ('AMBERIMPROPER', 'IMPROPERCOSINE', 'HARMONIC',
@@ -385,15 +381,14 @@ class OMDFileVisitor(OMDVisitor):
     def visitRigidbodyblock(self, ctx):
         result = {
             'index':       self.visitIntConst(ctx.intConst()),
-            'assignments': {},
-            'members':     [],
+            'members':     None,
         }
         for stmt in ctx.rigidbodystatement():
             if stmt.assignment():
                 key, value = self.visitAssignment(stmt.assignment())
-                result['assignments'][key] = value
+                result[key] = value
             elif stmt.MEMBERS():
-                result['members'].append(self.visitInttuple(stmt.inttuple()))
+                result['members'] = self.visitInttuple(stmt.inttuple())
         return result
 
     # -------------------------------------------------------------------------
@@ -403,15 +398,14 @@ class OMDFileVisitor(OMDVisitor):
     def visitCutoffgroupblock(self, ctx):
         result = {
             'index':       self.visitIntConst(ctx.intConst()) if ctx.intConst() else None,
-            'assignments': {},
-            'members':     [],
+            'members':     None,
         }
         for stmt in ctx.cutoffgroupstatement():
             if stmt.assignment():
                 key, value = self.visitAssignment(stmt.assignment())
-                result['assignments'][key] = value
+                result[key] = value
             elif stmt.MEMBERS():
-                result['members'].append(self.visitInttuple(stmt.inttuple()))
+                result['members'] = self.visitInttuple(stmt.inttuple())
         return result
 
     # -------------------------------------------------------------------------
@@ -421,15 +415,14 @@ class OMDFileVisitor(OMDVisitor):
     def visitConstraintblock(self, ctx):
         result = {
             'index':       self.visitIntConst(ctx.intConst()) if ctx.intConst() else None,
-            'assignments': {},
-            'members':     [],
+            'members':     None,
         }
         for stmt in ctx.constraintstatement():
             if stmt.assignment():
                 key, value = self.visitAssignment(stmt.assignment())
-                result['assignments'][key] = value
+                result[key] = value
             elif stmt.MEMBERS():
-                result['members'].append(self.visitInttuple(stmt.inttuple()))
+                result['members'] = self.visitInttuple(stmt.inttuple())
         return result
 
     # -------------------------------------------------------------------------
@@ -439,15 +432,14 @@ class OMDFileVisitor(OMDVisitor):
     def visitNodesblock(self, ctx):
         result = {
             'index':       self.visitIntConst(ctx.intConst()) if ctx.intConst() else None,
-            'assignments': {},
-            'members':     [],
+            'members':     None,
         }
         for stmt in ctx.nodesstatement():
             if stmt.assignment():
                 key, value = self.visitAssignment(stmt.assignment())
-                result['assignments'][key] = value
+                result[key] = value
             elif stmt.MEMBERS():
-                result['members'].append(self.visitInttuple(stmt.inttuple()))
+                result['members'] = self.visitInttuple(stmt.inttuple())
         return result
 
     # -------------------------------------------------------------------------
@@ -456,21 +448,20 @@ class OMDFileVisitor(OMDVisitor):
 
     def visitFragmentblock(self, ctx):
         result = {
-            'assignments':  {},
             'atoms':        [],
             'bonds':        [],
             'bends':        [],
             'torsions':     [],
             'inversions':   [],
-            'rigidbodies':  [],
-            'cutoffgroups': [],
+            'rigidBodies':  [],
+            'cutoffGroups': [],
             'constraints':  [],
             'nodes':        [],
         }
         for stmt in ctx.fragmentstatement():
             if stmt.assignment():
                 key, value = self.visitAssignment(stmt.assignment())
-                result['assignments'][key] = value
+                result[key] = value
             elif stmt.atomblock():
                 result['atoms'].append(self.visitAtomblock(stmt.atomblock()))
             elif stmt.bondblock():
@@ -482,9 +473,9 @@ class OMDFileVisitor(OMDVisitor):
             elif stmt.inversionblock():
                 result['inversions'].append(self.visitInversionblock(stmt.inversionblock()))
             elif stmt.rigidbodyblock():
-                result['rigidbodies'].append(self.visitRigidbodyblock(stmt.rigidbodyblock()))
+                result['rigidBodies'].append(self.visitRigidbodyblock(stmt.rigidbodyblock()))
             elif stmt.cutoffgroupblock():
-                result['cutoffgroups'].append(self.visitCutoffgroupblock(stmt.cutoffgroupblock()))
+                result['cutoffGroups'].append(self.visitCutoffgroupblock(stmt.cutoffgroupblock()))
             elif stmt.constraintblock():
                 result['constraints'].append(self.visitConstraintblock(stmt.constraintblock()))
             elif stmt.nodesblock():

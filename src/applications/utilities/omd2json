@@ -60,6 +60,41 @@ def resolve_includes(text, base_dir):
 
     return include_re.sub(replacer, text)
 
+class CompactJSONEncoder(json.JSONEncoder):
+    """JSON encoder that keeps short numeric lists on a single line."""
+    
+    def iterencode(self, obj, _one_shot=False):
+        return self._encode(obj, 0)
+    
+    def _encode(self, obj, level):
+        indent_str = ' ' * self.indent * level if self.indent else ''
+        next_indent = ' ' * self.indent * (level + 1) if self.indent else ''
+        
+        if isinstance(obj, list) and self._is_numeric_list(obj):
+            # Compact form for short numeric lists
+            return '[' + ', '.join(self._encode(v, 0) for v in obj) + ']'
+        elif isinstance(obj, list):
+            if not obj:
+                return '[]'
+            items = [next_indent + self._encode(v, level + 1) for v in obj]
+            return '[\n' + ',\n'.join(items) + '\n' + indent_str + ']'
+        elif isinstance(obj, dict):
+            if not obj:
+                return '{}'
+            items = [
+                next_indent + json.dumps(k) + ': ' + self._encode(v, level + 1)
+                for k, v in obj.items()
+            ]
+            return '{\n' + ',\n'.join(items) + '\n' + indent_str + '}'
+        else:
+            return json.dumps(obj)
+    
+    def _is_numeric_list(self, obj):
+        """True if obj is a flat list of numbers (i.e. a vector)."""
+        return (isinstance(obj, list) and 
+                len(obj) <= 16 and
+                all(isinstance(v, (int, float)) for v in obj))
+
 # -----------------------------------------------------------------------------
 # Error handling
 # -----------------------------------------------------------------------------
@@ -131,8 +166,9 @@ def parse_metadata(metadata_text):
 
 def to_json(data, pretty=False):
     """Serialize the parsed data dict to a JSON string."""
-    indent = 2 if pretty else None
-    return json.dumps(data, indent=indent, default=_json_default)
+    if pretty:
+       return CompactJSONEncoder(indent=2).encode(data)
+    return json.dumps(data, default=_json_default)
 
 
 def _json_default(obj):
