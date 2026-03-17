@@ -50,21 +50,21 @@ public:
     if (ctx->intConst()) {
       int ival = getIntConst(ctx->intConst());
       blockStack.top()->assign(id, ival);
-    }
-    else if (ctx->floatConst()) {
+    } else if (ctx->floatConst()) {
       RealType dval = getFloatConst(ctx->floatConst());
       blockStack.top()->assign(id, dval);
-    }
-    else if (ctx->ID()) {
+    } else if (ctx->TRUE()) {
+      blockStack.top()->assign(id, true);
+    } else if (ctx->FALSE()) {
+      blockStack.top()->assign(id, false);
+    } else if (ctx->ID()) {
       std::string str = ctx->ID()->getText();
       blockStack.top()->assign(id, str);
-    }
-    else if (ctx->StringLiteral()) {
+    } else if (ctx->StringLiteral()) {
       std::string s = ctx->StringLiteral()->getText();
       s = s.substr(1, s.length()-2);
       blockStack.top()->assign(id, s);
-    }
-    else if (ctx->vectorConst()) {
+    } else if (ctx->vectorConst()) {
       std::vector<RealType> dvec = getDoubleNumberTuple(
 			      	ctx->vectorConst()->doubleNumberTuple());
       blockStack.top()->assign(id, dvec);

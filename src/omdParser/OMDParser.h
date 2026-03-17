@@ -17,20 +17,20 @@
 class  OMDParser : public antlr4::Parser {
 public:
   enum {
-    COMPONENT = 1, MOLECULE = 2, ZCONSTRAINT = 3, RESTRAINT = 4, ATOM = 5, 
-    BOND = 6, BEND = 7, TORSION = 8, INVERSION = 9, RIGIDBODY = 10, CUTOFFGROUP = 11, 
-    CONSTRAINT = 12, DISTANCE = 13, FRAGMENT = 14, SEQUENCE = 15, MEMBERS = 16, 
-    CENTER = 17, SATELLITES = 18, POSITION = 19, ORIENTATION = 20, FLUCQ = 21, 
-    RNEMD = 22, LIGHT = 23, MINIMIZER = 24, FIXED = 25, HARMONIC = 26, CUBIC = 27, 
-    QUARTIC = 28, POLYNOMIAL = 29, MORSE = 30, GHOSTBEND = 31, UREYBRADLEY = 32, 
-    COSINE = 33, GHOSTTORSION = 34, CHARMM = 35, OPLS = 36, TRAPPE = 37, 
-    AMBERIMPROPER = 38, IMPROPERCOSINE = 39, CENTRALATOMHEIGHT = 40, DREIDING = 41, 
-    CHARGE = 42, NODES = 43, ASSIGNEQUAL = 44, COLON = 45, COMMA = 46, QUESTIONMARK = 47, 
-    SEMICOLON = 48, DOT = 49, LPAREN = 50, RPAREN = 51, LBRACKET = 52, RBRACKET = 53, 
-    LCURLY = 54, RCURLY = 55, ID = 56, NUM_LONG = 57, NUM_INT = 58, NUM_FLOAT = 59, 
-    NUM_DOUBLE = 60, CharLiteral = 61, StringLiteral = 62, Whitespace = 63, 
-    Newline = 64, LineContinuation = 65, Comment = 66, CPPComment = 67, 
-    PREPROC_DIRECTIVE = 68
+    TRUE = 1, FALSE = 2, COMPONENT = 3, MOLECULE = 4, ZCONSTRAINT = 5, RESTRAINT = 6, 
+    ATOM = 7, BOND = 8, BEND = 9, TORSION = 10, INVERSION = 11, RIGIDBODY = 12, 
+    CUTOFFGROUP = 13, CONSTRAINT = 14, DISTANCE = 15, FRAGMENT = 16, SEQUENCE = 17, 
+    MEMBERS = 18, CENTER = 19, SATELLITES = 20, POSITION = 21, ORIENTATION = 22, 
+    FLUCQ = 23, RNEMD = 24, LIGHT = 25, MINIMIZER = 26, FIXED = 27, HARMONIC = 28, 
+    CUBIC = 29, QUARTIC = 30, POLYNOMIAL = 31, MORSE = 32, GHOSTBEND = 33, 
+    UREYBRADLEY = 34, COSINE = 35, GHOSTTORSION = 36, CHARMM = 37, OPLS = 38, 
+    TRAPPE = 39, AMBERIMPROPER = 40, IMPROPERCOSINE = 41, CENTRALATOMHEIGHT = 42, 
+    DREIDING = 43, CHARGE = 44, NODES = 45, ASSIGNEQUAL = 46, COLON = 47, 
+    COMMA = 48, QUESTIONMARK = 49, SEMICOLON = 50, DOT = 51, LPAREN = 52, 
+    RPAREN = 53, LBRACKET = 54, RBRACKET = 55, LCURLY = 56, RCURLY = 57, 
+    NUM_LONG = 58, NUM_INT = 59, NUM_FLOAT = 60, NUM_DOUBLE = 61, CharLiteral = 62, 
+    StringLiteral = 63, ID = 64, Whitespace = 65, Newline = 66, LineContinuation = 67, 
+    Comment = 68, CPPComment = 69, PREPROC_DIRECTIVE = 70
   };
 
   enum {
@@ -66,7 +66,7 @@ public:
 
 
       FilenameObserver* observer;
-      
+
       void setObserver(FilenameObserver* osv) {
           observer = osv;
       }
@@ -179,6 +179,8 @@ public:
     IntConstContext *intConst();
     FloatConstContext *floatConst();
     VectorConstContext *vectorConst();
+    antlr4::tree::TerminalNode *TRUE();
+    antlr4::tree::TerminalNode *FALSE();
     antlr4::tree::TerminalNode *ID();
     antlr4::tree::TerminalNode *StringLiteral();
 
