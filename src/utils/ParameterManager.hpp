@@ -119,6 +119,11 @@ struct ParameterTraits<bool> {
     return result;
   }
 
+  static bool convert(bool b, RepType& r) {
+    r = b;
+    return true;
+  }
+
   static std::string getParamType() { return "bool"; }
 };
 
@@ -309,6 +314,7 @@ public:
   virtual bool setData(RealType)              = 0;
   virtual bool setData(std::pair<int, int>)   = 0;
   virtual bool setData(std::vector<RealType>) = 0;
+  virtual bool setData(bool)                  = 0;
   virtual std::string getParamType()          = 0;
 
 protected:
@@ -345,6 +351,9 @@ public:
   }
   virtual bool setData(std::vector<RealType> pval) {
     return internalSetData<std::vector<RealType>>(pval);
+  }
+  virtual bool setData(bool bval) {
+    return internalSetData<bool>(bval);
   }
 
   virtual std::string getParamType() {
