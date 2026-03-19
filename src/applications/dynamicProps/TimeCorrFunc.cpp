@@ -424,10 +424,7 @@ namespace OpenMD {
     // deltaTime_ and nFrames_ are already set by the constructor
     // so we can compute frame counts here.
     nStart_    = nStart;
-    nTimeBins_ = (tcorr_fs > 0)
-      ? static_cast<int>(tcorr_fs / deltaTime_)
-      : nFrames_;
-
+    
     // tsep_fs > 0: gap between end of one window and start of the next
     //              (non-overlapping with decorrelation gap)
     // tsep_fs = 0: tight non-overlapping windows (nStride = nTimeBins)
@@ -437,10 +434,15 @@ namespace OpenMD {
     //              nStride = nTimeBins + nSep, where nSep < 0.
     //              nStride is clamped to a minimum of 1 so that window
     //              origins always advance by at least one frame.
-    nSep_    = static_cast<int>(tsep_fs / deltaTime_);
-    nStride_ = std::max(1, static_cast<int>(nTimeBins_) + nSep_);
-    useWindowing_ = (nStride_ != static_cast<int>(nTimeBins_) || nStart_ > 0);
 
+    nSep_    = static_cast<int>(tsep_fs / deltaTime_);
+    int nBins = (tcorr_fs > 0)
+      ? static_cast<int>(tcorr_fs / deltaTime_)
+      : nFrames_;
+    nStride_ = std::max(1, nBins + nSep_);
+    useWindowing_ = (nStride_ != nBins || nStart_ > 0);
+    nTimeBins_ = useWindowing_ ? nBins : nFrames_;
+    
     T zeroType(0.0);
     histogram_.assign(nTimeBins_, zeroType);
     count_.assign(nTimeBins_, 0);

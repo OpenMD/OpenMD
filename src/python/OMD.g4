@@ -1,5 +1,14 @@
-// ANTLR v4 grammar for OpenMD Parser (Python target)
-// Adapted from OMD.g4 - C++ specific sections removed
+// ANTLR v4 grammar for OpenMD Parser
+// Single source grammar for C++ and Python targets.
+//
+// To generate C++ parser:
+//   antlr4 -Dlanguage=Cpp -visitor OMD.g4
+// 
+// The @header and @parser/@lexer::members sections are C++-specific. To make
+// a python grammer, strip these blocks and put the result in ../python/OMD.g4
+//
+// Then to generate Python parser:
+//   antlr4 -Dlanguage=Python3 -visitor OMD_python.g4
 
 grammar OMD;
 
@@ -27,11 +36,13 @@ statement
 assignment
     : ID ASSIGNEQUAL constant SEMICOLON
     ;
-            
+
 constant
     : intConst
     | floatConst
     | vectorConst
+    | TRUE
+    | FALSE
     | ID
     | StringLiteral
     ;
@@ -39,7 +50,7 @@ constant
 componentblock
     : COMPONENT LCURLY assignment* RCURLY
     ;
-    
+
 zconstraintblock
     : ZCONSTRAINT LCURLY assignment* RCURLY
     ;
@@ -63,7 +74,7 @@ lightblock
 minimizerblock
     : MINIMIZER LCURLY assignment* RCURLY
     ;
-  
+
 moleculeblock
     : MOLECULE LCURLY moleculestatement* RCURLY
     ;
@@ -91,7 +102,7 @@ atomstatement
     | ORIENTATION LPAREN doubleNumberTuple RPAREN SEMICOLON
     | CHARGE LPAREN floatConst RPAREN SEMICOLON
     ;
-                      
+
 bondblock
     : BOND (LBRACKET intConst RBRACKET)? LCURLY bondstatement* RCURLY
     ;
@@ -229,7 +240,7 @@ doubleNumber
     : intConst
     | floatConst
     ;
-              
+
 floatConst
     : NUM_FLOAT
     | NUM_DOUBLE
@@ -243,7 +254,11 @@ vectorConst
 // LEXER RULES
 // ============================================================================
 
-// Keywords (tokens)
+// Boolean keywords — must come before ID
+TRUE  : 'true' ;
+FALSE : 'false' ;
+
+// Block and structure keywords
 COMPONENT       : 'component' ;
 MOLECULE        : 'molecule' ;
 ZCONSTRAINT     : 'zconstraint' ;
@@ -268,6 +283,8 @@ FLUCQ           : 'flucQ' ;
 RNEMD           : 'RNEMD' ;
 LIGHT           : 'light' ;
 MINIMIZER       : 'minimizer' ;
+
+// Potential type keywords
 FIXED           : 'Fixed' ;
 HARMONIC        : 'Harmonic' ;
 CUBIC           : 'Cubic' ;
@@ -304,22 +321,23 @@ LCURLY          : '{' ;
 RCURLY          : '}' ;
 
 // Numeric literals
-// NUM_LONG must come before NUM_INT so the [lL] suffix is captured greedily
+// NUM_LONG must precede NUM_INT so the mandatory [lL] suffix is captured
+// before NUM_INT can match without it.
 NUM_LONG
     : [+\-]? (
-        '0' [xX] HEX_DIGIT+
-      | '0' [0-7]+
-      | [1-9] [0-9]*
-      | '0'
+        '0' [xX] HEX_DIGIT+                     // Hexadecimal
+      | '0' [0-7]+                              // Octal
+      | [1-9] [0-9]*                            // Decimal
+      | '0'                                     // Zero
       ) [lL]
     ;
 
 NUM_INT
     : [+\-]? (
-        '0' [xX] HEX_DIGIT+
-      | '0' [0-7]+
-      | [1-9] [0-9]*
-      | '0'
+        '0' [xX] HEX_DIGIT+                     // Hexadecimal
+      | '0' [0-7]+                              // Octal
+      | [1-9] [0-9]*                            // Decimal
+      | '0'                                     // Zero
       )
     ;
 
@@ -341,7 +359,7 @@ NUM_DOUBLE
       )
     ;
 
-// String literals
+// Character and string literals
 CharLiteral
     : '\'' (Escape | ~[']) '\''
     ;
@@ -350,37 +368,37 @@ StringLiteral
     : '"' (Escape | '\\' ('\r\n' | '\r' | '\n') | ~["\r\n\\])* '"'
     ;
 
-// Identifiers - must come after keywords
+// Identifiers — must come after all keywords so keywords are not lexed as ID
 ID
     : [a-zA-Z_][a-zA-Z_0-9]*
     ;
 
 // Whitespace
 Whitespace
-    : [ \t\f]+                  -> skip
+    : [ \t\f]+                   -> skip
     ;
 
 Newline
-    : ('\r\n' | '\r' | '\n')    -> skip
+    : ('\r\n' | '\r' | '\n')     -> skip
     ;
 
 // Line continuation
 LineContinuation
-    : '\\' ('\r\n' | '\r' | '\n')   -> skip
+    : '\\' ('\r\n' | '\r' | '\n')  -> skip
     ;
 
 // Comments
 Comment
-    : '/*' .*? '*/'             -> skip
+    : '/*' .*? '*/'              -> skip
     ;
 
 CPPComment
-    : '//' ~[\r\n]*             -> skip
+    : '//' ~[\r\n]*              -> skip
     ;
 
-// Preprocessor directives
+// Preprocessor directives (includes handled externally before parsing)
 PREPROC_DIRECTIVE
-    : '#' ~[\r\n]*              -> skip
+    : '#' ~[\r\n]*               -> skip
     ;
 
 // Fragment rules

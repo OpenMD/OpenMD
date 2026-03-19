@@ -1080,6 +1080,11 @@ if(USE_OPENBABEL)
 endif(USE_OPENBABEL)
 
 set(PYNONUMPY_FILES
+    src/python/OMDLexer.py
+    src/python/OMDListener.py
+    src/python/OMDParser.py
+    src/python/OMDVisitor.py
+    src/python/OMDFileVisitor.py
     src/applications/utilities/affineScale
     src/applications/utilities/dumpConverter
     src/applications/utilities/funcflExtractor
@@ -1088,6 +1093,7 @@ set(PYNONUMPY_FILES
     src/applications/utilities/omdSplit
     src/applications/utilities/omdShrink
     src/applications/utilities/omdLast
+    src/applications/utilities/omd2json
     src/applications/utilities/solvator
     src/applications/utilities/stat2dielectric
     src/applications/utilities/stat2tension

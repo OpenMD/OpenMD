@@ -1,0 +1,262 @@
+#!@Python3_EXECUTABLE@
+"""
+omd2json
+
+Converts an OpenMD metadata section (the <MetaData>...</MetaData> block
+from a .omd file) into JSON using the ANTLR4-generated Python parser.
+
+Usage:
+    # From a full .omd file (extracts MetaData block automatically):
+    omd2json myfile.omd
+
+    # From a bare metadata text file (no <MetaData> tags needed):
+    omd2json myfile.omd --raw
+
+    # Write output to a file:
+    omd2json myfile.omd -o output.json
+
+    # Pretty-print to stdout:
+    omd2json myfile.omd --pretty
+
+Requirements:
+    pip install antlr4-python3-runtime
+
+    And the generated parser files in the same directory:
+        OMDLexer.py  OMDParser.py  OMDVisitor.py  OMDFileVisitor.py
+"""
+
+import argparse
+import json
+import re
+import sys
+import os
+
+from antlr4 import CommonTokenStream, InputStream
+from antlr4.error.ErrorListener import ErrorListener
+
+from OMDLexer import OMDLexer
+from OMDParser import OMDParser
+from OMDFileVisitor import OMDFileVisitor
+
+def resolve_includes(text, base_dir):
+    """
+    Recursively expand #include "filename" directives.
+    base_dir is the directory of the file being processed,
+    used to resolve relative include paths.
+    """
+    include_re = re.compile(r'^\s*#\s*include\s+"([^"]+)"', re.MULTILINE)
+
+    def replacer(match):
+        inc_path = os.path.join(base_dir, match.group(1))
+        try:
+            with open(inc_path, 'r', encoding='utf-8') as f:
+                included = f.read()
+            # Recurse in case included files have their own includes
+            return resolve_includes(included, os.path.dirname(inc_path))
+        except OSError as e:
+            print(f"Warning: could not read include file {inc_path}: {e}",
+                  file=sys.stderr)
+            return ''  # skip missing includes gracefully
+
+    return include_re.sub(replacer, text)
+
+class CompactJSONEncoder(json.JSONEncoder):
+    """JSON encoder that keeps short numeric lists on a single line."""
+    
+    def iterencode(self, obj, _one_shot=False):
+        return self._encode(obj, 0)
+    
+    def _encode(self, obj, level):
+        indent_str = ' ' * self.indent * level if self.indent else ''
+        next_indent = ' ' * self.indent * (level + 1) if self.indent else ''
+        
+        if isinstance(obj, list) and self._is_numeric_list(obj):
+            # Compact form for short numeric lists
+            return '[' + ', '.join(self._encode(v, 0) for v in obj) + ']'
+        elif isinstance(obj, list):
+            if not obj:
+                return '[]'
+            items = [next_indent + self._encode(v, level + 1) for v in obj]
+            return '[\n' + ',\n'.join(items) + '\n' + indent_str + ']'
+        elif isinstance(obj, dict):
+            if not obj:
+                return '{}'
+            items = [
+                next_indent + json.dumps(k) + ': ' + self._encode(v, level + 1)
+                for k, v in obj.items()
+            ]
+            return '{\n' + ',\n'.join(items) + '\n' + indent_str + '}'
+        else:
+            return json.dumps(obj)
+    
+    def _is_numeric_list(self, obj):
+        """True if obj is a flat list of numbers (i.e. a vector)."""
+        return (isinstance(obj, list) and 
+                len(obj) <= 16 and
+                all(isinstance(v, (int, float)) for v in obj))
+
+# -----------------------------------------------------------------------------
+# Error handling
+# -----------------------------------------------------------------------------
+
+class OMDErrorListener(ErrorListener):
+    """Collect parse errors rather than just printing them."""
+
+    def __init__(self):
+        super().__init__()
+        self.errors = []
+
+    def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+        self.errors.append(f"Line {line}:{column} - {msg}")
+
+
+# -----------------------------------------------------------------------------
+# MetaData block extraction
+# -----------------------------------------------------------------------------
+
+def extract_metadata(text):
+    """
+    Extract the content between <MetaData> and </MetaData> tags.
+    Returns the inner text, or the full text if no tags are found
+    (i.e. the input is already a bare metadata block).
+    """
+    match = re.search(
+        r'<MetaData>\s*(.*?)\s*</MetaData>',
+        text,
+        flags=re.DOTALL | re.IGNORECASE
+    )
+    if match:
+        return match.group(1)
+    return text  # assume raw metadata input
+
+
+# -----------------------------------------------------------------------------
+# Parse and convert
+# -----------------------------------------------------------------------------
+
+def parse_metadata(metadata_text):
+    """
+    Parse an OMD metadata string and return a structured Python dict.
+    Raises RuntimeError if there are parse errors.
+    """
+    input_stream = InputStream(metadata_text)
+
+    lexer = OMDLexer(input_stream)
+    lexer.removeErrorListeners()
+    lex_errors = OMDErrorListener()
+    lexer.addErrorListener(lex_errors)
+
+    token_stream = CommonTokenStream(lexer)
+
+    parser = OMDParser(token_stream)
+    parser.removeErrorListeners()
+    parse_errors = OMDErrorListener()
+    parser.addErrorListener(parse_errors)
+
+    tree = parser.omdfile()
+
+    all_errors = lex_errors.errors + parse_errors.errors
+    if all_errors:
+        raise RuntimeError("Parse errors:\n" + "\n".join(all_errors))
+
+    visitor = OMDFileVisitor()
+    result = visitor.visitOmdfile(tree)  # call directly instead of visit(tree)
+    return result
+
+
+def to_json(data, pretty=False):
+    """Serialize the parsed data dict to a JSON string."""
+    if pretty:
+       return CompactJSONEncoder(indent=2).encode(data)
+    return json.dumps(data, default=_json_default)
+
+
+def _json_default(obj):
+    """Fallback serializer for any types json.dumps doesn't handle."""
+    return str(obj)
+
+
+# -----------------------------------------------------------------------------
+# Pruning — remove empty lists/dicts to keep output tidy
+# -----------------------------------------------------------------------------
+
+def prune(obj):
+    """
+    Recursively remove empty lists and dicts from the output so the
+    JSON isn't cluttered with keys like "inversions": [] on every molecule.
+    """
+    if isinstance(obj, dict):
+        pruned = {}
+        for k, v in obj.items():
+            v2 = prune(v)
+            if v2 != {} and v2 != [] and v2 is not None:
+                pruned[k] = v2
+        return pruned
+    elif isinstance(obj, list):
+        return [prune(item) for item in obj]
+    return obj
+
+
+# -----------------------------------------------------------------------------
+# CLI
+# -----------------------------------------------------------------------------
+
+def main():
+    ap = argparse.ArgumentParser(
+        description="Convert an OpenMD metadata section to JSON."
+    )
+    ap.add_argument("input",
+                    help="Path to .omd file (or raw metadata text file with --raw)")
+    ap.add_argument("-o", "--output",
+                    help="Write JSON to this file (default: stdout)")
+    ap.add_argument("--raw", action="store_true",
+                    help="Input is a bare metadata block, not a full .omd file")
+    ap.add_argument("--pretty", action="store_true",
+                    help="Pretty-print JSON output")
+    ap.add_argument("--no-prune", action="store_true",
+                    help="Keep empty lists/dicts in output")
+    args = ap.parse_args()
+
+    # Read input
+    try:
+        with open(args.input, 'r', encoding='utf-8') as f:
+            text = f.read()
+    except OSError as e:
+        print(f"Error reading {args.input}: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+    base_dir = os.path.dirname(os.path.abspath(args.input))
+    metadata_text = text if args.raw else extract_metadata(text)
+    metadata_text = resolve_includes(metadata_text, base_dir)
+
+    # Parse
+    try:
+        data = parse_metadata(metadata_text)
+    except RuntimeError as e:
+        print(str(e), file=sys.stderr)
+        sys.exit(1)
+
+    # Optionally prune empty collections
+    if not args.no_prune:
+        data = prune(data)
+
+    # Serialize
+    json_str = to_json(data, pretty=args.pretty)
+
+    # Output
+    if args.output:
+        try:
+            with open(args.output, 'w', encoding='utf-8') as f:
+                f.write(json_str)
+                f.write('\n')
+            print(f"Written to {args.output}")
+        except OSError as e:
+            print(f"Error writing {args.output}: {e}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        print(json_str)
+
+
+if __name__ == '__main__':
+    main()
