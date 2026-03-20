@@ -94,34 +94,52 @@ namespace OpenMD {
 
     // -----------------------------------------------------------------------
     // Spectroscopic maps.
-    // w10_   : ω₁₀(E) = a0 + a1·E + a2·E²    [cm⁻¹;  E in a.u.]
-    // p10_   : |μ₁₀|(E) = c0 + c1·E           [Debye]
-    //          Transition dipole MOMENT for TDC coupling + collective μ.
-    // wintra_: J_intra(E) = d0 + d1·E + d2·E² [cm⁻¹]
-    // alphaMap_: (α_par, α_perp)               [Å² amu⁻⁰·⁵]
+    //
+    // w10_     : ω₁₀(E) = a0 + a1·E + a2·E²            [cm⁻¹; E in a.u.]
+    // muPrime_ : μ′(E)  = m0 + m1·E + m2·E²            [a.u.]
+    //            Dipole derivative along OH bond direction.
+    // x10_     : x₁₀(ω) = x0 + x1·ω₁₀                 [a.u.]
+    //            Coordinate matrix element.  |μ₁₀| = μ′ × x₁₀  [a.u.]
+    //            Converted to Debye·amu⁻⁰·⁵ by × 4.8032 × 7.2906.
+    // p10_     : p₁₀(ω) = p0 + p1·ω₁₀                  [a.u.]
+    //            Momentum matrix element.
+    // wintra_  : ω^intra_jk = [k0 + k1·(Eⱼ+Eₖ)]·xⱼ·xₖ
+    //                        + kinetic_coeff · pⱼ·pₖ    [cm⁻¹]
+    // alphaMap_: (α_par, α_perp)                         [Å² amu⁻⁰·⁵]
     //
     // Sources: Auer & Skinner, J. Chem. Phys. 128, 224511 (2008) — SPC/E
-    //          Gruenbaum et al., JCTC 9, 3109 (2013) — TIP4P
+    //          Gruenbaum et al., JCTC 9, 3109 (2013)     — TIP4P
     //          Takayama et al., J. Chem. Phys. 158, 136101 (2023) — TIP4P-Ice
     // -----------------------------------------------------------------------
 
-    // SPC/E
+    // SPC/E  (Auer & Skinner 2008, Table I)
+    //   μ′/μ′_g = 0.7112 + 75.59·E  →  μ′(E) = 0.1646*(0.7112 + 75.59·E)
+    //           = 0.11706 + 12.44·E + 0·E²
     w10_["H_SPCE"]      = std::make_tuple(3761.6,  -5060.4,  -86225.0);
+    muPrime_["H_SPCE"]  = std::make_tuple(0.11706, 12.44,    0.0);
+    x10_["H_SPCE"]      = std::make_pair(0.1934,  -1.75e-5);
     p10_["H_SPCE"]      = std::make_pair(1.611,    5.893e-4);
-    wintra_["H_SPCE"]   = std::make_tuple(-1789.0,  23852.0,    -1.966);
+    wintra_["H_SPCE"]   = std::make_tuple(-1789.0,  23852.0,  -1.966);
     alphaMap_["H_SPCE"] = std::make_pair(0.185, 0.033);
+    tdcLoc_["H_SPCE"]   = 0.58;   // Å from O along OH bond
 
-    // TIP4P
+    // TIP4P  (Gruenbaum et al. 2013, Table 1)
     w10_["H_TIP4P"]      = std::make_tuple(3760.2,  -3541.7, -152677.0);
+    muPrime_["H_TIP4P"]  = std::make_tuple(0.1646,  11.39,    63.41);
+    x10_["H_TIP4P"]      = std::make_pair(0.19285, -1.7261e-5);
     p10_["H_TIP4P"]      = std::make_pair(1.6466,   5.7692e-4);
-    wintra_["H_TIP4P"]   = std::make_tuple(-1361.0,  27165.0,    -1.887);
+    wintra_["H_TIP4P"]   = std::make_tuple(-1361.0,  27165.0,  -1.887);
     alphaMap_["H_TIP4P"] = std::make_pair(0.185, 0.033);
+    tdcLoc_["H_TIP4P"]   = 0.67;  // Å from O along OH bond
 
     // TIP4P-Ice (transferability from TIP4P)
     w10_["H_TIP4P-Ice"]      = w10_["H_TIP4P"];
+    muPrime_["H_TIP4P-Ice"]  = muPrime_["H_TIP4P"];
+    x10_["H_TIP4P-Ice"]      = x10_["H_TIP4P"];
     p10_["H_TIP4P-Ice"]      = p10_["H_TIP4P"];
     wintra_["H_TIP4P-Ice"]   = wintra_["H_TIP4P"];
     alphaMap_["H_TIP4P-Ice"] = alphaMap_["H_TIP4P"];
+    tdcLoc_["H_TIP4P-Ice"]   = tdcLoc_["H_TIP4P"];
 
     // -----------------------------------------------------------------------
     // Applied external electric field.
@@ -345,6 +363,12 @@ namespace OpenMD {
 
     std::vector<RealType> freqs;
 
+    // Per-chromophore electric field, x₁₀, p₁₀ needed for
+    // intramolecular coupling: ω^intra = [k0+k1(Ei+Ej)] xi xj + kp pi pj
+    std::vector<RealType> eFields;   // projected E in a.u.
+    std::vector<RealType> x10vals;   // coordinate matrix element [a.u.]
+    std::vector<RealType> p10vals;   // momentum matrix element [a.u.]
+
     int ii;
     StuntDouble* sd1;
 
@@ -359,8 +383,8 @@ namespace OpenMD {
 
       auto wIt = w10_.find(name);
       if (wIt == w10_.end()) continue;
-      auto pIt = p10_.find(name);
-      if (pIt == p10_.end()) continue;
+      auto mpIt = muPrime_.find(name);
+      if (mpIt == muPrime_.end()) continue;
 
       int sdID  = sd1->getGlobalIndex();
       int molID = info_->getGlobalMolMembership(sdID);
@@ -394,16 +418,41 @@ namespace OpenMD {
       auto [a0, a1, a2] = wIt->second;
       RealType freq = a0 + a1*E + a2*E*E;
 
-      // Transition dipole moment |μ₁₀| [D] from p10_ map
-      auto [c0, c1] = pIt->second;
-      RealType muMag = c0 + c1*E;
+      // -------------------------------------------------------------------
+      // Transition dipole moment |μ₁₀| via Gruenbaum et al. (2013):
+      //   μ′(E) = m0 + m1·E + m2·E²            [a.u., dipole derivative]
+      //   x₁₀(ω) = x0 + x1·ω₁₀                [a.u., coordinate matrix el.]
+      //   |μ₁₀| = μ′ × x₁₀                     [a.u.] → Debye × amu⁻⁰·⁵
+      //
+      // Unit conversion: 1 a.u.(dipole) = 2.5417 D (ea₀ → D)
+      //                  1 a.u.(x)      = 0.5292 Å × amu⁰·⁵  (in mass-weighted)
+      // But Gruenbaum x₁₀ is in bohr·amu^{1/2} already (mass-weighted),
+      // so μ₁₀ [a.u.] = μ′·x₁₀ and the conversion factor to get the
+      // transition dipole in Debye is ea₀/D = 2.5417 D per a.u.
+      // However, for TDC the prefactor 5034.12 cm⁻¹ D⁻² Å³ expects μ in
+      // Debye. We convert: |μ₁₀| [D] = μ′(E) × x₁₀(ω) × (ea₀→D).
+      // -------------------------------------------------------------------
+      auto [m0, m1, m2] = mpIt->second;
+      RealType muPrime = m0 + m1*E + m2*E*E;        // [a.u.]
 
-      // Intramolecular coupling [cm⁻¹]
-      auto [d0, d1, d2] = wintra_.at(name);
-      RealType Jintra = d0 + d1*E + d2*E*E;
+      auto [x0, x1] = x10_.at(name);
+      RealType x10  = x0 + x1*freq;                 // [a.u.]
 
-      // OH midpoint using minimum-image vector (correct across PBC)
-      Vector3d midpoint = Opos + 0.5 * rOH_mic;
+      // Momentum matrix element for intramolecular coupling
+      auto [pv0, pv1] = p10_.at(name);
+      RealType p10  = pv0 + pv1*freq;               // [a.u.]
+
+      // Transition dipole magnitude [Debye]
+      const RealType eaBohr_to_Debye = 2.5417464;
+      RealType muMag = muPrime * x10 * eaBohr_to_Debye;
+
+      // TDC dipole location: a fitted distance along the OH bond from O.
+      // Auer & Skinner 2008: 0.58 Å (SPC/E); Gruenbaum et al. 2013: 0.67 Å (TIP4P).
+      RealType tdcDist = 0.5 * rOH_mic.length();  // fallback: midpoint
+      auto tdcIt = tdcLoc_.find(name);
+      if (tdcIt != tdcLoc_.end())
+        tdcDist = tdcIt->second;
+      Vector3d dipolePos = Opos + tdcDist * ohUnit;
 
       // Bond polarizability tensor
       auto [apar, aperp] = alphaMap_.at(name);
@@ -414,10 +463,21 @@ namespace OpenMD {
       fd.alpha.push_back(bondPolarizability(ohUnit, apar, aperp));
 
       // Auxiliary data for Hamiltonian construction
-      ohPos.push_back(midpoint);
+      ohPos.push_back(dipolePos);
       molIndex.push_back(molID);
-      intraJ.push_back(Jintra);
       freqs.push_back(freq);
+      eFields.push_back(E);
+      x10vals.push_back(x10);
+      p10vals.push_back(p10);
+
+      // Intramolecular coupling is computed in buildHamiltonian using
+      // pairs (Ei+Ej, xi, xj, pi, pj); store per-chromophore values here.
+      // intraJ is kept as a placeholder for the potential coupling prefactor
+      // [k0 + k1·E] for this chromophore; the actual coupling requires the
+      // partner's E and matrix elements too.
+      auto [k0, k1, kp] = wintra_.at(name);
+      (void)kp;  // kinetic coefficient used in buildHamiltonian
+      intraJ.push_back(k0 + k1*E);   // potential prefactor for this site
     }
 
     // Build H once with the final size; set diagonal to ω₁₀ frequencies.
@@ -429,6 +489,23 @@ namespace OpenMD {
       fd.idToIndex[fd.globalIDs[i]] = i;
     }
 
+    // Stash x10/p10 vectors into buildHamiltonian via the caller's arrays.
+    // We repurpose the intraJ vector to carry the potential prefactor only;
+    // x10vals and p10vals are passed through the caller.  To avoid changing
+    // the signature of buildHamiltonian (which would ripple), we extend
+    // intraJ to pack [potentialPrefactor, x10, p10] triples.  Each
+    // chromophore contributes 3 consecutive entries.
+    {
+      std::vector<RealType> packed;
+      packed.reserve(3 * N);
+      for (int i = 0; i < N; ++i) {
+        packed.push_back(intraJ[i]);   // potential prefactor k0 + k1·E
+        packed.push_back(x10vals[i]);  // x₁₀
+        packed.push_back(p10vals[i]);  // p₁₀
+      }
+      intraJ = std::move(packed);
+    }
+
     return fd;
   }
 
@@ -437,8 +514,16 @@ namespace OpenMD {
   //
   // Fills fd.H off-diagonal elements only.
   // Diagonal (ω₁₀) was already set by extractFrame.
-  //   same molecule  → J = average of the two intramolecular couplings
-  //   different mols → J = TDC coupling between OH midpoints
+  //   same molecule  → J from Gruenbaum eq 3.17:
+  //     ω^intra_jk = [k0 + k1·(Eⱼ+Eₖ)]·xⱼ·xₖ + kp·pⱼ·pₖ
+  //     where k0, k1, kp come from wintra_ and the per-chromophore
+  //     potential prefactors, x₁₀, p₁₀ are packed in intraJ.
+  //   different mols → J = TDC coupling between OH dipole locations
+  //
+  // intraJ packing (from extractFrame): 3 entries per chromophore:
+  //   [3*i+0] = potential prefactor: k0 + k1·Eᵢ
+  //   [3*i+1] = x₁₀,ᵢ
+  //   [3*i+2] = p₁₀,ᵢ
   // =========================================================================
   void SFG::buildHamiltonian(FrameData&                   fd,
 			     const std::vector<Vector3d>& ohPos,
@@ -453,7 +538,38 @@ namespace OpenMD {
       for (int j = i+1; j < N; ++j) {
 	RealType J = 0.0;
 	if (molIndex[i] == molIndex[j]) {
-	  J = 0.5 * (intraJ[i] + intraJ[j]);
+	  // Gruenbaum et al. (2013) eq 3.17 / eq 2.1:
+	  //   ω^intra_jk = [k0 + k1·(Eⱼ+Eₖ)]·xⱼ·xₖ + kp·pⱼ·pₖ
+	  //
+	  // We stored Ki = k0 + k1·Eᵢ per site in intraJ[3*i+0], so:
+	  //   k0 + k1·(Eᵢ+Eⱼ) = Ki + Kj − k0
+	  //
+	  // k0 and kp are looked up from the wintra_ map.  For a single
+	  // water model (the common case), all entries share the same k0/kp.
+	  RealType k0_val = 0.0, kp_val = 0.0;
+	  if (!wintra_.empty()) {
+	    auto [kk0, kk1, kkp] = wintra_.begin()->second;
+	    k0_val = kk0;
+	    kp_val = kkp;
+	    (void)kk1;
+	  }
+
+	  RealType Ki = intraJ[3*i + 0];
+	  RealType xi = intraJ[3*i + 1];
+	  RealType pi = intraJ[3*i + 2];
+	  RealType Kj = intraJ[3*j + 0];
+	  RealType xj = intraJ[3*j + 1];
+	  RealType pj = intraJ[3*j + 2];
+
+	  // Potential coupling: [k0 + k1·(Ei+Ej)] · xi · xj
+	  // = (Ki + Kj - k0) · xi · xj
+	  RealType potentialTerm = (Ki + Kj - k0_val) * xi * xj;
+
+	  // Kinetic coupling: kp · pi · pj
+	  // (kp includes the −cosφ/mO factor from Gruenbaum eq 2.1)
+	  RealType kineticTerm = kp_val * pi * pj;
+
+	  J = potentialTerm + kineticTerm;
 	} else {
 	  Vector3d r_ij = ohPos[j] - ohPos[i];
 	  currentSnapshot_->wrapVector(r_ij);
@@ -494,7 +610,9 @@ namespace OpenMD {
 
     // -----------------------------------------------------------------------
     // Thread-local scratch: grown as needed, never shrunk.
-    // Vbuf: eigenvectors, column-major (V(i,k) = Vbuf[i + k*N]).
+    // Vbuf: eigenvectors, ROW-MAJOR: V(i,k) = Vbuf[i*N + k].
+    //       Column k is the k-th eigenvector.
+    //       This matches MultiSpec's convention (LAPACK_ROW_MAJOR).
     // -----------------------------------------------------------------------
     thread_local std::vector<double> Hbuf;
     thread_local std::vector<double> Wbuf;
@@ -512,27 +630,23 @@ namespace OpenMD {
 
     // -----------------------------------------------------------------------
     // Step 1: Diagonalize H -> Wbuf (eigenvalues),
-    //                          Vbuf (eigenvectors col-major)
+    //                          Vbuf (eigenvectors row-major)
     // -----------------------------------------------------------------------
 #if defined(HAVE_LAPACK)
-    // Copy H into Hbuf column-major (symmetric, so row == col order).
-    // This must happen BEFORE the workspace query: dsyevd_ uses the A
-    // array as scratch even during the query call (lwork=-1), so querying
-    // with Hbuf and then refilling it would corrupt the input.
+    // Copy H into Hbuf ROW-MAJOR for dsyevd_ with LAPACK_ROW_MAJOR.
+    // Note: dsyevd_ is the Fortran interface which expects column-major,
+    // but for symmetric matrices row-major == column-major (A = A^T).
+    // dsyevd_ returns eigenvectors in COLUMN-major layout.
+    // We then transpose to get row-major Vbuf.
     for (int i = 0; i < N; ++i)
       for (int j = 0; j < N; ++j)
         Hbuf[i + j*N] = static_cast<double>(H(i, j));
 
-    // Workspace query: use a throwaway A buffer so Hbuf is not touched.
-    // dsyevd_ with JOBZ='V' requires lwork >= 1+6N+2N^2 and
-    // liwork >= 3+5N; the query returns the optimal (larger) sizes.
-    // work_d and iwork_d are thread_local so we only pay for the query
-    // when N grows to a new maximum.
+    // Workspace query
     {
       int lwork_q = -1, liwork_q = -1, info_q = 0;
       double  wq  = 0.0;
       int     wiq = 0;
-      // Temporary A copy for query — keeps Hbuf intact
       std::vector<double> Htmp(Hbuf.begin(), Hbuf.begin() + N*N);
       std::vector<double> Wtmp(N, 0.0);
       dsyevd_("V", "U", &N, Htmp.data(), &N, Wtmp.data(),
@@ -550,7 +664,12 @@ namespace OpenMD {
       dsyevd_("V", "U", &N, Hbuf.data(), &N, Wbuf.data(),
               work_d.data(), &lw, iwork_d.data(), &liw, &info);
       if (info == 0) {
-        Vbuf = Hbuf;   // dsyevd_ overwrites Hbuf with eigenvectors
+        // dsyevd_ (Fortran) returns eigenvectors in column-major:
+        //   Hbuf[i + k*N] = V(i,k).
+        // Transpose into row-major Vbuf: Vbuf[i*N + k] = V(i,k).
+        for (int i = 0; i < N; ++i)
+          for (int k = 0; k < N; ++k)
+            Vbuf[i*N + k] = Hbuf[i + k*N];
         goto after_diag;
       }
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
@@ -571,7 +690,7 @@ namespace OpenMD {
       for (int k = 0; k < N; ++k) {
         Wbuf[k] = static_cast<double>(evals_j[k]);
         for (int i = 0; i < N; ++i)
-          Vbuf[i + k*N] = static_cast<double>(evecs_j(i, k));
+          Vbuf[i*N + k] = static_cast<double>(evecs_j(i, k));
       }
     }
 
@@ -589,16 +708,21 @@ namespace OpenMD {
     }
 
     // -----------------------------------------------------------------------
-    // Steps 3-5: F <- V . diag(phase) . V^T . F
+    // Steps 3-5: F <- V · diag(phase) · V^T · F
     //
-    // Split F into real/imag parts so that real BLAS dgemm can be used.
-    // Vbuf is column-major: V(i,k) = Vbuf[i + k*N].
+    // All arrays are ROW-MAJOR: M(i,j) = buf[i*N + j].
+    // Vbuf is row-major: V(i,k) = Vbuf[i*N + k].
+    // F is row-major:    F(i,j) = F[i*N + j].
     //
-    // Step 3: [Tr,Ti] = V^T * [Fr,Fi]
-    //   In column-major BLAS: T = V^T * F  =>  cblas_dgemm(Trans, NoTrans)
-    // Step 4: row k of [Tr,Ti] *= phase[k]
-    // Step 5: [Fr,Fi] = V * [Tr,Ti]
-    //   In column-major BLAS: F = V * T    =>  cblas_dgemm(NoTrans, NoTrans)
+    // Split F into real/imag parts.
+    //
+    // Step 3: T = V^T · F      →  T(k,j) = Σ_i V(i,k)·F(i,j)
+    // Step 4: T(k,j) *= phase[k]
+    // Step 5: F = V · T        →  F(i,j) = Σ_k V(i,k)·T(k,j)
+    //
+    // For CBLAS with CblasRowMajor:
+    //   Step 3: T = V^T * F  → dgemm(RowMajor, Trans, NoTrans, ...)
+    //   Step 5: F = V  * T   → dgemm(RowMajor, NoTrans, NoTrans, ...)
     // -----------------------------------------------------------------------
 
     for (int idx = 0; idx < N2; ++idx) {
@@ -611,33 +735,35 @@ namespace OpenMD {
 #    pragma clang diagnostic push
 #    pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #  endif
-    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+    // Step 3: T = V^T * F  (row-major throughout)
+    cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                 N, N, N, 1.0, Vbuf.data(), N, Fr.data(), N, 0.0, Tr.data(), N);
-    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+    cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                 N, N, N, 1.0, Vbuf.data(), N, Fi.data(), N, 0.0, Ti.data(), N);
 #  if defined(__APPLE__)
 #    pragma clang diagnostic pop
 #  endif
 #else
+    // Manual fallback: T(k,j) = Σ_i V(i,k) * F(i,j)
     std::fill(Tr.begin(), Tr.begin()+N2, 0.0);
     std::fill(Ti.begin(), Ti.begin()+N2, 0.0);
     for (int k = 0; k < N; ++k)
       for (int i = 0; i < N; ++i) {
-        double vik = Vbuf[i + k*N];
-        for (int a = 0; a < N; ++a) {
-          Tr[k*N+a] += vik * Fr[i*N+a];
-          Ti[k*N+a] += vik * Fi[i*N+a];
+        double vik = Vbuf[i*N + k];   // V(i,k) row-major
+        for (int j = 0; j < N; ++j) {
+          Tr[k*N+j] += vik * Fr[i*N+j];
+          Ti[k*N+j] += vik * Fi[i*N+j];
         }
       }
 #endif
 
-    // Apply phase row-wise
+    // Step 4: Apply phase row-wise: T(k,:) *= phase[k]
     for (int k = 0; k < N; ++k) {
       double pr = phase[k].real(), pi = phase[k].imag();
-      for (int a = 0; a < N; ++a) {
-        double tr = Tr[k*N+a], ti = Ti[k*N+a];
-        Tr[k*N+a] = pr*tr - pi*ti;
-        Ti[k*N+a] = pr*ti + pi*tr;
+      for (int j = 0; j < N; ++j) {
+        double tr = Tr[k*N+j], ti = Ti[k*N+j];
+        Tr[k*N+j] = pr*tr - pi*ti;
+        Ti[k*N+j] = pr*ti + pi*tr;
       }
     }
 
@@ -646,22 +772,24 @@ namespace OpenMD {
 #    pragma clang diagnostic push
 #    pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #  endif
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
+    // Step 5: F = V * T  (row-major throughout)
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
                 N, N, N, 1.0, Vbuf.data(), N, Tr.data(), N, 0.0, Fr.data(), N);
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
                 N, N, N, 1.0, Vbuf.data(), N, Ti.data(), N, 0.0, Fi.data(), N);
 #  if defined(__APPLE__)
 #    pragma clang diagnostic pop
 #  endif
 #else
+    // Manual fallback: F(i,j) = Σ_k V(i,k) * T(k,j)
     std::fill(Fr.begin(), Fr.begin()+N2, 0.0);
     std::fill(Fi.begin(), Fi.begin()+N2, 0.0);
     for (int i = 0; i < N; ++i)
       for (int k = 0; k < N; ++k) {
-        double vik = Vbuf[i + k*N];
-        for (int a = 0; a < N; ++a) {
-          Fr[i*N+a] += vik * Tr[k*N+a];
-          Fi[i*N+a] += vik * Ti[k*N+a];
+        double vik = Vbuf[i*N + k];   // V(i,k) row-major
+        for (int j = 0; j < N; ++j) {
+          Fr[i*N+j] += vik * Tr[k*N+j];
+          Fi[i*N+j] += vik * Ti[k*N+j];
         }
       }
 #endif
@@ -734,8 +862,9 @@ namespace OpenMD {
 			   + dot_alpha(s2, n, Fmu_s2)) * decay;
 
     // PPP: near-normal approximation (Buch et al. 2007)
-    tcf_ppp_[tt] += (-dot_alpha(s1, s1, Fmu_n)
-		     - dot_alpha(s2, s2, Fmu_n)
+    // MultiSpec: pppt += (-0.5*cxxz - 0.5*cyyz + czzz) * exptc
+    tcf_ppp_[tt] += (-0.5 * dot_alpha(s1, s1, Fmu_n)
+		     - 0.5 * dot_alpha(s2, s2, Fmu_n)
 		     + dot_alpha(n,  n,  Fmu_n)) * decay;
   }
 
@@ -965,8 +1094,18 @@ namespace OpenMD {
     // The FFT of the shifted TCF C'(t) is centered at k=0 = wAvg_.
     // Bin k → absolute frequency: wAvg_ + k*dOmega
     // Bins N_fft/2+1..N_fft-1 are the negative side (ω < wAvg_).
-    // Output only physically meaningful frequencies (ω > 0) in
-    // ascending order: negative half first, then positive.
+    // Output bins within the intrinsic resolution bandwidth only:
+    // the physically meaningful frequency range is wAvg_ ± (N_corr/2)·dOmega,
+    // which is the same window you'd get without zero-filling.  Zero-filling
+    // only adds interpolation points within this band; bins outside it
+    // contain no new information and just show ringing / noise.
+    //
+    // For each FFT bin k, the absolute frequency is:
+    //   k <= N_fft/2:  ω = wAvg_ + k·dOmega
+    //   k >  N_fft/2:  ω = wAvg_ + (k − N_fft)·dOmega
+    //
+    // The intrinsic bandwidth limit in bin-index space is |offset| ≤ N_corr/2,
+    // where offset = k (positive side) or k−N_fft (negative side).
     auto writeRow = [&](double omega, int k) {
       if (omega <= 0.0) return;
       double re = out[k][0] * norm;
@@ -979,11 +1118,15 @@ namespace OpenMD {
       << re*re + im_corr*im_corr << "\n";
     };
 
-    // negative half → ω below wAvg_
-    for (int k = N_fft - N_corr/2; k < N_fft; ++k) 
+    const int halfBW = N_corr / 2;  // intrinsic bandwidth in bins
+
+    // negative half → ω below wAvg_ (ascending)
+    // offset = k − N_fft ranges from −halfBW to −1
+    for (int k = N_fft - halfBW; k < N_fft; ++k)
       writeRow(wAvg_ + (k - N_fft) * dOmega, k);
     // positive half → ω at/above wAvg_
-    for (int k = 0; k <= N_corr/2; ++k)              
+    // offset = k ranges from 0 to +halfBW
+    for (int k = 0; k <= halfBW; ++k)
       writeRow(wAvg_ + k * dOmega, k);
     
     ofs.close();

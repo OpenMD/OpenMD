@@ -75,14 +75,16 @@ namespace OpenMD {
    * Spectroscopic maps (Auer & Skinner 2008 for SPC/E;
    *                     Gruenbaum et al. 2013 for TIP4P):
    *   w10_   : ω₁₀(E) = a0 + a1·E + a2·E²        [cm⁻¹; E in a.u.]
-   *   p10_   : |μ₁₀|(E) = c0 + c1·E               [Debye]
-   *            Transition dipole MOMENT used for TDC coupling and local μ.
-   *   wintra_: J_intra(E) = d0 + d1·E + d2·E²     [cm⁻¹]
+   *   muPrime_: μ′(E) = m0 + m1·E + m2·E²        [a.u., dipole deriv.]
+   *   x10_   : x₁₀(ω) = x0 + x1·ω₁₀             [a.u., coord. matrix el.]
+   *   p10_   : p₁₀(ω) = p0 + p1·ω₁₀              [a.u., momentum matrix el.]
+   *            Transition dipole |μ₁₀| = μ′·x₁₀ (converted to Debye).
+   *   wintra_: ω^intra = [k0+k1·(Eⱼ+Eₖ)]·xⱼ·xₖ + kp·pⱼ·pₖ  [cm⁻¹]
    *   alphaMap_: (α_par, α_perp)                   [Å² amu⁻⁰·⁵]
    *
    * Supported polarization combinations (interface normal = z):
    *   ssp : Im C_yyz = α_yy(t)ᵀ · F(t,0) · μ_z(0)
-   *   ppp : Im [−C_xxz − C_yyz + C_zzz] (near-normal incidence)
+   *   ppp : Im [−0.5·C_xxz − 0.5·C_yyz + C_zzz] (near-normal incidence)
    *   sps : Im C_yzy = α_yz(t)ᵀ · F(t,0) · μ_y(0)
    */
   class SFG : public SystemACF<RealType> {
@@ -114,15 +116,29 @@ namespace OpenMD {
   private:
     // -----------------------------------------------------------------------
     // Spectroscopic map tables, keyed by H atom type name.
-    // w10_   : (a0,a1,a2)  ω₁₀(E) = a0 + a1·E + a2·E²   [cm⁻¹]
-    // p10_   : (c0,c1)     |μ₁₀|(E) = c0 + c1·E          [Debye]
-    // wintra_: (d0,d1,d2)  J_intra(E) = d0+d1·E+d2·E²    [cm⁻¹]
-    // alphaMap_: (α_par, α_perp)                           [Å² amu⁻⁰·⁵]
+    //
+    // w10_     : (a0,a1,a2)  ω₁₀(E) = a0 + a1·E + a2·E²       [cm⁻¹]
+    // muPrime_ : (m0,m1,m2)  μ′(E)  = m0 + m1·E + m2·E²       [a.u.]
+    //            Dipole derivative along OH bond.
+    // x10_     : (x0,x1)     x₁₀(ω) = x0 + x1·ω₁₀            [a.u.]
+    //            Coordinate matrix element.  |μ₁₀| = μ′·x₁₀.
+    // p10_     : (p0,p1)     p₁₀(ω) = p0 + p1·ω₁₀             [a.u.]
+    //            Momentum matrix element.
+    // wintra_  : (k0,k1,kinetic_coeff)
+    //            ω^intra = [k0 + k1·(Eⱼ+Eₖ)]·xⱼ·xₖ
+    //                    + kinetic_coeff·pⱼ·pₖ               [cm⁻¹]
+    //            (kinetic_coeff < 0; includes −cosφ/m_O factor)
+    // alphaMap_: (α_par, α_perp)                                [Å² amu⁻⁰·⁵]
+    // tdcLoc_ : distance from O along OH bond for TDC location  [Å]
+    //           (Auer 2008: 0.58 Å for SPC/E; Gruenbaum 2013: 0.67 Å for TIP4P)
     // -----------------------------------------------------------------------
     std::map<std::string, std::tuple<RealType,RealType,RealType>> w10_;
+    std::map<std::string, std::tuple<RealType,RealType,RealType>> muPrime_;
+    std::map<std::string, std::pair<RealType,RealType>>           x10_;
     std::map<std::string, std::pair<RealType,RealType>>           p10_;
     std::map<std::string, std::tuple<RealType,RealType,RealType>> wintra_;
     std::map<std::string, std::pair<RealType,RealType>>           alphaMap_;
+    std::map<std::string, RealType>                              tdcLoc_;
 
     // Applied external field [kcal mol⁻¹ Å⁻¹ e⁻¹], pre-converted in ctor
     Vector3d EF_;
