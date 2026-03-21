@@ -52,6 +52,9 @@
 #cmakedefine RAPID_JSON 1
 #cmakedefine NLOHMANN_JSON 1
 
+/* Is defined if the NEP_CPU neuroevolution potential library is available. */
+#cmakedefine HAVE_NEP 1
+
 /* Define to the one symbol short name of this package. */
 #cmakedefine PACKAGE_TARNAME
 
