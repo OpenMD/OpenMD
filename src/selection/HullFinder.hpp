@@ -79,6 +79,11 @@ namespace OpenMD {
     RealType surfaceArea_;
     RealType volume_;
     std::vector<StuntDouble*> localSites_;
+
+  private:
+    // Unified implementation. computeVolume controls whether volume_
+    // is computed (the frameless overload historically did not).
+    SelectionSet findHullImpl(bool computeVolume);
   };
 
   class AlphaHullFinder : public HullFinder {

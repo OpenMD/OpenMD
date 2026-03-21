@@ -620,6 +620,7 @@ namespace OpenMD {
     thread_local std::vector<double> work_d;
     thread_local std::vector<int>    iwork_d;
     thread_local std::vector<double> Fr, Fi, Tr, Ti;
+    thread_local int lastN = 0;  // tracks when workspace query is needed
 
     const int N2 = N * N;
     if (static_cast<int>(Hbuf.size()) < N2) {
@@ -633,21 +634,21 @@ namespace OpenMD {
     //                          Vbuf (eigenvectors row-major)
     // -----------------------------------------------------------------------
 #if defined(HAVE_LAPACK)
-    // Copy H into Hbuf ROW-MAJOR for dsyevd_ with LAPACK_ROW_MAJOR.
-    // Note: dsyevd_ is the Fortran interface which expects column-major,
-    // but for symmetric matrices row-major == column-major (A = A^T).
-    // dsyevd_ returns eigenvectors in COLUMN-major layout.
-    // We then transpose to get row-major Vbuf.
-    for (int i = 0; i < N; ++i)
-      for (int j = 0; j < N; ++j)
-        Hbuf[i + j*N] = static_cast<double>(H(i, j));
-
-    // Workspace query
+    // Copy H's contiguous row-major storage into Hbuf.
+    // H is symmetric so row-major == column-major for dsyevd_.
+    // dsyevd_ will overwrite Hbuf with eigenvectors (column-major).
     {
+      const RealType* src = H.getArrayPointer();
+      for (int i = 0; i < N2; ++i)
+        Hbuf[i] = static_cast<double>(src[i]);
+    }
+
+    // Workspace query — only needed when N changes.
+    if (N != lastN) {
       int lwork_q = -1, liwork_q = -1, info_q = 0;
       double  wq  = 0.0;
       int     wiq = 0;
-      std::vector<double> Htmp(Hbuf.begin(), Hbuf.begin() + N*N);
+      std::vector<double> Htmp(N2, 0.0);
       std::vector<double> Wtmp(N, 0.0);
       dsyevd_("V", "U", &N, Htmp.data(), &N, Wtmp.data(),
               &wq, &lwork_q, &wiq, &liwork_q, &info_q);
@@ -655,6 +656,7 @@ namespace OpenMD {
       int liw = wiq;
       if (static_cast<int>(work_d.size())  < lw)  work_d.resize(lw);
       if (static_cast<int>(iwork_d.size()) < liw) iwork_d.resize(liw);
+      lastN = N;
     }
 
     {
@@ -1112,10 +1114,10 @@ namespace OpenMD {
       double im = out[k][1] * norm;
       double x  = omega / kT_invcm;
       double qCorr = (x > 1.0e-6) ?
-      ((x < 50.0) ? x / (1.0 - std::exp(-x)) : x) : 1.0;
+	((x < 50.0) ? x / (1.0 - std::exp(-x)) : x) : 1.0;
       double im_corr = im * qCorr;
       ofs << omega << "\t" << re << "\t" << im_corr << "\t"
-      << re*re + im_corr*im_corr << "\n";
+	  << re*re + im_corr*im_corr << "\n";
     };
 
     const int halfBW = N_corr / 2;  // intrinsic bandwidth in bins

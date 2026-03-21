@@ -91,24 +91,18 @@ namespace OpenMD {
          mol = info_->nextMolecule(mi)) {
       molecules_[mol->getGlobalIndex()] = mol;
 
-      // Hull is constructed from all known integrable objects.
       for (sd = mol->beginIntegrableObject(ioi); sd != NULL;
            sd = mol->nextIntegrableObject(ioi)) {
         localSites_.push_back(sd);
       }
 
-      // selection can include atoms (which may be a subset of the IOs)
       for (atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
         stuntdoubles_[atom->getGlobalIndex()] = atom;
       }
-
-      // and rigid bodies
       for (rb = mol->beginRigidBody(rbIter); rb != NULL;
            rb = mol->nextRigidBody(rbIter)) {
         stuntdoubles_[rb->getGlobalIndex()] = rb;
       }
-
-      // These others are going to be inferred from the objects on the hull:
       for (bond = mol->beginBond(bondIter); bond != NULL;
            bond = mol->nextBond(bondIter)) {
         bonds_[bond->getGlobalIndex()] = bond;
@@ -151,65 +145,27 @@ namespace OpenMD {
 #endif
   }
 
-  SelectionSet HullFinder::findHull() {
+  SelectionSet HullFinder::findHull() { return findHullImpl(false); }
+
+  SelectionSet HullFinder::findHull(int) { return findHullImpl(true); }
+
+  SelectionSet HullFinder::findHullImpl(bool computeVolume) {
     SelectionSet ssResult(nObjects_);
 #ifdef HAVE_QHULL
     surfaceMesh_->computeHull(localSites_);
 
     std::vector<Triangle> sMesh = surfaceMesh_->getMesh();
-    // Loop over the mesh faces
-    std::vector<Triangle>::iterator face;
-    std::vector<StuntDouble*>::iterator vertex;
 
-    // This will work in parallel because the triangles returned by the mesh
-    // have a NULL stuntDouble if this processor doesn't own
-
-    for (face = sMesh.begin(); face != sMesh.end(); ++face) {
-      Triangle thisTriangle               = *face;
-      std::vector<StuntDouble*> vertexSDs = thisTriangle.getVertices();
-      for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex) {
-        if ((*vertex) != NULL) {
-          ssResult.bitsets_[STUNTDOUBLE].setBitOn((*vertex)->getGlobalIndex());
+    for (auto& face : sMesh) {
+      std::vector<StuntDouble*> vertexSDs = face.getVertices();
+      for (auto* vertex : vertexSDs) {
+        if (vertex != NULL) {
+          ssResult.bitsets_[STUNTDOUBLE].setBitOn(vertex->getGlobalIndex());
         }
       }
     }
     surfaceArea_ = surfaceMesh_->getArea();
-#else
-    snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-             "HullFinder : Hull calculation is not possible without libqhull.\n"
-             "\tPlease rebuild OpenMD with qhull enabled.");
-    painCave.severity = OPENMD_ERROR;
-    painCave.isFatal  = 1;
-    simError();
-#endif
-
-    return ssResult;
-  }
-
-  SelectionSet HullFinder::findHull(int) {
-    SelectionSet ssResult(nObjects_);
-#ifdef HAVE_QHULL
-    surfaceMesh_->computeHull(localSites_);
-    std::vector<Triangle> sMesh = surfaceMesh_->getMesh();
-    // Loop over the mesh faces
-    std::vector<Triangle>::iterator face;
-    std::vector<StuntDouble*>::iterator vertex;
-
-    // This will work in parallel because the triangles returned by the mesh
-    // have a NULL stuntDouble if this processor doesn't own the
-
-    for (face = sMesh.begin(); face != sMesh.end(); ++face) {
-      Triangle thisTriangle               = *face;
-      std::vector<StuntDouble*> vertexSDs = thisTriangle.getVertices();
-      for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex) {
-        if ((*vertex) != NULL) {
-          ssResult.bitsets_[STUNTDOUBLE].setBitOn((*vertex)->getGlobalIndex());
-        }
-      }
-    }
-    surfaceArea_ = surfaceMesh_->getArea();
-    volume_      = surfaceMesh_->getVolume();
-
+    if (computeVolume) volume_ = surfaceMesh_->getVolume();
 #else
     snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
              "HullFinder : Hull calculation is not possible without libqhull.\n"
