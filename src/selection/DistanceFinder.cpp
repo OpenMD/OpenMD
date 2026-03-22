@@ -117,136 +117,31 @@ namespace OpenMD {
     }
   }
 
-  SelectionSet DistanceFinder::find(const SelectionSet& bs, RealType distance) {
-    StuntDouble* center;
-    Vector3d centerPos;
-    Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    SelectionSet bsResult(nObjects_);
-    assert(bsResult.size() == bs.size());
-
-#ifdef IS_MPI
-    int mol;
-    int proc;
-    RealType data[3];
-    int worldRank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
-#endif
-
-    for (unsigned int j = 0; j < stuntdoubles_.size(); ++j) {
-      if (stuntdoubles_[j] != NULL) {
-        if (stuntdoubles_[j]->isRigidBody()) {
-          RigidBody* rb = static_cast<RigidBody*>(stuntdoubles_[j]);
-          rb->updateAtoms();
-        }
-      }
-    }
-
-    SelectionSet bsTemp = bs;
-    bsTemp              = bsTemp.parallelReduce();
-
-    for (size_t i = 0; i < bsTemp.bitsets_[STUNTDOUBLE].size(); ++i) {
-      if (bsTemp.bitsets_[STUNTDOUBLE][i]) {
-#ifdef IS_MPI
-
-        // Now, if we own stuntdouble i, we can use the position, but in
-        // parallel, we'll need to let everyone else know what that
-        // position is!
-
-        mol  = info_->getGlobalMolMembership(i);
-        proc = info_->getMolToProc(mol);
-
-        if (proc == worldRank) {
-          center    = stuntdoubles_[i];
-          centerPos = center->getPos();
-          data[0]   = centerPos.x();
-          data[1]   = centerPos.y();
-          data[2]   = centerPos.z();
-          MPI_Bcast(data, 3, MPI_REALTYPE, proc, MPI_COMM_WORLD);
-        } else {
-          MPI_Bcast(data, 3, MPI_REALTYPE, proc, MPI_COMM_WORLD);
-          centerPos = Vector3d(data);
-        }
-#else
-        center    = stuntdoubles_[i];
-        centerPos = center->getPos();
-#endif
-        for (size_t j = 0; j < molecules_.size(); ++j) {
-          if (molecules_[j] != NULL) {
-            Vector3d r = centerPos - molecules_[j]->getCom();
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) {
-              bsResult.bitsets_[MOLECULE].setBitOn(j);
-            }
-          }
-        }
-        for (size_t j = 0; j < stuntdoubles_.size(); ++j) {
-          if (stuntdoubles_[j] != NULL) {
-            Vector3d r = centerPos - stuntdoubles_[j]->getPos();
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) {
-              bsResult.bitsets_[STUNTDOUBLE].setBitOn(j);
-            }
-          }
-        }
-        for (size_t j = 0; j < bonds_.size(); ++j) {
-          if (bonds_[j] != NULL) {
-            Vector3d loc = bonds_[j]->getAtomA()->getPos();
-            loc += bonds_[j]->getAtomB()->getPos();
-            loc        = loc / 2.0;
-            Vector3d r = centerPos - loc;
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) { bsResult.bitsets_[BOND].setBitOn(j); }
-          }
-        }
-        for (size_t j = 0; j < bends_.size(); ++j) {
-          if (bends_[j] != NULL) {
-            Vector3d loc = bends_[j]->getAtomA()->getPos();
-            loc += bends_[j]->getAtomB()->getPos();
-            loc += bends_[j]->getAtomC()->getPos();
-            loc        = loc / 3.0;
-            Vector3d r = centerPos - loc;
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) { bsResult.bitsets_[BEND].setBitOn(j); }
-          }
-        }
-        for (size_t j = 0; j < torsions_.size(); ++j) {
-          if (torsions_[j] != NULL) {
-            Vector3d loc = torsions_[j]->getAtomA()->getPos();
-            loc += torsions_[j]->getAtomB()->getPos();
-            loc += torsions_[j]->getAtomC()->getPos();
-            loc += torsions_[j]->getAtomD()->getPos();
-            loc        = loc / 4.0;
-            Vector3d r = centerPos - loc;
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) {
-              bsResult.bitsets_[TORSION].setBitOn(j);
-            }
-          }
-        }
-        for (size_t j = 0; j < inversions_.size(); ++j) {
-          if (inversions_[j] != NULL) {
-            Vector3d loc = inversions_[j]->getAtomA()->getPos();
-            loc += inversions_[j]->getAtomB()->getPos();
-            loc += inversions_[j]->getAtomC()->getPos();
-            loc += inversions_[j]->getAtomD()->getPos();
-            loc        = loc / 4.0;
-            Vector3d r = centerPos - loc;
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) {
-              bsResult.bitsets_[INVERSION].setBitOn(j);
-            }
-          }
-        }
-      }
-    }
-    return bsResult;
+  SelectionSet DistanceFinder::find(const SelectionSet& bs,
+                                    RealType distance) {
+    return findImpl(bs, distance, -1);
   }
 
   SelectionSet DistanceFinder::find(const SelectionSet& bs, RealType distance,
                                     int frame) {
-    StuntDouble* center;
-    Vector3d centerPos;
-    Snapshot* currSnapshot = info_->getSnapshotManager()->getSnapshot(frame);
+    return findImpl(bs, distance, frame);
+  }
+
+  SelectionSet DistanceFinder::findImpl(const SelectionSet& bs,
+                                        RealType distance, int frame) {
+    const bool useCurrent = (frame < 0);
+    Snapshot* currSnapshot = useCurrent
+      ? info_->getSnapshotManager()->getCurrentSnapshot()
+      : info_->getSnapshotManager()->getSnapshot(frame);
+
+    // Position-retrieval helpers that dispatch on frame
+    auto getPos = [useCurrent, frame](StuntDouble* sd) -> Vector3d {
+      return useCurrent ? sd->getPos() : sd->getPos(frame);
+    };
+    auto getCom = [useCurrent, frame](Molecule* mol) -> Vector3d {
+      return useCurrent ? mol->getCom() : mol->getCom(frame);
+    };
+
     SelectionSet bsResult(nObjects_);
     assert(bsResult.size() == bs.size());
 
@@ -262,106 +157,102 @@ namespace OpenMD {
       if (stuntdoubles_[j] != NULL) {
         if (stuntdoubles_[j]->isRigidBody()) {
           RigidBody* rb = static_cast<RigidBody*>(stuntdoubles_[j]);
-          rb->updateAtoms(frame);
+          useCurrent ? rb->updateAtoms() : rb->updateAtoms(frame);
         }
       }
     }
+
+    // Helper: check if pos is within distance of centerPos (min-image)
+    // and set the bit if so.
+    auto checkDistance = [&](const Vector3d& centerPos, const Vector3d& pos,
+			     OpenMDBitSet& bits, size_t idx) {
+      Vector3d r = centerPos - pos;
+      currSnapshot->wrapVector(r);
+      if (r.length() <= distance) { bits.setBitOn(idx); }
+    };
 
     SelectionSet bsTemp = bs;
     bsTemp              = bsTemp.parallelReduce();
 
     for (size_t i = 0; i < bsTemp.bitsets_[STUNTDOUBLE].size(); ++i) {
-      if (bsTemp.bitsets_[STUNTDOUBLE][i]) {
-        // Now, if we own stuntdouble i, we can use the position, but in
-        // parallel, we'll need to let everyone else know what that
-        // position is!
+      if (!bsTemp.bitsets_[STUNTDOUBLE][i]) continue;
+
+      Vector3d centerPos;
 
 #ifdef IS_MPI
-        mol  = info_->getGlobalMolMembership(i);
-        proc = info_->getMolToProc(mol);
+      mol  = info_->getGlobalMolMembership(i);
+      proc = info_->getMolToProc(mol);
 
-        if (proc == worldRank) {
-          center    = stuntdoubles_[i];
-          centerPos = center->getPos(frame);
-          data[0]   = centerPos.x();
-          data[1]   = centerPos.y();
-          data[2]   = centerPos.z();
-          MPI_Bcast(data, 3, MPI_REALTYPE, proc, MPI_COMM_WORLD);
-        } else {
-          MPI_Bcast(data, 3, MPI_REALTYPE, proc, MPI_COMM_WORLD);
-          centerPos = Vector3d(data);
-        }
+      if (proc == worldRank) {
+        centerPos = getPos(stuntdoubles_[i]);
+        data[0]   = centerPos.x();
+        data[1]   = centerPos.y();
+        data[2]   = centerPos.z();
+        MPI_Bcast(data, 3, MPI_REALTYPE, proc, MPI_COMM_WORLD);
+      } else {
+        MPI_Bcast(data, 3, MPI_REALTYPE, proc, MPI_COMM_WORLD);
+        centerPos = Vector3d(data);
+      }
 #else
-        center    = stuntdoubles_[i];
-        centerPos = center->getPos(frame);
+      centerPos = getPos(stuntdoubles_[i]);
 #endif
-        for (size_t j = 0; j < molecules_.size(); ++j) {
-          if (molecules_[j] != NULL) {
-            Vector3d r = centerPos - molecules_[j]->getCom(frame);
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) {
-              bsResult.bitsets_[MOLECULE].setBitOn(j);
-            }
-          }
-        }
 
-        for (size_t j = 0; j < stuntdoubles_.size(); ++j) {
-          if (stuntdoubles_[j] != NULL) {
-            Vector3d r = centerPos - stuntdoubles_[j]->getPos(frame);
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) {
-              bsResult.bitsets_[STUNTDOUBLE].setBitOn(j);
-            }
-          }
+      // Molecules
+      for (size_t j = 0; j < molecules_.size(); ++j) {
+        if (molecules_[j] != NULL)
+          checkDistance(centerPos, getCom(molecules_[j]),
+			bsResult.bitsets_[MOLECULE], j);
+      }
+
+      // StuntDoubles (atoms and rigid bodies)
+      for (size_t j = 0; j < stuntdoubles_.size(); ++j) {
+        if (stuntdoubles_[j] != NULL)
+          checkDistance(centerPos, getPos(stuntdoubles_[j]),
+			bsResult.bitsets_[STUNTDOUBLE], j);
+      }
+
+      // Bonds (midpoint of two atoms)
+      for (size_t j = 0; j < bonds_.size(); ++j) {
+        if (bonds_[j] != NULL) {
+          Vector3d loc = getPos(bonds_[j]->getAtomA())
+	    + getPos(bonds_[j]->getAtomB());
+          checkDistance(centerPos, loc / 2.0,
+			bsResult.bitsets_[BOND], j);
         }
-        for (size_t j = 0; j < bonds_.size(); ++j) {
-          if (bonds_[j] != NULL) {
-            Vector3d loc = bonds_[j]->getAtomA()->getPos(frame);
-            loc += bonds_[j]->getAtomB()->getPos(frame);
-            loc        = loc / 2.0;
-            Vector3d r = centerPos - loc;
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) { bsResult.bitsets_[BOND].setBitOn(j); }
-          }
+      }
+
+      // Bends (centroid of three atoms)
+      for (size_t j = 0; j < bends_.size(); ++j) {
+        if (bends_[j] != NULL) {
+          Vector3d loc = getPos(bends_[j]->getAtomA())
+	    + getPos(bends_[j]->getAtomB())
+	    + getPos(bends_[j]->getAtomC());
+          checkDistance(centerPos, loc / 3.0,
+			bsResult.bitsets_[BEND], j);
         }
-        for (size_t j = 0; j < bends_.size(); ++j) {
-          if (bends_[j] != NULL) {
-            Vector3d loc = bends_[j]->getAtomA()->getPos(frame);
-            loc += bends_[j]->getAtomB()->getPos(frame);
-            loc += bends_[j]->getAtomC()->getPos(frame);
-            loc        = loc / 3.0;
-            Vector3d r = centerPos - loc;
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) { bsResult.bitsets_[BEND].setBitOn(j); }
-          }
+      }
+
+      // Torsions (centroid of four atoms)
+      for (size_t j = 0; j < torsions_.size(); ++j) {
+        if (torsions_[j] != NULL) {
+          Vector3d loc = getPos(torsions_[j]->getAtomA())
+	    + getPos(torsions_[j]->getAtomB())
+	    + getPos(torsions_[j]->getAtomC())
+	    + getPos(torsions_[j]->getAtomD());
+          checkDistance(centerPos, loc / 4.0,
+			bsResult.bitsets_[TORSION], j);
         }
-        for (size_t j = 0; j < torsions_.size(); ++j) {
-          if (torsions_[j] != NULL) {
-            Vector3d loc = torsions_[j]->getAtomA()->getPos(frame);
-            loc += torsions_[j]->getAtomB()->getPos(frame);
-            loc += torsions_[j]->getAtomC()->getPos(frame);
-            loc += torsions_[j]->getAtomD()->getPos(frame);
-            loc        = loc / 4.0;
-            Vector3d r = centerPos - loc;
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) {
-              bsResult.bitsets_[TORSION].setBitOn(j);
-            }
-          }
-        }
-        for (size_t j = 0; j < inversions_.size(); ++j) {
-          if (inversions_[j] != NULL) {
-            Vector3d loc = inversions_[j]->getAtomA()->getPos(frame);
-            loc += inversions_[j]->getAtomB()->getPos(frame);
-            loc += inversions_[j]->getAtomC()->getPos(frame);
-            loc += inversions_[j]->getAtomD()->getPos(frame);
-            loc        = loc / 4.0;
-            Vector3d r = centerPos - loc;
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) {
-              bsResult.bitsets_[INVERSION].setBitOn(j);
-            }
-          }
+      }
+
+      // Inversions (centroid of four atoms)
+      for (size_t j = 0; j < inversions_.size(); ++j) {
+        if (inversions_[j] != NULL) {
+          Vector3d loc = getPos(inversions_[j]->getAtomA())
+	    + getPos(inversions_[j]->getAtomB())
+	    + getPos(inversions_[j]->getAtomC())
+	    + getPos(inversions_[j]->getAtomD());
+          checkDistance(centerPos, loc / 4.0,
+			bsResult.bitsets_[INVERSION], j);
         }
       }
     }

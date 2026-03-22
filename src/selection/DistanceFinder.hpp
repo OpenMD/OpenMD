@@ -65,6 +65,10 @@ namespace OpenMD {
     SelectionSet find(const SelectionSet& bs, RealType distance);
     SelectionSet find(const SelectionSet& bs, RealType distance, int frame);
 
+  private:
+    // Unified implementation. frame < 0 means use the current snapshot.
+    SelectionSet findImpl(const SelectionSet& bs, RealType distance, int frame);
+
     SimInfo* info_ {nullptr};
     std::vector<StuntDouble*> stuntdoubles_;
     std::vector<Bond*> bonds_;

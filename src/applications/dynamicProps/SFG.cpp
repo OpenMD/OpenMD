@@ -63,6 +63,10 @@ extern "C" {
 #include <cblas.h>
 #endif
 
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
+
 namespace OpenMD {
 
   // ℏ in cm⁻¹·ps  (= ℏ / (hc × 100) × 10¹²)
@@ -272,6 +276,97 @@ namespace OpenMD {
 
     progressBar_->clear();
 
+#if defined(_OPENMP)
+    // -----------------------------------------------------------------
+    // OpenMP parallel window loop.
+    //
+    // Each thread accumulates into its own local TCF vectors, which are
+    // merged into the shared tcf_ssp_/ppp_/sps_ at the end.  All per-
+    // window state (F, refFreqs, fd0, fdt) is already thread-local.
+    // The propagateF scratch (Hbuf, Vbuf, etc.) is thread_local static.
+    // allFrames_ is read-only and shared.
+    // -----------------------------------------------------------------
+    int completedWindows = 0;
+
+#pragma omp parallel
+    {
+      // Per-thread TCF accumulators
+      std::vector<std::complex<double>> loc_ssp(ncor, czero);
+      std::vector<std::complex<double>> loc_ppp(ncor, czero);
+      std::vector<std::complex<double>> loc_sps(ncor, czero);
+
+#pragma omp for schedule(dynamic)
+      for (int iwin = 0; iwin < navg_; ++iwin) {
+        int istart = nStart_ + iwin * nStride_;
+        if (istart >= nFrames_) continue;
+
+        const FrameData& fd0raw = allFrames_[istart];
+        int N = fd0raw.N;
+        if (N == 0) continue;
+
+        const std::vector<int>& refIDs = fd0raw.globalIDs;
+
+        std::vector<RealType> refFreqs(N);
+        for (int i = 0; i < N; ++i)
+          refFreqs[i] = fd0raw.H(i, i);
+
+        // F = identity
+        std::vector<std::complex<double>> F(N * N, czero);
+        for (int i = 0; i < N; ++i) F[i*N+i] = std::complex<double>(1.0, 0.0);
+
+        FrameData fd0;
+        remapFrame(fd0raw, refIDs, refFreqs, fd0);
+
+        for (int tt = 0; tt < ncor; ++tt) {
+          int iframe = istart + tt;
+          if (iframe >= nFrames_) break;
+
+          FrameData fdt;
+          if (!remapFrame(allFrames_[iframe], refIDs, refFreqs, fdt))
+            break;
+
+          for (int i = 0; i < N; ++i) {
+            auto it = allFrames_[iframe].idToIndex.find(refIDs[i]);
+            if (it != allFrames_[iframe].idToIndex.end())
+              refFreqs[i] = allFrames_[iframe].H(it->second, it->second);
+          }
+
+          if (tt > 0)
+            propagateF(F, fdt.H, dt_ps, N);
+
+          RealType exptc = (T1_ps_ > 0.0)
+            ? std::exp(-static_cast<RealType>(tt) * dt_ps / (2.0 * T1_ps_))
+            : 1.0;
+
+          accumulateTCF(tt, F, fd0, fdt, N, exptc,
+                        loc_ssp, loc_ppp, loc_sps);
+        }
+
+        // Progress update (atomic to avoid garbled output)
+#pragma omp atomic
+        completedWindows++;
+
+        if (omp_get_thread_num() == 0) {
+          progressBar_->setStatus(completedWindows, navg_);
+          progressBar_->update();
+        }
+      }
+
+      // Merge per-thread accumulators into shared TCF vectors
+#pragma omp critical
+      {
+        for (int tt = 0; tt < ncor; ++tt) {
+          tcf_ssp_[tt] += loc_ssp[tt];
+          tcf_ppp_[tt] += loc_ppp[tt];
+          tcf_sps_[tt] += loc_sps[tt];
+        }
+      }
+    }  // end omp parallel
+
+#else
+    // -----------------------------------------------------------------
+    // Serial fallback (no OpenMP).
+    // -----------------------------------------------------------------
     for (int iwin = 0; iwin < navg_; ++iwin) {
       int istart = nStart_ + iwin * nStride_;
       if (istart >= nFrames_) break;
@@ -283,14 +378,8 @@ namespace OpenMD {
       int N = fd0raw.N;
       if (N == 0) continue;
 
-      // Fix the atom set for this entire window at the origin frame's
-      // selection. As molecules diffuse across the z-boundary, remapFrame()
-      // maps every subsequent frame onto this fixed set so F stays valid.
       const std::vector<int>& refIDs = fd0raw.globalIDs;
 
-      // Seed reference frequencies from the origin frame's shifted diagonal.
-      // Updated each lag step so atoms that temporarily leave the selection
-      // get a fresh fallback frequency when they return.
       std::vector<RealType> refFreqs(N);
       for (int i = 0; i < N; ++i)
         refFreqs[i] = fd0raw.H(i, i);
@@ -308,18 +397,14 @@ namespace OpenMD {
 
         FrameData fdt;
         if (!remapFrame(allFrames_[iframe], refIDs, refFreqs, fdt))
-          break;  // too many atoms missing; abandon this window
+          break;
 
-        // Update refFreqs for atoms present in this frame.
         for (int i = 0; i < N; ++i) {
           auto it = allFrames_[iframe].idToIndex.find(refIDs[i]);
           if (it != allFrames_[iframe].idToIndex.end())
             refFreqs[i] = allFrames_[iframe].H(it->second, it->second);
         }
 
-        // Propagate F using H at the current frame (matches MultiSpec:
-        // readHf advances to current frame, moveF() uses it, then calcSFG
-        // accumulates).
         if (tt > 0)
           propagateF(F, fdt.H, dt_ps, N);
 
@@ -327,9 +412,11 @@ namespace OpenMD {
           ? std::exp(-static_cast<RealType>(tt) * dt_ps / (2.0 * T1_ps_))
           : 1.0;
 
-        accumulateTCF(tt, F, fd0, fdt, N, exptc);
+        accumulateTCF(tt, F, fd0, fdt, N, exptc,
+                      tcf_ssp_, tcf_ppp_, tcf_sps_);
       }
     }
+#endif
 
     // Normalize by number of windows
     if (navg_ > 0) {
@@ -620,6 +707,7 @@ namespace OpenMD {
     thread_local std::vector<double> work_d;
     thread_local std::vector<int>    iwork_d;
     thread_local std::vector<double> Fr, Fi, Tr, Ti;
+    thread_local int lastN = 0;  // tracks when workspace query is needed
 
     const int N2 = N * N;
     if (static_cast<int>(Hbuf.size()) < N2) {
@@ -633,21 +721,21 @@ namespace OpenMD {
     //                          Vbuf (eigenvectors row-major)
     // -----------------------------------------------------------------------
 #if defined(HAVE_LAPACK)
-    // Copy H into Hbuf ROW-MAJOR for dsyevd_ with LAPACK_ROW_MAJOR.
-    // Note: dsyevd_ is the Fortran interface which expects column-major,
-    // but for symmetric matrices row-major == column-major (A = A^T).
-    // dsyevd_ returns eigenvectors in COLUMN-major layout.
-    // We then transpose to get row-major Vbuf.
-    for (int i = 0; i < N; ++i)
-      for (int j = 0; j < N; ++j)
-        Hbuf[i + j*N] = static_cast<double>(H(i, j));
-
-    // Workspace query
+    // Copy H's contiguous row-major storage into Hbuf.
+    // H is symmetric so row-major == column-major for dsyevd_.
+    // dsyevd_ will overwrite Hbuf with eigenvectors (column-major).
     {
+      const RealType* src = H.getArrayPointer();
+      for (int i = 0; i < N2; ++i)
+        Hbuf[i] = static_cast<double>(src[i]);
+    }
+
+    // Workspace query — only needed when N changes.
+    if (N != lastN) {
       int lwork_q = -1, liwork_q = -1, info_q = 0;
       double  wq  = 0.0;
       int     wiq = 0;
-      std::vector<double> Htmp(Hbuf.begin(), Hbuf.begin() + N*N);
+      std::vector<double> Htmp(N2, 0.0);
       std::vector<double> Wtmp(N, 0.0);
       dsyevd_("V", "U", &N, Htmp.data(), &N, Wtmp.data(),
               &wq, &lwork_q, &wiq, &liwork_q, &info_q);
@@ -655,6 +743,7 @@ namespace OpenMD {
       int liw = wiq;
       if (static_cast<int>(work_d.size())  < lw)  work_d.resize(lw);
       if (static_cast<int>(iwork_d.size()) < liw) iwork_d.resize(liw);
+      lastN = N;
     }
 
     {
@@ -823,7 +912,10 @@ namespace OpenMD {
 			  const std::vector<std::complex<double>>& F,
 			  const FrameData& fd0,
 			  const FrameData& fdt,
-			  int N, double exptc) {
+			  int N, double exptc,
+			  std::vector<std::complex<double>>& tgt_ssp,
+			  std::vector<std::complex<double>>& tgt_ppp,
+			  std::vector<std::complex<double>>& tgt_sps) {
 
     using cdbl = std::complex<double>;
     const int n  = privilegedAxis_;   // interface normal axis index
@@ -854,18 +946,18 @@ namespace OpenMD {
     cdbl decay(exptc, 0.0);
 
     // SSP: average chi2_{s1,s1,n} and chi2_{s2,s2,n}
-    tcf_ssp_[tt] += 0.5 * (dot_alpha(s1, s1, Fmu_n)
-			   + dot_alpha(s2, s2, Fmu_n)) * decay;
+    tgt_ssp[tt] += 0.5 * (dot_alpha(s1, s1, Fmu_n)
+			  + dot_alpha(s2, s2, Fmu_n)) * decay;
 
     // SPS: average s1 and s2 channels
-    tcf_sps_[tt] += 0.5 * (dot_alpha(s1, n, Fmu_s1)
-			   + dot_alpha(s2, n, Fmu_s2)) * decay;
+    tgt_sps[tt] += 0.5 * (dot_alpha(s1, n, Fmu_s1)
+			  + dot_alpha(s2, n, Fmu_s2)) * decay;
 
     // PPP: near-normal approximation (Buch et al. 2007)
     // MultiSpec: pppt += (-0.5*cxxz - 0.5*cyyz + czzz) * exptc
-    tcf_ppp_[tt] += (-0.5 * dot_alpha(s1, s1, Fmu_n)
-		     - 0.5 * dot_alpha(s2, s2, Fmu_n)
-		     + dot_alpha(n,  n,  Fmu_n)) * decay;
+    tgt_ppp[tt] += (-0.5 * dot_alpha(s1, s1, Fmu_n)
+		    - 0.5 * dot_alpha(s2, s2, Fmu_n)
+		    + dot_alpha(n,  n,  Fmu_n)) * decay;
   }
 
   // =========================================================================

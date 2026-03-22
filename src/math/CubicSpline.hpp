@@ -78,8 +78,7 @@ namespace OpenMD {
 
     bool isUniform;
     bool generated;
-    RealType dx, dt;
-    int n, j;
+    RealType dx;
     std::vector<RealType> x_;
     std::vector<RealType> y_;
     std::vector<RealType> b;

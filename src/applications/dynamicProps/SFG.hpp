@@ -243,23 +243,29 @@ namespace OpenMD {
                     RealType dt_ps, int N);
 
     /**
-     * Accumulate one lag point into tcf_ssp_, tcf_ppp_, tcf_sps_.
+     * Accumulate one lag point into the provided TCF vectors.
      *
      * For each polarization element pqr:
      *   C_pqr(t) += Σᵢ α_pq,i(t) * [F · μ_r(0)]ᵢ  × exp(−t/2T1)
      *
-     * @param tt     lag index [0 .. ncor_-1]
-     * @param F      current N×N propagator (row-major complex vector)
-     * @param fd0    FrameData at t=0  (μ₀ components)
-     * @param fdt    FrameData at t    (α components)
-     * @param N      system size
-     * @param exptc  T1 decay: exp(−tt·dt_ps / (2·T1_ps_)); 1.0 if T1=0
+     * @param tt      lag index [0 .. ncor_-1]
+     * @param F       current N×N propagator (row-major complex vector)
+     * @param fd0     FrameData at t=0  (μ₀ components)
+     * @param fdt     FrameData at t    (α components)
+     * @param N       system size
+     * @param exptc   T1 decay: exp(−tt·dt_ps / (2·T1_ps_)); 1.0 if T1=0
+     * @param tgt_ssp target SSP TCF vector to accumulate into
+     * @param tgt_ppp target PPP TCF vector to accumulate into
+     * @param tgt_sps target SPS TCF vector to accumulate into
      */
     void accumulateTCF(int tt,
                        const std::vector<std::complex<double>>& F,
                        const FrameData& fd0,
                        const FrameData& fdt,
-                       int N, RealType exptc);
+                       int N, RealType exptc,
+                       std::vector<std::complex<double>>& tgt_ssp,
+                       std::vector<std::complex<double>>& tgt_ppp,
+                       std::vector<std::complex<double>>& tgt_sps);
 
     /**
      * TDC coupling between sites i and j.

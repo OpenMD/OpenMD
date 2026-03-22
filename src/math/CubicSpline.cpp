@@ -92,7 +92,7 @@ namespace OpenMD {
 
     // make sure the sizes match
 
-    n = x_.size();
+    int n = x_.size();
     b.resize(n);
     c.resize(n);
     d.resize(n);
@@ -154,18 +154,18 @@ namespace OpenMD {
     fp1 = c[0] - b[0] * (c[1] - c[0]) / (b[0] + b[1]);
     if (n > 3)
       fp1 = fp1 +
-            b[0] *
-                ((b[0] + b[1]) * (c[2] - c[1]) / (b[1] + b[2]) - c[1] + c[0]) /
-                (x_[3] - x_[0]);
+	b[0] *
+	((b[0] + b[1]) * (c[2] - c[1]) / (b[1] + b[2]) - c[1] + c[0]) /
+	(x_[3] - x_[0]);
 
     fpn = c[n - 2] + b[n - 2] * (c[n - 2] - c[n - 3]) / (b[n - 3] + b[n - 2]);
 
     if (n > 3)
       fpn = fpn + b[n - 2] *
-                      (c[n - 2] - c[n - 3] -
-                       (b[n - 3] + b[n - 2]) * (c[n - 3] - c[n - 4]) /
-                           (b[n - 3] + b[n - 4])) /
-                      (x_[n - 1] - x_[n - 4]);
+	(c[n - 2] - c[n - 3] -
+	 (b[n - 3] + b[n - 2]) * (c[n - 3] - c[n - 4]) /
+	 (b[n - 3] + b[n - 4])) /
+	(x_[n - 1] - x_[n - 4]);
 
     // Calculate the right hand side and store it in C.
 
@@ -204,24 +204,16 @@ namespace OpenMD {
   }
 
   RealType CubicSpline::getValueAt(const RealType& t) {
-    // Evaluate the spline at t using coefficients
-    //
-    // Input parameters
-    //   t = point where spline is to be evaluated.
-    // Output:
-    //   value of spline at t.
-
     if (!generated) generate();
 
-    //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
-    //  to t.
+    int n = x_.size();
+    int j;
+    RealType dt;
 
     if (isUniform) {
       j = int((t - x_[0]) * dx);
-
     } else {
       j = n - 1;
-
       for (int i = 0; i < n; i++) {
         if (t < x_[i]) {
           j = i - 1;
@@ -231,32 +223,22 @@ namespace OpenMD {
     }
 
     j = std::clamp(j, 0, n - 1);
-
-    //  Evaluate the cubic polynomial.
 
     dt = t - x_[j];
     return y_[j] + dt * (b[j] + dt * (c[j] + dt * d[j]));
   }
 
   void CubicSpline::getValueAt(const RealType& t, RealType& v) {
-    // Evaluate the spline at t using coefficients
-    //
-    // Input parameters
-    //   t = point where spline is to be evaluated.
-    // Output:
-    //   value of spline at t.
-
     if (!generated) generate();
 
-    //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
-    //  to t.
+    int n = x_.size();
+    int j;
+    RealType dt;
 
     if (isUniform) {
       j = int((t - x_[0]) * dx);
-
     } else {
       j = n - 1;
-
       for (int i = 0; i < n; i++) {
         if (t < x_[i]) {
           j = i - 1;
@@ -266,8 +248,6 @@ namespace OpenMD {
     }
 
     j = std::clamp(j, 0, n - 1);
-
-    //  Evaluate the cubic polynomial.
 
     dt = t - x_[j];
     v  = y_[j] + dt * (b[j] + dt * (c[j] + dt * d[j]));
@@ -289,22 +269,16 @@ namespace OpenMD {
 
   void CubicSpline::getValueAndDerivativeAt(const RealType& t, RealType& v,
                                             RealType& dv) {
-    // Evaluate the spline and first derivative at t using coefficients
-    //
-    // Input parameters
-    //   t = point where spline is to be evaluated.
-
     if (!generated) generate();
 
-    //  Find the interval ( x[j], x[j+1] ) that contains or is nearest
-    //  to t.
+    int n = x_.size();
+    int j;
+    RealType dt;
 
     if (isUniform) {
       j = int((t - x_[0]) * dx);
-
     } else {
       j = n - 1;
-
       for (int i = 0; i < n; i++) {
         if (t < x_[i]) {
           j = i - 1;
@@ -315,16 +289,13 @@ namespace OpenMD {
 
     j = std::clamp(j, 0, n - 1);
 
-    //  Evaluate the cubic polynomial.
-
     dt = t - x_[j];
-
     v  = y_[j] + dt * (b[j] + dt * (c[j] + dt * d[j]));
     dv = b[j] + dt * (2.0 * c[j] + 3.0 * dt * d[j]);
   }
 
   std::vector<int> CubicSpline::sort_permutation(
-      const std::vector<double>& v) const {
+						 const std::vector<double>& v) const {
     std::vector<int> p(v.size());
 
     std::iota(p.begin(), p.end(), 0);
@@ -334,7 +305,7 @@ namespace OpenMD {
   }
 
   std::vector<RealType> CubicSpline::apply_permutation(
-      const std::vector<RealType>& v, const std::vector<int>& p) const {
+						       const std::vector<RealType>& v, const std::vector<int>& p) const {
     std::size_t n = p.size();
     std::vector<RealType> sorted_vec(n);
 
