@@ -467,6 +467,21 @@ else()
   message(STATUS "LAPACK/BLAS not found — SFG will use the JAMA eigensolver fallback")
 endif()
 
+if(APPLE)
+  execute_process(COMMAND brew --prefix libomp
+    OUTPUT_VARIABLE LIBOMP_PREFIX
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(LIBOMP_PREFIX)
+    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -I${LIBOMP_PREFIX}/include")
+    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I${LIBOMP_PREFIX}/include")
+    set(OpenMP_C_LIB_NAMES "omp")
+    set(OpenMP_CXX_LIB_NAMES "omp")
+    set(OpenMP_omp_LIBRARY "${LIBOMP_PREFIX}/lib/libomp.dylib")
+  endif()
+endif()
+
+find_package(OpenMP)
+
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
@@ -999,10 +1014,14 @@ add_executable(Dump2XYZ ${DUMP2XYZSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(Dump2XYZ openmd_single openmd_core openmd_single
                       openmd_core)
 add_executable(DynamicProps ${DYNAMICPROPSSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(DynamicProps openmd_single openmd_core openmd_single
-                      openmd_core)
+target_link_libraries(DynamicProps PRIVATE openmd_single openmd_core 
+                      openmd_single openmd_core)
+if(OpenMP_CXX_FOUND)
+    target_compile_definitions(DynamicProps PRIVATE HAVE_OPENMP)
+    target_link_libraries(DynamicProps PRIVATE OpenMP::OpenMP_CXX)
+endif()
 if(LAPACK_FOUND AND BLAS_FOUND)
-  target_link_libraries(DynamicProps ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(DynamicProps PRIVATE ${LAPACK_BLAS_LIBRARIES})
   # Accelerate deprecated the legacy CBLAS interface in macOS 13.3.
   # -DACCELERATE_NEW_LAPACK opts into the updated headers that replace it.
   if(APPLE AND BLA_VENDOR STREQUAL "Apple")
