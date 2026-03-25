@@ -61,8 +61,8 @@ namespace OpenMD {
 
   /**
 
-      Computes eigenvalues and eigenvectors of a real (non-complex)
-      symmetric tridiagonal matrix by the QL method.
+     Computes eigenvalues and eigenvectors of a real (non-complex)
+     symmetric tridiagonal matrix by the QL method.
   **/
 
   template<typename Real>
@@ -91,16 +91,16 @@ namespace OpenMD {
 
       Real f    = 0.0;
       Real tst1 = 0.0;
-      Real eps  = pow(2.0, -52.0);
+      Real eps  = std::pow(2.0, -52.0);
       for (int l = 0; l < n; l++) {
         // Find small subdiagonal element
 
-        tst1  = max(tst1, abs(d(l)) + abs(e(l)));
+        tst1  = std::max(tst1, std::abs(d(l)) + std::abs(e(l)));
         int m = l;
 
         // Original while-loop from Java code
         while (m < n) {
-          if (abs(e(m)) <= eps * tst1) { break; }
+          if (std::abs(e(m)) <= eps * tst1) { break; }
           m++;
         }
 
@@ -116,7 +116,7 @@ namespace OpenMD {
 
             Real g = d(l);
             Real p = (d(l + 1) - g) / (2.0 * e(l));
-            Real r = hypot(p, 1.0);
+            Real r = std::hypot(p, 1.0);
             if (p < 0) { r = -r; }
             d(l)     = e(l) / (p + r);
             d(l + 1) = e(l) * (p + r);
@@ -142,7 +142,7 @@ namespace OpenMD {
               s2       = s;
               g        = c * e(i);
               h        = c * p;
-              r        = hypot(p, e(i));
+              r        = std::hypot(p, e(i));
               e(i + 1) = s * r;
               s        = e(i) / r;
               c        = p / r;
@@ -163,7 +163,7 @@ namespace OpenMD {
 
             // Check for convergence.
 
-          } while (abs(e(l)) > eps * tst1);
+          } while (std::abs(e(l)) > eps * tst1);
         }
         d(l) = d(l) + f;
         e(l) = 0.0;
@@ -197,7 +197,7 @@ namespace OpenMD {
 
         @param diagonals the diagonal elements of the input matrix.
         @param subdiagonals the subdiagonal elements of the input matrix in its
-                 last n-1 positions.  subdiagonals[0] is arbitrary.
+	last n-1 positions.  subdiagonals[0] is arbitrary.
     */
     RealSymmetricTridiagonal(const DynamicVector<Real>& diagonals,
                              const DynamicVector<Real>& subdiagonals) {

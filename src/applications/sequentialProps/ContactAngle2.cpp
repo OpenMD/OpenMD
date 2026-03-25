@@ -118,7 +118,7 @@ namespace OpenMD {
       pos = sd->getPos() - com;
 
       // r goes from zero upwards
-      r = sqrt(pow(pos.x(), 2) + pow(pos.y(), 2));
+      r = std::sqrt(std::pow(pos.x(), 2) + std::pow(pos.y(), 2));
       // z is possibly symmetric around 0
       z = pos.z();
 
@@ -245,7 +245,8 @@ namespace OpenMD {
     center[0] = -((RealType)0.5) * coeff[1];
     center[1] = -((RealType)0.5) * coeff[2];
     RealType radius =
-        sqrt(fabs(center[0] * center[0] + center[1] * center[1] - coeff[0]));
+      std::sqrt(std::abs(center[0] * center[0] +
+			 center[1] * center[1] - coeff[0]));
 
     int i1;
     for (i1 = 0; i1 < 100; ++i1) {
@@ -271,17 +272,17 @@ namespace OpenMD {
       radius = lenAverage;
 
       Vector<RealType, 2> diff = center - current;
-      if (fabs(diff[0]) <= 1e-6 && fabs(diff[1]) <= 1e-6) { break; }
+      if (std::abs(diff[0]) <= 1e-6 && std::abs(diff[1]) <= 1e-6) { break; }
     }
 
     RealType zCen  = center[1];
     RealType rDrop = radius;
     RealType ca;
 
-    if (fabs(zCen) > rDrop) {
+    if (std::abs(zCen) > rDrop) {
       ca = 180.0;
     } else {
-      ca = 90.0 + asin(zCen / rDrop) * (180.0 / Constants::PI);
+      ca = 90.0 + std::asin(zCen / rDrop) * (180.0 / Constants::PI);
     }
 
     values_.push_back(ca);

@@ -2,11 +2,11 @@
 
 #include "math/SVD.hpp"
 
-using namespace OpenMD;
 using namespace JAMA;
+using namespace OpenMD;
 
-RealType RMSD::calculate_rmsd(std::vector<Vector3d> mov, Vector3d mov_com,
-                              Vector3d mov_to_ref) {
+RealType RMSD::calculate_rmsd(std::vector<Vector3d> mov, Vector3d& mov_com,
+                              Vector3d& mov_to_ref) {
   assert(mov.size() == ref_.size());
   int n;
   int n_vec = ref_.size();
@@ -73,13 +73,14 @@ RealType RMSD::calculate_rmsd(std::vector<Vector3d> mov, Vector3d mov_com,
   if (is_reflection) s(2) = -s(2);
 
   RealType rmsd_sq = (E0 - 2.0 * s.sum()) / (RealType)n_vec;
-  rmsd_sq          = max(rmsd_sq, RealType(0.0));
-  RealType rmsd    = sqrt(rmsd_sq);
+  rmsd_sq          = std::max(rmsd_sq, RealType(0.0));
+  RealType rmsd    = std::sqrt(rmsd_sq);
   return rmsd;
 }
 
 RotMat3x3d RMSD::optimal_superposition(std::vector<Vector3d> mov,
-                                       Vector3d mov_com, Vector3d mov_to_ref) {
+                                       Vector3d& mov_com,
+				       Vector3d& mov_to_ref) {
   assert(mov.size() == ref_.size());
   int n;
   int n_vec = ref_.size();

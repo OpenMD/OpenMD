@@ -8,8 +8,9 @@
 #include <cmath>
 // for abs() below
 
-using namespace OpenMD;
-using namespace std;
+using std::hypot;
+using OpenMD::DynamicRectMatrix;
+using OpenMD::DynamicVector;
 
 namespace JAMA {
   /** Singular Value Decomposition.
@@ -39,8 +40,8 @@ namespace JAMA {
     SVD(const DynamicRectMatrix<Real>& Arg) {
       m      = Arg.getNRow();
       n      = Arg.getNCol();
-      int nu = min(m, n);
-      s      = DynamicVector<Real>(min(m + 1, n));
+      int nu = std::min(m, n);
+      s      = DynamicVector<Real>(std::min(m + 1, n));
       U      = DynamicRectMatrix<Real>(m, nu, Real(0));
       V      = DynamicRectMatrix<Real>(n, n);
       DynamicVector<Real> e(n);
@@ -54,17 +55,17 @@ namespace JAMA {
       // Reduce A to bidiagonal form, storing the diagonal elements
       // in s and the super-diagonal elements in e.
 
-      int nct = min(m - 1, n);
-      int nrt = max(0, min(n - 2, m));
+      int nct = std::min(m - 1, n);
+      int nrt = std::max(0, std::min(n - 2, m));
 
-      for (k = 0; k < max(nct, nrt); k++) {
+      for (k = 0; k < std::max(nct, nrt); k++) {
         if (k < nct) {
           // Compute the transformation for the k-th column and
           // place the k-th diagonal in s(k).
           // Compute 2-norm of k-th column without under/overflow.
           s(k) = 0;
           for (i = k; i < m; i++) {
-            s(k) = hypot(s(k), A(i, k));
+            s(k) = std::hypot(s(k), A(i, k));
           }
           if (s(k) != 0.0) {
             if (A(k, k) < 0.0) { s(k) = -s(k); }
@@ -108,7 +109,7 @@ namespace JAMA {
           // Compute 2-norm without under/overflow.
           e(k) = 0;
           for (i = k + 1; i < n; i++) {
-            e(k) = hypot(e(k), e(i));
+            e(k) = std::hypot(e(k), e(i));
           }
           if (e(k) != 0.0) {
             if (e(k + 1) < 0.0) { e(k) = -e(k); }
@@ -149,7 +150,7 @@ namespace JAMA {
 
       // Set up the final bidiagonal matrix or order p.
 
-      int p = min(n, m + 1);
+      int p = std::min(n, m + 1);
       if (nct < n) { s(nct) = A(nct, nct); }
       if (m < p) { s(p - 1) = 0.0; }
       if (nrt + 1 < p) { e(nrt) = A(nrt, p - 1); }
@@ -219,7 +220,7 @@ namespace JAMA {
 
       int pp   = p - 1;
       int iter = 0;
-      Real eps(pow(2.0, -52.0));
+      Real eps(std::pow(2.0, -52.0));
       while (p > 0) {
         int k    = 0;
         int kase = 0;
@@ -238,7 +239,7 @@ namespace JAMA {
 
         for (k = p - 2; k >= -1; k--) {
           if (k == -1) { break; }
-          if (abs(e(k)) <= eps * (abs(s(k)) + abs(s(k + 1)))) {
+          if (std::abs(e(k)) <= eps * (std::abs(s(k)) + std::abs(s(k + 1)))) {
             e(k) = 0.0;
             break;
           }
@@ -249,9 +250,9 @@ namespace JAMA {
           int ks;
           for (ks = p - 1; ks >= k; ks--) {
             if (ks == k) { break; }
-            Real t((ks != p ? abs(e(ks)) : 0.) +
-                   (ks != k + 1 ? abs(e(ks - 1)) : 0.));
-            if (abs(s(ks)) <= eps * t) {
+            Real t((ks != p ? std::abs(e(ks)) : 0.) +
+                   (ks != k + 1 ? std::abs(e(ks - 1)) : 0.));
+            if (std::abs(s(ks)) <= eps * t) {
               s(ks) = 0.0;
               break;
             }
@@ -276,7 +277,7 @@ namespace JAMA {
           Real f(e(p - 2));
           e(p - 2) = 0.0;
           for (j = p - 2; j >= k; j--) {
-            Real t(hypot(s(j), f));
+            Real t(std::hypot(s(j), f));
             Real cs(s(j) / t);
             Real sn(f / t);
             s(j) = t;
@@ -300,7 +301,7 @@ namespace JAMA {
           Real f(e(k - 1));
           e(k - 1) = 0.0;
           for (j = k; j < p; j++) {
-            Real t(hypot(s(j), f));
+            Real t(std::hypot(s(j), f));
             Real cs(s(j) / t);
             Real sn(f / t);
             s(j) = t;
@@ -322,9 +323,11 @@ namespace JAMA {
           // Calculate the shift.
 
           Real scale =
-              max(max(max(max(abs(s(p - 1)), abs(s(p - 2))), abs(e(p - 2))),
-                      abs(s(k))),
-                  abs(e(k)));
+	    std::max(std::max(std::max(std::max(std::abs(s(p - 1)),
+						std::abs(s(p - 2))),
+				       std::abs(e(p - 2))),
+			      std::abs(s(k))),
+		     std::abs(e(k)));
           Real sp    = s(p - 1) / scale;
           Real spm1  = s(p - 2) / scale;
           Real epm1  = e(p - 2) / scale;
@@ -334,7 +337,7 @@ namespace JAMA {
           Real c     = (sp * epm1) * (sp * epm1);
           Real shift = 0.0;
           if ((b != 0.0) || (c != 0.0)) {
-            shift = sqrt(b * b + c);
+            shift = std::sqrt(b * b + c);
             if (b < 0.0) { shift = -shift; }
             shift = c / (b + shift);
           }
@@ -344,7 +347,7 @@ namespace JAMA {
           // Chase zeros.
 
           for (j = k; j < p - 1; j++) {
-            Real t  = hypot(f, g);
+            Real t  = std::hypot(f, g);
             Real cs = f / t;
             Real sn = g / t;
             if (j != k) { e(j - 1) = t; }
@@ -359,7 +362,7 @@ namespace JAMA {
                 V(i, j)     = t;
               }
             }
-            t        = hypot(f, g);
+            t        = std::hypot(f, g);
             cs       = f / t;
             sn       = g / t;
             s(j)     = t;
@@ -424,7 +427,7 @@ namespace JAMA {
     }
 
     void getU(DynamicRectMatrix<Real>& A) {
-      int minm = min(m + 1, n);
+      int minm = std::min(m + 1, n);
 
       A = DynamicRectMatrix<Real>(m, minm);
 
@@ -452,20 +455,20 @@ namespace JAMA {
       }
     }
 
-    /** Two norm  (max(S)) */
+    /** Two norm  (std::max(S)) */
     Real norm2() { return s(0); }
 
-    /** Two norm of condition number (max(S)/min(S)) */
-    Real cond() { return s(0) / s(min(m, n) - 1); }
+    /** Two norm of condition number (std::max(S)/std::min(S)) */
+    Real cond() { return s(0) / s(std::min(m, n) - 1); }
 
     /** Effective numerical matrix rank
         @return     Number of nonnegligible singular values.
     */
     int rank() {
-      Real eps = pow(2.0, -52.0);
-      Real tol = max(m, n) * s(0) * eps;
+      Real eps = std::pow(2.0, -52.0);
+      Real tol = std::max(m, n) * s(0) * eps;
       int r    = 0;
-      for (int i = 0; i < s.dim(); i++) {
+      for (int i = 0; i < s.size(); i++) {
         if (s(i) > tol) { r++; }
       }
       return r;
