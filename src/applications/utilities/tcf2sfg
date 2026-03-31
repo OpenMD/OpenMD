@@ -1,0 +1,256 @@
+#!@Python3_EXECUTABLE@
+"""
+tcf2sfg - Convert SFG time-correlation function files to spectra.
+
+Reads a .sfg.tcf file (as written by OpenMD's DynamicProps SFG module)
+and produces an SFG spectrum using the two-pass Hermitian FFT method
+(following MultiSpec's dofft.cpp).
+
+The Hermitian extension C(-t) = C*(t) ensures clean separation of
+absorptive (Im) and dispersive (Re) lineshapes with no phase mixing.
+
+Usage:
+    tcf2sfg <tcf_file> [options]
+
+Example:
+    tcf2sfg spce_sfg.tcf --polarization ssp --wAvg 3592 --T 300
+    tcf2sfg ice_sfg.tcf -p ssp --wAvg 3383 --T 223 --t_apod 500
+"""
+
+import argparse
+import sys
+import numpy as np
+
+
+def hermitian_fft(tcf, N_fft):
+    """Two-pass Hermitian FFT following MultiSpec's dofft.cpp.
+
+    Parameters
+    ----------
+    tcf : complex array, length N_corr
+        One-sided time correlation function C(t) for t >= 0.
+    N_fft : int
+        FFT size (must be >= 2 * len(tcf)).
+
+    Returns
+    -------
+    spectrum : complex array, length N_fft
+        Re = dispersive part, Im = absorptive part.
+    """
+    N_corr = len(tcf)
+    assert N_fft >= 2 * N_corr, \
+        f"N_fft ({N_fft}) must be >= 2*N_corr ({2*N_corr})"
+
+    # Pass 1: Re(spectrum) from Hermitian-extended C(t)
+    buf = np.zeros(N_fft, dtype=complex)
+    buf[:N_corr] = tcf
+    buf[N_fft - N_corr + 1:] = np.conj(tcf[1:][::-1])
+    fft1 = np.fft.fft(buf)
+    # Hermitian input -> output is real; take real part
+    re_spectrum = fft1.real.copy()
+
+    # Pass 2: Im(spectrum) from Hermitian-extended -i*C(t)
+    ic = -1j * tcf
+    buf[:] = 0.0
+    buf[:N_corr] = ic
+    buf[N_fft - N_corr + 1:] = np.conj(ic[1:][::-1])
+    fft2 = np.fft.fft(buf)
+    im_spectrum = fft2.real.copy()
+
+    return re_spectrum + 1j * im_spectrum
+
+
+def next_power_of_two(n):
+    """Round up to the next power of two."""
+    p = 1
+    while p < n:
+        p <<= 1
+    return p
+
+
+def parse_tcf_header(filename):
+    """Extract metadata from the TCF file header comments."""
+    info = {}
+    with open(filename, 'r') as f:
+        for line in f:
+            if not line.startswith('#'):
+                break
+            if 'navg' in line and 'ncor' in line:
+                parts = line.split()
+                for i, p in enumerate(parts):
+                    if p == 'navg':
+                        info['navg'] = int(parts[i + 2])
+                    if p == 'ncor':
+                        info['ncor'] = int(parts[i + 2])
+            if 'selection:' in line:
+                info['selection'] = line.split('selection:')[1].strip()
+    return info
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Convert SFG TCF file to spectrum using Hermitian FFT.')
+    parser.add_argument('tcf_file', help='Input .sfg.tcf file')
+    parser.add_argument('-o', '--output', default=None,
+                        help='Output .sfg file (default: replace .sfg.tcf '
+                             'with .sfg)')
+    parser.add_argument('-p', '--polarization', default='ssp',
+                        choices=['ssp', 'ppp', 'sps'],
+                        help='Polarization combination (default: ssp)')
+    parser.add_argument('--wAvg', type=float, required=True,
+                        help='Average frequency wAvg in cm-1 '
+                             '(from original .sfg header)')
+    parser.add_argument('--T', type=float, default=300.0,
+                        help='Temperature in K (default: 300)')
+    parser.add_argument('--t_apod', type=float, default=0.0,
+                        help='Apodization time constant in fs '
+                             '(0 = no apodization)')
+    parser.add_argument('--t_zerofill', type=float, default=0.0,
+                        help='Zero-fill duration in fs (0 = no zero-filling)')
+    parser.add_argument('--no_qcorr', action='store_true',
+                        help='Skip Bose-Einstein quantum correction')
+
+    args = parser.parse_args()
+
+    # Determine output filename
+    if args.output is None:
+        if args.tcf_file.endswith('_sfg.tcf'):
+            args.output = args.tcf_file.replace('_sfg.tcf', '.sfg')
+        elif args.tcf_file.endswith('.sfg.tcf'):
+            args.output = args.tcf_file.replace('.sfg.tcf', '.sfg')
+        else:
+            args.output = args.tcf_file + '.sfg'
+
+    # Read TCF file
+    # Format: t(ps) Re_ssp Im_ssp Re_ppp Im_ppp Re_sps Im_sps
+    data = np.loadtxt(args.tcf_file, comments='#')
+    t = data[:, 0]
+    N_corr = len(t)
+    dt_ps = t[1] - t[0] if N_corr > 1 else 0.002
+
+    # Select polarization columns
+    pol_cols = {'ssp': (1, 2), 'ppp': (3, 4), 'sps': (5, 6)}
+    re_col, im_col = pol_cols[args.polarization]
+    tcf = data[:, re_col] + 1j * data[:, im_col]
+
+    # Apply apodization
+    if args.t_apod > 0.0:
+        apod = np.exp(-t / (args.t_apod / 1000))
+        tcf = tcf * apod
+
+    # Determine FFT size: must be >= 2*N_corr for Hermitian extension
+    ps_to_invcm = 33.3564
+    N_zf = N_corr
+    if args.t_zerofill > 0.0:
+        N_zf = int(np.ceil(N_corr + (args.t_zerofill / 1000.0) / dt_ps))
+    N_zf = max(N_zf, 2 * N_corr)
+    N_fft = next_power_of_two(N_zf)
+
+    # Compute spectrum via Hermitian FFT
+    spectrum = hermitian_fft(tcf, N_fft)
+
+    # Normalize: factor of 2*N_corr (N_corr for zero-fill independence,
+    # 2 for the Hermitian doubling)
+    spectrum /= (2.0 * N_corr)
+
+    # Frequency grid
+    dOmega = ps_to_invcm / (N_fft * dt_ps)
+    dOmega_res = ps_to_invcm / (N_corr * dt_ps)
+    wAvg = args.wAvg
+
+    # Bose-Einstein quantum correction
+    kT_invcm = 0.6950356 * args.T
+
+    def q_correction(omega):
+        if args.no_qcorr:
+            return 1.0
+        x = omega / kT_invcm
+        if x < 1.0e-6:
+            return 1.0
+        elif x > 50.0:
+            return x
+        else:
+            return x / (1.0 - np.exp(-x))
+
+    # Assemble output: negative frequencies first, then positive
+    # Restrict to intrinsic bandwidth: ±(N_corr/2)*dOmega_res from wAvg,
+    # converted to bin indices on the (possibly finer) zero-filled grid.
+    halfBW_freq = (N_corr // 2) * dOmega_res  # bandwidth in cm-1
+    halfBW = int(np.round(halfBW_freq / dOmega))  # bandwidth in FFT bins
+
+    omegas = []
+    re_out = []
+    im_out = []
+
+    # Negative half: bins N_fft - halfBW .. N_fft - 1
+    for k in range(N_fft - halfBW, N_fft):
+        omega = wAvg + (k - N_fft) * dOmega
+        if omega > 0.0:
+            qc = q_correction(omega)
+            omegas.append(omega)
+            re_out.append(spectrum[k].real * qc)
+            im_out.append(spectrum[k].imag * qc)
+
+    # Positive half: bins 0 .. halfBW
+    for k in range(0, halfBW + 1):
+        omega = wAvg + k * dOmega
+        if omega > 0.0:
+            qc = q_correction(omega)
+            omegas.append(omega)
+            re_out.append(spectrum[k].real * qc)
+            im_out.append(spectrum[k].imag * qc)
+
+    omegas = np.array(omegas)
+    re_out = np.array(re_out)
+    im_out = np.array(im_out)
+    mod2 = re_out**2 + im_out**2
+
+    # Parse header info from TCF file
+    info = parse_tcf_header(args.tcf_file)
+
+    # Write output
+    with open(args.output, 'w') as f:
+        f.write(f"# SFG spectrum ({args.polarization})\n")
+        f.write(f"# Generated by tcf2sfg.py from {args.tcf_file}\n")
+        if 'selection' in info:
+            f.write(f"# selection: {info['selection']}\n")
+        f.write(f"# T = {args.T} K,  kT = {kT_invcm:.3f} cm-1\n")
+        f.write(f"# wAvg = {wAvg} cm-1\n")
+        if 'navg' in info:
+            f.write(f"# navg = {info['navg']}  nTimeBins = {N_corr}\n")
+        f.write(f"# intrinsic resolution = {dOmega_res:.4f} cm-1")
+        if args.t_apod > 0.0:
+            added_bw = ps_to_invcm / (np.pi * (args.t_apod / 1000))
+            f.write(f"  t_apod = {args.t_apod / 1000} ps"
+                    f"  (added broadening ~{added_bw:.4f} cm-1)")
+        f.write("\n")
+        f.write(f"# dOmega = {dOmega:.6f} cm-1")
+        if args.t_zerofill > 0.0 or N_fft > 2 * N_corr:
+            f.write(f"  (Hermitian + zero-filled: N_corr={N_corr}"
+                    f" -> N_fft={N_fft})")
+        else:
+            f.write(f"  (Hermitian: N_corr={N_corr} -> N_fft={N_fft})")
+        f.write("\n")
+        f.write(f"# Quantum correction: "
+                f"{'Bose-Einstein' if not args.no_qcorr else 'none'}\n")
+        f.write("#omega(cm-1)\tRe(chi2)\tIm(chi2)\t|chi2|^2\n")
+
+        for i in range(len(omegas)):
+            f.write(f"{omegas[i]}\t{re_out[i]}\t{im_out[i]}\t{mod2[i]}\n")
+
+    print(f"Wrote {len(omegas)} frequency points to {args.output}")
+    print(f"  Frequency range: {omegas[0]:.1f} - {omegas[-1]:.1f} cm-1")
+    print(f"  Grid spacing: {dOmega:.4f} cm-1"
+          f"  (resolution: {dOmega_res:.4f} cm-1)")
+
+    # Quick diagnostics
+    peak_pos = np.argmax(im_out)
+    peak_neg = np.argmin(im_out)
+    print(f"  Im(chi2) max: {im_out[peak_pos]:.6f}"
+          f" at {omegas[peak_pos]:.1f} cm-1")
+    print(f"  Im(chi2) min: {im_out[peak_neg]:.6f}"
+          f" at {omegas[peak_neg]:.1f} cm-1")
+
+
+if __name__ == '__main__':
+    main()

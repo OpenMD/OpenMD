@@ -1094,8 +1094,7 @@ namespace OpenMD {
 
     // N_corr: number of real TCF points (determines intrinsic resolution).
     // N_fft:  FFT size after zero-filling (determines grid spacing).
-    // Normalization uses N_corr throughout so amplitudes are independent
-    // of the zero-filling factor.
+    // The Hermitian extension requires N_fft >= 2*N_corr.
     int N_corr = static_cast<int>(nTimeBins_);
     if (N_corr < 2) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
@@ -1104,11 +1103,13 @@ namespace OpenMD {
     }
 
     // Zero-filling: extend to T_corr + t_zerofill_ps_, rounded up to next
-    // power of two for FFTW efficiency.  If t_zerofill_ps_ == 0, N_fft = N_corr.
+    // power of two for FFTW efficiency.  Minimum is 2*N_corr for the
+    // Hermitian extension (C(-t) = C*(t) occupies the upper half).
     int N_zf = (t_zerofill_ps_ > 0.0)
       ? static_cast<int>(std::ceil((static_cast<double>(N_corr)
 				    + t_zerofill_ps_ / dt_ps_)))
       : N_corr;
+    N_zf = std::max(N_zf, 2 * N_corr);
     // Round up to next power of two
     int N_fft = 1;
     while (N_fft < N_zf) N_fft <<= 1;
@@ -1121,26 +1122,80 @@ namespace OpenMD {
       painCave.isFatal = 1; simError();
     }
 
-    // Apply apodization to the TCF data region; zero-fill the rest.
-    // exp(-t/t_apod_ps_) window; if t_apod_ps_ == 0, weight = 1 (no apodization).
-    for (int i = 0; i < N_fft; ++i) {
-      if (i < N_corr) {
-        double t = static_cast<double>(i) * dt_ps_;
-        double w = (t_apod_ps_ > 0.0) ? std::exp(-t / t_apod_ps_) : 1.0;
-        in[i][0] = (*pTCF)[i].real() * w;
-        in[i][1] = (*pTCF)[i].imag() * w;
-      } else {
-        in[i][0] = 0.0;   // zero-fill
-        in[i][1] = 0.0;
-      }
+    // Pre-apply apodization to the TCF data and store in a work vector.
+    std::vector<std::complex<double>> apodTCF(N_corr);
+    for (int i = 0; i < N_corr; ++i) {
+      double t = static_cast<double>(i) * dt_ps_;
+      double w = (t_apod_ps_ > 0.0) ? std::exp(-t / t_apod_ps_) : 1.0;
+      apodTCF[i] = (*pTCF)[i] * w;
     }
 
-    fftw_plan plan = fftw_plan_dft_1d(N_fft, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+    // Result vector for the two-pass Hermitian FFT
+    std::vector<std::complex<double>> spectrum(N_fft);
+
+    fftw_plan plan = fftw_plan_dft_1d(N_fft, in, out,
+				      FFTW_FORWARD, FFTW_ESTIMATE);
+
+    // -----------------------------------------------------------------------
+    // Two-pass Hermitian FFT (following MultiSpec dofft.cpp).
+    //
+    // The one-sided TCF C(t) for t >= 0 is extended to negative times
+    // using the physical symmetry C(-t) = C*(t).  This Hermitian
+    // extension ensures that the real and imaginary parts of the
+    // Fourier transform are cleanly separated into dispersive (Re)
+    // and absorptive (Im) lineshapes with no phase mixing.
+    //
+    // Pass 1:  input = C(t) for t>0, C*(-t) for t<0  →  Re(spectrum)
+    // Pass 2:  input = i·C(t) for t>0, conj(i·C(t)) for t<0  →  Im(spectrum)
+    // -----------------------------------------------------------------------
+
+    // Pass 1: get Re(chi2)
+    for (int i = 0; i < N_fft; ++i) { in[i][0] = 0.0; in[i][1] = 0.0; }
+    for (int i = 0; i < N_corr; ++i) {
+      in[i][0] = apodTCF[i].real();
+      in[i][1] = apodTCF[i].imag();
+      if (i > 0) {
+	// Hermitian mirror: C(-t) = C*(t) at index N_fft - i
+	in[N_fft - i][0] =  apodTCF[i].real();
+	in[N_fft - i][1] = -apodTCF[i].imag();
+      }
+    }
     fftw_execute(plan);
+    // The Hermitian input guarantees the output is purely real;
+    // take the real part as Re(spectrum).
+    for (int i = 0; i < N_fft; ++i)
+      spectrum[i].real(out[i][0]);
+
+    // Pass 2: get Im(chi2)
+    // Multiply TCF by i: i·C = -Im(C) + i·Re(C)
+    for (int i = 0; i < N_fft; ++i) { in[i][0] = 0.0; in[i][1] = 0.0; }
+    for (int i = 0; i < N_corr; ++i) {
+      double re_ic = apodTCF[i].imag();
+      double im_ic = -apodTCF[i].real();
+      in[i][0] = re_ic;
+      in[i][1] = im_ic;
+      if (i > 0) {
+	// Hermitian mirror of i·C(t)
+	in[N_fft - i][0] =  re_ic;
+	in[N_fft - i][1] = -im_ic;
+      }
+    }
+    fftw_execute(plan);
+    for (int i = 0; i < N_fft; ++i)
+      spectrum[i].imag(out[i][0]);
+
     fftw_destroy_plan(plan);
 
-    // Frequency grid: spacing set by total FFT length, but intrinsic
-    // resolution is still 1/T_corr = ps_to_invcm/(N_corr*dt_ps_).
+    // Normalization: we normalize by 2*N_corr — the factor of N_corr keeps
+    // amplitudes independent of zero-filling, and the factor of 2 accounts
+    // for the Hermitian extension which places C(t) at both positive and
+    // negative times, doubling the effective signal relative to the one-sided
+    // transform.
+    const double norm = 1.0 / (2.0 * static_cast<double>(N_corr));
+    for (int i = 0; i < N_fft; ++i)
+      spectrum[i] *= norm;
+
+    // Frequency grid
     const double dOmega      = ps_to_invcm / (static_cast<double>(N_fft) * dt_ps_);
     const double dOmega_res  = ps_to_invcm / (static_cast<double>(N_corr) * dt_ps_);
 
@@ -1177,47 +1232,28 @@ namespace OpenMD {
     ofs << "\n";
     ofs << "#omega(cm-1)\tRe(chi2)\tIm(chi2)\t|chi2|^2\n";
 
-    // Normalize by N_corr (not N_fft) so that amplitudes are independent
-    // of the zero-filling factor.  The FFT of a zero-padded sequence
-    // returns values scaled by N_fft; dividing by N_corr instead recovers
-    // the same per-point normalization as the unpadded transform.
-    const double norm = 1.0 / static_cast<double>(N_corr);
+    // Output frequency range: wAvg_ ± (N_corr/2)*dOmega_res from wAvg.
+    // Convert intrinsic bandwidth to bin count on the zero-filled grid.
+    const double halfBW_freq = (N_corr / 2) * dOmega_res;
+    const int halfBW = static_cast<int>(std::round(halfBW_freq / dOmega));
 
-    // The FFT of the shifted TCF C'(t) is centered at k=0 = wAvg_.
-    // Bin k → absolute frequency: wAvg_ + k*dOmega
-    // Bins N_fft/2+1..N_fft-1 are the negative side (ω < wAvg_).
-    // Output bins within the intrinsic resolution bandwidth only:
-    // the physically meaningful frequency range is wAvg_ ± (N_corr/2)·dOmega,
-    // which is the same window you'd get without zero-filling.  Zero-filling
-    // only adds interpolation points within this band; bins outside it
-    // contain no new information and just show ringing / noise.
-    //
-    // For each FFT bin k, the absolute frequency is:
-    //   k <= N_fft/2:  ω = wAvg_ + k·dOmega
-    //   k >  N_fft/2:  ω = wAvg_ + (k − N_fft)·dOmega
-    //
-    // The intrinsic bandwidth limit in bin-index space is |offset| ≤ N_corr/2,
-    // where offset = k (positive side) or k−N_fft (negative side).
     auto writeRow = [&](double omega, int k) {
       if (omega <= 0.0) return;
-      double re = out[k][0] * norm;
-      double im = out[k][1] * norm;
+      double re = spectrum[k].real();
+      double im = spectrum[k].imag();
       double x  = omega / kT_invcm;
       double qCorr = (x > 1.0e-6) ?
       ((x < 50.0) ? x / (1.0 - std::exp(-x)) : x) : 1.0;
-      double im_corr = im * qCorr;
-      ofs << omega << "\t" << re << "\t" << im_corr << "\t"
-      << re*re + im_corr*im_corr << "\n";
+      re *= qCorr;
+      im *= qCorr;
+      ofs << omega << "\t" << re << "\t" << im << "\t"
+      << re*re + im*im << "\n";
     };
-
-    const int halfBW = N_corr / 2;  // intrinsic bandwidth in bins
-
+    
     // negative half → ω below wAvg_ (ascending)
-    // offset = k − N_fft ranges from −halfBW to −1
     for (int k = N_fft - halfBW; k < N_fft; ++k)
       writeRow(wAvg_ + (k - N_fft) * dOmega, k);
     // positive half → ω at/above wAvg_
-    // offset = k ranges from 0 to +halfBW
     for (int k = 0; k <= halfBW; ++k)
       writeRow(wAvg_ + k * dOmega, k);
     
