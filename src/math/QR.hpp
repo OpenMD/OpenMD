@@ -5,8 +5,8 @@
 
 #include "math/DynamicRectMatrix.hpp"
 
-using namespace OpenMD;
-using namespace std;
+using OpenMD::DynamicRectMatrix;
+using OpenMD::DynamicVector;
 
 namespace JAMA {
 
@@ -71,7 +71,7 @@ namespace JAMA {
         // Compute 2-norm of k-th column without under/overflow.
         Real nrm = 0;
         for (i = k; i < m; i++) {
-          nrm = hypot(nrm, QR_(i, k));
+          nrm = std::hypot(nrm, QR_(i, k));
         }
 
         if (nrm != 0.0) {

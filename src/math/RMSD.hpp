@@ -68,8 +68,8 @@ namespace OpenMD {
      *   returns
      *    - rmsd: measures similarity between the vectors
      */
-    RealType calculate_rmsd(std::vector<Vector3d> mov, Vector3d mov_com,
-                            Vector3d mov_to_ref);
+    RealType calculate_rmsd(std::vector<Vector3d> mov, Vector3d& mov_com,
+                            Vector3d& mov_to_ref);
 
     /*
      * optimal_superposition()
@@ -77,7 +77,7 @@ namespace OpenMD {
      *   Returns best-fit rotation matrix
      */
     RotMat3x3d optimal_superposition(std::vector<Vector3d> mov,
-                                     Vector3d mov_com, Vector3d mov_to_ref);
+                                     Vector3d& mov_com, Vector3d& mov_to_ref);
 
   protected:
     std::vector<Vector3d> ref_;

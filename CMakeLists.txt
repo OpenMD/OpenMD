@@ -1132,6 +1132,7 @@ set(PYNUMPY_FILES
     src/applications/utilities/principalAxisCalculator
     src/applications/utilities/protonSampler
     src/applications/utilities/slabBuilder
+    src/applications/utilities/tcf2sfg
     src/applications/utilities/vcorr2spectrum
     src/applications/utilities/waterReplacer
     src/applications/utilities/wcorr2spectrum
@@ -1140,7 +1141,8 @@ set(PYNUMPY_FILES
     samples/Madelung/quadrupoles/buildQuadrupolarArray)
 
 set(PYSCIPY_FILES
-    src/applications/utilities/lcorrzFit src/applications/utilities/slipLength
+    src/applications/utilities/lcorrzFit
+    src/applications/utilities/slipLength
     src/applications/utilities/solLiqFricCalc)
 
 if(SCIPY_FOUND)

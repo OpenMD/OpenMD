@@ -118,7 +118,7 @@ namespace OpenMD {
     RealType volume(0.0);
     for (std::vector<HydrodynamicsElement>::iterator iter = elements_.begin();
          iter != elements_.end(); ++iter) {
-      volume += 4.0 / 3.0 * Constants::PI * pow((*iter).radius, 3);
+      volume += 4.0 / 3.0 * Constants::PI * std::pow((*iter).radius, 3);
     }
     // double loop double counts overlap volume Vij = Vji
     volume -= 0.5 * volumeOverlap_;
@@ -171,7 +171,7 @@ namespace OpenMD {
         RealType b2 = 1.0 - a;
         Tij         = (b1 * I + b2 * op) * c;
 
-      } else if (rij > fabs(elements_[i].radius - elements_[j].radius) &&
+      } else if (rij > std::abs(elements_[i].radius - elements_[j].radius) &&
                  rij < (elements_[i].radius + elements_[j].radius)) {
         // overlapping beads, part I
 
@@ -215,7 +215,7 @@ namespace OpenMD {
         Tij(1, 1) = c;
         Tij(2, 2) = c;
 
-        volumeOverlap_ += (4.0 / 3.0) * Constants::PI * pow(rmin, 3);
+        volumeOverlap_ += (4.0 / 3.0) * Constants::PI * std::pow(rmin, 3);
       }
     }
 

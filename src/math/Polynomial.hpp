@@ -282,7 +282,7 @@ namespace OpenMD {
     }
 
     // Find the Roots of a given polynomial
-    std::vector<complex<Real>> FindRoots() {
+    std::vector<std::complex<Real>> FindRoots() {
       int rank                          = degree();
       DynamicRectMatrix<Real> companion = CreateCompanion();
       JAMA::Eigenvalue<Real> eig(companion);
@@ -290,9 +290,9 @@ namespace OpenMD {
       eig.getRealEigenvalues(reals);
       eig.getImagEigenvalues(imags);
 
-      std::vector<complex<Real>> roots;
+      std::vector<std::complex<Real>> roots;
       for (int i = 0; i < rank; i++) {
-        roots.push_back(complex<Real>(reals(i), imags(i)));
+        roots.push_back(std::complex<Real>(reals(i), imags(i)));
       }
 
       return roots;
@@ -317,7 +317,7 @@ namespace OpenMD {
         Real fC1    = getCoefficient(1);
         Real fC0    = getCoefficient(0);
         Real fDiscr = fC1 * fC1 - 4.0 * fC0 * fC2;
-        if (abs(fDiscr) <= fEpsilon) { fDiscr = (Real)0.0; }
+        if (std::abs(fDiscr) <= fEpsilon) { fDiscr = (Real)0.0; }
 
         if (fDiscr < (Real)0.0) {  // complex roots only
           return roots;
@@ -326,7 +326,7 @@ namespace OpenMD {
         Real fTmp = ((Real)0.5) / fC2;
 
         if (fDiscr > (Real)0.0) {  // 2 real roots
-          fDiscr = sqrt(fDiscr);
+          fDiscr = std::sqrt(fDiscr);
           roots.push_back(fTmp * (-fC1 - fDiscr));
           roots.push_back(fTmp * (-fC1 + fDiscr));
         } else {
@@ -356,31 +356,31 @@ namespace OpenMD {
         Real fHalfB = ((Real)0.5) * fB;
 
         Real fDiscr = fHalfB * fHalfB + fA * fA * fA * fTwentySeventh;
-        if (fabs(fDiscr) <= fEpsilon) { fDiscr = (Real)0.0; }
+        if (std::abs(fDiscr) <= fEpsilon) { fDiscr = (Real)0.0; }
 
         if (fDiscr > (Real)0.0) {  // 1 real, 2 complex roots
 
-          fDiscr     = sqrt(fDiscr);
+          fDiscr     = std::sqrt(fDiscr);
           Real fTemp = -fHalfB + fDiscr;
           Real root;
           if (fTemp >= (Real)0.0) {
-            root = pow(fTemp, fThird);
+            root = std::pow(fTemp, fThird);
           } else {
-            root = -pow(-fTemp, fThird);
+            root = -std::pow(-fTemp, fThird);
           }
           fTemp = -fHalfB - fDiscr;
           if (fTemp >= (Real)0.0) {
-            root += pow(fTemp, fThird);
+            root += std::pow(fTemp, fThird);
           } else {
-            root -= pow(-fTemp, fThird);
+            root -= std::pow(-fTemp, fThird);
           }
           root -= fOffset;
 
           roots.push_back(root);
         } else if (fDiscr < (Real)0.0) {
-          const Real fSqrt3 = sqrt((Real)3.0);
-          Real fDist        = sqrt(-fThird * fA);
-          Real fAngle       = fThird * atan2(sqrt(-fDiscr), -fHalfB);
+          const Real fSqrt3 = std::sqrt((Real)3.0);
+          Real fDist        = std::sqrt(-fThird * fA);
+          Real fAngle       = fThird * std::atan2(std::sqrt(-fDiscr), -fHalfB);
           Real fCos         = cos(fAngle);
           Real fSin         = sin(fAngle);
           roots.push_back(((Real)2.0) * fDist * fCos - fOffset);
@@ -389,9 +389,9 @@ namespace OpenMD {
         } else {
           Real fTemp;
           if (fHalfB >= (Real)0.0) {
-            fTemp = -pow(fHalfB, fThird);
+            fTemp = -std::pow(fHalfB, fThird);
           } else {
-            fTemp = pow(-fHalfB, fThird);
+            fTemp = std::pow(-fHalfB, fThird);
           }
           roots.push_back(((Real)2.0) * fTemp - fOffset);
           roots.push_back(-fTemp - fOffset);
@@ -423,18 +423,18 @@ namespace OpenMD {
         tempCubic.setCoefficient(2, fR2);
         tempCubic.setCoefficient(3, 1.0);
         std::vector<Real> cubeRoots = tempCubic.FindRealRoots();  // always
-        // produces
-        // at
-        // least
-        // one
-        // root
+								  // produces
+								  // at
+								  // least
+								  // one
+								  // root
         Real fY = cubeRoots[0];
 
         Real fDiscr = ((Real)0.25) * fC3 * fC3 - fC2 + fY;
-        if (fabs(fDiscr) <= fEpsilon) { fDiscr = (Real)0.0; }
+        if (std::abs(fDiscr) <= fEpsilon) { fDiscr = (Real)0.0; }
 
         if (fDiscr > (Real)0.0) {
-          Real fR  = sqrt(fDiscr);
+          Real fR  = std::sqrt(fDiscr);
           Real fT1 = ((Real)0.75) * fC3 * fC3 - fR * fR - ((Real)2.0) * fC2;
           Real fT2 =
               (((Real)4.0) * fC3 * fC2 - ((Real)8.0) * fC1 - fC3 * fC3 * fC3) /
@@ -442,16 +442,16 @@ namespace OpenMD {
 
           Real fTplus  = fT1 + fT2;
           Real fTminus = fT1 - fT2;
-          if (fabs(fTplus) <= fEpsilon) { fTplus = (Real)0.0; }
-          if (fabs(fTminus) <= fEpsilon) { fTminus = (Real)0.0; }
+          if (std::abs(fTplus) <= fEpsilon) { fTplus = (Real)0.0; }
+          if (std::abs(fTminus) <= fEpsilon) { fTminus = (Real)0.0; }
 
           if (fTplus >= (Real)0.0) {
-            Real fD = sqrt(fTplus);
+            Real fD = std::sqrt(fTplus);
             roots.push_back(-((Real)0.25) * fC3 + ((Real)0.5) * (fR + fD));
             roots.push_back(-((Real)0.25) * fC3 + ((Real)0.5) * (fR - fD));
           }
           if (fTminus >= (Real)0.0) {
-            Real fE = sqrt(fTminus);
+            Real fE = std::sqrt(fTminus);
             roots.push_back(-((Real)0.25) * fC3 + ((Real)0.5) * (fE - fR));
             roots.push_back(-((Real)0.25) * fC3 - ((Real)0.5) * (fE + fR));
           }
@@ -463,15 +463,15 @@ namespace OpenMD {
             if (fT2 < (Real)0.0) {  // round to zero
               fT2 = (Real)0.0;
             }
-            fT2      = ((Real)2.0) * sqrt(fT2);
+            fT2      = ((Real)2.0) * std::sqrt(fT2);
             Real fT1 = ((Real)0.75) * fC3 * fC3 - ((Real)2.0) * fC2;
             if (fT1 + fT2 >= fEpsilon) {
-              Real fD = sqrt(fT1 + fT2);
+              Real fD = std::sqrt(fT1 + fT2);
               roots.push_back(-((Real)0.25) * fC3 + ((Real)0.5) * fD);
               roots.push_back(-((Real)0.25) * fC3 - ((Real)0.5) * fD);
             }
             if (fT1 - fT2 >= fEpsilon) {
-              Real fE = sqrt(fT1 - fT2);
+              Real fE = std::sqrt(fT1 - fT2);
               roots.push_back(-((Real)0.25) * fC3 + ((Real)0.5) * fE);
               roots.push_back(-((Real)0.25) * fC3 - ((Real)0.5) * fE);
             }
@@ -487,7 +487,7 @@ namespace OpenMD {
         eig.getImagEigenvalues(imags);
 
         for (int i = 0; i < deg; i++) {
-          if (fabs(imags(i)) < fEpsilon) roots.push_back(reals(i));
+          if (std::abs(imags(i)) < fEpsilon) roots.push_back(reals(i));
         }
       }
         return roots;

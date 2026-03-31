@@ -8,57 +8,57 @@
 #include <cmath>
 // for abs() below
 
-using namespace OpenMD;
-using namespace std;
+using OpenMD::DynamicRectMatrix;
+using OpenMD::DynamicVector;
 
 namespace JAMA {
 
   /**
 
-  Computes eigenvalues and eigenvectors of a real (non-complex)
-  matrix.
-  <P>
-  If A is symmetric, then A = V*D*V' where the eigenvalue matrix D is
-  diagonal and the eigenvector matrix V is orthogonal. That is,
-  the diagonal values of D are the eigenvalues, and
-  V*V' = I, where I is the identity matrix.  The columns of V
-  represent the eigenvectors in the sense that A*V = V*D.
+     Computes eigenvalues and eigenvectors of a real (non-complex)
+     matrix.
+     <P>
+     If A is symmetric, then A = V*D*V' where the eigenvalue matrix D is
+     diagonal and the eigenvector matrix V is orthogonal. That is,
+     the diagonal values of D are the eigenvalues, and
+     V*V' = I, where I is the identity matrix.  The columns of V
+     represent the eigenvectors in the sense that A*V = V*D.
 
-  <P>
-  If A is not symmetric, then the eigenvalue matrix D is block diagonal
-  with the real eigenvalues in 1-by-1 blocks and any complex eigenvalues,
-  a + i*b, in 2-by-2 blocks, [a, b; -b, a].  That is, if the complex
-  eigenvalues look like
-<pre>
+     <P>
+     If A is not symmetric, then the eigenvalue matrix D is block diagonal
+     with the real eigenvalues in 1-by-1 blocks and any complex eigenvalues,
+     a + i*b, in 2-by-2 blocks, [a, b; -b, a].  That is, if the complex
+     eigenvalues look like
+     <pre>
 
-          u + iv     .        .          .      .    .
-            .      u - iv     .          .      .    .
-            .        .      a + ib       .      .    .
-            .        .        .        a - ib   .    .
-            .        .        .          .      x    .
-            .        .        .          .      .    y
-</pre>
-  then D looks like
-<pre>
+     u + iv     .        .          .      .    .
+     .      u - iv     .          .      .    .
+     .        .      a + ib       .      .    .
+     .        .        .        a - ib   .    .
+     .        .        .          .      x    .
+     .        .        .          .      .    y
+     </pre>
+     then D looks like
+     <pre>
 
-            u        v        .          .      .    .
-           -v        u        .          .      .    .
-            .        .        a          b      .    .
-            .        .       -b          a      .    .
-            .        .        .          .      x    .
-            .        .        .          .      .    y
-</pre>
-  This keeps V a real matrix in both symmetric and non-symmetric
-  cases, and A*V = V*D.
+     u        v        .          .      .    .
+     -v        u        .          .      .    .
+     .        .        a          b      .    .
+     .        .       -b          a      .    .
+     .        .        .          .      x    .
+     .        .        .          .      .    y
+     </pre>
+     This keeps V a real matrix in both symmetric and non-symmetric
+     cases, and A*V = V*D.
 
-  <p>
-  The matrix V may be badly
-  conditioned, or even singular, so the validity of the equation
-  A = V*D*inverse(V) depends upon the condition number of V.
+     <p>
+     The matrix V may be badly
+     conditioned, or even singular, so the validity of the equation
+     A = V*D*inverse(V) depends upon the condition number of V.
 
-  <p>
-  (Adapted from JAMA, a Java Matrix Library, developed by jointly
-  by the Mathworks and NIST; see  http://math.nist.gov/javanumerics/jama).
+     <p>
+     (Adapted from JAMA, a Java Matrix Library, developed by jointly
+     by the Mathworks and NIST; see  http://math.nist.gov/javanumerics/jama).
   **/
 
   template<class Real>
@@ -106,7 +106,7 @@ namespace JAMA {
         Real scale = 0.0;
         Real h     = 0.0;
         for (int k = 0; k < i; k++) {
-          scale = scale + abs(d(k));
+          scale = scale + std::abs(d(k));
         }
         if (scale == 0.0) {
           e(i) = d(i - 1);
@@ -123,7 +123,7 @@ namespace JAMA {
             h += d(k) * d(k);
           }
           Real f = d(i - 1);
-          Real g = sqrt(h);
+          Real g = std::sqrt(h);
           if (f > 0) { g = -g; }
           e(i)     = scale * g;
           h        = h - f * g;
@@ -213,16 +213,16 @@ namespace JAMA {
 
       Real f    = 0.0;
       Real tst1 = 0.0;
-      Real eps  = pow(2.0, -52.0);
+      Real eps  = std::pow(2.0, -52.0);
       for (int l = 0; l < n; l++) {
         // Find small subdiagonal element
 
-        tst1  = max(tst1, abs(d(l)) + abs(e(l)));
+        tst1  = std::max(tst1, std::abs(d(l)) + std::abs(e(l)));
         int m = l;
 
         // Original while-loop from Java code
         while (m < n) {
-          if (abs(e(m)) <= eps * tst1) { break; }
+          if (std::abs(e(m)) <= eps * tst1) { break; }
           m++;
         }
 
@@ -238,7 +238,7 @@ namespace JAMA {
 
             Real g = d(l);
             Real p = (d(l + 1) - g) / (2.0 * e(l));
-            Real r = hypot(p, 1.0);
+            Real r = std::hypot(p, 1.0);
             if (p < 0) { r = -r; }
             d(l)     = e(l) / (p + r);
             d(l + 1) = e(l) * (p + r);
@@ -264,7 +264,7 @@ namespace JAMA {
               s2       = s;
               g        = c * e(i);
               h        = c * p;
-              r        = hypot(p, e(i));
+              r        = std::hypot(p, e(i));
               e(i + 1) = s * r;
               s        = e(i) / r;
               c        = p / r;
@@ -285,7 +285,7 @@ namespace JAMA {
 
             // Check for convergence.
 
-          } while (abs(e(l)) > eps * tst1);
+          } while (std::abs(e(l)) > eps * tst1);
         }
         d(l) = d(l) + f;
         e(l) = 0.0;
@@ -330,7 +330,7 @@ namespace JAMA {
 
         Real scale = 0.0;
         for (int i = m; i <= high; i++) {
-          scale = scale + abs(H(i, m - 1));
+          scale = scale + std::abs(H(i, m - 1));
         }
         if (scale != 0.0) {
           // Compute Householder transformation.
@@ -340,7 +340,7 @@ namespace JAMA {
             ort(i) = H(i, m - 1) / scale;
             h += ort(i) * ort(i);
           }
-          Real g = sqrt(h);
+          Real g = std::sqrt(h);
           if (ort(m) > 0) { g = -g; }
           h      = h - ort(m) * g;
           ort(m) = ort(m) - g;
@@ -407,7 +407,7 @@ namespace JAMA {
     Real cdivr, cdivi;
     void cdiv(Real xr, Real xi, Real yr, Real yi) {
       Real r, d;
-      if (abs(yr) > abs(yi)) {
+      if (std::abs(yr) > std::abs(yi)) {
         r     = yi / yr;
         d     = yr + r * yi;
         cdivr = (xr + r * xi) / d;
@@ -434,7 +434,7 @@ namespace JAMA {
       int n        = nn - 1;
       int low      = 0;
       int high     = nn - 1;
-      Real eps     = pow(2.0, -52.0);
+      Real eps     = std::pow(2.0, -52.0);
       Real exshift = 0.0;
       Real p = 0, q = 0, r = 0, s = 0, z = 0, t, w, x, y;
 
@@ -446,8 +446,8 @@ namespace JAMA {
           d(i) = H(i, i);
           e(i) = 0.0;
         }
-        for (int j = max(i - 1, 0); j < nn; j++) {
-          norm = norm + abs(H(i, j));
+        for (int j = std::max(i - 1, 0); j < nn; j++) {
+          norm = norm + std::abs(H(i, j));
         }
       }
 
@@ -459,9 +459,9 @@ namespace JAMA {
 
         int l = n;
         while (l > low) {
-          s = abs(H(l - 1, l - 1)) + abs(H(l, l));
+          s = std::abs(H(l - 1, l - 1)) + std::abs(H(l, l));
           if (s == 0.0) { s = norm; }
-          if (abs(H(l, l - 1)) < eps * s) { break; }
+          if (std::abs(H(l, l - 1)) < eps * s) { break; }
           l--;
         }
 
@@ -481,7 +481,7 @@ namespace JAMA {
           w               = H(n, n - 1) * H(n - 1, n);
           p               = (H(n - 1, n - 1) - H(n, n)) / 2.0;
           q               = p * p + w;
-          z               = sqrt(abs(q));
+          z               = std::sqrt(std::abs(q));
           H(n, n)         = H(n, n) + exshift;
           H(n - 1, n - 1) = H(n - 1, n - 1) + exshift;
           x               = H(n, n);
@@ -500,10 +500,10 @@ namespace JAMA {
             e(n - 1) = 0.0;
             e(n)     = 0.0;
             x        = H(n, n - 1);
-            s        = abs(x) + abs(z);
+            s        = std::abs(x) + std::abs(z);
             p        = x / s;
             q        = z / s;
-            r        = sqrt(p * p + q * q);
+            r        = std::sqrt(p * p + q * q);
             p        = p / r;
             q        = q / r;
 
@@ -562,7 +562,7 @@ namespace JAMA {
             for (int i = low; i <= n; i++) {
               H(i, i) -= x;
             }
-            s = abs(H(n, n - 1)) + abs(H(n - 1, n - 2));
+            s = std::abs(H(n, n - 1)) + std::abs(H(n - 1, n - 2));
             x = y = 0.75 * s;
             w     = -0.4375 * s * s;
           }
@@ -573,7 +573,7 @@ namespace JAMA {
             s = (y - x) / 2.0;
             s = s * s + w;
             if (s > 0) {
-              s = sqrt(s);
+              s = std::sqrt(s);
               if (y < x) { s = -s; }
               s = x - w / ((y - x) / 2.0 + s);
               for (int i = low; i <= n; i++) {
@@ -596,14 +596,14 @@ namespace JAMA {
             p = (r * s - w) / H(m + 1, m) + H(m, m + 1);
             q = H(m + 1, m + 1) - z - r - s;
             r = H(m + 2, m + 1);
-            s = abs(p) + abs(q) + abs(r);
+            s = std::abs(p) + std::abs(q) + std::abs(r);
             p = p / s;
             q = q / s;
             r = r / s;
             if (m == l) { break; }
-            if (abs(H(m, m - 1)) * (abs(q) + abs(r)) <
-                eps * (abs(p) * (abs(H(m - 1, m - 1)) + abs(z) +
-                                 abs(H(m + 1, m + 1))))) {
+            if (std::abs(H(m, m - 1)) * (std::abs(q) + std::abs(r)) <
+                eps * (std::abs(p) * (std::abs(H(m - 1, m - 1)) + std::abs(z) +
+				      std::abs(H(m + 1, m + 1))))) {
               break;
             }
             m--;
@@ -622,7 +622,7 @@ namespace JAMA {
               p = H(k, k - 1);
               q = H(k + 1, k - 1);
               r = (notlast ? H(k + 2, k - 1) : 0.0);
-              x = abs(p) + abs(q) + abs(r);
+              x = std::abs(p) + std::abs(q) + std::abs(r);
               if (x != 0.0) {
                 p = p / x;
                 q = q / x;
@@ -630,7 +630,7 @@ namespace JAMA {
               }
             }
             if (x == 0.0) { break; }
-            s = sqrt(p * p + q * q + r * r);
+            s = std::sqrt(p * p + q * q + r * r);
             if (p < 0) { s = -s; }
             if (s != 0) {
               if (k != m) {
@@ -659,7 +659,7 @@ namespace JAMA {
 
               // Column modification
 
-              for (int i = 0; i <= min(n, k + 3); i++) {
+              for (int i = 0; i <= std::min(n, k + 3); i++) {
                 p = x * H(i, k) + y * H(i, k + 1);
                 if (notlast) {
                   p           = p + z * H(i, k + 2);
@@ -724,7 +724,7 @@ namespace JAMA {
                 q       = (d(i) - p) * (d(i) - p) + e(i) * e(i);
                 t       = (x * s - z * r) / q;
                 H(i, n) = t;
-                if (abs(x) > abs(z)) {
+                if (std::abs(x) > std::abs(z)) {
                   H(i + 1, n) = (-r - w * t) / x;
                 } else {
                   H(i + 1, n) = (-s - y * t) / z;
@@ -733,7 +733,7 @@ namespace JAMA {
 
               // Overflow control
 
-              t = abs(H(i, n));
+              t = std::abs(H(i, n));
               if ((eps * t) * t > 1) {
                 for (int j = i; j <= n; j++) {
                   H(j, n) = H(j, n) / t;
@@ -749,7 +749,7 @@ namespace JAMA {
 
           // Last vector component imaginary so matrix is triangular
 
-          if (abs(H(n, n - 1)) > abs(H(n - 1, n))) {
+          if (std::abs(H(n, n - 1)) > std::abs(H(n - 1, n))) {
             H(n - 1, n - 1) = q / H(n, n - 1);
             H(n - 1, n)     = -(H(n, n) - p) / H(n, n - 1);
           } else {
@@ -788,12 +788,13 @@ namespace JAMA {
                 vi = (d(i) - p) * 2.0 * q;
                 if ((vr == 0.0) && (vi == 0.0)) {
                   vr =
-                      eps * norm * (abs(w) + abs(q) + abs(x) + abs(y) + abs(z));
+		    eps * norm * (std::abs(w) + std::abs(q) + std::abs(x) +
+				  std::abs(y) + std::abs(z));
                 }
                 cdiv(x * r - z * ra + q * sa, x * s - z * sa - q * ra, vr, vi);
                 H(i, n - 1) = cdivr;
                 H(i, n)     = cdivi;
-                if (abs(x) > (abs(z) + abs(q))) {
+                if (std::abs(x) > (std::abs(z) + std::abs(q))) {
                   H(i + 1, n - 1) = (-ra - w * H(i, n - 1) + q * H(i, n)) / x;
                   H(i + 1, n)     = (-sa - w * H(i, n) - q * H(i, n - 1)) / x;
                 } else {
@@ -805,7 +806,7 @@ namespace JAMA {
 
               // Overflow control
 
-              t = max(abs(H(i, n - 1)), abs(H(i, n)));
+              t = std::max(std::abs(H(i, n - 1)), std::abs(H(i, n)));
               if ((eps * t) * t > 1) {
                 for (int j = i; j <= n; j++) {
                   H(j, n - 1) = H(j, n - 1) / t;
@@ -832,7 +833,7 @@ namespace JAMA {
       for (int j = nn - 1; j >= low; j--) {
         for (int i = low; i <= high; i++) {
           z = 0.0;
-          for (int k = low; k <= min(j, high); k++) {
+          for (int k = low; k <= std::min(j, high); k++) {
             z = z + V(i, k) * H(k, j);
           }
           V(i, j) = z;
@@ -916,38 +917,38 @@ namespace JAMA {
     }
 
     /**
-        Computes the block diagonal eigenvalue matrix.
-        If the original matrix A is not symmetric, then the eigenvalue
-        matrix D is block diagonal with the real eigenvalues in 1-by-1
-        blocks and any complex eigenvalues,
-        a + i*b, in 2-by-2 blocks, (a, b; -b, a).  That is, if the complex
-        eigenvalues look like
-<pre>
+       Computes the block diagonal eigenvalue matrix.
+       If the original matrix A is not symmetric, then the eigenvalue
+       matrix D is block diagonal with the real eigenvalues in 1-by-1
+       blocks and any complex eigenvalues,
+       a + i*b, in 2-by-2 blocks, (a, b; -b, a).  That is, if the complex
+       eigenvalues look like
+       <pre>
 
-          u + iv     .        .          .      .    .
-            .      u - iv     .          .      .    .
-            .        .      a + ib       .      .    .
-            .        .        .        a - ib   .    .
-            .        .        .          .      x    .
-            .        .        .          .      .    y
-</pre>
-        then D looks like
-<pre>
+       u + iv     .        .          .      .    .
+       .      u - iv     .          .      .    .
+       .        .      a + ib       .      .    .
+       .        .        .        a - ib   .    .
+       .        .        .          .      x    .
+       .        .        .          .      .    y
+       </pre>
+       then D looks like
+       <pre>
 
-            u        v        .          .      .    .
-           -v        u        .          .      .    .
-            .        .        a          b      .    .
-            .        .       -b          a      .    .
-            .        .        .          .      x    .
-            .        .        .          .      .    y
-</pre>
-    This keeps V a real matrix in both symmetric and non-symmetric
-    cases, and A*V = V*D.
+       u        v        .          .      .    .
+       -v        u        .          .      .    .
+       .        .        a          b      .    .
+       .        .       -b          a      .    .
+       .        .        .          .      x    .
+       .        .        .          .      .    y
+       </pre>
+       This keeps V a real matrix in both symmetric and non-symmetric
+       cases, and A*V = V*D.
 
-        @param D: upon return, the matrix is filled with the block diagonal
-        eigenvalue matrix.
+       @param D: upon return, the matrix is filled with the block diagonal
+       eigenvalue matrix.
 
-*/
+    */
     void getD(DynamicRectMatrix<Real>& D) {
       D = DynamicRectMatrix<Real>(n, n);
       for (int i = 0; i < n; i++) {
