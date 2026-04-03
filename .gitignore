@@ -1,4 +1,5 @@
 build
+build_test
 openmd.spec
 .DS_STORE
 .*.swp

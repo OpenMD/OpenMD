@@ -79,6 +79,11 @@
 #include "restraints/ThermoIntegrationForceModifier.hpp"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
+#include "config.h"
+
+#ifdef HAVE_NEP
+#include <algorithm>
+#endif
 
 using namespace std;
 namespace OpenMD {
@@ -524,6 +529,50 @@ namespace OpenMD {
 
     fDecomp_->distributeInitialData();
 
+#ifdef HAVE_NEP
+    if (info_->getSimParams()->haveNEPModelFileName()) {
+      std::string nepFile = info_->getSimParams()->getNEPModelFileName();
+      try {
+        nepInteraction_ = new NEPInteraction(nepFile);
+        useNEP_         = true;
+
+        // Expand OpenMD's cutoff if NEP requires a larger one
+        RealType nepCut = (RealType)nepInteraction_->getMaxCutoff();
+        if (rCut_ < nepCut) {
+          rCut_   = nepCut;
+          rCutSq_ = rCut_ * rCut_;
+        }
+
+        // Map OpenMD atom-type ident → NEP type index
+        const auto& elemList = nepInteraction_->nep3_.element_list;
+        AtomTypeSet atypes   = info_->getSimulatedAtomTypes();
+        for (auto* at : atypes) {
+          int         atid = at->getIdent();
+          std::string name = at->getName();
+          auto it = std::find(elemList.begin(), elemList.end(), name);
+          nepTypeMap_[atid] =
+              (it != elemList.end()) ? (int)(it - elemList.begin()) : -1;
+        }
+
+        // Build per-local-atom NEP type vector (used by runANN)
+        std::vector<int> identArr = info_->getIdentArray();
+        nepAtomTypes_.resize(identArr.size());
+        for (size_t i = 0; i < identArr.size(); ++i) {
+          auto it     = nepTypeMap_.find(identArr[i]);
+          nepAtomTypes_[i] =
+              (it != nepTypeMap_.end()) ? it->second : -1;
+        }
+      } catch (const std::exception& e) {
+        snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+                 "ForceManager: failed to load NEP model '%s': %s\n",
+                 nepFile.c_str(), e.what());
+        painCave.isFatal  = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
+      }
+    }
+#endif
+
     doPotentialSelection_ = false;
     if (info_->getSimParams()->havePotentialSelection()) {
       doPotentialSelection_ = true;
@@ -857,6 +906,9 @@ namespace OpenMD {
     } else {
       loopStart = PAIR_LOOP;
     }
+#ifdef HAVE_NEP
+    if (useNEP_) loopStart = PREPAIR_LOOP;
+#endif
     for (int iLoop = loopStart; iLoop <= loopEnd; iLoop++) {
       if (iLoop == loopStart) {
         bool update_nlist = fDecomp_->checkNeighborList(savedPositions_);
@@ -867,6 +919,14 @@ namespace OpenMD {
           fDecomp_->buildNeighborList(neighborList_, point_, savedPositions_);
         }
       }
+
+#ifdef HAVE_NEP
+      // Zero NEP descriptor accumulators at the start of PREPAIR_LOOP
+      if (iLoop == PREPAIR_LOOP && useNEP_) {
+        nepInteraction_->allocate((int)info_->getNAtoms());
+        nepInteraction_->zeroDescriptors();
+      }
+#endif
 
       for (cg1 = 0; cg1 < int(point_.size()) - 1; cg1++) {
         atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
@@ -950,8 +1010,38 @@ namespace OpenMD {
                   if (iLoop == PREPAIR_LOOP) {
                     interactionMan_->doPrePair(idat);
                     fDecomp_->unpackPrePairData(idat, atom1, atom2);
+#ifdef HAVE_NEP
+                    if (useNEP_) {
+                      auto it1 = nepTypeMap_.find(idat.atid1);
+                      auto it2 = nepTypeMap_.find(idat.atid2);
+                      int t1   = (it1 != nepTypeMap_.end()) ? it1->second : -1;
+                      int t2   = (it2 != nepTypeMap_.end()) ? it2->second : -1;
+                      if (t1 >= 0 && t2 >= 0) {
+                        double r12[3] = {idat.d[0], idat.d[1], idat.d[2]};
+                        nepInteraction_->accumDescriptor(
+                            atom1, atom2, r12, idat.rij, t1, t2);
+                      }
+                    }
+#endif
                   } else {
                     interactionMan_->doPair(idat);
+#ifdef HAVE_NEP
+                    if (useNEP_) {
+                      auto it1 = nepTypeMap_.find(idat.atid1);
+                      auto it2 = nepTypeMap_.find(idat.atid2);
+                      int t1   = (it1 != nepTypeMap_.end()) ? it1->second : -1;
+                      int t2   = (it2 != nepTypeMap_.end()) ? it2->second : -1;
+                      if (t1 >= 0 && t2 >= 0) {
+                        double r12[3]     = {idat.d[0], idat.d[1], idat.d[2]};
+                        double f12_nep[3] = {0.0, 0.0, 0.0};
+                        nepInteraction_->calcForce(
+                            atom1, atom2, r12, idat.rij, t1, t2, f12_nep);
+                        idat.f1[0] += (RealType)f12_nep[0];
+                        idat.f1[1] += (RealType)f12_nep[1];
+                        idat.f1[2] += (RealType)f12_nep[2];
+                      }
+                    }
+#endif
                     fDecomp_->unpackInteractionData(idat, atom1, atom2);
                     vij += idat.vpair;
                     fij += idat.f1;
@@ -1043,6 +1133,12 @@ namespace OpenMD {
 
           fDecomp_->distributeIntermediateData();
         }
+#ifdef HAVE_NEP
+        // Run NEP ANN pass (per-atom, serial only for now)
+        if (useNEP_) {
+          nepInteraction_->runANN(nepAtomTypes_);
+        }
+#endif
       }
     }
 
@@ -1074,6 +1170,12 @@ namespace OpenMD {
     fDecomp_->collectSelfData();
 
     longRangePotential = fDecomp_->getPairwisePotential();
+#ifdef HAVE_NEP
+    if (useNEP_) {
+      longRangePotential[METALLIC_EMBEDDING_FAMILY] +=
+          (RealType)nepInteraction_->getTotalEnergy();
+    }
+#endif
     curSnapshot->setLongRangePotentials(longRangePotential);
 
     selfPotential = fDecomp_->getSelfPotential();
