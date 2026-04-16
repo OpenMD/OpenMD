@@ -136,15 +136,20 @@ namespace OpenMD {
       computeFrame(istep);
     }
 
+    dtMean_ = 0.0;
     RealType dt2Avg(0.0);
-    for (int istep = 1; istep < nFrames_; istep++) {
-      RealType dt = times_[istep] - times_[istep - 1];
-      dtMean_ += dt;
-      dt2Avg += dt * dt;
+    dtSigma_ = 0.0;
+
+    if (nFrames_ > 1) {
+      for (int istep = 1; istep < nFrames_; istep++) {
+	RealType dt = times_[istep] - times_[istep - 1];
+	dtMean_ += dt;
+	dt2Avg += dt * dt;
+      }
+      dtMean_ /= RealType(nFrames_ - 1);
+      dt2Avg /= RealType(nFrames_ - 1);
+      dtSigma_ = std::sqrt(dt2Avg - dtMean_ * dtMean_);
     }
-    dtMean_ /= RealType(nFrames_ - 1);
-    dt2Avg /= RealType(nFrames_ - 1);
-    dtSigma_ = std::sqrt(dt2Avg - dtMean_ * dtMean_);
 
     if (dtSigma_ > 1.0e-6) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
