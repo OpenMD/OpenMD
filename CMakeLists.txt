@@ -901,7 +901,8 @@ set(SEQUENTIALPROPSSOURCE
     src/applications/sequentialProps/GCNSeq.cpp
     src/applications/sequentialProps/SequentialAnalyzer.cpp
     src/applications/sequentialProps/SequentialProps.cpp
-    src/applications/sequentialProps/SequentialPropsCmd.cpp)
+    src/applications/sequentialProps/SequentialPropsCmd.cpp
+    src/applications/sequentialProps/Qsurf.cpp)
 
 set(STATICPROPSSOURCE
     src/applications/staticProps/AngleR.cpp

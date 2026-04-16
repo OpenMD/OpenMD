@@ -83,6 +83,12 @@ struct gengetopt_args_info
   double rcut_arg;	/**< @brief cutoff radius (rcut).  */
   char * rcut_orig;	/**< @brief cutoff radius (rcut) original value given at command line.  */
   const char *rcut_help; /**< @brief cutoff radius (rcut) help description.  */
+  double voxelSize_arg;	/**< @brief voxel size for coarse graining (Angstroms) (default='2.0').  */
+  char * voxelSize_orig;	/**< @brief voxel size for coarse graining (Angstroms) original value given at command line.  */
+  const char *voxelSize_help; /**< @brief voxel size for coarse graining (Angstroms) help description.  */
+  double gaussWidth_arg;	/**< @brief Gaussian width for coarse graining (Angstroms) (default='3.0').  */
+  char * gaussWidth_orig;	/**< @brief Gaussian width for coarse graining (Angstroms) original value given at command line.  */
+  const char *gaussWidth_help; /**< @brief Gaussian width for coarse graining (Angstroms) help description.  */
   const char *com_help; /**< @brief selection center of mass help description.  */
   const char *comvel_help; /**< @brief selection center of mass velocity help description.  */
   const char *deltaCount_help; /**< @brief difference in counts between two selections help description.  */
@@ -91,6 +97,7 @@ struct gengetopt_args_info
   const char *ca2_help; /**< @brief contact angle of selection (using density profile) help description.  */
   const char *gcn_help; /**< @brief Generalized Coordinate Number help description.  */
   const char *testequi_help; /**< @brief Temperature using all componets of linear and angular momentum help description.  */
+  const char *qsurf_help; /**< @brief tetrahedrality Q field as OpenDX volumetric files help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -108,6 +115,8 @@ struct gengetopt_args_info
   unsigned int threshDens_given ;	/**< @brief Whether threshDens was given.  */
   unsigned int bufferLength_given ;	/**< @brief Whether bufferLength was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
+  unsigned int voxelSize_given ;	/**< @brief Whether voxelSize was given.  */
+  unsigned int gaussWidth_given ;	/**< @brief Whether gaussWidth was given.  */
   unsigned int com_given ;	/**< @brief Whether com was given.  */
   unsigned int comvel_given ;	/**< @brief Whether comvel was given.  */
   unsigned int deltaCount_given ;	/**< @brief Whether deltaCount was given.  */
@@ -116,6 +125,7 @@ struct gengetopt_args_info
   unsigned int ca2_given ;	/**< @brief Whether ca2 was given.  */
   unsigned int gcn_given ;	/**< @brief Whether gcn was given.  */
   unsigned int testequi_given ;	/**< @brief Whether testequi was given.  */
+  unsigned int qsurf_given ;	/**< @brief Whether qsurf was given.  */
 
   char **inputs ; /**< @brief unnamed options (options without names) */
   unsigned inputs_num ; /**< @brief unnamed options number */

@@ -57,6 +57,7 @@
 #include "applications/sequentialProps/ContactAngle2.hpp"
 #include "applications/sequentialProps/FluxOut.hpp"
 #include "applications/sequentialProps/GCNSeq.hpp"
+#include "applications/sequentialProps/Qsurf.hpp"
 #include "applications/sequentialProps/SequentialAnalyzer.hpp"
 #include "applications/sequentialProps/equipartitionTest.hpp"
 #include "brains/SimCreator.hpp"
@@ -242,6 +243,20 @@ int main(int argc, char* argv[]) {
 					       bufferLength,
 					       args_info.nbins_arg,
 					       args_info.nbins_z_arg);
+  } else if (args_info.qsurf_given) {
+    if (!args_info.rcut_given) {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "A cutoff radius (--rcut) must be specified when using\n"
+               "\t--qsurf for the neighbor search.");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal  = 1;
+      simError();
+    }
+
+    analyzer = std::make_unique<Qsurf>(info, dumpFileName, sele1, sele2,
+                                       args_info.rcut_arg,
+                                       args_info.voxelSize_arg,
+                                       args_info.gaussWidth_arg);
   }
 
   if (analyzer != NULL) {

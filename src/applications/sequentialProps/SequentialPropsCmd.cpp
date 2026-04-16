@@ -49,6 +49,8 @@ const char *gengetopt_args_info_help[] = {
   "      --threshDens=DOUBLE       Threshold Density in g/cm^3",
   "      --bufferLength=DOUBLE     Buffer length in angstroms",
   "      --rcut=DOUBLE             cutoff radius (rcut)",
+  "      --voxelSize=DOUBLE        voxel size for coarse graining (Angstroms)\n                                  (default=`2.0')",
+  "      --gaussWidth=DOUBLE       Gaussian width for coarse graining (Angstroms)\n                                  (default=`3.0')",
   "\n Group: sequentialProps\n   an option of this group is required",
   "  -c, --com                     selection center of mass",
   "  -v, --comvel                  selection center of mass velocity",
@@ -58,6 +60,7 @@ const char *gengetopt_args_info_help[] = {
   "      --ca2                     contact angle of selection (using density\n                                  profile)",
   "      --gcn                     Generalized Coordinate Number",
   "  -t, --testequi                Temperature using all componets of linear and\n                                  angular momentum",
+  "      --qsurf                   tetrahedrality Q field as OpenDX volumetric\n                                  files",
     0
 };
 
@@ -104,6 +107,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->threshDens_given = 0 ;
   args_info->bufferLength_given = 0 ;
   args_info->rcut_given = 0 ;
+  args_info->voxelSize_given = 0 ;
+  args_info->gaussWidth_given = 0 ;
   args_info->com_given = 0 ;
   args_info->comvel_given = 0 ;
   args_info->deltaCount_given = 0 ;
@@ -112,6 +117,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->ca2_given = 0 ;
   args_info->gcn_given = 0 ;
   args_info->testequi_given = 0 ;
+  args_info->qsurf_given = 0 ;
   args_info->sequentialProps_group_counter = 0 ;
 }
 
@@ -140,6 +146,10 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->threshDens_orig = NULL;
   args_info->bufferLength_orig = NULL;
   args_info->rcut_orig = NULL;
+  args_info->voxelSize_arg = 2.0;
+  args_info->voxelSize_orig = NULL;
+  args_info->gaussWidth_arg = 3.0;
+  args_info->gaussWidth_orig = NULL;
   
 }
 
@@ -164,14 +174,17 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->threshDens_help = gengetopt_args_info_help[13] ;
   args_info->bufferLength_help = gengetopt_args_info_help[14] ;
   args_info->rcut_help = gengetopt_args_info_help[15] ;
-  args_info->com_help = gengetopt_args_info_help[17] ;
-  args_info->comvel_help = gengetopt_args_info_help[18] ;
-  args_info->deltaCount_help = gengetopt_args_info_help[19] ;
-  args_info->fluxOut_help = gengetopt_args_info_help[20] ;
-  args_info->ca1_help = gengetopt_args_info_help[21] ;
-  args_info->ca2_help = gengetopt_args_info_help[22] ;
-  args_info->gcn_help = gengetopt_args_info_help[23] ;
-  args_info->testequi_help = gengetopt_args_info_help[24] ;
+  args_info->voxelSize_help = gengetopt_args_info_help[16] ;
+  args_info->gaussWidth_help = gengetopt_args_info_help[17] ;
+  args_info->com_help = gengetopt_args_info_help[19] ;
+  args_info->comvel_help = gengetopt_args_info_help[20] ;
+  args_info->deltaCount_help = gengetopt_args_info_help[21] ;
+  args_info->fluxOut_help = gengetopt_args_info_help[22] ;
+  args_info->ca1_help = gengetopt_args_info_help[23] ;
+  args_info->ca2_help = gengetopt_args_info_help[24] ;
+  args_info->gcn_help = gengetopt_args_info_help[25] ;
+  args_info->testequi_help = gengetopt_args_info_help[26] ;
+  args_info->qsurf_help = gengetopt_args_info_help[27] ;
   
 }
 
@@ -282,6 +295,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->threshDens_orig));
   free_string_field (&(args_info->bufferLength_orig));
   free_string_field (&(args_info->rcut_orig));
+  free_string_field (&(args_info->voxelSize_orig));
+  free_string_field (&(args_info->gaussWidth_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -390,6 +405,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "bufferLength", args_info->bufferLength_orig, 0);
   if (args_info->rcut_given)
     write_into_file(outfile, "rcut", args_info->rcut_orig, 0);
+  if (args_info->voxelSize_given)
+    write_into_file(outfile, "voxelSize", args_info->voxelSize_orig, 0);
+  if (args_info->gaussWidth_given)
+    write_into_file(outfile, "gaussWidth", args_info->gaussWidth_orig, 0);
   if (args_info->com_given)
     write_into_file(outfile, "com", 0, 0 );
   if (args_info->comvel_given)
@@ -406,6 +425,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "gcn", 0, 0 );
   if (args_info->testequi_given)
     write_into_file(outfile, "testequi", 0, 0 );
+  if (args_info->qsurf_given)
+    write_into_file(outfile, "qsurf", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -467,6 +488,7 @@ reset_group_sequentialProps(struct gengetopt_args_info *args_info)
   args_info->ca2_given = 0 ;
   args_info->gcn_given = 0 ;
   args_info->testequi_given = 0 ;
+  args_info->qsurf_given = 0 ;
 
   args_info->sequentialProps_group_counter = 0;
 }
@@ -1327,6 +1349,8 @@ cmdline_parser_internal (
         { "threshDens",	1, NULL, 0 },
         { "bufferLength",	1, NULL, 0 },
         { "rcut",	1, NULL, 0 },
+        { "voxelSize",	1, NULL, 0 },
+        { "gaussWidth",	1, NULL, 0 },
         { "com",	0, NULL, 'c' },
         { "comvel",	0, NULL, 'v' },
         { "deltaCount",	0, NULL, 0 },
@@ -1335,6 +1359,7 @@ cmdline_parser_internal (
         { "ca2",	0, NULL, 0 },
         { "gcn",	0, NULL, 0 },
         { "testequi",	0, NULL, 't' },
+        { "qsurf",	0, NULL, 0 },
         { 0,  0, 0, 0 }
       };
 
@@ -1593,6 +1618,34 @@ cmdline_parser_internal (
               goto failure;
           
           }
+          /* voxel size for coarse graining (Angstroms).  */
+          else if (strcmp (long_options[option_index].name, "voxelSize") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->voxelSize_arg), 
+                 &(args_info->voxelSize_orig), &(args_info->voxelSize_given),
+                &(local_args_info.voxelSize_given), optarg, 0, "2.0", ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "voxelSize", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Gaussian width for coarse graining (Angstroms).  */
+          else if (strcmp (long_options[option_index].name, "gaussWidth") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->gaussWidth_arg), 
+                 &(args_info->gaussWidth_orig), &(args_info->gaussWidth_given),
+                &(local_args_info.gaussWidth_given), optarg, 0, "3.0", ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "gaussWidth", '-',
+                additional_error))
+              goto failure;
+          
+          }
           /* difference in counts between two selections.  */
           else if (strcmp (long_options[option_index].name, "deltaCount") == 0)
           {
@@ -1674,6 +1727,23 @@ cmdline_parser_internal (
                 &(local_args_info.gcn_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "gcn", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* tetrahedrality Q field as OpenDX volumetric files.  */
+          else if (strcmp (long_options[option_index].name, "qsurf") == 0)
+          {
+          
+            if (args_info->sequentialProps_group_counter && override)
+              reset_group_sequentialProps (args_info);
+            args_info->sequentialProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->qsurf_given),
+                &(local_args_info.qsurf_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "qsurf", '-',
                 additional_error))
               goto failure;
           

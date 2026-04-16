@@ -30,6 +30,8 @@ option  "dropletR"      r       "Droplet radius in angstroms"  double no
 option  "threshDens"    -       "Threshold Density in g/cm^3"  double no
 option  "bufferLength"  -       "Buffer length in angstroms"   double no
 option  "rcut"          -       "cutoff radius (rcut)"         double no
+option  "voxelSize"     -       "voxel size for coarse graining (Angstroms)"  double  default="2.0"  no
+option  "gaussWidth"    -       "Gaussian width for coarse graining (Angstroms)"  double  default="3.0"  no
 defgroup "sequentialProps" groupdesc=" an option of this group is required" yes
 groupoption "com"       c       "selection center of mass" group="sequentialProps"
 groupoption "comvel"    v       "selection center of mass velocity" group="sequentialProps"
@@ -38,4 +40,5 @@ groupoption "fluxOut"   -       "number flux out of a selection" group="sequenti
 groupoption "ca1"       -       "contact angle of selection (using center of mass)" group="sequentialProps"
 groupoption "ca2"       -       "contact angle of selection (using density profile)" group="sequentialProps"
 groupoption "gcn"       -       "Generalized Coordinate Number" group="sequentialProps"
-groupoption "testequi"  t "Temperature using all componets of linear and angular momentum" group="sequentialProps"
+groupoption "testequi"  t       "Temperature using all componets of linear and angular momentum" group="sequentialProps"
+groupoption "qsurf"     -       "tetrahedrality Q field as OpenDX volumetric files" group="sequentialProps"
