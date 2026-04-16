@@ -808,6 +808,14 @@ namespace OpenMD {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
     }
 
+    if (seleMan3_.getSelectionCount() < 1) {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+               "HBondJumpR::findHBonds Error: No objects in selection 3!\n");
+      painCave.isFatal = 1;
+      simError();
+    }
+
+
     bool usePeriodicBoundaryConditions_ =
         info_->getSimParams()->getUsePeriodicBoundaryConditions();
 
