@@ -807,14 +807,17 @@ namespace OpenMD {
     if (evaluator3_.isDynamic()) {
       seleMan3_.setSelectionSet(evaluator3_.evaluate());
     }
-
-    if (seleMan3_.getSelectionCount() < 1) {
+    
+    if (seleMan3_.getSelectionCount() == 0) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-               "HBondJumpR::findHBonds Error: No objects in selection 3!\n");
-      painCave.isFatal = 1;
+	       "HBondJump:findHBonds: third selection has no objects at frame"
+	       "%d, skipping frame.\n",
+	       frame);
+      painCave.severity = OPENMD_WARNING;
+      painCave.isFatal  = 0;
       simError();
-    }
-
+      return;
+    } 
 
     bool usePeriodicBoundaryConditions_ =
         info_->getSimParams()->getUsePeriodicBoundaryConditions();

@@ -137,6 +137,17 @@ namespace OpenMD {
       if (evaluator3_.isDynamic()) {
         seleMan3_.setSelectionSet(evaluator3_.evaluate());
       }
+      
+      if (seleMan3_.getSelectionCount() == 0) {
+	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+		 "TetrahedralityParamR:process: third selection has no objects"
+		 "at frame %d, skipping frame.\n",
+		 istep);
+	painCave.severity = OPENMD_WARNING;
+	painCave.isFatal  = 0;
+	simError();
+	continue;
+      } 
 
       // outer loop is over the selected StuntDoubles:
       for (sd = seleMan1_.beginSelected(isd1); sd != NULL;
