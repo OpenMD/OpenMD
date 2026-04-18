@@ -161,7 +161,7 @@ namespace OpenMD {
           simError();
         }
 
-        int timeBin = int((time2 - time1) / dtMean_ + 0.5);
+	int timeBin = (nFrames_ == 1) ? 0 : int((time2 - time1)/dtMean_ + 0.5);
 
         corrVal = 0.0;
         count   = 0;
@@ -660,8 +660,8 @@ namespace OpenMD {
           simError();
         }
 
-        int timeBin = int((time2 - time1) / dtMean_ + 0.5);
-
+	int timeBin = (nFrames_ == 1) ? 0 : int((time2 - time1)/dtMean_ + 0.5);
+	
         // loop over the Hydrogens found in frame i:
 
         for (i1 = s1.begin(); i1 != s1.end(); ++i1) {
@@ -978,7 +978,7 @@ namespace OpenMD {
           simError();
         }
 
-        int timeBin = int((time2 - time1) / dtMean_ + 0.5);
+	int timeBin = (nFrames_ == 1) ? 0 : int((time2 - time1)/dtMean_ + 0.5);
 
         // loop over the Hydrogens found in frame i:
 

@@ -86,6 +86,17 @@ namespace OpenMD {
     simError();
 
     nFrames_   = reader_->getNFrames();
+
+    if (nFrames_ < 2) {
+      snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
+	       "Not enough frames for a meaningful time correlation"
+	       " (need >= 2, have %d).\n",
+	       nFrames_);
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_WARNING;
+      simError();
+    }
+    
     nTimeBins_ = nFrames_;
 
     T zeroType(0.0);
@@ -548,8 +559,8 @@ namespace OpenMD {
             }
             simError();
           }
-
-          int timeBin = int((time2 - time1) / dtMean_ + 0.5);
+	  
+	  int timeBin = (nFrames_== 1) ? 0 : int((time2 - time1)/dtMean_ + 0.5);
           correlateFrames(i, j, timeBin);
         }
       }
