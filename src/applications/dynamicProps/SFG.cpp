@@ -117,10 +117,10 @@ namespace OpenMD {
     // -----------------------------------------------------------------------
 
     // SPC/E  (Auer & Skinner 2008, Table I)
-    //   μ′/μ′_g = 0.7112 + 75.59·E  →  μ′(E) = 0.1646*(0.7112 + 75.59·E)
-    //           = 0.11706 + 12.44·E + 0·E²
+    //   μ′/μ′_g = 0.7112 + 75.59·E  →  μ′(E) = 0.1874*(0.7112 + 75.59·E)
+    //           = 0.1333 + 14.17·E + 0·E²
     w10_["H_SPCE"]      = std::make_tuple(3761.6,  -5060.4,  -86225.0);
-    muPrime_["H_SPCE"]  = std::make_tuple(0.11706, 12.44,    0.0);
+    muPrime_["H_SPCE"] = std::make_tuple(0.1333, 14.17, 0.0);
     x10_["H_SPCE"]      = std::make_pair(0.1934,  -1.75e-5);
     p10_["H_SPCE"]      = std::make_pair(1.611,    5.893e-4);
     wintra_["H_SPCE"]   = std::make_tuple(-1789.0,  23852.0,  -1.966);
@@ -455,6 +455,8 @@ namespace OpenMD {
     std::vector<RealType> eFields;   // projected E in a.u.
     std::vector<RealType> x10vals;   // coordinate matrix element [a.u.]
     std::vector<RealType> p10vals;   // momentum matrix element [a.u.]
+    std::vector<RealType> intraJ_k0; // per-site k0 from wintra_ map
+    std::vector<RealType> intraJ_kp; // per-site kp from wintra_ map
 
     int ii;
     StuntDouble* sd1;
@@ -541,13 +543,20 @@ namespace OpenMD {
         tdcDist = tdcIt->second;
       Vector3d dipolePos = Opos + tdcDist * ohUnit;
 
-      // Bond polarizability tensor
+      // Bond polarizability tensor.
+      // Following MultiSpec (trPol), the transition polarizability
+      // is proportional to x10, which varies with the local field.
+      // The published alpha_par/alpha_perp values incorporate x10 at
+      // the gas-phase value (x10_gas = x0 from the x10 map), so we
+      // scale by x10/x10_gas to capture the field dependence.
       auto [apar, aperp] = alphaMap_.at(name);
+      RealType x10_gas = x10_.at(name).first;
 
       fd.N++;
       fd.globalIDs.push_back(sd1->getGlobalIndex());
       fd.mu.push_back(muMag * ohUnit);
-      fd.alpha.push_back(bondPolarizability(ohUnit, apar, aperp));
+      fd.alpha.push_back(bondPolarizability(ohUnit, apar, aperp,
+					    x10, x10_gas));
 
       // Auxiliary data for Hamiltonian construction
       ohPos.push_back(dipolePos);
@@ -563,8 +572,9 @@ namespace OpenMD {
       // [k0 + k1·E] for this chromophore; the actual coupling requires the
       // partner's E and matrix elements too.
       auto [k0, k1, kp] = wintra_.at(name);
-      (void)kp;  // kinetic coefficient used in buildHamiltonian
       intraJ.push_back(k0 + k1*E);   // potential prefactor for this site
+      intraJ_k0.push_back(k0);
+      intraJ_kp.push_back(kp);
     }
 
     // Build H once with the final size; set diagonal to ω₁₀ frequencies.
@@ -576,19 +586,18 @@ namespace OpenMD {
       fd.idToIndex[fd.globalIDs[i]] = i;
     }
 
-    // Stash x10/p10 vectors into buildHamiltonian via the caller's arrays.
-    // We repurpose the intraJ vector to carry the potential prefactor only;
-    // x10vals and p10vals are passed through the caller.  To avoid changing
-    // the signature of buildHamiltonian (which would ripple), we extend
-    // intraJ to pack [potentialPrefactor, x10, p10] triples.  Each
-    // chromophore contributes 3 consecutive entries.
+    // Stash x10/p10/k0/kp vectors into buildHamiltonian via the caller's
+    // arrays.  We extend intraJ to pack [Ki, x10, p10, k0, kp] quintuples.
+    // Each chromophore contributes 5 consecutive entries.
     {
       std::vector<RealType> packed;
-      packed.reserve(3 * N);
+      packed.reserve(5 * N);
       for (int i = 0; i < N; ++i) {
-        packed.push_back(intraJ[i]);   // potential prefactor k0 + k1·E
-        packed.push_back(x10vals[i]);  // x₁₀
-        packed.push_back(p10vals[i]);  // p₁₀
+        packed.push_back(intraJ[i]);      // Ki = k0 + k1·E
+        packed.push_back(x10vals[i]);     // x₁₀
+        packed.push_back(p10vals[i]);     // p₁₀
+        packed.push_back(intraJ_k0[i]);   // k0 (per atom type)
+        packed.push_back(intraJ_kp[i]);   // kp (per atom type)
       }
       intraJ = std::move(packed);
     }
@@ -603,14 +612,16 @@ namespace OpenMD {
   // Diagonal (ω₁₀) was already set by extractFrame.
   //   same molecule  → J from Gruenbaum eq 3.17:
   //     ω^intra_jk = [k0 + k1·(Eⱼ+Eₖ)]·xⱼ·xₖ + kp·pⱼ·pₖ
-  //     where k0, k1, kp come from wintra_ and the per-chromophore
-  //     potential prefactors, x₁₀, p₁₀ are packed in intraJ.
+  //     where k0, kp, and the per-chromophore potential prefactors,
+  //     x₁₀, p₁₀ are packed in intraJ (per atom type from wintra_).
   //   different mols → J = TDC coupling between OH dipole locations
   //
-  // intraJ packing (from extractFrame): 3 entries per chromophore:
-  //   [3*i+0] = potential prefactor: k0 + k1·Eᵢ
-  //   [3*i+1] = x₁₀,ᵢ
-  //   [3*i+2] = p₁₀,ᵢ
+  // intraJ packing (from extractFrame): 5 entries per chromophore:
+  //   [5*i+0] = Ki = k0 + k1·Eᵢ  (potential coupling prefactor)
+  //   [5*i+1] = x₁₀,ᵢ            (coordinate matrix element, a.u.)
+  //   [5*i+2] = p₁₀,ᵢ            (momentum matrix element, a.u.)
+  //   [5*i+3] = k0                (from wintra_ map, per atom type)
+  //   [5*i+4] = kp                (from wintra_ map, per atom type)
   // =========================================================================
   void SFG::buildHamiltonian(FrameData&                   fd,
 			     const std::vector<Vector3d>& ohPos,
@@ -628,25 +639,20 @@ namespace OpenMD {
 	  // Gruenbaum et al. (2013) eq 3.17 / eq 2.1:
 	  //   ω^intra_jk = [k0 + k1·(Eⱼ+Eₖ)]·xⱼ·xₖ + kp·pⱼ·pₖ
 	  //
-	  // We stored Ki = k0 + k1·Eᵢ per site in intraJ[3*i+0], so:
+	  // We stored Ki = k0 + k1·Eᵢ per site in intraJ[5*i+0], so:
 	  //   k0 + k1·(Eᵢ+Eⱼ) = Ki + Kj − k0
 	  //
-	  // k0 and kp are looked up from the wintra_ map.  For a single
-	  // water model (the common case), all entries share the same k0/kp.
-	  RealType k0_val = 0.0, kp_val = 0.0;
-	  if (!wintra_.empty()) {
-	    auto [kk0, kk1, kkp] = wintra_.begin()->second;
-	    k0_val = kk0;
-	    kp_val = kkp;
-	    (void)kk1;
-	  }
-
-	  RealType Ki = intraJ[3*i + 0];
-	  RealType xi = intraJ[3*i + 1];
-	  RealType pi = intraJ[3*i + 2];
-	  RealType Kj = intraJ[3*j + 0];
-	  RealType xj = intraJ[3*j + 1];
-	  RealType pj = intraJ[3*j + 2];
+	  // k0 and kp are stored per-site (looked up from wintra_ by
+	  // atom type during extractFrame).  For same-molecule pairs
+	  // both atoms have the same type, so either site's values work.
+	  RealType Ki     = intraJ[5*i + 0];
+	  RealType xi     = intraJ[5*i + 1];
+	  RealType pi     = intraJ[5*i + 2];
+	  RealType k0_val = intraJ[5*i + 3];
+	  RealType kp_val = intraJ[5*i + 4];
+	  RealType Kj     = intraJ[5*j + 0];
+	  RealType xj     = intraJ[5*j + 1];
+	  RealType pj     = intraJ[5*j + 2];
 
 	  // Potential coupling: [k0 + k1·(Ei+Ej)] · xi · xj
 	  // = (Ki + Kj - k0) · xi · xj
@@ -1026,16 +1032,26 @@ namespace OpenMD {
 
   // =========================================================================
   // bondPolarizability
-  // α_ab = α_perp·δ_ab + (α_par − α_perp)·ê_a·ê_b
+  //
+  // Transition polarizability tensor for one OH bond.
+  //   α_ab = [α_perp·δ_ab + (α_par − α_perp)·ê_a·ê_b] × (x10 / x10_gas)
+  //
+  // The published α_par/α_perp values incorporate the gas-phase x10.
+  // Following MultiSpec's trPol(), we scale by the local x10 (which
+  // depends on the OH frequency / electric field) divided by x10_gas
+  // (the constant term of the x10 map) so the Raman tensor reflects
+  // the field-dependent coordinate matrix element.
   // =========================================================================
   Mat3x3d SFG::bondPolarizability(const Vector3d& ohUnit,
-				  RealType alpha_par, RealType alpha_perp) {
+				  RealType alpha_par, RealType alpha_perp,
+				  RealType x10, RealType x10_gas) {
+    RealType scale = (x10_gas > 0.0) ? x10 / x10_gas : 1.0;
     RealType da = alpha_par - alpha_perp;
     Mat3x3d a(0.0);
     for (int p = 0; p < 3; ++p) {
-      a(p, p) = alpha_perp + da * ohUnit[p] * ohUnit[p];
+      a(p, p) = (alpha_perp + da * ohUnit[p] * ohUnit[p]) * scale;
       for (int q = p+1; q < 3; ++q) {
-        a(p, q) = da * ohUnit[p] * ohUnit[q];
+        a(p, q) = da * ohUnit[p] * ohUnit[q] * scale;
         a(q, p) = a(p, q);
       }
     }
@@ -1167,15 +1183,18 @@ namespace OpenMD {
       spectrum[i].real(out[i][0]);
 
     // Pass 2: get Im(chi2)
-    // Multiply TCF by i: i·C = -Im(C) + i·Re(C)
+    // Multiply TCF by -i: -i·C = Im(C) - i·Re(C)
+    // The sign convention ensures that Im(chi2) > 0 for the H-bonded
+    // OH stretch region at the water/vapor interface (SSP), consistent
+    // with experiment and the one-sided FT convention.
     for (int i = 0; i < N_fft; ++i) { in[i][0] = 0.0; in[i][1] = 0.0; }
     for (int i = 0; i < N_corr; ++i) {
-      double re_ic = apodTCF[i].imag();
+      double re_ic =  apodTCF[i].imag();
       double im_ic = -apodTCF[i].real();
       in[i][0] = re_ic;
       in[i][1] = im_ic;
       if (i > 0) {
-	// Hermitian mirror of i·C(t)
+	// Hermitian mirror of -i·C(t)
 	in[N_fft - i][0] =  re_ic;
 	in[N_fft - i][1] = -im_ic;
       }
@@ -1249,7 +1268,7 @@ namespace OpenMD {
       ofs << omega << "\t" << re << "\t" << im << "\t"
       << re*re + im*im << "\n";
     };
-    
+
     // negative half → ω below wAvg_ (ascending)
     for (int k = N_fft - halfBW; k < N_fft; ++k)
       writeRow(wAvg_ + (k - N_fft) * dOmega, k);

@@ -243,20 +243,17 @@ namespace OpenMD {
                     RealType dt_ps, int N);
 
     /**
-     * Accumulate one lag point into the provided TCF vectors.
+     * Accumulate one lag point into tcf_ssp_, tcf_ppp_, tcf_sps_.
      *
      * For each polarization element pqr:
      *   C_pqr(t) += Σᵢ α_pq,i(t) * [F · μ_r(0)]ᵢ  × exp(−t/2T1)
      *
-     * @param tt      lag index [0 .. ncor_-1]
-     * @param F       current N×N propagator (row-major complex vector)
-     * @param fd0     FrameData at t=0  (μ₀ components)
-     * @param fdt     FrameData at t    (α components)
-     * @param N       system size
-     * @param exptc   T1 decay: exp(−tt·dt_ps / (2·T1_ps_)); 1.0 if T1=0
-     * @param tgt_ssp target SSP TCF vector to accumulate into
-     * @param tgt_ppp target PPP TCF vector to accumulate into
-     * @param tgt_sps target SPS TCF vector to accumulate into
+     * @param tt     lag index [0 .. ncor_-1]
+     * @param F      current N×N propagator (row-major complex vector)
+     * @param fd0    FrameData at t=0  (μ₀ components)
+     * @param fdt    FrameData at t    (α components)
+     * @param N      system size
+     * @param exptc  T1 decay: exp(−tt·dt_ps / (2·T1_ps_)); 1.0 if T1=0
      */
     void accumulateTCF(int tt,
                        const std::vector<std::complex<double>>& F,
@@ -287,11 +284,13 @@ namespace OpenMD {
 
     /**
      * Bond-polarizability tensor for one OH bond.
-     * α = α_perp·I + (α_par − α_perp)·ê⊗ê
-     * Returns the 6 independent components.
+     * α = [α_perp·I + (α_par − α_perp)·ê⊗ê] × (x10/x10_gas)
+     * The x10/x10_gas factor captures the field-dependent coordinate
+     * matrix element following MultiSpec's trPol() convention.
      */
     Mat3x3d bondPolarizability(const Vector3d& ohUnit,
-                               RealType alpha_par, RealType alpha_perp);
+                               RealType alpha_par, RealType alpha_perp,
+                               RealType x10, RealType x10_gas);
   };
 
 }  // namespace OpenMD
