@@ -54,7 +54,8 @@ option "dipoleX"       -       "X-component of the dipole with respect to body f
 option "dipoleY"       -       "Y-component of the dipole with respect to body frame" default="0.0" double optional
 option "dipoleZ"       -       "Z-component of the dipole with respect to body frame" default="-1.0" double optional
 option "selectionMode" -       "How to treat objects which leave a dynamic selection and then return later (default = survival)" values="survival","restart" enum default="survival" optional
-option "sfg-polarization" -   "SFG polarization combination: ssp, ppp, sps" string default="ssp"  no
+option "sfgPolarization" -   "SFG polarization combination: ssp, ppp, sps" string default="ssp"  no
+option "fermiCoupling"   -   "Fermi coupling for stretch-bend coupling in SFG spectra" double default="50" optional
 defgroup "correlation function" groupdesc=" an option of this group is required" yes
 groupoption "selecorr"     s  "selection correlation function" group="correlation function"
 groupoption "rcorr"        r  "mean squared displacement" group="correlation function"

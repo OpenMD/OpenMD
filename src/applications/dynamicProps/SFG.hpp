@@ -92,7 +92,8 @@ namespace OpenMD {
     SFG(SimInfo* info, const std::string& filename, const std::string& sele1,
         const std::string& sele2, const std::string& polarization = "ssp",
         int privilegedAxis = 2,
-        RealType t_apod = 0.0, RealType t_zerofill = 0.0);
+        RealType t_apod = 0.0, RealType t_zerofill = 0.0,
+        RealType fc = 50.0);
 
     virtual ~SFG();
 
@@ -131,6 +132,12 @@ namespace OpenMD {
     // alphaMap_: (α_par, α_perp)                                [Å² amu⁻⁰·⁵]
     // tdcLoc_ : distance from O along OH bond for TDC location  [Å]
     //           (Auer 2008: 0.58 Å for SPC/E; Gruenbaum 2013: 0.67 Å for TIP4P)
+    //
+    // Bend maps (Ni & Skinner JCP 143, 014502 (2015), for H2O):
+    //   wb01_   : (b0, b1)  ω_{0→1}(E_b) = b0 + b1·E_b   [cm⁻¹]
+    //   wb12_   : (c0, c1)  ω_{1→2}(E_b) = c0 + c1·E_b   [cm⁻¹]
+    //   ω₂δ on Hamiltonian diagonal = ω_{0→1} + ω_{1→2}.
+    //   E_b is the field projected on the HOH bisector (computed in extractFrame).
     // -----------------------------------------------------------------------
     std::map<std::string, std::tuple<RealType,RealType,RealType>> w10_;
     std::map<std::string, std::tuple<RealType,RealType,RealType>> muPrime_;
@@ -139,6 +146,19 @@ namespace OpenMD {
     std::map<std::string, std::tuple<RealType,RealType,RealType>> wintra_;
     std::map<std::string, std::pair<RealType,RealType>>           alphaMap_;
     std::map<std::string, RealType>                              tdcLoc_;
+
+    // Bend maps keyed by water-model name (e.g. "TIP4P", "SPCE", "TIP4P-Ice")
+    std::map<std::string, std::pair<RealType,RealType>>           wb01_;
+    std::map<std::string, std::pair<RealType,RealType>>           wb12_;
+
+    // Fermi coupling [cm⁻¹] between OH stretch and HOH bend overtone
+    // on the same molecule.  Default 50 cm⁻¹ following MultiSpec / Ni 2015.
+    // If 0, Fermi resonance is effectively disabled.
+    RealType fc_ {50.0};
+
+    // True if a bend map is available for the water model(s) selected.
+    // Set during the first extractFrame() call.
+    bool useFermi_ {false};
 
     // Applied external field [kcal mol⁻¹ Å⁻¹ e⁻¹], pre-converted in ctor
     Vector3d EF_;
@@ -161,13 +181,25 @@ namespace OpenMD {
 
     // -----------------------------------------------------------------------
     // Per-frame data in the LOCAL (site) basis.
+    //
+    // When Fermi resonance is enabled, the Hamiltonian and chromophore arrays
+    // include bend-overtone entries appended after the OH stretches:
+    //   indices [0 .. N_stretch-1]            : OH-stretch chromophores
+    //   indices [N_stretch .. N_stretch+N_bend-1] : HOH bend overtones
+    //
+    // Total chromophore count is fd.N = N_stretch + N_bend.
+    // The bend overtones have zero transition dipole and polarizability
+    // (their intensity is borrowed from the stretches via Fermi mixing).
     // -----------------------------------------------------------------------
     struct FrameData {
-      int N {0};
+      int N {0};                        // total chromophores (stretches+bends)
+      int nStretch {0};                 // number of OH stretches
+      int nBend    {0};                 // number of bend overtones
       DynamicRectMatrix<RealType> H;    // NxN exciton Hamiltonian [cm-1]
       std::vector<Vector3d>  mu;        // transition dipole vectors [D]
       std::vector<Mat3x3d>   alpha;     // Raman polarizability tensors
       std::vector<int>       globalIDs; // global H-atom index per chromophore
+                                         // (for bend overtones: O atom global ID)
       std::map<int,int>      idToIndex; // reverse map: globalID -> local index
     };
 
@@ -265,11 +297,13 @@ namespace OpenMD {
                        std::vector<std::complex<double>>& tgt_sps);
 
     /**
-     * TDC coupling between sites i and j.
-     * J = 5034.12 [cm⁻¹ D⁻² Å³] × (μᵢ·μⱼ − 3(μᵢ·r̂)(μⱼ·r̂)) / r³
+     * TDC coupling between sites i and j (MultiSpec convention).
+     * J = AU_TO_WN × geom × (μ′·x₁₀)ᵢ × (μ′·x₁₀)ⱼ / r_bohr³
+     * where geom = (eᵢ·eⱼ − 3(eᵢ·r̂)(eⱼ·r̂)) using unit OH vectors.
      */
     RealType tdcCoupling(const Vector3d& r_ij,
-                         const Vector3d& mu_i, const Vector3d& mu_j);
+                         const Vector3d& e_i, const Vector3d& e_j,
+                         RealType mx_i, RealType mx_j);
 
     /**
      * Build a FrameData containing only the atoms in refIDs, in that order,
@@ -280,7 +314,9 @@ namespace OpenMD {
     bool remapFrame(const FrameData&             src,
                     const std::vector<int>&      refIDs,
                     const std::vector<RealType>& refFreqs,
-                    FrameData&                   out);
+                    FrameData&                   out,
+                    int                          refNStretch,
+                    int                          refNBend);
 
     /**
      * Bond-polarizability tensor for one OH bond.

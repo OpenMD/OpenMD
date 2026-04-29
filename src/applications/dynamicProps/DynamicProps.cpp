@@ -366,9 +366,10 @@ int main(int argc, char* argv[]) {
         std::make_unique<MeanDisplacement>(info, dumpFileName, sele1, sele2);
   } else if (args_info.sfg_given) {
     corrFunc = std::make_unique<SFG>(info, dumpFileName, sele1, sele2,
-				     args_info.sfg_polarization_arg,
+				     args_info.sfgPolarization_arg,
                                      privilegedAxis, args_info.t_apod_arg,
-				     args_info.t_zerofill_arg);
+				     args_info.t_zerofill_arg,
+				     args_info.fermiCoupling_arg);
   }
 
   if (args_info.selectionMode_arg == selectionMode_arg_restart) {

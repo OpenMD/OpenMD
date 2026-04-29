@@ -114,9 +114,12 @@ struct gengetopt_args_info
   enum enum_selectionMode selectionMode_arg;	/**< @brief How to treat objects which leave a dynamic selection and then return later (default = survival) (default='survival').  */
   char * selectionMode_orig;	/**< @brief How to treat objects which leave a dynamic selection and then return later (default = survival) original value given at command line.  */
   const char *selectionMode_help; /**< @brief How to treat objects which leave a dynamic selection and then return later (default = survival) help description.  */
-  char * sfg_polarization_arg;	/**< @brief SFG polarization combination: ssp, ppp, sps (default='ssp').  */
-  char * sfg_polarization_orig;	/**< @brief SFG polarization combination: ssp, ppp, sps original value given at command line.  */
-  const char *sfg_polarization_help; /**< @brief SFG polarization combination: ssp, ppp, sps help description.  */
+  char * sfgPolarization_arg;	/**< @brief SFG polarization combination: ssp, ppp, sps (default='ssp').  */
+  char * sfgPolarization_orig;	/**< @brief SFG polarization combination: ssp, ppp, sps original value given at command line.  */
+  const char *sfgPolarization_help; /**< @brief SFG polarization combination: ssp, ppp, sps help description.  */
+  double fermiCoupling_arg;	/**< @brief Fermi coupling for stretch-bend coupling in SFG spectra (default='50').  */
+  char * fermiCoupling_orig;	/**< @brief Fermi coupling for stretch-bend coupling in SFG spectra original value given at command line.  */
+  const char *fermiCoupling_help; /**< @brief Fermi coupling for stretch-bend coupling in SFG spectra help description.  */
   const char *selecorr_help; /**< @brief selection correlation function help description.  */
   const char *rcorr_help; /**< @brief mean squared displacement help description.  */
   const char *rcorrZ_help; /**< @brief mean squared displacement binned by Z help description.  */
@@ -185,7 +188,8 @@ struct gengetopt_args_info
   unsigned int dipoleY_given ;	/**< @brief Whether dipoleY was given.  */
   unsigned int dipoleZ_given ;	/**< @brief Whether dipoleZ was given.  */
   unsigned int selectionMode_given ;	/**< @brief Whether selectionMode was given.  */
-  unsigned int sfg_polarization_given ;	/**< @brief Whether sfg-polarization was given.  */
+  unsigned int sfgPolarization_given ;	/**< @brief Whether sfgPolarization was given.  */
+  unsigned int fermiCoupling_given ;	/**< @brief Whether fermiCoupling was given.  */
   unsigned int selecorr_given ;	/**< @brief Whether selecorr was given.  */
   unsigned int rcorr_given ;	/**< @brief Whether rcorr was given.  */
   unsigned int rcorrZ_given ;	/**< @brief Whether rcorrZ was given.  */

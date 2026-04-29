@@ -59,7 +59,8 @@ const char *gengetopt_args_info_help[] = {
   "      --dipoleY=DOUBLE          Y-component of the dipole with respect to body\n                                  frame  (default=`0.0')",
   "      --dipoleZ=DOUBLE          Z-component of the dipole with respect to body\n                                  frame  (default=`-1.0')",
   "      --selectionMode=ENUM      How to treat objects which leave a dynamic\n                                  selection and then return later (default =\n                                  survival)  (possible values=\"survival\",\n                                  \"restart\" default=`survival')",
-  "      --sfg-polarization=STRING SFG polarization combination: ssp, ppp, sps\n                                  (default=`ssp')",
+  "      --sfgPolarization=STRING  SFG polarization combination: ssp, ppp, sps\n                                  (default=`ssp')",
+  "      --fermiCoupling=DOUBLE    Fermi coupling for stretch-bend coupling in SFG\n                                  spectra  (default=`50')",
   "\n Group: correlation function\n   an option of this group is required",
   "  -s, --selecorr                selection correlation function",
   "  -r, --rcorr                   mean squared displacement",
@@ -159,7 +160,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->dipoleY_given = 0 ;
   args_info->dipoleZ_given = 0 ;
   args_info->selectionMode_given = 0 ;
-  args_info->sfg_polarization_given = 0 ;
+  args_info->sfgPolarization_given = 0 ;
+  args_info->fermiCoupling_given = 0 ;
   args_info->selecorr_given = 0 ;
   args_info->rcorr_given = 0 ;
   args_info->rcorrZ_given = 0 ;
@@ -253,8 +255,10 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->dipoleZ_orig = NULL;
   args_info->selectionMode_arg = selectionMode_arg_survival;
   args_info->selectionMode_orig = NULL;
-  args_info->sfg_polarization_arg = gengetopt_strdup ("ssp");
-  args_info->sfg_polarization_orig = NULL;
+  args_info->sfgPolarization_arg = gengetopt_strdup ("ssp");
+  args_info->sfgPolarization_orig = NULL;
+  args_info->fermiCoupling_arg = 50;
+  args_info->fermiCoupling_orig = NULL;
   
 }
 
@@ -289,48 +293,49 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->dipoleY_help = gengetopt_args_info_help[23] ;
   args_info->dipoleZ_help = gengetopt_args_info_help[24] ;
   args_info->selectionMode_help = gengetopt_args_info_help[25] ;
-  args_info->sfg_polarization_help = gengetopt_args_info_help[26] ;
-  args_info->selecorr_help = gengetopt_args_info_help[28] ;
-  args_info->rcorr_help = gengetopt_args_info_help[29] ;
-  args_info->rcorrZ_help = gengetopt_args_info_help[30] ;
-  args_info->vcorr_help = gengetopt_args_info_help[31] ;
-  args_info->vcorrZ_help = gengetopt_args_info_help[32] ;
-  args_info->vcorrR_help = gengetopt_args_info_help[33] ;
-  args_info->vaOutProdcorr_help = gengetopt_args_info_help[34] ;
-  args_info->waOutProdcorr_help = gengetopt_args_info_help[35] ;
-  args_info->vwOutProdcorr_help = gengetopt_args_info_help[36] ;
-  args_info->wvOutProdcorr_help = gengetopt_args_info_help[37] ;
-  args_info->wcorr_help = gengetopt_args_info_help[38] ;
-  args_info->dcorr_help = gengetopt_args_info_help[39] ;
-  args_info->lcorr_help = gengetopt_args_info_help[40] ;
-  args_info->lcorrZ_help = gengetopt_args_info_help[41] ;
-  args_info->cohZ_help = gengetopt_args_info_help[42] ;
-  args_info->sdcorr_help = gengetopt_args_info_help[43] ;
-  args_info->r_rcorr_help = gengetopt_args_info_help[44] ;
-  args_info->thetacorr_help = gengetopt_args_info_help[45] ;
-  args_info->drcorr_help = gengetopt_args_info_help[46] ;
-  args_info->stresscorr_help = gengetopt_args_info_help[47] ;
-  args_info->bondcorr_help = gengetopt_args_info_help[48] ;
-  args_info->freqfluccorr_help = gengetopt_args_info_help[49] ;
-  args_info->jumptime_help = gengetopt_args_info_help[50] ;
-  args_info->jumptimeZ_help = gengetopt_args_info_help[51] ;
-  args_info->jumptimeR_help = gengetopt_args_info_help[52] ;
-  args_info->persistence_help = gengetopt_args_info_help[53] ;
-  args_info->pjcorr_help = gengetopt_args_info_help[54] ;
-  args_info->ftcorr_help = gengetopt_args_info_help[55] ;
-  args_info->ckcorr_help = gengetopt_args_info_help[56] ;
-  args_info->cscorr_help = gengetopt_args_info_help[57] ;
-  args_info->facorr_help = gengetopt_args_info_help[58] ;
-  args_info->tfcorr_help = gengetopt_args_info_help[59] ;
-  args_info->tacorr_help = gengetopt_args_info_help[60] ;
-  args_info->disp_help = gengetopt_args_info_help[61] ;
-  args_info->dispZ_help = gengetopt_args_info_help[62] ;
-  args_info->current_help = gengetopt_args_info_help[63] ;
-  args_info->onsager_help = gengetopt_args_info_help[64] ;
-  args_info->ddisp_help = gengetopt_args_info_help[65] ;
-  args_info->rotAngleDisp_help = gengetopt_args_info_help[66] ;
-  args_info->meandisp_help = gengetopt_args_info_help[67] ;
-  args_info->sfg_help = gengetopt_args_info_help[68] ;
+  args_info->sfgPolarization_help = gengetopt_args_info_help[26] ;
+  args_info->fermiCoupling_help = gengetopt_args_info_help[27] ;
+  args_info->selecorr_help = gengetopt_args_info_help[29] ;
+  args_info->rcorr_help = gengetopt_args_info_help[30] ;
+  args_info->rcorrZ_help = gengetopt_args_info_help[31] ;
+  args_info->vcorr_help = gengetopt_args_info_help[32] ;
+  args_info->vcorrZ_help = gengetopt_args_info_help[33] ;
+  args_info->vcorrR_help = gengetopt_args_info_help[34] ;
+  args_info->vaOutProdcorr_help = gengetopt_args_info_help[35] ;
+  args_info->waOutProdcorr_help = gengetopt_args_info_help[36] ;
+  args_info->vwOutProdcorr_help = gengetopt_args_info_help[37] ;
+  args_info->wvOutProdcorr_help = gengetopt_args_info_help[38] ;
+  args_info->wcorr_help = gengetopt_args_info_help[39] ;
+  args_info->dcorr_help = gengetopt_args_info_help[40] ;
+  args_info->lcorr_help = gengetopt_args_info_help[41] ;
+  args_info->lcorrZ_help = gengetopt_args_info_help[42] ;
+  args_info->cohZ_help = gengetopt_args_info_help[43] ;
+  args_info->sdcorr_help = gengetopt_args_info_help[44] ;
+  args_info->r_rcorr_help = gengetopt_args_info_help[45] ;
+  args_info->thetacorr_help = gengetopt_args_info_help[46] ;
+  args_info->drcorr_help = gengetopt_args_info_help[47] ;
+  args_info->stresscorr_help = gengetopt_args_info_help[48] ;
+  args_info->bondcorr_help = gengetopt_args_info_help[49] ;
+  args_info->freqfluccorr_help = gengetopt_args_info_help[50] ;
+  args_info->jumptime_help = gengetopt_args_info_help[51] ;
+  args_info->jumptimeZ_help = gengetopt_args_info_help[52] ;
+  args_info->jumptimeR_help = gengetopt_args_info_help[53] ;
+  args_info->persistence_help = gengetopt_args_info_help[54] ;
+  args_info->pjcorr_help = gengetopt_args_info_help[55] ;
+  args_info->ftcorr_help = gengetopt_args_info_help[56] ;
+  args_info->ckcorr_help = gengetopt_args_info_help[57] ;
+  args_info->cscorr_help = gengetopt_args_info_help[58] ;
+  args_info->facorr_help = gengetopt_args_info_help[59] ;
+  args_info->tfcorr_help = gengetopt_args_info_help[60] ;
+  args_info->tacorr_help = gengetopt_args_info_help[61] ;
+  args_info->disp_help = gengetopt_args_info_help[62] ;
+  args_info->dispZ_help = gengetopt_args_info_help[63] ;
+  args_info->current_help = gengetopt_args_info_help[64] ;
+  args_info->onsager_help = gengetopt_args_info_help[65] ;
+  args_info->ddisp_help = gengetopt_args_info_help[66] ;
+  args_info->rotAngleDisp_help = gengetopt_args_info_help[67] ;
+  args_info->meandisp_help = gengetopt_args_info_help[68] ;
+  args_info->sfg_help = gengetopt_args_info_help[69] ;
   
 }
 
@@ -452,8 +457,9 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->dipoleY_orig));
   free_string_field (&(args_info->dipoleZ_orig));
   free_string_field (&(args_info->selectionMode_orig));
-  free_string_field (&(args_info->sfg_polarization_arg));
-  free_string_field (&(args_info->sfg_polarization_orig));
+  free_string_field (&(args_info->sfgPolarization_arg));
+  free_string_field (&(args_info->sfgPolarization_orig));
+  free_string_field (&(args_info->fermiCoupling_orig));
   
   
   for (i = 0; i < args_info->inputs_num; ++i)
@@ -582,8 +588,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "dipoleZ", args_info->dipoleZ_orig, 0);
   if (args_info->selectionMode_given)
     write_into_file(outfile, "selectionMode", args_info->selectionMode_orig, cmdline_parser_selectionMode_values);
-  if (args_info->sfg_polarization_given)
-    write_into_file(outfile, "sfg-polarization", args_info->sfg_polarization_orig, 0);
+  if (args_info->sfgPolarization_given)
+    write_into_file(outfile, "sfgPolarization", args_info->sfgPolarization_orig, 0);
+  if (args_info->fermiCoupling_given)
+    write_into_file(outfile, "fermiCoupling", args_info->fermiCoupling_orig, 0);
   if (args_info->selecorr_given)
     write_into_file(outfile, "selecorr", 0, 0 );
   if (args_info->rcorr_given)
@@ -1630,7 +1638,8 @@ cmdline_parser_internal (
         { "dipoleY",	1, NULL, 0 },
         { "dipoleZ",	1, NULL, 0 },
         { "selectionMode",	1, NULL, 0 },
-        { "sfg-polarization",	1, NULL, 0 },
+        { "sfgPolarization",	1, NULL, 0 },
+        { "fermiCoupling",	1, NULL, 0 },
         { "selecorr",	0, NULL, 's' },
         { "rcorr",	0, NULL, 'r' },
         { "rcorrZ",	0, NULL, 0 },
@@ -2180,15 +2189,29 @@ cmdline_parser_internal (
           
           }
           /* SFG polarization combination: ssp, ppp, sps.  */
-          else if (strcmp (long_options[option_index].name, "sfg-polarization") == 0)
+          else if (strcmp (long_options[option_index].name, "sfgPolarization") == 0)
           {
           
           
-            if (update_arg( (void *)&(args_info->sfg_polarization_arg), 
-                 &(args_info->sfg_polarization_orig), &(args_info->sfg_polarization_given),
-                &(local_args_info.sfg_polarization_given), optarg, 0, "ssp", ARG_STRING,
+            if (update_arg( (void *)&(args_info->sfgPolarization_arg), 
+                 &(args_info->sfgPolarization_orig), &(args_info->sfgPolarization_given),
+                &(local_args_info.sfgPolarization_given), optarg, 0, "ssp", ARG_STRING,
                 check_ambiguity, override, 0, 0,
-                "sfg-polarization", '-',
+                "sfgPolarization", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Fermi coupling for stretch-bend coupling in SFG spectra.  */
+          else if (strcmp (long_options[option_index].name, "fermiCoupling") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->fermiCoupling_arg), 
+                 &(args_info->fermiCoupling_orig), &(args_info->fermiCoupling_given),
+                &(local_args_info.fermiCoupling_given), optarg, 0, "50", ARG_DOUBLE,
+                check_ambiguity, override, 0, 0,
+                "fermiCoupling", '-',
                 additional_error))
               goto failure;
           
