@@ -506,120 +506,125 @@ namespace OpenMD {
     std::map<int, MolData> molMap;   // molID -> MolData
 
     int ii;
-    StuntDouble* sd1;
+    Molecule* mol;
 
-    for (sd1 = seleMan1_.beginSelected(ii); sd1 != nullptr;
-	 sd1 = seleMan1_.nextSelected(ii)) {
+    for (mol = seleMan1_.beginSelectedMolecule(ii); mol != nullptr;
+	 mol = seleMan1_.nextSelectedMolecule(ii)) {
 
-      if (!sd1->isAtom()) continue;
+      int molID = mol->getGlobalIndex();
 
-      Atom* atom      = dynamic_cast<Atom*>(sd1);
-      AtomType* at    = atom->getAtomType();
-      std::string name = at->getName();
-
-      auto wIt = w10_.find(name);
-      if (wIt == w10_.end()) continue;
-      auto mpIt = muPrime_.find(name);
-      if (mpIt == muPrime_.end()) continue;
-
-      int sdID  = sd1->getGlobalIndex();
-      int molID = info_->getGlobalMolMembership(sdID);
-      Molecule* mol = info_->getMoleculeByGlobalIndex(molID);
-
+      // Locate the oxygen and the (up to two) mapped hydrogens of this water.
       Vector3d Opos;
       int      OgID = -1;
       bool foundO = false;
+      std::vector<Atom*> hAtoms;
       Molecule::AtomIterator ai;
-      for (Atom* oatom = mol->beginAtom(ai); oatom != nullptr;
-           oatom = mol->nextAtom(ai)) {
-        if (oatom->getAtomType()->getName()[0] == 'O') {
-          Opos   = oatom->getPos();
-          OgID   = oatom->getGlobalIndex();
+      for (Atom* atom = mol->beginAtom(ai); atom != nullptr;
+           atom = mol->nextAtom(ai)) {
+        const std::string& aname = atom->getAtomType()->getName();
+        if (aname[0] == 'O' && !foundO) {
+          Opos   = atom->getPos();
+          OgID   = atom->getGlobalIndex();
           foundO = true;
-          break;
+        } else if (w10_.find(aname) != w10_.end()) {
+          hAtoms.push_back(atom);
         }
       }
       if (!foundO) continue;
+      if (hAtoms.empty()) continue;
 
-      Vector3d Hpos    = sd1->getPos();
-      Vector3d rOH_mic = Hpos - Opos;
-      currentSnapshot_->wrapVector(rOH_mic);   // minimum-image OH vector
-      RealType rOH_len = rOH_mic.length();
-      Vector3d ohUnit  = rOH_mic;
-      ohUnit.normalize();
+      // Build a stretch chromophore for EACH OH bond of this molecule.
+      // Iterating over molecules (selected by COM z) and including BOTH OH
+      // bonds removes the orientational bias that arises when selecting
+      // individual hydrogens in a thin z-slab (which preferentially admits
+      // up-pointing OH bonds, biasing <mu_z>).
+      for (Atom* hAtom : hAtoms) {
+        std::string name = hAtom->getAtomType()->getName();
 
-      // Electric field [kcal mol⁻¹ Å⁻¹ e⁻¹] → AU
-      Vector3d sE = sd1->getElectricField() + EF_;
-      sE *= kcalToAU;
-      RealType E = dot(ohUnit, sE);
+        auto wIt  = w10_.find(name);
+        auto mpIt = muPrime_.find(name);
+        if (wIt == w10_.end() || mpIt == muPrime_.end()) continue;
 
-      // Local frequency ω₁₀ [cm⁻¹]
-      auto [a0, a1, a2] = wIt->second;
-      RealType freq = a0 + a1*E + a2*E*E;
+        Vector3d Hpos    = hAtom->getPos();
+        Vector3d rOH_mic = Hpos - Opos;
+        currentSnapshot_->wrapVector(rOH_mic);   // minimum-image OH vector
+        RealType rOH_len = rOH_mic.length();
+        Vector3d ohUnit  = rOH_mic;
+        ohUnit.normalize();
 
-      auto [m0, m1, m2] = mpIt->second;
-      RealType muPrime = m0 + m1*E + m2*E*E;        // [a.u.]
+        // Electric field [kcal mol⁻¹ Å⁻¹ e⁻¹] → AU
+        Vector3d sE = hAtom->getElectricField() + EF_;
+        sE *= kcalToAU;
+        RealType E = dot(ohUnit, sE);
 
-      auto [x0, x1] = x10_.at(name);
-      RealType x10  = x0 + x1*freq;                 // [a.u.]
+        // Local frequency ω₁₀ [cm⁻¹]
+        auto [a0, a1, a2] = wIt->second;
+        RealType freq = a0 + a1*E + a2*E*E;
 
-      // Momentum matrix element for intramolecular coupling
-      auto [pv0, pv1] = p10_.at(name);
-      RealType p10  = pv0 + pv1*freq;               // [a.u.]
+        auto [m0, m1, m2] = mpIt->second;
+        RealType muPrime = m0 + m1*E + m2*E*E;        // [a.u.]
 
-      // Transition dipole magnitude [Debye]
-      const RealType eaBohr_to_Debye = 2.5417464;
-      RealType muMag = muPrime * x10 * eaBohr_to_Debye;
+        auto [x0, x1] = x10_.at(name);
+        RealType x10  = x0 + x1*freq;                 // [a.u.]
 
-      // TDC dipole location: a fitted distance along the OH bond from O.
-      // Auer & Skinner 2008: 0.58 Å (SPC/E); Gruenbaum et al. 2013: 0.67 Å (TIP4P).
-      RealType tdcDist = 0.5 * rOH_len;  // fallback: midpoint
-      auto tdcIt = tdcLoc_.find(name);
-      if (tdcIt != tdcLoc_.end())
-        tdcDist = tdcIt->second;
-      Vector3d dipolePos = Opos + tdcDist * ohUnit;
+        // Momentum matrix element for intramolecular coupling
+        auto [pv0, pv1] = p10_.at(name);
+        RealType p10  = pv0 + pv1*freq;               // [a.u.]
 
-      // Bond polarizability tensor.
-      auto [apar, aperp] = alphaMap_.at(name);
-      RealType x10_gas = x10_.at(name).first;
+        // Transition dipole magnitude [Debye]
+        const RealType eaBohr_to_Debye = 2.5417464;
+        RealType muMag = muPrime * x10 * eaBohr_to_Debye;
 
-      fd.N++;
-      fd.globalIDs.push_back(sd1->getGlobalIndex());
-      fd.mu.push_back(muMag * ohUnit);
-      fd.alpha.push_back(bondPolarizability(ohUnit, apar, aperp,
-					    x10, x10_gas));
+        // TDC dipole location: a fitted distance along the OH bond from O.
+        // Auer & Skinner 2008: 0.58 Å (SPC/E); Gruenbaum 2013: 0.67 Å (TIP4P).
+        RealType tdcDist = 0.5 * rOH_len;  // fallback: midpoint
+        auto tdcIt = tdcLoc_.find(name);
+        if (tdcIt != tdcLoc_.end())
+          tdcDist = tdcIt->second;
+        Vector3d dipolePos = Opos + tdcDist * ohUnit;
 
-      // Auxiliary data for Hamiltonian construction
-      ohPos.push_back(dipolePos);
-      molIndex.push_back(molID);
-      freqs.push_back(freq);
-      eFields.push_back(E);
-      x10vals.push_back(x10);
-      p10vals.push_back(p10);
-      mxvals.push_back(muPrime * x10);   // a.u., for TDC coupling
+        // Bond polarizability tensor.
+        auto [apar, aperp] = alphaMap_.at(name);
+        RealType x10_gas = x10_.at(name).first;
 
-      auto [k0, k1, kp] = wintra_.at(name);
-      intraJ.push_back(k0 + k1*E);
-      intraJ_k0.push_back(k0);
-      intraJ_kp.push_back(kp);
+        fd.N++;
+        fd.globalIDs.push_back(hAtom->getGlobalIndex());
+        fd.mu.push_back(muMag * ohUnit);
+        fd.alpha.push_back(bondPolarizability(ohUnit, apar, aperp,
+                                              x10, x10_gas));
 
-      // -------------------------------------------------------------------
-      // Stash this stretch's per-molecule info for the bend pass
-      // -------------------------------------------------------------------
-      MolData& md = molMap[molID];
-      md.Opos    = Opos;
-      md.molOgID = OgID;
-      md.modelName = mol->getType();
-      if (md.ohCount == 0) {
-        md.ohUnit1 = ohUnit;
-        md.Efield1 = sE;
-        md.rOH1    = rOH_len;
-      } else if (md.ohCount == 1) {
-        md.ohUnit2 = ohUnit;
-        md.Efield2 = sE;
-        md.rOH2    = rOH_len;
+        // Auxiliary data for Hamiltonian construction
+        ohPos.push_back(dipolePos);
+        molIndex.push_back(molID);
+        freqs.push_back(freq);
+        eFields.push_back(E);
+        x10vals.push_back(x10);
+        p10vals.push_back(p10);
+        mxvals.push_back(muPrime * x10);   // a.u., for TDC coupling
+
+        auto [k0, k1, kp] = wintra_.at(name);
+        intraJ.push_back(k0 + k1*E);
+        intraJ_k0.push_back(k0);
+        intraJ_kp.push_back(kp);
+
+        // -----------------------------------------------------------------
+        // Stash this stretch's per-molecule info for the bend pass
+        // -----------------------------------------------------------------
+        MolData& md = molMap[molID];
+        md.Opos    = Opos;
+        md.molOgID = OgID;
+        md.modelName = mol->getType();
+        if (md.ohCount == 0) {
+          md.ohUnit1 = ohUnit;
+          md.Efield1 = sE;
+          md.rOH1    = rOH_len;
+        } else if (md.ohCount == 1) {
+          md.ohUnit2 = ohUnit;
+          md.Efield2 = sE;
+          md.rOH2    = rOH_len;
+        }
+        md.ohCount++;
       }
-      md.ohCount++;
     }
 
     int nStretch = fd.N;
@@ -1354,11 +1359,23 @@ namespace OpenMD {
     // Fourier transform are cleanly separated into dispersive (Re)
     // and absorptive (Im) lineshapes with no phase mixing.
     //
-    // Pass 1:  input = C(t) for t>0, C*(-t) for t<0  →  Re(spectrum)
-    // Pass 2:  input = i·C(t) for t>0, conj(i·C(t)) for t<0  →  Im(spectrum)
+    // -----------------------------------------------------------------------
+    // The SFG response carries an explicit leading factor of i:
+    //     chi2(w) ∝ i ∫ dt e^{-iwt} C(t).
+    // Let Ctilde(w) = ∫ dt e^{-iwt} C(t) be the raw transform.  Then
+    //     chi2 = i·Ctilde  =>  Re(chi2) = -Im(Ctilde),  Im(chi2) = +Re(Ctilde).
+    // Pass 1 below computes Re(Ctilde) (cosine transform of the Hermitian
+    // extension); Pass 2 computes Im(Ctilde).  We therefore assign:
+    //     Im(chi2) =  Re(Ctilde)   [pass 1]
+    //     Re(chi2) = -Im(Ctilde)   [pass 2]
+    // so that Im(chi2) is the absorptive lineshape (positive H-bonded band
+    // for the conventional upper face), matching the time-averaging module.
+    //
+    // Pass 1:  input = C(t) for t>0, C*(-t) for t<0  →  Re(Ctilde) → Im(chi2)
+    // Pass 2:  input = -i·C(t), Hermitian-extended    →  Im(Ctilde) → -Re(chi2)
     // -----------------------------------------------------------------------
 
-    // Pass 1: get Re(chi2)
+    // Pass 1: get Re(Ctilde), which becomes Im(chi2)
     for (int i = 0; i < N_fft; ++i) { in[i][0] = 0.0; in[i][1] = 0.0; }
     for (int i = 0; i < N_corr; ++i) {
       in[i][0] = apodTCF[i].real();
@@ -1370,16 +1387,12 @@ namespace OpenMD {
       }
     }
     fftw_execute(plan);
-    // The Hermitian input guarantees the output is purely real;
-    // take the real part as Re(spectrum).
+    // Hermitian input → real output.  This is Re(Ctilde) = Im(chi2).
     for (int i = 0; i < N_fft; ++i)
-      spectrum[i].real(out[i][0]);
+      spectrum[i].imag(out[i][0]);
 
-    // Pass 2: get Im(chi2)
+    // Pass 2: get Im(Ctilde), which becomes -Re(chi2)
     // Multiply TCF by -i: -i·C = Im(C) - i·Re(C)
-    // The sign convention ensures that Im(chi2) > 0 for the H-bonded
-    // OH stretch region at the water/vapor interface (SSP), consistent
-    // with experiment and the one-sided FT convention.
     for (int i = 0; i < N_fft; ++i) { in[i][0] = 0.0; in[i][1] = 0.0; }
     for (int i = 0; i < N_corr; ++i) {
       double re_ic =  apodTCF[i].imag();
@@ -1393,8 +1406,9 @@ namespace OpenMD {
       }
     }
     fftw_execute(plan);
+    // out[i][0] = Re(transform of -i·C) = Im(Ctilde).  Re(chi2) = -Im(Ctilde).
     for (int i = 0; i < N_fft; ++i)
-      spectrum[i].imag(out[i][0]);
+      spectrum[i].real(-out[i][0]);
 
     fftw_destroy_plan(plan);
 

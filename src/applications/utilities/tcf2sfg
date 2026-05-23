@@ -41,23 +41,28 @@ def hermitian_fft(tcf, N_fft):
     assert N_fft >= 2 * N_corr, \
         f"N_fft ({N_fft}) must be >= 2*N_corr ({2*N_corr})"
 
-    # Pass 1: Re(spectrum) from Hermitian-extended C(t)
+    # Pass 1: cosine transform of Hermitian-extended C(t) = Re(Ctilde)
     buf = np.zeros(N_fft, dtype=complex)
     buf[:N_corr] = tcf
     buf[N_fft - N_corr + 1:] = np.conj(tcf[1:][::-1])
     fft1 = np.fft.fft(buf)
-    # Hermitian input -> output is real; take real part
-    re_spectrum = fft1.real.copy()
+    # Hermitian input -> output is real
+    re_ctilde = fft1.real.copy()
 
-    # Pass 2: Im(spectrum) from Hermitian-extended -i*C(t)
+    # Pass 2: transform of Hermitian-extended -i*C(t) = Im(Ctilde)
     ic = -1j * tcf
     buf[:] = 0.0
     buf[:N_corr] = ic
     buf[N_fft - N_corr + 1:] = np.conj(ic[1:][::-1])
     fft2 = np.fft.fft(buf)
-    im_spectrum = fft2.real.copy()
+    im_ctilde = fft2.real.copy()
 
-    return re_spectrum + 1j * im_spectrum
+    # The SFG response carries a leading factor of i:
+    #   chi2(w) ∝ i * Ctilde(w),  where Ctilde = re_ctilde + i*im_ctilde.
+    # Hence  Re(chi2) = -im_ctilde,  Im(chi2) = +re_ctilde, so that Im(chi2)
+    # is the absorptive lineshape (negative H-bonded band, positive free-OH
+    # for the conventional upper face), matching the time-averaging module.
+    return (-im_ctilde) + 1j * re_ctilde
 
 
 def next_power_of_two(n):

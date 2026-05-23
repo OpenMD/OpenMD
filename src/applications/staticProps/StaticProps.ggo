@@ -68,6 +68,9 @@ option "dipoleZ"       -       "Z-component of the dipole with respect to body f
 option "v_radius"        -        "VanderWaals radiius for fictious atoms used in model eg. M site in TIP4P-FQ water model" double optional
 option "gen_xyz"  - "generates xyz file" flag				off
 option "atom_name" - "name of atom for with average charge to be generated" string	typestr="selection script"	optional
+option "sfgPolarization" -   "SFG polarization combination: ssp, ppp, sps" string default="ssp"  no
+option "lorentzianWidth" -   "Lorentzian half-width [cm-1] applied to eigenstates in SFG spectra" double default="20" optional
+option "fermiCoupling"   -   "Fermi coupling [cm-1] for stretch-bend coupling in SFG spectra" double default="50" optional
 
 defgroup "staticProps" groupdesc=" an option of this group is required" required
 groupoption "bo"        -       "bond order parameter (--rcut must be specified)" group="staticProps"
@@ -144,3 +147,4 @@ groupoption "countz" - "computes the number of selected atoms  along selected ax
 groupoption "momentum_distribution" M "computes the momentum distribution for the selected atom" group ="staticProps"
 groupoption "dipole_orientation" S "spatially-resolved dipole order parameter S(z), S = (3 Cos^2\\theta - 1)/2" group = "staticProps"
 groupoption "order_prob" - "probability of order parameter for given selection" group = "staticProps"
+groupoption "sfg"        - "SFG susceptibility spectrum (time averaging approximation) - uses molecular selections" group = "staticProps"

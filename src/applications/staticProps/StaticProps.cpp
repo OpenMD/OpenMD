@@ -72,6 +72,7 @@
 #include "applications/staticProps/RhoZ.hpp"
 #include "applications/staticProps/RippleOP.hpp"
 #include "applications/staticProps/SCDOrderParameter.hpp"
+#include "applications/staticProps/SFGTimeAvg.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "applications/staticProps/TwoDGofR.hpp"
 #include "applications/staticProps/pAngle.hpp"
@@ -680,6 +681,14 @@ int main(int argc, char* argv[]) {
   } else if (args_info.OHfreqmap_given) {
     analyser = std::make_unique<OHFrequencyMap>(info, dumpFileName, sele1,
 						args_info.nbins_arg);
+  } else if (args_info.sfg_given) {
+        analyser = std::make_unique<SFGTimeAvg>(info, dumpFileName, sele1,
+						args_info.nbins_arg,
+						args_info.sfgPolarization_arg,
+						privilegedAxis,
+						args_info.lorentzianWidth_arg,
+						args_info.fermiCoupling_arg);
+
   } else if (args_info.p_angle_given) {
     if (args_info.sele1_given) {
       if (args_info.sele2_given)

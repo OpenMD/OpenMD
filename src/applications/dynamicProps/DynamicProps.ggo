@@ -55,7 +55,7 @@ option "dipoleY"       -       "Y-component of the dipole with respect to body f
 option "dipoleZ"       -       "Z-component of the dipole with respect to body frame" default="-1.0" double optional
 option "selectionMode" -       "How to treat objects which leave a dynamic selection and then return later (default = survival)" values="survival","restart" enum default="survival" optional
 option "sfgPolarization" -   "SFG polarization combination: ssp, ppp, sps" string default="ssp"  no
-option "fermiCoupling"   -   "Fermi coupling for stretch-bend coupling in SFG spectra" double default="50" optional
+option "fermiCoupling"   -   "Fermi coupling [cm-1] for stretch-bend coupling in SFG spectra" double default="50" optional
 defgroup "correlation function" groupdesc=" an option of this group is required" yes
 groupoption "selecorr"     s  "selection correlation function" group="correlation function"
 groupoption "rcorr"        r  "mean squared displacement" group="correlation function"
@@ -99,4 +99,4 @@ groupoption "onsager"      -  "Onsager coefficient correlation functions" group 
 groupoption "ddisp"        -  "Collective Dipole displacement function (Helfand moment of Current Density)" group = "correlation function"
 groupoption "rotAngleDisp" -  "Displacement correlation function for rotation angles" group = "correlation function"
 groupoption "meandisp"     -  "mean displacement" group="correlation function"
-groupoption "sfg"          -  "SFG susceptibility spectrum (exciton model)" group = "correlation function"
+groupoption "sfg"          -  "SFG susceptibility spectrum (exciton model) - use molecular selections" group = "correlation function"

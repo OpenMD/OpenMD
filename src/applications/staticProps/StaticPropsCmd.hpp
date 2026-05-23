@@ -169,6 +169,15 @@ struct gengetopt_args_info
   char * atom_name_arg;	/**< @brief name of atom for with average charge to be generated.  */
   char * atom_name_orig;	/**< @brief name of atom for with average charge to be generated original value given at command line.  */
   const char *atom_name_help; /**< @brief name of atom for with average charge to be generated help description.  */
+  char * sfgPolarization_arg;	/**< @brief SFG polarization combination: ssp, ppp, sps (default='ssp').  */
+  char * sfgPolarization_orig;	/**< @brief SFG polarization combination: ssp, ppp, sps original value given at command line.  */
+  const char *sfgPolarization_help; /**< @brief SFG polarization combination: ssp, ppp, sps help description.  */
+  double lorentzianWidth_arg;	/**< @brief Lorentzian half-width [cm-1] applied to eigenstates in SFG spectra (default='20').  */
+  char * lorentzianWidth_orig;	/**< @brief Lorentzian half-width [cm-1] applied to eigenstates in SFG spectra original value given at command line.  */
+  const char *lorentzianWidth_help; /**< @brief Lorentzian half-width [cm-1] applied to eigenstates in SFG spectra help description.  */
+  double fermiCoupling_arg;	/**< @brief Fermi coupling [cm-1] for stretch-bend coupling in SFG spectra (default='50').  */
+  char * fermiCoupling_orig;	/**< @brief Fermi coupling [cm-1] for stretch-bend coupling in SFG spectra original value given at command line.  */
+  const char *fermiCoupling_help; /**< @brief Fermi coupling [cm-1] for stretch-bend coupling in SFG spectra help description.  */
   const char *bo_help; /**< @brief bond order parameter (--rcut must be specified) help description.  */
   const char *ior_help; /**< @brief icosahedral bond order parameter as a function of radius (--rcut must be specified) help description.  */
   const char *for_help; /**< @brief FCC bond order parameter as a function of radius (--rcut must be specified) help description.  */
@@ -242,6 +251,7 @@ struct gengetopt_args_info
   const char *momentum_distribution_help; /**< @brief computes the momentum distribution for the selected atom help description.  */
   const char *dipole_orientation_help; /**< @brief spatially-resolved dipole order parameter S(z), S = (3 Cos^2\\theta - 1)/2 help description.  */
   const char *order_prob_help; /**< @brief probability of order parameter for given selection help description.  */
+  const char *sfg_help; /**< @brief SFG susceptibility spectrum (time averaging approximation) - uses molecular selections help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -287,6 +297,9 @@ struct gengetopt_args_info
   unsigned int v_radius_given ;	/**< @brief Whether v_radius was given.  */
   unsigned int gen_xyz_given ;	/**< @brief Whether gen_xyz was given.  */
   unsigned int atom_name_given ;	/**< @brief Whether atom_name was given.  */
+  unsigned int sfgPolarization_given ;	/**< @brief Whether sfgPolarization was given.  */
+  unsigned int lorentzianWidth_given ;	/**< @brief Whether lorentzianWidth was given.  */
+  unsigned int fermiCoupling_given ;	/**< @brief Whether fermiCoupling was given.  */
   unsigned int bo_given ;	/**< @brief Whether bo was given.  */
   unsigned int ior_given ;	/**< @brief Whether ior was given.  */
   unsigned int for_given ;	/**< @brief Whether for was given.  */
@@ -360,6 +373,7 @@ struct gengetopt_args_info
   unsigned int momentum_distribution_given ;	/**< @brief Whether momentum_distribution was given.  */
   unsigned int dipole_orientation_given ;	/**< @brief Whether dipole_orientation was given.  */
   unsigned int order_prob_given ;	/**< @brief Whether order_prob was given.  */
+  unsigned int sfg_given ;	/**< @brief Whether sfg was given.  */
 
   char **inputs ; /**< @brief unnamed options (options without names) */
   unsigned inputs_num ; /**< @brief unnamed options number */

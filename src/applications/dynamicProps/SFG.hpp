@@ -199,7 +199,7 @@ namespace OpenMD {
       std::vector<Vector3d>  mu;        // transition dipole vectors [D]
       std::vector<Mat3x3d>   alpha;     // Raman polarizability tensors
       std::vector<int>       globalIDs; // global H-atom index per chromophore
-                                         // (for bend overtones: O atom global ID)
+      // (for bend overtones: O atom global ID)
       std::map<int,int>      idToIndex; // reverse map: globalID -> local index
     };
 

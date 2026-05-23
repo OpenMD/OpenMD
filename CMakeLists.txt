@@ -459,7 +459,7 @@ if(LAPACK_FOUND AND BLAS_FOUND)
     add_definitions(-DHAVE_CBLAS)
   endif()
 
-  # Link DynamicProps against LAPACK+BLAS.  Other targets don't need it.
+  # Link DynamicProps and StaticProps against LAPACK+BLAS.  Other targets don't need it.
   # We defer the actual target_link_libraries call until after DynamicProps
   # is defined (see below).
   set(LAPACK_BLAS_LIBRARIES ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
@@ -949,6 +949,7 @@ set(STATICPROPSSOURCE
     src/applications/staticProps/RippleOP.cpp
     src/applications/staticProps/RNEMDStats.cpp
     src/applications/staticProps/SCDOrderParameter.cpp
+    src/applications/staticProps/SFGTimeAvg.cpp
     src/applications/staticProps/SpatialStatistics.cpp
     src/applications/staticProps/StaticAnalyser.cpp
     src/applications/staticProps/StaticProps.cpp
@@ -1039,8 +1040,16 @@ add_executable(equationofstate ${EOSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(equationofstate openmd_single openmd_core openmd_single
                       openmd_core)
 add_executable(StaticProps ${STATICPROPSSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(StaticProps openmd_single openmd_core openmd_single
+target_link_libraries(StaticProps PRIVATE openmd_single openmd_core openmd_single
                       openmd_core)
+if(LAPACK_FOUND AND BLAS_FOUND)
+  target_link_libraries(StaticProps PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  # Accelerate deprecated the legacy CBLAS interface in macOS 13.3.
+  # -DACCELERATE_NEW_LAPACK opts into the updated headers that replace it.
+  if(APPLE AND BLA_VENDOR STREQUAL "Apple")
+    target_compile_definitions(StaticProps PRIVATE ACCELERATE_NEW_LAPACK)
+  endif()
+endif()
 add_executable(SequentialProps ${SEQUENTIALPROPSSOURCE} ${GETOPT_SOURCE})
 target_link_libraries(SequentialProps openmd_single openmd_core openmd_single
                       openmd_core)

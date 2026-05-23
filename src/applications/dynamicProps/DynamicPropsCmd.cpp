@@ -60,7 +60,7 @@ const char *gengetopt_args_info_help[] = {
   "      --dipoleZ=DOUBLE          Z-component of the dipole with respect to body\n                                  frame  (default=`-1.0')",
   "      --selectionMode=ENUM      How to treat objects which leave a dynamic\n                                  selection and then return later (default =\n                                  survival)  (possible values=\"survival\",\n                                  \"restart\" default=`survival')",
   "      --sfgPolarization=STRING  SFG polarization combination: ssp, ppp, sps\n                                  (default=`ssp')",
-  "      --fermiCoupling=DOUBLE    Fermi coupling for stretch-bend coupling in SFG\n                                  spectra  (default=`50')",
+  "      --fermiCoupling=DOUBLE    Fermi coupling [cm-1] for stretch-bend coupling\n                                  in SFG spectra  (default=`50')",
   "\n Group: correlation function\n   an option of this group is required",
   "  -s, --selecorr                selection correlation function",
   "  -r, --rcorr                   mean squared displacement",
@@ -102,7 +102,7 @@ const char *gengetopt_args_info_help[] = {
   "      --ddisp                   Collective Dipole displacement function\n                                  (Helfand moment of Current Density)",
   "      --rotAngleDisp            Displacement correlation function for rotation\n                                  angles",
   "      --meandisp                mean displacement",
-  "      --sfg                     SFG susceptibility spectrum (exciton model)",
+  "      --sfg                     SFG susceptibility spectrum (exciton model) -\n                                  use molecular selections",
     0
 };
 
@@ -2202,7 +2202,7 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* Fermi coupling for stretch-bend coupling in SFG spectra.  */
+          /* Fermi coupling [cm-1] for stretch-bend coupling in SFG spectra.  */
           else if (strcmp (long_options[option_index].name, "fermiCoupling") == 0)
           {
           
@@ -2726,7 +2726,7 @@ cmdline_parser_internal (
               goto failure;
           
           }
-          /* SFG susceptibility spectrum (exciton model).  */
+          /* SFG susceptibility spectrum (exciton model) - use molecular selections.  */
           else if (strcmp (long_options[option_index].name, "sfg") == 0)
           {
           
