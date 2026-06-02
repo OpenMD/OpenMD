@@ -56,6 +56,9 @@ namespace OpenMD {
     DeclareParameter(ObjectSelection, std::string);
     DeclareParameter(MolIndex, int);
     DeclareParameter(DisplacementSpringConstant, RealType);
+    DeclareParameter(DisplacementXSpringConstant, RealType);
+    DeclareParameter(DisplacementYSpringConstant, RealType);
+    DeclareParameter(DisplacementZSpringConstant, RealType);
     DeclareParameter(AbsoluteSpringConstant, RealType);
     DeclareParameter(TwistSpringConstant, RealType);
     DeclareParameter(SwingXSpringConstant, RealType);

@@ -58,6 +58,12 @@ namespace OpenMD {
     DefineOptionalParameter(ObjectSelection, "objectSelection");
     DefineOptionalParameter(DisplacementSpringConstant,
                             "displacementSpringConstant");
+    DefineOptionalParameter(DisplacementXSpringConstant,
+                            "displacementXSpringConstant");
+    DefineOptionalParameter(DisplacementYSpringConstant,
+                            "displacementYSpringConstant");
+    DefineOptionalParameter(DisplacementZSpringConstant,
+                            "displacementZSpringConstant");
     DefineOptionalParameter(AbsoluteSpringConstant, "absoluteSpringConstant");
     DefineOptionalParameter(TwistSpringConstant, "twistSpringConstant");
     DefineOptionalParameter(SwingXSpringConstant, "swingXSpringConstant");
@@ -77,6 +83,9 @@ namespace OpenMD {
     CheckParameter(
         Type, isEqualIgnoreCase("Object") || isEqualIgnoreCase("Molecular"));
     CheckParameter(DisplacementSpringConstant, isNonNegative());
+    CheckParameter(DisplacementXSpringConstant, isNonNegative());
+    CheckParameter(DisplacementYSpringConstant, isNonNegative());
+    CheckParameter(DisplacementZSpringConstant, isNonNegative());
     CheckParameter(AbsoluteSpringConstant, isNonNegative());
     CheckParameter(TwistSpringConstant, isNonNegative());
     CheckParameter(SwingXSpringConstant, isNonNegative());

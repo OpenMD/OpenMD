@@ -186,6 +186,18 @@ namespace OpenMD {
             rest->setDisplacementForceConstant(
                 stamp[i]->getDisplacementSpringConstant());
           }
+	  if (stamp[i]->haveDisplacementXSpringConstant()) {
+            rest->setDisplacementXForceConstant(
+                stamp[i]->getDisplacementXSpringConstant());
+          }
+	  if (stamp[i]->haveDisplacementYSpringConstant()) {
+            rest->setDisplacementYForceConstant(
+                stamp[i]->getDisplacementYSpringConstant());
+          }
+	  if (stamp[i]->haveDisplacementZSpringConstant()) {
+            rest->setDisplacementZForceConstant(
+                stamp[i]->getDisplacementZSpringConstant());
+          }
           if (stamp[i]->haveAbsoluteSpringConstant()) {
             rest->setAbsoluteForceConstant(
                 stamp[i]->getAbsoluteSpringConstant());
@@ -273,6 +285,18 @@ namespace OpenMD {
             rest->setDisplacementForceConstant(
                 stamp[i]->getDisplacementSpringConstant());
           }
+	  if (stamp[i]->haveDisplacementXSpringConstant()) {
+            rest->setDisplacementXForceConstant(
+                stamp[i]->getDisplacementXSpringConstant());
+          }
+	  if (stamp[i]->haveDisplacementYSpringConstant()) {
+            rest->setDisplacementYForceConstant(
+                stamp[i]->getDisplacementYSpringConstant());
+          }
+	  if (stamp[i]->haveDisplacementZSpringConstant()) {
+            rest->setDisplacementZForceConstant(
+                stamp[i]->getDisplacementZSpringConstant());
+          }	  
           if (stamp[i]->haveAbsoluteSpringConstant()) {
             rest->setAbsoluteForceConstant(
                 stamp[i]->getAbsoluteSpringConstant());
