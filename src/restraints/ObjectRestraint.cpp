@@ -64,6 +64,39 @@ namespace OpenMD {
       if (printRest_) restInfo_[rtDisplacement] = std::make_pair(r, p);
     }
 
+    if (restType_ & rtDisplacementX) {
+      Vector3d del = struc - refPos_;
+      RealType r   = del.x();
+      Vector3d frc = -kDispX_ * r * V3X;
+      RealType p   = 0.5 * kDisp_ * r * r;
+
+      pot_ += p;
+      force_ += frc * scaleFactor_;
+      if (printRest_) restInfo_[rtDisplacementX] = std::make_pair(r, p);
+    }
+
+    if (restType_ & rtDisplacementY) {
+      Vector3d del = struc - refPos_;
+      RealType r   = del.y();
+      Vector3d frc = -kDispY_ * r * V3Y;
+      RealType p   = 0.5 * kDisp_ * r * r;
+
+      pot_ += p;
+      force_ += frc * scaleFactor_;
+      if (printRest_) restInfo_[rtDisplacementY] = std::make_pair(r, p);
+    }
+
+    if (restType_ & rtDisplacementZ) {
+      Vector3d del = struc - refPos_;
+      RealType r   = del.z();
+      Vector3d frc = -kDispZ_ * r * V3Z;
+      RealType p   = 0.5 * kDisp_ * r * r;
+
+      pot_ += p;
+      force_ += frc * scaleFactor_;
+      if (printRest_) restInfo_[rtDisplacementZ] = std::make_pair(r, p);
+    }
+    
     if (restType_ & rtAbsoluteZ) {
       RealType r   = struc(2) - posZ0_;
       Vector3d frc = Vector3d(0.0, 0.0, -kAbs_ * r);
@@ -78,9 +111,9 @@ namespace OpenMD {
   void ObjectRestraint::calcForce(Vector3d struc, RotMat3x3d A) {
     calcForce(struc);
 
-    // rtDisplacement is 1, rtAbsolute is 2, so anything higher than 3
-    // that requires orientations:
-    if (restType_ > 3) {
+    // Anything higher than 32 requires orientations:
+    
+    if (restType_ >= 32) {
       Vector3d tBody(0.0);
 
       RotMat3x3d temp = A * refA_.transpose();

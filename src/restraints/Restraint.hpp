@@ -68,10 +68,13 @@ namespace OpenMD {
   public:
     enum {
       rtDisplacement = 1,
-      rtAbsoluteZ    = 2,
-      rtTwist        = 4,
-      rtSwingX       = 8,
-      rtSwingY       = 16
+      rtDisplacementX = 2,
+      rtDisplacementY = 4,
+      rtDisplacementZ = 8,
+      rtAbsoluteZ    = 16,
+      rtTwist        = 32,
+      rtSwingX       = 64,
+      rtSwingY       = 128
     };
 
     using RealPair = std::pair<RealType, RealType>;
@@ -104,6 +107,22 @@ namespace OpenMD {
       kDisp_ = kDisp;
       restType_ |= rtDisplacement;
       if (printRest_) restInfo_[rtDisplacement] = std::make_pair(0.0, 0.0);
+    }
+
+    void setDisplacementXForceConstant(RealType kDisp) {
+      kDispX_ = kDisp;
+      restType_ |= rtDisplacementX;
+      if (printRest_) restInfo_[rtDisplacementX] = std::make_pair(0.0, 0.0);
+    }
+    void setDisplacementYForceConstant(RealType kDisp) {
+      kDispY_ = kDisp;
+      restType_ |= rtDisplacementY;
+      if (printRest_) restInfo_[rtDisplacementY] = std::make_pair(0.0, 0.0);
+    }
+    void setDisplacementZForceConstant(RealType kDisp) {
+      kDispZ_ = kDisp;
+      restType_ |= rtDisplacementZ;
+      if (printRest_) restInfo_[rtDisplacementZ] = std::make_pair(0.0, 0.0);
     }
 
     void setAbsoluteForceConstant(RealType kAbs) {
@@ -161,6 +180,9 @@ namespace OpenMD {
     void setPrintRestraint(bool printRest) { printRest_ = printRest; }
 
     RealType getDisplacementForceConstant() { return kDisp_; }
+    RealType getDisplacementXForceConstant() { return kDispX_; }
+    RealType getDisplacementYForceConstant() { return kDispY_; }
+    RealType getDisplacementZForceConstant() { return kDispZ_; }
     RealType getAbsoluteForceConstant() { return kAbs_; }
     RealType getAbsolutePositionZ() { return posZ0_; }
     RealType getTwistForceConstant() { return kTwist_; }
@@ -175,6 +197,9 @@ namespace OpenMD {
   protected:
     RealType scaleFactor_;
     RealType kDisp_;
+    RealType kDispX_;
+    RealType kDispY_;
+    RealType kDispZ_;
     RealType kAbs_;
     RealType kTwist_;
     RealType kSwingX_;

@@ -80,7 +80,49 @@ namespace OpenMD {
       for (it = forces_.begin(); it != forces_.end(); ++it)
         (*it) += -kDisp_ * del * scaleFactor_;
     }
+    
+    if (restType_ & rtDisplacementX) {
+      Vector3d del = molCom - refCom_;
 
+      RealType r = del.x();
+      RealType p = 0.5 * kDispX_ * r * r;
+
+      pot_ += p;
+
+      if (printRest_) restInfo_[rtDisplacementX] = std::make_pair(r, p);
+
+      for (it = forces_.begin(); it != forces_.end(); ++it)
+        (*it) += -kDispX_ * r * V3X * scaleFactor_;
+    }
+
+    if (restType_ & rtDisplacementY) {
+      Vector3d del = molCom - refCom_;
+
+      RealType r = del.y();
+      RealType p = 0.5 * kDispY_ * r * r;
+
+      pot_ += p;
+
+      if (printRest_) restInfo_[rtDisplacementY] = std::make_pair(r, p);
+
+      for (it = forces_.begin(); it != forces_.end(); ++it)
+        (*it) +=  -kDispY_ * r * V3Y * scaleFactor_;
+    }
+
+    if (restType_ & rtDisplacementZ) {
+      Vector3d del = molCom - refCom_;
+
+      RealType r = del.z();
+      RealType p = 0.5 * kDispZ_ * r * r;
+
+      pot_ += p;
+
+      if (printRest_) restInfo_[rtDisplacementZ] = std::make_pair(r, p);
+
+      for (it = forces_.begin(); it != forces_.end(); ++it)
+        (*it) +=  -kDispZ_ * r * V3Z * scaleFactor_;
+    }
+    
     if (restType_ & rtAbsoluteZ) {
       RealType r   = molCom(2) - posZ0_;
       RealType p   = 0.5 * kAbs_ * r * r;
@@ -94,9 +136,9 @@ namespace OpenMD {
         (*it) += frc * scaleFactor_;
     }
 
-    // rtDisplacement is 1, rtAbsolute is 2, so anything higher than 3
-    // that requires orientations:
-    if (restType_ > 3) {
+    // Anything higher than 32 requires orientations:
+
+    if (restType_ >= 32) {
       Vector3d tBody(0.0);
 
       Mat3x3d R(0.0);
