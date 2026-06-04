@@ -60,7 +60,7 @@ const char *gengetopt_args_info_help[] = {
   "      --dipoleZ=DOUBLE          Z-component of the dipole with respect to body\n                                  frame  (default=`-1.0')",
   "      --selectionMode=ENUM      How to treat objects which leave a dynamic\n                                  selection and then return later (default =\n                                  survival)  (possible values=\"survival\",\n                                  \"restart\" default=`survival')",
   "      --sfgPolarization=STRING  SFG polarization combination: ssp, ppp, sps\n                                  (default=`ssp')",
-  "      --fermiCoupling=DOUBLE    Fermi coupling [cm-1] for stretch-bend coupling\n                                  in SFG spectra  (default=`50')",
+  "      --fermiCoupling=DOUBLE    Fermi coupling [cm-1] for stretch-bend coupling\n                                  in SFG spectra  (default=`25')",
   "\n Group: correlation function\n   an option of this group is required",
   "  -s, --selecorr                selection correlation function",
   "  -r, --rcorr                   mean squared displacement",
@@ -257,7 +257,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->selectionMode_orig = NULL;
   args_info->sfgPolarization_arg = gengetopt_strdup ("ssp");
   args_info->sfgPolarization_orig = NULL;
-  args_info->fermiCoupling_arg = 50;
+  args_info->fermiCoupling_arg = 25;
   args_info->fermiCoupling_orig = NULL;
   
 }
@@ -2209,7 +2209,7 @@ cmdline_parser_internal (
           
             if (update_arg( (void *)&(args_info->fermiCoupling_arg), 
                  &(args_info->fermiCoupling_orig), &(args_info->fermiCoupling_given),
-                &(local_args_info.fermiCoupling_given), optarg, 0, "50", ARG_DOUBLE,
+                &(local_args_info.fermiCoupling_given), optarg, 0, "25", ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "fermiCoupling", '-',
                 additional_error))

@@ -93,7 +93,7 @@ namespace OpenMD {
         const std::string& sele2, const std::string& polarization = "ssp",
         int privilegedAxis = 2,
         RealType t_apod = 0.0, RealType t_zerofill = 0.0,
-        RealType fc = 50.0);
+        RealType fc = 25.0);
 
     virtual ~SFG();
 
@@ -154,7 +154,7 @@ namespace OpenMD {
     // Fermi coupling [cm⁻¹] between OH stretch and HOH bend overtone
     // on the same molecule.  Default 50 cm⁻¹ following MultiSpec / Ni 2015.
     // If 0, Fermi resonance is effectively disabled.
-    RealType fc_ {50.0};
+    RealType fc_ {25.0};
 
     // True if a bend map is available for the water model(s) selected.
     // Set during the first extractFrame() call.

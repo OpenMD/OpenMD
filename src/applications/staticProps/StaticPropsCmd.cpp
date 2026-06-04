@@ -78,8 +78,8 @@ const char *gengetopt_args_info_help[] = {
   "      --gen_xyz                 generates xyz file  (default=off)",
   "      --atom_name=selection script\n                                name of atom for with average charge to be\n                                  generated",
   "      --sfgPolarization=STRING  SFG polarization combination: ssp, ppp, sps\n                                  (default=`ssp')",
-  "      --lorentzianWidth=DOUBLE  Lorentzian half-width [cm-1] applied to\n                                  eigenstates in SFG spectra  (default=`20')",
-  "      --fermiCoupling=DOUBLE    Fermi coupling [cm-1] for stretch-bend coupling\n                                  in SFG spectra  (default=`50')",
+  "      --lorentzianWidth=DOUBLE  Lorentzian half-width [cm-1] applied to\n                                  eigenstates in SFG spectra  (default=`5')",
+  "      --fermiCoupling=DOUBLE    Fermi coupling [cm-1] for stretch-bend coupling\n                                  in SFG spectra  (default=`25')",
   "\n Group: staticProps\n   an option of this group is required",
   "      --bo                      bond order parameter (--rcut must be specified)",
   "      --ior                     icosahedral bond order parameter as a function\n                                  of radius (--rcut must be specified)",
@@ -386,9 +386,9 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->atom_name_orig = NULL;
   args_info->sfgPolarization_arg = gengetopt_strdup ("ssp");
   args_info->sfgPolarization_orig = NULL;
-  args_info->lorentzianWidth_arg = 20;
+  args_info->lorentzianWidth_arg = 5;
   args_info->lorentzianWidth_orig = NULL;
-  args_info->fermiCoupling_arg = 50;
+  args_info->fermiCoupling_arg = 25;
   args_info->fermiCoupling_orig = NULL;
   
 }
@@ -2875,7 +2875,7 @@ cmdline_parser_internal (
           
             if (update_arg( (void *)&(args_info->lorentzianWidth_arg), 
                  &(args_info->lorentzianWidth_orig), &(args_info->lorentzianWidth_given),
-                &(local_args_info.lorentzianWidth_given), optarg, 0, "20", ARG_DOUBLE,
+                &(local_args_info.lorentzianWidth_given), optarg, 0, "5", ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "lorentzianWidth", '-',
                 additional_error))
@@ -2889,7 +2889,7 @@ cmdline_parser_internal (
           
             if (update_arg( (void *)&(args_info->fermiCoupling_arg), 
                  &(args_info->fermiCoupling_orig), &(args_info->fermiCoupling_given),
-                &(local_args_info.fermiCoupling_given), optarg, 0, "50", ARG_DOUBLE,
+                &(local_args_info.fermiCoupling_given), optarg, 0, "25", ARG_DOUBLE,
                 check_ambiguity, override, 0, 0,
                 "fermiCoupling", '-',
                 additional_error))

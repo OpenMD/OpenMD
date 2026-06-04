@@ -117,7 +117,7 @@ struct gengetopt_args_info
   char * sfgPolarization_arg;	/**< @brief SFG polarization combination: ssp, ppp, sps (default='ssp').  */
   char * sfgPolarization_orig;	/**< @brief SFG polarization combination: ssp, ppp, sps original value given at command line.  */
   const char *sfgPolarization_help; /**< @brief SFG polarization combination: ssp, ppp, sps help description.  */
-  double fermiCoupling_arg;	/**< @brief Fermi coupling [cm-1] for stretch-bend coupling in SFG spectra (default='50').  */
+  double fermiCoupling_arg;	/**< @brief Fermi coupling [cm-1] for stretch-bend coupling in SFG spectra (default='25').  */
   char * fermiCoupling_orig;	/**< @brief Fermi coupling [cm-1] for stretch-bend coupling in SFG spectra original value given at command line.  */
   const char *fermiCoupling_help; /**< @brief Fermi coupling [cm-1] for stretch-bend coupling in SFG spectra help description.  */
   const char *selecorr_help; /**< @brief selection correlation function help description.  */

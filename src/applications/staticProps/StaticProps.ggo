@@ -69,8 +69,8 @@ option "v_radius"        -        "VanderWaals radiius for fictious atoms used i
 option "gen_xyz"  - "generates xyz file" flag				off
 option "atom_name" - "name of atom for with average charge to be generated" string	typestr="selection script"	optional
 option "sfgPolarization" -   "SFG polarization combination: ssp, ppp, sps" string default="ssp"  no
-option "lorentzianWidth" -   "Lorentzian half-width [cm-1] applied to eigenstates in SFG spectra" double default="20" optional
-option "fermiCoupling"   -   "Fermi coupling [cm-1] for stretch-bend coupling in SFG spectra" double default="50" optional
+option "lorentzianWidth" -   "Lorentzian half-width [cm-1] applied to eigenstates in SFG spectra" double default="5" optional
+option "fermiCoupling"   -   "Fermi coupling [cm-1] for stretch-bend coupling in SFG spectra" double default="25" optional
 
 defgroup "staticProps" groupdesc=" an option of this group is required" required
 groupoption "bo"        -       "bond order parameter (--rcut must be specified)" group="staticProps"

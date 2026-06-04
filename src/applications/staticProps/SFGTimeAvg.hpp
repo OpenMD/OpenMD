@@ -78,7 +78,7 @@ namespace OpenMD {
    * module so that the two are directly comparable.
    *
    * Fermi resonance with the HOH bend overtone is included by default
-   * (fc = 50 cm-1); set fc = 0 to disable.
+   * (fc = 25 cm-1); set fc = 0 to disable.
    */
   class SFGTimeAvg : public StaticAnalyser {
   public:
@@ -86,7 +86,7 @@ namespace OpenMD {
                const std::string& sele1, int nbins,
                const std::string& polarization = "ssp",
                int privilegedAxis = 2,
-               RealType gamma = 20.0, RealType fc = 50.0);
+               RealType gamma = 5.0, RealType fc = 25.0);
 
     virtual void process();
 
@@ -158,8 +158,8 @@ namespace OpenMD {
     int  privilegedAxis_ {2};
     int  s1_ {0};
     int  s2_ {1};
-    RealType gamma_ {20.0};   // Lorentzian half-width [cm-1]
-    RealType fc_    {50.0};   // Fermi coupling [cm-1]
+    RealType gamma_ {5.0};    // Lorentzian half-width [cm-1]
+    RealType fc_    {25.0};   // Fermi coupling [cm-1]
     bool useFermi_  {false};
 
     int      nProcessed_ {0};

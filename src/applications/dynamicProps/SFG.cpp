@@ -809,7 +809,7 @@ namespace OpenMD {
 	    J = potentialTerm + kineticTerm;
 	  } else if (i_is_bend != j_is_bend) {
 	    // Stretch ⟷ bend overtone Fermi coupling on same molecule.
-	    // Constant fc_ (default 50 cm⁻¹, Ni & Skinner 2015 / Kananenka 2018).
+	    // Constant fc_ (default 25 cm⁻¹, Ni & Skinner 2015 / Kananenka 2018).
 	    J = fc_;
 	  }
 	  // else: both bends → impossible (one bend per molecule), J=0
