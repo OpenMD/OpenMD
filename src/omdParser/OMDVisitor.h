@@ -44,6 +44,8 @@ public:
 
     virtual std::any visitLightblock(OMDParser::LightblockContext *context) = 0;
 
+    virtual std::any visitVelocityfieldblock(OMDParser::VelocityfieldblockContext *context) = 0;
+
     virtual std::any visitMinimizerblock(OMDParser::MinimizerblockContext *context) = 0;
 
     virtual std::any visitMoleculeblock(OMDParser::MoleculeblockContext *context) = 0;

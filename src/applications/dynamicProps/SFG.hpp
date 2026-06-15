@@ -152,7 +152,7 @@ namespace OpenMD {
     std::map<std::string, std::pair<RealType,RealType>>           wb12_;
 
     // Fermi coupling [cm⁻¹] between OH stretch and HOH bend overtone
-    // on the same molecule.  Default 50 cm⁻¹ following MultiSpec / Ni 2015.
+    // on the same molecule.  Default 25 cm⁻¹ following MultiSpec / Ni 2015.
     // If 0, Fermi resonance is effectively disabled.
     RealType fc_ {25.0};
 

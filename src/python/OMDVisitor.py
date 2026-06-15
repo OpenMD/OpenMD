@@ -59,6 +59,11 @@ class OMDVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by OMDParser#velocityfieldblock.
+    def visitVelocityfieldblock(self, ctx:OMDParser.VelocityfieldblockContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by OMDParser#minimizerblock.
     def visitMinimizerblock(self, ctx:OMDParser.MinimizerblockContext):
         return self.visitChildren(ctx)

@@ -49,6 +49,9 @@ public:
   virtual void enterLightblock(OMDParser::LightblockContext *ctx) = 0;
   virtual void exitLightblock(OMDParser::LightblockContext *ctx) = 0;
 
+  virtual void enterVelocityfieldblock(OMDParser::VelocityfieldblockContext *ctx) = 0;
+  virtual void exitVelocityfieldblock(OMDParser::VelocityfieldblockContext *ctx) = 0;
+
   virtual void enterMinimizerblock(OMDParser::MinimizerblockContext *ctx) = 0;
   virtual void exitMinimizerblock(OMDParser::MinimizerblockContext *ctx) = 0;
 

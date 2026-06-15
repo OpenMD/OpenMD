@@ -666,6 +666,7 @@ set(SOURCE
     src/nonbonded/Sticky.cpp
     src/nonbonded/SwitchingFunction.cpp
     src/perturbations/LightParameters.cpp
+    src/perturbations/VelocityFieldParameters.cpp
     src/primitives/Atom.cpp
     src/primitives/Bend.cpp
     src/primitives/DirectionalAtom.cpp
@@ -776,6 +777,7 @@ set(PARALLEL_SOURCE
     src/parallel/ForceDecomposition.cpp
     src/parallel/ForceMatrixDecomposition.cpp
     src/perturbations/Light.cpp
+    src/perturbations/VelocityField.cpp
     src/perturbations/UniformField.cpp
     src/perturbations/MagneticField.cpp
     src/perturbations/UniformGradient.cpp

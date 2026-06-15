@@ -98,6 +98,15 @@ class OMDListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by OMDParser#velocityfieldblock.
+    def enterVelocityfieldblock(self, ctx:OMDParser.VelocityfieldblockContext):
+        pass
+
+    # Exit a parse tree produced by OMDParser#velocityfieldblock.
+    def exitVelocityfieldblock(self, ctx:OMDParser.VelocityfieldblockContext):
+        pass
+
+
     # Enter a parse tree produced by OMDParser#minimizerblock.
     def enterMinimizerblock(self, ctx:OMDParser.MinimizerblockContext):
         pass

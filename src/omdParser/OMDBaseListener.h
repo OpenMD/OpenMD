@@ -51,6 +51,9 @@ public:
   virtual void enterLightblock(OMDParser::LightblockContext * /*ctx*/) override { }
   virtual void exitLightblock(OMDParser::LightblockContext * /*ctx*/) override { }
 
+  virtual void enterVelocityfieldblock(OMDParser::VelocityfieldblockContext * /*ctx*/) override { }
+  virtual void exitVelocityfieldblock(OMDParser::VelocityfieldblockContext * /*ctx*/) override { }
+
   virtual void enterMinimizerblock(OMDParser::MinimizerblockContext * /*ctx*/) override { }
   virtual void exitMinimizerblock(OMDParser::MinimizerblockContext * /*ctx*/) override { }
 

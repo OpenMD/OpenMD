@@ -60,6 +60,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitVelocityfieldblock(OMDParser::VelocityfieldblockContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitMinimizerblock(OMDParser::MinimizerblockContext *ctx) override {
     return visitChildren(ctx);
   }

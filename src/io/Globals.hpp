@@ -57,6 +57,7 @@
 #include "flucq/FluctuatingChargeParameters.hpp"
 #include "optimization/MinimizerParameters.hpp"
 #include "perturbations/LightParameters.hpp"
+#include "perturbations/VelocityFieldParameters.hpp"
 #include "rnemd/RNEMDParameters.hpp"
 #include "types/Component.hpp"
 #include "types/FragmentStamp.hpp"
@@ -196,6 +197,9 @@ namespace OpenMD {
     bool addLightParameters(Perturbations::LightParameters* lightPars);
     Perturbations::LightParameters* getLightParameters() { return lightPars_; }
 
+    bool addVelocityFieldParameters(Perturbations::VelocityFieldParameters* vfPars);   
+    Perturbations::VelocityFieldParameters* getVelocityFieldParameters() { return vfPars_; }
+
     bool addMinimizerParameters(MinimizerParameters* miniPars);
     MinimizerParameters* getMinimizerParameters() { return minimizerPars_; }
 
@@ -211,6 +215,7 @@ namespace OpenMD {
     FluctuatingChargeParameters* flucQpars_;
     RNEMD::RNEMDParameters* rnemdPars_;
     Perturbations::LightParameters* lightPars_;
+    Perturbations::VelocityFieldParameters* vfPars_;
     MinimizerParameters* minimizerPars_;
   };
 }  // namespace OpenMD

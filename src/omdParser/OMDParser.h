@@ -21,31 +21,31 @@ public:
     ATOM = 7, BOND = 8, BEND = 9, TORSION = 10, INVERSION = 11, RIGIDBODY = 12, 
     CUTOFFGROUP = 13, CONSTRAINT = 14, DISTANCE = 15, FRAGMENT = 16, SEQUENCE = 17, 
     MEMBERS = 18, CENTER = 19, SATELLITES = 20, POSITION = 21, ORIENTATION = 22, 
-    FLUCQ = 23, RNEMD = 24, LIGHT = 25, MINIMIZER = 26, FIXED = 27, HARMONIC = 28, 
-    CUBIC = 29, QUARTIC = 30, POLYNOMIAL = 31, MORSE = 32, GHOSTBEND = 33, 
-    UREYBRADLEY = 34, COSINE = 35, GHOSTTORSION = 36, CHARMM = 37, OPLS = 38, 
-    TRAPPE = 39, AMBERIMPROPER = 40, IMPROPERCOSINE = 41, CENTRALATOMHEIGHT = 42, 
-    DREIDING = 43, CHARGE = 44, NODES = 45, ASSIGNEQUAL = 46, COLON = 47, 
-    COMMA = 48, QUESTIONMARK = 49, SEMICOLON = 50, DOT = 51, LPAREN = 52, 
-    RPAREN = 53, LBRACKET = 54, RBRACKET = 55, LCURLY = 56, RCURLY = 57, 
-    NUM_LONG = 58, NUM_INT = 59, NUM_FLOAT = 60, NUM_DOUBLE = 61, CharLiteral = 62, 
-    StringLiteral = 63, ID = 64, Whitespace = 65, Newline = 66, LineContinuation = 67, 
-    Comment = 68, CPPComment = 69, PREPROC_DIRECTIVE = 70
+    FLUCQ = 23, RNEMD = 24, LIGHT = 25, VELOCITYFIELD = 26, MINIMIZER = 27, 
+    FIXED = 28, HARMONIC = 29, CUBIC = 30, QUARTIC = 31, POLYNOMIAL = 32, 
+    MORSE = 33, GHOSTBEND = 34, UREYBRADLEY = 35, COSINE = 36, GHOSTTORSION = 37, 
+    CHARMM = 38, OPLS = 39, TRAPPE = 40, AMBERIMPROPER = 41, IMPROPERCOSINE = 42, 
+    CENTRALATOMHEIGHT = 43, DREIDING = 44, CHARGE = 45, NODES = 46, ASSIGNEQUAL = 47, 
+    COLON = 48, COMMA = 49, QUESTIONMARK = 50, SEMICOLON = 51, DOT = 52, 
+    LPAREN = 53, RPAREN = 54, LBRACKET = 55, RBRACKET = 56, LCURLY = 57, 
+    RCURLY = 58, NUM_LONG = 59, NUM_INT = 60, NUM_FLOAT = 61, NUM_DOUBLE = 62, 
+    CharLiteral = 63, StringLiteral = 64, ID = 65, Whitespace = 66, Newline = 67, 
+    LineContinuation = 68, Comment = 69, CPPComment = 70, PREPROC_DIRECTIVE = 71
   };
 
   enum {
     RuleOmdfile = 0, RuleStatement = 1, RuleAssignment = 2, RuleConstant = 3, 
     RuleComponentblock = 4, RuleZconstraintblock = 5, RuleRestraintblock = 6, 
-    RuleFlucqblock = 7, RuleRnemdblock = 8, RuleLightblock = 9, RuleMinimizerblock = 10, 
-    RuleMoleculeblock = 11, RuleMoleculestatement = 12, RuleAtomblock = 13, 
-    RuleAtomstatement = 14, RuleBondblock = 15, RuleBondstatement = 16, 
-    RuleBendblock = 17, RuleBendstatement = 18, RuleTorsionblock = 19, RuleTorsionstatement = 20, 
-    RuleInversionblock = 21, RuleInversionstatement = 22, RuleRigidbodyblock = 23, 
-    RuleRigidbodystatement = 24, RuleCutoffgroupblock = 25, RuleCutoffgroupstatement = 26, 
-    RuleNodesblock = 27, RuleNodesstatement = 28, RuleFragmentblock = 29, 
-    RuleFragmentstatement = 30, RuleConstraintblock = 31, RuleConstraintstatement = 32, 
-    RuleSequencestring = 33, RuleDoubleNumberTuple = 34, RuleInttuple = 35, 
-    RuleIntConst = 36, RuleDoubleNumber = 37, RuleFloatConst = 38, RuleVectorConst = 39
+    RuleFlucqblock = 7, RuleRnemdblock = 8, RuleLightblock = 9, RuleVelocityfieldblock = 10, 
+    RuleMinimizerblock = 11, RuleMoleculeblock = 12, RuleMoleculestatement = 13, 
+    RuleAtomblock = 14, RuleAtomstatement = 15, RuleBondblock = 16, RuleBondstatement = 17, 
+    RuleBendblock = 18, RuleBendstatement = 19, RuleTorsionblock = 20, RuleTorsionstatement = 21, 
+    RuleInversionblock = 22, RuleInversionstatement = 23, RuleRigidbodyblock = 24, 
+    RuleRigidbodystatement = 25, RuleCutoffgroupblock = 26, RuleCutoffgroupstatement = 27, 
+    RuleNodesblock = 28, RuleNodesstatement = 29, RuleFragmentblock = 30, 
+    RuleFragmentstatement = 31, RuleConstraintblock = 32, RuleConstraintstatement = 33, 
+    RuleSequencestring = 34, RuleDoubleNumberTuple = 35, RuleInttuple = 36, 
+    RuleIntConst = 37, RuleDoubleNumber = 38, RuleFloatConst = 39, RuleVectorConst = 40
   };
 
   explicit OMDParser(antlr4::TokenStream *input);
@@ -82,6 +82,7 @@ public:
   class FlucqblockContext;
   class RnemdblockContext;
   class LightblockContext;
+  class VelocityfieldblockContext;
   class MinimizerblockContext;
   class MoleculeblockContext;
   class MoleculestatementContext;
@@ -143,6 +144,7 @@ public:
     FlucqblockContext *flucqblock();
     RnemdblockContext *rnemdblock();
     LightblockContext *lightblock();
+    VelocityfieldblockContext *velocityfieldblock();
     MinimizerblockContext *minimizerblock();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -306,6 +308,25 @@ public:
   };
 
   LightblockContext* lightblock();
+
+  class  VelocityfieldblockContext : public antlr4::ParserRuleContext {
+  public:
+    VelocityfieldblockContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *VELOCITYFIELD();
+    antlr4::tree::TerminalNode *LCURLY();
+    antlr4::tree::TerminalNode *RCURLY();
+    std::vector<AssignmentContext *> assignment();
+    AssignmentContext* assignment(size_t i);
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  VelocityfieldblockContext* velocityfieldblock();
 
   class  MinimizerblockContext : public antlr4::ParserRuleContext {
   public:

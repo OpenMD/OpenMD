@@ -61,6 +61,7 @@ namespace OpenMD {
     flucQpars_     = new FluctuatingChargeParameters();
     rnemdPars_     = new RNEMD::RNEMDParameters();
     lightPars_     = new Perturbations::LightParameters();
+    vfPars_        = new Perturbations::VelocityFieldParameters();
     minimizerPars_ = new MinimizerParameters();
 
     DefineParameter(ForceField, "forceField");
@@ -357,6 +358,13 @@ namespace OpenMD {
     return true;
   }
 
+  bool Globals::addVelocityFieldParameters(Perturbations::VelocityFieldParameters* vfPars) {
+    if (vfPars_ != NULL) delete vfPars_;
+
+    vfPars_ = vfPars;
+    return true;
+  }
+  
   bool Globals::addMinimizerParameters(MinimizerParameters* miniPars) {
     if (minimizerPars_ != NULL) delete minimizerPars_;
 

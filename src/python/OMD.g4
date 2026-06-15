@@ -30,6 +30,7 @@ statement
     | flucqblock
     | rnemdblock
     | lightblock
+    | velocityfieldblock
     | minimizerblock
     ;
 
@@ -69,6 +70,10 @@ rnemdblock
 
 lightblock
     : LIGHT LCURLY assignment* RCURLY
+    ;
+
+velocityfieldblock
+    : VELOCITYFIELD LCURLY assignment* RCURLY
     ;
 
 minimizerblock
@@ -282,6 +287,7 @@ ORIENTATION     : 'orientation' ;
 FLUCQ           : 'flucQ' ;
 RNEMD           : 'RNEMD' ;
 LIGHT           : 'light' ;
+VELOCITYFIELD   : 'velocityField' ;
 MINIMIZER       : 'minimizer' ;
 
 // Potential type keywords
