@@ -464,7 +464,7 @@ if(LAPACK_FOUND AND BLAS_FOUND)
   # is defined (see below).
   set(LAPACK_BLAS_LIBRARIES ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 else()
-  message(STATUS "LAPACK/BLAS not found — SFG will use the JAMA eigensolver fallback")
+  message(STATUS "LAPACK/BLAS not found — will use the JAMA eigensolver fallback")
 endif()
 
 if(APPLE)
@@ -565,6 +565,7 @@ set(SOURCE
     src/hydrodynamics/HydrodynamicsModel.cpp
     src/hydrodynamics/HydrodynamicsModelFactory.cpp
     src/hydrodynamics/RoughShell.cpp
+    src/hydrodynamics/RPYMobility.cpp
     src/hydrodynamics/ShapeBuilder.cpp
     src/hydrodynamics/Sphere.cpp
     src/integrators/DLM.cpp
@@ -588,6 +589,7 @@ set(SOURCE
     src/integrators/NPTxyz.cpp
     src/integrators/NVE.cpp
     src/integrators/NVT.cpp
+    src/integrators/LHDForceModifier.cpp
     src/integrators/VelocityVerletIntegrator.cpp
     src/io/AtomTypesSectionParser.cpp
     src/io/BaseAtomTypesSectionParser.cpp
@@ -814,15 +816,29 @@ if(MPI_FOUND)
   set_target_properties(openmd_parallel PROPERTIES COMPILE_DEFINITIONS IS_MPI)
 endif(MPI_FOUND)
 
-add_executable(openmd src/applications/openmd/openmd.cpp)
-target_link_libraries(openmd openmd_single openmd_core openmd_single
-                      openmd_core)
+if(LAPACK_FOUND AND BLAS_FOUND)
+  # Accelerate deprecated the legacy CBLAS interface in macOS 13.3.
+  # -DACCELERATE_NEW_LAPACK opts into the updated headers that replace it.
+  if(APPLE AND BLA_VENDOR STREQUAL "Apple")
+    target_compile_definitions(openmd_core PRIVATE ACCELERATE_NEW_LAPACK)
+  endif()
+endif()
 
+add_executable(openmd src/applications/openmd/openmd.cpp)
+target_link_libraries(openmd PRIVATE openmd_single openmd_core)
+if(LAPACK_FOUND AND BLAS_FOUND)
+  target_link_libraries(openmd PRIVATE ${LAPACK_BLAS_LIBRARIES})
+endif()
+		      
 if(MPI_FOUND)
   add_executable(openmd_MPI src/applications/openmd/openmd.cpp)
   set_target_properties(openmd_MPI PROPERTIES COMPILE_DEFINITIONS IS_MPI)
-  target_link_libraries(openmd_MPI openmd_parallel openmd_core openmd_parallel
+  target_link_libraries(openmd_MPI PRIVATE openmd_parallel openmd_core openmd_parallel
                         openmd_core ${MPI_CXX_LIBRARIES})
+  if(LAPACK_FOUND AND BLAS_FOUND)
+    target_link_libraries(openmd_MPI PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  endif()
+	
   install(
     TARGETS openmd_parallel openmd_MPI
     RUNTIME
@@ -1014,76 +1030,71 @@ set(ELASTICCONSTANTSSOURCE
     src/applications/elasticConstants/elasticConstants.cpp
     src/applications/elasticConstants/elasticConstantsCmd.cpp)
 
-add_executable(Dump2XYZ ${DUMP2XYZSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(Dump2XYZ openmd_single openmd_core openmd_single
-                      openmd_core)
 add_executable(DynamicProps ${DYNAMICPROPSSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(DynamicProps PRIVATE openmd_single openmd_core 
-                      openmd_single openmd_core)
+target_link_libraries(DynamicProps PRIVATE openmd_single openmd_core)
+
 if(OpenMP_CXX_FOUND)
     target_compile_definitions(DynamicProps PRIVATE HAVE_OPENMP)
     target_link_libraries(DynamicProps PRIVATE OpenMP::OpenMP_CXX)
 endif()
 if(LAPACK_FOUND AND BLAS_FOUND)
-  target_link_libraries(DynamicProps PRIVATE ${LAPACK_BLAS_LIBRARIES})
   # Accelerate deprecated the legacy CBLAS interface in macOS 13.3.
   # -DACCELERATE_NEW_LAPACK opts into the updated headers that replace it.
   if(APPLE AND BLA_VENDOR STREQUAL "Apple")
     target_compile_definitions(DynamicProps PRIVATE ACCELERATE_NEW_LAPACK)
   endif()
 endif()
+
+add_executable(Dump2XYZ ${DUMP2XYZSOURCE} ${GETOPT_SOURCE})
 add_executable(Hydro ${HYDROSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(Hydro PRIVATE openmd_single openmd_core openmd_single
-                                    openmd_core)
-add_executable(omd2omd ${OMD2OMDSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(omd2omd openmd_single openmd_core openmd_single
-                      openmd_core)
-add_executable(equationofstate ${EOSSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(equationofstate openmd_single openmd_core openmd_single
-                      openmd_core)
-add_executable(StaticProps ${STATICPROPSSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(StaticProps PRIVATE openmd_single openmd_core openmd_single
-                      openmd_core)
-if(LAPACK_FOUND AND BLAS_FOUND)
-  target_link_libraries(StaticProps PRIVATE ${LAPACK_BLAS_LIBRARIES})
-  # Accelerate deprecated the legacy CBLAS interface in macOS 13.3.
-  # -DACCELERATE_NEW_LAPACK opts into the updated headers that replace it.
-  if(APPLE AND BLA_VENDOR STREQUAL "Apple")
-    target_compile_definitions(StaticProps PRIVATE ACCELERATE_NEW_LAPACK)
-  endif()
-endif()
 add_executable(SequentialProps ${SEQUENTIALPROPSSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(SequentialProps openmd_single openmd_core openmd_single
-                      openmd_core)
-add_executable(nanoparticleBuilder ${NANOPARTICLEBUILDERSOURCE}
-                                   ${GETOPT_SOURCE})
-target_link_libraries(nanoparticleBuilder openmd_single openmd_core
-                      openmd_single openmd_core openmd_single)
-add_executable(nanorodBuilder ${NANORODBUILDERSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(nanorodBuilder openmd_single openmd_core openmd_single
-                      openmd_core openmd_single)
-add_executable(nanorod_pentBuilder ${NANOROD_PENTBUILDERSOURCE}
-                                   ${GETOPT_SOURCE})
-target_link_libraries(nanorod_pentBuilder openmd_single openmd_core
-                      openmd_single openmd_core openmd_single)
-add_executable(icosahedralBuilder ${ICOSAHEDRALBUILDERSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(icosahedralBuilder openmd_single openmd_core
-                      openmd_single openmd_core openmd_single)
-add_executable(randomBuilder ${RANDOMBUILDERSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(randomBuilder openmd_single openmd_core openmd_single
-                      openmd_core openmd_single)
-add_executable(simpleBuilder ${SIMPLEBUILDERSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(simpleBuilder openmd_single openmd_core openmd_single
-                      openmd_core openmd_single)
-add_executable(thermalizer ${THERMALIZERSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(thermalizer openmd_single openmd_core openmd_single
-                      openmd_core openmd_single)
-add_executable(recenter ${RECENTERSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(recenter openmd_single openmd_core openmd_single
-                      openmd_core openmd_single)
+add_executable(StaticProps ${STATICPROPSSOURCE} ${GETOPT_SOURCE})
 add_executable(elasticConstants ${ELASTICCONSTANTSSOURCE} ${GETOPT_SOURCE})
-target_link_libraries(elasticConstants openmd_single openmd_core openmd_single
-                      openmd_core openmd_single)
+add_executable(equationofstate ${EOSSOURCE} ${GETOPT_SOURCE})
+add_executable(icosahedralBuilder ${ICOSAHEDRALBUILDERSOURCE} ${GETOPT_SOURCE})
+add_executable(nanoparticleBuilder ${NANOPARTICLEBUILDERSOURCE}  ${GETOPT_SOURCE})
+add_executable(nanorodBuilder ${NANORODBUILDERSOURCE} ${GETOPT_SOURCE})
+add_executable(nanorod_pentBuilder ${NANOROD_PENTBUILDERSOURCE}  ${GETOPT_SOURCE})
+add_executable(omd2omd ${OMD2OMDSOURCE} ${GETOPT_SOURCE})
+add_executable(randomBuilder ${RANDOMBUILDERSOURCE} ${GETOPT_SOURCE})
+add_executable(recenter ${RECENTERSOURCE} ${GETOPT_SOURCE})
+add_executable(simpleBuilder ${SIMPLEBUILDERSOURCE} ${GETOPT_SOURCE})
+add_executable(thermalizer ${THERMALIZERSOURCE} ${GETOPT_SOURCE})
+
+target_link_libraries(Dump2XYZ PRIVATE openmd_single openmd_core)
+target_link_libraries(Hydro PRIVATE openmd_single openmd_core)
+target_link_libraries(SequentialProps PRIVATE openmd_single openmd_core)
+target_link_libraries(StaticProps PRIVATE openmd_single openmd_core)
+target_link_libraries(elasticConstants PRIVATE openmd_single openmd_core)
+target_link_libraries(equationofstate PRIVATE openmd_single openmd_core)
+target_link_libraries(icosahedralBuilder PRIVATE openmd_single openmd_core)
+target_link_libraries(nanoparticleBuilder PRIVATE openmd_single openmd_core)
+target_link_libraries(nanorodBuilder PRIVATE openmd_single openmd_core)
+target_link_libraries(nanorod_pentBuilder PRIVATE openmd_single openmd_core)
+target_link_libraries(omd2omd PRIVATE openmd_single openmd_core)
+target_link_libraries(randomBuilder PRIVATE openmd_single openmd_core)
+target_link_libraries(recenter PRIVATE openmd_single openmd_core)
+target_link_libraries(simpleBuilder PRIVATE openmd_single openmd_core)
+target_link_libraries(thermalizer PRIVATE openmd_single openmd_core)
+
+if(LAPACK_FOUND AND BLAS_FOUND)
+  target_link_libraries(Hydro PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(Dump2XYZ PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(DynamicProps PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(SequentialProps PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(StaticProps PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(elasticConstants PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(equationofstate PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(icosahedralBuilder PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(nanoparticleBuilder PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(nanorodBuilder PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(nanorod_pentBuilder PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(omd2omd PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(randomBuilder PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(recenter PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(simpleBuilder PRIVATE ${LAPACK_BLAS_LIBRARIES})
+  target_link_libraries(thermalizer PRIVATE ${LAPACK_BLAS_LIBRARIES})
+endif()
 
 if(USE_OPENBABEL)
   set(ATOM2OMDSOURCE src/applications/atom2omd/atom2omd.cpp
@@ -1094,8 +1105,7 @@ if(USE_OPENBABEL)
   # calls.
   target_compile_definitions(
     atom2omd PUBLIC _LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
-  target_link_libraries(atom2omd openmd_single openmd_core openmd_single
-                        openmd_core ${OPENBABEL_LIBRARIES})
+  target_link_libraries(atom2omd openmd_single openmd_core ${OPENBABEL_LIBRARIES})
   install(
     TARGETS atom2omd
     RUNTIME

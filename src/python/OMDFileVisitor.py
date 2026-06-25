@@ -39,15 +39,16 @@ class OMDFileVisitor(OMDVisitor):
 
     The top-level visit(tree) call returns a dict of the form:
     {
-        'components':   [ ... ],
-        'molecules':    [ { 'atoms': [...], ... }, ... ],
-        'fragments':    [ ... ],
-        'zconstraints': [ ... ],
-        'restraints':   [ ... ],
-        'flucq':        { ... },
-        'rnemd':        { ... },
-        'light':        { ... },
-        'minimizer':    { ... },
+        'components':    [ ... ],
+        'molecules':     [ { 'atoms': [...], ... }, ... ],
+        'fragments':     [ ... ],
+        'zconstraints':  [ ... ],
+        'restraints':    [ ... ],
+        'flucq':         { ... },
+        'rnemd':         { ... },
+        'light':         { ... },
+        'velocityField': { ... },
+        'minimizer':     { ... },
     }
     """
 
@@ -58,15 +59,16 @@ class OMDFileVisitor(OMDVisitor):
     def visitOmdfile(self, ctx):
         result = {}
         structural = {
-            'fragments':    [],            
-            'molecules':    [],
-            'components':   [],
-            'zconstraints': [],
-            'restraints':   [],
-            'flucq':        {},
-            'rnemd':        {},
-            'light':        {},
-            'minimizer':    {},
+            'fragments':     [],            
+            'molecules':     [],
+            'components':    [],
+            'zconstraints':  [],
+            'restraints':    [],
+            'flucq':         {},
+            'rnemd':         {},
+            'light':         {},
+            'velocityField': {},
+            'minimizer':     {},
         }
         assignments = {}
         for stmt in ctx.statement():
@@ -93,6 +95,8 @@ class OMDFileVisitor(OMDVisitor):
             structural['rnemd'] = self.visitRnemdblock(ctx.rnemdblock())
         elif ctx.lightblock():
             structural['light'] = self.visitLightblock(ctx.lightblock())
+        elif ctx.velocityfieldblock():
+            structural['velocityField'] = self.visitVelocityfieldblock(ctx.velocityfieldblock())
         elif ctx.minimizerblock():
             structural['minimizer'] = self.visitMinimizerblock(ctx.minimizerblock())
 
@@ -126,7 +130,7 @@ class OMDFileVisitor(OMDVisitor):
 
     # -------------------------------------------------------------------------
     # Simple blocks (component, zconstraint, restraint, flucq, rnemd,
-    #                light, minimizer) — all share the same structure
+    #                light, velocityField, minimizer) — all share the same structure
     # -------------------------------------------------------------------------
 
     def _visit_simple_block(self, ctx):
@@ -153,6 +157,9 @@ class OMDFileVisitor(OMDVisitor):
         return self._visit_simple_block(ctx)
 
     def visitLightblock(self, ctx):
+        return self._visit_simple_block(ctx)
+
+    def visitVelocityfieldblock(self, ctx):
         return self._visit_simple_block(ctx)
 
     def visitMinimizerblock(self, ctx):

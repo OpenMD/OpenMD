@@ -70,6 +70,7 @@ namespace OpenMD {
     bool haveSD1  = vfParams_->haveStrainDirection1();
     bool haveSD2  = vfParams_->haveStrainDirection2();
     bool haveVort = vfParams_->haveVorticity();
+    bool haveBG   = vfParams_->haveBackgroundVelocity();
 
     bool anyStrain  = haveSR || haveSD1 || haveSD2;
     bool fullStrain = haveSR && haveSD1 && haveSD2;
@@ -84,11 +85,11 @@ namespace OpenMD {
       simError();
     }
 
-    if (!fullStrain && !haveVort) {
+    if (!fullStrain && !haveVort && !haveBG) {
       snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
                "VelocityField: nothing to do.  Specify a rate-of-strain block\n"
                "\t(strainRate, strainDirection1, strainDirection2), a vorticity\n"
-               "\tvector, or both.\n");
+               "\tvector, a backgroundVelocity, or some combination of these.\n");
       painCave.isFatal = 1;
       simError();
     }

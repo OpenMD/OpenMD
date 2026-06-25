@@ -234,6 +234,7 @@ namespace OpenMD {
     delete flucQpars_;
     delete rnemdPars_;
     delete lightPars_;
+    delete vfPars_;
     delete minimizerPars_;
   }
 
@@ -245,14 +246,17 @@ namespace OpenMD {
     CheckParameter(
         Ensemble,
         isEqualIgnoreCase("NVE") || isEqualIgnoreCase("NVT") ||
-            isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") ||
-            isEqualIgnoreCase("NPTxyz") || isEqualIgnoreCase("NPTsz") ||
-            isEqualIgnoreCase("NPAT") || isEqualIgnoreCase("NPA") ||
-            isEqualIgnoreCase("LANGEVINDYNAMICS") || isEqualIgnoreCase("LD") ||
-            isEqualIgnoreCase("NPRT") || isEqualIgnoreCase("NPGT") ||
-            isEqualIgnoreCase("NGammaT") || isEqualIgnoreCase("NGT") ||
-            isEqualIgnoreCase("LANGEVINHULL") || isEqualIgnoreCase("LHULL") ||
-            isEqualIgnoreCase("SMIPD") || isEqualIgnoreCase("LANGEVINPISTON"));
+	isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") ||
+	isEqualIgnoreCase("NPTxyz") || isEqualIgnoreCase("NPTsz") ||
+	isEqualIgnoreCase("NPAT") || isEqualIgnoreCase("NPA") ||
+	isEqualIgnoreCase("LANGEVINDYNAMICS") || isEqualIgnoreCase("LD") ||
+	isEqualIgnoreCase("NPRT") || isEqualIgnoreCase("NPGT") ||
+	isEqualIgnoreCase("NGammaT") || isEqualIgnoreCase("NGT") ||
+	isEqualIgnoreCase("LANGEVINHULL") || isEqualIgnoreCase("LHULL") ||
+	isEqualIgnoreCase("SMIPD") || isEqualIgnoreCase("LANGEVINPISTON") ||
+	isEqualIgnoreCase("RPY") || isEqualIgnoreCase("RPYDYNAMICS") ||
+	isEqualIgnoreCase("LHD") || isEqualIgnoreCase("LANGEVINHYDRODYNAMICS"));
+
     CheckParameter(Dt, isPositive());
     CheckParameter(RunTime, isPositive());
     CheckParameter(FinalConfig, isNotEmpty());

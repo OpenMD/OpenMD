@@ -326,6 +326,17 @@ namespace OpenMD {
      */
     Real lengthSquare() { return dot(*this, *this); }
 
+    /** Returns a vector containing the absolute value of each element. */
+    DynamicVector<Real> abs() const {
+      DynamicVector<Real> result(this->size());
+      std::transform(this->begin(), this->end(), result.begin(),
+		     [](Real val) { return std::abs(val); });
+      return result;
+    }
+    
+    /** Returns the largest element of this vector. */
+    Real max() const { return *std::max_element(this->begin(), this->end()); }
+    
     /** Normalizes this vector in place */
     void normalize() {
       Real len = length();

@@ -102,6 +102,12 @@ namespace OpenMD {
          vorticity        = (0, 0, 2.0e-3);  // fs^-1
       }
 
+      // background velocity field
+      velocityField {
+         useVelocityField   = true;
+         backgroundVelocity = (0, 0, 1.0e-4);  // Angstrom fs^-1
+      }
+
       // simple shear  v_x = gammaDot * y  (equal strain + vorticity)
       velocityField {
          useVelocityField = true;

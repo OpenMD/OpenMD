@@ -62,6 +62,7 @@
 
 #include "constraints/ZconstraintForceModifier.hpp"
 #include "integrators/LDForceModifier.hpp"
+#include "integrators/LHDForceModifier.hpp"
 #include "integrators/LangevinHullForceModifier.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "parallel/ForceMatrixDecomposition.hpp"
@@ -511,6 +512,10 @@ namespace OpenMD {
     } else if (ensembleParam == "LANGEVINDYNAMICS" || ensembleParam == "LD") {
       LDForceModifier* langevinDynamicsFM = new LDForceModifier(info_);
       forceModifiers_.push_back(langevinDynamicsFM);
+    } else if (ensembleParam == "RPYDYNAMICS" || ensembleParam == "RPY"
+	       || ensembleParam =="LHD" || ensembleParam =="LANGEVINHYDRODYNAMICS" ) {
+      LHDForceModifier* lhdFM = new LHDForceModifier(info_);
+      forceModifiers_.push_back(lhdFM);
     }
 
     if (info_->getSimParams()->getNZconsStamps() > 0) {

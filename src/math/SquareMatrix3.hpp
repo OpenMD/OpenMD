@@ -85,6 +85,9 @@ namespace OpenMD {
     /** copy  constructor */
     SquareMatrix3(const SquareMatrix<Real, 3>& m) : SquareMatrix<Real, 3>(m) {}
 
+    /** Construct from a RectMatrix (e.g. the result of matrix arithmetic). */
+    SquareMatrix3(const RectMatrix<Real, 3, 3>& m) : SquareMatrix<Real, 3>(m) {}
+    
     SquareMatrix3(const Vector3<Real>& eulerAngles) {
       setupRotMat(eulerAngles);
     }
@@ -98,9 +101,9 @@ namespace OpenMD {
     SquareMatrix3(Real w, Real x, Real y, Real z) { setupRotMat(w, x, y, z); }
 
     /** copy assignment operator */
-    SquareMatrix3<Real>& operator=(const SquareMatrix<Real, 3>& m) {
+    SquareMatrix3<Real>& operator=(const RectMatrix<Real, 3, 3>& m) {
       if (this == &m) return *this;
-      SquareMatrix<Real, 3>::operator=(m);
+      RectMatrix<Real, 3, 3>::operator=(m);
       return *this;
     }
 

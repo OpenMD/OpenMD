@@ -149,6 +149,19 @@ public:
     return nullptr;
   }
 
+  // VelocityField block
+  virtual antlrcpp::Any visitVelocityfieldblock(OMDParser::VelocityfieldblockContext *ctx) override {
+    Perturbations::VelocityFieldParameters* vfPars = new Perturbations::VelocityFieldParameters();
+    blockStack.push(vfPars);
+        
+    visitChildren(ctx);
+        
+    blockStack.top()->validate();
+    blockStack.pop();
+    currConf->addVelocityFieldParameters(vfPars);
+    return nullptr;
+  }
+
   // Minimizer block
   virtual antlrcpp::Any visitMinimizerblock(OMDParser::MinimizerblockContext *ctx) override {
     MinimizerParameters* minimizerPars = new MinimizerParameters();

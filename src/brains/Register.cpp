@@ -111,6 +111,14 @@ namespace OpenMD {
     IntegratorFactory::getInstance().registerIntegrator(
         new IntegratorBuilder<LangevinDynamics>("SMIPD"));
     IntegratorFactory::getInstance().registerIntegrator(
+	new IntegratorBuilder<LangevinDynamics>("RPYDYNAMICS"));
+    IntegratorFactory::getInstance().registerIntegrator(
+        new IntegratorBuilder<LangevinDynamics>("RPY"));
+    IntegratorFactory::getInstance().registerIntegrator(
+	new IntegratorBuilder<LangevinDynamics>("LHD"));
+    IntegratorFactory::getInstance().registerIntegrator(
+	new IntegratorBuilder<LangevinDynamics>("LANGEVINHYDRODYNAMICS"));
+    IntegratorFactory::getInstance().registerIntegrator(
         new IntegratorBuilder<LangevinPiston>("LANGEVINPISTON"));
   }
 

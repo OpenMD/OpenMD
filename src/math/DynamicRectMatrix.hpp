@@ -205,6 +205,15 @@ namespace OpenMD {
         std::swap(data_[k * ncol_ + i], data_[k * ncol_ + j]);
     }
 
+    /** Returns a DynamicVector of the diagonal elements. */
+    DynamicVector<Real> diagonals() const {
+      unsigned int dim = (nrow_ < ncol_) ? nrow_ : ncol_;
+      DynamicVector<Real> result(dim);
+      for (unsigned int i = 0; i < dim; ++i)
+	result(i) = data_[i * ncol_ + i];
+      return result;
+    }
+
     /**
      * Tests if this matrix is identical to matrix m
      * @param m matrix to be compared
