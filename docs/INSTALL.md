@@ -23,12 +23,16 @@ The following are optional when compiling OpenMD, but if they are not
 available some features will be missing:
 
 * [OpenMPI](https://www.open-mpi.org/) or
-[MPICH](https://www.mpich.org/) – Very good implementations of the MPI-2 specification for parallel computing.  A version of the MPI library is required if you want to run the multi-processor version of OpenMD. 
+[MPICH](https://www.mpich.org/) – Very good implementations of the
+MPI-2 specification for parallel computing.  A version of the MPI
+library is required if you want to run the multi-processor version of
+OpenMD.
+
 * [python](https://www.python.org/) - An interpreted scripting
 language that some of the OpenMD utilities use to parse and process
 data files. Some python scripts also depend on
 [NumPy](https://numpy.org/) and [SciPy](https://scipy.org/). You'll
-want Python version 3 or higher, and we test on 3.12
+want Python version 3 or higher, and we test on 3.14
 
 * [qhull](http://qhull.org/) – A computational geometry toolbox for
 computing convex hulls and Delaunay triangulations. qhull is
