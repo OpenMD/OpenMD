@@ -63,18 +63,7 @@ namespace OpenMD {
     RealType getTranslationalKinetic();  // the translational kinetic energy
     RealType getRotationalKinetic();     // the rotational kinetic energy
     RealType getElectronicKinetic();     // the electronic kinetic energy
-    
-    RealType getPeculiarTranslationalKinetic(); // the translational
-						// kinetic energy
-						// subtracting motion
-						// of imposed velocity
-						// field
-    
     RealType getKinetic();               // the total kinetic energy
-    RealType getPeculiarKinetic();       // the total kinetic energy
-					 // subtracting motion of
-					 // imposed velocity field
-    
     RealType getPotential();             // the total potential energy
     potVec getSelectionPotentials();     // the potential energy of a selection
 
@@ -83,8 +72,6 @@ namespace OpenMD {
     RealType getTemperature();            // Gives the instant temp. in K
     RealType getElectronicTemperature();  // gives the instant electronic
                                           // temperature in K
-    RealType getPeculiarTemperature();    // Gives the instantaneous temperature
-                                          // subtracting motion of imposed velocity field
     RealType getNetCharge();       // gives the total net charge on the system
     RealType getChargeMomentum();  // gives the instantaneous charge momentum in
                                    // kcal fs / e / mol
