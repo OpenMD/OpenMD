@@ -974,8 +974,8 @@ int main(int argc, char* argv[]) {
     analyser = std::make_unique<DensityField>(info, dumpFileName, sele1,
                                               args_info.voxelSize_arg);
   } else if (args_info.velocityfield_given) {
-    analyser = std::make_unique<VelocityField>(info, dumpFileName, sele1,
-                                               args_info.voxelSize_arg);
+    analyser = std::make_unique<SDVelocityField>(info, dumpFileName, sele1,
+						 args_info.voxelSize_arg);
   } else if (args_info.velocityZ_given) {
     switch (privilegedAxis) {
     case 0:

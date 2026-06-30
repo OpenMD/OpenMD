@@ -68,6 +68,11 @@
 using namespace std;
 namespace OpenMD {
 
+  Thermo::Thermo(SimInfo* info) : info_(info) {
+    velField_ = std::make_unique<VelocityField>(info);
+    bool usePeculiarVelocities_ = velField_->isActive();	
+  }
+
   RealType Thermo::getTranslationalKinetic() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -77,6 +82,7 @@ namespace OpenMD {
       Molecule* mol;
       StuntDouble* sd;
       Vector3d vel;
+      Vector3d ambient;
       RealType mass;
       RealType kinetic(0.0);
 
@@ -86,6 +92,11 @@ namespace OpenMD {
              sd = mol->nextIntegrableObject(iiter)) {
           mass = sd->getMass();
           vel  = sd->getVel();
+	  
+	  if (usePeculiarVelocities_) {
+	    ambient = velField_->getVelocity(sd->getPos());
+	    vel -= ambient;
+	  }
 
           kinetic +=
               mass * (vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
@@ -112,30 +123,43 @@ namespace OpenMD {
       vector<StuntDouble*>::iterator iiter;
       Molecule* mol;
       StuntDouble* sd;
-      Vector3d angMom;
-      Mat3x3d I;
+      Vector3d vorticity(0.0);
+      Vector3d J, omegaB, omegaL;
+      Mat3x3d I, A, Atrans;
       int i, j, k;
       RealType kinetic(0.0);
+
+      if (usePeculiarVelocities_) {
+	vorticity = velField_->getVorticity();
+      }
 
       for (mol = info_->beginMolecule(miter); mol != NULL;
            mol = info_->nextMolecule(miter)) {
         for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
              sd = mol->nextIntegrableObject(iiter)) {
           if (sd->isDirectional()) {
-            angMom = sd->getJ();
+            J      = sd->getJ();
             I      = sd->getI();
+	    A      = sd->getA();
+            Atrans = A.transpose();
 
             if (sd->isLinear()) {
               i = sd->linearAxis();
               j = (i + 1) % 3;
               k = (i + 2) % 3;
-              kinetic += angMom[j] * angMom[j] / I(j, j) +
-                         angMom[k] * angMom[k] / I(k, k);
+	      omegaB[i] = 0.0;
+	      omegaB[j] = J[j] / I(j,j);
+	      omegaB[k] = J[k] / I(k,k);
             } else {
-              kinetic += angMom[0] * angMom[0] / I(0, 0) +
-                         angMom[1] * angMom[1] / I(1, 1) +
-                         angMom[2] * angMom[2] / I(2, 2);
+	      omegaB[0] = J[0] / I(0,0);
+	      omegaB[1] = J[1] / I(1,1);
+	      omegaB[2] = J[2] / I(2,2);
             }
+	    omegaL = Atrans * omegaB - vorticity;
+	    omegaB = A * omegaL;
+
+	    kinetic += dot(omegaB, I * omegaB);
+	    
           }
         }
       }
@@ -145,7 +169,7 @@ namespace OpenMD {
                     MPI_COMM_WORLD);
 #endif
 
-      kinetic = kinetic * 0.5 / Constants::energyConvert;
+      kinetic = kinetic * 0.5 / Constants::energyConvert ;
 
       snap->setRotationalKineticEnergy(kinetic);
     }
@@ -349,6 +373,7 @@ namespace OpenMD {
     AtomType* atype;
     AtomTypeSet::iterator at;
     Vector3d Jc(0.0);
+    Vector3d ambient;
     std::vector<Vector3d> typeJc(simTypes.size(), V3Zero);
 
     for (mol = info_->beginMolecule(miter); mol != NULL;
@@ -362,6 +387,11 @@ namespace OpenMD {
       for (atom = mol->beginAtom(iiter); atom != NULL;
            atom = mol->nextAtom(iiter)) {
         Vector3d v = atom->getVel();
+	if (usePeculiarVelocities_) {
+	  ambient = velField_->getVelocity(atom->getPos());
+	  v -= ambient;
+	}
+	
         RealType q = 0.0;
         int typeIndex(-1);
 
@@ -461,6 +491,7 @@ namespace OpenMD {
       Mat3x3d p_tens(0.0);
       RealType mass;
       Vector3d vcom;
+      Vector3d ambient;
 
       SimInfo::MoleculeIterator i;
       vector<StuntDouble*>::iterator j;
@@ -472,6 +503,10 @@ namespace OpenMD {
              sd = mol->nextIntegrableObject(j)) {
           mass = sd->getMass();
           vcom = sd->getVel();
+	  if (usePeculiarVelocities_) {
+	    ambient = velField_->getVelocity(sd->getPos());
+	    vcom -= ambient;
+	  }	  
           p_tens += mass * outProduct(vcom, vcom);
         }
       }
@@ -501,6 +536,7 @@ namespace OpenMD {
       Mat3x3d p_tens(0.0);
       RealType mass;
       Vector3d vcom;
+      Vector3d ambient;
 
       SimInfo::MoleculeIterator i;
       vector<StuntDouble*>::iterator j;
@@ -512,6 +548,10 @@ namespace OpenMD {
              sd = mol->nextIntegrableObject(j)) {
           mass = sd->getMass();
           vcom = sd->getVel(snap);
+	  if (usePeculiarVelocities_) {
+	    ambient = velField_->getVelocity(sd->getPos());
+	    vcom -= ambient;
+	  }	  	  
           p_tens += mass * outProduct(vcom, vcom);
         }
       }
@@ -701,9 +741,10 @@ namespace OpenMD {
     StuntDouble* sd;
     RigidBody::AtomIterator ai;
     Atom* atom;
-    Vector3d vel;
-    Vector3d angMom;
-    Mat3x3d I;
+    Vector3d vel, omegaB, omegaL;
+    Vector3d ambient, vorticity;
+    Vector3d J;
+    Mat3x3d I, A, Atrans;
     int i;
     int j;
     int k;
@@ -716,6 +757,10 @@ namespace OpenMD {
     // Convective portion of the heat flux
     Vector3d heatFluxJc = V3Zero;
 
+    if (usePeculiarVelocities_) {
+      vorticity = velField_->getVorticity();
+    }
+
     /* Calculate convective portion of the heat flux */
     for (mol = info_->beginMolecule(miter); mol != NULL;
          mol = info_->nextMolecule(miter)) {
@@ -723,25 +768,36 @@ namespace OpenMD {
            sd = mol->nextIntegrableObject(iiter)) {
         mass = sd->getMass();
         vel  = sd->getVel();
+	if (usePeculiarVelocities_) {
+	  ambient = velField_->getVelocity(sd->getPos());
+	  vel -= ambient;
+	}	  
 
         kinetic = mass * (vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
 
         if (sd->isDirectional()) {
-          angMom = sd->getJ();
+          J      = sd->getJ();
           I      = sd->getI();
+	  A      = sd->getA();
+	  Atrans = A.transpose();
 
-          if (sd->isLinear()) {
-            i = sd->linearAxis();
-            j = (i + 1) % 3;
-            k = (i + 2) % 3;
-            kinetic += angMom[j] * angMom[j] / I(j, j) +
-                       angMom[k] * angMom[k] / I(k, k);
-          } else {
-            kinetic += angMom[0] * angMom[0] / I(0, 0) +
-                       angMom[1] * angMom[1] / I(1, 1) +
-                       angMom[2] * angMom[2] / I(2, 2);
-          }
-        }
+	  if (sd->isLinear()) {
+	    i = sd->linearAxis();
+	    j = (i + 1) % 3;
+	    k = (i + 2) % 3;
+	    omegaB[i] = 0.0;
+	    omegaB[j] = J[j] / I(j,j);
+	    omegaB[k] = J[k] / I(k,k);
+	  } else {
+	    omegaB[0] = J[0] / I(0,0);
+	    omegaB[1] = J[1] / I(1,1);
+	    omegaB[2] = J[2] / I(2,2);
+	  }
+	  omegaL = Atrans * omegaB - vorticity;
+	  omegaB = A * omegaL;
+	  
+	  kinetic += dot(omegaB, I * omegaB);
+	}
 
         potential = 0.0;
 
@@ -789,6 +845,8 @@ namespace OpenMD {
       SimInfo::MoleculeIterator i;
       Molecule* mol;
 
+      Vector3d vel;
+      Vector3d ambient;
       Vector3d comVel(0.0);
       RealType totalMass(0.0);
 
@@ -796,7 +854,13 @@ namespace OpenMD {
            mol = info_->nextMolecule(i)) {
         RealType mass = mol->getMass();
         totalMass += mass;
-        comVel += mass * mol->getComVel();
+	vel = mol->getComVel();
+	if (usePeculiarVelocities_) {
+	  ambient = velField_->getVelocity(mol->getCom());
+	  vel -= ambient;
+	}	  
+
+        comVel += mass * vel;
       }
 
 #ifdef IS_MPI
@@ -854,6 +918,8 @@ namespace OpenMD {
       Molecule* mol;
 
       RealType totalMass(0.0);
+      Vector3d vel;
+      Vector3d ambient;
 
       com    = 0.0;
       comVel = 0.0;
@@ -863,7 +929,15 @@ namespace OpenMD {
         RealType mass = mol->getMass();
         totalMass += mass;
         com += mass * mol->getCom();
-        comVel += mass * mol->getComVel();
+
+	vel = mol->getComVel();
+	if (usePeculiarVelocities_) {
+	  ambient = velField_->getVelocity(mol->getCom());
+	  vel -= ambient;
+	}	  
+
+        comVel += mass * vel;
+
       }
 
 #ifdef IS_MPI

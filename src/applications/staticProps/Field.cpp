@@ -466,13 +466,13 @@ namespace OpenMD {
     return charge;
   }
 
-  VelocityField::VelocityField(SimInfo* info, const std::string& filename,
-                               const std::string& sele1, RealType voxelSize) :
-      Field<Vector3d>(info, filename, sele1, voxelSize) {
+  SDVelocityField::SDVelocityField(SimInfo* info, const std::string& filename,
+				   const std::string& sele1, RealType voxelSize) :
+    Field<Vector3d>(info, filename, sele1, voxelSize) {
     setOutputName(getPrefix(filename) + ".velocityField");
   }
 
-  Vector3d VelocityField::getValue(StuntDouble* sd) { return sd->getVel(); }
+  Vector3d SDVelocityField::getValue(StuntDouble* sd) { return sd->getVel(); }
 
   DipoleField::DipoleField(SimInfo* info, const std::string& filename,
                            const std::string& sele1, RealType voxelSize) :

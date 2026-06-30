@@ -105,10 +105,10 @@ namespace OpenMD {
     virtual RealType getValue(StuntDouble* sd);
   };
 
-  class VelocityField : public Field<Vector3d> {
+  class SDVelocityField : public Field<Vector3d> {
   public:
-    VelocityField(SimInfo* info, const std::string& filename,
-                  const std::string& sele1, RealType voxelSize);
+    SDVelocityField(SimInfo* info, const std::string& filename,
+		    const std::string& sele1, RealType voxelSize);
     virtual Vector3d getValue(StuntDouble* sd);
   };
 

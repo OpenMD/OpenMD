@@ -177,15 +177,10 @@ namespace OpenMD {
       std::vector<Vector3d> vEff =
           useFlow ? mob.effectiveAmbient(pos, ambient, E) : ambient;
 
-      std::cerr << "Fsys = ";
-      for (std::size_t i = 0; i < N; ++i) std::cerr << hm.beads[i]->getFrc() << " ";
-      std::cerr << "\n";
-
       // --- correlated random force, applied once ---
       std::vector<RealType> Z(3 * N);
       for (std::size_t k = 0; k < 3 * N; ++k) Z[k] = normal_(*randNumGen_);
       std::vector<Vector3d> Frand = mob.randomForce(Z, kT_, dt_);
-      std::cerr << "Frand = " << Frand[0] << " " << Frand[1] << "\n";
       for (std::size_t i = 0; i < N; ++i) hm.beads[i]->addFrc(Frand[i]);
 
       // --- self-consistent coupled friction solve ---
@@ -201,7 +196,6 @@ namespace OpenMD {
         oldF = Ffric;
         // f_i = sum_j R_ij ( vEff_j - velStep_j )
         Ffric = mob.dragForce(vEff, velStep);
-  	std::cerr << "FFric = " << Ffric[0] << " " << Ffric[1] << "\n";
         for (std::size_t i = 0; i < N; ++i)
           velStep[i] =
               vel[i] + (dt2_ / hm.masses[i] * eConv) * (frc[i] + Ffric[i]);
@@ -224,7 +218,6 @@ namespace OpenMD {
     // Drift removal only makes sense without an imposed flow; with a background
     // flow it would cancel the net advection the flow imparts.
     if (!useFlow) {
-      std::cerr << "here!\n";
       if (simParams_->getConserveLinearMomentum()) veloMunge_->removeComDrift();
       if (!simParams_->getUsePeriodicBoundaryConditions() &&
           simParams_->getConserveAngularMomentum())
