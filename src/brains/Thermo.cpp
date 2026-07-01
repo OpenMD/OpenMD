@@ -68,11 +68,88 @@
 using namespace std;
 namespace OpenMD {
 
+  /**
+   * @brief Constructs a Thermo helper bound to a SimInfo instance.
+   *
+   * Constructs the (optional) background VelocityField and caches whether
+   * peculiar velocities should be used.  When a velocity field is active,
+   * kinetic energies, temperatures, the kinetic part of the pressure tensor,
+   * and the convective heat flux are all evaluated in the frame co-moving
+   * with the local background flow.
+   */
   Thermo::Thermo(SimInfo* info) : info_(info) {
-    velField_ = std::make_unique<VelocityField>(info);
-    bool usePeculiarVelocities_ = velField_->isActive();	
+    velField_              = std::make_unique<VelocityField>(info);
+    usePeculiarVelocities_ = velField_->isActive();
   }
 
+  /**
+   * @brief Returns the peculiar (flow-subtracted) velocity at a position.
+   *
+   * When no background velocity field is active, @p vel is returned
+   * unchanged.  Otherwise the local background flow velocity, sampled at
+   * @p pos, is subtracted.
+   *
+   * @param vel lab-frame velocity (Angstrom/fs)
+   * @param pos position at which to sample the background flow (Angstrom)
+   * @return peculiar velocity in the co-moving frame (Angstrom/fs)
+   */
+  Vector3d Thermo::peculiarVelocity(const Vector3d& vel, const Vector3d& pos) {
+    if (usePeculiarVelocities_) { return vel - velField_->getVelocity(pos); }
+    return vel;
+  }
+
+  /**
+   * @brief Returns the (peculiar) body-frame angular velocity of a
+   * directional StuntDouble.
+   *
+   * The body-frame angular velocity is first obtained from the body-frame
+   * angular momentum, \f$\omega_b = I^{-1} J\f$.  The local angular velocity
+   * of the background flow, @p flowOmega, is then removed in the lab frame
+   * and the result is transformed back to the body frame.  Using the
+   * orthogonality of the rotation matrix \f$A\f$ this round trip reduces to
+   * \f[
+   *   \omega_b^{\text{pec}} = A\,(A^{T}\omega_b - \Omega_{\text{flow}})
+   *                         = \omega_b - A\,\Omega_{\text{flow}}.
+   * \f]
+   *
+   * @note @p flowOmega must be the *angular velocity* of the background flow,
+   * i.e. one half of the vorticity \f$\tfrac{1}{2}\nabla\times v\f$ for an
+   * incompressible field.  Confirm the convention returned by
+   * VelocityField::getVorticity() (raw curl vs. angular velocity) before
+   * relying on the rotational temperature under flow.
+   *
+   * @param sd directional StuntDouble
+   * @param flowOmega lab-frame angular velocity of the background flow
+   * @return peculiar body-frame angular velocity
+   */
+  Vector3d Thermo::bodyAngularVelocity(StuntDouble* sd,
+                                       const Vector3d& flowOmega) {
+    Vector3d J = sd->getJ();
+    Mat3x3d I  = sd->getI();
+    Vector3d omegaB;
+
+    if (sd->isLinear()) {
+      int i     = sd->linearAxis();
+      int j     = (i + 1) % 3;
+      int k     = (i + 2) % 3;
+      omegaB[i] = 0.0;
+      omegaB[j] = J[j] / I(j, j);
+      omegaB[k] = J[k] / I(k, k);
+    } else {
+      omegaB[0] = J[0] / I(0, 0);
+      omegaB[1] = J[1] / I(1, 1);
+      omegaB[2] = J[2] / I(2, 2);
+    }
+
+    return omegaB - sd->getA() * flowOmega;
+  }
+
+  /**
+   * @brief Returns the translational kinetic energy of the system (kcal/mol).
+   *
+   * Uses peculiar velocities when a background velocity field is active so
+   * that the streaming contribution is excluded.
+   */
   RealType Thermo::getTranslationalKinetic() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -82,7 +159,6 @@ namespace OpenMD {
       Molecule* mol;
       StuntDouble* sd;
       Vector3d vel;
-      Vector3d ambient;
       RealType mass;
       RealType kinetic(0.0);
 
@@ -91,12 +167,7 @@ namespace OpenMD {
         for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
              sd = mol->nextIntegrableObject(iiter)) {
           mass = sd->getMass();
-          vel  = sd->getVel();
-	  
-	  if (usePeculiarVelocities_) {
-	    ambient = velField_->getVelocity(sd->getPos());
-	    vel -= ambient;
-	  }
+          vel  = peculiarVelocity(sd->getVel(), sd->getPos());
 
           kinetic +=
               mass * (vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
@@ -115,6 +186,13 @@ namespace OpenMD {
     return snap->getTranslationalKineticEnergy();
   }
 
+  /**
+   * @brief Returns the rotational kinetic energy of the system (kcal/mol).
+   *
+   * When a background velocity field is active, the local flow rotation is
+   * removed from each directional object's angular velocity (see
+   * bodyAngularVelocity) before the kinetic energy is accumulated.
+   */
   RealType Thermo::getRotationalKinetic() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -123,43 +201,18 @@ namespace OpenMD {
       vector<StuntDouble*>::iterator iiter;
       Molecule* mol;
       StuntDouble* sd;
-      Vector3d vorticity(0.0);
-      Vector3d J, omegaB, omegaL;
-      Mat3x3d I, A, Atrans;
-      int i, j, k;
+      Vector3d flowOmega(0.0);
       RealType kinetic(0.0);
 
-      if (usePeculiarVelocities_) {
-	vorticity = velField_->getVorticity();
-      }
+      if (usePeculiarVelocities_) { flowOmega = velField_->getVorticity(); }
 
       for (mol = info_->beginMolecule(miter); mol != NULL;
            mol = info_->nextMolecule(miter)) {
         for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
              sd = mol->nextIntegrableObject(iiter)) {
           if (sd->isDirectional()) {
-            J      = sd->getJ();
-            I      = sd->getI();
-	    A      = sd->getA();
-            Atrans = A.transpose();
-
-            if (sd->isLinear()) {
-              i = sd->linearAxis();
-              j = (i + 1) % 3;
-              k = (i + 2) % 3;
-	      omegaB[i] = 0.0;
-	      omegaB[j] = J[j] / I(j,j);
-	      omegaB[k] = J[k] / I(k,k);
-            } else {
-	      omegaB[0] = J[0] / I(0,0);
-	      omegaB[1] = J[1] / I(1,1);
-	      omegaB[2] = J[2] / I(2,2);
-            }
-	    omegaL = Atrans * omegaB - vorticity;
-	    omegaB = A * omegaL;
-
-	    kinetic += dot(omegaB, I * omegaB);
-	    
+            Vector3d omegaB = bodyAngularVelocity(sd, flowOmega);
+            kinetic += dot(omegaB, sd->getI() * omegaB);
           }
         }
       }
@@ -169,13 +222,17 @@ namespace OpenMD {
                     MPI_COMM_WORLD);
 #endif
 
-      kinetic = kinetic * 0.5 / Constants::energyConvert ;
+      kinetic = kinetic * 0.5 / Constants::energyConvert;
 
       snap->setRotationalKineticEnergy(kinetic);
     }
     return snap->getRotationalKineticEnergy();
   }
 
+  /**
+   * @brief Returns the total kinetic energy (translational + rotational +
+   * electronic) of the system in kcal/mol.
+   */
   RealType Thermo::getKinetic() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -188,22 +245,31 @@ namespace OpenMD {
     return snap->getKineticEnergy();
   }
 
+  /**
+   * @brief Returns the total potential energy (kcal/mol).
+   *
+   * ForceManager computes the potential and stores it in the Snapshot; this
+   * accessor simply reports it.
+   */
   RealType Thermo::getPotential() {
-    // ForceManager computes the potential and stores it in the
-    // Snapshot.  All we have to do is report it.
-
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
     return snap->getPotentialEnergy();
   }
 
+  /**
+   * @brief Returns the per-selection potential energies.
+   *
+   * ForceManager computes the selection potentials and stores them in the
+   * Snapshot; this accessor simply reports them.
+   */
   potVec Thermo::getSelectionPotentials() {
-    // ForceManager computes the selection potentials and stores them
-    // in the Snapshot.  All we have to do is report them.
-
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
     return snap->getSelectionPotentials();
   }
 
+  /**
+   * @brief Returns the total energy (kinetic + potential) in kcal/mol.
+   */
   RealType Thermo::getTotalEnergy() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -214,9 +280,15 @@ namespace OpenMD {
     return snap->getTotalEnergy();
   }
 
-  /*
-   * Returns only the nuclear portion of the temperature - see
-   * getElectronicTemperature for the electronic portion */
+  /**
+   * @brief Returns the nuclear (translational + rotational) temperature in K.
+   *
+   * See getElectronicTemperature for the electronic portion.  When a
+   * background velocity field is active this is the peculiar temperature,
+   * since the underlying kinetic energies use peculiar velocities.  With no
+   * degrees of freedom the temperature is not well defined and is set to
+   * zero.
+   */
   RealType Thermo::getTemperature() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -225,9 +297,6 @@ namespace OpenMD {
           this->getTranslationalKinetic() + this->getRotationalKinetic();
 
       RealType temperature {};
-
-      // With no degrees of freedom, T is not well defined, but we'll
-      // set to zero.
 
       if (info_->getNdf() > 0)
         temperature = (2.0 * nuclearKE) / (info_->getNdf() * Constants::kb);
@@ -240,6 +309,10 @@ namespace OpenMD {
     return snap->getTemperature();
   }
 
+  /**
+   * @brief Returns the electronic (fluctuating-charge) kinetic energy in
+   * kcal/mol.
+   */
   RealType Thermo::getElectronicKinetic() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -274,6 +347,9 @@ namespace OpenMD {
     return snap->getElectronicKineticEnergy();
   }
 
+  /**
+   * @brief Returns the electronic (fluctuating-charge) temperature in K.
+   */
   RealType Thermo::getElectronicTemperature() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -287,6 +363,9 @@ namespace OpenMD {
     return snap->getElectronicTemperature();
   }
 
+  /**
+   * @brief Returns the total net charge on the system (electrons).
+   */
   RealType Thermo::getNetCharge() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -326,6 +405,9 @@ namespace OpenMD {
     return snap->getNetCharge();
   }
 
+  /**
+   * @brief Returns the instantaneous charge momentum in kcal fs / e / mol.
+   */
   RealType Thermo::getChargeMomentum() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -360,6 +442,16 @@ namespace OpenMD {
     return snap->getChargeMomentum();
   }
 
+  /**
+   * @brief Returns the current density of the system.
+   *
+   * The first entry is the total current density; the remaining entries are
+   * per-atom-type contributions, in the order given by
+   * SimInfo::getSimulatedAtomTypes().  When a background velocity field is
+   * active, peculiar velocities are used, so the returned quantity is the
+   * conduction current in the frame co-moving with the local flow rather
+   * than the lab-frame current.
+   */
   std::vector<Vector3d> Thermo::getCurrentDensity() {
     Snapshot* snap       = info_->getSnapshotManager()->getCurrentSnapshot();
     AtomTypeSet simTypes = info_->getSimulatedAtomTypes();
@@ -373,7 +465,6 @@ namespace OpenMD {
     AtomType* atype;
     AtomTypeSet::iterator at;
     Vector3d Jc(0.0);
-    Vector3d ambient;
     std::vector<Vector3d> typeJc(simTypes.size(), V3Zero);
 
     for (mol = info_->beginMolecule(miter); mol != NULL;
@@ -386,12 +477,8 @@ namespace OpenMD {
 
       for (atom = mol->beginAtom(iiter); atom != NULL;
            atom = mol->nextAtom(iiter)) {
-        Vector3d v = atom->getVel();
-	if (usePeculiarVelocities_) {
-	  ambient = velField_->getVelocity(atom->getPos());
-	  v -= ambient;
-	}
-	
+        Vector3d v = peculiarVelocity(atom->getVel(), atom->getPos());
+
         RealType q = 0.0;
         int typeIndex(-1);
 
@@ -438,11 +525,17 @@ namespace OpenMD {
     return result;
   }
 
+  /**
+   * @brief Returns the system volume in Ang^3.
+   */
   RealType Thermo::getVolume() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
     return snap->getVolume();
   }
 
+  /**
+   * @brief Returns the instantaneous pressure in atm (current snapshot).
+   */
   RealType Thermo::getPressure() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -463,6 +556,9 @@ namespace OpenMD {
     return snap->getPressure();
   }
 
+  /**
+   * @brief Returns the instantaneous pressure in atm for a given snapshot.
+   */
   RealType Thermo::getPressure(Snapshot* snap) {
     if (!snap->hasPressure) {
       // Relies on the calculation of the full molecular pressure tensor
@@ -480,10 +576,15 @@ namespace OpenMD {
     return snap->getPressure();
   }
 
+  /**
+   * @brief Returns the pressure tensor in amu*fs^-2*Ang^-1 (current snapshot).
+   *
+   * Derived via the virial theorem description in Paci & Marchi,
+   * J. Phys. Chem. 1996, 100, 4314-4322.  When a background velocity field is
+   * active, the kinetic (streaming) part uses peculiar velocities so that the
+   * bulk flow does not contribute a spurious ram pressure.
+   */
   Mat3x3d Thermo::getPressureTensor() {
-    // returns pressure tensor in units amu*fs^-2*Ang^-1
-    // routine derived via viral theorem description in:
-    // Paci, E. and Marchi, M. J.Phys.Chem. 1996, 100, 4314-4322
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
     if (!snap->hasPressureTensor) {
@@ -491,7 +592,6 @@ namespace OpenMD {
       Mat3x3d p_tens(0.0);
       RealType mass;
       Vector3d vcom;
-      Vector3d ambient;
 
       SimInfo::MoleculeIterator i;
       vector<StuntDouble*>::iterator j;
@@ -502,11 +602,7 @@ namespace OpenMD {
         for (sd = mol->beginIntegrableObject(j); sd != NULL;
              sd = mol->nextIntegrableObject(j)) {
           mass = sd->getMass();
-          vcom = sd->getVel();
-	  if (usePeculiarVelocities_) {
-	    ambient = velField_->getVelocity(sd->getPos());
-	    vcom -= ambient;
-	  }	  
+          vcom = peculiarVelocity(sd->getVel(), sd->getPos());
           p_tens += mass * outProduct(vcom, vcom);
         }
       }
@@ -527,16 +623,21 @@ namespace OpenMD {
     return snap->getPressureTensor();
   }
 
+  /**
+   * @brief Returns the pressure tensor in amu*fs^-2*Ang^-1 for a given
+   * snapshot.
+   *
+   * Derived via the virial theorem description in Paci & Marchi,
+   * J. Phys. Chem. 1996, 100, 4314-4322.  As with the current-snapshot
+   * overload, the kinetic part uses peculiar velocities when a background
+   * velocity field is active.
+   */
   Mat3x3d Thermo::getPressureTensor(Snapshot* snap) {
-    // returns pressure tensor in units amu*fs^-2*Ang^-1
-    // routine derived via viral theorem description in:
-    // Paci, E. and Marchi, M. J.Phys.Chem. 1996, 100, 4314-4322
     if (!snap->hasPressureTensor) {
       Mat3x3d pressureTensor;
       Mat3x3d p_tens(0.0);
       RealType mass;
       Vector3d vcom;
-      Vector3d ambient;
 
       SimInfo::MoleculeIterator i;
       vector<StuntDouble*>::iterator j;
@@ -547,11 +648,7 @@ namespace OpenMD {
         for (sd = mol->beginIntegrableObject(j); sd != NULL;
              sd = mol->nextIntegrableObject(j)) {
           mass = sd->getMass();
-          vcom = sd->getVel(snap);
-	  if (usePeculiarVelocities_) {
-	    ambient = velField_->getVelocity(sd->getPos());
-	    vcom -= ambient;
-	  }	  	  
+          vcom = peculiarVelocity(sd->getVel(snap), sd->getPos(snap));
           p_tens += mass * outProduct(vcom, vcom);
         }
       }
@@ -572,6 +669,9 @@ namespace OpenMD {
     return snap->getPressureTensor();
   }
 
+  /**
+   * @brief Accumulates and returns the simulation box dipole moment in C*m.
+   */
   Vector3d Thermo::getSystemDipole() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -669,6 +769,9 @@ namespace OpenMD {
     return snap->getSystemDipole();
   }
 
+  /**
+   * @brief Accumulates and returns the simulation box quadrupole moment.
+   */
   Mat3x3d Thermo::getSystemQuadrupole() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -732,7 +835,15 @@ namespace OpenMD {
     return snap->getSystemQuadrupole();
   }
 
-  // Returns the Heat Flux Vector for the system
+  /**
+   * @brief Returns the heat flux vector for the system in amu/fs^3.
+   *
+   * The convective part (Jc) is accumulated over local integrable objects
+   * and reduced across processors; the conductive part (Jv) is already
+   * globally reduced in the ForceManager.  When a background velocity field
+   * is active, peculiar translational and angular velocities are used so that
+   * the flux is measured in the frame co-moving with the local flow.
+   */
   Vector3d Thermo::getHeatFlux() {
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     SimInfo::MoleculeIterator miter;
@@ -741,25 +852,16 @@ namespace OpenMD {
     StuntDouble* sd;
     RigidBody::AtomIterator ai;
     Atom* atom;
-    Vector3d vel, omegaB, omegaL;
-    Vector3d ambient, vorticity;
-    Vector3d J;
-    Mat3x3d I, A, Atrans;
-    int i;
-    int j;
-    int k;
+    Vector3d vel;
+    Vector3d flowOmega(0.0);
     RealType mass;
-
-    Vector3d x_a;
     RealType kinetic;
     RealType potential;
     RealType eatom;
     // Convective portion of the heat flux
     Vector3d heatFluxJc = V3Zero;
 
-    if (usePeculiarVelocities_) {
-      vorticity = velField_->getVorticity();
-    }
+    if (usePeculiarVelocities_) { flowOmega = velField_->getVorticity(); }
 
     /* Calculate convective portion of the heat flux */
     for (mol = info_->beginMolecule(miter); mol != NULL;
@@ -767,37 +869,14 @@ namespace OpenMD {
       for (sd = mol->beginIntegrableObject(iiter); sd != NULL;
            sd = mol->nextIntegrableObject(iiter)) {
         mass = sd->getMass();
-        vel  = sd->getVel();
-	if (usePeculiarVelocities_) {
-	  ambient = velField_->getVelocity(sd->getPos());
-	  vel -= ambient;
-	}	  
+        vel  = peculiarVelocity(sd->getVel(), sd->getPos());
 
         kinetic = mass * (vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
 
         if (sd->isDirectional()) {
-          J      = sd->getJ();
-          I      = sd->getI();
-	  A      = sd->getA();
-	  Atrans = A.transpose();
-
-	  if (sd->isLinear()) {
-	    i = sd->linearAxis();
-	    j = (i + 1) % 3;
-	    k = (i + 2) % 3;
-	    omegaB[i] = 0.0;
-	    omegaB[j] = J[j] / I(j,j);
-	    omegaB[k] = J[k] / I(k,k);
-	  } else {
-	    omegaB[0] = J[0] / I(0,0);
-	    omegaB[1] = J[1] / I(1,1);
-	    omegaB[2] = J[2] / I(2,2);
-	  }
-	  omegaL = Atrans * omegaB - vorticity;
-	  omegaB = A * omegaL;
-	  
-	  kinetic += dot(omegaB, I * omegaB);
-	}
+          Vector3d omegaB = bodyAngularVelocity(sd, flowOmega);
+          kinetic += dot(omegaB, sd->getI() * omegaB);
+        }
 
         potential = 0.0;
 
@@ -838,6 +917,14 @@ namespace OpenMD {
     return (heatFluxJv + heatFluxJc) / this->getVolume();  // amu / fs^3
   }
 
+  /**
+   * @brief Returns the center-of-mass velocity of the whole system.
+   *
+   * @note When a background velocity field is active, the returned (and
+   * cached) value is the mass-weighted *peculiar* COM velocity.  Callers that
+   * read Snapshot::getCOMvel() and expect the lab-frame drift velocity should
+   * be aware of this.
+   */
   Vector3d Thermo::getComVel() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -846,7 +933,6 @@ namespace OpenMD {
       Molecule* mol;
 
       Vector3d vel;
-      Vector3d ambient;
       Vector3d comVel(0.0);
       RealType totalMass(0.0);
 
@@ -854,11 +940,7 @@ namespace OpenMD {
            mol = info_->nextMolecule(i)) {
         RealType mass = mol->getMass();
         totalMass += mass;
-	vel = mol->getComVel();
-	if (usePeculiarVelocities_) {
-	  ambient = velField_->getVelocity(mol->getCom());
-	  vel -= ambient;
-	}	  
+        vel = peculiarVelocity(mol->getComVel(), mol->getCom());
 
         comVel += mass * vel;
       }
@@ -876,6 +958,9 @@ namespace OpenMD {
     return snap->getCOMvel();
   }
 
+  /**
+   * @brief Returns the center of mass of the whole system.
+   */
   Vector3d Thermo::getCom() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -907,8 +992,13 @@ namespace OpenMD {
   }
 
   /**
-   * Returns center of mass and center of mass velocity in one
-   * function call.
+   * @brief Returns center of mass and center-of-mass velocity in one call.
+   *
+   * @param[out] com the center of mass of the whole system
+   * @param[out] comVel the center-of-mass velocity of the whole system
+   *
+   * @note As with getComVel, the returned/cached @p comVel is the peculiar
+   * COM velocity when a background velocity field is active.
    */
   void Thermo::getComAll(Vector3d& com, Vector3d& comVel) {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -919,7 +1009,6 @@ namespace OpenMD {
 
       RealType totalMass(0.0);
       Vector3d vel;
-      Vector3d ambient;
 
       com    = 0.0;
       comVel = 0.0;
@@ -930,14 +1019,9 @@ namespace OpenMD {
         totalMass += mass;
         com += mass * mol->getCom();
 
-	vel = mol->getComVel();
-	if (usePeculiarVelocities_) {
-	  ambient = velField_->getVelocity(mol->getCom());
-	  vel -= ambient;
-	}	  
+        vel = peculiarVelocity(mol->getComVel(), mol->getCom());
 
         comVel += mass * vel;
-
       }
 
 #ifdef IS_MPI
@@ -960,14 +1044,20 @@ namespace OpenMD {
   }
 
   /**
-   * \brief Return inertia tensor for entire system and angular momentum
-   *  Vector.
+   * @brief Returns the inertia tensor and angular momentum for the entire
+   * system.
    *
+   * @param[out] inertiaTensor the inertia tensor
+   *   \f[
+   *     I = \begin{bmatrix} I_{xx} & -I_{xy} & -I_{xz} \\
+   *                        -I_{yx} &  I_{yy} & -I_{yz} \\
+   *                        -I_{zx} & -I_{yz} &  I_{zz} \end{bmatrix}
+   *   \f]
+   * @param[out] angularMomentum the angular momentum vector
    *
-   *
-   *    [  Ixx -Ixy  -Ixz ]
-   * I =| -Iyx  Iyy  -Iyz |
-   *    [ -Izx -Iyz   Izz ]
+   * @note The COM velocity returned by getComAll is peculiar when a
+   * background velocity field is active, so per-object velocities are also
+   * taken peculiar here to keep the angular momentum in a single frame.
    */
   void Thermo::getInertiaTensor(Mat3x3d& inertiaTensor,
                                 Vector3d& angularMomentum) {
@@ -1001,7 +1091,7 @@ namespace OpenMD {
         for (sd = mol->beginIntegrableObject(j); sd != NULL;
              sd = mol->nextIntegrableObject(j)) {
           r = sd->getPos() - com;
-          v = sd->getVel() - comVel;
+          v = peculiarVelocity(sd->getVel(), sd->getPos()) - comVel;
 
           m = sd->getMass();
 
@@ -1054,6 +1144,9 @@ namespace OpenMD {
     return;
   }
 
+  /**
+   * @brief Returns the axis-aligned bounding box for the current system.
+   */
   Mat3x3d Thermo::getBoundingBox() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -1109,7 +1202,13 @@ namespace OpenMD {
     return snap->getBoundingBox();
   }
 
-  // Returns the angular momentum of the system
+  /**
+   * @brief Returns the angular momentum of the system.
+   *
+   * @note Uses peculiar molecular COM velocities when a background velocity
+   * field is active, consistent with the peculiar COM velocity returned by
+   * getComAll.
+   */
   Vector3d Thermo::getAngularMomentum() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -1132,7 +1231,8 @@ namespace OpenMD {
            mol = info_->nextMolecule(i)) {
         thisMass = mol->getMass();
         thisr    = mol->getCom() - com;
-        thisp    = (mol->getComVel() - comVel) * thisMass;
+        thisp    = (peculiarVelocity(mol->getComVel(), mol->getCom()) - comVel) *
+                thisMass;
 
         angularMomentum += cross(thisr, thisp);
       }
@@ -1149,12 +1249,12 @@ namespace OpenMD {
   }
 
   /**
-   * Returns the Volume of the system based on a ellipsoid with
-   * semi-axes based on the radius of gyration V=4/3*Pi*R_1*R_2*R_3
-   * where R_i are related to the principle inertia moments
-   *  R_i = sqrt(C*I_i/N), this reduces to
-   *  V = 4/3*Pi*(C/N)^3/2*sqrt(det(I)).
-   * See S.E. Baltazar et. al. Comp. Mat. Sci. 37 (2006) 526-536.
+   * @brief Returns the volume of the system estimated from an ellipsoid with
+   * semi-axes based on the radius of gyration.
+   *
+   * \f$V = \tfrac{4}{3}\pi R_1 R_2 R_3\f$ with \f$R_i = \sqrt{C\,I_i/N}\f$,
+   * which reduces to \f$V = \tfrac{4}{3}\pi (C/N)^{3/2}\sqrt{\det I}\f$.
+   * See S.E. Baltazar et al., Comp. Mat. Sci. 37 (2006) 526-536.
    */
   RealType Thermo::getGyrationalVolume() {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -1182,6 +1282,13 @@ namespace OpenMD {
     return snap->getGyrationalVolume();
   }
 
+  /**
+   * @brief Overloaded gyrational volume that also returns det(I) so that
+   * dV/dr can be calculated.
+   *
+   * @param[out] volume the gyrational volume
+   * @param[out] detI the determinant of the inertia tensor
+   */
   void Thermo::getGyrationalVolume(RealType& volume, RealType& detI) {
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -1208,6 +1315,12 @@ namespace OpenMD {
     return;
   }
 
+  /**
+   * @brief Returns the distance between a tagged pair of atoms in Angstroms.
+   *
+   * Returns 0 when no tagged pair is configured or when printing of the
+   * tagged-pair distance is disabled.
+   */
   RealType Thermo::getTaggedAtomPairDistance() {
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     Globals* simParams     = info_->getSimParams();
@@ -1264,6 +1377,11 @@ namespace OpenMD {
     return 0.0;
   }
 
+  /**
+   * @brief Returns the volume of the convex or alpha-shape hull enclosing the
+   * system (requires QHULL).  Returns 0 when QHULL is unavailable or no valid
+   * hull method is configured.
+   */
   RealType Thermo::getHullVolume() {
 #ifdef HAVE_QHULL
     Snapshot* snap = info_->getSnapshotManager()->getCurrentSnapshot();

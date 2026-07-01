@@ -136,10 +136,23 @@ namespace OpenMD {
     RealType getTaggedAtomPairDistance();
 
   private:
+    /** \brief Returns the peculiar (flow-subtracted) velocity at a position.
+     *
+     * When no background velocity field is active, \p vel is returned
+     * unchanged; otherwise the local background flow velocity sampled at
+     * \p pos is subtracted.
+     */
+    Vector3d peculiarVelocity(const Vector3d& vel, const Vector3d& pos);
+
+    /** \brief Returns the peculiar body-frame angular velocity of a
+     * directional StuntDouble, with the local background-flow rotation
+     * \p flowOmega removed.
+     */
+    Vector3d bodyAngularVelocity(StuntDouble* sd, const Vector3d& flowOmega);
+
     SimInfo* info_ {nullptr};
     std::unique_ptr<VelocityField> velField_;
     bool usePeculiarVelocities_ {false};
-
   };
 }  // namespace OpenMD
 

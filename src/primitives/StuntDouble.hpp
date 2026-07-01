@@ -210,6 +210,9 @@ namespace OpenMD {
       return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_)
           .position[localIndex_];
     }
+    Vector3d getPos(Snapshot* snapshot) {
+      return (snapshot->*storage_).position[localIndex_];
+    }
 
     /**
      * Sets  the previous position of this stuntDouble
