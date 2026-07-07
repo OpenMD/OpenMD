@@ -91,6 +91,16 @@ namespace OpenMD {
     std::vector<Vector3d> randomForce(const std::vector<RealType>& Z,
                                       RealType kT, RealType dt) const;
 
+    //! Direct (non-iterative) solve of the implicit friction velocity update
+    //!   (I + diag(c) R) x = rhs ,
+    //! with c a per-bead coefficient (length N, applied to all three components
+    //! of each bead). Unconditionally stable for any R >= 0, replacing the
+    //! Picard iteration whose spectral radius c*lambda_max(R) exceeds 1 for
+    //! stiff, overlapping-bead configurations.
+    std::vector<Vector3d> solveImplicitVelocity(
+        const std::vector<RealType>& c,
+        const std::vector<Vector3d>& rhs) const;
+
     std::size_t size() const { return N_; }
     bool isPositiveDefinite() const { return spd_; }
     const DynamicRectMatrix<RealType>& mobility() const { return M_; }

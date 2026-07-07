@@ -183,35 +183,29 @@ namespace OpenMD {
       std::vector<Vector3d> Frand = mob.randomForce(Z, kT_, dt_);
       for (std::size_t i = 0; i < N; ++i) hm.beads[i]->addFrc(Frand[i]);
 
-      // --- self-consistent coupled friction solve ---
-      // velocity is known at the half step; the friction needs the full-step
-      // velocity, which depends on the friction. Iterate to convergence.
-      std::vector<Vector3d> frc(N), velStep(N), Ffric(N, V3Zero), oldF(N);
+      // --- implicit coupled friction solve (direct, unconditionally stable) ---
+      // The full-step velocity satisfies the fixed point
+      //   (I + c R) velStep = vel + c ( frc + R vEff ),   c_i = dt2 / m_i * eConv,
+      // where frc already carries the conservative + random force. Solving this
+      // linear system directly -- rather than Picard-iterating
+      //   velStep <- vel + c ( frc + R (vEff - velStep) )
+      // -- is stable for any resistance. The old iteration's map is -cR, whose
+      // spectral radius c*lambda_max(R) exceeds 1 for stiff overlapping-bead
+      // configurations; the negative eigenvalues then make it diverge
+      // oscillatorily (flipping the friction sign each pass). The direct solve
+      // returns exactly the converged fixed point wherever the iteration would
+      // have converged, so previously-working cases are unchanged.
+      std::vector<RealType> c(N);
+      std::vector<Vector3d> frc(N), zero(N, V3Zero), rhs(N);
+      std::vector<Vector3d> RvEff = mob.dragForce(vEff, zero);  // R * vEff
       for (std::size_t i = 0; i < N; ++i) {
-        frc[i]     = hm.beads[i]->getFrc();  // conservative + random
-        velStep[i] = vel[i] + (dt2_ / hm.masses[i] * eConv) * frc[i];
+        c[i]   = dt2_ / hm.masses[i] * eConv;
+        frc[i] = hm.beads[i]->getFrc();  // conservative + random
+        rhs[i] = vel[i] + c[i] * (frc[i] + RvEff[i]);
       }
 
-      for (int k = 0; k < maxIterNum_; ++k) {
-        oldF = Ffric;
-        // f_i = sum_j R_ij ( vEff_j - velStep_j )
-        Ffric = mob.dragForce(vEff, velStep);
-        for (std::size_t i = 0; i < N; ++i)
-          velStep[i] =
-              vel[i] + (dt2_ / hm.masses[i] * eConv) * (frc[i] + Ffric[i]);
-
-        // converged when every bead's friction force has stopped changing
-        // direction/magnitude (fdot -> 1)
-        RealType worst = 0.0;
-        for (std::size_t i = 0; i < N; ++i) {
-          RealType f2 = Ffric[i].lengthSquare();
-          if (f2 < 1.0e-12) continue;  // negligible drag on this bead
-          RealType fdot = dot(Ffric[i], oldF[i]) / f2;
-          worst         = std::max(worst, std::fabs(1.0 - fdot));
-        }
-        if (worst <= forceTolerance_) break;
-      }
-
+      std::vector<Vector3d> velStep = mob.solveImplicitVelocity(c, rhs);
+      std::vector<Vector3d> Ffric   = mob.dragForce(vEff, velStep);
       for (std::size_t i = 0; i < N; ++i) hm.beads[i]->addFrc(Ffric[i]);
     }
 

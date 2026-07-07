@@ -154,4 +154,44 @@ namespace OpenMD {
         f[i][p] = scale * fv[3 * i + p];
     return f;
   }
+
+  std::vector<Vector3d> RPYMobility::solveImplicitVelocity(
+      const std::vector<RealType>& c,
+      const std::vector<Vector3d>& rhs) const {
+    // Build A = I + diag(c) R (c_i scales the three rows of bead i) and solve
+    // A x = rhs. A has eigenvalues 1 + c*lambda(R) >= 1, so it is nonsingular
+    // for any positive-semidefinite R -- the stiff (overlapping) modes simply
+    // come back strongly damped (x -> rhs's flow part) instead of diverging.
+    // A is non-symmetric when bead masses differ, so this uses the LU path
+    // (invertMatrix), which dispatches to LAPACK when available. One extra
+    // O(N^3) solve per step; if it ever matters, factor A once (dgetrf/dgetrs)
+    // rather than forming the explicit inverse.
+    const std::size_t n3 = 3 * N_;
+    DynamicRectMatrix<RealType> A(n3, n3);
+    for (std::size_t i = 0; i < N_; ++i) {
+      for (int p = 0; p < 3; ++p) {
+        std::size_t row = 3 * i + p;
+        for (std::size_t col = 0; col < n3; ++col)
+          A(row, col) = c[i] * R_(row, col);
+        A(row, row) += 1.0;  // + I
+      }
+    }
+ 
+    DynamicRectMatrix<RealType> Ainv(n3, n3);
+    invertMatrix(A, Ainv);  // A is overwritten; inverse returned in Ainv
+ 
+    DynamicVector<RealType> b(n3);
+    for (std::size_t i = 0; i < N_; ++i)
+      for (int p = 0; p < 3; ++p)
+        b[3 * i + p] = rhs[i][p];
+ 
+    DynamicVector<RealType> x = Ainv * b;
+ 
+    std::vector<Vector3d> velStep(N_, V3Zero);
+    for (std::size_t i = 0; i < N_; ++i)
+      for (int p = 0; p < 3; ++p)
+        velStep[i][p] = x[3 * i + p];
+    return velStep;
+  }
+
 }  // namespace OpenMD
