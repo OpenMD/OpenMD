@@ -1854,9 +1854,13 @@ namespace OpenMD {
     selfPotential = fDecomp_->getSelfPotential();
     curSnapshot->setSelfPotentials(selfPotential);
 
-    curSnapshot->setExcludedPotentials(fDecomp_->getExcludedSelfPotential() +
-                                       fDecomp_->getExcludedPotential());
-
+    if (info_->getSimParams()->getSkipIntermolecularForces()) {
+          curSnapshot->setExcludedPotentials(fDecomp_->getExcludedSelfPotential());
+    } else {
+      curSnapshot->setExcludedPotentials(fDecomp_->getExcludedSelfPotential() +
+					 fDecomp_->getExcludedPotential());
+    }
+      
     if (doPotentialSelection_) {
       selectionPotential = curSnapshot->getSelectionPotentials();
       selectionPotential += fDecomp_->getSelectedSelfPotential();
