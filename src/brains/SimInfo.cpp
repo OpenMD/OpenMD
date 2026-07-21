@@ -899,14 +899,17 @@ namespace OpenMD {
   }
 
   void SimInfo::prepareTopology() {
-    // calculate mass ratio of cutoff group
-    SimInfo::MoleculeIterator mi;
+
+    SimInfo::MoleculeIterator mi, mj;
     Molecule* mol;
+    Molecule* mol2;
     Molecule::CutoffGroupIterator ci;
     CutoffGroup* cg;
-    Molecule::AtomIterator ai;
+    Molecule::AtomIterator ai, aj;
     Atom* atom;
+    Atom* atom2;
     RealType totalMass;
+    int a, b;
 
     /**
      * The mass factor is the relative mass of an atom to the total
@@ -945,6 +948,26 @@ namespace OpenMD {
       for (atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
         identArray_.push_back(atom->getIdent());
         regions_.push_back(reg);
+      }
+    }
+
+    if (simParams_->getSkipIntermolecularForces()) {
+      for (mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
+        for (mj = mi, mol2 = beginMolecule(mj); mol2 != NULL;
+             mol2 = nextMolecule(mj)) {
+	  
+	  for (atom = mol->beginAtom(ai); atom != NULL;
+	       atom = mol->nextAtom(ai)) {
+	    a = atom->getGlobalIndex();
+
+	    for (atom2 = mol2->beginAtom(aj); atom2 != NULL;
+		 atom2 = mol2->nextAtom(aj)) {
+	      
+	      b = atom2->getGlobalIndex();
+	      excludedInteractions_.addPair(a, b);		      
+	    }
+	  }
+	}
       }
     }
 

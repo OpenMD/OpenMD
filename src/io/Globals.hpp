@@ -140,6 +140,7 @@ namespace OpenMD {
     DeclareParameter(BeadSize, RealType);
     DeclareParameter(UseSphericalBoundaryConditions, bool);
     DeclareParameter(SkipPairLoop, bool);
+    DeclareParameter(SkipIntermolecularForces, bool);
     DeclareParameter(FrozenBufferRadius, RealType);
     DeclareParameter(LangevinBufferRadius, RealType);
     DeclareParameter(AccumulateBoxDipole, bool);

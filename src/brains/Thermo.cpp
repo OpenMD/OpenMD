@@ -112,11 +112,10 @@ namespace OpenMD {
    *                         = \omega_b - A\,\Omega_{\text{flow}}.
    * \f]
    *
-   * @note @p flowOmega must be the *angular velocity* of the background flow,
-   * i.e. one half of the vorticity \f$\tfrac{1}{2}\nabla\times v\f$ for an
-   * incompressible field.  Confirm the convention returned by
-   * VelocityField::getVorticity() (raw curl vs. angular velocity) before
-   * relying on the rotational temperature under flow.
+   * @note @p flowOmega is the *angular velocity* of the background
+   * flow, i.e. one half of the vorticity \f$\tfrac{1}{2}\nabla\times
+   * v\f$ for an incompressible field. Functions calling this routine
+   * should not use vorticity without modification.
    *
    * @param sd directional StuntDouble
    * @param flowOmega lab-frame angular velocity of the background flow
@@ -204,7 +203,7 @@ namespace OpenMD {
       Vector3d flowOmega(0.0);
       RealType kinetic(0.0);
 
-      if (usePeculiarVelocities_) { flowOmega = velField_->getVorticity(); }
+      if (usePeculiarVelocities_) { flowOmega = 0.5 * velField_->getVorticity(); }
 
       for (mol = info_->beginMolecule(miter); mol != NULL;
            mol = info_->nextMolecule(miter)) {
@@ -861,7 +860,7 @@ namespace OpenMD {
     // Convective portion of the heat flux
     Vector3d heatFluxJc = V3Zero;
 
-    if (usePeculiarVelocities_) { flowOmega = velField_->getVorticity(); }
+    if (usePeculiarVelocities_) { flowOmega = 0.5 * velField_->getVorticity(); }
 
     /* Calculate convective portion of the heat flux */
     for (mol = info_->beginMolecule(miter); mol != NULL;

@@ -296,7 +296,7 @@ namespace OpenMD {
       line += buffer;
 
       if (doPositions_) {
-        snprintf(buffer, 1024, "%15.8f%15.8f%15.8f", atomInfo->pos[0],
+        snprintf(buffer, 1024, " %15.8f %15.8f %15.8f", atomInfo->pos[0],
                  atomInfo->pos[1], atomInfo->pos[2]);
         line += buffer;
       }
@@ -305,27 +305,27 @@ namespace OpenMD {
         line += buffer;
       }
       if (doVectors_ && atomInfo->hasVector) {
-        snprintf(buffer, 1024, "%15.8f%15.8f%15.8f", atomInfo->vec[0],
+        snprintf(buffer, 1024, " %15.8f %15.8f %15.8f", atomInfo->vec[0],
                  atomInfo->vec[1], atomInfo->vec[2]);
         line += buffer;
       }
       if (doVelocities_ && atomInfo->hasVelocity) {
-        snprintf(buffer, 1024, "%15.8f%15.8f%15.8f", atomInfo->vel[0],
+        snprintf(buffer, 1024, " %15.8f %15.8f %15.8f", atomInfo->vel[0],
                  atomInfo->vel[1], atomInfo->vel[2]);
         line += buffer;
       }
       if (doForces_ && atomInfo->hasForce) {
-        snprintf(buffer, 1024, "%15.8f%15.8f%15.8f", atomInfo->frc[0],
+        snprintf(buffer, 1024, " %15.8f %15.8f %15.8f", atomInfo->frc[0],
                  atomInfo->frc[1], atomInfo->frc[2]);
         line += buffer;
       }
       if (doElectricFields_ && atomInfo->hasElectricField) {
-        snprintf(buffer, 1024, "%15.8f%15.8f%15.8f", atomInfo->eField[0],
+        snprintf(buffer, 1024, " %15.8f %15.8f %15.8f", atomInfo->eField[0],
                  atomInfo->eField[1], atomInfo->eField[2]);
         line += buffer;
       }
       if (doGlobalIDs_) {
-        snprintf(buffer, 1024, "%10d", atomInfo->globalID);
+        snprintf(buffer, 1024, " %10d", atomInfo->globalID);
         line += buffer;
       }
 

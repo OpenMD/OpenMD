@@ -136,6 +136,8 @@ namespace OpenMD {
 
     DefineOptionalParameterWithDefaultValue(SkipPairLoop, "skipPairLoop",
                                             false);
+    DefineOptionalParameterWithDefaultValue(SkipIntermolecularForces,
+					    "skipIntermolecularForces", false);
     DefineOptionalParameterWithDefaultValue(
         UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);
     DefineOptionalParameterWithDefaultValue(ConserveLinearMomentum,
