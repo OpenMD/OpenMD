@@ -385,6 +385,8 @@ namespace OpenMD {
     /** Returns the velocity of center of mass of this molecule */
     Vector3d getComVel();
 
+    std::vector<int> getAtomGlobalIDs();
+
     friend std::ostream& operator<<(std::ostream& o, Molecule& mol);
 
     // below functions are just forward functions

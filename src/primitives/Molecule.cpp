@@ -418,6 +418,17 @@ namespace OpenMD {
     return potential;
   }
 
+  std::vector<int> Molecule::getAtomGlobalIDs() {
+    Atom* atom;
+    AtomIterator ai;   
+    std::vector<int> gids {};
+    
+    for (atom = beginAtom(ai); atom != NULL; atom = nextAtom(ai)) {
+      gids.push_back(atom->getGlobalIndex());
+    }
+    return gids;
+  }
+
   void Molecule::addProperty(std::shared_ptr<GenericData> genData) {
     properties_.addProperty(genData);
   }

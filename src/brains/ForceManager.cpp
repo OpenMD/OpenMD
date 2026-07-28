@@ -392,7 +392,7 @@ namespace OpenMD {
       //! manager has set up the atom-atom interactions so that we can
       //! query them for suggested cutoff values
       setupCutoffs();
-
+      
       info_->prepareTopology();
 
       doParticlePot_ = info_->getSimParams()->getOutputParticlePotential();
@@ -1087,12 +1087,14 @@ namespace OpenMD {
     curSnapshot->setExcludedPotentials(fDecomp_->getExcludedSelfPotential() +
                                        fDecomp_->getExcludedPotential());
 
+    
     if (doPotentialSelection_) {
       selectionPotential = curSnapshot->getSelectionPotentials();
       selectionPotential += fDecomp_->getSelectedSelfPotential();
       selectionPotential += fDecomp_->getSelectedPotential();
       curSnapshot->setSelectionPotentials(selectionPotential);
     }
+
   }
 
   void ForceManager::postCalculation() {

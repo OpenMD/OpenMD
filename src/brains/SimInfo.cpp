@@ -952,25 +952,63 @@ namespace OpenMD {
     }
 
     if (simParams_->getSkipIntermolecularForces()) {
-      for (mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
-        for (mj = mi, mol2 = beginMolecule(mj); mol2 != NULL;
-             mol2 = nextMolecule(mj)) {
-	  
-	  for (atom = mol->beginAtom(ai); atom != NULL;
-	       atom = mol->nextAtom(ai)) {
-	    a = atom->getGlobalIndex();
+      std::vector<int> atoms1;
+      std::vector<int> atoms2;
 
-	    for (atom2 = mol2->beginAtom(aj); atom2 != NULL;
-		 atom2 = mol2->nextAtom(aj)) {
-	      
-	      b = atom2->getGlobalIndex();
-	      excludedInteractions_.addPair(a, b);		      
+#ifdef IS_MPI
+      int myrank;
+      int nAtoms1, nAtoms2;
+      
+      MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+#endif
+      
+      for (int i = 0; i < getNGlobalMolecules() - 1; ++i) {
+	
+#ifdef IS_MPI	
+	int whichProc1 = getMolToProc(i);
+        if (whichProc1 == myrank) {
+	  Molecule* mol = getMoleculeByGlobalIndex(i);
+	  atoms1 = mol->getAtomGlobalIDs();
+	  nAtoms1 = atoms1.size();
+	  MPI_Bcast(&nAtoms1, 1, MPI_UNSIGNED, whichProc1, MPI_COMM_WORLD);
+	  MPI_Bcast(&atoms1[0], nAtoms1, MPI_INT, whichProc1, MPI_COMM_WORLD);
+	} else {
+	  MPI_Bcast(&nAtoms1, 1, MPI_UNSIGNED, whichProc1, MPI_COMM_WORLD);
+	  atoms1.resize(nAtoms1, -1);
+	  MPI_Bcast(&atoms1[0], nAtoms1, MPI_INT, whichProc1, MPI_COMM_WORLD);
+	}
+#else
+	Molecule* mol = getMoleculeByGlobalIndex(i);
+	atoms1 = mol->getAtomGlobalIDs();
+#endif
+	
+	for (int j = i+1; j < getNGlobalMolecules(); ++j)  {
+
+#ifdef IS_MPI
+	  int whichProc2 = getMolToProc(j);
+	  if (whichProc2 == myrank) {
+	    Molecule* mol2 = getMoleculeByGlobalIndex(j);
+	    atoms2 = mol2->getAtomGlobalIDs();
+	    nAtoms2 = atoms2.size();	    
+	    MPI_Bcast(&nAtoms2, 1, MPI_UNSIGNED, whichProc2, MPI_COMM_WORLD);		 
+	    MPI_Bcast(&atoms2[0], nAtoms2, MPI_INT, whichProc2, MPI_COMM_WORLD);
+	  } else {
+	    MPI_Bcast(&nAtoms2, 1, MPI_UNSIGNED, whichProc2, MPI_COMM_WORLD);
+	    atoms2.resize(nAtoms2, -1);
+	    MPI_Bcast(&atoms2[0], nAtoms2, MPI_INT, whichProc2, MPI_COMM_WORLD);
+	  }
+#else
+	  Molecule* mol2 = getMoleculeByGlobalIndex(j);
+	  atoms2 = mol2->getAtomGlobalIDs();
+#endif
+	  for (int a : atoms1) {
+	    for (int b : atoms2) {
+	      excludedInteractions_.addPair(a,b);
 	    }
 	  }
 	}
       }
     }
-
     topologyDone_ = true;
   }
 
