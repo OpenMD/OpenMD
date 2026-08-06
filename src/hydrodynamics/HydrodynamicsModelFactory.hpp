@@ -111,8 +111,6 @@ namespace OpenMD {
      * @return a pointer of the concrete object, return NULL if no creator is
      * registed for creating this concrete object
      * @param id the identification of the concrete object
-     * @param sd a pointer to the StuntDouble being modeled
-     * @param info a pointer to the SimInfo object
      */
     HydrodynamicsModel* createHydrodynamicsModel(const std::string& id);
 
