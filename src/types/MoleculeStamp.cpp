@@ -424,7 +424,7 @@ namespace OpenMD {
       std::vector<int>::iterator j =
           std::find_if(torsionAtoms.begin(), torsionAtoms.end(),
                        std::bind(std::greater<int>(), std::placeholders::_1,
-                                 getNAtoms() - 1));
+                                 static_cast<int>(getNAtoms()) - 1));
       std::vector<int>::iterator k =
           std::find_if(torsionAtoms.begin(), torsionAtoms.end(),
                        std::bind(std::less<int>(), std::placeholders::_1, 0));
@@ -581,7 +581,7 @@ namespace OpenMD {
       std::vector<int>::iterator j =
           std::find_if(inversionAtoms.begin(), inversionAtoms.end(),
                        std::bind(std::greater<int>(), std::placeholders::_1,
-                                 getNAtoms() - 1));
+                                 static_cast<int>(getNAtoms()) - 1));
       std::vector<int>::iterator k =
           std::find_if(inversionAtoms.begin(), inversionAtoms.end(),
                        std::bind(std::less<int>(), std::placeholders::_1, 0));
@@ -713,7 +713,7 @@ namespace OpenMD {
       std::vector<int>::iterator j =
           std::find_if(rigidAtoms.begin(), rigidAtoms.end(),
                        std::bind(std::greater<int>(), std::placeholders::_1,
-                                 getNAtoms() - 1));
+                                 static_cast<int>(getNAtoms()) - 1));
       if (j != rigidAtoms.end()) {
         oss << "Error in Molecule " << getName();
         throw OpenMDException(oss.str());
@@ -736,7 +736,7 @@ namespace OpenMD {
       std::vector<int>::iterator j =
           std::find_if(cutoffGroupAtoms.begin(), cutoffGroupAtoms.end(),
                        std::bind(std::greater<int>(), std::placeholders::_1,
-                                 getNAtoms() - 1));
+                                 static_cast<int>(getNAtoms()) - 1));
       if (j != cutoffGroupAtoms.end()) {
         std::ostringstream oss;
         oss << "Error in Molecule " << getName() << ": cutoffGroup"

@@ -360,7 +360,8 @@ namespace OpenMD {
       std::vector<int> torsionAtoms = torsionStamp->getMembers();
       std::vector<int>::iterator j  = std::find_if(
           torsionAtoms.begin(), torsionAtoms.end(),
-          std::bind(std::greater<int>(), placeholders::_1, getNAtoms() - 1));
+          std::bind(std::greater<int>(), placeholders::_1,
+		    static_cast<int>(getNAtoms()) - 1));
       std::vector<int>::iterator k =
           std::find_if(torsionAtoms.begin(), torsionAtoms.end(),
                        std::bind(std::less<int>(), placeholders::_1, 0));
@@ -476,7 +477,8 @@ namespace OpenMD {
 
       std::vector<int>::iterator j = std::find_if(
           inversionAtoms.begin(), inversionAtoms.end(),
-          std::bind(std::greater<int>(), placeholders::_1, getNAtoms() - 1));
+          std::bind(std::greater<int>(), placeholders::_1,
+		    static_cast<int>(getNAtoms()) - 1));
       std::vector<int>::iterator k =
           std::find_if(inversionAtoms.begin(), inversionAtoms.end(),
                        std::bind(std::less<int>(), placeholders::_1, 0));
@@ -565,7 +567,8 @@ namespace OpenMD {
       std::vector<int> rigidAtoms  = rbStamp->getMembers();
       std::vector<int>::iterator j = std::find_if(
           rigidAtoms.begin(), rigidAtoms.end(),
-          std::bind(std::greater<int>(), placeholders::_1, getNAtoms() - 1));
+          std::bind(std::greater<int>(), placeholders::_1,
+		    static_cast<int>(getNAtoms()) - 1));
       if (j != rigidAtoms.end()) {
         oss << "Error in Fragment " << getName();
         throw OpenMDException(oss.str());
@@ -587,7 +590,8 @@ namespace OpenMD {
       std::vector<int> cutoffGroupAtoms  = cutoffGroupStamp->getMembers();
       std::vector<int>::iterator j       = std::find_if(
           cutoffGroupAtoms.begin(), cutoffGroupAtoms.end(),
-          std::bind(std::greater<int>(), placeholders::_1, getNAtoms() - 1));
+          std::bind(std::greater<int>(), placeholders::_1,
+		    static_cast<int>(getNAtoms()) - 1));
       if (j != cutoffGroupAtoms.end()) {
         std::ostringstream oss;
         oss << "Error in Fragment " << getName() << ": cutoffGroup"
@@ -676,7 +680,8 @@ namespace OpenMD {
       std::vector<int> nodeAtoms   = nStamp->getMembers();
       std::vector<int>::iterator j = std::find_if(
           nodeAtoms.begin(), nodeAtoms.end(),
-          std::bind(std::greater<int>(), placeholders::_1, getNAtoms() - 1));
+          std::bind(std::greater<int>(), placeholders::_1,
+		    static_cast<int>(getNAtoms()) - 1));
       if (j != nodeAtoms.end()) {
         oss << "Error in Fragment " << getName();
         throw OpenMDException(oss.str());
