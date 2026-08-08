@@ -258,9 +258,9 @@ namespace OpenMD {
       BendStamp* bendStamp       = getBendStamp(i);
       std::vector<int> bendAtoms = bendStamp->getMembers();
       std::vector<int>::iterator j =
-          std::find_if(bendAtoms.begin(), bendAtoms.end(),
+	  std::find_if(bendAtoms.begin(), bendAtoms.end(),
                        std::bind(std::greater<int>(), std::placeholders::_1,
-                                 getNAtoms() - 1));
+                                 static_cast<int>(getNAtoms()) - 1));
       std::vector<int>::iterator k =
           std::find_if(bendAtoms.begin(), bendAtoms.end(),
                        std::bind(std::less<int>(), std::placeholders::_1, 0));

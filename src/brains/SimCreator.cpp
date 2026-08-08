@@ -104,7 +104,7 @@ namespace OpenMD {
       simError();
 
       // Throw an exception here to halt parsing
-      std::runtime_error("Parse error");      
+      throw std::runtime_error("Parse error");      
     }
   };
 
@@ -175,7 +175,7 @@ namespace OpenMD {
       // Check for parse errors
       if (parser.getNumberOfSyntaxErrors() > 0) {
 	snprintf(painCave.errMsg, MAX_SIM_ERROR_MSG_LENGTH,
-		 "Parsing failed with: %lu errors\n",
+		 "Parsing failed with: %zu errors\n",
 		 parser.getNumberOfSyntaxErrors());
 	painCave.isFatal = 1;
 	simError();
